@@ -12,11 +12,6 @@
     <PackageReference Include="MSTest.TestFramework" Version="1.1.11" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Splitio-net-core.Redis\Splitio.Redis.csproj" />
-    <ProjectReference Include="..\src\Splitio-net-core\Splitio.csproj" />
-  </ItemGroup>
-
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2'">
     <DefineConstants>NETCORE</DefineConstants>
   </PropertyGroup>
@@ -36,6 +31,11 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0'">
     <DefineConstants>NETCORE</DefineConstants>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Splitio.Redis\Splitio.Redis.csproj" />
+    <ProjectReference Include="..\src\Splitio\Splitio.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />

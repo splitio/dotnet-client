@@ -2,12 +2,12 @@
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
-using Splitio_net_core.Integration_tests.Resources;
+using Splitio.Integration_tests.Resources;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace Splitio_net_core.Integration_tests
+namespace Splitio.Integration_tests
 {
     [DeploymentItem(@"Resources\split_changes.json")]
     [DeploymentItem(@"Resources\split_changes_1.json")]

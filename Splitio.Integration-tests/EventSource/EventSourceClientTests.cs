@@ -3,7 +3,7 @@ using Splitio.Services.EventSource;
 using System.Collections.Concurrent;
 using System.Threading;
 
-namespace Splitio_net_core.Integration_tests.EventSource
+namespace Splitio.Integration_tests.EventSource
 {
     [TestClass]
     public class EventSourceClientTests

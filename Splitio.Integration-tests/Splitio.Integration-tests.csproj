@@ -2,8 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net472;net451;netcoreapp2.2;netcoreapp1.0</TargetFrameworks>
-    <RootNamespace>Splitio_net_core.Integration_tests</RootNamespace>
-
+    <RootNamespace>Splitio.Integration_tests</RootNamespace>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -19,7 +18,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Splitio-net-core\Splitio.csproj" />
+    <ProjectReference Include="..\Splitio.Redis\Splitio.Redis.csproj" />
+    <ProjectReference Include="..\src\Splitio\Splitio.csproj" />
   </ItemGroup>
 
   <ItemGroup>

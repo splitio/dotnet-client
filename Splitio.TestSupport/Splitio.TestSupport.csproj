@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Splitio-net-core\Splitio.csproj" />
+    <ProjectReference Include="..\src\Splitio\Splitio.csproj" />
   </ItemGroup>
 
   <ItemGroup>

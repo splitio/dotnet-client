@@ -1,4 +1,4 @@
-﻿using Splitio_net_core.Integration_tests.Resources;
+﻿using Splitio.Integration_tests.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +8,7 @@ using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
 
-namespace Splitio_net_core.Integration_tests
+namespace Splitio.Integration_tests
 {
     public class HttpClientMock : IDisposable
     {

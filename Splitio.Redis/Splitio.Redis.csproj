@@ -48,9 +48,9 @@
     <PackageReference Include="Microsoft.Bcl.Async" version="1.0.168" />
     <PackageReference Include="Microsoft.Bcl.Build" Version="1.0.14" />
   </ItemGroup>
-
+  
   <ItemGroup>
-    <ProjectReference Include="..\src\Splitio-net-core\Splitio.csproj" />
+    <ProjectReference Include="..\src\Splitio\Splitio.csproj" />
   </ItemGroup>
 
 </Project>

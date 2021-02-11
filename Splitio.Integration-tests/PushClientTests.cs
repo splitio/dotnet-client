@@ -4,7 +4,7 @@ using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using System.Threading;
 
-namespace Splitio_net_core.Integration_tests
+namespace Splitio.Integration_tests
 {
     [DeploymentItem(@"Resources\splits_push.json")]
     [DeploymentItem(@"Resources\splits_push2.json")]

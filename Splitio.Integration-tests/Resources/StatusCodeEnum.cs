@@ -1,4 +1,4 @@
-﻿namespace Splitio_net_core.Integration_tests.Resources
+﻿namespace Splitio.Integration_tests.Resources
 {
     public enum StatusCodeEnum
     {
