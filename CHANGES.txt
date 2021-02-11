@@ -1,0 +1,156 @@
+CHANGES
+
+6.2.3 (Dec 22, 2020)
+- Fixed package strong name
+
+6.2.1 (Nov 18, 2020)
+- Fixed the first schedule for the SSE refresh token.
+
+6.2.0 (Oct 13, 2020)
+- Added deduplication logic for impressions data.
+  - Now there are two modes for Impressions when the SDK is in standalone mode, OPTIMIZED (default) that only ships unique impressions and DEBUG for times where you need to send ALL impressions to debug an integration.
+  - Impression listener remains unchanged and will still get all impressions.
+- Fixed async operation.
+
+6.1.5 (Sep 3, 2020)
+- Fixed Destroy client.
+
+6.1.4 (Aug 14, 2020)
+- Fixed SplitManager.Splits() when Redis db != 0 is used.
+
+6.1.3 (Jul 6, 2020)
+- Fixed Control notifications parser.
+
+6.1.2 (Jun 15, 2020)
+- Removed vulnerabilities.
+- Updated StreamingEnabled default to true.
+
+6.1.1 (May 22, 2020)
+- Updated YamlDotNet dependency to 8.1.1.
+
+6.1.0 (May 15, 2020)
+- Added support for the new Split streaming architecture. When enabled, the SDK will not poll for updates but instead receive notifications every time there's a change in your environments, allowing to process those much quicker. If disabled (default) or in the event of an issue, the SDK will fallback to the known polling mechanism to provide a seamless experience.
+
+6.0.3 (Apr 16, 2020)
+- Removed YamlDotNet.Signed obsolete dependency.
+
+6.0.2 (Feb 10, 2020)
+- Updated Newtonsoft.Json dependency to >= 10.0.3.
+
+6.0.1 (Jan 20, 2020)
+- Improved clients synchronization.
+- Improved IListener implementation.
+- Improved a few naming conventions.
+- Improved RedisClient constructor. We connect to server async now.
+
+6.0.0 (Nov 1, 2019)
+- BREAKING CHANGE: Changed our logging framework implementation for .NET Core sdk. We use Microsoft.Extensions.Logging now.
+- Improved the performance of the getTreatments() and getTreatmentsWithConfig() call, by minimizing the amount of calls to redis when fetching splits.
+- Added IPAddressesEnabled to enable/disable sending MachineName and MachineIP headers when data is posted to Split Servers.
+- Added support for NET core 3.0. 
+
+5.0.3 (Oct 10, 2019)
+- Refactor Evaluator.
+- Added Integration Tests.
+
+5.0.2 (Oct 02, 2019)
+- Avoid unnecessary dependencies for .Net Framework 4.5+
+
+5.0.1 (Sep 16, 2019)
+- Added HttpClientMock for improved Integration Tests.
+- Merged NET and NET Core repositories to improved our productivity and code.
+
+5.0.0 (Jul 22, 2019)
+- BREAKING CHANGE: Moving block until ready out of the factory into the split client and manager client.
+- Added validation for traffic type name when calling track.
+- Added new label when the sdk is not ready.
+- Added validation for split names on getTreatment and manager calls.
+- Check for multiple factories instantiated.
+
+4.1.3
+- Added support for optional event properties via our client.track() method. Read more in our docs!
+
+4.1.2
+- Updated localhost mode. Now besides supporting the old text files with `.split` extension (to be deprecated soon), we support YAML (.yaml/.yml) files with more options. Read more in our docs!
+
+4.1.1
+- Bugfix: SDK return error when posting events successfully.
+
+4.1.0
+- Added Dynamic Configurations support through two new methods that mimick the regular ones, changing the type of what is returned.
+  - GetTreatmentWithConfig: Same as getTreatment, but instead of a string it returns a map with treatment and config as a stringified JSON.
+  - GetTreatmentWithConfig: Same as getTreatments, but instead of a map of string it returns a map of objects with treatment and config as a stringified JSON.
+- Added configs to SplitViews returned by the manager module.
+
+4.0.1
+- Bug fix InvalidOperationException in ImpressionsLog(). "Collection was modified; enumeration operation may not execute".
+
+4.0.0
+- BREAKING CHANGE: Updated impressions cache for Redis storage to reduce the amount of Redis operations by using a single queue. Must use Synchronizer 2.x or above with this or newer SDK versions if you are using Redis mode. 
+- Improved Input validation to provide better and faster feedback in case of missuse.
+- Updated FeaturesRefreshRate to be 5 seconds.
+
+3.5.0
+- Added Input validation
+- Adding Block Until Ready for Redis client
+- Fix authors and other package metadata
+- Fix an issue when Traffic Allocation is set to 1 and the resulting bucket is also 1.
+
+3.4.2
+- Improve async handling
+
+3.4.1
+- Fix track() bug on localhost mode
+
+3.4.0
+- Add support for .track()
+- Bug fix on date rule matchers
+
+3.3.3
+- Solved Issue 94: Invalid Api key causes high CPU usage
+
+3.3.1
+- Bug fix on RedisSplitManager.
+
+3.3.0
+- Changed Splitio package to support just Standalone mode, and added Splitio.Redis package for Consumer mode.
+- Included Splitio.TestSupport framework, for unit testing.
+
+3.2.1
+- Updated Split Manager to return treatments from ROLLOUT condition.
+
+3.2.0
+- Support for Boolean and Regex matchers.
+- Support for Dependency Matcher.
+- Support for Client Destroy using In Memory mode.
+
+3.1.2
+- Changed logging approach by supporting Common.Logging integration. Client can configure its already existing logging system 
+by using Common.Logging adapter, to be used in Splitio SDK.
+
+3.1.1
+- Bug fixes.
+
+3.1.0
+- Support for new string and set matchers: ContainsAllOfSet, ContainsAnyOfSet, ContainsString, EndsWith, EqualToSet, PartOfSet and StartsWith.
+
+3.0.1
+- Bug fixes.
+
+3.0.0
+- New hashing algorithm for splitter: Murmur hash. 
+
+1.1.1
+- Support for Impression Listener on configurations
+
+1.1.0
+- Support for Traffic Allocation
+
+1.0.2
+- NLog logger can be configured by user. If not configured, the SDK will use default log file in 'Logs\split-sdk.log'
+
+1.0.1
+- No changes for this update
+
+1.0.0
+- First release of Split.io SDK for Net Core
