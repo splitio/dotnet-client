@@ -8,11 +8,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio", "src\Splitio-net-
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio.Redis", "Splitio-net-core.Redis\Splitio.Redis.csproj", "{C12DE747-F565-4327-A3BA-6E6B5D5C9BBA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio-net-core.TestSupport", "Splitio.TestSupport\Splitio-net-core.TestSupport.csproj", "{FCB20D65-39D6-4D1A-816B-43F9B8931FDC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio.TestSupport", "Splitio.TestSupport\Splitio.TestSupport.csproj", "{FCB20D65-39D6-4D1A-816B-43F9B8931FDC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio-net-core-tests", "Splitio-net-core-tests\Splitio-net-core-tests.csproj", "{87059146-5A35-41E5-89F3-F5FDC68059E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio-tests", "Splitio-net-core-tests\Splitio-tests.csproj", "{87059146-5A35-41E5-89F3-F5FDC68059E9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio-net-core.Integration-tests", "Splitio-net-core.Integration-tests\Splitio-net-core.Integration-tests.csproj", "{3ADD3081-F2B1-4FC6-BA40-03CC6B897AEB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio.Integration-tests", "Splitio-net-core.Integration-tests\Splitio.Integration-tests.csproj", "{3ADD3081-F2B1-4FC6-BA40-03CC6B897AEB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
