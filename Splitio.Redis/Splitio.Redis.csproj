@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard1.6;net40;net45</TargetFrameworks>
-    <AssemblyName>Splitio-net-core.Redis</AssemblyName>
-    <PackageId>Splitio-net-core.Redis</PackageId>
+    <AssemblyName>Splitio.Redis</AssemblyName>
+    <PackageId>Splitio.Redis</PackageId>
     <PackageTargetFallback Condition="'$(TargetFramework)' != 'netstandard2.0'">
       $(PackageTargetFallback);dnxcore50
     </PackageTargetFallback>
@@ -48,9 +48,9 @@
     <PackageReference Include="Microsoft.Bcl.Async" version="1.0.168" />
     <PackageReference Include="Microsoft.Bcl.Build" Version="1.0.14" />
   </ItemGroup>
-
+  
   <ItemGroup>
-    <ProjectReference Include="..\src\Splitio-net-core\Splitio.csproj" />
+    <ProjectReference Include="..\src\Splitio\Splitio.csproj" />
   </ItemGroup>
 
 </Project>

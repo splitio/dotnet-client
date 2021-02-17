@@ -2,7 +2,7 @@
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
 
-namespace Splitio_net_core.Integration_tests.Resources
+namespace Splitio.Integration_tests.Resources
 {
     public class IntegrationTestsImpressionListener : IImpressionListener
     {

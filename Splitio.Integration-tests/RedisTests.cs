@@ -4,13 +4,13 @@ using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
-using Splitio_net_core.Integration_tests.Resources;
+using Splitio.Integration_tests.Resources;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 
-namespace Splitio_net_core.Integration_tests
+namespace Splitio.Integration_tests
 {
     [TestClass]
     public class RedisTests : BaseIntegrationTests

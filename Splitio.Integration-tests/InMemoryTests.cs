@@ -2,13 +2,13 @@
 using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
-using Splitio_net_core.Integration_tests.Resources;
+using Splitio.Integration_tests.Resources;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace Splitio_net_core.Integration_tests
+namespace Splitio.Integration_tests
 {
     [TestClass]
     public class InMemoryTests : BaseIntegrationTests
