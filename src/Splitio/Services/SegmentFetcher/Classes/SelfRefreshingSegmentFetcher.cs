@@ -6,6 +6,8 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -119,6 +121,21 @@ namespace Splitio.Services.SegmentFetcher.Classes
             catch (Exception ex)
             {
                 _log.Error($"Segment {segmentName} is not initialized. {ex.Message}");
+            }
+        }
+
+
+        public async Task FetchSegmentsIfNotExists(IList<string> names)
+        {
+            if (names.Count == 0) return;
+
+            var uniqueNames = names.Distinct().ToList();
+
+            foreach (var name in uniqueNames)
+            {
+                var changeNumber = _segmentCache.GetChangeNumber(name);
+
+                if (changeNumber == -1) await Fetch(name);
             }
         }
         #endregion

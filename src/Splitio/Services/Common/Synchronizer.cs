@@ -95,7 +95,8 @@ namespace Splitio.Services.Common
 
         public async Task SynchronizeSplits()
         {
-            await _splitFetcher.FetchSplits();
+            var segmentNames = await _splitFetcher.FetchSplits();
+            await _segmentFetcher.FetchSegmentsIfNotExists(segmentNames);
             _log.Debug("Splits fetched...");
         }
         #endregion

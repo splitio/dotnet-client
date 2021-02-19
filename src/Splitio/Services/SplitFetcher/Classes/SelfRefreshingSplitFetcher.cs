@@ -60,8 +60,11 @@ namespace Splitio.Services.SplitFetcher.Classes
             _splitCache.Clear();
         }
 
-        public async Task FetchSplits()
+        public async Task<IList<string>> FetchSplits()
         {
+            var segmentNames = new List<string>();
+            var names = new Dictionary<string, string>();
+
             while (true)
             {
                 var changeNumber = _splitCache.GetChangeNumber();
@@ -84,7 +87,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                     if (result.splits != null && result.splits.Count > 0)
                     {
-                        UpdateSplitsFromChangeFetcherResponse(result.splits);
+                        segmentNames.AddRange(UpdateSplitsFromChangeFetcherResponse(result.splits));
                         _splitCache.SetChangeNumber(result.till);
                     }
                 }
@@ -101,14 +104,17 @@ namespace Splitio.Services.SplitFetcher.Classes
                     }
                 }
             }
+
+            return segmentNames;
         }
         #endregion
 
         #region Private Methods
-        private void UpdateSplitsFromChangeFetcherResponse(List<Split> splitChanges)
+        private IList<string> UpdateSplitsFromChangeFetcherResponse(List<Split> splitChanges)
         {
             var addedSplits = new List<Split>();
             var removedSplits = new List<Split>();
+            var segmentNames = new List<string>();
 
             foreach (Split split in splitChanges)
             {
@@ -129,32 +135,48 @@ namespace Splitio.Services.SplitFetcher.Classes
                         //If not existing in _splits, its a new split
                         addedSplits.Add(split);
                     }
+
+                    segmentNames.AddRange(GetSegmentNames(split));
                 }
             }
 
-            if (addedSplits.Count() > 0)
+            if (_log.IsDebugEnabled && addedSplits.Count() > 0)
             {
                 var addedFeatureNames = addedSplits
                     .Select(x => x.name)
                     .ToList();
 
-                if (_log.IsDebugEnabled)
-                {
-                    _log.Debug(string.Format("Added features: {0}", string.Join(" - ", addedFeatureNames)));
-                }
+                _log.Debug(string.Format("Added features: {0}", string.Join(" - ", addedFeatureNames)));
             }
 
-            if (removedSplits.Count() > 0)
+            if (_log.IsDebugEnabled && removedSplits.Count() > 0)
             {
                 var removedFeatureNames = removedSplits
                     .Select(x => x.name)
                     .ToList();
 
-                if (_log.IsDebugEnabled)
+                _log.Debug(string.Format("Deleted features: {0}", string.Join(" - ", removedFeatureNames)));
+            }
+
+            return segmentNames;
+        }
+
+        public IList<string> GetSegmentNames(Split split)
+        {
+            var names = new List<string>();
+
+            foreach (var condition in split.conditions)
+            {
+                foreach (var matcher in condition.matcherGroup.matchers)
                 {
-                    _log.Debug(string.Format("Deleted features: {0}", string.Join(" - ", removedFeatureNames)));
+                    if (matcher.userDefinedSegmentMatcherData != null)
+                    {
+                        names.Add(matcher.userDefinedSegmentMatcherData.segmentName);
+                    }
                 }
             }
+
+            return names;
         }
         #endregion
     }
