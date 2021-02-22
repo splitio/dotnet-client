@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.SegmentFetcher.Interfaces
 {
@@ -8,6 +9,7 @@ namespace Splitio.Services.SegmentFetcher.Interfaces
         void Stop();
         Task FetchAll();
         Task Fetch(string segmentName);
+        Task FetchSegmentsIfNotExists(IList<string> names);
         void Clear();
     }
 }

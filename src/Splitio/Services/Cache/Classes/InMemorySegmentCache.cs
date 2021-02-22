@@ -20,20 +20,20 @@ namespace Splitio.Services.Cache.Classes
 
         public void AddToSegment(string segmentName, List<string> segmentKeys)
         {
-            Segment segment;
-            segments.TryGetValue(segmentName, out segment);
+            segments.TryGetValue(segmentName, out Segment segment);
+
             if (segment == null)
             {
                 segment = new Segment(segmentName);
                 segments.TryAdd(segmentName, segment);
             }
+
             segment.AddKeys(segmentKeys);
         }
 
         public void RemoveFromSegment(string segmentName, List<string> segmentKeys)
         {
-            Segment segment;
-            if (segments.TryGetValue(segmentName, out segment))
+            if (segments.TryGetValue(segmentName, out Segment segment))
             {
                 segment.RemoveKeys(segmentKeys);
             }
@@ -41,8 +41,7 @@ namespace Splitio.Services.Cache.Classes
 
         public bool IsInSegment(string segmentName, string key)
         {
-            Segment segment;
-            if (segments.TryGetValue(segmentName, out segment))
+            if (segments.TryGetValue(segmentName, out Segment segment))
             {
                 return segment.Contains(key);
             }
@@ -52,8 +51,7 @@ namespace Splitio.Services.Cache.Classes
 
         public void SetChangeNumber(string segmentName, long changeNumber)
         {
-            Segment segment;
-            if (segments.TryGetValue(segmentName, out segment))
+            if (segments.TryGetValue(segmentName, out Segment segment))
             {
                 if (changeNumber < segment.changeNumber)
                 {
@@ -65,8 +63,7 @@ namespace Splitio.Services.Cache.Classes
 
         public long GetChangeNumber(string segmentName)
         {
-            Segment segment;
-            if (segments.TryGetValue(segmentName, out segment))
+            if (segments.TryGetValue(segmentName, out Segment segment))
             {
                 return segment.changeNumber;
             }
