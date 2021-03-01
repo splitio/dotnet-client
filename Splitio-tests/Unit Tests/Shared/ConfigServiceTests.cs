@@ -52,8 +52,6 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual(60, result.EventLogRefreshRate);
             Assert.AreEqual(5000, result.EventLogSize);
             Assert.AreEqual(10, result.EventsFirstPushWindow);
-            Assert.AreEqual(1000, result.MaxCountCalls);
-            Assert.AreEqual(60, result.MaxTimeBetweenCalls);
             Assert.AreEqual(5, result.NumberOfParalellSegmentTasks);
             Assert.AreEqual(true, result.StreamingEnabled);
             Assert.AreEqual(1, result.AuthRetryBackoffBase);
@@ -108,8 +106,6 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual(60, result.EventLogRefreshRate);
             Assert.AreEqual(5000, result.EventLogSize);
             Assert.AreEqual(10, result.EventsFirstPushWindow);
-            Assert.AreEqual(1000, result.MaxCountCalls);
-            Assert.AreEqual(60, result.MaxTimeBetweenCalls);
             Assert.AreEqual(5, result.NumberOfParalellSegmentTasks);
             Assert.AreEqual(false, result.StreamingEnabled);
             Assert.AreEqual(1, result.AuthRetryBackoffBase);
