@@ -1,6 +1,5 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Logger;
-using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System;
 using System.Net;
@@ -16,13 +15,11 @@ namespace Splitio.CommonLibraries
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SdkApiClient));
 
         private readonly HttpClient _httpClient;
-        protected readonly IMetricsLog _metricsLog;
 
         public SdkApiClient (HTTPHeader header,
             string baseUrl,
             long connectionTimeOut,
-            long readTimeout,
-            IMetricsLog metricsLog = null)
+            long readTimeout)
         {
 #if NET40 || NET45
             ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
@@ -60,8 +57,6 @@ namespace Splitio.CommonLibraries
             {
                 _httpClient.DefaultRequestHeaders.Add("SplitSDKImpressionsMode", header.SplitSDKImpressionsMode.Value.ToString());
             }
-
-            _metricsLog = metricsLog;
         }
 
         public virtual async Task<HTTPResult> ExecuteGet(string requestUri)

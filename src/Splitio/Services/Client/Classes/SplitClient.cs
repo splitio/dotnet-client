@@ -8,7 +8,6 @@ using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
-using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
@@ -35,9 +34,7 @@ namespace Splitio.Services.Client.Classes
         protected bool Destroyed;
         protected string ApiKey;
 
-        protected IMetricsLog _metricsLog;
         protected ISplitManager _manager;
-        protected IMetricsCache _metricsCache;
         protected IImpressionsLog _impressionsLog;
         protected IEventsLog _eventsLog;
         protected ISplitCache _splitCache;
@@ -213,11 +210,6 @@ namespace Splitio.Services.Client.Classes
 
             var result = _evaluator.EvaluateFeature(key, feature, attributes);
 
-            if (_metricsLog != null)
-            {
-                _metricsLog.Time(operation, result.ElapsedMilliseconds);
-            }
-
             if (!Labels.SplitNotFound.Equals(result.Label))
             {
                 _impressionsManager.BuildAndTrack(key.matchingKey, feature, result.Treatment, CurrentTimeHelper.CurrentTimeMillis(), result.ChangeNumber, LabelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null);
@@ -256,11 +248,6 @@ namespace Splitio.Services.Client.Classes
                     {
                         ImpressionsQueue.Add(_impressionsManager.BuildImpression(key.matchingKey, treatmentResult.Key, treatmentResult.Value.Treatment, CurrentTimeHelper.CurrentTimeMillis(), treatmentResult.Value.ChangeNumber, LabelsEnabled ? treatmentResult.Value.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null));
                     }
-                }
-
-                if (_metricsLog != null)
-                {
-                    _metricsLog.Time(operation, results.ElapsedMilliseconds);
                 }
 
                 _impressionsManager.Track(ImpressionsQueue);

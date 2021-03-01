@@ -1,6 +1,5 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Services.Logger;
-using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
@@ -23,8 +22,7 @@ namespace Splitio.Services.SplitFetcher.Classes
         public SplitSdkApiClient(HTTPHeader header,
             string baseUrl,
             long connectionTimeOut,
-            long readTimeout,
-            IMetricsLog metricsLog = null) : base(header, baseUrl, connectionTimeOut, readTimeout, metricsLog)
+            long readTimeout) : base(header, baseUrl, connectionTimeOut, readTimeout)
         { }
 
         public async Task<string> FetchSplitChanges(long since)
@@ -39,22 +37,11 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                 if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
                 {
-                    if (_metricsLog != null)
-                    {
-                        _metricsLog.Time(SplitFetcherTime, clock.ElapsedMilliseconds);
-                        _metricsLog.Count(string.Format(SplitFetcherStatus, response.statusCode), 1);
-                    }
-
                     return response.content;
                 }
                 else
                 {
                     _log.Error(string.Format("Http status executing FetchSplitChanges: {0} - {1}", response.statusCode.ToString(), response.content));
-
-                    if (_metricsLog != null)
-                    {
-                        _metricsLog.Count(string.Format(SplitFetcherStatus, response.statusCode), 1);
-                    }
 
                     return string.Empty;
                 }
@@ -62,11 +49,6 @@ namespace Splitio.Services.SplitFetcher.Classes
             catch (Exception e)
             {
                 _log.Error("Exception caught executing FetchSplitChanges", e);
-
-                if (_metricsLog != null)
-                {
-                    _metricsLog.Count(SplitFetcherException, 1);
-                }
 
                 return string.Empty;
             }

@@ -1,6 +1,5 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Services.Logger;
-using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
@@ -23,8 +22,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
         public SegmentSdkApiClient(HTTPHeader header,
             string baseUrl,
             long connectionTimeOut,
-            long readTimeout,
-            IMetricsLog metricsLog = null) : base(header, baseUrl, connectionTimeOut, readTimeout, metricsLog)
+            long readTimeout) : base(header, baseUrl, connectionTimeOut, readTimeout)
         { }
 
         public async Task<string> FetchSegmentChanges(string name, long since)
@@ -39,23 +37,12 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
                 {
-                    if (_metricsLog != null)
-                    {
-                        _metricsLog.Time(SegmentFetcherTime, clock.ElapsedMilliseconds);
-                        _metricsLog.Count(string.Format(SegmentFetcherStatus, response.statusCode), 1);
-                    }
-
                     if (_log.IsDebugEnabled)
                     {
                         _log.Debug($"FetchSegmentChanges with name '{name}' took {clock.ElapsedMilliseconds} milliseconds using uri '{requestUri}'");
                     }
 
                     return response.content;
-                }
-
-                if (_metricsLog != null)
-                {
-                    _metricsLog.Count(string.Format(SegmentFetcherStatus, response.statusCode), 1);
                 }
 
                 _log.Error(response.statusCode == HttpStatusCode.Forbidden
@@ -68,11 +55,6 @@ namespace Splitio.Services.SegmentFetcher.Classes
             catch (Exception e)
             {
                 _log.Error("Exception caught executing FetchSegmentChanges", e);
-                
-                if (_metricsLog != null)
-                {
-                    _metricsLog.Count(SegmentFetcherException, 1);
-                }
 
                 return string.Empty;
             }
