@@ -20,10 +20,11 @@ namespace Splitio.Integration_tests
         private const string Password = "";
         private const int Database = 0;
 
-        private readonly IRedisAdapter _redisAdapter;
-        private readonly string rootFilePath;
+        private IRedisAdapter _redisAdapter;
+        private string rootFilePath;
 
-        public RedisTests()
+        [TestInitialize]
+        public void RedisTestsInitialize()
         {
             _redisAdapter = new RedisAdapter(Host, Port, Password, Database);
             _redisAdapter.Connect();
