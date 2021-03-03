@@ -45,7 +45,6 @@ namespace Splitio_Tests.Integration_Tests
             _redisAdapter.Connect();
 
             _client = new RedisClient(_config, API_KEY, _logMock.Object);
-            _client.BlockUntilReady(10000);
         }
 
         [TestInitialize]
