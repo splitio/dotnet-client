@@ -23,8 +23,7 @@ namespace Splitio_Tests.Integration_Tests
         private Mock<ISplitLogger> _logMock = new Mock<ISplitLogger>();
         private IRedisAdapter _redisAdapter;
 
-        [TestInitialize]
-        public void Initialization()
+        public RedisClientTests()
         {
             var cacheAdapterConfig = new CacheAdapterConfigurationOptions
             {
@@ -42,6 +41,16 @@ namespace Splitio_Tests.Integration_Tests
 
             _redisAdapter = new RedisAdapter(HOST, PORT, PASSWORD, DB);
             _redisAdapter.Connect();
+        }
+
+        [TestInitialize]
+        public void Initialization()
+        {
+            if (!_redisAdapter.IsConnected())
+            {
+                _redisAdapter.Connect();
+            }
+
             LoadSplits();
         }
 
