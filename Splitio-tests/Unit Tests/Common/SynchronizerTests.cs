@@ -4,7 +4,6 @@ using Splitio.Services.Common;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
-using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System.Collections.Generic;
@@ -19,7 +18,6 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<ISelfRefreshingSegmentFetcher> _segmentFetcher;
         private readonly Mock<IImpressionsLog> _impressionsLog;
         private readonly Mock<IEventsLog> _eventsLog;
-        private readonly Mock<IMetricsLog> _metricsLog;
         private readonly Mock<ISplitLogger> _log;
         private readonly Mock<IImpressionsCountSender> _impressionsCountSender;
 
@@ -31,11 +29,10 @@ namespace Splitio_Tests.Unit_Tests.Common
             _segmentFetcher = new Mock<ISelfRefreshingSegmentFetcher>();
             _impressionsLog = new Mock<IImpressionsLog>();
             _eventsLog = new Mock<IEventsLog>();
-            _metricsLog = new Mock<IMetricsLog>();
             _log = new Mock<ISplitLogger>();
             _impressionsCountSender = new Mock<IImpressionsCountSender>();
 
-            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _metricsLog.Object, _impressionsCountSender.Object, log: _log.Object);
+            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCountSender.Object, log: _log.Object);
         }
 
         [TestMethod]
@@ -47,7 +44,6 @@ namespace Splitio_Tests.Unit_Tests.Common
             // Assert.
             _impressionsLog.Verify(mock => mock.Start(), Times.Once);
             _eventsLog.Verify(mock => mock.Start(), Times.Once);
-            _metricsLog.Verify(mock => mock.Start(), Times.Once);
             _impressionsCountSender.Verify(mock => mock.Start(), Times.Once);
         }
 
@@ -71,7 +67,6 @@ namespace Splitio_Tests.Unit_Tests.Common
             // Assert.
             _impressionsLog.Verify(mock => mock.Stop(), Times.Once);
             _eventsLog.Verify(mock => mock.Stop(), Times.Once);
-            _metricsLog.Verify(mock => mock.Clear(), Times.Once);
             _impressionsCountSender.Verify(mock => mock.Stop(), Times.Once);
         }
 

@@ -11,8 +11,6 @@ using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Logger;
-using Splitio.Services.Metrics.Classes;
-using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.SegmentFetcher.Interfaces;
@@ -42,7 +40,6 @@ namespace Splitio.Services.Client.Classes
         private ISegmentSdkApiClient _segmentSdkApiClient;
         private ITreatmentSdkApiClient _treatmentSdkApiClient;
         private IEventSdkApiClient _eventSdkApiClient;
-        private IMetricsSdkApiClient _metricsSdkApiClient;
         private ISelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
         private ISyncManager _syncManager;
         private IImpressionsCounter _impressionsCounter;
@@ -126,13 +123,7 @@ namespace Splitio.Services.Client.Classes
         {
             var eventsCache = new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(_config.EventLogSize));
             _eventsLog = new EventsLog(_eventSdkApiClient, _config.EventsFirstPushWindow, _config.EventLogRefreshRate, eventsCache);
-        }
-        
-        private void BuildMetricsLog()
-        {
-            _metricsCache = new InMemoryMetricsCache(new ConcurrentDictionary<string, Counter>(), new ConcurrentDictionary<string, ILatencyTracker>(), new ConcurrentDictionary<string, long>());
-            _metricsLog = new AsyncMetricsLog(_metricsSdkApiClient, _metricsCache, _config.MaxCountCalls, _config.MaxTimeBetweenCalls);
-        }
+        }        
 
         private int Random(int refreshRate)
         {
@@ -152,10 +143,8 @@ namespace Splitio.Services.Client.Classes
                 SplitSDKImpressionsMode = _config.ImpressionsMode.Equals(ImpressionsMode.Optimized)
             };
 
-            _metricsSdkApiClient = new MetricsSdkApiClient(header, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
-            BuildMetricsLog();
-            _splitSdkApiClient = new SplitSdkApiClient(header, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout, _metricsLog);
-            _segmentSdkApiClient = new SegmentSdkApiClient(header, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout, _metricsLog);
+            _splitSdkApiClient = new SplitSdkApiClient(header, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
+            _segmentSdkApiClient = new SegmentSdkApiClient(header, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
             _treatmentSdkApiClient = new TreatmentSdkApiClient(header, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
             _eventSdkApiClient = new EventSdkApiClient(header, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
         }
@@ -175,7 +164,7 @@ namespace Splitio.Services.Client.Classes
             try
             {
                 var impressionsCountSender = new ImpressionsCountSender(_treatmentSdkApiClient, _impressionsCounter);
-                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _metricsLog, impressionsCountSender, _wrapperAdapter);
+                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, impressionsCountSender, _wrapperAdapter);
                 var splitsWorker = new SplitsWorker(_splitCache, synchronizer);
                 var segmentsWorker = new SegmentsWorker(_segmentCache, synchronizer);
                 var notificationProcessor = new NotificationProcessor(splitsWorker, segmentsWorker);

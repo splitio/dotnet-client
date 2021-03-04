@@ -1,5 +1,6 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
+using System;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -9,18 +10,20 @@ namespace Splitio.Services.Client.Classes
         public string Endpoint { get; set; }
         public string EventsEndpoint { get; set; }
         public string LocalhostFilePath { get; set; }
-        public int? FeaturesRefreshRate { get; set; } 
-        public int? SegmentsRefreshRate { get; set; } 
-        public bool RandomizeRefreshRates { get; set; } 
+        public int? FeaturesRefreshRate { get; set; }
+        public int? SegmentsRefreshRate { get; set; }
+        public bool RandomizeRefreshRates { get; set; }
         public int? ImpressionsRefreshRate { get; set; }
         public int? MaxImpressionsLogSize { get; set; }
         public int? EventsFirstPushWindow { get; set; }
         public int? EventsPushRate { get; set; }
         public int? EventsQueueSize { get; set; }
-        public long? ConnectionTimeout { get; set; } 
-        public long? ReadTimeout { get; set; } 
-        public int? MaxMetricsCountCallsBeforeFlush { get; set; } 
-        public int? MetricsRefreshRate { get; set; } 
+        public long? ConnectionTimeout { get; set; }
+        public long? ReadTimeout { get; set; }
+        [Obsolete]
+        public int? MaxMetricsCountCallsBeforeFlush { get; set; }
+        [Obsolete]
+        public int? MetricsRefreshRate { get; set; }
         public int? SplitsStorageConcurrencyLevel { get; set; }
         public string SdkMachineName { get; set; }
         public string SdkMachineIP { get; set; }

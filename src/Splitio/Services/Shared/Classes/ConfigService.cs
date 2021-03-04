@@ -66,8 +66,6 @@ namespace Splitio.Services.Shared.Classes
                 EventLogRefreshRate = config.EventsPushRate ?? 60,
                 EventLogSize = config.EventsQueueSize ?? 5000,
                 EventsFirstPushWindow = config.EventsFirstPushWindow ?? 10,
-                MaxCountCalls = config.MaxMetricsCountCallsBeforeFlush ?? 1000,
-                MaxTimeBetweenCalls = config.MetricsRefreshRate ?? 60,
                 NumberOfParalellSegmentTasks = config.NumberOfParalellSegmentTasks ?? 5,
                 StreamingEnabled = config.StreamingEnabled ?? true,
                 AuthRetryBackoffBase = GetMinimunAllowed(config.AuthRetryBackoffBase ?? 1, 1, "AuthRetryBackoffBase"),

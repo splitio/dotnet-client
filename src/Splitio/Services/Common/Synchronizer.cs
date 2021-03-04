@@ -1,7 +1,6 @@
 ﻿using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
-using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
@@ -16,7 +15,6 @@ namespace Splitio.Services.Common
         private readonly ISelfRefreshingSegmentFetcher _segmentFetcher;
         private readonly IImpressionsLog _impressionsLog;
         private readonly IEventsLog _eventsLog;
-        private readonly IMetricsLog _metricsLog;
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISplitLogger _log;
         private readonly IImpressionsCountSender _impressionsCountSender;
@@ -25,7 +23,6 @@ namespace Splitio.Services.Common
             ISelfRefreshingSegmentFetcher segmentFetcher,
             IImpressionsLog impressionsLog,
             IEventsLog eventsLog,
-            IMetricsLog metricsLog,
             IImpressionsCountSender impressionsCountSender,
             IWrapperAdapter wrapperAdapter = null,
             ISplitLogger log = null)
@@ -34,7 +31,6 @@ namespace Splitio.Services.Common
             _segmentFetcher = segmentFetcher;
             _impressionsLog = impressionsLog;
             _eventsLog = eventsLog;
-            _metricsLog = metricsLog;
             _impressionsCountSender = impressionsCountSender;
             _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
             _log = log ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
@@ -45,7 +41,6 @@ namespace Splitio.Services.Common
         {
             _impressionsLog.Start();
             _eventsLog.Start();
-            _metricsLog.Start();
             _impressionsCountSender.Start();
             _log.Debug("Periodic Data Recording started...");
         }
@@ -61,7 +56,6 @@ namespace Splitio.Services.Common
         {
             _impressionsLog.Stop();
             _eventsLog.Stop();
-            _metricsLog.Clear();
             _impressionsCountSender.Stop();
             _log.Debug("Periodic Data Recording stopped...");
         }

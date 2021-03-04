@@ -1,4 +1,6 @@
-﻿namespace Splitio.Domain
+﻿using System;
+
+namespace Splitio.Domain
 {
     public class SelfRefreshingConfig : BaseConfig
     {
@@ -14,8 +16,6 @@
         public int EventsFirstPushWindow { get; set; }
         public int EventLogRefreshRate { get; set; }
         public int EventLogSize { get; set; }
-        public int MaxCountCalls { get; set; }
-        public int MaxTimeBetweenCalls { get; set; }
         public int NumberOfParalellSegmentTasks { get; set; }
         public bool RandomizeRefreshRates { get; set; }
         public bool StreamingEnabled { get; set; }
