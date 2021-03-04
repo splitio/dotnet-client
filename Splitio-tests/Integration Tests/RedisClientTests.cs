@@ -218,14 +218,13 @@ namespace Splitio_Tests.Integration_Tests
         public void Destroy()
         {
             //Arrange
-            var client = new RedisClient(_config, API_KEY, _logMock.Object);
-            client.BlockUntilReady(10000);
+            _client.BlockUntilReady(10000);
 
             //Act
-            client.Destroy();
+            _client.Destroy();
 
             //Assert
-            Assert.IsTrue(client.IsDestroyed());
+            Assert.IsTrue(_client.IsDestroyed());
         }
 
         private void LoadSplits()
