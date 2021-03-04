@@ -20,12 +20,13 @@ namespace Splitio_Tests.Integration_Tests
         private const int DB = 0;
         private const string API_KEY = "redis_api_key";
 
-        private readonly ConfigurationOptions _config;
-        private readonly Mock<ISplitLogger> _logMock = new Mock<ISplitLogger>();
-        private readonly IRedisAdapter _redisAdapter;
-        private readonly ISplitClient _client;
+        private ConfigurationOptions _config;
+        private Mock<ISplitLogger> _logMock = new Mock<ISplitLogger>();
+        private IRedisAdapter _redisAdapter;
+        private ISplitClient _client;
 
-        public RedisClientTests()
+        [TestInitialize]
+        public void Initialization()
         {
             var cacheAdapterConfig = new CacheAdapterConfigurationOptions
             {
@@ -45,15 +46,6 @@ namespace Splitio_Tests.Integration_Tests
             _redisAdapter.Connect();
 
             _client = new RedisClient(_config, API_KEY, _logMock.Object);
-        }
-
-        [TestInitialize]
-        public void Initialization()
-        {
-            if (!_redisAdapter.IsConnected())
-            {
-                _redisAdapter.Connect();
-            }
 
             LoadSplits();
         }
@@ -61,6 +53,9 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         public void GetTreatment_WhenFeatureExists_ReturnsOn()
         {
+            //Arrange
+            _client.BlockUntilReady(10000);
+
             //Act           
             var result = _client.GetTreatment("test", "always_on", null);
 
@@ -72,6 +67,9 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         public void GetTreatment_WhenFeatureExists_ReturnsOff()
         {
+            //Arrange
+            _client.BlockUntilReady(10000);
+
             //Act           
             var result = _client.GetTreatment("test", "always_off", null);
 
@@ -83,6 +81,9 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         public void GetTreatment_WhenFeatureDoenstExist_ReturnsControl()
         {
+            //Arrange
+            _client.BlockUntilReady(10000);
+
             //Act           
             var result = _client.GetTreatment("test", "always_control", null);
 
@@ -99,6 +100,8 @@ namespace Splitio_Tests.Integration_Tests
             var alwaysOff = "always_off";
 
             var features = new List<string> { alwaysOn, alwaysOff };
+
+            _client.BlockUntilReady(10000);
 
             //Act           
             var result = _client.GetTreatments("test", features, null);
@@ -119,6 +122,8 @@ namespace Splitio_Tests.Integration_Tests
 
             var features = new List<string> { alwaysOn, alwaysOff, alwaysControl };
 
+            _client.BlockUntilReady(10000);
+
             //Act           
             var result = _client.GetTreatments("test", features, null);
 
@@ -132,8 +137,11 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         public void GetTreatmentsWithConfig_WhenClientIsNotReady_ReturnsControl()
         {
+            // Arrange.
+            var client = new RedisClient(_config, API_KEY, _logMock.Object);
+
             // Act.
-            var result = _client.GetTreatmentsWithConfig("key", new List<string>());
+            var result = client.GetTreatmentsWithConfig("key", new List<string>());
 
             // Assert.
             foreach (var res in result)
@@ -148,8 +156,11 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         public void GetTreatmentWithConfig_WhenClientIsNotReady_ReturnsControl()
         {
+            // Arrange.
+            var client = new RedisClient(_config, API_KEY, _logMock.Object);
+
             // Act.
-            var result = _client.GetTreatmentWithConfig("key", string.Empty);
+            var result = client.GetTreatmentWithConfig("key", string.Empty);
 
             // Assert.
             Assert.AreEqual("control", result.Treatment);
