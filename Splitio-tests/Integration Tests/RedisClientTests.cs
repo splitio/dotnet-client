@@ -50,6 +50,7 @@ namespace Splitio_Tests.Integration_Tests
             LoadSplits();
         }
 
+        [Ignore]
         [TestMethod]
         public void GetTreatment_WhenFeatureExists_ReturnsOn()
         {
