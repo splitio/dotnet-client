@@ -30,6 +30,8 @@ namespace Splitio.Redis.Services.Shared
                         ready = true;
                         break;
                     }
+
+                    Thread.Sleep(2000);
                 }
 
                 if (!ready) throw new TimeoutException($"SDK was not ready in {blockMilisecondsUntilReady}. Could not connect to Redis");

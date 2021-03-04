@@ -33,7 +33,8 @@ namespace Splitio_Tests.Integration_Tests
                 Host = HOST,
                 Port = PORT,
                 Password = PASSWORD,
-                Database = DB
+                Database = DB,
+                ConnectTimeout = 9000,
             };
 
             _config = new ConfigurationOptions
@@ -53,33 +54,39 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         public void GetTreatment_WhenFeatureExists_ReturnsOn()
         {
+            //Arrange
+            _client.BlockUntilReady(10000);
+
             //Act
             var result = _client.GetTreatment("test", "always_on", null);
 
             //Assert
-            Assert.IsNotNull(result);
             Assert.AreEqual("on", result);
         }
 
         [TestMethod]
         public void GetTreatment_WhenFeatureExists_ReturnsOff()
         {
+            //Arrange
+            _client.BlockUntilReady(10000);
+
             //Act
             var result = _client.GetTreatment("test", "always_off", null);
 
             //Assert
-            Assert.IsNotNull(result);
             Assert.AreEqual("off", result);
         }
 
         [TestMethod]
         public void GetTreatment_WhenFeatureDoenstExist_ReturnsControl()
         {
+            //Arrange
+            _client.BlockUntilReady(10000);
+
             //Act
             var result = _client.GetTreatment("test", "always_control", null);
 
             //Assert
-            Assert.IsNotNull(result);
             Assert.AreEqual("control", result);
         }
 
@@ -92,11 +99,12 @@ namespace Splitio_Tests.Integration_Tests
 
             var features = new List<string> { alwaysOn, alwaysOff };
 
+            _client.BlockUntilReady(10000);
+
             //Act
             var result = _client.GetTreatments("test", features, null);
 
             //Assert
-            Assert.IsNotNull(result);
             Assert.AreEqual("off", result[alwaysOff]);
             Assert.AreEqual("on", result[alwaysOn]);
         }
@@ -111,11 +119,12 @@ namespace Splitio_Tests.Integration_Tests
 
             var features = new List<string> { alwaysOn, alwaysOff, alwaysControl };
 
+            _client.BlockUntilReady(10000);
+
             //Act
             var result = _client.GetTreatments("test", features, null);
 
             //Assert
-            Assert.IsNotNull(result);
             Assert.AreEqual("off", result[alwaysOff]);
             Assert.AreEqual("on", result[alwaysOn]);
             Assert.AreEqual("control", result[alwaysControl]);
@@ -203,6 +212,9 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         public void Destroy()
         {
+            //Arrange
+            _client.BlockUntilReady(10000);
+
             //Act
             _client.Destroy();
 
