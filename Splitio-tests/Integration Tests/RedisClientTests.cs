@@ -54,10 +54,7 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         public void GetTreatment_WhenFeatureExists_ReturnsOn()
         {
-            //Arrange
-            _client.BlockUntilReady(10000);
-
-            //Act           
+            //Act
             var result = _client.GetTreatment("test", "always_on", null);
 
             //Assert
@@ -68,10 +65,7 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         public void GetTreatment_WhenFeatureExists_ReturnsOff()
         {
-            //Arrange
-            _client.BlockUntilReady(10000);
-
-            //Act           
+            //Act
             var result = _client.GetTreatment("test", "always_off", null);
 
             //Assert
@@ -82,10 +76,7 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         public void GetTreatment_WhenFeatureDoenstExist_ReturnsControl()
         {
-            //Arrange
-            _client.BlockUntilReady(10000);
-
-            //Act           
+            //Act
             var result = _client.GetTreatment("test", "always_control", null);
 
             //Assert
@@ -102,9 +93,7 @@ namespace Splitio_Tests.Integration_Tests
 
             var features = new List<string> { alwaysOn, alwaysOff };
 
-            _client.BlockUntilReady(10000);
-
-            //Act           
+            //Act
             var result = _client.GetTreatments("test", features, null);
 
             //Assert
@@ -123,9 +112,7 @@ namespace Splitio_Tests.Integration_Tests
 
             var features = new List<string> { alwaysOn, alwaysOff, alwaysControl };
 
-            _client.BlockUntilReady(10000);
-
-            //Act           
+            //Act
             var result = _client.GetTreatments("test", features, null);
 
             //Assert
@@ -217,9 +204,6 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         public void Destroy()
         {
-            //Arrange
-            _client.BlockUntilReady(10000);
-
             //Act
             _client.Destroy();
 
