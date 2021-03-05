@@ -1,4 +1,4 @@
-﻿namespace Splitio.Telemetry.Domain
+﻿namespace Splitio.Telemetry.Domain.Enums
 {
     public enum ResourceEnum
     {

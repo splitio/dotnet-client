@@ -1,4 +1,5 @@
 ﻿using Splitio.Telemetry.Domain;
+using Splitio.Telemetry.Domain.Enums;
 
 namespace Splitio.Telemetry.Storages
 {
@@ -6,17 +7,17 @@ namespace Splitio.Telemetry.Storages
     {
         void RecordLatency(MethodEnum method, int bucket);
         void RecordException(MethodEnum method);
-        void RecordSucccessfulSync(RecordsEnum method, long timestamp);
+        void RecordSuccessfulSync(LastSynchronizationRecordsEnum method, long timestamp);
         void RecordSyncError(ResourceEnum resuource, int status);
-        void RecordSyncLatency(string path, int bucket);
+        void RecordSyncLatency(HttpLatenciesEnum path, int bucket);
         void RecordAuthRejections();
         void RecordTokenRefreshes();
-        void RecordImpressionsStats(RecordsEnum data, long count);
+        void RecordImpressionsStats(ImpressionsDataRecordsEnum data, long count);
         void RecordStreamingEvent(StreamingEvent streamingEvent);
         void RecordSessionLength(long session);
         void RecordNonReadyUsages();
         void RecordBURTimeout();
-        void RecordEventsStats(RecordsEnum data, long count);
+        void RecordEventsStats(EventsDataRecordsEnum data, long count);
         void AddTag(string tag);
     }
 }

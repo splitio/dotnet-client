@@ -14,6 +14,6 @@ namespace Splitio.Telemetry.Domain
         [JsonProperty("tcs")]
         public IList<long> TreatmenstWithConfig { get; set; }
         [JsonProperty("tr")]
-        public IList<long> Track { get; set; }  
+        public IList<long> Track { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Splitio.Telemetry.Domain;
+using Splitio.Telemetry.Domain.Enums;
 using System.Collections.Generic;
 
 namespace Splitio.Telemetry.Storages
@@ -6,8 +7,8 @@ namespace Splitio.Telemetry.Storages
     public interface ITelemetryStorageConsumer
     {
         MethodLatencies PopLatencies();
-        IDictionary<MethodEnum, long> PopExceptions();
-        LastSynchronization GetLAstSynchronizations();
+        MethodExceptions PopExceptions();
+        LastSynchronization GetLastSynchronizations();
         HTTPErrors PopHttpErrors();
         HTTPLatencies PopHttpLatencies();
         long PopAuthRejections();
@@ -17,7 +18,7 @@ namespace Splitio.Telemetry.Storages
         long GetSessionLength();
         long GetNonReadyUsages();
         long GetBURTimeouts();
-        long GetEventsStats(RecordsEnum data);
-        long GetImpressionsStats(RecordsEnum data);
+        long GetEventsStats(EventsDataRecordsEnum data);
+        long GetImpressionsStats(ImpressionsDataRecordsEnum data);
     }
 }
