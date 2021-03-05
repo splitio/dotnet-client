@@ -195,6 +195,7 @@ namespace Splitio.Telemetry.Storages
             };
 
             _httpErrors.Clear();
+            InitHttpErrors();
 
             return erros;
         }
@@ -212,6 +213,7 @@ namespace Splitio.Telemetry.Storages
             };
 
             _httpLatencies.Clear();
+            InitHttpLatencies();
 
             return latencies;
         }
@@ -228,6 +230,7 @@ namespace Splitio.Telemetry.Storages
             };
 
             _methodLatencies.Clear();
+            InitLatencies();
 
             return latencies;
         }
