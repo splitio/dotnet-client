@@ -122,45 +122,59 @@ namespace Splitio.Telemetry.Storages
         #region Public Methods - Consumer
         public long GetBURTimeouts()
         {
-            return _factoryCounters[FactoryCountersEnum.BurTimeouts];
+            if (!_factoryCounters.TryGetValue(FactoryCountersEnum.BurTimeouts, out long value))
+            {
+                return 0;
+            }
+
+            return value;
         }
 
         public long GetEventsStats(EventsDataRecordsEnum data)
         {
-            return _eventsDataRecords[data];
+            return _eventsDataRecords.TryGetValue(data, out long value) ? value : 0;
         }
 
         public long GetImpressionsStats(ImpressionsDataRecordsEnum data)
-        {
-            return _impressionsDataRecords[data];
+        {            
+            return _impressionsDataRecords.TryGetValue(data, out long value) ? value : 0;
         }
 
         public LastSynchronization GetLastSynchronizations()
         {
             return new LastSynchronization
             {
-                Splits = _lastSynchronizationRecords[LastSynchronizationRecordsEnum.Splits],
-                Segments = _lastSynchronizationRecords[LastSynchronizationRecordsEnum.Segments],
-                Impressions = _lastSynchronizationRecords[LastSynchronizationRecordsEnum.Impressions],
-                Events = _lastSynchronizationRecords[LastSynchronizationRecordsEnum.Events],
-                Telemetry = _lastSynchronizationRecords[LastSynchronizationRecordsEnum.Telemetry],
-                Token = _lastSynchronizationRecords[LastSynchronizationRecordsEnum.Token]
+                Splits = _lastSynchronizationRecords.TryGetValue(LastSynchronizationRecordsEnum.Splits, out long splitsValue) ? splitsValue : 0,
+                Segments = _lastSynchronizationRecords.TryGetValue(LastSynchronizationRecordsEnum.Segments, out long segValue) ? segValue : 0,
+                Impressions = _lastSynchronizationRecords.TryGetValue(LastSynchronizationRecordsEnum.Impressions, out long impValue) ? impValue : 0,
+                Events = _lastSynchronizationRecords.TryGetValue(LastSynchronizationRecordsEnum.Events, out long evetsValue) ? evetsValue : 0,
+                Telemetry = _lastSynchronizationRecords.TryGetValue(LastSynchronizationRecordsEnum.Telemetry, out long telValue) ? telValue : 0,
+                Token = _lastSynchronizationRecords.TryGetValue(LastSynchronizationRecordsEnum.Token, out long tokenValue) ? tokenValue : 0
             };
         }
 
         public long GetNonReadyUsages()
         {
-            return _factoryCounters[FactoryCountersEnum.NonReadyUsages];
+            if (!_factoryCounters.TryGetValue(FactoryCountersEnum.NonReadyUsages, out long value))
+            {
+                return 0;
+            }
+
+            return value;
         }
 
         public long GetSessionLength()
         {
-            return _sdkRecords[SdkRecordsEnum.Session];
+            return _sdkRecords.TryGetValue(SdkRecordsEnum.Session, out long value) ? value : 0;
         }
 
         public long PopAuthRejections()
         {
-            var authRejections = _pushCounters[PushCountersEnum.AuthRejecttions];
+            if (!_pushCounters.TryGetValue(PushCountersEnum.AuthRejecttions, out long authRejections))
+            {
+                return 0;
+            }
+
             _pushCounters[PushCountersEnum.AuthRejecttions] = 0;
 
             return authRejections;
@@ -170,11 +184,11 @@ namespace Splitio.Telemetry.Storages
         {
             var exceptions = new MethodExceptions
             {
-                Treatment = _exceptionsCounters[MethodEnum.Treatment],
-                Treatments = _exceptionsCounters[MethodEnum.Treatments],
-                TreatmentWithConfig = _exceptionsCounters[MethodEnum.TreatmentWithConfig],
-                TreatmenstWithConfig = _exceptionsCounters[MethodEnum.TreatmentsWithConfig],
-                Track = _exceptionsCounters[MethodEnum.Track],
+                Treatment = _exceptionsCounters.TryGetValue(MethodEnum.Treatment, out long treatmentValue) ? treatmentValue : 0,
+                Treatments = _exceptionsCounters.TryGetValue(MethodEnum.Treatments, out long treatmentsValue) ? treatmentsValue : 0,
+                TreatmentWithConfig = _exceptionsCounters.TryGetValue(MethodEnum.TreatmentWithConfig, out long twcValue) ? twcValue : 0,
+                TreatmentsWithConfig = _exceptionsCounters.TryGetValue(MethodEnum.TreatmentsWithConfig, out long tswcValue) ? tswcValue : 0,
+                Track = _exceptionsCounters.TryGetValue(MethodEnum.Track, out long trackValue) ? trackValue : 0,
             };
 
             _exceptionsCounters.Clear();
@@ -259,7 +273,11 @@ namespace Splitio.Telemetry.Storages
 
         public long PopTokenRefreshes()
         {
-            var tokenRefreshes = _pushCounters[PushCountersEnum.TokenRefreshes];
+            if (!_pushCounters.TryGetValue(PushCountersEnum.TokenRefreshes, out long tokenRefreshes))
+            {
+                return 0;
+            }
+
             _pushCounters[PushCountersEnum.TokenRefreshes] = 0;
 
             return tokenRefreshes;
