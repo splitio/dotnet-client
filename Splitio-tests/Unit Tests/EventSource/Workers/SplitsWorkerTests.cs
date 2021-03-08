@@ -48,7 +48,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             Thread.Sleep(50);
 
             _splitsWorker.AddToQueue(1585956698476);
-            Thread.Sleep(5000);
+            Thread.Sleep(1000);
 
             _splitsWorker.Stop();
             _splitsWorker.AddToQueue(1585956698486);
@@ -72,7 +72,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Act.            
             _splitsWorker.AddToQueue(1585956698457);
-            Thread.Sleep(5000);
+            Thread.Sleep(1000);
 
             _splitsWorker.Stop();
 
