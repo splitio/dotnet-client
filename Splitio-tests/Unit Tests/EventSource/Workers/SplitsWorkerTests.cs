@@ -26,6 +26,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _splitsWorker = new SplitsWorker(_splitCache.Object, _synchronizer.Object, _log.Object);
         }
 
+
         [Ignore]
         [TestMethod]
         public void AddToQueue_WithElements_ShouldTriggerFetch()
