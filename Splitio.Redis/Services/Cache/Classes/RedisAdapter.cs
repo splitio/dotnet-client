@@ -280,6 +280,20 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
         }
 
+        public double HashIncrement(string key, double value)
+        {
+            try
+            {
+                return _database.HashIncrement(key, "hashField", value);
+            }
+            catch (Exception e)
+            {
+                _log.Error("Exception calling Redis Adapter HashIncrement, ", e);
+                return 0;
+            }
+        }
+
+        #region Private Methods
         private string GetConfig()
         {
             var config = string.Format("{0}:{1}, password = {2}, allowAdmin = true", _host, _port, _password);
@@ -303,5 +317,6 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             return config;
         }
+        #endregion
     }
 }
