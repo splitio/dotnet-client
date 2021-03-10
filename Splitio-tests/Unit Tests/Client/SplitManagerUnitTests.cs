@@ -422,14 +422,14 @@ namespace Splitio_Tests.Unit_Tests.Client
                 conditionWithLogic
             };
 
-            var splits = new List<ParsedSplit>
+            var splitNames = new List<string>
             {
-                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic },
-                new ParsedSplit { name = "test2", conditions = conditionsWithLogic },
-                new ParsedSplit { name = "test3", conditions = conditionsWithLogic },
-                new ParsedSplit { name = "test4", conditions = conditionsWithLogic },
-                new ParsedSplit { name = "test5", conditions = conditionsWithLogic },
-                new ParsedSplit { name = "test6", conditions = conditionsWithLogic }
+                "test1",
+                "test2",
+                "test3",
+                "test4",
+                "test5",
+                "test6"
             };
             
             _blockUntilReadyService
@@ -437,8 +437,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetAllSplits())
-                .Returns(splits);
+                .Setup(mock => mock.GetSplitNames())
+                .Returns(splitNames);
             
             _splitManager.BlockUntilReady(1000);
 

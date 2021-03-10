@@ -68,14 +68,6 @@ namespace Splitio.Redis.Services.Cache.Classes
             return _redisAdapter.SAdd(key, segments);
         }
 
-        public List<string> GetRegisteredSegments()
-        {
-            var key = $"{RedisKeyPrefix}{segmentsKeyPrefix}registered";
-            var result = _redisAdapter.SMembers(key);
-
-            return result.Select(x => (string)x).ToList();
-        }
-
         public void Flush()
         {
             _redisAdapter.Flush();
@@ -84,6 +76,14 @@ namespace Splitio.Redis.Services.Cache.Classes
         public void Clear()
         {
             return;
+        }
+
+        public List<string> GetSegmentNames()
+        {
+            var key = $"{RedisKeyPrefix}{segmentsKeyPrefix}registered";
+            var result = _redisAdapter.SMembers(key);
+
+            return result.Select(x => (string)x).ToList();
         }
     }
 }

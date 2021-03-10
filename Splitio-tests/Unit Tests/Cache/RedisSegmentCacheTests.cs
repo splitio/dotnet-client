@@ -59,7 +59,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
             //Act
-            var result = segmentCache.GetRegisteredSegments();
+            var result = segmentCache.GetSegmentNames();
 
             //Assert
             Assert.IsNotNull(result);

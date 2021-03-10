@@ -2,7 +2,7 @@
 {
     public enum ResourceEnum
     {
-        SplitSync,
+        SplitSync = 1,
         SegmentSync,
         Impressionsync,
         EventSync,

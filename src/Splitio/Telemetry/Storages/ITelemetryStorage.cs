@@ -1,6 +1,6 @@
 ﻿namespace Splitio.Telemetry.Storages
 {
-    public interface ITelemetryStorage : ITelemetryStorageConsumer, ITelemetryStorageProducer
+    public interface ITelemetryStorage : ITelemetryStorageProducer, ITelemetryStorageConsumer
     {
     }
 }

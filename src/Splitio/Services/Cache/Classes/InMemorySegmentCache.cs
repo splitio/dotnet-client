@@ -4,6 +4,7 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Splitio.Services.Cache.Classes
 {
@@ -11,21 +12,21 @@ namespace Splitio.Services.Cache.Classes
     {
         private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(InMemorySegmentCache));
 
-        private ConcurrentDictionary<string, Segment> segments;
+        private ConcurrentDictionary<string, Segment> _segments;
 
         public InMemorySegmentCache(ConcurrentDictionary<string, Segment> segments)
         {
-            this.segments = segments;
+            _segments = segments;
         }
 
         public void AddToSegment(string segmentName, List<string> segmentKeys)
         {
-            segments.TryGetValue(segmentName, out Segment segment);
+            _segments.TryGetValue(segmentName, out Segment segment);
 
             if (segment == null)
             {
                 segment = new Segment(segmentName);
-                segments.TryAdd(segmentName, segment);
+                _segments.TryAdd(segmentName, segment);
             }
 
             segment.AddKeys(segmentKeys);
@@ -33,7 +34,7 @@ namespace Splitio.Services.Cache.Classes
 
         public void RemoveFromSegment(string segmentName, List<string> segmentKeys)
         {
-            if (segments.TryGetValue(segmentName, out Segment segment))
+            if (_segments.TryGetValue(segmentName, out Segment segment))
             {
                 segment.RemoveKeys(segmentKeys);
             }
@@ -41,7 +42,7 @@ namespace Splitio.Services.Cache.Classes
 
         public bool IsInSegment(string segmentName, string key)
         {
-            if (segments.TryGetValue(segmentName, out Segment segment))
+            if (_segments.TryGetValue(segmentName, out Segment segment))
             {
                 return segment.Contains(key);
             }
@@ -51,7 +52,7 @@ namespace Splitio.Services.Cache.Classes
 
         public void SetChangeNumber(string segmentName, long changeNumber)
         {
-            if (segments.TryGetValue(segmentName, out Segment segment))
+            if (_segments.TryGetValue(segmentName, out Segment segment))
             {
                 if (changeNumber < segment.changeNumber)
                 {
@@ -63,7 +64,7 @@ namespace Splitio.Services.Cache.Classes
 
         public long GetChangeNumber(string segmentName)
         {
-            if (segments.TryGetValue(segmentName, out Segment segment))
+            if (_segments.TryGetValue(segmentName, out Segment segment))
             {
                 return segment.changeNumber;
             }
@@ -73,7 +74,14 @@ namespace Splitio.Services.Cache.Classes
 
         public void Clear()
         {
-            segments.Clear();
+            _segments.Clear();
+        }
+
+        public List<string> GetSegmentNames()
+        {
+            return _segments
+                .Keys
+                .ToList();
         }
     }
 }
