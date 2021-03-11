@@ -2,7 +2,7 @@
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 
-namespace Splitio_Tests.Unit_Tests.Telemetry
+namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
 {
     [TestClass]
     public class InMemoryTelemetryStorageTests

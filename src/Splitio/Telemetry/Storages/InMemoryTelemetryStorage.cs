@@ -24,7 +24,7 @@ namespace Splitio.Telemetry.Storages
         private readonly ConcurrentDictionary<FactoryRecordsEnum, long> _factoryRecords = new ConcurrentDictionary<FactoryRecordsEnum, long>();
 
         // HttpErrors
-        private readonly ConcurrentDictionary<ResourceEnum, ConcurrentDictionary<long, long>> _httpErrors = new ConcurrentDictionary<ResourceEnum, ConcurrentDictionary<long, long>>();
+        private readonly ConcurrentDictionary<ResourceEnum, ConcurrentDictionary<int, long>> _httpErrors = new ConcurrentDictionary<ResourceEnum, ConcurrentDictionary<int, long>>();
 
         // Tags
         private readonly IList<string> _tags = new List<string>();
@@ -306,12 +306,12 @@ namespace Splitio.Telemetry.Storages
 
         private void InitHttpErrors()
         {
-            _httpErrors.TryAdd(ResourceEnum.EventSync, new ConcurrentDictionary<long, long>());
-            _httpErrors.TryAdd(ResourceEnum.Impressionsync, new ConcurrentDictionary<long, long>());
-            _httpErrors.TryAdd(ResourceEnum.SegmentSync, new ConcurrentDictionary<long, long>());
-            _httpErrors.TryAdd(ResourceEnum.SplitSync, new ConcurrentDictionary<long, long>());
-            _httpErrors.TryAdd(ResourceEnum.TelemetrySync, new ConcurrentDictionary<long, long>());
-            _httpErrors.TryAdd(ResourceEnum.TokenSync, new ConcurrentDictionary<long, long>());
+            _httpErrors.TryAdd(ResourceEnum.EventSync, new ConcurrentDictionary<int, long>());
+            _httpErrors.TryAdd(ResourceEnum.Impressionsync, new ConcurrentDictionary<int, long>());
+            _httpErrors.TryAdd(ResourceEnum.SegmentSync, new ConcurrentDictionary<int, long>());
+            _httpErrors.TryAdd(ResourceEnum.SplitSync, new ConcurrentDictionary<int, long>());
+            _httpErrors.TryAdd(ResourceEnum.TelemetrySync, new ConcurrentDictionary<int, long>());
+            _httpErrors.TryAdd(ResourceEnum.TokenSync, new ConcurrentDictionary<int, long>());
         }
         #endregion
     }
