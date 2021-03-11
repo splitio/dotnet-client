@@ -83,5 +83,15 @@ namespace Splitio.Services.Cache.Classes
                 .Keys
                 .ToList();
         }
+
+        public List<string> GetSegmentKeys(string segmentName)
+        {
+            if (_segments.TryGetValue(segmentName, out Segment segment))
+            {
+                return segment.GetKeys();
+            }
+
+            return new List<string>();
+        }
     }
 }

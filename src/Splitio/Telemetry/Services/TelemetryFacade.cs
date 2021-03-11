@@ -148,8 +148,16 @@ namespace Splitio.Telemetry.Services
 
         public long GetSegmentKeysCount()
         {
-            // Should implement segment cache method
-            throw new System.NotImplementedException();
+            var toReturn = 0;
+
+            var segmentNames = _segmentCache.GetSegmentNames();
+
+            foreach (var name in segmentNames)
+            {
+                toReturn += _segmentCache.GetSegmentKeys(name).Count;
+            }
+
+            return toReturn;
         }
 
         public long PopAuthRejections()
