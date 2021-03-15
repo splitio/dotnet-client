@@ -2,13 +2,13 @@
 {
     public enum FactoryCountersEnum
     {
-        BurTimeouts,
-        NonReadyUsages
+        BurTimeouts = 1,
+        NonReadyUsages = 2
     }
 
     public enum PushCountersEnum
     {
-        AuthRejecttions,
-        TokenRefreshes
+        AuthRejecttions = 1,
+        TokenRefreshes = 2
     }
 }

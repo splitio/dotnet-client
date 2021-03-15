@@ -12,13 +12,13 @@ namespace Splitio.Telemetry.Storages
         HTTPErrors PopHttpErrors();
         HTTPLatencies PopHttpLatencies();
         long PopAuthRejections();
-        long PopTokenRefreshes();        
+        long PopTokenRefreshes();
         IList<StreamingEvent> PopStreamingEvents();
         IList<string> PopTags();
         long GetSessionLength();
         long GetNonReadyUsages();
         long GetBURTimeouts();
-        long GetEventsStats(EventsDataRecordsEnum data);
-        long GetImpressionsStats(ImpressionsDataRecordsEnum data);
+        long GetEventsStats(EventsEnum data);
+        long GetImpressionsStats(ImpressionsEnum data);
     }
 }

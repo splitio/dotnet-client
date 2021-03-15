@@ -43,7 +43,7 @@ namespace Splitio.Redis.Telemetry.Storages
         #endregion
 
         #region Not Implemented Methods
-        public void RecordSyncLatency(HttpLatenciesEnum path, int bucket)
+        public void RecordSyncLatency(ResourceEnum resource, int bucket)
         {
             throw new System.NotImplementedException("Not implemented for redis.");
         }
@@ -58,12 +58,12 @@ namespace Splitio.Redis.Telemetry.Storages
             throw new System.NotImplementedException("Not implemented for redis.");
         }
 
-        public long GetEventsStats(EventsDataRecordsEnum data)
+        public long GetEventsStats(EventsEnum data)
         {
             throw new System.NotImplementedException("Not implemented for redis.");
         }
 
-        public long GetImpressionsStats(ImpressionsDataRecordsEnum data)
+        public long GetImpressionsStats(ImpressionsEnum data)
         {
             throw new System.NotImplementedException("Not implemented for redis.");
         }
@@ -133,12 +133,12 @@ namespace Splitio.Redis.Telemetry.Storages
             throw new System.NotImplementedException("Not implemented for redis.");
         }
 
-        public void RecordEventsStats(EventsDataRecordsEnum data, long count)
+        public void RecordEventsStats(EventsEnum data, long count)
         {
             throw new System.NotImplementedException("Not implemented for redis.");
         }        
 
-        public void RecordImpressionsStats(ImpressionsDataRecordsEnum data, long count)
+        public void RecordImpressionsStats(ImpressionsEnum data, long count)
         {
             throw new System.NotImplementedException("Not implemented for redis.");
         }        
@@ -158,7 +158,7 @@ namespace Splitio.Redis.Telemetry.Storages
             throw new System.NotImplementedException("Not implemented for redis.");
         }
 
-        public void RecordSuccessfulSync(LastSynchronizationRecordsEnum method, long timestamp)
+        public void RecordSuccessfulSync(ResourceEnum resource, long timestamp)
         {
             throw new System.NotImplementedException("Not implemented for redis.");
         }

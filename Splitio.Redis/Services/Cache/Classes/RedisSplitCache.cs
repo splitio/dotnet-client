@@ -156,6 +156,13 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             throw new System.NotImplementedException();
         }
+
+        public List<string> GetSplitNames()
+        {
+            return GetAllSplits()
+                .Select(s => s.name)
+                .ToList();
+        }
     }
 }
  

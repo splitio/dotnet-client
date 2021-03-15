@@ -9,7 +9,7 @@ namespace Splitio.Telemetry.Storages
     {
         // Latencies
         private readonly ConcurrentDictionary<MethodEnum, IList<long>> _methodLatencies = new ConcurrentDictionary<MethodEnum, IList<long>>();
-        private readonly ConcurrentDictionary<HttpLatenciesEnum, IList<long>> _httpLatencies = new ConcurrentDictionary<HttpLatenciesEnum, IList<long>>();
+        private readonly ConcurrentDictionary<ResourceEnum, IList<long>> _httpLatencies = new ConcurrentDictionary<ResourceEnum, IList<long>>();
 
         // Counters
         private readonly ConcurrentDictionary<MethodEnum, long> _exceptionsCounters = new ConcurrentDictionary<MethodEnum, long>();
@@ -17,14 +17,14 @@ namespace Splitio.Telemetry.Storages
         private readonly ConcurrentDictionary<FactoryCountersEnum, long> _factoryCounters = new ConcurrentDictionary<FactoryCountersEnum, long>();
 
         // Records
-        private readonly ConcurrentDictionary<ImpressionsDataRecordsEnum, long> _impressionsDataRecords = new ConcurrentDictionary<ImpressionsDataRecordsEnum, long>();
-        private readonly ConcurrentDictionary<EventsDataRecordsEnum, long> _eventsDataRecords = new ConcurrentDictionary<EventsDataRecordsEnum, long>();
-        private readonly ConcurrentDictionary<LastSynchronizationRecordsEnum, long> _lastSynchronizationRecords = new ConcurrentDictionary<LastSynchronizationRecordsEnum, long>();
+        private readonly ConcurrentDictionary<ImpressionsEnum, long> _impressionsDataRecords = new ConcurrentDictionary<ImpressionsEnum, long>();
+        private readonly ConcurrentDictionary<EventsEnum, long> _eventsDataRecords = new ConcurrentDictionary<EventsEnum, long>();
+        private readonly ConcurrentDictionary<ResourceEnum, long> _lastSynchronizationRecords = new ConcurrentDictionary<ResourceEnum, long>();
         private readonly ConcurrentDictionary<SdkRecordsEnum, long> _sdkRecords = new ConcurrentDictionary<SdkRecordsEnum, long>();
         private readonly ConcurrentDictionary<FactoryRecordsEnum, long> _factoryRecords = new ConcurrentDictionary<FactoryRecordsEnum, long>();
 
         // HttpErrors
-        private readonly ConcurrentDictionary<ResourceEnum, ConcurrentDictionary<long, long>> _httpErrors = new ConcurrentDictionary<ResourceEnum, ConcurrentDictionary<long, long>>();
+        private readonly ConcurrentDictionary<ResourceEnum, ConcurrentDictionary<int, long>> _httpErrors = new ConcurrentDictionary<ResourceEnum, ConcurrentDictionary<int, long>>();
 
         // Tags
         private readonly IList<string> _tags = new List<string>();
@@ -60,7 +60,7 @@ namespace Splitio.Telemetry.Storages
             _factoryCounters.AddOrUpdate(FactoryCountersEnum.BurTimeouts, 1, (key, value) => value + 1);
         }
 
-        public void RecordEventsStats(EventsDataRecordsEnum data, long count)
+        public void RecordEventsStats(EventsEnum data, long count)
         {
             _eventsDataRecords.AddOrUpdate(data, count, (key, value) => value + count);
         }
@@ -70,7 +70,7 @@ namespace Splitio.Telemetry.Storages
             _exceptionsCounters.AddOrUpdate(method, 1, (key, count) => count + 1);
         }
 
-        public void RecordImpressionsStats(ImpressionsDataRecordsEnum data, long count)
+        public void RecordImpressionsStats(ImpressionsEnum data, long count)
         {
             _impressionsDataRecords.AddOrUpdate(data, count, (key, value) => value + count);
         }
@@ -98,7 +98,7 @@ namespace Splitio.Telemetry.Storages
             }
         }
 
-        public void RecordSuccessfulSync(LastSynchronizationRecordsEnum resource, long timestamp)
+        public void RecordSuccessfulSync(ResourceEnum resource, long timestamp)
         {
             _lastSynchronizationRecords.AddOrUpdate(resource, timestamp, (key, value) => timestamp);
         }
@@ -108,9 +108,9 @@ namespace Splitio.Telemetry.Storages
             _httpErrors[resource].AddOrUpdate(status, 1, (key, count) => count + 1);
         }
 
-        public void RecordSyncLatency(HttpLatenciesEnum path, int bucket)
+        public void RecordSyncLatency(ResourceEnum resource, int bucket)
         {
-            _httpLatencies[path].Add(bucket);
+            _httpLatencies[resource].Add(bucket);
         }
 
         public void RecordTokenRefreshes()
@@ -130,12 +130,12 @@ namespace Splitio.Telemetry.Storages
             return value;
         }
 
-        public long GetEventsStats(EventsDataRecordsEnum data)
+        public long GetEventsStats(EventsEnum data)
         {
             return _eventsDataRecords.TryGetValue(data, out long value) ? value : 0;
         }
 
-        public long GetImpressionsStats(ImpressionsDataRecordsEnum data)
+        public long GetImpressionsStats(ImpressionsEnum data)
         {            
             return _impressionsDataRecords.TryGetValue(data, out long value) ? value : 0;
         }
@@ -144,12 +144,12 @@ namespace Splitio.Telemetry.Storages
         {
             return new LastSynchronization
             {
-                Splits = _lastSynchronizationRecords.TryGetValue(LastSynchronizationRecordsEnum.Splits, out long splitsValue) ? splitsValue : 0,
-                Segments = _lastSynchronizationRecords.TryGetValue(LastSynchronizationRecordsEnum.Segments, out long segValue) ? segValue : 0,
-                Impressions = _lastSynchronizationRecords.TryGetValue(LastSynchronizationRecordsEnum.Impressions, out long impValue) ? impValue : 0,
-                Events = _lastSynchronizationRecords.TryGetValue(LastSynchronizationRecordsEnum.Events, out long evetsValue) ? evetsValue : 0,
-                Telemetry = _lastSynchronizationRecords.TryGetValue(LastSynchronizationRecordsEnum.Telemetry, out long telValue) ? telValue : 0,
-                Token = _lastSynchronizationRecords.TryGetValue(LastSynchronizationRecordsEnum.Token, out long tokenValue) ? tokenValue : 0
+                Splits = _lastSynchronizationRecords.TryGetValue(ResourceEnum.SplitSync, out long splitsValue) ? splitsValue : 0,
+                Segments = _lastSynchronizationRecords.TryGetValue(ResourceEnum.SegmentSync, out long segValue) ? segValue : 0,
+                Impressions = _lastSynchronizationRecords.TryGetValue(ResourceEnum.Impressionsync, out long impValue) ? impValue : 0,
+                Events = _lastSynchronizationRecords.TryGetValue(ResourceEnum.EventSync, out long evetsValue) ? evetsValue : 0,
+                Telemetry = _lastSynchronizationRecords.TryGetValue(ResourceEnum.TelemetrySync, out long telValue) ? telValue : 0,
+                Token = _lastSynchronizationRecords.TryGetValue(ResourceEnum.TokenSync, out long tokenValue) ? tokenValue : 0
             };
         }
 
@@ -218,12 +218,12 @@ namespace Splitio.Telemetry.Storages
         {
             var latencies = new HTTPLatencies
             {
-                Events = _httpLatencies[HttpLatenciesEnum.Events],
-                Impressions = _httpLatencies[HttpLatenciesEnum.Impressions],
-                Segments = _httpLatencies[HttpLatenciesEnum.Segments],
-                Splits = _httpLatencies[HttpLatenciesEnum.Splits],
-                Telemetry = _httpLatencies[HttpLatenciesEnum.Telemetry],
-                Token = _httpLatencies[HttpLatenciesEnum.Token]
+                Events = _httpLatencies[ResourceEnum.EventSync],
+                Impressions = _httpLatencies[ResourceEnum.Impressionsync],
+                Segments = _httpLatencies[ResourceEnum.SegmentSync],
+                Splits = _httpLatencies[ResourceEnum.SplitSync],
+                Telemetry = _httpLatencies[ResourceEnum.TelemetrySync],
+                Token = _httpLatencies[ResourceEnum.TokenSync]
             };
 
             _httpLatencies.Clear();
@@ -296,22 +296,22 @@ namespace Splitio.Telemetry.Storages
 
         private void InitHttpLatencies()
         {
-            _httpLatencies.TryAdd(HttpLatenciesEnum.Splits, new List<long>());
-            _httpLatencies.TryAdd(HttpLatenciesEnum.Segments, new List<long>());
-            _httpLatencies.TryAdd(HttpLatenciesEnum.Impressions, new List<long>());
-            _httpLatencies.TryAdd(HttpLatenciesEnum.Events, new List<long>());
-            _httpLatencies.TryAdd(HttpLatenciesEnum.Telemetry, new List<long>());
-            _httpLatencies.TryAdd(HttpLatenciesEnum.Token, new List<long>());
+            _httpLatencies.TryAdd(ResourceEnum.SplitSync, new List<long>());
+            _httpLatencies.TryAdd(ResourceEnum.SegmentSync, new List<long>());
+            _httpLatencies.TryAdd(ResourceEnum.Impressionsync, new List<long>());
+            _httpLatencies.TryAdd(ResourceEnum.EventSync, new List<long>());
+            _httpLatencies.TryAdd(ResourceEnum.TelemetrySync, new List<long>());
+            _httpLatencies.TryAdd(ResourceEnum.TokenSync, new List<long>());
         }
 
         private void InitHttpErrors()
         {
-            _httpErrors.TryAdd(ResourceEnum.EventSync, new ConcurrentDictionary<long, long>());
-            _httpErrors.TryAdd(ResourceEnum.Impressionsync, new ConcurrentDictionary<long, long>());
-            _httpErrors.TryAdd(ResourceEnum.SegmentSync, new ConcurrentDictionary<long, long>());
-            _httpErrors.TryAdd(ResourceEnum.SplitSync, new ConcurrentDictionary<long, long>());
-            _httpErrors.TryAdd(ResourceEnum.TelemetrySync, new ConcurrentDictionary<long, long>());
-            _httpErrors.TryAdd(ResourceEnum.TokenSync, new ConcurrentDictionary<long, long>());
+            _httpErrors.TryAdd(ResourceEnum.EventSync, new ConcurrentDictionary<int, long>());
+            _httpErrors.TryAdd(ResourceEnum.Impressionsync, new ConcurrentDictionary<int, long>());
+            _httpErrors.TryAdd(ResourceEnum.SegmentSync, new ConcurrentDictionary<int, long>());
+            _httpErrors.TryAdd(ResourceEnum.SplitSync, new ConcurrentDictionary<int, long>());
+            _httpErrors.TryAdd(ResourceEnum.TelemetrySync, new ConcurrentDictionary<int, long>());
+            _httpErrors.TryAdd(ResourceEnum.TokenSync, new ConcurrentDictionary<int, long>());
         }
         #endregion
     }

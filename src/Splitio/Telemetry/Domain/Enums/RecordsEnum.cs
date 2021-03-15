@@ -1,35 +1,12 @@
 ﻿namespace Splitio.Telemetry.Domain.Enums
 {
-    public enum ImpressionsDataRecordsEnum
-    {
-        ImpressionsQueued,
-        ImpressionsDropped,
-        ImpressionsDeduped
-    }
-
-    public enum EventsDataRecordsEnum
-    {
-        EventsQueued,
-        EventsDropped
-    }
-
-    public enum LastSynchronizationRecordsEnum
-    {
-        Splits,
-        Segments,
-        Impressions,
-        Events,
-        Token,
-        Telemetry
-    }
-
     public enum SdkRecordsEnum
     {
-        Session
+        Session = 1
     }
 
     public enum FactoryRecordsEnum
     {
-        TimeUntilReady
+        TimeUntilReady = 1
     }
 }
