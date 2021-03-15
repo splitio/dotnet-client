@@ -27,7 +27,7 @@ namespace Splitio.CommonLibraries
             long readTimeout,
             ITelemetryRuntimeProducer telemetryRuntimeProducer)
         {
-#if NET40 || NET45
+#if NET40 || NET45 || NET461
             ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
 #endif
             _telemetryRuntimeProducer = telemetryRuntimeProducer;

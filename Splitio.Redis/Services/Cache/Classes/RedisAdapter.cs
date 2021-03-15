@@ -1,4 +1,5 @@
-﻿using Splitio.Redis.Services.Cache.Interfaces;
+﻿using Splitio.Domain;
+using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using StackExchange.Redis;
@@ -10,7 +11,7 @@ namespace Splitio.Redis.Services.Cache.Classes
     public class RedisAdapter : IRedisAdapter
     {
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(RedisAdapter));
-               
+
         private readonly string _host;
         private readonly string _port;
         private readonly string _password = "";
@@ -18,6 +19,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         private readonly int _connectTimeout = 0;
         private readonly int _connectRetry = 0;
         private readonly int _syncTimeout = 0;
+        private readonly TlsConfig _tlsConfig;
 
         private IConnectionMultiplexer _redis;
         private IDatabase _database;
@@ -29,7 +31,8 @@ namespace Splitio.Redis.Services.Cache.Classes
             int databaseNumber = 0,
             int connectTimeout = 0,
             int connectRetry = 0,
-            int syncTimeout = 0)
+            int syncTimeout = 0,
+            TlsConfig tlsConfig = null)
         {
             _host = host;
             _port = port;
@@ -38,8 +41,10 @@ namespace Splitio.Redis.Services.Cache.Classes
             _connectTimeout = connectTimeout;
             _connectRetry = connectRetry;
             _syncTimeout = syncTimeout;
+            _tlsConfig = tlsConfig;
         }
 
+        #region Public Methods
         public void Connect()
         {
             try
@@ -292,28 +297,50 @@ namespace Splitio.Redis.Services.Cache.Classes
                 return 0;
             }
         }
+        #endregion
 
         #region Private Methods
-        private string GetConfig()
+        // public only for testing.
+        public ConfigurationOptions GetConfig()
         {
-            var config = string.Format("{0}:{1}, password = {2}, allowAdmin = true", _host, _port, _password);
+            var config = new ConfigurationOptions
+            {
+                EndPoints = { $"{_host}:{_port}" },
+                Password = _password,
+                AllowAdmin = true,
+                KeepAlive = 1,
+            };
+
+            if (_tlsConfig != null && _tlsConfig.Ssl)
+            {
+                config.Ssl = _tlsConfig.Ssl;
+                config.SslHost = _host;
+
+                if (_tlsConfig.CertificateValidationFunc != null)
+                {
+                    config.CertificateValidation += _tlsConfig.CertificateValidationFunc.Invoke;
+                }
+
+                if (_tlsConfig.CertificateSelectionFunc != null)
+                {
+                    config.CertificateSelection += _tlsConfig.CertificateSelectionFunc.Invoke;
+                }
+            }      
 
             if (_connectTimeout > 0)
             {
-                config += ", connectTimeout = " + _connectTimeout;
+                config.ConnectTimeout = _connectTimeout;
             }
 
             if (_connectRetry > 0)
             {
-                config += ", connectRetry = " + _connectRetry;
+                config.ConnectRetry = _connectRetry;
             }
 
             if (_syncTimeout > 0)
             {
-                config += ", syncTimeout = " + _syncTimeout;
+                config.SyncTimeout = _syncTimeout;
             }
-
-            config += ", keepAlive = " + 1;
 
             return config;
         }
