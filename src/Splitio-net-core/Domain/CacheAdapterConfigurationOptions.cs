@@ -1,4 +1,6 @@
-﻿namespace Splitio.Services.Client.Classes
+﻿using Splitio.Domain;
+
+namespace Splitio.Services.Client.Classes
 {
     public class CacheAdapterConfigurationOptions
     {
@@ -11,5 +13,6 @@
         public int? ConnectRetry { get; set; }
         public int? SyncTimeout { get; set; }
         public string UserPrefix { get; set; }
+        public TlsConfig TlsConfig { get; set; }
     }
 }

@@ -1,16 +1,19 @@
-﻿using Splitio.Redis.Services.Cache.Interfaces;
+﻿using Splitio.Domain;
+using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using StackExchange.Redis;
 using System;
 using System.Linq;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
     public class RedisAdapter : IRedisAdapter
     {
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(RedisAdapter));
-               
+
         private readonly string _host;
         private readonly string _port;
         private readonly string _password = "";
@@ -18,6 +21,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         private readonly int _connectTimeout = 0;
         private readonly int _connectRetry = 0;
         private readonly int _syncTimeout = 0;
+        private readonly TlsConfig _tlsConfig;
 
         private IConnectionMultiplexer _redis;
         private IDatabase _database;
@@ -29,7 +33,8 @@ namespace Splitio.Redis.Services.Cache.Classes
             int databaseNumber = 0,
             int connectTimeout = 0,
             int connectRetry = 0,
-            int syncTimeout = 0)
+            int syncTimeout = 0,
+            TlsConfig tlsConfig = null)
         {
             _host = host;
             _port = port;
@@ -38,13 +43,15 @@ namespace Splitio.Redis.Services.Cache.Classes
             _connectTimeout = connectTimeout;
             _connectRetry = connectRetry;
             _syncTimeout = syncTimeout;
+            _tlsConfig = tlsConfig;
         }
 
+        #region Public Methods
         public void Connect()
         {
             try
             {
-                _redis = ConnectionMultiplexer.Connect(GetConfig());
+                _redis = ConnectionMultiplexer.Connect(GetConfig());             
                 _database = _redis.GetDatabase(_databaseNumber);
                 _server = _redis.GetServer($"{_host}:{_port}");
             }
@@ -279,29 +286,80 @@ namespace Splitio.Redis.Services.Cache.Classes
                 return new RedisValue[0];
             }
         }
+        #endregion
 
-        private string GetConfig()
+        #region Private Methods
+        private ConfigurationOptions GetConfig()
         {
-            var config = string.Format("{0}:{1}, password = {2}, allowAdmin = true", _host, _port, _password);
+            var config = new ConfigurationOptions
+            {
+                EndPoints = { $"{_host}:{_port}" },
+                Password = _password,
+                AllowAdmin = true,
+                KeepAlive = 1,
+            };
+
+            if (_tlsConfig != null && _tlsConfig.Ssl)
+            {
+                config.Ssl = _tlsConfig.Ssl;
+                config.SslHost = _host;
+                config.CertificateValidation += CheckServerCertificate;
+
+                if (!string.IsNullOrEmpty(_tlsConfig.SslClientCertificate))
+                {
+                    config.CertificateSelection += delegate
+                    {
+                        return new X509Certificate2(_tlsConfig.SslClientCertificate);
+                    };
+                }
+            }      
 
             if (_connectTimeout > 0)
             {
-                config += ", connectTimeout = " + _connectTimeout;
+                config.ConnectTimeout = _connectTimeout;
             }
 
             if (_connectRetry > 0)
             {
-                config += ", connectRetry = " + _connectRetry;
+                config.ConnectRetry = _connectRetry;
             }
 
             if (_syncTimeout > 0)
             {
-                config += ", syncTimeout = " + _syncTimeout;
+                config.SyncTimeout = _syncTimeout;
             }
-
-            config += ", keepAlive = " + 1;
 
             return config;
         }
+
+        private bool CheckServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            try
+            {
+                if (_tlsConfig.InsecureSkipVerify) return true;
+
+                if (_tlsConfig.SslCaCertificates == null) return false;
+
+                // check that the CA thumbprint is in the chain
+                foreach (var caCertificate in _tlsConfig.SslCaCertificates)
+                {
+                    var ca = new X509Certificate2(caCertificate);
+
+                    var found = chain.ChainElements
+                        .Cast<X509ChainElement>()
+                        .Any(x => x.Certificate.Thumbprint == ca.Thumbprint);
+
+                    if (!found) return false;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _log.Debug($"CheckServerCertificate exception: {ex.Message}");
+                return false;
+            }
+        }
+        #endregion
     }
 }

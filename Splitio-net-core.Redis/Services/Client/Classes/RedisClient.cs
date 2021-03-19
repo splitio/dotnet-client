@@ -58,6 +58,7 @@ namespace Splitio.Redis.Services.Client.Classes
             _config.RedisSyncTimeout = config.CacheAdapterConfig.SyncTimeout ?? 0;
             _config.RedisConnectRetry = config.CacheAdapterConfig.ConnectRetry ?? 0;
             _config.RedisUserPrefix = config.CacheAdapterConfig.UserPrefix;
+            _config.TlsConfig = config.CacheAdapterConfig.TlsConfig;
         }
 
         private void BuildRedisCache()

@@ -12,6 +12,6 @@ namespace Splitio.Redis.Services.Domain
         public int RedisConnectTimeout { get; set; }
         public int RedisConnectRetry { get; set; }
         public int RedisSyncTimeout { get; set; }
-        public bool TlsEnabled { get; set; }
+        public TlsConfig TlsConfig { get; set; }
     }
 }
