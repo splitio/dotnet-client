@@ -30,10 +30,10 @@ after_build:
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework netcoreapp1.0
  - Redis-64\tools\redis-server.exe --service-stop
  - Redis-64\tools\redis-server.exe --service-start
- - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net472
+ - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net462 
  - Redis-64\tools\redis-server.exe --service-stop
  - Redis-64\tools\redis-server.exe --service-start
- - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net462
+ - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net472
  - Redis-64\tools\redis-server.exe --service-stop
  - Redis-64\tools\redis-server.exe --service-start
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net45
