@@ -10,7 +10,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>6.2.8-mauro</Version>
+    <Version>6.2.10-mauro</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -27,12 +27,12 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net461'">
-    <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
+    <PackageReference Include="StackExchange.Redis" Version="2.2.4" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6' Or '$(TargetFramework)' == 'net45'">
     <PackageReference Include="StackExchange.Redis.StrongName" Version="1.2.6" />
-  </ItemGroup>      
+  </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework)' == 'net40' ">
     <PackageReference Include="StackExchange.Redis.StrongName" version="1.2.1" />
