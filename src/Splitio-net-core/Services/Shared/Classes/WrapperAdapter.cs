@@ -33,7 +33,7 @@ namespace Splitio.Services.Shared.Classes
 
         public Task TaskDelay(int millisecondsDelay)
         {
-#if NETSTANDARD || NET45
+#if NETSTANDARD || NET45 || NET461
             return Task.Delay(millisecondsDelay);
 #else
             return TaskEx.Delay(millisecondsDelay);
@@ -42,8 +42,8 @@ namespace Splitio.Services.Shared.Classes
 
         public Task<Task> WhenAny(params Task[] tasks)
         {
-#if NETSTANDARD || NET45
-            return Task.WhenAny(tasks);
+#if NETSTANDARD || NET45 || NET461
+             return Task.WhenAny(tasks);
 #else
             return TaskEx.WhenAny(tasks);
 #endif
@@ -51,7 +51,7 @@ namespace Splitio.Services.Shared.Classes
 
         public async Task<T> TaskFromResult<T>(T result)
         {
-#if NETSTANDARD || NET45
+#if NETSTANDARD || NET45 || NET461
             return await Task.FromResult(result);
 #else
             return await TaskEx.FromResult(result);

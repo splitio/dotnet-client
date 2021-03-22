@@ -1,4 +1,4 @@
-﻿#if NET40 || NET45
+﻿#if NET40 || NET45 || NET461
 using Common.Logging;
 using System; 
 

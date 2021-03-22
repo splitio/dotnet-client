@@ -63,7 +63,7 @@ namespace Splitio.Redis.Services.Client.Classes
 
         private void BuildRedisCache()
         {
-            _redisAdapter = new RedisAdapter(_config.RedisHost, _config.RedisPort, _config.RedisPassword, _config.RedisDatabase, _config.RedisConnectTimeout, _config.RedisConnectRetry, _config.RedisSyncTimeout);
+            _redisAdapter = new RedisAdapter(_config.RedisHost, _config.RedisPort, _config.RedisPassword, _config.RedisDatabase, _config.RedisConnectTimeout, _config.RedisConnectRetry, _config.RedisSyncTimeout, _config.TlsConfig);
 
             Task.Factory.StartNew(() => _redisAdapter.Connect());
 
