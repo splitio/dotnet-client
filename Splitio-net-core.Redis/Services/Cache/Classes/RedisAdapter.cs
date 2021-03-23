@@ -289,7 +289,8 @@ namespace Splitio.Redis.Services.Cache.Classes
         #endregion
 
         #region Private Methods
-        private ConfigurationOptions GetConfig()
+        // public only for testing.
+        public ConfigurationOptions GetConfig()
         {
             var config = new ConfigurationOptions
             {
