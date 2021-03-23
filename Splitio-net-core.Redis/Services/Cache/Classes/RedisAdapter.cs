@@ -51,7 +51,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                _redis = ConnectionMultiplexer.Connect(GetConfig());             
+                _redis = ConnectionMultiplexer.Connect(GetConfig());
                 _database = _redis.GetDatabase(_databaseNumber);
                 _server = _redis.GetServer($"{_host}:{_port}");
             }
