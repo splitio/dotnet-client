@@ -305,6 +305,9 @@ namespace Splitio.Redis.Services.Cache.Classes
                 config.Ssl = _tlsConfig.Ssl;
                 config.SslHost = _host;
                 config.CertificateValidation += CheckServerCertificate;
+#if NETSTANDARD || NET45 || NET461
+                config.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls11;
+#endif
 
                 if (!string.IsNullOrEmpty(_tlsConfig.SslClientCertificate))
                 {
