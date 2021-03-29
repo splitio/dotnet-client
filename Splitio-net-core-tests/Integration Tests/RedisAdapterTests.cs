@@ -6,6 +6,8 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -321,11 +323,8 @@ namespace Splitio_Tests.Integration_Tests
         public void GetConfigWithTls()
         {
             //Arrange
-            var tlsConfig = new TlsConfig
-            {
-                Ssl = true,
-                SslCaCertificates = new List<string> { "cert.pem" }
-            };
+            var tlsConfig = new TlsConfig(ssl: true);
+
             var adapter = new RedisAdapter("localhost", "6379", "", 0, 1000, 5, 1000, tlsConfig);
 
             //Act

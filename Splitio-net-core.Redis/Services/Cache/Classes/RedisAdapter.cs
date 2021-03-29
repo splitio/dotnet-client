@@ -5,8 +5,6 @@ using Splitio.Services.Shared.Classes;
 using StackExchange.Redis;
 using System;
 using System.Linq;
-using System.Net.Security;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
@@ -304,14 +302,15 @@ namespace Splitio.Redis.Services.Cache.Classes
             {
                 config.Ssl = _tlsConfig.Ssl;
                 config.SslHost = _host;
-                config.CertificateValidation += CheckServerCertificate;
 
-                if (!string.IsNullOrEmpty(_tlsConfig.SslClientCertificate))
+                if (_tlsConfig.CertificateValidationFunc != null)
                 {
-                    config.CertificateSelection += delegate
-                    {
-                        return new X509Certificate2(_tlsConfig.SslClientCertificate);
-                    };
+                    config.CertificateValidation += _tlsConfig.CertificateValidationFunc.Invoke;
+                }
+
+                if (_tlsConfig.CertificateSelectionFunc != null)
+                {
+                    config.CertificateSelection += _tlsConfig.CertificateSelectionFunc.Invoke;
                 }
             }      
 
@@ -331,33 +330,6 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
 
             return config;
-        }
-
-        private bool CheckServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
-        {
-            try
-            {
-                if (_tlsConfig.InsecureSkipVerify || _tlsConfig.SslCaCertificates == null) return true;
-
-                // check that the CA thumbprint is in the chain
-                foreach (var caCertificate in _tlsConfig.SslCaCertificates)
-                {
-                    var ca = new X509Certificate2(caCertificate);
-
-                    var found = chain.ChainElements
-                        .Cast<X509ChainElement>()
-                        .Any(x => x.Certificate.Thumbprint == ca.Thumbprint);
-
-                    if (!found) return false;
-                }
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _log.Debug($"CheckServerCertificate exception: {ex.Message}");
-                return false;
-            }
         }
         #endregion
     }
