@@ -337,9 +337,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                if (_tlsConfig.InsecureSkipVerify) return true;
-
-                if (_tlsConfig.SslCaCertificates == null) return false;
+                if (_tlsConfig.InsecureSkipVerify || _tlsConfig.SslCaCertificates == null) return true;
 
                 // check that the CA thumbprint is in the chain
                 foreach (var caCertificate in _tlsConfig.SslCaCertificates)
