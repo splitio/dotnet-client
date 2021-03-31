@@ -7,7 +7,7 @@ namespace Splitio.Domain
     public class TlsConfig
     {
         /// <summary>
-        /// From StackExchange.Redis: Indicates whether the connection should be encrypted
+        /// From StackExchange.Redis: Indicates whether the connection should be encrypted.
         /// </summary>
         public bool Ssl { get; set; }
         /// <summary>
