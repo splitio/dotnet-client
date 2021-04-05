@@ -117,6 +117,11 @@ namespace Splitio.Telemetry.Storages
         {
             _pushCounters.AddOrUpdate(PushCountersEnum.TokenRefreshes, 1, (key, value) => value + 1);
         }
+
+        public void RecordInit()
+        {
+            
+        }
         #endregion
 
         #region Public Methods - Consumer
@@ -312,7 +317,7 @@ namespace Splitio.Telemetry.Storages
             _httpErrors.TryAdd(ResourceEnum.SplitSync, new ConcurrentDictionary<int, long>());
             _httpErrors.TryAdd(ResourceEnum.TelemetrySync, new ConcurrentDictionary<int, long>());
             _httpErrors.TryAdd(ResourceEnum.TokenSync, new ConcurrentDictionary<int, long>());
-        }
+        }        
         #endregion
     }
 }

@@ -1,12 +1,9 @@
 ﻿using Splitio.Redis.Services.Cache.Interfaces;
-using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
-using Splitio.Telemetry.Storages;
-using System.Collections.Generic;
 
 namespace Splitio.Redis.Telemetry.Storages
 {
-    public class RedisTelemetryStorage : ITelemetryStorage
+    public class RedisTelemetryStorage : IRedisTelemetryStorageProducer
     {
         private const string TelemetryLatencyKey = "{prefix}.SPLITIO.telemetry.latencies.{metadata}.{method}.{bucket}";
         private const string TelemetryExceptionKey = "{prefix}.SPLITIO.telemetry.exceptions.{metadata}.{method}";
@@ -36,141 +33,24 @@ namespace Splitio.Redis.Telemetry.Storages
             _redisAdapter.HashIncrement(BuildKeyException(method.ToString()), 1);
         }
 
+        public void RecordInit()
+        {
+            
+        }
+
         public void RecordLatency(MethodEnum method, int bucket)
         {
             _redisAdapter.HashIncrement(BuildKeyLatency(method.ToString(), bucket), 1);
         }
-        #endregion
 
-        #region Not Implemented Methods
-        public void RecordSyncLatency(ResourceEnum resource, int bucket)
+        public void RecordNonReadyUsages()
         {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public void AddTag(string tag)
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public long GetBURTimeouts()
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public long GetEventsStats(EventsEnum data)
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public long GetImpressionsStats(ImpressionsEnum data)
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public LastSynchronization GetLastSynchronizations()
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public long GetNonReadyUsages()
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public long GetSessionLength()
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public long PopAuthRejections()
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public MethodExceptions PopExceptions()
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public HTTPErrors PopHttpErrors()
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public HTTPLatencies PopHttpLatencies()
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public MethodLatencies PopLatencies()
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public IList<StreamingEvent> PopStreamingEvents()
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public IList<string> PopTags()
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public long PopTokenRefreshes()
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public void RecordAuthRejections()
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
+            throw new System.NotImplementedException();
         }
 
         public void RecordBURTimeout()
         {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public void RecordEventsStats(EventsEnum data, long count)
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }        
-
-        public void RecordImpressionsStats(ImpressionsEnum data, long count)
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }        
-
-        public void RecordNonReadyUsages()
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public void RecordSessionLength(long session)
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public void RecordStreamingEvent(StreamingEvent streamingEvent)
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public void RecordSuccessfulSync(ResourceEnum resource, long timestamp)
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }
-
-        public void RecordSyncError(ResourceEnum resuource, int status)
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
-        }        
-
-        public void RecordTokenRefreshes()
-        {
-            throw new System.NotImplementedException("Not implemented for redis.");
+            throw new System.NotImplementedException();
         }
         #endregion
 
