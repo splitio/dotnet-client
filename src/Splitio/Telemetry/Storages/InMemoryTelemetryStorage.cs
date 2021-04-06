@@ -118,9 +118,9 @@ namespace Splitio.Telemetry.Storages
             _pushCounters.AddOrUpdate(PushCountersEnum.TokenRefreshes, 1, (key, value) => value + 1);
         }
 
-        public void RecordInit()
+        public void RecordConfigInit(Config config)
         {
-            
+            // No-Op. Config Data will be sent directly to Split Servers. No need to store.
         }
         #endregion
 
@@ -151,7 +151,8 @@ namespace Splitio.Telemetry.Storages
             {
                 Splits = _lastSynchronizationRecords.TryGetValue(ResourceEnum.SplitSync, out long splitsValue) ? splitsValue : 0,
                 Segments = _lastSynchronizationRecords.TryGetValue(ResourceEnum.SegmentSync, out long segValue) ? segValue : 0,
-                Impressions = _lastSynchronizationRecords.TryGetValue(ResourceEnum.Impressionsync, out long impValue) ? impValue : 0,
+                Impressions = _lastSynchronizationRecords.TryGetValue(ResourceEnum.ImpressionSync, out long impValue) ? impValue : 0,
+                ImpressionCount = _lastSynchronizationRecords.TryGetValue(ResourceEnum.ImpressionCountSync, out long impCountValue) ? impCountValue : 0,
                 Events = _lastSynchronizationRecords.TryGetValue(ResourceEnum.EventSync, out long evetsValue) ? evetsValue : 0,
                 Telemetry = _lastSynchronizationRecords.TryGetValue(ResourceEnum.TelemetrySync, out long telValue) ? telValue : 0,
                 Token = _lastSynchronizationRecords.TryGetValue(ResourceEnum.TokenSync, out long tokenValue) ? tokenValue : 0
@@ -206,7 +207,8 @@ namespace Splitio.Telemetry.Storages
             var erros = new HTTPErrors
             {
                 Events = _httpErrors[ResourceEnum.EventSync],
-                Impressions = _httpErrors[ResourceEnum.Impressionsync],
+                Impressions = _httpErrors[ResourceEnum.ImpressionSync],
+                ImpressionCount = _httpErrors[ResourceEnum.ImpressionCountSync],
                 Segments = _httpErrors[ResourceEnum.SegmentSync],
                 Splits = _httpErrors[ResourceEnum.SplitSync],
                 Telemetry = _httpErrors[ResourceEnum.TelemetrySync],
@@ -224,7 +226,8 @@ namespace Splitio.Telemetry.Storages
             var latencies = new HTTPLatencies
             {
                 Events = _httpLatencies[ResourceEnum.EventSync],
-                Impressions = _httpLatencies[ResourceEnum.Impressionsync],
+                Impressions = _httpLatencies[ResourceEnum.ImpressionSync],
+                ImpressionCount = _httpLatencies[ResourceEnum.ImpressionCountSync],
                 Segments = _httpLatencies[ResourceEnum.SegmentSync],
                 Splits = _httpLatencies[ResourceEnum.SplitSync],
                 Telemetry = _httpLatencies[ResourceEnum.TelemetrySync],
@@ -303,7 +306,8 @@ namespace Splitio.Telemetry.Storages
         {
             _httpLatencies.TryAdd(ResourceEnum.SplitSync, new List<long>());
             _httpLatencies.TryAdd(ResourceEnum.SegmentSync, new List<long>());
-            _httpLatencies.TryAdd(ResourceEnum.Impressionsync, new List<long>());
+            _httpLatencies.TryAdd(ResourceEnum.ImpressionSync, new List<long>());
+            _httpLatencies.TryAdd(ResourceEnum.ImpressionCountSync, new List<long>());
             _httpLatencies.TryAdd(ResourceEnum.EventSync, new List<long>());
             _httpLatencies.TryAdd(ResourceEnum.TelemetrySync, new List<long>());
             _httpLatencies.TryAdd(ResourceEnum.TokenSync, new List<long>());
@@ -312,7 +316,8 @@ namespace Splitio.Telemetry.Storages
         private void InitHttpErrors()
         {
             _httpErrors.TryAdd(ResourceEnum.EventSync, new ConcurrentDictionary<int, long>());
-            _httpErrors.TryAdd(ResourceEnum.Impressionsync, new ConcurrentDictionary<int, long>());
+            _httpErrors.TryAdd(ResourceEnum.ImpressionSync, new ConcurrentDictionary<int, long>());
+            _httpErrors.TryAdd(ResourceEnum.ImpressionCountSync, new ConcurrentDictionary<int, long>());
             _httpErrors.TryAdd(ResourceEnum.SegmentSync, new ConcurrentDictionary<int, long>());
             _httpErrors.TryAdd(ResourceEnum.SplitSync, new ConcurrentDictionary<int, long>());
             _httpErrors.TryAdd(ResourceEnum.TelemetrySync, new ConcurrentDictionary<int, long>());

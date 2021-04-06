@@ -2,7 +2,7 @@
 {
     public enum EventsEnum
     {
-        EventsDropped = 1,
-        EventsQueued = 2
+        EventsDropped,
+        EventsQueued
     }
 }

@@ -43,6 +43,6 @@ namespace Splitio.Redis.Services.Cache.Interfaces
 
         void Connect();
 
-        double HashIncrement(string key, double value);
+        double HashIncrement(string key, string field, double value);
     }
 }

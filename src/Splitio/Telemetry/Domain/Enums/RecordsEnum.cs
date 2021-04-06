@@ -2,11 +2,11 @@
 {
     public enum SdkRecordsEnum
     {
-        Session = 1
+        Session
     }
 
     public enum FactoryRecordsEnum
     {
-        TimeUntilReady = 1
+        TimeUntilReady
     }
 }
