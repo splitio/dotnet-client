@@ -11,6 +11,8 @@ namespace Splitio.Telemetry.Domain
         public IDictionary<int, long> Segments { get; set; }
         [JsonProperty("im")]
         public IDictionary<int, long> Impressions { get; set; }
+        [JsonProperty("ic")]
+        public IDictionary<int, long> ImpressionCount { get; set; }
         [JsonProperty("ev")]
         public IDictionary<int, long> Events { get; set; }
         [JsonProperty("to")]

@@ -11,6 +11,8 @@ namespace Splitio.Telemetry.Domain
         public IList<long> Segments { get; set; }
         [JsonProperty("im")]
         public IList<long> Impressions { get; set; }
+        [JsonProperty("ic")]
+        public IList<long> ImpressionCount { get; set; }
         [JsonProperty("ev")]
         public IList<long> Events { get; set; }
         [JsonProperty("to")]

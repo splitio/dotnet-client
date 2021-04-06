@@ -79,8 +79,8 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             // Arrange.
             _telemetryStorage.RecordSyncLatency(ResourceEnum.EventSync, 2);
             _telemetryStorage.RecordSyncLatency(ResourceEnum.EventSync, 4);
-            _telemetryStorage.RecordSyncLatency(ResourceEnum.Impressionsync, 2);
-            _telemetryStorage.RecordSyncLatency(ResourceEnum.Impressionsync, 2);
+            _telemetryStorage.RecordSyncLatency(ResourceEnum.ImpressionSync, 2);
+            _telemetryStorage.RecordSyncLatency(ResourceEnum.ImpressionSync, 2);
             _telemetryStorage.RecordSyncLatency(ResourceEnum.SegmentSync, 2);
             _telemetryStorage.RecordSyncLatency(ResourceEnum.SplitSync, 2);
             _telemetryStorage.RecordSyncLatency(ResourceEnum.SplitSync, 3);
@@ -331,7 +331,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         {
             // Arrange.
             _telemetryStorage.RecordSuccessfulSync(ResourceEnum.EventSync, 123);
-            _telemetryStorage.RecordSuccessfulSync(ResourceEnum.Impressionsync, 2222);
+            _telemetryStorage.RecordSuccessfulSync(ResourceEnum.ImpressionSync, 2222);
             _telemetryStorage.RecordSuccessfulSync(ResourceEnum.SegmentSync, 3333);
             _telemetryStorage.RecordSuccessfulSync(ResourceEnum.SplitSync, 44444);
             _telemetryStorage.RecordSuccessfulSync(ResourceEnum.TelemetrySync, 66666);

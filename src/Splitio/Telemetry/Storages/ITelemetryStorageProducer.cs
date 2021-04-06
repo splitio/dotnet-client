@@ -29,7 +29,7 @@ namespace Splitio.Telemetry.Storages
 
     public interface ITelemetryInitProducer
     {
-        void RecordInit(); // config param 
+        void RecordConfigInit(Config config);
         void RecordNonReadyUsages();
         void RecordBURTimeout();
     }

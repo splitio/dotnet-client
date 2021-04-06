@@ -280,11 +280,11 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
         }
 
-        public double HashIncrement(string key, double value)
+        public double HashIncrement(string key, string hashField, double value)
         {
             try
             {
-                return _database.HashIncrement(key, "hashField", value);
+                return _database.HashIncrement(key, hashField, value);
             }
             catch (Exception e)
             {

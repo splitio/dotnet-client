@@ -302,16 +302,16 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteHashIncrementShouldReturnValue()
         {
             //Act & Assert
-            var result = adapter.HashIncrement("test_count", 2);
+            var result = adapter.HashIncrement("test_count", "hashField", 2);
             Assert.AreEqual(2, result);
 
-            result = adapter.HashIncrement("test_count", 2);
+            result = adapter.HashIncrement("test_count", "hashField", 2);
             Assert.AreEqual(4, result);
 
-            result = adapter.HashIncrement("test_count", 3);
+            result = adapter.HashIncrement("test_count", "hashField", 3);
             Assert.AreEqual(7, result);
 
-            result = adapter.HashIncrement("test", 1);
+            result = adapter.HashIncrement("test", "hashField", 1);
             Assert.AreEqual(1, result);
         }
     }
