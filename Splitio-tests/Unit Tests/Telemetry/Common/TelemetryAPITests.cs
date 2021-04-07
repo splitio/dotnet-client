@@ -80,7 +80,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             var data = "{\"hL\":{\"se\":[88,22,99],\"ev\":[55,66,77]},\"tR\":0,\"aR\":2,\"iQ\":0,\"iDe\":0,\"iDr\":0,\"spC\":0,\"seC\":0,\"skC\":0,\"sL\":0,\"eQ\":0,\"eD\":0}";
 
             _splitioHttpClient
-                .Setup(mock => mock.PostAsync("www.fake-url.com/metrics/stats", data))
+                .Setup(mock => mock.PostAsync("www.fake-url.com/metrics/usage", data))
                 .ReturnsAsync(new HTTPResult
                 {
                     statusCode = System.Net.HttpStatusCode.OK
