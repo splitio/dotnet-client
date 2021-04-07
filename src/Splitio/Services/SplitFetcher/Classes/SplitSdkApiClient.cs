@@ -3,6 +3,7 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
@@ -19,10 +20,11 @@ namespace Splitio.Services.SplitFetcher.Classes
         private const string SplitFetcherStatus = "splitChangeFetcher.status.{0}";
         private const string SplitFetcherException = "splitChangeFetcher.exception";
         
-        public SplitSdkApiClient(HTTPHeader header,
+        public SplitSdkApiClient(string apiKey,
+            Dictionary<string, string> headers,
             string baseUrl,
             long connectionTimeOut,
-            long readTimeout) : base(header, baseUrl, connectionTimeOut, readTimeout)
+            long readTimeout) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout)
         { }
 
         public async Task<string> FetchSplitChanges(long since)

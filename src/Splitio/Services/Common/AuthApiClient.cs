@@ -18,12 +18,11 @@ namespace Splitio.Services.Common
 
         public AuthApiClient(string url,
             string apiKey,
-            long connectionTimeOut,
-            ISplitioHttpClient splitioHttpClient = null,
+            ISplitioHttpClient splitioHttpClient,
             ISplitLogger log = null)
         {
             _url = url;
-            _splitioHttpClient = splitioHttpClient ?? new SplitioHttpClient(apiKey, connectionTimeOut);
+            _splitioHttpClient = splitioHttpClient;
             _log = log ?? WrapperAdapter.GetLogger(typeof(AuthApiClient));            
         }
 

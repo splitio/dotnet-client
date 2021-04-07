@@ -1,5 +1,4 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
@@ -17,8 +16,10 @@ using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
+using Splitio.Telemetry.Common;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -43,6 +44,7 @@ namespace Splitio.Services.Client.Classes
         private ISelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
         private ISyncManager _syncManager;
         private IImpressionsCounter _impressionsCounter;
+        private ITelemetryAPI _telemetryAPI;
 
         public SelfRefreshingClient(string apiKey, 
             ConfigurationOptions config, 
@@ -62,6 +64,7 @@ namespace Splitio.Services.Client.Classes
             BuildEvaluator();
             BuildBlockUntilReadyService();
             BuildManager();
+            BuildTelemetryAPI();
             BuildSyncManager();
 
             Start();
@@ -133,20 +136,14 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildSdkApiClients()
         {
-            var header = new HTTPHeader
-            {
-                authorizationApiKey = ApiKey,
-                splitSDKVersion = _config.SdkVersion,
-                splitSDKSpecVersion = _config.SdkSpecVersion,
-                splitSDKMachineName = _config.SdkMachineName,
-                splitSDKMachineIP = _config.SdkMachineIP,
-                SplitSDKImpressionsMode = _config.ImpressionsMode.Equals(ImpressionsMode.Optimized)
-            };
+            var headers = GetHeaders();
+            headers.Add("Accept-Encoding", "gzip");
+            headers.Add("Keep-Alive", "true");
 
-            _splitSdkApiClient = new SplitSdkApiClient(header, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
-            _segmentSdkApiClient = new SegmentSdkApiClient(header, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
-            _treatmentSdkApiClient = new TreatmentSdkApiClient(header, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
-            _eventSdkApiClient = new EventSdkApiClient(header, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
+            _splitSdkApiClient = new SplitSdkApiClient(ApiKey, headers, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
+            _segmentSdkApiClient = new SegmentSdkApiClient(ApiKey, headers, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
+            _treatmentSdkApiClient = new TreatmentSdkApiClient(ApiKey, headers, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
+            _eventSdkApiClient = new EventSdkApiClient(ApiKey, headers, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
         }
 
         private void BuildManager()
@@ -159,28 +156,78 @@ namespace Splitio.Services.Client.Classes
             _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(_gates, _log);
         }
 
+        private void BuildTelemetryAPI()
+        {
+            var httpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, GetHeaders());
+            _telemetryAPI = new TelemetryAPI(httpClient, _config.TelemetryServiceURL);
+        }
+
         private void BuildSyncManager()
         {
             try
             {
+                // Synchronizer
                 var impressionsCountSender = new ImpressionsCountSender(_treatmentSdkApiClient, _impressionsCounter);
                 var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, impressionsCountSender, _wrapperAdapter);
+
+                // Workers
                 var splitsWorker = new SplitsWorker(_splitCache, synchronizer);
                 var segmentsWorker = new SegmentsWorker(_segmentCache, synchronizer);
+
+                // NotificationProcessor
                 var notificationProcessor = new NotificationProcessor(splitsWorker, segmentsWorker);
+
+                // NotificationParser
                 var notificationParser = new NotificationParser();
-                var eventSourceClient = new EventSourceClient(notificationParser: notificationParser);
+
+                // NotificationManagerKeeper
                 var notificationManagerKeeper = new NotificationManagerKeeper();
+
+                // EventSourceClient
+                var headers = GetHeaders();
+                headers.Add("SplitSDKClientKey", ApiKey.Substring(ApiKey.Length - 4));
+                headers.Add("Accept", "text/event-stream");
+                var sseHttpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, headers);
+                var eventSourceClient = new EventSourceClient(notificationParser, _wrapperAdapter, sseHttpClient);
+
+                // SSEHandler
                 var sseHandler = new SSEHandler(_config.StreamingServiceURL, splitsWorker, segmentsWorker, notificationProcessor, notificationManagerKeeper, eventSourceClient: eventSourceClient);
-                var authApiClient = new AuthApiClient(_config.AuthServiceURL, ApiKey, _config.HttpReadTimeout);
+
+                // AuthApiClient
+                var httpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, GetHeaders());
+                var authApiClient = new AuthApiClient(_config.AuthServiceURL, ApiKey, httpClient);
+
+                // PushManager
                 var pushManager = new PushManager(_config.AuthRetryBackoffBase, sseHandler, authApiClient, _wrapperAdapter);
 
+                // SyncManager
                 _syncManager = new SyncManager(_config.StreamingEnabled, synchronizer, pushManager, sseHandler, notificationManagerKeeper);
             }
             catch (Exception ex)
             {
                 _log.Error($"BuildSyncManager: {ex.Message}");
             }
+        }        
+
+        private Dictionary<string, string> GetHeaders()
+        {
+            var headers = new Dictionary<string, string>
+            {
+                { "SplitSDKVersion", _config.SdkVersion },
+                { "SplitSDKImpressionsMode", _config.ImpressionsMode.Equals(ImpressionsMode.Optimized).ToString() }
+            };
+
+            if (!string.IsNullOrEmpty(_config.SdkMachineName) && !_config.SdkMachineName.Equals(Constans.Unknown))
+            {
+                headers.Add("SplitSDKMachineName", _config.SdkMachineName);
+            }
+
+            if (!string.IsNullOrEmpty(_config.SdkMachineIP) && !_config.SdkMachineIP.Equals(Constans.Unknown))
+            {
+                headers.Add("SplitSDKMachineIP", _config.SdkMachineIP);
+            }
+
+            return headers;
         }
 
         private void Start()

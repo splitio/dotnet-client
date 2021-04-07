@@ -28,7 +28,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         {
             //Arrange            
             var options = new ConfigurationOptions();
-            var factory = new SplitFactory("any", options);
+            var factory = new SplitFactory("any-873428748237489", options);
 
             //Act         
             var client = factory.Client();
@@ -65,7 +65,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void BuildSplitClientWithApiKeyShouldReturnSelfRefreshingSplitClient()
         {
             //Arrange
-            var factory = new SplitFactory("any", null);
+            var factory = new SplitFactory("any-7634876238764238", null);
 
             //Act         
             var client = factory.Client();

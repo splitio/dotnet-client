@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.CommonLibraries;
 using Splitio.Services.SplitFetcher.Classes;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Integration_Tests
@@ -14,15 +14,14 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var baseUrl = "http://sdk-aws-staging.split.io/api/";
-            var httpHeader = new HTTPHeader()
+            var headers = new Dictionary<string, string>
             {
-                authorizationApiKey = "///PUT API KEY HERE///",
-                splitSDKMachineIP = "1.0.0.0",
-                splitSDKMachineName = "localhost",
-                splitSDKVersion = "net-0.0.0",
-                splitSDKSpecVersion = "1.2",
+                { "SplitSDKMachineIP", "1.0.0.0" },
+                { "SplitSDKMachineName", "localhost" },
+                { "SplitSDKVersion", "1" }
             };
-            var SplitSdkApiClient = new SplitSdkApiClient(httpHeader, baseUrl, 10000, 10000);
+
+            var SplitSdkApiClient = new SplitSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000);
 
             //Act
             var result = await SplitSdkApiClient.FetchSplitChanges(-1);
@@ -36,14 +35,14 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var baseUrl = "https://sdk.aws.staging.split.io/api";
-            var httpHeader = new HTTPHeader()
+            var headers = new Dictionary<string, string>
             {
-                splitSDKMachineIP = "1.0.0.0",
-                splitSDKMachineName = "localhost",
-                splitSDKVersion = "net-0.0.0",
-                splitSDKSpecVersion = "1.2"
+                { "SplitSDKMachineIP", "1.0.0.0" },
+                { "SplitSDKMachineName", "localhost" },
+                { "SplitSDKVersion", "1" }
             };
-            var SplitSdkApiClient = new SplitSdkApiClient(httpHeader, baseUrl, 10000, 10000);
+
+            var SplitSdkApiClient = new SplitSdkApiClient(string.Empty, headers, baseUrl, 10000, 10000);
 
             //Act
             var result = await SplitSdkApiClient.FetchSplitChanges(-1);

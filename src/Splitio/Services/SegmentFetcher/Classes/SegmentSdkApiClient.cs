@@ -3,6 +3,7 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
@@ -19,10 +20,11 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SegmentSdkApiClient));
 
-        public SegmentSdkApiClient(HTTPHeader header,
+        public SegmentSdkApiClient(string apiKey,
+            Dictionary<string, string> headers,
             string baseUrl,
             long connectionTimeOut,
-            long readTimeout) : base(header, baseUrl, connectionTimeOut, readTimeout)
+            long readTimeout) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout)
         { }
 
         public async Task<string> FetchSegmentChanges(string name, long since)

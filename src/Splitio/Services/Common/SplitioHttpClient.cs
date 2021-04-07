@@ -28,8 +28,7 @@ namespace Splitio.Services.Common
             }
         }
 
-        public SplitioHttpClient(
-            string apiKey,
+        public SplitioHttpClient(string apiKey,
             long connectionTimeOut,
             Dictionary<string, string> headers = null)
         {

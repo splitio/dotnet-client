@@ -18,8 +18,11 @@ namespace Splitio.Services.Impressions.Classes
 
         private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(TreatmentSdkApiClient));
 
-        public TreatmentSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout) 
-            : base(header, baseUrl, connectionTimeOut, readTimeout)
+        public TreatmentSdkApiClient(string apiKey,
+            Dictionary<string, string> headers,
+            string baseUrl,
+            long connectionTimeOut,
+            long readTimeout) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout)
         { }
 
         public async void SendBulkImpressions(List<KeyImpression> impressions)
