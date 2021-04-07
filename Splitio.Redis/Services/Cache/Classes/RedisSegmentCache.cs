@@ -96,5 +96,15 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             return keys.Select(k => (string)k).ToList();
         }
+
+        public int SegmentsCount()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int SegmentKeysCount()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

@@ -12,5 +12,7 @@ namespace Splitio.Services.Cache.Interfaces
         void Clear();
         List<string> GetSegmentNames();
         List<string> GetSegmentKeys(string segmentName);
+        int SegmentsCount();
+        int SegmentKeysCount();
     }
 }

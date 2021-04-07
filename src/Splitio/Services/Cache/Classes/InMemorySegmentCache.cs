@@ -93,5 +93,27 @@ namespace Splitio.Services.Cache.Classes
 
             return new List<string>();
         }
+
+        public int SegmentsCount()
+        {
+            return GetSegmentNames().Count;
+        }
+
+        public int SegmentKeysCount()
+        {
+            var keys = 0;
+
+            var names = _segments.Keys;
+
+            foreach (var segmentName in names)
+            {
+                if (_segments.TryGetValue(segmentName, out Segment segment))
+                {
+                    keys += segment.GetKeys().Count;
+                }
+            }
+
+            return keys;
+        }
     }
 }

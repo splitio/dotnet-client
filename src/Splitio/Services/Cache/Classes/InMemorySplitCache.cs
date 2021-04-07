@@ -183,5 +183,10 @@ namespace Splitio.Services.Cache.Classes
                 .Where(name => !string.IsNullOrEmpty(name))
                 .ToList();
         }
+
+        public int SplitsCount()
+        {
+            return GetSplitNames().Count;
+        }
     }
 }
