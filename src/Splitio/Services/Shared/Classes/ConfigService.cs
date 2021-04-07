@@ -74,7 +74,7 @@ namespace Splitio.Services.Shared.Classes
                 StreamingServiceURL = string.IsNullOrEmpty(config.StreamingServiceURL) ? "https://streaming.split.io/event-stream" : config.StreamingServiceURL,
                 ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Optimized,
                 TelemetryRefreshRate = GetMinimunAllowed(config.TelemetryRefreshRate ?? 3600, 60, "TelemetryRefreshRate"),
-                TelemetryServiceURL = string.IsNullOrEmpty(config.TelemetryServiceURL) ? "https://telemetry.split-stage.io/api/v1" : config.TelemetryServiceURL
+                TelemetryServiceURL = string.IsNullOrEmpty(config.TelemetryServiceURL) ? "https://telemetry.split.io/api/v1" : config.TelemetryServiceURL
             };
 
             selfRefreshingConfig.TreatmentLogRefreshRate = GetImpressionRefreshRate(selfRefreshingConfig.ImpressionsMode, config.ImpressionsRefreshRate);
