@@ -90,7 +90,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             _telemetryAPI.RecordStats(stats);
 
             // Assert.
-            _splitioHttpClient.Verify(mock => mock.PostAsync("www.fake-url.com/metrics/stats", data), Times.Once);
+            _splitioHttpClient.Verify(mock => mock.PostAsync("www.fake-url.com/metrics/usage", data), Times.Once);
             _log.Verify(mock => mock.Error(It.IsAny<string>()), Times.Never);
         }
     }

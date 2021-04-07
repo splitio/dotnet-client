@@ -17,5 +17,6 @@ namespace Splitio.Services.Cache.Interfaces
         List<ParsedSplit> FetchMany(List<string> splitNames);
         void Kill(long changeNumber, string splitName, string defaultTreatment);
         List<string> GetSplitNames();
+        int SplitsCount();
     }
 }

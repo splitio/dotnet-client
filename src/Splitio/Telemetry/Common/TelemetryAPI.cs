@@ -11,7 +11,7 @@ namespace Splitio.Telemetry.Common
     public class TelemetryAPI : ITelemetryAPI
     {
         private const string ConfigURL = "/metrics/config";
-        private const string StatsURL = "/metrics/stats";
+        private const string UsageURL = "/metrics/usage";
 
         private readonly ISplitioHttpClient _splitioHttpClient;
         private readonly ISplitLogger _log;
@@ -34,7 +34,7 @@ namespace Splitio.Telemetry.Common
 
         public async void RecordStats(Stats stats)
         {
-            await ExecutePost(StatsURL, stats, nameof(RecordStats));
+            await ExecutePost(UsageURL, stats, nameof(RecordStats));
         }
         #endregion        
 
