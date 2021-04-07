@@ -163,6 +163,11 @@ namespace Splitio.Redis.Services.Cache.Classes
                 .Select(s => s.name)
                 .ToList();
         }
+
+        public int SplitsCount()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
  

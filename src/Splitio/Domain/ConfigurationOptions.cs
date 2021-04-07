@@ -6,9 +6,7 @@ namespace Splitio.Services.Client.Classes
 {
     public class ConfigurationOptions
     {
-        public Mode Mode { get; set; }
-        public string Endpoint { get; set; }
-        public string EventsEndpoint { get; set; }
+        public Mode Mode { get; set; }        
         public string LocalhostFilePath { get; set; }        
         public int? MaxImpressionsLogSize { get; set; }
         public int? EventsFirstPushWindow { get; set; }
@@ -28,10 +26,15 @@ namespace Splitio.Services.Client.Classes
         public bool? StreamingEnabled { get; set; }
         public int? AuthRetryBackoffBase { get; set; }
         public int? StreamingReconnectBackoffBase { get; set; }
-        public string AuthServiceURL { get; set; }
-        public string StreamingServiceURL { get; set; }
         public ImpressionsMode? ImpressionsMode { get; set; }
         public bool RandomizeRefreshRates { get; set; }
+
+        // Urls.
+        public string Endpoint { get; set; }
+        public string EventsEndpoint { get; set; }        
+        public string AuthServiceURL { get; set; }
+        public string StreamingServiceURL { get; set; }
+        public string TelemetryServiceURL { get; set; }
 
         // Rates.
         public int? FeaturesRefreshRate { get; set; }
