@@ -37,7 +37,6 @@ namespace Splitio.Services.Shared.Classes
             return new BaseConfig
             {
                 SdkVersion = data.SdkVersion,
-                SdkSpecVersion = data.SdkSpecVersion,
                 SdkMachineName = data.SdkMachineName,
                 SdkMachineIP = data.SdkMachineIP,
                 LabelsEnabled = config.LabelsEnabled ?? true
@@ -51,7 +50,6 @@ namespace Splitio.Services.Shared.Classes
             var selfRefreshingConfig = new SelfRefreshingConfig
             {
                 SdkVersion = baseConfig.SdkVersion,
-                SdkSpecVersion = baseConfig.SdkSpecVersion,
                 SdkMachineName = baseConfig.SdkMachineName,
                 SdkMachineIP = baseConfig.SdkMachineIP,
                 LabelsEnabled = baseConfig.LabelsEnabled,

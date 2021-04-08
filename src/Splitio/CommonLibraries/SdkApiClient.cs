@@ -1,5 +1,4 @@
-﻿using Splitio.Domain;
-using Splitio.Services.Logger;
+﻿using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
@@ -38,7 +37,7 @@ namespace Splitio.CommonLibraries
                 Timeout = TimeSpan.FromMilliseconds(connectionTimeOut + readTimeout)
             };
 
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Constans.Bearer, apiKey);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Constants.Http.Bearer, apiKey);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             foreach (var header in headers)

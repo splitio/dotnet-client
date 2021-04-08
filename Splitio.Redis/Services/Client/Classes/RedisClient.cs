@@ -43,7 +43,6 @@ namespace Splitio.Redis.Services.Client.Classes
         {            
             var baseConfig = _configService.ReadConfig(config, ConfingTypes.Redis);
             _config.SdkVersion = baseConfig.SdkVersion;
-            _config.SdkSpecVersion = baseConfig.SdkSpecVersion;
             _config.SdkMachineName = baseConfig.SdkMachineName;
             _config.SdkMachineIP = baseConfig.SdkMachineIP;
             LabelsEnabled = baseConfig.LabelsEnabled;

@@ -19,7 +19,6 @@ namespace Splitio.Services.Shared.Classes
             var data = new ReadConfigData();
             var ipAddressesEnabled = config.IPAddressesEnabled ?? true;
 
-            data.SdkSpecVersion = ".NET-" + SplitSpecVersion();
 #if NETSTANDARD
             data.SdkVersion = ".NET_CORE-" + SplitSdkVersion();
 #else
@@ -86,11 +85,6 @@ namespace Splitio.Services.Shared.Classes
         }
 
         #region Private Methods
-        private string SplitSpecVersion()
-        {
-            return "1.0";
-        }
-
         private string GetSdkMachineName(ConfigurationOptions config, bool ipAddressesEnabled, ISplitLogger log)
         {
             if (ipAddressesEnabled)
@@ -102,12 +96,12 @@ namespace Splitio.Services.Shared.Classes
                 catch (Exception e)
                 {
                     log.Warn("Exception retrieving machine name.", e);
-                    return Constans.Unknown;
+                    return Constants.Gral.Unknown;
                 }
             }
             else if(config.CacheAdapterConfig?.Type == AdapterType.Redis)
             {
-                return Constans.NA;
+                return Constants.Gral.NA;
             }
 
             return string.Empty;
@@ -130,12 +124,12 @@ namespace Splitio.Services.Shared.Classes
                 catch (Exception e)
                 {
                     log.Warn("Exception retrieving machine IP.", e);
-                    return Constans.Unknown;
+                    return Constants.Gral.Unknown;
                 }
             }
             else if (config.CacheAdapterConfig?.Type == AdapterType.Redis)
             {
-                return Constans.NA;
+                return Constants.Gral.NA;
             }
 
             return string.Empty;

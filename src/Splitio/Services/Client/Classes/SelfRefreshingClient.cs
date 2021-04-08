@@ -137,8 +137,8 @@ namespace Splitio.Services.Client.Classes
         private void BuildSdkApiClients()
         {
             var headers = GetHeaders();
-            headers.Add("Accept-Encoding", "gzip");
-            headers.Add("Keep-Alive", "true");
+            headers.Add(Constants.Http.AcceptEncoding, Constants.Http.Gzip);
+            headers.Add(Constants.Http.KeepAlive, "true");
 
             _splitSdkApiClient = new SplitSdkApiClient(ApiKey, headers, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
             _segmentSdkApiClient = new SegmentSdkApiClient(ApiKey, headers, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
@@ -185,8 +185,8 @@ namespace Splitio.Services.Client.Classes
 
                 // EventSourceClient
                 var headers = GetHeaders();
-                headers.Add("SplitSDKClientKey", ApiKey.Substring(ApiKey.Length - 4));
-                headers.Add("Accept", "text/event-stream");
+                headers.Add(Constants.Http.SplitSDKClientKey, ApiKey.Substring(ApiKey.Length - 4));
+                headers.Add(Constants.Http.Accept, Constants.Http.EventStream);
                 var sseHttpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, headers);
                 var eventSourceClient = new EventSourceClient(notificationParser, _wrapperAdapter, sseHttpClient);
 
@@ -213,18 +213,18 @@ namespace Splitio.Services.Client.Classes
         {
             var headers = new Dictionary<string, string>
             {
-                { "SplitSDKVersion", _config.SdkVersion },
-                { "SplitSDKImpressionsMode", _config.ImpressionsMode.Equals(ImpressionsMode.Optimized).ToString() }
+                { Constants.Http.SplitSDKVersion, _config.SdkVersion },
+                { Constants.Http.SplitSDKImpressionsMode, _config.ImpressionsMode.Equals(ImpressionsMode.Optimized).ToString() }
             };
 
-            if (!string.IsNullOrEmpty(_config.SdkMachineName) && !_config.SdkMachineName.Equals(Constans.Unknown))
+            if (!string.IsNullOrEmpty(_config.SdkMachineName) && !_config.SdkMachineName.Equals(Constants.Gral.Unknown))
             {
-                headers.Add("SplitSDKMachineName", _config.SdkMachineName);
+                headers.Add(Constants.Http.SplitSDKMachineName, _config.SdkMachineName);
             }
 
-            if (!string.IsNullOrEmpty(_config.SdkMachineIP) && !_config.SdkMachineIP.Equals(Constans.Unknown))
+            if (!string.IsNullOrEmpty(_config.SdkMachineIP) && !_config.SdkMachineIP.Equals(Constants.Gral.Unknown))
             {
-                headers.Add("SplitSDKMachineIP", _config.SdkMachineIP);
+                headers.Add(Constants.Http.SplitSDKMachineIP, _config.SdkMachineIP);
             }
 
             return headers;

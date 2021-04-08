@@ -1,5 +1,4 @@
-﻿using Splitio.Domain;
-using Splitio.Services.Logger;
+﻿using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
 
@@ -89,13 +88,13 @@ namespace Splitio.Services.EventSource
 
         private void UpdatePublishers(string channel, int publishers)
         {
-            if (channel.Equals(Constans.PushControlPri))
+            if (channel.Equals(Constants.Push.ControlPri))
             {
                 _publishersPri = publishers;
                 return;
             }
 
-            if (channel.Equals(Constans.PushControlSec))
+            if (channel.Equals(Constants.Push.ControlSec))
             {
                 _publishersSec = publishers;
                 return;
