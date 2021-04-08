@@ -12,11 +12,11 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     [TestClass]
     public class ImpressionsCountSenderTests
     {
-        private readonly Mock<ITreatmentSdkApiClient> _apiClient;
+        private readonly Mock<IImpressionsSdkApiClient> _apiClient;
 
         public ImpressionsCountSenderTests()
         {
-            _apiClient = new Mock<ITreatmentSdkApiClient>();
+            _apiClient = new Mock<IImpressionsSdkApiClient>();
             
         }
 

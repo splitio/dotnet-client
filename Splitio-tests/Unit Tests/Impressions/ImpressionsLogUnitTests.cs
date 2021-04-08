@@ -12,7 +12,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     [TestClass]
     public class ImpressionsLogUnitTests
     {
-        private Mock<ITreatmentSdkApiClient> _apiClientMock;
+        private Mock<IImpressionsSdkApiClient> _apiClientMock;
         private BlockingQueue<KeyImpression> _queue;
         private InMemorySimpleCache<KeyImpression> _impressionsCache;
         private ImpressionsLog _impressionsLog;
@@ -20,7 +20,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         [TestInitialize]
         public void Initialize()
         {
-            _apiClientMock = new Mock<ITreatmentSdkApiClient>();
+            _apiClientMock = new Mock<IImpressionsSdkApiClient>();
             _queue = new BlockingQueue<KeyImpression>(10);
             _impressionsCache = new InMemorySimpleCache<KeyImpression>(_queue);
 

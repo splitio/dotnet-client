@@ -11,14 +11,14 @@ using System.Net;
 
 namespace Splitio.Services.Impressions.Classes
 {
-    public class TreatmentSdkApiClient : SdkApiClient, ITreatmentSdkApiClient
+    public class ImpressionsSdkApiClient : SdkApiClient, IImpressionsSdkApiClient
     {
         private const string TestImpressionsUrlTemplate = "/api/testImpressions/bulk";
         private const string ImpressionsCountUrlTemplate = "/api/testImpressions/count";
 
-        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(TreatmentSdkApiClient));
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(ImpressionsSdkApiClient));
 
-        public TreatmentSdkApiClient(string apiKey,
+        public ImpressionsSdkApiClient(string apiKey,
             Dictionary<string, string> headers,
             string baseUrl,
             long connectionTimeOut,

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Splitio.Services.Impressions.Interfaces
 {
-    public interface ITreatmentSdkApiClient
+    public interface IImpressionsSdkApiClient
     {
         void SendBulkImpressions(List<KeyImpression> impressions);
         void SendBulkImpressionsCount(ConcurrentDictionary<KeyCache, int> impressionsCount);
