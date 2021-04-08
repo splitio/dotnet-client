@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Splitio.Domain;
 using System;
 
 namespace Splitio.Services.EventSource
@@ -12,7 +11,7 @@ namespace Splitio.Services.EventSource
         {
             if (notification.Contains("event: message"))
             {
-                if (notification.Contains(Constans.PushOccupancyPrefix))
+                if (notification.Contains(Constants.Push.OccupancyPrefix))
                 {
                     return ParseControlChannelMessage(notification);
                 }
@@ -57,7 +56,7 @@ namespace Splitio.Services.EventSource
         private IncomingNotification ParseControlChannelMessage(string notificationString)
         {
             var notificationData = GetNotificationData<NotificationData>(notificationString);
-            var channel = notificationData.Channel.Replace(Constans.PushOccupancyPrefix, string.Empty);
+            var channel = notificationData.Channel.Replace(Constants.Push.OccupancyPrefix, string.Empty);
 
             if (notificationData.Data.Contains("controlType"))
             {

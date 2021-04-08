@@ -18,12 +18,11 @@ namespace Splitio.Services.Common
 
         public AuthApiClient(string url,
             string apiKey,
-            long connectionTimeOut,
-            ISplitioHttpClient splitioHttpClient = null,
+            ISplitioHttpClient splitioHttpClient,
             ISplitLogger log = null)
         {
             _url = url;
-            _splitioHttpClient = splitioHttpClient ?? new SplitioHttpClient(apiKey, connectionTimeOut);
+            _splitioHttpClient = splitioHttpClient;
             _log = log ?? WrapperAdapter.GetLogger(typeof(AuthApiClient));            
         }
 
@@ -93,15 +92,15 @@ namespace Splitio.Services.Common
         private string AddPrefixControlChannels(string channels)
         {
             channels = channels
-                .Replace(Constans.PushControlPri, $"{Constans.PushOccupancyPrefix}{Constans.PushControlPri}")
-                .Replace(Constans.PushControlSec, $"{Constans.PushOccupancyPrefix}{Constans.PushControlSec}");
+                .Replace(Constants.Push.ControlPri, $"{Constants.Push.OccupancyPrefix}{Constants.Push.ControlPri}")
+                .Replace(Constants.Push.ControlSec, $"{Constants.Push.OccupancyPrefix}{Constants.Push.ControlSec}");
 
             return channels;
         }
 
         private double GetExpirationSeconds(Jwt token)
         {
-            return token.Expiration - token.IssuedAt - Constans.PushSecondsBeforeExpiration;
+            return token.Expiration - token.IssuedAt - Constants.Push.SecondsBeforeExpiration;
         }
 
         private string DecodeJwt(string token)

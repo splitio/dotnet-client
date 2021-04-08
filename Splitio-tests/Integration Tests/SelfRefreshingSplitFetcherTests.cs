@@ -1,13 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.CommonLibraries;
-using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Domain;
-using Splitio.Services.SegmentFetcher.Classes;
-using Splitio.Services.Client.Classes;
 using Splitio.Services.Cache.Classes;
-using System.Collections.Concurrent;
+using Splitio.Services.Client.Classes;
 using Splitio.Services.Parsing.Classes;
-
+using Splitio.Services.SegmentFetcher.Classes;
+using Splitio.Services.SplitFetcher.Classes;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -86,17 +85,16 @@ namespace Splitio_Tests.Integration_Tests
             //Arrange
             var baseUrl = "https://sdk-aws-staging.split.io/api/";
             //var baseUrl = "http://localhost:3000/api/";
-            var httpHeader = new HTTPHeader()
+            var headers = new Dictionary<string, string>
             {
-                authorizationApiKey = "///PUT API KEY HERE///",
-                splitSDKMachineIP = "1.0.0.0",
-                splitSDKMachineName = "localhost",
-                splitSDKVersion = "net-0.0.0",
-                splitSDKSpecVersion = "1.2",
+                { "SplitSDKMachineIP", "1.0.0.0" },
+                { "SplitSDKMachineName", "localhost" },
+                { "SplitSDKVersion", "1" }
             };
-            var sdkApiClient = new SplitSdkApiClient(httpHeader, baseUrl, 10000, 10000);
+
+            var sdkApiClient = new SplitSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000);
             var apiSplitChangeFetcher = new ApiSplitChangeFetcher(sdkApiClient);
-            var sdkSegmentApiClient = new SegmentSdkApiClient(httpHeader, baseUrl, 10000, 10000);
+            var sdkSegmentApiClient = new SegmentSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000);
             var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkSegmentApiClient);
             var gates = new InMemoryReadinessGatesCache();
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
@@ -125,17 +123,16 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var baseUrl = "https://sdk-aws-staging.split.io/api/";
-            var httpHeader = new HTTPHeader()
+            var headers = new Dictionary<string, string>
             {
-                authorizationApiKey = "0",
-                splitSDKMachineIP = "1.0.0.0",
-                splitSDKMachineName = "localhost",
-                splitSDKVersion = "net-0.0.0",
-                splitSDKSpecVersion = "1.2",
+                { "SplitSDKMachineIP", "1.0.0.0" },
+                { "SplitSDKMachineName", "localhost" },
+                { "SplitSDKVersion", "1" }
             };
-            var sdkApiClient = new SplitSdkApiClient(httpHeader, baseUrl, 10000, 10000);
+
+            var sdkApiClient = new SplitSdkApiClient("0", headers, baseUrl, 10000, 10000);
             var apiSplitChangeFetcher = new ApiSplitChangeFetcher(sdkApiClient);
-            var sdkSegmentApiClient = new SegmentSdkApiClient(httpHeader, baseUrl, 10000, 10000);
+            var sdkSegmentApiClient = new SegmentSdkApiClient("0", headers, baseUrl, 10000, 10000);
             var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkSegmentApiClient);
             var gates = new InMemoryReadinessGatesCache();
 

@@ -1,5 +1,4 @@
 ﻿using Splitio.CommonLibraries;
-using Splitio.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
@@ -28,13 +27,12 @@ namespace Splitio.Services.Common
             }
         }
 
-        public SplitioHttpClient(
-            string apiKey,
+        public SplitioHttpClient(string apiKey,
             long connectionTimeOut,
             Dictionary<string, string> headers = null)
         {
 #if NET40 || NET45
-            ServicePointManager.SecurityProtocol = (SecurityProtocolType)Constans.ProtocolTypeTls12;
+            ServicePointManager.SecurityProtocol = (SecurityProtocolType)Constants.Http.ProtocolTypeTls12;
 #endif
             _log = WrapperAdapter.GetLogger(typeof(SplitioHttpClient));
             _httpClient = new HttpClient()
@@ -42,7 +40,7 @@ namespace Splitio.Services.Common
                 Timeout = TimeSpan.FromMilliseconds(connectionTimeOut)
             };
 
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Constans.Bearer, apiKey);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Constants.Http.Bearer, apiKey);
 
             if (headers != null)
             {

@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Impressions.Classes;
 using Splitio_Tests.Resources;
@@ -22,7 +21,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impressions = new ConcurrentDictionary<KeyCache, int>();
             impressions.TryAdd(new KeyCache("featur1", time9am), 2);
 
-            var treatmentSdkApiClient = new TreatmentSdkApiClient(new HTTPHeader(), "http://www.fake-test-split.com", 5, 5);
+            var treatmentSdkApiClient = new TreatmentSdkApiClient(string.Empty, new Dictionary<string, string>(), "http://www.fake-test-split.com", 5, 5);
             
             // Act.
             var result = treatmentSdkApiClient.ConvertToJson(impressions);
@@ -43,7 +42,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 new KeyImpression("matching-key", "feature-2", "treatment", 34534546, 3333444, "label", "bucketing-key"),
             };
 
-            var treatmentSdkApiClient = new TreatmentSdkApiClient(new HTTPHeader(), "http://www.fake-test-split.com", 5, 5);
+            var treatmentSdkApiClient = new TreatmentSdkApiClient(string.Empty, new Dictionary<string, string>(), "http://www.fake-test-split.com", 5, 5);
 
             // Act.
             var result = treatmentSdkApiClient.ConvertToJson(impressions);

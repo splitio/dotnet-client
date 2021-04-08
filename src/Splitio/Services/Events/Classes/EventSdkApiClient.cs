@@ -15,8 +15,11 @@ namespace Splitio.Services.Events.Classes
         
         private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(EventSdkApiClient));
 
-        public EventSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout) 
-            : base(header, baseUrl, connectionTimeOut, readTimeout)
+        public EventSdkApiClient(string apiKey,
+            Dictionary<string, string> headers,
+            string baseUrl,
+            long connectionTimeOut,
+            long readTimeout) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout)
         { }
 
         public async void SendBulkEvents(List<Event> events)

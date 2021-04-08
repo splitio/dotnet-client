@@ -3,7 +3,6 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
@@ -24,22 +23,24 @@ namespace Splitio.Services.EventSource
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly CountdownEvent _disconnectSignal;
         private readonly CountdownEvent _connectedSignal;
+        private readonly ISplitioHttpClient _splitHttpClient;
 
         private string _url;
         private bool _connected;
         private bool _firstEvent;
-
-        private ISplitioHttpClient _splitHttpClient;
+        
         private CancellationTokenSource _cancellationTokenSource;
         private CancellationTokenSource _streamReadcancellationTokenSource;        
 
-        public EventSourceClient(ISplitLogger log = null,
-            INotificationParser notificationParser = null,
-            IWrapperAdapter wrapperAdapter = null)
-        {
+        public EventSourceClient(INotificationParser notificationParser,
+            IWrapperAdapter wrapperAdapter,
+            ISplitioHttpClient splitHttpClient,
+            ISplitLogger log = null)
+        {            
+            _notificationParser = notificationParser;
+            _wrapperAdapter = wrapperAdapter;
+            _splitHttpClient = splitHttpClient;
             _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
-            _notificationParser = notificationParser ?? new NotificationParser();
-            _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
 
             _disconnectSignal = new CountdownEvent(1);
             _connectedSignal = new CountdownEvent(1);
@@ -93,7 +94,6 @@ namespace Splitio.Services.EventSource
             _streamReadcancellationTokenSource.Cancel();
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
-            _splitHttpClient.Dispose();
             
             _connected = false;
 
@@ -111,7 +111,6 @@ namespace Splitio.Services.EventSource
 
             try
             {
-                _splitHttpClient = new SplitioHttpClient(new Dictionary<string, string> { { "Accept", "text/event-stream" } });
                 _cancellationTokenSource = new CancellationTokenSource();
 
                 using (var response = await _splitHttpClient.GetAsync(_url, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token))
