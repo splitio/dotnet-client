@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace Splitio_Tests.Unit_Tests.Impressions
 {
     [TestClass]
-    public class TreatmentSdkApiClientTests
+    public class ImpressionsSdkApiClientTests
     {
         [TestMethod]
         public void CorrectFormatSendCounts()
@@ -21,10 +21,10 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impressions = new ConcurrentDictionary<KeyCache, int>();
             impressions.TryAdd(new KeyCache("featur1", time9am), 2);
 
-            var treatmentSdkApiClient = new TreatmentSdkApiClient(string.Empty, new Dictionary<string, string>(), "http://www.fake-test-split.com", 5, 5);
+            var impressionsSdkApiClient = new ImpressionsSdkApiClient(string.Empty, new Dictionary<string, string>(), "http://www.fake-test-split.com", 5, 5);
             
             // Act.
-            var result = treatmentSdkApiClient.ConvertToJson(impressions);
+            var result = impressionsSdkApiClient.ConvertToJson(impressions);
 
             // Assert.
             var expected = $"{{\"pf\":[{{\"f\":\"featur1\",\"m\":{time9am},\"rc\":2}}]}}";
@@ -42,10 +42,10 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 new KeyImpression("matching-key", "feature-2", "treatment", 34534546, 3333444, "label", "bucketing-key"),
             };
 
-            var treatmentSdkApiClient = new TreatmentSdkApiClient(string.Empty, new Dictionary<string, string>(), "http://www.fake-test-split.com", 5, 5);
+            var impressionsSdkApiClient = new ImpressionsSdkApiClient(string.Empty, new Dictionary<string, string>(), "http://www.fake-test-split.com", 5, 5);
 
             // Act.
-            var result = treatmentSdkApiClient.ConvertToJson(impressions);
+            var result = impressionsSdkApiClient.ConvertToJson(impressions);
 
             // Assert.
             var expected = "[{\"f\":\"feature-1\",\"i\":[{\"k\":\"matching-key\",\"t\":\"treatment\",\"m\":34534546,\"c\":3333444,\"r\":\"label\",\"b\":\"bucketing-key\"},{\"k\":\"matching-key\",\"t\":\"treatment\",\"m\":34534550,\"c\":3333444,\"r\":\"label\",\"b\":\"bucketing-key\"}]},{\"f\":\"feature-2\",\"i\":[{\"k\":\"matching-key\",\"t\":\"treatment\",\"m\":34534546,\"c\":3333444,\"r\":\"label\",\"b\":\"bucketing-key\"}]}]";

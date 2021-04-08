@@ -39,7 +39,7 @@ namespace Splitio.Services.Client.Classes
         private ISplitFetcher _splitFetcher;
         private ISplitSdkApiClient _splitSdkApiClient;
         private ISegmentSdkApiClient _segmentSdkApiClient;
-        private ITreatmentSdkApiClient _treatmentSdkApiClient;
+        private IImpressionsSdkApiClient _impressionsSdkApiClient;
         private IEventSdkApiClient _eventSdkApiClient;
         private ISelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
         private ISyncManager _syncManager;
@@ -109,7 +109,7 @@ namespace Splitio.Services.Client.Classes
         private void BuildTreatmentLog(ConfigurationOptions config)
         {
             var impressionsCache = new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(_config.TreatmentLogSize));
-            _impressionsLog = new ImpressionsLog(_treatmentSdkApiClient, _config.TreatmentLogRefreshRate, impressionsCache);
+            _impressionsLog = new ImpressionsLog(_impressionsSdkApiClient, _config.TreatmentLogRefreshRate, impressionsCache);
 
             _customerImpressionListener = config.ImpressionListener;
         }
@@ -142,7 +142,7 @@ namespace Splitio.Services.Client.Classes
 
             _splitSdkApiClient = new SplitSdkApiClient(ApiKey, headers, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
             _segmentSdkApiClient = new SegmentSdkApiClient(ApiKey, headers, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
-            _treatmentSdkApiClient = new TreatmentSdkApiClient(ApiKey, headers, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
+            _impressionsSdkApiClient = new ImpressionsSdkApiClient(ApiKey, headers, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
             _eventSdkApiClient = new EventSdkApiClient(ApiKey, headers, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
         }
 
@@ -167,7 +167,7 @@ namespace Splitio.Services.Client.Classes
             try
             {
                 // Synchronizer
-                var impressionsCountSender = new ImpressionsCountSender(_treatmentSdkApiClient, _impressionsCounter);
+                var impressionsCountSender = new ImpressionsCountSender(_impressionsSdkApiClient, _impressionsCounter);
                 var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, impressionsCountSender, _wrapperAdapter);
 
                 // Workers
