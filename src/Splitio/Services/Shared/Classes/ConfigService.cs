@@ -1,4 +1,5 @@
-﻿using Splitio.Domain;
+﻿using Splitio.CommonLibraries;
+using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
@@ -49,16 +50,15 @@ namespace Splitio.Services.Shared.Classes
 
             var selfRefreshingConfig = new SelfRefreshingConfig
             {
+                Mode = config.Mode,
                 SdkVersion = baseConfig.SdkVersion,
                 SdkMachineName = baseConfig.SdkMachineName,
                 SdkMachineIP = baseConfig.SdkMachineIP,
-                LabelsEnabled = baseConfig.LabelsEnabled,
-                BaseUrl = string.IsNullOrEmpty(config.Endpoint) ? "https://sdk.split.io" : config.Endpoint,
-                EventsBaseUrl = string.IsNullOrEmpty(config.EventsEndpoint) ? "https://events.split.io" : config.EventsEndpoint,
+                LabelsEnabled = baseConfig.LabelsEnabled,                
                 SplitsRefreshRate = config.FeaturesRefreshRate ?? 5,
                 SegmentRefreshRate = config.SegmentsRefreshRate ?? 60,
                 HttpConnectionTimeout = config.ConnectionTimeout ?? 15000,
-                HttpReadTimeout = config.ReadTimeout ?? 15000,                
+                HttpReadTimeout = config.ReadTimeout ?? 15000,
                 RandomizeRefreshRates = config.RandomizeRefreshRates,ConcurrencyLevel = config.SplitsStorageConcurrencyLevel ?? 4,
                 TreatmentLogSize = config.MaxImpressionsLogSize ?? 30000,
                 EventLogRefreshRate = config.EventsPushRate ?? 60,
@@ -68,11 +68,15 @@ namespace Splitio.Services.Shared.Classes
                 StreamingEnabled = config.StreamingEnabled ?? true,
                 AuthRetryBackoffBase = GetMinimunAllowed(config.AuthRetryBackoffBase ?? 1, 1, "AuthRetryBackoffBase"),
                 StreamingReconnectBackoffBase = GetMinimunAllowed(config.StreamingReconnectBackoffBase ?? 1, 1, "StreamingReconnectBackoffBase"),
-                AuthServiceURL = string.IsNullOrEmpty(config.AuthServiceURL) ? "https://auth.split.io/api/auth" : config.AuthServiceURL,
-                StreamingServiceURL = string.IsNullOrEmpty(config.StreamingServiceURL) ? "https://streaming.split.io/event-stream" : config.StreamingServiceURL,
                 ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Optimized,
                 TelemetryRefreshRate = GetMinimunAllowed(config.TelemetryRefreshRate ?? 3600, 60, "TelemetryRefreshRate"),
-                TelemetryServiceURL = string.IsNullOrEmpty(config.TelemetryServiceURL) ? "https://telemetry.split.io/api/v1" : config.TelemetryServiceURL
+                ImpressionListener = config.ImpressionListener,
+                AuthServiceURL = string.IsNullOrEmpty(config.AuthServiceURL) ? Constants.Urls.AuthServiceURL : config.AuthServiceURL,
+                BaseUrl = string.IsNullOrEmpty(config.Endpoint) ? Constants.Urls.BaseUrl : config.Endpoint,
+                EventsBaseUrl = string.IsNullOrEmpty(config.EventsEndpoint) ? Constants.Urls.EventsBaseUrl : config.EventsEndpoint,
+                StreamingServiceURL = string.IsNullOrEmpty(config.StreamingServiceURL) ? Constants.Urls.StreamingServiceURL : config.StreamingServiceURL,
+                TelemetryServiceURL = string.IsNullOrEmpty(config.TelemetryServiceURL) ? Constants.Urls.TelemetryServiceURL : config.TelemetryServiceURL,
+                SdkStartTime = CurrentTimeHelper.CurrentTimeMillis()
             };
 
             selfRefreshingConfig.TreatmentLogRefreshRate = GetImpressionRefreshRate(selfRefreshingConfig.ImpressionsMode, config.ImpressionsRefreshRate);

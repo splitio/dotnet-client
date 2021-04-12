@@ -6,6 +6,7 @@ using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
+using Splitio.Telemetry.Common;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
@@ -20,6 +21,7 @@ namespace Splitio.Services.Common
         private readonly ISplitLogger _log;
         private readonly IImpressionsCountSender _impressionsCountSender;
         private readonly IReadinessGatesCache _gates;
+        private readonly ITelemetrySyncTask _telemetrySyncTask;
 
         public Synchronizer(ISplitFetcher splitFetcher,
             ISelfRefreshingSegmentFetcher segmentFetcher,
@@ -28,21 +30,24 @@ namespace Splitio.Services.Common
             IImpressionsCountSender impressionsCountSender,
             IWrapperAdapter wrapperAdapter,
             IReadinessGatesCache gates,
+            ITelemetrySyncTask telemetrySyncTask,
             ISplitLogger log = null)
         {
             _splitFetcher = splitFetcher;
             _segmentFetcher = segmentFetcher;
             _impressionsLog = impressionsLog;
             _eventsLog = eventsLog;
-            _impressionsCountSender = impressionsCountSender;
+            _impressionsCountSender = impressionsCountSender;            
             _wrapperAdapter = wrapperAdapter;
             _gates = gates;
+            _telemetrySyncTask = telemetrySyncTask;
             _log = log ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
         }
 
         #region Public Methods
         public void StartPeriodicDataRecording()
         {
+            _telemetrySyncTask.Start();
             _impressionsLog.Start();
             _eventsLog.Start();
             _impressionsCountSender.Start();

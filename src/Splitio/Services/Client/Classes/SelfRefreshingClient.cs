@@ -17,6 +17,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Common;
+using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -45,6 +46,8 @@ namespace Splitio.Services.Client.Classes
         private ISyncManager _syncManager;
         private IImpressionsCounter _impressionsCounter;
         private ITelemetryAPI _telemetryAPI;
+        private ITelemetryStorage _telemetryStorage;
+        private ITelemetrySyncTask _telemetrySyncTask;
 
         public SelfRefreshingClient(string apiKey, 
             ConfigurationOptions config, 
@@ -64,7 +67,7 @@ namespace Splitio.Services.Client.Classes
             BuildEvaluator();
             BuildBlockUntilReadyService();
             BuildManager();
-            BuildTelemetryAPI();
+            BuildTelemetry();
             BuildSyncManager();
 
             Start();
@@ -156,10 +159,14 @@ namespace Splitio.Services.Client.Classes
             _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(_gates, _log);
         }
 
-        private void BuildTelemetryAPI()
+        private void BuildTelemetry()
         {
+            var factoryInstantiationsService = FactoryInstantiationsService.Instance();
             var httpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, GetHeaders());
+
             _telemetryAPI = new TelemetryAPI(httpClient, _config.TelemetryServiceURL);
+            _telemetryStorage = new InMemoryTelemetryStorage();            
+            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage, _telemetryAPI, _splitCache, _segmentCache, _gates, _config);
         }
 
         private void BuildSyncManager()
@@ -168,7 +175,7 @@ namespace Splitio.Services.Client.Classes
             {
                 // Synchronizer
                 var impressionsCountSender = new ImpressionsCountSender(_impressionsSdkApiClient, _impressionsCounter);
-                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, impressionsCountSender, _wrapperAdapter, _gates);
+                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, impressionsCountSender, _wrapperAdapter, _gates, _telemetrySyncTask);
 
                 // Workers
                 var splitsWorker = new SplitsWorker(_splitCache, synchronizer);

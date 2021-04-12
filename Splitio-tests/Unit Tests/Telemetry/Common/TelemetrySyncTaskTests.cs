@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Telemetry.Common;
@@ -20,6 +21,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
         private Mock<ISegmentCache> _segmentCache;
         private Mock<CancellationTokenSource> _cancellationTokenSource;
         private Mock<ISplitLogger> _log;
+        private Mock<IReadinessGatesCache> _gates;
 
         private ITelemetrySyncTask _telemetrySyncTask;
 
@@ -31,7 +33,8 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             _splitCache = new Mock<ISplitCache>();
             _segmentCache = new Mock<ISegmentCache>();
             _cancellationTokenSource = new Mock<CancellationTokenSource>();
-            _log = new Mock<ISplitLogger>();            
+            _log = new Mock<ISplitLogger>();
+            _gates = new Mock<IReadinessGatesCache>();
         }
 
         [TestMethod]
@@ -57,7 +60,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             _segmentCache.Setup(mock => mock.SegmentsCount()).Returns(10);
             _segmentCache.Setup(mock => mock.SegmentKeysCount()).Returns(33);
 
-            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, refreshRate: 2, log: _log.Object);
+            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, _gates.Object, new SelfRefreshingConfig(), log: _log.Object);
 
             // Act.
             _telemetrySyncTask.Start();
@@ -108,7 +111,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             _segmentCache.Setup(mock => mock.SegmentsCount()).Returns(10);
             _segmentCache.Setup(mock => mock.SegmentKeysCount()).Returns(33);
 
-            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, refreshRate: 2, log: _log.Object);
+            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, _gates.Object, new SelfRefreshingConfig(), log: _log.Object);
 
             // Act.
             _telemetrySyncTask.Stop();

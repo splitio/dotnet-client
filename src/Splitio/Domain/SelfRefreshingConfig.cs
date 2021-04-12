@@ -1,10 +1,14 @@
-﻿namespace Splitio.Domain
+﻿using Splitio.Services.Client.Classes;
+using Splitio.Services.Impressions.Interfaces;
+
+namespace Splitio.Domain
 {
     public class SelfRefreshingConfig : BaseConfig
-    {        
+    {
+        public Mode Mode { get; set; }
         public long HttpConnectionTimeout { get; set; }
         public long HttpReadTimeout { get; set; }
-        public int ConcurrencyLevel { get; set; }        
+        public int ConcurrencyLevel { get; set; }
         public int TreatmentLogSize { get; set; }
         public int EventsFirstPushWindow { get; set; }
         public int EventLogSize { get; set; }
@@ -13,8 +17,9 @@
         public bool StreamingEnabled { get; set; }
         public int AuthRetryBackoffBase { get; set; }
         public int StreamingReconnectBackoffBase { get; set; }
-        
+        public IImpressionListener ImpressionListener { get; set; }
         public ImpressionsMode ImpressionsMode { get; set; }
+        public long SdkStartTime { get; set; }
 
         // Urls.
         public string BaseUrl { get; set; }
