@@ -168,7 +168,7 @@ namespace Splitio.Services.Client.Classes
             {
                 // Synchronizer
                 var impressionsCountSender = new ImpressionsCountSender(_impressionsSdkApiClient, _impressionsCounter);
-                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, impressionsCountSender, _wrapperAdapter);
+                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, impressionsCountSender, _wrapperAdapter, _gates);
 
                 // Workers
                 var splitsWorker = new SplitsWorker(_splitCache, synchronizer);

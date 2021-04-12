@@ -1,10 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
+using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System.Collections.Generic;
 using System.Threading;
@@ -20,6 +22,8 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<IEventsLog> _eventsLog;
         private readonly Mock<ISplitLogger> _log;
         private readonly Mock<IImpressionsCountSender> _impressionsCountSender;
+        private readonly Mock<IWrapperAdapter> _wrapperAdapter;
+        private readonly Mock<IReadinessGatesCache> _gates;
 
         private readonly ISynchronizer _synchronizer;
 
@@ -31,8 +35,10 @@ namespace Splitio_Tests.Unit_Tests.Common
             _eventsLog = new Mock<IEventsLog>();
             _log = new Mock<ISplitLogger>();
             _impressionsCountSender = new Mock<IImpressionsCountSender>();
+            _wrapperAdapter = new Mock<IWrapperAdapter>();
+            _gates = new Mock<IReadinessGatesCache>();
 
-            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCountSender.Object, log: _log.Object);
+            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCountSender.Object, _wrapperAdapter.Object, _gates.Object, _log.Object);
         }
 
         [TestMethod]
@@ -91,6 +97,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             Thread.Sleep(500);
             _splitFetcher.Verify(mock => mock.FetchSplits(), Times.Once);            
             _segmentFetcher.Verify(mock => mock.FetchAll(), Times.Once);
+            _gates.Verify(mock => mock.SdkInternalReady(), Times.Once);
         }
 
         [TestMethod]

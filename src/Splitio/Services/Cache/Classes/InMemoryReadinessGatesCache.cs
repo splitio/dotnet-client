@@ -40,6 +40,8 @@ namespace Splitio.Services.Client.Classes
 
         public void WaitUntilSdkInternalReady()
         {
+            if (_sdkInternalReady.IsSet) return;
+
             _sdkInternalReady.Wait();
         }
         #endregion

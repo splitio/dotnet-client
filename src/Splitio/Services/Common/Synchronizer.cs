@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Events.Interfaces;
+﻿using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
@@ -18,13 +19,15 @@ namespace Splitio.Services.Common
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISplitLogger _log;
         private readonly IImpressionsCountSender _impressionsCountSender;
+        private readonly IReadinessGatesCache _gates;
 
         public Synchronizer(ISplitFetcher splitFetcher,
             ISelfRefreshingSegmentFetcher segmentFetcher,
             IImpressionsLog impressionsLog,
             IEventsLog eventsLog,
             IImpressionsCountSender impressionsCountSender,
-            IWrapperAdapter wrapperAdapter = null,
+            IWrapperAdapter wrapperAdapter,
+            IReadinessGatesCache gates,
             ISplitLogger log = null)
         {
             _splitFetcher = splitFetcher;
@@ -32,7 +35,8 @@ namespace Splitio.Services.Common
             _impressionsLog = impressionsLog;
             _eventsLog = eventsLog;
             _impressionsCountSender = impressionsCountSender;
-            _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
+            _wrapperAdapter = wrapperAdapter;
+            _gates = gates;
             _log = log ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
         }
 
@@ -78,6 +82,7 @@ namespace Splitio.Services.Common
             Task.Factory
                 .StartNew(() => _splitFetcher.FetchSplits().Wait())
                 .ContinueWith((x) => _segmentFetcher.FetchAll().Wait())
+                .ContinueWith((x) => _gates.SdkInternalReady())
                 .ContinueWith((x) => _log.Debug("Spltis and Segments synchronized..."));
         }
 

@@ -5,7 +5,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class SegmentFetcher : ISegmentFetcher
     {
-        protected ISegmentCache _segmentCache;
+        protected readonly ISegmentCache _segmentCache;
 
         public SegmentFetcher(ISegmentCache segmentCache)
         {
