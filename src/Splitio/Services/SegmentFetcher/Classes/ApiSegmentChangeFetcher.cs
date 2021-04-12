@@ -6,21 +6,20 @@ using System.Threading.Tasks;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
-    public class ApiSegmentChangeFetcher: SegmentChangeFetcher, ISegmentChangeFetcher
+    public class ApiSegmentChangeFetcher : SegmentChangeFetcher, ISegmentChangeFetcher
     {
-        private readonly ISegmentSdkApiClient apiClient;
+        private readonly ISegmentSdkApiClient _apiClient;
 
         public ApiSegmentChangeFetcher(ISegmentSdkApiClient apiClient)
         {
-            this.apiClient = apiClient;
+            _apiClient = apiClient;
         }
 
         protected override async Task<SegmentChange> FetchFromBackend(string name, long since)
         {
-            var fetchResult = await apiClient.FetchSegmentChanges(name, since);
+            var fetchResult = await _apiClient.FetchSegmentChanges(name, since);
 
-            var segmentChange = JsonConvert.DeserializeObject<SegmentChange>(fetchResult);
-            return segmentChange;
+            return JsonConvert.DeserializeObject<SegmentChange>(fetchResult);
         }
     }
 }

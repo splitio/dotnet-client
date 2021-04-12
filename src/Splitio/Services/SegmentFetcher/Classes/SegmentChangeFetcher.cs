@@ -9,8 +9,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public abstract class SegmentChangeFetcher: ISegmentChangeFetcher
     {
-        private SegmentChange segmentChange;
-        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SegmentChangeFetcher));
+        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SegmentChangeFetcher));
 
         protected abstract Task<SegmentChange> FetchFromBackend(string name, long since);
 
@@ -18,14 +17,13 @@ namespace Splitio.Services.SegmentFetcher.Classes
         {
             try
             {
-                segmentChange = await FetchFromBackend(name, since);
+                return await FetchFromBackend(name, since);
             }
             catch(Exception e)
             {
-                Log.Error(string.Format("Exception caught executing fetch segment changes since={0}", since), e);
-                segmentChange = null; 
-            }                   
-            return segmentChange;
+                _log.Error(string.Format("Exception caught executing fetch segment changes since={0}", since), e);
+                return null;
+            }
         }
     }   
 }

@@ -13,5 +13,8 @@
         void SegmentIsReady(string segmentName);
 
         void SplitsAreReady();
+
+        void SdkInternalReady();
+        void WaitUntilSdkInternalReady();
     }
 }

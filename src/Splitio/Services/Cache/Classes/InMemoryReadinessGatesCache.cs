@@ -10,22 +10,43 @@ namespace Splitio.Services.Client.Classes
 {
     public class InMemoryReadinessGatesCache : IReadinessGatesCache
     {
-        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(InMemoryReadinessGatesCache));
+        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(InMemoryReadinessGatesCache));
 
-        private readonly CountdownEvent splitsAreReady = new CountdownEvent(1);
-        private readonly Dictionary<string, CountdownEvent> segmentsAreReady = new Dictionary<string, CountdownEvent>();
-        private readonly Stopwatch _splitsReadyTimer = new Stopwatch();
-        private readonly Stopwatch _segmentsReadyTimer = new Stopwatch();
+        private readonly CountdownEvent _sdkInternalReady;
+        private readonly CountdownEvent _splitsAreReady;
+        private readonly Dictionary<string, CountdownEvent> _segmentsAreReady;
+        private readonly Stopwatch _splitsReadyTimer;
+        private readonly Stopwatch _segmentsReadyTimer;
 
         public InMemoryReadinessGatesCache()
         {
+            _sdkInternalReady = new CountdownEvent(1);
+            _splitsAreReady = new CountdownEvent(1);
+            _segmentsAreReady = new Dictionary<string, CountdownEvent>();
+            _splitsReadyTimer = new Stopwatch();
+            _segmentsReadyTimer = new Stopwatch();
+
             _segmentsReadyTimer.Start();
             _splitsReadyTimer.Start();
         }
 
+        #region Internal Ready
+        public void SdkInternalReady()
+        {
+            if (_sdkInternalReady.IsSet) return;
+
+            _sdkInternalReady.Signal();
+        }
+
+        public void WaitUntilSdkInternalReady()
+        {
+            _sdkInternalReady.Wait();
+        }
+        #endregion
+
         public bool IsSDKReady(int milliseconds)
         {
-            Stopwatch clock = new Stopwatch();
+            var clock = new Stopwatch();
             clock.Start();
 
             if (!AreSplitsReady(milliseconds))
@@ -36,20 +57,21 @@ namespace Splitio.Services.Client.Classes
             int timeLeft = milliseconds - (int)clock.ElapsedMilliseconds;
 
             return AreSegmentsReady(timeLeft);
-        }
-
+        }       
 
         public void SplitsAreReady()
         {
-            if (!splitsAreReady.IsSet)
+            if (!_splitsAreReady.IsSet)
             {
-                splitsAreReady.Signal();
-                if (splitsAreReady.IsSet)
+                _splitsAreReady.Signal();
+
+                if (_splitsAreReady.IsSet)
                 {
                     _splitsReadyTimer.Stop();
-                    if (Log.IsDebugEnabled)
+
+                    if (_log.IsDebugEnabled)
                     {
-                        Log.Debug($"Splits are ready in {_splitsReadyTimer.ElapsedMilliseconds} milliseconds");
+                        _log.Debug($"Splits are ready in {_splitsReadyTimer.ElapsedMilliseconds} milliseconds");
                     }
                 }
             }
@@ -57,8 +79,7 @@ namespace Splitio.Services.Client.Classes
 
         public void SegmentIsReady(string segmentName)
         {
-            CountdownEvent countDown;
-            segmentsAreReady.TryGetValue(segmentName, out countDown);
+            _segmentsAreReady.TryGetValue(segmentName, out CountdownEvent countDown);
 
             if ((countDown == null) || (countDown.IsSet))
             {
@@ -67,18 +88,15 @@ namespace Splitio.Services.Client.Classes
 
             countDown.Signal();
 
-            if (countDown.IsSet)
+            if (countDown.IsSet && _log.IsDebugEnabled)
             {
-                if (Log.IsDebugEnabled)
-                {
-                    Log.Debug(segmentName + " segment is ready");
-                }
+                _log.Debug($"{segmentName} segment is ready");
             }
         }
 
         public bool AreSplitsReady(int milliseconds)
         {
-            return splitsAreReady.Wait(milliseconds);
+            return _splitsAreReady.Wait(milliseconds);
         }
 
         public bool RegisterSegment(string segmentName)
@@ -90,15 +108,16 @@ namespace Splitio.Services.Client.Classes
 
             try
             {
-                segmentsAreReady.Add(segmentName, new CountdownEvent(1));
-                if (Log.IsDebugEnabled)
+                _segmentsAreReady.Add(segmentName, new CountdownEvent(1));
+
+                if (_log.IsDebugEnabled)
                 {
-                    Log.Debug("Registered segment: " + segmentName);
+                    _log.Debug("Registered segment: " + segmentName);
                 }
             }
             catch (ArgumentException e)
             {
-                Log.Warn("Already registered segment: " + segmentName, e);
+                _log.Warn("Already registered segment: " + segmentName, e);
             }
 
             return true;
@@ -106,36 +125,33 @@ namespace Splitio.Services.Client.Classes
 
         public bool AreSegmentsReady(int milliseconds)
         {
-            Stopwatch clock = new Stopwatch();
+            var clock = new Stopwatch();
             clock.Start();
             int timeLeft = milliseconds;
 
-            foreach (var entry in segmentsAreReady)
+            foreach (var entry in _segmentsAreReady)
             {
                 var segmentName = entry.Key;
                 var countdown = entry.Value;
 
-                if (timeLeft >= 0)
+                if (timeLeft >= 0 && !countdown.Wait(timeLeft))
                 {
-                    if (!countdown.Wait(timeLeft))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
-                else
+
+                if (timeLeft < 0 && !countdown.Wait(0))
                 {
-                    if (!countdown.Wait(0))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
+
                 timeLeft = timeLeft - (int)clock.ElapsedMilliseconds;
             }
 
             _segmentsReadyTimer.Stop();
-            if (Log.IsDebugEnabled)
+
+            if (_log.IsDebugEnabled)
             {
-                Log.Debug($"Segments are ready in {_segmentsReadyTimer.ElapsedMilliseconds} milliseconds");
+                _log.Debug($"Segments are ready in {_segmentsReadyTimer.ElapsedMilliseconds} milliseconds");
             }
 
             return true;

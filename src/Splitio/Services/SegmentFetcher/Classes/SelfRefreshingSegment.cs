@@ -10,7 +10,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class SelfRefreshingSegment : ISelfRefreshingSegment
     {
-        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SelfRefreshingSegment));
+        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SelfRefreshingSegment));
 
         public string Name;
         private readonly IReadinessGatesCache _gates;
@@ -36,10 +36,12 @@ namespace Splitio.Services.SegmentFetcher.Classes
                 try
                 {
                     var response = await _segmentChangeFetcher.Fetch(Name, changeNumber);
+
                     if (response == null)
                     {
                         break;
                     }
+
                     if (changeNumber >= response.till)
                     {
                         _gates.SegmentIsReady(Name);
@@ -51,18 +53,16 @@ namespace Splitio.Services.SegmentFetcher.Classes
                         _segmentCache.AddToSegment(Name, response.added);
                         _segmentCache.RemoveFromSegment(Name, response.removed);
 
-                        if (response.added.Count() > 0)
+                        if (_log.IsDebugEnabled)
                         {
-                            if (Log.IsDebugEnabled)
+                            if (response.added.Count() > 0)
                             {
-                                Log.Debug(string.Format("Segment {0} - Added : {1}", Name, string.Join(" - ", response.added)));
+                                _log.Debug($"Segment {Name} - Added : {string.Join(" - ", response.added)}");
                             }
-                        }
-                        if (response.removed.Count() > 0)
-                        {
-                            if (Log.IsDebugEnabled)
+
+                            if (response.removed.Count() > 0)
                             {
-                                Log.Debug(string.Format("Segment {0} - Removed : {1}", Name, string.Join(" - ", response.removed)));
+                                _log.Debug($"Segment {Name} - Removed : {string.Join(" - ", response.removed)}");
                             }
                         }
                     }
@@ -71,13 +71,13 @@ namespace Splitio.Services.SegmentFetcher.Classes
                 }
                 catch (Exception e)
                 {
-                    Log.Error("Exception caught refreshing segment", e);
+                    _log.Error("Exception caught refreshing segment", e);
                 }
                 finally
                 {
-                    if (Log.IsDebugEnabled)
+                    if (_log.IsDebugEnabled)
                     {
-                        Log.Debug(string.Format("segment {0} fetch before: {1}, after: {2}", Name, changeNumber, _segmentCache.GetChangeNumber(Name)));
+                        _log.Debug($"segment {Name} fetch before: {changeNumber}, after: {_segmentCache.GetChangeNumber(Name)}");
                     }
                 }
             }
