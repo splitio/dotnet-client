@@ -34,12 +34,7 @@ namespace Splitio.Services.Events.Classes
 
             var response = await ExecutePost(EventsUrlTemplate, eventsJson);
 
-            if ((int)response.statusCode < (int)HttpStatusCode.OK || (int)response.statusCode >= (int)HttpStatusCode.Ambiguous)
-            {
-                _log.Error($"Http status executing SendBulkEvents: {response.statusCode.ToString()} - {response.content}");
-
-                _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.EventSync, (int)response.statusCode);
-            }
+            RecordTelemetry(nameof(SendBulkEvents), (int)response.statusCode, response.content, ResourceEnum.EventSync);
         }
     }
 }

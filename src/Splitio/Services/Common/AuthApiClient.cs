@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
@@ -41,6 +42,8 @@ namespace Splitio.Services.Common
                 if (response.statusCode == HttpStatusCode.OK)
                 {
                     _log.Debug($"Success connection to: {_url}");
+
+                    _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.TokenSync, CurrentTimeHelper.CurrentTimeMillis());
 
                     return GetSuccessResponse(response.content);
                 }

@@ -42,6 +42,8 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                 if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
                 {
+                    _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.SplitSync, CurrentTimeHelper.CurrentTimeMillis());
+
                     return response.content;
                 }
 

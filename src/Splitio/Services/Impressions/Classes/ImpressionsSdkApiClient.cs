@@ -9,7 +9,6 @@ using Splitio.Telemetry.Storages;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -32,14 +31,9 @@ namespace Splitio.Services.Impressions.Classes
         {
             var impressionsJson = ConvertToJson(impressions);
 
-            var response = await ExecutePost(TestImpressionsUrlTemplate, impressionsJson);
+            var response = await ExecutePost(TestImpressionsUrlTemplate, impressionsJson);           
 
-            if ((int)response.statusCode < (int)HttpStatusCode.OK || (int)response.statusCode >= (int)HttpStatusCode.Ambiguous)
-            {
-                _log.Error($"Http status executing SendBulkImpressions: {response.statusCode.ToString()} - {response.content}");
-
-                _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.ImpressionSync, (int)response.statusCode);
-            }
+            RecordTelemetry(nameof(SendBulkImpressions), (int)response.statusCode, response.content, ResourceEnum.ImpressionSync);
         }
 
         public async void SendBulkImpressionsCount(ConcurrentDictionary<KeyCache, int> impressionsCount)
@@ -48,12 +42,7 @@ namespace Splitio.Services.Impressions.Classes
 
             var response = await ExecutePost(ImpressionsCountUrlTemplate, json);
 
-            if ((int)response.statusCode < (int)HttpStatusCode.OK || (int)response.statusCode >= (int)HttpStatusCode.Ambiguous)
-            {
-                _log.Error($"Http status executing SendBulkImpressionsCount: {response.statusCode.ToString()} - {response.content}");
-
-                _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.ImpressionCountSync, (int)response.statusCode);
-            }
+            RecordTelemetry(nameof(SendBulkImpressionsCount), (int)response.statusCode, response.content, ResourceEnum.ImpressionCountSync);
         }
 
         // Public for tests

@@ -1,5 +1,6 @@
 ﻿using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
@@ -88,6 +89,20 @@ namespace Splitio.CommonLibraries
             }
 
             return result;
+        }
+
+        protected void RecordTelemetry(string method, int statusCode, string content, ResourceEnum resource)
+        {
+            if (statusCode >= (int)HttpStatusCode.OK && statusCode < (int)HttpStatusCode.Ambiguous)
+            {
+                _telemetryRuntimeProducer.RecordSuccessfulSync(resource, CurrentTimeHelper.CurrentTimeMillis());
+            }
+            else
+            {
+                _log.Error($"Http status executing {method}: {statusCode.ToString()} - {content}");
+
+                _telemetryRuntimeProducer.RecordSyncError(resource, statusCode);
+            }
         }
     }
 }

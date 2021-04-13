@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Splitio.CommonLibraries;
 using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
@@ -52,7 +53,11 @@ namespace Splitio.Telemetry.Common
 
             var response = await _splitioHttpClient.PostAsync($"{_telemetryURL}{url}", jsonData);
 
-            if ((int)response.statusCode < (int)HttpStatusCode.OK || (int)response.statusCode >= (int)HttpStatusCode.Ambiguous)
+            if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
+            {
+                _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.TelemetrySync, CurrentTimeHelper.CurrentTimeMillis());
+            }
+            else
             {
                 _log.Error($"Http status executing {method}: {response.statusCode} - {response.content}");
                 _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.TelemetrySync, (int)response.statusCode);
