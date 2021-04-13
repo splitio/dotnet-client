@@ -3,6 +3,7 @@ using Moq;
 using Splitio.CommonLibraries;
 using Splitio.Services.Common;
 using Splitio.Services.Logger;
+using Splitio.Telemetry.Storages;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Common
@@ -12,14 +13,16 @@ namespace Splitio_Tests.Unit_Tests.Common
     {
         private readonly Mock<ISplitLogger> _logMock;
         private readonly Mock<ISplitioHttpClient> _splitioHttpClientMock;
+        private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private readonly IAuthApiClient _authApiClient;
 
         public AuthApiClientTests()
         {
             _logMock = new Mock<ISplitLogger>();
             _splitioHttpClientMock = new Mock<ISplitioHttpClient>();
+            _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
 
-            _authApiClient = new AuthApiClient("https://auth.fake.io/auth", "test-apikey", _splitioHttpClientMock.Object, _logMock.Object);
+            _authApiClient = new AuthApiClient("https://auth.fake.io/auth", "test-apikey", _splitioHttpClientMock.Object, _telemetryRuntimeProducer.Object, _logMock.Object);
         }
 
         [TestMethod]

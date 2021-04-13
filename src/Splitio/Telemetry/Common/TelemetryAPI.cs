@@ -28,6 +28,7 @@ namespace Splitio.Telemetry.Common
         {
             _splitioHttpClient = splitioHttpClient;
             _telemetryURL = telemetryURL;
+            _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _log = log ?? WrapperAdapter.GetLogger(typeof(TelemetryAPI));
         }
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Services.SplitFetcher.Classes;
+using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -21,7 +22,8 @@ namespace Splitio_Tests.Integration_Tests
                 { "SplitSDKVersion", "1" }
             };
 
-            var SplitSdkApiClient = new SplitSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000);
+            var telemetryStorage = new InMemoryTelemetryStorage();
+            var SplitSdkApiClient = new SplitSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000, telemetryStorage);
 
             //Act
             var result = await SplitSdkApiClient.FetchSplitChanges(-1);
@@ -42,7 +44,8 @@ namespace Splitio_Tests.Integration_Tests
                 { "SplitSDKVersion", "1" }
             };
 
-            var SplitSdkApiClient = new SplitSdkApiClient(string.Empty, headers, baseUrl, 10000, 10000);
+            var telemetryStorage = new InMemoryTelemetryStorage();
+            var SplitSdkApiClient = new SplitSdkApiClient(string.Empty, headers, baseUrl, 10000, 10000, telemetryStorage);
 
             //Act
             var result = await SplitSdkApiClient.FetchSplitChanges(-1);

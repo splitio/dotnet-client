@@ -3,6 +3,7 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
+using Splitio.Telemetry.Storages;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -54,7 +55,8 @@ namespace Splitio_Tests.Integration_Tests
                 { "SplitSDKVersion", "1" }
             };
 
-            var sdkApiClient = new SegmentSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000);
+            var telemetryStorage = new InMemoryTelemetryStorage();
+            var sdkApiClient = new SegmentSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000, telemetryStorage);
             var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkApiClient);
             var gates = new InMemoryReadinessGatesCache();
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
