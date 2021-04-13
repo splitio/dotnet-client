@@ -1,9 +1,11 @@
 ﻿using Splitio.Domain;
+using Splitio.Services.Client.Classes;
 
 namespace Splitio.Redis.Services.Domain
 {
     public class RedisConfig : BaseConfig
     {
+        public Mode Mode { get; set; }
         public string RedisHost { get; set; }
         public string RedisPort { get; set; }
         public string RedisPassword { get; set; }

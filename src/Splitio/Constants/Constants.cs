@@ -41,6 +41,7 @@
 
     public class StorageType
     {
-        public static string InMemory => "InMemory";
+        public static string Memory => "Memory";
+        public static string Redis => "Redis";
     }
 }

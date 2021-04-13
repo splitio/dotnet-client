@@ -105,7 +105,7 @@ namespace Splitio.Telemetry.Common
                     TimeUntilSDKReady = CurrentTimeHelper.CurrentTimeMillis() - _configurationOptions.SdkStartTime,
                     ActiveFactories = _factoryInstantiationsService.GetActiveFactories(),
                     RedundantActiveFactories = _factoryInstantiationsService.GetRedundantActiveFactories(),
-                    Storage = Constants.StorageType.InMemory,
+                    Storage = Constants.StorageType.Memory,
                     SDKNotReadyUsage = _telemetryStorage.GetNonReadyUsages(),
                 };
 
