@@ -2,6 +2,8 @@
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,13 +20,14 @@ namespace Splitio.Services.SplitFetcher.Classes
         private const string UrlParameterSince = "?since=";
         private const string SplitFetcherTime = "splitChangeFetcher.time";
         private const string SplitFetcherStatus = "splitChangeFetcher.status.{0}";
-        private const string SplitFetcherException = "splitChangeFetcher.exception";
-        
+        private const string SplitFetcherException = "splitChangeFetcher.exception";        
+
         public SplitSdkApiClient(string apiKey,
             Dictionary<string, string> headers,
             string baseUrl,
             long connectionTimeOut,
-            long readTimeout) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout)
+            long readTimeout,
+            ITelemetryRuntimeProducer telemetryRuntimeProducer) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout, telemetryRuntimeProducer)
         { }
 
         public async Task<string> FetchSplitChanges(long since)
@@ -41,12 +44,12 @@ namespace Splitio.Services.SplitFetcher.Classes
                 {
                     return response.content;
                 }
-                else
-                {
-                    _log.Error(string.Format("Http status executing FetchSplitChanges: {0} - {1}", response.statusCode.ToString(), response.content));
 
-                    return string.Empty;
-                }
+                _log.Error($"Http status executing FetchSplitChanges: {response.statusCode.ToString()} - {response.content}");
+
+                _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.SplitSync, (int)response.statusCode);
+
+                return string.Empty;
             }
             catch (Exception e)
             {

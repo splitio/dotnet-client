@@ -2,6 +2,8 @@
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,7 +26,8 @@ namespace Splitio.Services.SegmentFetcher.Classes
             Dictionary<string, string> headers,
             string baseUrl,
             long connectionTimeOut,
-            long readTimeout) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout)
+            long readTimeout,
+            ITelemetryRuntimeProducer telemetryRuntimeProducer) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout, telemetryRuntimeProducer)
         { }
 
         public async Task<string> FetchSegmentChanges(string name, long since)
@@ -49,7 +52,9 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 _log.Error(response.statusCode == HttpStatusCode.Forbidden
                     ? "factory instantiation: you passed a browser type api_key, please grab an api key from the Split console that is of type sdk"
-                    : string.Format("Http status executing FetchSegmentChanges: {0} - {1}", response.statusCode.ToString(), response.content));
+                    : $"Http status executing FetchSegmentChanges: {response.statusCode.ToString()} - {response.content}");
+
+                _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.SegmentSync, (int)response.statusCode);
 
                 return string.Empty;
                

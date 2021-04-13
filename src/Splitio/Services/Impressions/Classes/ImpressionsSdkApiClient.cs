@@ -4,6 +4,8 @@ using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,13 +18,14 @@ namespace Splitio.Services.Impressions.Classes
         private const string TestImpressionsUrlTemplate = "/api/testImpressions/bulk";
         private const string ImpressionsCountUrlTemplate = "/api/testImpressions/count";
 
-        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(ImpressionsSdkApiClient));
+        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(ImpressionsSdkApiClient));
 
         public ImpressionsSdkApiClient(string apiKey,
             Dictionary<string, string> headers,
             string baseUrl,
             long connectionTimeOut,
-            long readTimeout) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout)
+            long readTimeout,
+            ITelemetryRuntimeProducer telemetryRuntimeProducer) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout, telemetryRuntimeProducer)
         { }
 
         public async void SendBulkImpressions(List<KeyImpression> impressions)
@@ -33,7 +36,9 @@ namespace Splitio.Services.Impressions.Classes
 
             if ((int)response.statusCode < (int)HttpStatusCode.OK || (int)response.statusCode >= (int)HttpStatusCode.Ambiguous)
             {
-                Log.Error(string.Format("Http status executing SendBulkImpressions: {0} - {1}", response.statusCode.ToString(), response.content));
+                _log.Error($"Http status executing SendBulkImpressions: {response.statusCode.ToString()} - {response.content}");
+
+                _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.ImpressionSync, (int)response.statusCode);
             }
         }
 
@@ -45,7 +50,9 @@ namespace Splitio.Services.Impressions.Classes
 
             if ((int)response.statusCode < (int)HttpStatusCode.OK || (int)response.statusCode >= (int)HttpStatusCode.Ambiguous)
             {
-                Log.Error(string.Format("Http status executing SendBulkImpressions: {0} - {1}", response.statusCode.ToString(), response.content));
+                _log.Error($"Http status executing SendBulkImpressionsCount: {response.statusCode.ToString()} - {response.content}");
+
+                _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.ImpressionCountSync, (int)response.statusCode);
             }
         }
 

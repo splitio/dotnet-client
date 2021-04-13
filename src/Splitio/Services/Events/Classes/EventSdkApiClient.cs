@@ -4,6 +4,8 @@ using Splitio.Domain;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Net;
 
@@ -13,13 +15,14 @@ namespace Splitio.Services.Events.Classes
     {
         private const string EventsUrlTemplate = "/api/events/bulk";
         
-        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(EventSdkApiClient));
+        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(EventSdkApiClient));
 
         public EventSdkApiClient(string apiKey,
             Dictionary<string, string> headers,
             string baseUrl,
             long connectionTimeOut,
-            long readTimeout) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout)
+            long readTimeout,
+            ITelemetryRuntimeProducer telemetryRuntimeProducer) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout, telemetryRuntimeProducer)
         { }
 
         public async void SendBulkEvents(List<Event> events)
@@ -33,7 +36,9 @@ namespace Splitio.Services.Events.Classes
 
             if ((int)response.statusCode < (int)HttpStatusCode.OK || (int)response.statusCode >= (int)HttpStatusCode.Ambiguous)
             {
-                Log.Error(string.Format("Http status executing SendBulkEvents: {0} - {1}", response.statusCode.ToString(), response.content));
+                _log.Error($"Http status executing SendBulkEvents: {response.statusCode.ToString()} - {response.content}");
+
+                _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.EventSync, (int)response.statusCode);
             }
         }
     }
