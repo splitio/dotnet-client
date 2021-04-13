@@ -58,16 +58,16 @@ namespace Splitio.Services.Client.Classes
             Destroyed = false;
             
             ApiKey = apiKey;
-            BuildSdkReadinessGates();
+            BuildSdkReadinessGates();            
             BuildSdkApiClients();
             BuildSplitFetcher();
             BuildTreatmentLog(config);
             BuildImpressionManager();
             BuildEventLog(config);
             BuildEvaluator();
-            BuildBlockUntilReadyService();
-            BuildManager();
             BuildTelemetry();
+            BuildBlockUntilReadyService();            
+            BuildManager();            
             BuildSyncManager();
 
             Start();
@@ -156,7 +156,7 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildBlockUntilReadyService()
         {
-            _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(_gates, _log);
+            _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(_gates, _telemetryStorage, _log);
         }
 
         private void BuildTelemetry()
@@ -166,7 +166,7 @@ namespace Splitio.Services.Client.Classes
 
             _telemetryAPI = new TelemetryAPI(httpClient, _config.TelemetryServiceURL);
             _telemetryStorage = new InMemoryTelemetryStorage();            
-            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage, _telemetryAPI, _splitCache, _segmentCache, _gates, _config);
+            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage, _telemetryAPI, _splitCache, _segmentCache, _gates, _config, FactoryInstantiationsService.Instance());
         }
 
         private void BuildSyncManager()

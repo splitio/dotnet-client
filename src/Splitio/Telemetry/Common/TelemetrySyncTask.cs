@@ -3,6 +3,7 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
@@ -23,6 +24,7 @@ namespace Splitio.Telemetry.Common
         private readonly ISplitLogger _log;
         private readonly IReadinessGatesCache _gates;
         private readonly SelfRefreshingConfig _configurationOptions;
+        private readonly IFactoryInstantiationsService _factoryInstantiationsService;
         private bool _firstTime;
 
         public TelemetrySyncTask(ITelemetryStorageConsumer telemetryStorage,
@@ -31,6 +33,7 @@ namespace Splitio.Telemetry.Common
             ISegmentCache segmentCache,
             IReadinessGatesCache gates,
             SelfRefreshingConfig configurationOptions,
+            IFactoryInstantiationsService factoryInstantiationsService,
             bool firstTime = true,
             ISplitLogger log = null)
         {
@@ -40,8 +43,9 @@ namespace Splitio.Telemetry.Common
             _segmentCache = segmentCache;
             _gates = gates;
             _configurationOptions = configurationOptions;
+            _factoryInstantiationsService = factoryInstantiationsService;
             _firstTime = firstTime;
-            _cancellationTokenSource = new CancellationTokenSource();            
+            _cancellationTokenSource = new CancellationTokenSource();
             _log = log ?? WrapperAdapter.GetLogger(typeof(TelemetrySyncTask));
         }
 
@@ -98,7 +102,11 @@ namespace Splitio.Telemetry.Common
                     OperationMode = (int)_configurationOptions.Mode,
                     ImpressionsQueueSize = _configurationOptions.TreatmentLogSize,
                     Tags = _telemetryStorage.PopTags().ToList(),
-                    TimeUntilSDKReady = CurrentTimeHelper.CurrentTimeMillis() - _configurationOptions.SdkStartTime
+                    TimeUntilSDKReady = CurrentTimeHelper.CurrentTimeMillis() - _configurationOptions.SdkStartTime,
+                    ActiveFactories = _factoryInstantiationsService.GetActiveFactories(),
+                    RedundantActiveFactories = _factoryInstantiationsService.GetRedundantActiveFactories(),
+                    Storage = Constants.StorageType.InMemory,
+                    SDKNotReadyUsage = _telemetryStorage.GetNonReadyUsages(),
                 };
 
                 _telemetryAPI.RecordConfigInit(config);

@@ -63,6 +63,7 @@ namespace Splitio.Services.Common
 
         public void StopPeriodicDataRecording()
         {
+            _telemetrySyncTask.Stop();
             _impressionsLog.Stop();
             _eventsLog.Stop();
             _impressionsCountSender.Stop();

@@ -103,7 +103,63 @@ namespace Splitio_Tests.Unit_Tests.Shared
             result = _factoryInstantiationsService.GetInstantiations();
 
             // Assert
-            Assert.IsFalse(result.TryGetValue(apiKey, out int value));
+            Assert.IsFalse(result.TryGetValue(apiKey, out int value));            
+        }
+
+        [TestMethod]
+        public void GetActiveFactories()
+        {
+            // Arrange.
+            _factoryInstantiationsService.Clear();
+
+            var apiKey = "apiKey";
+            var apiKey2 = "apiKey-2";
+            var apiKey3 = "apiKey-3";
+            var apiKey4 = "apiKey-4";
+
+            _factoryInstantiationsService.Increase(apiKey);
+            _factoryInstantiationsService.Increase(apiKey2);
+            _factoryInstantiationsService.Increase(apiKey3);
+            _factoryInstantiationsService.Increase(apiKey4);
+            _factoryInstantiationsService.Decrease(apiKey2);
+
+            // Act.
+            var result = _factoryInstantiationsService.GetActiveFactories();
+
+            // Assert.
+            Assert.AreEqual(3, result);
+        }
+
+        [TestMethod]
+        public void GetRedundantActiveFactories()
+        {
+            // Arrange.
+            _factoryInstantiationsService.Clear();
+
+            var apiKey = "apiKey";
+            var apiKey2 = "apiKey-2";
+            var apiKey3 = "apiKey-3";
+            var apiKey4 = "apiKey-4";
+
+            _factoryInstantiationsService.Increase(apiKey);
+            _factoryInstantiationsService.Increase(apiKey);
+
+            _factoryInstantiationsService.Increase(apiKey2);
+            _factoryInstantiationsService.Increase(apiKey2);
+            _factoryInstantiationsService.Decrease(apiKey2);
+
+            _factoryInstantiationsService.Increase(apiKey3);
+
+            _factoryInstantiationsService.Increase(apiKey4);            
+            _factoryInstantiationsService.Increase(apiKey4);
+            _factoryInstantiationsService.Increase(apiKey4);
+            _factoryInstantiationsService.Increase(apiKey4);
+
+            // Act.
+            var result = _factoryInstantiationsService.GetRedundantActiveFactories();
+
+            // Assert.
+            Assert.AreEqual(4, result);
         }
     }
 }

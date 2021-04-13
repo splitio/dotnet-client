@@ -54,6 +54,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _impressionsLog.Verify(mock => mock.Start(), Times.Once);
             _eventsLog.Verify(mock => mock.Start(), Times.Once);
             _impressionsCountSender.Verify(mock => mock.Start(), Times.Once);
+            _telemetrySyncTask.Verify(mock => mock.Start(), Times.Once);
         }
 
         [TestMethod]
@@ -77,6 +78,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _impressionsLog.Verify(mock => mock.Stop(), Times.Once);
             _eventsLog.Verify(mock => mock.Stop(), Times.Once);
             _impressionsCountSender.Verify(mock => mock.Stop(), Times.Once);
+            _telemetrySyncTask.Verify(mock => mock.Stop(), Times.Once);
         }
 
         [TestMethod]

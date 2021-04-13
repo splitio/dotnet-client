@@ -38,4 +38,9 @@
         public static string StreamingServiceURL => "https://streaming.split.io/event-stream";
         public static string TelemetryServiceURL => "https://telemetry.split.io/api/v1";
     }
+
+    public class StorageType
+    {
+        public static string InMemory => "InMemory";
+    }
 }
