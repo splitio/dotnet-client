@@ -22,7 +22,6 @@ namespace Splitio.Redis.Services.Client.Classes
         private readonly RedisConfig _config;
 
         private IRedisAdapter _redisAdapter;
-        private IRedisTelemetryStorageProducer _redisTelemetryStorage;
 
         public RedisClient(ConfigurationOptions config,
             string apiKey,
@@ -33,13 +32,13 @@ namespace Splitio.Redis.Services.Client.Classes
 
             ReadConfig(config);
             BuildRedisCache();
+            BuildTelemetryStorage();
             BuildTreatmentLog(config);
             BuildImpressionManager();
             BuildEventLog();
             BuildBlockUntilReadyService();
             BuildManager();
-            BuildEvaluator();
-            BuildTelemetry();
+            BuildEvaluator();            
 
             RecordConfigInit();
         }
@@ -106,9 +105,9 @@ namespace Splitio.Redis.Services.Client.Classes
             _blockUntilReadyService = new RedisBlockUntilReadyService(_redisAdapter);
         }
 
-        private void BuildTelemetry()
+        private void BuildTelemetryStorage()
         {
-            _redisTelemetryStorage = new RedisTelemetryStorage(_redisAdapter, _config.RedisUserPrefix, _config.SdkVersion, _config.SdkMachineIP, _config.SdkMachineName);
+            _telemetryStorage = new RedisTelemetryStorage(_redisAdapter, _config.RedisUserPrefix, _config.SdkVersion, _config.SdkMachineIP, _config.SdkMachineName);
         }
 
         private void RecordConfigInit()
@@ -121,7 +120,7 @@ namespace Splitio.Redis.Services.Client.Classes
                 RedundantActiveFactories = _factoryInstantiationsService.GetRedundantActiveFactories()
             };
 
-            _redisTelemetryStorage.RecordConfigInit(config);
+            _telemetryStorage.RecordConfigInit(config);
         }
 
         private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)

@@ -17,6 +17,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Common;
+using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Concurrent;
@@ -44,8 +45,7 @@ namespace Splitio.Services.Client.Classes
         private IEventSdkApiClient _eventSdkApiClient;
         private ISelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
         private ISyncManager _syncManager;
-        private IImpressionsCounter _impressionsCounter;
-        private ITelemetryStorage _telemetryStorage;
+        private IImpressionsCounter _impressionsCounter;        
         private ITelemetrySyncTask _telemetrySyncTask;
 
         public SelfRefreshingClient(string apiKey, 
