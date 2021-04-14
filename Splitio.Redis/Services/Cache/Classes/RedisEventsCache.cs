@@ -23,7 +23,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             _sdkVersion = sdkVersion;
         }
 
-        public void AddItems(IList<WrappedEvent> items)
+        public int AddItems(IList<WrappedEvent> items)
         {
             foreach (var item in items)
             {
@@ -35,6 +35,8 @@ namespace Splitio.Redis.Services.Cache.Classes
 
                 _redisAdapter.ListRightPush($"{RedisKeyPrefix}events", eventJson);
             }
+
+            return 0;
         }
     }
 }
