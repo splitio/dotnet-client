@@ -51,7 +51,7 @@ namespace Splitio.Services.Common
                 {
                     _log.Debug($"Problem to connect to : {_url}. Response status: {response.statusCode}");
 
-                    _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.TokenSync, (int)response.statusCode);
+                    _telemetryRuntimeProducer.RecordAuthRejections();
                     return new AuthenticationResponse { PushEnabled = false, Retry = false };
                 }
 
@@ -79,6 +79,8 @@ namespace Splitio.Services.Common
 
                 authResponse.Channels = GetChannels(token);
                 authResponse.Expiration = GetExpirationSeconds(token);
+
+                _telemetryRuntimeProducer.RecordTokenRefreshes();
             }
 
             authResponse.Retry = false;

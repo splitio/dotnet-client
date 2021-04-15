@@ -14,9 +14,9 @@ namespace Splitio.Redis.Services.Impressions.Classes
             _impressionsCache = impressionsCache;
         }
 
-        public void Log(IList<KeyImpression> impressions)
+        public int Log(IList<KeyImpression> impressions)
         {
-            _impressionsCache.AddItems(impressions);
+            return _impressionsCache.AddItems(impressions);
         }
 
         public void Start()

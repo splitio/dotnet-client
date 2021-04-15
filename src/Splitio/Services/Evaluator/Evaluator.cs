@@ -4,6 +4,7 @@ using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Classes;
+using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,12 +23,12 @@ namespace Splitio.Services.Evaluator
 
         public Evaluator(ISplitCache splitCache,
             ISplitParser splitParser,
-            ISplitter splitter = null,
+            ISplitter splitter,
             ISplitLogger log = null)
         {
             _splitCache = splitCache;
             _splitParser = splitParser;
-            _splitter = splitter ?? new Splitter();
+            _splitter = splitter;
             _log = log ?? WrapperAdapter.GetLogger(typeof(Evaluator));
         }
 
@@ -47,15 +48,16 @@ namespace Splitio.Services.Evaluator
             {
                 _log.Error($"Exception caught getting treatment for feature: {featureName}", e);
 
-                return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
+                return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds, exception: true);
             }
         }
 
         public MultipleEvaluatorResult EvaluateFeatures(Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
         {
-            var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
+            var exception = false;
+            var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();            
             var clock = new Stopwatch();
-            clock.Start();
+            clock.Start();            
 
             try
             {
@@ -78,12 +80,15 @@ namespace Splitio.Services.Evaluator
                 {
                     treatmentsForFeatures.Add(name, new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds));
                 }
+
+                exception = true;
             }
 
             return new MultipleEvaluatorResult
             {
                 TreatmentResults = treatmentsForFeatures,
-                ElapsedMilliseconds = clock.ElapsedMilliseconds
+                ElapsedMilliseconds = clock.ElapsedMilliseconds,
+                Exception = exception
             };
         }
         #endregion

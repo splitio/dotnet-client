@@ -6,5 +6,6 @@ namespace Splitio.Domain
     {
         public Dictionary<string, TreatmentResult> TreatmentResults { get; set; }
         public long ElapsedMilliseconds { get; set; }
+        public bool Exception { get; set; }
     }
 }

@@ -8,6 +8,7 @@ using Splitio.Services.Client.Classes;
 using Splitio.Services.Logger;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System;
 
 namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
@@ -22,7 +23,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         private string _machineIp;
         private string _machineName;
 
-        private IRedisTelemetryStorageProducer _telemetryStorage;
+        private ITelemetryStorage _telemetryStorage;
 
         [TestInitialize]
         public void Initialization()

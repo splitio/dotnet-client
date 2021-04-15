@@ -2,6 +2,7 @@
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
+using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
@@ -11,6 +12,8 @@ using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,6 +49,7 @@ namespace Splitio.Services.Client.Classes
         protected IEvaluator _evaluator;
         protected IImpressionListener _customerImpressionListener;
         protected IImpressionsManager _impressionsManager;
+        protected ITelemetryStorage _telemetryStorage;
 
         public SplitClient(ISplitLogger log)
         {
@@ -67,7 +71,7 @@ namespace Splitio.Services.Client.Classes
 
         public SplitResult GetTreatmentWithConfig(Key key, string feature, Dictionary<string, object> attributes = null)
         {
-            var result = GetTreatmentResult(key, feature, Operations.SdkGetTreatmentWithConfig, nameof(GetTreatmentWithConfig), attributes);
+            var result = GetTreatmentResult(key, feature, nameof(GetTreatmentWithConfig), attributes);
 
             return new SplitResult
             {
@@ -83,7 +87,7 @@ namespace Splitio.Services.Client.Classes
 
         public virtual string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null)
         {
-            var result = GetTreatmentResult(key, feature, Operations.SdkGetTreatment, nameof(GetTreatment), attributes);
+            var result = GetTreatmentResult(key, feature, nameof(GetTreatment), attributes);
 
             return result.Treatment;
         }
@@ -95,7 +99,7 @@ namespace Splitio.Services.Client.Classes
 
         public Dictionary<string, SplitResult> GetTreatmentsWithConfig(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            var results = GetTreatmentsResult(key, features, Operations.SdkGetTreatmentsWithConfig, nameof(GetTreatmentsWithConfig), attributes);
+            var results = GetTreatmentsResult(key, features, nameof(GetTreatmentsWithConfig), attributes);
 
             return results
                 .ToDictionary(r => r.Key, r => new SplitResult
@@ -112,7 +116,7 @@ namespace Splitio.Services.Client.Classes
 
         public Dictionary<string, string> GetTreatments(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            var results = GetTreatmentsResult(key, features, Operations.SdkGetTreatments, nameof(GetTreatments), attributes);
+            var results = GetTreatmentsResult(key, features, nameof(GetTreatments), attributes);
 
             return results
                 .ToDictionary(r => r.Key, r => r.Value.Treatment);
@@ -191,12 +195,13 @@ namespace Splitio.Services.Client.Classes
         #region Protected Methods
         protected void BuildEvaluator(ISplitLogger log = null)
         {
-            _evaluator = new Evaluator.Evaluator(_splitCache, _splitParser, log: log);
-        }
+            var splitter = new Splitter();
+            _evaluator = new Evaluator.Evaluator(_splitCache, _splitParser, splitter, log);
+        }        
         #endregion
 
         #region Private Methods
-        private TreatmentResult GetTreatmentResult(Key key, string feature, string operation, string method, Dictionary<string, object> attributes = null)
+        private TreatmentResult GetTreatmentResult(Key key, string feature, string method, Dictionary<string, object> attributes = null)
         {
             if (!IsClientReady(method)) return new TreatmentResult(string.Empty, Control, null);
 
@@ -210,6 +215,13 @@ namespace Splitio.Services.Client.Classes
 
             var result = _evaluator.EvaluateFeature(key, feature, attributes);
 
+            if (result.Exception)
+            {
+                RecordException(method);
+            }
+
+            RecordLatency(method, result.ElapsedMilliseconds);
+
             if (!Labels.SplitNotFound.Equals(result.Label))
             {
                 _impressionsManager.BuildAndTrack(key.matchingKey, feature, result.Treatment, CurrentTimeHelper.CurrentTimeMillis(), result.ChangeNumber, LabelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null);
@@ -218,7 +230,7 @@ namespace Splitio.Services.Client.Classes
             return result;
         }
 
-        private Dictionary<string, TreatmentResult> GetTreatmentsResult(Key key, List<string> features, string operation, string method, Dictionary<string, object> attributes = null)
+        private Dictionary<string, TreatmentResult> GetTreatmentsResult(Key key, List<string> features, string method, Dictionary<string, object> attributes = null)
         {
             var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
 
@@ -242,13 +254,20 @@ namespace Splitio.Services.Client.Classes
 
                 foreach (var treatmentResult in results.TreatmentResults)
                 {
-                    treatmentsForFeatures.Add(treatmentResult.Key, treatmentResult.Value);
+                    treatmentsForFeatures.Add(treatmentResult.Key, treatmentResult.Value);                    
 
                     if (!Labels.SplitNotFound.Equals(treatmentResult.Value.Label))
                     {
-                        ImpressionsQueue.Add(_impressionsManager.BuildImpression(key.matchingKey, treatmentResult.Key, treatmentResult.Value.Treatment, CurrentTimeHelper.CurrentTimeMillis(), treatmentResult.Value.ChangeNumber, LabelsEnabled ? treatmentResult.Value.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null));
-                    }
+                        ImpressionsQueue.Add(_impressionsManager.BuildImpression(key.matchingKey, treatmentResult.Key, treatmentResult.Value.Treatment, CurrentTimeHelper.CurrentTimeMillis(), treatmentResult.Value.ChangeNumber, LabelsEnabled ? treatmentResult.Value.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null));                        
+                    }                    
                 }
+
+                if (results.Exception)
+                {
+                    RecordException(method);
+                }
+
+                RecordLatency(method, results.ElapsedMilliseconds);
 
                 _impressionsManager.Track(ImpressionsQueue);
             }
@@ -278,6 +297,54 @@ namespace Splitio.Services.Client.Classes
             }
 
             return true;
+        }
+
+        private void RecordLatency(string method, long latency)
+        {
+            if (_telemetryStorage == null) return;
+
+            switch (method)
+            {
+                case nameof(GetTreatment):
+                    _telemetryStorage.RecordLatency(MethodEnum.Treatment, Util.Metrics.Bucket(latency));
+                    break;
+                case nameof(GetTreatments):
+                    _telemetryStorage.RecordLatency(MethodEnum.Treatments, Util.Metrics.Bucket(latency));
+                    break;
+                case nameof(GetTreatmentWithConfig):
+                    _telemetryStorage.RecordLatency(MethodEnum.TreatmentWithConfig, Util.Metrics.Bucket(latency));
+                    break;
+                case nameof(GetTreatmentsWithConfig):
+                    _telemetryStorage.RecordLatency(MethodEnum.TreatmentsWithConfig, Util.Metrics.Bucket(latency));
+                    break;
+                case nameof(Track):
+                    _telemetryStorage.RecordLatency(MethodEnum.Track, Util.Metrics.Bucket(latency));
+                    break;
+            }
+        }
+
+        private void RecordException(string method)
+        {
+            if (_telemetryStorage == null) return;
+
+            switch (method)
+            {
+                case nameof(GetTreatment):
+                    _telemetryStorage.RecordException(MethodEnum.Treatment);
+                    break;
+                case nameof(GetTreatments):
+                    _telemetryStorage.RecordException(MethodEnum.Treatments);
+                    break;
+                case nameof(GetTreatmentWithConfig):
+                    _telemetryStorage.RecordException(MethodEnum.TreatmentWithConfig);
+                    break;
+                case nameof(GetTreatmentsWithConfig):
+                    _telemetryStorage.RecordException(MethodEnum.TreatmentsWithConfig);
+                    break;
+                case nameof(Track):
+                    _telemetryStorage.RecordException(MethodEnum.Track);
+                    break;
+            }
         }
         #endregion
     }

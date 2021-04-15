@@ -72,6 +72,8 @@ namespace Splitio.Telemetry.Storages
 
         public void RecordImpressionsStats(ImpressionsEnum data, long count)
         {
+            if (count <= 0) return;
+
             _impressionsDataRecords.AddOrUpdate(data, count, (key, value) => value + count);
         }
 

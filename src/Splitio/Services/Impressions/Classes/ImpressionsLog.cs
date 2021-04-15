@@ -4,6 +4,7 @@ using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Telemetry.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -41,9 +42,9 @@ namespace Splitio.Services.Impressions.Classes
             SendBulkImpressions();
         }
 
-        public void Log(IList<KeyImpression> impressions)
+        public int Log(IList<KeyImpression> impressions)
         {
-            _impressionsCache.AddItems(impressions);
+            return _impressionsCache.AddItems(impressions);
         }
 
         private void SendBulkImpressions()

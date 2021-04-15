@@ -17,6 +17,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Common;
+using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Concurrent;
@@ -44,8 +45,7 @@ namespace Splitio.Services.Client.Classes
         private IEventSdkApiClient _eventSdkApiClient;
         private ISelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
         private ISyncManager _syncManager;
-        private IImpressionsCounter _impressionsCounter;
-        private ITelemetryStorage _telemetryStorage;
+        private IImpressionsCounter _impressionsCounter;        
         private ITelemetrySyncTask _telemetrySyncTask;
 
         public SelfRefreshingClient(string apiKey, 
@@ -134,13 +134,13 @@ namespace Splitio.Services.Client.Classes
             var impressionsHasher = new ImpressionHasher();
             var impressionsObserver = new ImpressionsObserver(impressionsHasher);
             _impressionsCounter = new ImpressionsCounter();
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, true, _config.ImpressionsMode, impressionsObserver);
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, true, _config.ImpressionsMode, _telemetryStorage,impressionsObserver);
         }
 
         private void BuildEventLog(ConfigurationOptions config)
         {
             var eventsCache = new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(_config.EventLogSize));
-            _eventsLog = new EventsLog(_eventSdkApiClient, _config.EventsFirstPushWindow, _config.EventLogRefreshRate, eventsCache);
+            _eventsLog = new EventsLog(_eventSdkApiClient, _config.EventsFirstPushWindow, _config.EventLogRefreshRate, eventsCache, _telemetryStorage);
         }        
 
         private int Random(int refreshRate)
