@@ -5,6 +5,7 @@ using Splitio.Services.Client.Classes;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.SplitFetcher.Classes;
+using Splitio.Telemetry.Storages;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
@@ -92,9 +93,10 @@ namespace Splitio_Tests.Integration_Tests
                 { "SplitSDKVersion", "1" }
             };
 
-            var sdkApiClient = new SplitSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000);
+            var telemetryStorage = new InMemoryTelemetryStorage();
+            var sdkApiClient = new SplitSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000, telemetryStorage);
             var apiSplitChangeFetcher = new ApiSplitChangeFetcher(sdkApiClient);
-            var sdkSegmentApiClient = new SegmentSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000);
+            var sdkSegmentApiClient = new SegmentSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000, telemetryStorage);
             var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkSegmentApiClient);
             var gates = new InMemoryReadinessGatesCache();
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
@@ -130,9 +132,10 @@ namespace Splitio_Tests.Integration_Tests
                 { "SplitSDKVersion", "1" }
             };
 
-            var sdkApiClient = new SplitSdkApiClient("0", headers, baseUrl, 10000, 10000);
+            var telemetryStorage = new InMemoryTelemetryStorage();
+            var sdkApiClient = new SplitSdkApiClient("0", headers, baseUrl, 10000, 10000, telemetryStorage);
             var apiSplitChangeFetcher = new ApiSplitChangeFetcher(sdkApiClient);
-            var sdkSegmentApiClient = new SegmentSdkApiClient("0", headers, baseUrl, 10000, 10000);
+            var sdkSegmentApiClient = new SegmentSdkApiClient("0", headers, baseUrl, 10000, 10000, telemetryStorage);
             var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkSegmentApiClient);
             var gates = new InMemoryReadinessGatesCache();
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.CommonLibraries;
+using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
@@ -22,7 +23,8 @@ namespace Splitio_Tests.Integration_Tests
                 { "SplitSDKVersion", "1" }
             };
 
-            var SdkApiClient = new SdkApiClient("ABCD", headers, baseUrl, 10000, 10000);
+            var telemetryStorage = new InMemoryTelemetryStorage();
+            var SdkApiClient = new SdkApiClient("ABCD", headers, baseUrl, 10000, 10000, telemetryStorage);
 
             //Act
             var result = await SdkApiClient.ExecuteGet("/messages?item=msg1");
@@ -44,7 +46,9 @@ namespace Splitio_Tests.Integration_Tests
                 { "SplitSDKMachineName", "localhost" },
                 { "SplitSDKVersion", "1" }
             };
-            var SdkApiClient = new SdkApiClient(string.Empty, headers, baseUrl, 10000, 10000);
+
+            var telemetryStorage = new InMemoryTelemetryStorage();
+            var SdkApiClient = new SdkApiClient(string.Empty, headers, baseUrl, 10000, 10000, telemetryStorage);
 
             //Act
             var result = await SdkApiClient.ExecuteGet("/messages?item=msg2");
@@ -66,7 +70,8 @@ namespace Splitio_Tests.Integration_Tests
                 { "SplitSDKVersion", "1" }
             };
 
-            var SdkApiClient = new SdkApiClient("ABCD", headers, baseUrl, 10000, 10000);
+            var telemetryStorage = new InMemoryTelemetryStorage();
+            var SdkApiClient = new SdkApiClient("ABCD", headers, baseUrl, 10000, 10000, telemetryStorage);
 
             //Act
             var result = await SdkApiClient.ExecuteGet("/messages?item=msg2");
@@ -86,7 +91,9 @@ namespace Splitio_Tests.Integration_Tests
                 { "SplitSDKMachineName", "localhost" },
                 { "SplitSDKVersion", "1" }
             };
-            var SdkApiClient = new SdkApiClient("ABCD", headers, baseUrl, 10000, 10000);
+
+            var telemetryStorage = new InMemoryTelemetryStorage();
+            var SdkApiClient = new SdkApiClient("ABCD", headers, baseUrl, 10000, 10000, telemetryStorage);
 
             //Act
             var result = await SdkApiClient.ExecuteGet("/messages?item=msg2");
