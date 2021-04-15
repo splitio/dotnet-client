@@ -110,10 +110,8 @@ namespace Splitio.Redis.Services.Client.Classes
 
         private void BuildTelemetryStorage()
         {
-            var redisTelemetryStorage = new RedisTelemetryStorage(_redisAdapter, _config.RedisUserPrefix, _config.SdkVersion, _config.SdkMachineIP, _config.SdkMachineName);
-
-            _telemetryInitProducer = redisTelemetryStorage;
-            _telemetryEvaluationProducer = redisTelemetryStorage;
+            _telemetryInitProducer = new RedisTelemetryInitProducer(_redisAdapter, _config.RedisUserPrefix, _config.SdkVersion, _config.SdkMachineIP, _config.SdkMachineName);
+            _telemetryEvaluationProducer = new RedisTelemetryEvaluationProducer(_redisAdapter, _config.RedisUserPrefix, _config.SdkVersion, _config.SdkMachineIP, _config.SdkMachineName);
         }
 
         private void RecordConfigInit()

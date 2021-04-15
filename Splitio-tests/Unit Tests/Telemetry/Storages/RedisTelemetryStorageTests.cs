@@ -36,9 +36,8 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             _machineIp = "10.0.0.1";
             _machineName = "machine-name-test";
 
-            var redisTelemetryStorage = new RedisTelemetryStorage(_redisAdapter.Object, _userPrefix, _sdkVersion, _machineIp, _machineName, _log.Object);
-            _telemetryInitProducer = redisTelemetryStorage;
-            _telemetryEvaluationProducer = redisTelemetryStorage;
+            _telemetryInitProducer = new RedisTelemetryInitProducer(_redisAdapter.Object, _userPrefix, _sdkVersion, _machineIp, _machineName, _log.Object);
+            _telemetryEvaluationProducer = new RedisTelemetryEvaluationProducer(_redisAdapter.Object, _userPrefix, _sdkVersion, _machineIp, _machineName, _log.Object);
         }
 
         [TestMethod]
