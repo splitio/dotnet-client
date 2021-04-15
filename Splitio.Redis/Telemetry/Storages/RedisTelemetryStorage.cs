@@ -139,72 +139,72 @@ namespace Splitio.Redis.Telemetry.Storages
 
         public MethodLatencies PopLatencies()
         {
-            throw new NotImplementedException();
+            return new MethodLatencies();
         }
 
         public MethodExceptions PopExceptions()
         {
-            throw new NotImplementedException();
+            return new MethodExceptions();
         }
 
         public long GetNonReadyUsages()
         {
-            throw new NotImplementedException();
+            return 0;
         }
 
         public long GetBURTimeouts()
         {
-            throw new NotImplementedException();
+            return 0;
         }
 
         public long GetImpressionsStats(ImpressionsEnum data)
         {
-            throw new NotImplementedException();
+            return 0;
         }
 
         public long GetEventsStats(EventsEnum data)
         {
-            throw new NotImplementedException();
+            return 0;
         }
 
         public LastSynchronization GetLastSynchronizations()
         {
-            throw new NotImplementedException();
+            return new LastSynchronization();
         }
 
         public HTTPErrors PopHttpErrors()
         {
-            throw new NotImplementedException();
+            return new HTTPErrors();
         }
 
         public HTTPLatencies PopHttpLatencies()
         {
-            throw new NotImplementedException();
+            return new HTTPLatencies();
         }
 
         public long PopAuthRejections()
         {
-            throw new NotImplementedException();
+            return 0;
         }
 
         public long PopTokenRefreshes()
         {
-            throw new NotImplementedException();
+            return 0;
         }
 
         public IList<StreamingEvent> PopStreamingEvents()
         {
-            throw new NotImplementedException();
+            return new List<StreamingEvent>();
         }
 
         public IList<string> PopTags()
         {
-            throw new NotImplementedException();
+            return new List<string>();
         }
 
         public long GetSessionLength()
         {
-            throw new NotImplementedException();
+            return 0;
         }
         #endregion
     }
