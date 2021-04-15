@@ -1,7 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.CommonLibraries;
+using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
+using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Common;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
@@ -20,6 +23,8 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
         private Mock<ISegmentCache> _segmentCache;
         private Mock<CancellationTokenSource> _cancellationTokenSource;
         private Mock<ISplitLogger> _log;
+        private Mock<IReadinessGatesCache> _gates;
+        private Mock<IFactoryInstantiationsService> _factoryInstantiationsService;
 
         private ITelemetrySyncTask _telemetrySyncTask;
 
@@ -31,40 +36,27 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             _splitCache = new Mock<ISplitCache>();
             _segmentCache = new Mock<ISegmentCache>();
             _cancellationTokenSource = new Mock<CancellationTokenSource>();
-            _log = new Mock<ISplitLogger>();            
+            _log = new Mock<ISplitLogger>();
+            _gates = new Mock<IReadinessGatesCache>();
+            _factoryInstantiationsService = new Mock<IFactoryInstantiationsService>();
         }
 
         [TestMethod]
-        public void StartShouldPostStats()
+        public void StartShouldPostConfigAndStats()
         {
             // Arrange.
-            _telemetryStorage.Setup(mock => mock.PopAuthRejections()).Returns(2);
-            _telemetryStorage.Setup(mock => mock.GetEventsStats(EventsEnum.EventsDropped)).Returns(3);
-            _telemetryStorage.Setup(mock => mock.GetEventsStats(EventsEnum.EventsQueued)).Returns(4);
-            _telemetryStorage.Setup(mock => mock.PopHttpErrors()).Returns(new HTTPErrors());
-            _telemetryStorage.Setup(mock => mock.PopHttpLatencies()).Returns(new HTTPLatencies());
-            _telemetryStorage.Setup(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped)).Returns(5);
-            _telemetryStorage.Setup(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped)).Returns(6);
-            _telemetryStorage.Setup(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued)).Returns(7);
-            _telemetryStorage.Setup(mock => mock.GetLastSynchronizations()).Returns(new LastSynchronization());
-            _telemetryStorage.Setup(mock => mock.PopExceptions()).Returns(new MethodExceptions());
-            _telemetryStorage.Setup(mock => mock.PopLatencies()).Returns(new MethodLatencies());
-            _telemetryStorage.Setup(mock => mock.GetSessionLength()).Returns(8);
-            _telemetryStorage.Setup(mock => mock.PopStreamingEvents()).Returns(new List<StreamingEvent>());
-            _telemetryStorage.Setup(mock => mock.PopTags()).Returns(new List<string>());
-            _telemetryStorage.Setup(mock => mock.PopTokenRefreshes()).Returns(9);
-            _splitCache.Setup(mock => mock.SplitsCount()).Returns(50);
-            _segmentCache.Setup(mock => mock.SegmentsCount()).Returns(10);
-            _segmentCache.Setup(mock => mock.SegmentKeysCount()).Returns(33);
+            MockRecordStats();
+            var config = MockConfigInit();
 
-            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, refreshRate: 2, log: _log.Object);
+            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, _gates.Object, config, _factoryInstantiationsService.Object, log: _log.Object);
 
             // Act.
             _telemetrySyncTask.Start();
             Thread.Sleep(2000);
 
             // Assert.
-            _telemetryAPI.Verify(mock=> mock.RecordStats(It.IsAny<Stats>()), Times.AtLeastOnce);
+            _telemetryAPI.Verify(mock => mock.RecordConfigInit(It.IsAny<Config>()), Times.Once);
+            _telemetryAPI.Verify(mock => mock.RecordStats(It.IsAny<Stats>()), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.PopAuthRejections(), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.GetEventsStats(EventsEnum.EventsDropped), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.GetEventsStats(EventsEnum.EventsQueued), Times.AtLeastOnce);
@@ -89,26 +81,9 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
         public void StopShouldPostStats()
         {
             // Arrange.
-            _telemetryStorage.Setup(mock => mock.PopAuthRejections()).Returns(2);
-            _telemetryStorage.Setup(mock => mock.GetEventsStats(EventsEnum.EventsDropped)).Returns(3);
-            _telemetryStorage.Setup(mock => mock.GetEventsStats(EventsEnum.EventsQueued)).Returns(4);
-            _telemetryStorage.Setup(mock => mock.PopHttpErrors()).Returns(new HTTPErrors());
-            _telemetryStorage.Setup(mock => mock.PopHttpLatencies()).Returns(new HTTPLatencies());
-            _telemetryStorage.Setup(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped)).Returns(5);
-            _telemetryStorage.Setup(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped)).Returns(6);
-            _telemetryStorage.Setup(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued)).Returns(7);
-            _telemetryStorage.Setup(mock => mock.GetLastSynchronizations()).Returns(new LastSynchronization());
-            _telemetryStorage.Setup(mock => mock.PopExceptions()).Returns(new MethodExceptions());
-            _telemetryStorage.Setup(mock => mock.PopLatencies()).Returns(new MethodLatencies());
-            _telemetryStorage.Setup(mock => mock.GetSessionLength()).Returns(8);
-            _telemetryStorage.Setup(mock => mock.PopStreamingEvents()).Returns(new List<StreamingEvent>());
-            _telemetryStorage.Setup(mock => mock.PopTags()).Returns(new List<string>());
-            _telemetryStorage.Setup(mock => mock.PopTokenRefreshes()).Returns(9);
-            _splitCache.Setup(mock => mock.SplitsCount()).Returns(50);
-            _segmentCache.Setup(mock => mock.SegmentsCount()).Returns(10);
-            _segmentCache.Setup(mock => mock.SegmentKeysCount()).Returns(33);
+            MockRecordStats();
 
-            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, refreshRate: 2, log: _log.Object);
+            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, _gates.Object, new SelfRefreshingConfig(), _factoryInstantiationsService.Object, log: _log.Object);
 
             // Act.
             _telemetrySyncTask.Stop();
@@ -134,6 +109,55 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             _splitCache.Verify(mock => mock.SplitsCount(), Times.AtLeastOnce);
             _segmentCache.Verify(mock => mock.SegmentsCount(), Times.AtLeastOnce);
             _segmentCache.Verify(mock => mock.SegmentKeysCount(), Times.AtLeastOnce);
+        }
+
+        private SelfRefreshingConfig MockConfigInit()
+        {
+            _telemetryStorage.Setup(mock => mock.GetBURTimeouts()).Returns(2);
+            _factoryInstantiationsService.Setup(mock => mock.GetActiveFactories()).Returns(5);
+            _factoryInstantiationsService.Setup(mock => mock.GetRedundantActiveFactories()).Returns(8);
+            _telemetryStorage.Setup(mock => mock.GetNonReadyUsages()).Returns(10);
+
+            return new SelfRefreshingConfig
+            {
+                EventLogSize = 2,
+                EventLogRefreshRate = 60,
+                TreatmentLogRefreshRate = 60,
+                SegmentRefreshRate = 60,
+                SplitsRefreshRate = 60,
+                TelemetryRefreshRate = 60,
+                ImpressionsMode = ImpressionsMode.Optimized,
+                Mode = Splitio.Services.Client.Classes.Mode.Standalone,
+                TreatmentLogSize = 4,
+                SdkStartTime = CurrentTimeHelper.CurrentTimeMillis(),
+                BaseUrl = "https://sdk.split.io",
+                EventsBaseUrl = "https://events.split.io",
+                AuthServiceURL = "https://auth.split.io",
+                StreamingServiceURL = "https://streaming.split.io",
+                TelemetryServiceURL = "https://telemetry.split.io"
+            };
+        }
+
+        private void MockRecordStats()
+        {
+            _telemetryStorage.Setup(mock => mock.PopAuthRejections()).Returns(2);
+            _telemetryStorage.Setup(mock => mock.GetEventsStats(EventsEnum.EventsDropped)).Returns(3);
+            _telemetryStorage.Setup(mock => mock.GetEventsStats(EventsEnum.EventsQueued)).Returns(4);
+            _telemetryStorage.Setup(mock => mock.PopHttpErrors()).Returns(new HTTPErrors());
+            _telemetryStorage.Setup(mock => mock.PopHttpLatencies()).Returns(new HTTPLatencies());
+            _telemetryStorage.Setup(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped)).Returns(5);
+            _telemetryStorage.Setup(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped)).Returns(6);
+            _telemetryStorage.Setup(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued)).Returns(7);
+            _telemetryStorage.Setup(mock => mock.GetLastSynchronizations()).Returns(new LastSynchronization());
+            _telemetryStorage.Setup(mock => mock.PopExceptions()).Returns(new MethodExceptions());
+            _telemetryStorage.Setup(mock => mock.PopLatencies()).Returns(new MethodLatencies());
+            _telemetryStorage.Setup(mock => mock.GetSessionLength()).Returns(8);
+            _telemetryStorage.Setup(mock => mock.PopStreamingEvents()).Returns(new List<StreamingEvent>());
+            _telemetryStorage.Setup(mock => mock.PopTags()).Returns(new List<string>());
+            _telemetryStorage.Setup(mock => mock.PopTokenRefreshes()).Returns(9);
+            _splitCache.Setup(mock => mock.SplitsCount()).Returns(50);
+            _segmentCache.Setup(mock => mock.SegmentsCount()).Returns(10);
+            _segmentCache.Setup(mock => mock.SegmentKeysCount()).Returns(33);
         }
     }
 }

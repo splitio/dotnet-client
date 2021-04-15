@@ -27,6 +27,21 @@
     public class Gral
     {
         public static string Unknown => "unknown";
-        public static string NA => "NA";        
+        public static string NA => "NA";
+    }
+
+    public class Urls
+    {
+        public static string BaseUrl => "https://sdk.split.io";
+        public static string EventsBaseUrl => "https://events.split.io";
+        public static string AuthServiceURL => "https://auth.split.io/api/auth";
+        public static string StreamingServiceURL => "https://streaming.split.io/event-stream";
+        public static string TelemetryServiceURL => "https://telemetry.split.io/api/v1";
+    }
+
+    public class StorageType
+    {
+        public static string Memory => "Memory";
+        public static string Redis => "Redis";
     }
 }

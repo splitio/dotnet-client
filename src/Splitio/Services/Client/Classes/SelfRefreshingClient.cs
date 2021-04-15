@@ -17,6 +17,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Common;
+using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -44,7 +45,8 @@ namespace Splitio.Services.Client.Classes
         private ISelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
         private ISyncManager _syncManager;
         private IImpressionsCounter _impressionsCounter;
-        private ITelemetryAPI _telemetryAPI;
+        private ITelemetryStorage _telemetryStorage;
+        private ITelemetrySyncTask _telemetrySyncTask;
 
         public SelfRefreshingClient(string apiKey, 
             ConfigurationOptions config, 
@@ -56,15 +58,18 @@ namespace Splitio.Services.Client.Classes
             
             ApiKey = apiKey;
             BuildSdkReadinessGates();
+            BuildSplitCache();
+            BuildSegmentCache();
+            BuildTelemetryStorage();
+            BuildTelemetrySyncTask();            
             BuildSdkApiClients();
-            BuildSplitFetcher();
+            BuildSplitFetcher();            
             BuildTreatmentLog(config);
             BuildImpressionManager();
             BuildEventLog(config);
             BuildEvaluator();
-            BuildBlockUntilReadyService();
-            BuildManager();
-            BuildTelemetryAPI();
+            BuildBlockUntilReadyService();            
+            BuildManager();            
             BuildSyncManager();
 
             Start();
@@ -87,22 +92,32 @@ namespace Splitio.Services.Client.Classes
             _gates = new InMemoryReadinessGatesCache();
         }
 
+        private void BuildSplitCache()
+        {
+            _splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(_config.ConcurrencyLevel, InitialCapacity));
+        }
+
+        private void BuildSegmentCache()
+        {
+            _segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(_config.ConcurrencyLevel, InitialCapacity));
+        }
+
+        private void BuildTelemetryStorage()
+        {
+            _telemetryStorage = new InMemoryTelemetryStorage();
+        }
+
         private void BuildSplitFetcher()
         {
             var segmentRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SegmentRefreshRate) : _config.SegmentRefreshRate;
-            var splitsRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SplitsRefreshRate) : _config.SplitsRefreshRate;
-
-            _segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(_config.ConcurrencyLevel, InitialCapacity));
-
             var segmentChangeFetcher = new ApiSegmentChangeFetcher(_segmentSdkApiClient);
             var segmentTaskQueue = new SegmentTaskQueue();
             _selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, _gates, segmentRefreshRate, _segmentCache, _config.NumberOfParalellSegmentTasks, segmentTaskQueue);
 
             var splitChangeFetcher = new ApiSplitChangeFetcher(_splitSdkApiClient);
-            _splitParser = new InMemorySplitParser((SelfRefreshingSegmentFetcher)_selfRefreshingSegmentFetcher, _segmentCache);
-            _splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(_config.ConcurrencyLevel, InitialCapacity));
+            var splitsRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SplitsRefreshRate) : _config.SplitsRefreshRate;
+            _splitParser = new InMemorySplitParser((SelfRefreshingSegmentFetcher)_selfRefreshingSegmentFetcher, _segmentCache);            
             _splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, _splitParser, _gates, splitsRefreshRate, _splitCache);
-
             _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
         }
 
@@ -140,10 +155,10 @@ namespace Splitio.Services.Client.Classes
             headers.Add(Constants.Http.AcceptEncoding, Constants.Http.Gzip);
             headers.Add(Constants.Http.KeepAlive, "true");
 
-            _splitSdkApiClient = new SplitSdkApiClient(ApiKey, headers, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
-            _segmentSdkApiClient = new SegmentSdkApiClient(ApiKey, headers, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
-            _impressionsSdkApiClient = new ImpressionsSdkApiClient(ApiKey, headers, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
-            _eventSdkApiClient = new EventSdkApiClient(ApiKey, headers, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
+            _splitSdkApiClient = new SplitSdkApiClient(ApiKey, headers, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout, _telemetryStorage);
+            _segmentSdkApiClient = new SegmentSdkApiClient(ApiKey, headers, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout, _telemetryStorage);
+            _impressionsSdkApiClient = new ImpressionsSdkApiClient(ApiKey, headers, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout, _telemetryStorage);
+            _eventSdkApiClient = new EventSdkApiClient(ApiKey, headers, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout, _telemetryStorage);
         }
 
         private void BuildManager()
@@ -153,13 +168,15 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildBlockUntilReadyService()
         {
-            _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(_gates, _log);
+            _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(_gates, _telemetryStorage, _log);
         }
 
-        private void BuildTelemetryAPI()
+        private void BuildTelemetrySyncTask()
         {
-            var httpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, GetHeaders());
-            _telemetryAPI = new TelemetryAPI(httpClient, _config.TelemetryServiceURL);
+            var httpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, GetHeaders());            
+            var telemetryAPI = new TelemetryAPI(httpClient, _config.TelemetryServiceURL, _telemetryStorage);
+
+            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage, telemetryAPI, _splitCache, _segmentCache, _gates, _config, FactoryInstantiationsService.Instance());
         }
 
         private void BuildSyncManager()
@@ -168,7 +185,7 @@ namespace Splitio.Services.Client.Classes
             {
                 // Synchronizer
                 var impressionsCountSender = new ImpressionsCountSender(_impressionsSdkApiClient, _impressionsCounter);
-                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, impressionsCountSender, _wrapperAdapter, _gates);
+                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, impressionsCountSender, _wrapperAdapter, _gates, _telemetrySyncTask);
 
                 // Workers
                 var splitsWorker = new SplitsWorker(_splitCache, synchronizer);
@@ -195,7 +212,7 @@ namespace Splitio.Services.Client.Classes
 
                 // AuthApiClient
                 var httpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, GetHeaders());
-                var authApiClient = new AuthApiClient(_config.AuthServiceURL, ApiKey, httpClient);
+                var authApiClient = new AuthApiClient(_config.AuthServiceURL, ApiKey, httpClient, _telemetryStorage);
 
                 // PushManager
                 var pushManager = new PushManager(_config.AuthRetryBackoffBase, sseHandler, authApiClient, _wrapperAdapter);

@@ -1,8 +1,11 @@
 ﻿using Newtonsoft.Json;
+using Splitio.CommonLibraries;
 using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -15,14 +18,17 @@ namespace Splitio.Telemetry.Common
 
         private readonly ISplitioHttpClient _splitioHttpClient;
         private readonly ISplitLogger _log;
+        private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly string _telemetryURL;
 
         public TelemetryAPI(ISplitioHttpClient splitioHttpClient,
             string telemetryURL,
+            ITelemetryRuntimeProducer telemetryRuntimeProducer,
             ISplitLogger log = null)
         {
             _splitioHttpClient = splitioHttpClient;
             _telemetryURL = telemetryURL;
+            _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _log = log ?? WrapperAdapter.GetLogger(typeof(TelemetryAPI));
         }
 
@@ -48,9 +54,14 @@ namespace Splitio.Telemetry.Common
 
             var response = await _splitioHttpClient.PostAsync($"{_telemetryURL}{url}", jsonData);
 
-            if ((int)response.statusCode < (int)HttpStatusCode.OK || (int)response.statusCode >= (int)HttpStatusCode.Ambiguous)
+            if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
+            {
+                _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.TelemetrySync, CurrentTimeHelper.CurrentTimeMillis());
+            }
+            else
             {
                 _log.Error($"Http status executing {method}: {response.statusCode} - {response.content}");
+                _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.TelemetrySync, (int)response.statusCode);
             }
         }
         #endregion

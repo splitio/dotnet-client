@@ -8,6 +8,7 @@ using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
+using Splitio.Telemetry.Common;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -24,6 +25,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<IImpressionsCountSender> _impressionsCountSender;
         private readonly Mock<IWrapperAdapter> _wrapperAdapter;
         private readonly Mock<IReadinessGatesCache> _gates;
+        private readonly Mock<ITelemetrySyncTask> _telemetrySyncTask;
 
         private readonly ISynchronizer _synchronizer;
 
@@ -37,8 +39,9 @@ namespace Splitio_Tests.Unit_Tests.Common
             _impressionsCountSender = new Mock<IImpressionsCountSender>();
             _wrapperAdapter = new Mock<IWrapperAdapter>();
             _gates = new Mock<IReadinessGatesCache>();
+            _telemetrySyncTask = new Mock<ITelemetrySyncTask>();
 
-            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCountSender.Object, _wrapperAdapter.Object, _gates.Object, _log.Object);
+            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCountSender.Object, _wrapperAdapter.Object, _gates.Object, _telemetrySyncTask.Object, _log.Object);
         }
 
         [TestMethod]
@@ -51,6 +54,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _impressionsLog.Verify(mock => mock.Start(), Times.Once);
             _eventsLog.Verify(mock => mock.Start(), Times.Once);
             _impressionsCountSender.Verify(mock => mock.Start(), Times.Once);
+            _telemetrySyncTask.Verify(mock => mock.Start(), Times.Once);
         }
 
         [TestMethod]
@@ -74,6 +78,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _impressionsLog.Verify(mock => mock.Stop(), Times.Once);
             _eventsLog.Verify(mock => mock.Stop(), Times.Once);
             _impressionsCountSender.Verify(mock => mock.Stop(), Times.Once);
+            _telemetrySyncTask.Verify(mock => mock.Stop(), Times.Once);
         }
 
         [TestMethod]

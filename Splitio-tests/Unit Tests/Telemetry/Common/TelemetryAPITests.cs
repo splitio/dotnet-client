@@ -6,6 +6,8 @@ using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Telemetry.Common;
 using Splitio.Telemetry.Domain;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Telemetry.Common
@@ -15,6 +17,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
     {
         private Mock<ISplitioHttpClient> _splitioHttpClient;
         private Mock<ISplitLogger> _log;
+        private Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
 
         private ITelemetryAPI _telemetryAPI;
 
@@ -23,8 +26,9 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
         {
             _splitioHttpClient = new Mock<ISplitioHttpClient>();
             _log = new Mock<ISplitLogger>();
+            _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
 
-            _telemetryAPI = new TelemetryAPI(_splitioHttpClient.Object, "www.fake-url.com", _log.Object);
+            _telemetryAPI = new TelemetryAPI(_splitioHttpClient.Object, "www.fake-url.com", _telemetryRuntimeProducer.Object, _log.Object);
         }
 
         [TestMethod]
@@ -54,6 +58,9 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
                 {
                     statusCode = System.Net.HttpStatusCode.OK
                 });
+
+            _telemetryRuntimeProducer
+                .Setup(mock => mock.RecordSuccessfulSync(It.IsAny<ResourceEnum>(), It.IsAny<long>()));
 
             // Act.
             _telemetryAPI.RecordConfigInit(config);

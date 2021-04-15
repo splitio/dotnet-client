@@ -1,5 +1,7 @@
 ﻿using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -15,16 +17,19 @@ namespace Splitio.CommonLibraries
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SdkApiClient));
 
         private readonly HttpClient _httpClient;
+        protected readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
 
         public SdkApiClient (string apiKey,
             Dictionary<string, string> headers,
             string baseUrl,
             long connectionTimeOut,
-            long readTimeout)
+            long readTimeout,
+            ITelemetryRuntimeProducer telemetryRuntimeProducer)
         {
 #if NET40 || NET45
             ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
 #endif
+            _telemetryRuntimeProducer = telemetryRuntimeProducer;
             var handler = new HttpClientHandler()
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
@@ -84,6 +89,20 @@ namespace Splitio.CommonLibraries
             }
 
             return result;
+        }
+
+        protected void RecordTelemetry(string method, int statusCode, string content, ResourceEnum resource)
+        {
+            if (statusCode >= (int)HttpStatusCode.OK && statusCode < (int)HttpStatusCode.Ambiguous)
+            {
+                _telemetryRuntimeProducer.RecordSuccessfulSync(resource, CurrentTimeHelper.CurrentTimeMillis());
+            }
+            else
+            {
+                _log.Error($"Http status executing {method}: {statusCode.ToString()} - {content}");
+
+                _telemetryRuntimeProducer.RecordSyncError(resource, statusCode);
+            }
         }
     }
 }
