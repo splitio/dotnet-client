@@ -4,6 +4,8 @@ using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +22,7 @@ namespace Splitio.Services.Events.Classes
         private readonly IEventSdkApiClient _apiClient;
         private readonly ISimpleProducerCache<WrappedEvent> _wrappedEventsCache;
         private readonly CancellationTokenSource _cancellationTokenSource;
+        private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly int _interval;
         private readonly int _firstPushWindow;
         
@@ -28,7 +31,8 @@ namespace Splitio.Services.Events.Classes
         public EventsLog(IEventSdkApiClient apiClient, 
             int firstPushWindow, 
             int interval, 
-            ISimpleCache<WrappedEvent> eventsCache, 
+            ISimpleCache<WrappedEvent> eventsCache,
+            ITelemetryRuntimeProducer telemetryRuntimeProducer,
             int maximumNumberOfKeysToCache = -1)
         {
             _cancellationTokenSource = new CancellationTokenSource();
@@ -37,6 +41,7 @@ namespace Splitio.Services.Events.Classes
             _apiClient = apiClient;
             _interval = interval;
             _firstPushWindow = firstPushWindow;
+            _telemetryRuntimeProducer = telemetryRuntimeProducer;
 
             _wrapperAdapter = new WrapperAdapter();
         }
@@ -59,9 +64,14 @@ namespace Splitio.Services.Events.Classes
 
         public void Log(WrappedEvent wrappedEvent)
         {
-            _wrappedEventsCache.AddItems(new List<WrappedEvent> { wrappedEvent });
+            var dropped = _wrappedEventsCache.AddItems(new List<WrappedEvent> { wrappedEvent });
 
-            _acumulateSize += wrappedEvent.Size;
+            if (dropped == 0)
+            {
+                _acumulateSize += wrappedEvent.Size;
+            }
+
+            RecordStats(dropped);
 
             if (_wrappedEventsCache.HasReachedMaxSize() || _acumulateSize >= MAX_SIZE_BYTES)
             {
@@ -95,6 +105,14 @@ namespace Splitio.Services.Events.Classes
                     Logger.Error("Exception caught updating events.", e);
                 }
             }
+        }
+
+        private void RecordStats(int dropped)
+        {
+            if (_telemetryRuntimeProducer == null) return;
+
+            _telemetryRuntimeProducer.RecordEventsStats(EventsEnum.EventsQueued, 1  - dropped);
+            _telemetryRuntimeProducer.RecordEventsStats(EventsEnum.EventsDropped, dropped);
         }
     }
 }
