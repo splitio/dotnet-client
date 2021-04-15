@@ -7,19 +7,31 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
     [TestClass]
     public class InMemoryTelemetryStorageTests
     {
-        private ITelemetryStorage _telemetryStorage;
+        private ITelemetryEvaluationProducer _telemetryEvaluationProducer;
+        private ITelemetryInitProducer _telemetryInitProducer;
+        private ITelemetryRuntimeProducer _telemetryRuntimeProducer;
+        private ITelemetryEvaluationConsumer _telemetryEvaluationConsumer;
+        private ITelemetryInitConsumer _telemetryInitConsumer;
+        private ITelemetryRuntimeConsumer _telemetryRuntimeConsumer;
 
         [TestInitialize]
         public void Initialization()
         {
-            _telemetryStorage = new InMemoryTelemetryStorage();
+            var storage = new InMemoryTelemetryStorage();
+
+            _telemetryEvaluationProducer = new TelemetryEvaluationProducer(storage);
+            _telemetryInitProducer = new TelemetryInitProducer(storage);
+            _telemetryRuntimeProducer = new TelemetryRuntimeProducer(storage);
+            _telemetryEvaluationConsumer = new TelemetryEvaluationConsumer(storage);
+            _telemetryInitConsumer = new TelemetryInitConsumer(storage);
+            _telemetryRuntimeConsumer = new TelemetryRuntimeConsumer(storage);
         }
 
         [TestMethod]
         public void MethodLatenciesPopFirstTime()
         {            
             // Act.
-            var result = _telemetryStorage.PopLatencies();
+            var result = _telemetryEvaluationConsumer.PopLatencies();
 
             // Assert.
             Assert.AreEqual(0, result.Treatment.Count);
@@ -33,15 +45,15 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void MethodLatenciesRecordAndPop()
         {
             // Arrange.
-            _telemetryStorage.RecordLatency(MethodEnum.Treatment, 2343);
-            _telemetryStorage.RecordLatency(MethodEnum.Treatment, 2344);
-            _telemetryStorage.RecordLatency(MethodEnum.Treatments, 2345);
-            _telemetryStorage.RecordLatency(MethodEnum.TreatmentsWithConfig, 2346);
-            _telemetryStorage.RecordLatency(MethodEnum.Track, 78787);
-            _telemetryStorage.RecordLatency(MethodEnum.Track, 678678);
+            _telemetryEvaluationProducer.RecordLatency(MethodEnum.Treatment, 2343);
+            _telemetryEvaluationProducer.RecordLatency(MethodEnum.Treatment, 2344);
+            _telemetryEvaluationProducer.RecordLatency(MethodEnum.Treatments, 2345);
+            _telemetryEvaluationProducer.RecordLatency(MethodEnum.TreatmentsWithConfig, 2346);
+            _telemetryEvaluationProducer.RecordLatency(MethodEnum.Track, 78787);
+            _telemetryEvaluationProducer.RecordLatency(MethodEnum.Track, 678678);
 
             // Act.
-            var result = _telemetryStorage.PopLatencies();
+            var result = _telemetryEvaluationConsumer.PopLatencies();
 
             // Assert.
             Assert.AreEqual(2, result.Treatment.Count);
@@ -50,7 +62,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             Assert.AreEqual(1, result.TreatmenstWithConfig.Count);
             Assert.AreEqual(2, result.Track.Count);
 
-            result = _telemetryStorage.PopLatencies();
+            result = _telemetryEvaluationConsumer.PopLatencies();
             Assert.AreEqual(0, result.Treatment.Count);
             Assert.AreEqual(0, result.TreatmentWithConfig.Count);
             Assert.AreEqual(0, result.Treatments.Count);
@@ -62,7 +74,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void HttpLatenciesPopFirstTime()
         {
             // Act.
-            var result = _telemetryStorage.PopHttpLatencies();
+            var result = _telemetryRuntimeConsumer.PopHttpLatencies();
 
             // Assert.            
             Assert.AreEqual(0, result.Events.Count);
@@ -77,19 +89,19 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void HttpLatenciesRecordAndPop()
         {
             // Arrange.
-            _telemetryStorage.RecordSyncLatency(ResourceEnum.EventSync, 2);
-            _telemetryStorage.RecordSyncLatency(ResourceEnum.EventSync, 4);
-            _telemetryStorage.RecordSyncLatency(ResourceEnum.ImpressionSync, 2);
-            _telemetryStorage.RecordSyncLatency(ResourceEnum.ImpressionSync, 2);
-            _telemetryStorage.RecordSyncLatency(ResourceEnum.SegmentSync, 2);
-            _telemetryStorage.RecordSyncLatency(ResourceEnum.SplitSync, 2);
-            _telemetryStorage.RecordSyncLatency(ResourceEnum.SplitSync, 3);
-            _telemetryStorage.RecordSyncLatency(ResourceEnum.SplitSync, 4);
-            _telemetryStorage.RecordSyncLatency(ResourceEnum.TelemetrySync, 2);
-            _telemetryStorage.RecordSyncLatency(ResourceEnum.TelemetrySync, 7);
+            _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.EventSync, 2);
+            _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.EventSync, 4);
+            _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.ImpressionSync, 2);
+            _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.ImpressionSync, 2);
+            _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.SegmentSync, 2);
+            _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.SplitSync, 2);
+            _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.SplitSync, 3);
+            _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.SplitSync, 4);
+            _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.TelemetrySync, 2);
+            _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.TelemetrySync, 7);
 
             // Act.
-            var result = _telemetryStorage.PopHttpLatencies();
+            var result = _telemetryRuntimeConsumer.PopHttpLatencies();
 
             // Assert.
             Assert.AreEqual(2, result.Events.Count);
@@ -99,7 +111,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             Assert.AreEqual(2, result.Telemetry.Count);
             Assert.AreEqual(0, result.Token.Count);
 
-            result = _telemetryStorage.PopHttpLatencies();
+            result = _telemetryRuntimeConsumer.PopHttpLatencies();
             Assert.AreEqual(0, result.Events.Count);
             Assert.AreEqual(0, result.Impressions.Count);
             Assert.AreEqual(0, result.Segments.Count);
@@ -112,7 +124,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void ExceptionsCountersPopFirstTime()
         {
             // Act.
-            var result = _telemetryStorage.PopExceptions();
+            var result = _telemetryEvaluationConsumer.PopExceptions();
 
             // Assert.
             Assert.AreEqual(0, result.Treatment);
@@ -126,14 +138,14 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void ExceptionsCountersRecordAndPop()
         {
             // Arrange.
-            _telemetryStorage.RecordException(MethodEnum.Treatment);
-            _telemetryStorage.RecordException(MethodEnum.Treatment);
-            _telemetryStorage.RecordException(MethodEnum.Treatments);
-            _telemetryStorage.RecordException(MethodEnum.TreatmentsWithConfig);
-            _telemetryStorage.RecordException(MethodEnum.TreatmentWithConfig);
+            _telemetryEvaluationProducer.RecordException(MethodEnum.Treatment);
+            _telemetryEvaluationProducer.RecordException(MethodEnum.Treatment);
+            _telemetryEvaluationProducer.RecordException(MethodEnum.Treatments);
+            _telemetryEvaluationProducer.RecordException(MethodEnum.TreatmentsWithConfig);
+            _telemetryEvaluationProducer.RecordException(MethodEnum.TreatmentWithConfig);
 
             // Act.
-            var result = _telemetryStorage.PopExceptions();
+            var result = _telemetryEvaluationConsumer.PopExceptions();
 
             // Assert.
             Assert.AreEqual(2, result.Treatment);
@@ -142,7 +154,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             Assert.AreEqual(1, result.TreatmentsWithConfig);
             Assert.AreEqual(0, result.Track);
 
-            result = _telemetryStorage.PopExceptions();
+            result = _telemetryEvaluationConsumer.PopExceptions();
             Assert.AreEqual(0, result.Treatment);
             Assert.AreEqual(0, result.Treatments);
             Assert.AreEqual(0, result.TreatmentWithConfig);
@@ -154,8 +166,8 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void PushCountersPopFirstTime()
         {
             // Act.
-            var resultAuth = _telemetryStorage.PopAuthRejections();
-            var resultToken = _telemetryStorage.PopTokenRefreshes();
+            var resultAuth = _telemetryRuntimeConsumer.PopAuthRejections();
+            var resultToken = _telemetryRuntimeConsumer.PopTokenRefreshes();
 
             // Assert.
             Assert.AreEqual(0, resultAuth);
@@ -166,22 +178,22 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void PushCountersRecordAndPop()
         {
             // Arrange.
-            _telemetryStorage.RecordAuthRejections();
-            _telemetryStorage.RecordAuthRejections();
-            _telemetryStorage.RecordAuthRejections();
-            _telemetryStorage.RecordTokenRefreshes();
-            _telemetryStorage.RecordTokenRefreshes();
+            _telemetryRuntimeProducer.RecordAuthRejections();
+            _telemetryRuntimeProducer.RecordAuthRejections();
+            _telemetryRuntimeProducer.RecordAuthRejections();
+            _telemetryRuntimeProducer.RecordTokenRefreshes();
+            _telemetryRuntimeProducer.RecordTokenRefreshes();
 
             // Act.
-            var resultAuth = _telemetryStorage.PopAuthRejections();
-            var resultToken = _telemetryStorage.PopTokenRefreshes();
+            var resultAuth = _telemetryRuntimeConsumer.PopAuthRejections();
+            var resultToken = _telemetryRuntimeConsumer.PopTokenRefreshes();
 
             // Assert.
             Assert.AreEqual(3, resultAuth);
             Assert.AreEqual(2, resultToken);
 
-            resultAuth = _telemetryStorage.PopAuthRejections();
-            resultToken = _telemetryStorage.PopTokenRefreshes();
+            resultAuth = _telemetryRuntimeConsumer.PopAuthRejections();
+            resultToken = _telemetryRuntimeConsumer.PopTokenRefreshes();
             Assert.AreEqual(0, resultAuth);
             Assert.AreEqual(0, resultToken);
         }
@@ -190,8 +202,8 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void FactoryCountersGetFirstTime()
         {
             // Act.
-            var resultBur = _telemetryStorage.GetBURTimeouts();
-            var resultNon = _telemetryStorage.GetNonReadyUsages();
+            var resultBur = _telemetryInitConsumer.GetBURTimeouts();
+            var resultNon = _telemetryInitConsumer.GetNonReadyUsages();
 
             // Assert.
             Assert.AreEqual(0, resultBur);
@@ -202,25 +214,25 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void FactoryCountersRecordAndGet()
         {
             // Arrange.
-            _telemetryStorage.RecordBURTimeout();
-            _telemetryStorage.RecordBURTimeout();
-            _telemetryStorage.RecordBURTimeout();
-            _telemetryStorage.RecordNonReadyUsages();
-            _telemetryStorage.RecordNonReadyUsages();
+            _telemetryInitProducer.RecordBURTimeout();
+            _telemetryInitProducer.RecordBURTimeout();
+            _telemetryInitProducer.RecordBURTimeout();
+            _telemetryInitProducer.RecordNonReadyUsages();
+            _telemetryInitProducer.RecordNonReadyUsages();
 
             // Act.
-            var resultBur = _telemetryStorage.GetBURTimeouts();
-            var resultNon = _telemetryStorage.GetNonReadyUsages();
+            var resultBur = _telemetryInitConsumer.GetBURTimeouts();
+            var resultNon = _telemetryInitConsumer.GetNonReadyUsages();
 
             // Assert.
             Assert.AreEqual(3, resultBur);
             Assert.AreEqual(2, resultNon);
 
-            _telemetryStorage.RecordBURTimeout();
-            _telemetryStorage.RecordNonReadyUsages();
+            _telemetryInitProducer.RecordBURTimeout();
+            _telemetryInitProducer.RecordNonReadyUsages();
 
-            resultBur = _telemetryStorage.GetBURTimeouts();
-            resultNon = _telemetryStorage.GetNonReadyUsages();
+            resultBur = _telemetryInitConsumer.GetBURTimeouts();
+            resultNon = _telemetryInitConsumer.GetNonReadyUsages();
 
             Assert.AreEqual(4, resultBur);
             Assert.AreEqual(3, resultNon);
@@ -230,9 +242,9 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void ImpressionsDataRecordsGetFirstTime()
         {
             // Act.
-            var resultDedupe = _telemetryStorage.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped);
-            var resultDropped = _telemetryStorage.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped);
-            var resultQueued = _telemetryStorage.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued);
+            var resultDedupe = _telemetryRuntimeConsumer.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped);
+            var resultDropped = _telemetryRuntimeConsumer.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped);
+            var resultQueued = _telemetryRuntimeConsumer.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued);
 
             // Assert.
             Assert.AreEqual(0, resultDedupe);
@@ -244,29 +256,29 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void ImpressionsDataRecordsRecordAndGet()
         {
             // Arrange.
-            _telemetryStorage.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, 2);
-            _telemetryStorage.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, 5);
-            _telemetryStorage.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, 2);
-            _telemetryStorage.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, 3);
-            _telemetryStorage.RecordImpressionsStats(ImpressionsEnum.ImpressionsQueued, 2);
+            _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, 2);
+            _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, 5);
+            _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, 2);
+            _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, 3);
+            _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsQueued, 2);
 
             // Act.
-            var resultDedupe = _telemetryStorage.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped);
-            var resultDropped = _telemetryStorage.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped);
-            var resultQueued = _telemetryStorage.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued);
+            var resultDedupe = _telemetryRuntimeConsumer.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped);
+            var resultDropped = _telemetryRuntimeConsumer.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped);
+            var resultQueued = _telemetryRuntimeConsumer.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued);
 
             // Assert.
             Assert.AreEqual(7, resultDedupe);
             Assert.AreEqual(5, resultDropped);
             Assert.AreEqual(2, resultQueued);
 
-            _telemetryStorage.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, 2);
-            _telemetryStorage.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, 2);;
-            _telemetryStorage.RecordImpressionsStats(ImpressionsEnum.ImpressionsQueued, 2);
+            _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, 2);
+            _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, 2);;
+            _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsQueued, 2);
 
-            resultDedupe = _telemetryStorage.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped);
-            resultDropped = _telemetryStorage.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped);
-            resultQueued = _telemetryStorage.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued);
+            resultDedupe = _telemetryRuntimeConsumer.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped);
+            resultDropped = _telemetryRuntimeConsumer.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped);
+            resultQueued = _telemetryRuntimeConsumer.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued);
 
             Assert.AreEqual(9, resultDedupe);
             Assert.AreEqual(7, resultDropped);
@@ -277,8 +289,8 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void EventsDataRecordsGetFirstTime()
         {
             // Act.
-            var resultDropped = _telemetryStorage.GetEventsStats(EventsEnum.EventsDropped);
-            var resultQueued = _telemetryStorage.GetEventsStats(EventsEnum.EventsQueued);
+            var resultDropped = _telemetryRuntimeConsumer.GetEventsStats(EventsEnum.EventsDropped);
+            var resultQueued = _telemetryRuntimeConsumer.GetEventsStats(EventsEnum.EventsQueued);
 
             // Assert.
             Assert.AreEqual(0, resultDropped);
@@ -289,23 +301,23 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void EventsDataRecordsRecordAndGet()
         {
             // Arrange.
-            _telemetryStorage.RecordEventsStats(EventsEnum.EventsDropped, 2);
-            _telemetryStorage.RecordEventsStats(EventsEnum.EventsDropped, 2);
-            _telemetryStorage.RecordEventsStats(EventsEnum.EventsQueued, 2);
+            _telemetryRuntimeProducer.RecordEventsStats(EventsEnum.EventsDropped, 2);
+            _telemetryRuntimeProducer.RecordEventsStats(EventsEnum.EventsDropped, 2);
+            _telemetryRuntimeProducer.RecordEventsStats(EventsEnum.EventsQueued, 2);
 
             // Act.
-            var resultDropped = _telemetryStorage.GetEventsStats(EventsEnum.EventsDropped);
-            var resultQueued = _telemetryStorage.GetEventsStats(EventsEnum.EventsQueued);
+            var resultDropped = _telemetryRuntimeConsumer.GetEventsStats(EventsEnum.EventsDropped);
+            var resultQueued = _telemetryRuntimeConsumer.GetEventsStats(EventsEnum.EventsQueued);
 
             // Assert.
             Assert.AreEqual(4, resultDropped);
             Assert.AreEqual(2, resultQueued);
 
-            _telemetryStorage.RecordEventsStats(EventsEnum.EventsDropped, 2);
-            _telemetryStorage.RecordEventsStats(EventsEnum.EventsQueued, 2);
+            _telemetryRuntimeProducer.RecordEventsStats(EventsEnum.EventsDropped, 2);
+            _telemetryRuntimeProducer.RecordEventsStats(EventsEnum.EventsQueued, 2);
 
-            resultDropped = _telemetryStorage.GetEventsStats(EventsEnum.EventsDropped);
-            resultQueued = _telemetryStorage.GetEventsStats(EventsEnum.EventsQueued);
+            resultDropped = _telemetryRuntimeConsumer.GetEventsStats(EventsEnum.EventsDropped);
+            resultQueued = _telemetryRuntimeConsumer.GetEventsStats(EventsEnum.EventsQueued);
 
             Assert.AreEqual(6, resultDropped);
             Assert.AreEqual(4, resultQueued);
@@ -315,7 +327,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void LastSynchronizationRecordsGetFirstTime()
         {
             // Act.
-            var result = _telemetryStorage.GetLastSynchronizations();
+            var result = _telemetryRuntimeConsumer.GetLastSynchronizations();
 
             // Assert.
             Assert.AreEqual(0, result.Events);
@@ -330,14 +342,14 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void LastSynchronizationRecordsRecordAndGet()
         {
             // Arrange.
-            _telemetryStorage.RecordSuccessfulSync(ResourceEnum.EventSync, 123);
-            _telemetryStorage.RecordSuccessfulSync(ResourceEnum.ImpressionSync, 2222);
-            _telemetryStorage.RecordSuccessfulSync(ResourceEnum.SegmentSync, 3333);
-            _telemetryStorage.RecordSuccessfulSync(ResourceEnum.SplitSync, 44444);
-            _telemetryStorage.RecordSuccessfulSync(ResourceEnum.TelemetrySync, 66666);
+            _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.EventSync, 123);
+            _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.ImpressionSync, 2222);
+            _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.SegmentSync, 3333);
+            _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.SplitSync, 44444);
+            _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.TelemetrySync, 66666);
 
             // Act.
-            var result = _telemetryStorage.GetLastSynchronizations();
+            var result = _telemetryRuntimeConsumer.GetLastSynchronizations();
 
             // Assert.
             Assert.AreEqual(123, result.Events);
@@ -347,10 +359,10 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             Assert.AreEqual(66666, result.Telemetry);
             Assert.AreEqual(0, result.Token);
 
-            _telemetryStorage.RecordSuccessfulSync(ResourceEnum.SplitSync, 8888888);
-            _telemetryStorage.RecordSuccessfulSync(ResourceEnum.TelemetrySync, 99999);
+            _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.SplitSync, 8888888);
+            _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.TelemetrySync, 99999);
 
-            result = _telemetryStorage.GetLastSynchronizations();
+            result = _telemetryRuntimeConsumer.GetLastSynchronizations();
             Assert.AreEqual(123, result.Events);
             Assert.AreEqual(2222, result.Impressions);
             Assert.AreEqual(3333, result.Segments);
@@ -363,7 +375,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void SdkRecordsGetFirsTime()
         {
             // Act.
-            var result = _telemetryStorage.GetSessionLength();
+            var result = _telemetryRuntimeConsumer.GetSessionLength();
 
             // Assert. 
             Assert.AreEqual(0, result);
@@ -373,16 +385,16 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void SdkRecordsRecordAndGetFirsTime()
         {
             // Arrenge.
-            _telemetryStorage.RecordSessionLength(3333);
+            _telemetryRuntimeProducer.RecordSessionLength(3333);
 
             // Act.
-            var result = _telemetryStorage.GetSessionLength();
+            var result = _telemetryRuntimeConsumer.GetSessionLength();
 
             // Assert. 
             Assert.AreEqual(3333, result);
 
-            _telemetryStorage.RecordSessionLength(565656);
-            result = _telemetryStorage.GetSessionLength();
+            _telemetryRuntimeProducer.RecordSessionLength(565656);
+            result = _telemetryRuntimeConsumer.GetSessionLength();
             Assert.AreEqual(565656, result);
         }
     }

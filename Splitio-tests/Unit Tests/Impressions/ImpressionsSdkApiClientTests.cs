@@ -22,7 +22,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impressions = new ConcurrentDictionary<KeyCache, int>();
             impressions.TryAdd(new KeyCache("featur1", time9am), 2);
 
-            var telemetryStorage = new InMemoryTelemetryStorage();
+            var telemetryStorage = new TelemetryRuntimeProducer(new InMemoryTelemetryStorage());
             var impressionsSdkApiClient = new ImpressionsSdkApiClient(string.Empty, new Dictionary<string, string>(), "http://www.fake-test-split.com", 5, 5, telemetryStorage);
             
             // Act.
@@ -44,7 +44,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 new KeyImpression("matching-key", "feature-2", "treatment", 34534546, 3333444, "label", "bucketing-key"),
             };
 
-            var telemetryStorage = new InMemoryTelemetryStorage();
+            var telemetryStorage = new TelemetryRuntimeProducer( new InMemoryTelemetryStorage());
             var impressionsSdkApiClient = new ImpressionsSdkApiClient(string.Empty, new Dictionary<string, string>(), "http://www.fake-test-split.com", 5, 5, telemetryStorage);
 
             // Act.

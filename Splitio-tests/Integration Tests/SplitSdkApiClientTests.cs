@@ -22,7 +22,7 @@ namespace Splitio_Tests.Integration_Tests
                 { "SplitSDKVersion", "1" }
             };
 
-            var telemetryStorage = new InMemoryTelemetryStorage();
+            var telemetryStorage = new TelemetryRuntimeProducer(new InMemoryTelemetryStorage());
             var SplitSdkApiClient = new SplitSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000, telemetryStorage);
 
             //Act
@@ -44,7 +44,7 @@ namespace Splitio_Tests.Integration_Tests
                 { "SplitSDKVersion", "1" }
             };
 
-            var telemetryStorage = new InMemoryTelemetryStorage();
+            var telemetryStorage = new TelemetryRuntimeProducer(new InMemoryTelemetryStorage());
             var SplitSdkApiClient = new SplitSdkApiClient(string.Empty, headers, baseUrl, 10000, 10000, telemetryStorage);
 
             //Act

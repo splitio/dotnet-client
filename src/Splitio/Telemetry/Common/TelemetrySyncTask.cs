@@ -16,7 +16,9 @@ namespace Splitio.Telemetry.Common
 {
     public class TelemetrySyncTask : ITelemetrySyncTask
     {
-        private readonly ITelemetryStorageConsumer _telemetryStorage;
+        private readonly ITelemetryInitConsumer _telemetryInitConsumer;
+        private readonly ITelemetryRuntimeConsumer _telemetryRuntimeConsumer;
+        private readonly ITelemetryEvaluationConsumer _telemetryEvaluationConsumer;
         private readonly ITelemetryAPI _telemetryAPI;
         private readonly ISplitCache _splitCache;
         private readonly ISegmentCache _segmentCache;
@@ -27,7 +29,9 @@ namespace Splitio.Telemetry.Common
         private readonly IFactoryInstantiationsService _factoryInstantiationsService;
         private bool _firstTime;
 
-        public TelemetrySyncTask(ITelemetryStorageConsumer telemetryStorage,
+        public TelemetrySyncTask(ITelemetryInitConsumer telemetryInitConsumer,
+            ITelemetryRuntimeConsumer telemetryRuntimeConsumer,
+            ITelemetryEvaluationConsumer telemetryEvaluationConsumer,
             ITelemetryAPI telemetryAPI,            
             ISplitCache splitCache,
             ISegmentCache segmentCache,
@@ -37,7 +41,9 @@ namespace Splitio.Telemetry.Common
             bool firstTime = true,
             ISplitLogger log = null)
         {
-            _telemetryStorage = telemetryStorage;
+            _telemetryInitConsumer = telemetryInitConsumer;
+            _telemetryRuntimeConsumer = telemetryRuntimeConsumer;
+            _telemetryEvaluationConsumer = telemetryEvaluationConsumer;
             _telemetryAPI = telemetryAPI;            
             _splitCache = splitCache;
             _segmentCache = segmentCache;
@@ -78,7 +84,7 @@ namespace Splitio.Telemetry.Common
 
                 var config = new Config
                 {
-                    BURTimeouts = _telemetryStorage.GetBURTimeouts(),
+                    BURTimeouts = _telemetryInitConsumer.GetBURTimeouts(),
                     EventsQueueSize = _configurationOptions.EventLogSize,
                     Rates = new Rates
                     {
@@ -101,12 +107,12 @@ namespace Splitio.Telemetry.Common
                     ImpressionListenerEnabled = _configurationOptions.ImpressionListener != null,
                     OperationMode = (int)_configurationOptions.Mode,
                     ImpressionsQueueSize = _configurationOptions.TreatmentLogSize,
-                    Tags = _telemetryStorage.PopTags().ToList(),
+                    Tags = _telemetryRuntimeConsumer.PopTags().ToList(),
                     TimeUntilSDKReady = CurrentTimeHelper.CurrentTimeMillis() - _configurationOptions.SdkStartTime,
                     ActiveFactories = _factoryInstantiationsService.GetActiveFactories(),
                     RedundantActiveFactories = _factoryInstantiationsService.GetRedundantActiveFactories(),
                     Storage = Constants.StorageType.Memory,
-                    SDKNotReadyUsage = _telemetryStorage.GetNonReadyUsages(),
+                    SDKNotReadyUsage = _telemetryInitConsumer.GetNonReadyUsages(),
                 };
 
                 _telemetryAPI.RecordConfigInit(config);
@@ -123,21 +129,21 @@ namespace Splitio.Telemetry.Common
             {
                 var stats = new Stats
                 {
-                    AuthRejections = _telemetryStorage.PopAuthRejections(),
-                    EventsDropped = _telemetryStorage.GetEventsStats(EventsEnum.EventsDropped),
-                    EventsQueued = _telemetryStorage.GetEventsStats(EventsEnum.EventsQueued),
-                    HTTPErrors = _telemetryStorage.PopHttpErrors(),
-                    HTTPLatencies = _telemetryStorage.PopHttpLatencies(),
-                    ImpressionsDeduped = _telemetryStorage.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped),
-                    ImpressionsDropped = _telemetryStorage.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped),
-                    ImpressionsQueued = _telemetryStorage.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued),
-                    LastSynchronizations = _telemetryStorage.GetLastSynchronizations(),
-                    MethodExceptions = _telemetryStorage.PopExceptions(),
-                    MethodLatencies = _telemetryStorage.PopLatencies(),
-                    SessionLengthMs = _telemetryStorage.GetSessionLength(),
-                    StreamingEvents = _telemetryStorage.PopStreamingEvents().ToList(),
-                    Tags = _telemetryStorage.PopTags().ToList(),
-                    TokenRefreshes = _telemetryStorage.PopTokenRefreshes(),
+                    AuthRejections = _telemetryRuntimeConsumer.PopAuthRejections(),
+                    EventsDropped = _telemetryRuntimeConsumer.GetEventsStats(EventsEnum.EventsDropped),
+                    EventsQueued = _telemetryRuntimeConsumer.GetEventsStats(EventsEnum.EventsQueued),
+                    HTTPErrors = _telemetryRuntimeConsumer.PopHttpErrors(),
+                    HTTPLatencies = _telemetryRuntimeConsumer.PopHttpLatencies(),
+                    ImpressionsDeduped = _telemetryRuntimeConsumer.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped),
+                    ImpressionsDropped = _telemetryRuntimeConsumer.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped),
+                    ImpressionsQueued = _telemetryRuntimeConsumer.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued),
+                    LastSynchronizations = _telemetryRuntimeConsumer.GetLastSynchronizations(),
+                    MethodExceptions = _telemetryEvaluationConsumer.PopExceptions(),
+                    MethodLatencies = _telemetryEvaluationConsumer.PopLatencies(),
+                    SessionLengthMs = _telemetryRuntimeConsumer.GetSessionLength(),
+                    StreamingEvents = _telemetryRuntimeConsumer.PopStreamingEvents().ToList(),
+                    Tags = _telemetryRuntimeConsumer.PopTags().ToList(),
+                    TokenRefreshes = _telemetryRuntimeConsumer.PopTokenRefreshes(),
                     SplitCount = _splitCache.SplitsCount(),
                     SegmentCount = _segmentCache.SegmentsCount(),
                     SegmentKeyCount = _segmentCache.SegmentKeysCount()

@@ -55,7 +55,7 @@ namespace Splitio_Tests.Integration_Tests
                 { "SplitSDKVersion", "1" }
             };
 
-            var telemetryStorage = new InMemoryTelemetryStorage();
+            var telemetryStorage = new TelemetryRuntimeProducer(new InMemoryTelemetryStorage());
             var sdkApiClient = new SegmentSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000, telemetryStorage);
             var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkApiClient);
             var gates = new InMemoryReadinessGatesCache();

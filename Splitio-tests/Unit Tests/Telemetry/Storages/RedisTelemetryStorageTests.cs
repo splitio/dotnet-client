@@ -23,7 +23,8 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         private string _machineIp;
         private string _machineName;
 
-        private ITelemetryStorage _telemetryStorage;
+        private ITelemetryEvaluationProducer _telemetryEvaluationProducer;
+        private ITelemetryInitProducer _telemetryInitProducer;
 
         [TestInitialize]
         public void Initialization()
@@ -35,17 +36,19 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             _machineIp = "10.0.0.1";
             _machineName = "machine-name-test";
 
-            _telemetryStorage = new RedisTelemetryStorage(_redisAdapter.Object, _userPrefix, _sdkVersion, _machineIp, _machineName, _log.Object);
+            var redisTelemetryStorage = new RedisTelemetryStorage(_redisAdapter.Object, _userPrefix, _sdkVersion, _machineIp, _machineName, _log.Object);
+            _telemetryInitProducer = redisTelemetryStorage;
+            _telemetryEvaluationProducer = redisTelemetryStorage;
         }
 
         [TestMethod]
         public void RecordException()
         {
             // Act.
-            _telemetryStorage.RecordException(MethodEnum.Track);
-            _telemetryStorage.RecordException(MethodEnum.Treatment);
-            _telemetryStorage.RecordException(MethodEnum.Treatment);
-            _telemetryStorage.RecordException(MethodEnum.TreatmentsWithConfig);
+            _telemetryEvaluationProducer.RecordException(MethodEnum.Track);
+            _telemetryEvaluationProducer.RecordException(MethodEnum.Treatment);
+            _telemetryEvaluationProducer.RecordException(MethodEnum.Treatment);
+            _telemetryEvaluationProducer.RecordException(MethodEnum.TreatmentsWithConfig);
 
             // Assert.
             _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.exceptions", $"{_sdkVersion}/{_machineName}/{_machineIp}/Track", 1), Times.Once);
@@ -78,7 +81,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
                 .Returns(1);
 
             // Act.
-            _telemetryStorage.RecordConfigInit(config);
+            _telemetryInitProducer.RecordConfigInit(config);
 
             // Assert.
             _redisAdapter.Verify(mock => mock.ListRightPush(key, redisValue), Times.Once);
@@ -110,7 +113,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
                 .Returns(2);
 
             // Act.
-            _telemetryStorage.RecordConfigInit(config);
+            _telemetryInitProducer.RecordConfigInit(config);
 
             // Assert.
             _redisAdapter.Verify(mock => mock.ListRightPush(key, redisValue), Times.Once);
@@ -121,11 +124,11 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void RecordLatency()
         {
             // Act.
-            _telemetryStorage.RecordLatency(MethodEnum.Track, 1);
-            _telemetryStorage.RecordLatency(MethodEnum.Track, 2);
-            _telemetryStorage.RecordLatency(MethodEnum.Treatments, 3);
-            _telemetryStorage.RecordLatency(MethodEnum.TreatmentsWithConfig, 4);
-            _telemetryStorage.RecordLatency(MethodEnum.TreatmentWithConfig, 5);
+            _telemetryEvaluationProducer.RecordLatency(MethodEnum.Track, 1);
+            _telemetryEvaluationProducer.RecordLatency(MethodEnum.Track, 2);
+            _telemetryEvaluationProducer.RecordLatency(MethodEnum.Treatments, 3);
+            _telemetryEvaluationProducer.RecordLatency(MethodEnum.TreatmentsWithConfig, 4);
+            _telemetryEvaluationProducer.RecordLatency(MethodEnum.TreatmentWithConfig, 5);
 
             // Assert.
             _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/Track/1", 1), Times.Once);

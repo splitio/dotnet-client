@@ -17,7 +17,9 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
     [TestClass]
     public class TelemetrySyncTaskTests
     {
-        private Mock<ITelemetryStorageConsumer> _telemetryStorage;
+        private Mock<ITelemetryInitConsumer> _telemetryInitConsumer;
+        private Mock<ITelemetryRuntimeConsumer> _telemetryRuntimeConsumer;
+        private Mock<ITelemetryEvaluationConsumer> _telemetryEvaluationConsumer;
         private Mock<ITelemetryAPI> _telemetryAPI;
         private Mock<ISplitCache> _splitCache;
         private Mock<ISegmentCache> _segmentCache;
@@ -31,7 +33,9 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
         [TestInitialize]
         public void Initialization()
         {
-            _telemetryStorage = new Mock<ITelemetryStorageConsumer>();
+            _telemetryInitConsumer = new Mock<ITelemetryInitConsumer>();
+            _telemetryRuntimeConsumer = new Mock<ITelemetryRuntimeConsumer>();
+            _telemetryEvaluationConsumer = new Mock<ITelemetryEvaluationConsumer>();
             _telemetryAPI = new Mock<ITelemetryAPI>();
             _splitCache = new Mock<ISplitCache>();
             _segmentCache = new Mock<ISegmentCache>();
@@ -48,7 +52,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             MockRecordStats();
             var config = MockConfigInit();
 
-            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, _gates.Object, config, _factoryInstantiationsService.Object, log: _log.Object);
+            _telemetrySyncTask = new TelemetrySyncTask(_telemetryInitConsumer.Object, _telemetryRuntimeConsumer.Object, _telemetryEvaluationConsumer.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, _gates.Object, config, _factoryInstantiationsService.Object, log: _log.Object);
 
             // Act.
             _telemetrySyncTask.Start();
@@ -57,21 +61,21 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             // Assert.
             _telemetryAPI.Verify(mock => mock.RecordConfigInit(It.IsAny<Config>()), Times.Once);
             _telemetryAPI.Verify(mock => mock.RecordStats(It.IsAny<Stats>()), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.PopAuthRejections(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.GetEventsStats(EventsEnum.EventsDropped), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.GetEventsStats(EventsEnum.EventsQueued), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.PopHttpErrors(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.PopHttpLatencies(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.GetLastSynchronizations(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.PopExceptions(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.PopLatencies(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.GetSessionLength(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.PopStreamingEvents(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.PopTags(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.PopTokenRefreshes(), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.PopAuthRejections(), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.GetEventsStats(EventsEnum.EventsDropped), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.GetEventsStats(EventsEnum.EventsQueued), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.PopHttpErrors(), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.PopHttpLatencies(), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.GetLastSynchronizations(), Times.AtLeastOnce);
+            _telemetryEvaluationConsumer.Verify(mock => mock.PopExceptions(), Times.AtLeastOnce);
+            _telemetryEvaluationConsumer.Verify(mock => mock.PopLatencies(), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.GetSessionLength(), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.PopStreamingEvents(), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.PopTags(), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.PopTokenRefreshes(), Times.AtLeastOnce);
             _splitCache.Verify(mock => mock.SplitsCount(), Times.AtLeastOnce);
             _segmentCache.Verify(mock => mock.SegmentsCount(), Times.AtLeastOnce);
             _segmentCache.Verify(mock => mock.SegmentKeysCount(), Times.AtLeastOnce);
@@ -83,7 +87,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             // Arrange.
             MockRecordStats();
 
-            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, _gates.Object, new SelfRefreshingConfig(), _factoryInstantiationsService.Object, log: _log.Object);
+            _telemetrySyncTask = new TelemetrySyncTask(_telemetryInitConsumer.Object, _telemetryRuntimeConsumer.Object, _telemetryEvaluationConsumer.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, _gates.Object, new SelfRefreshingConfig(), _factoryInstantiationsService.Object, log: _log.Object);
 
             // Act.
             _telemetrySyncTask.Stop();
@@ -91,21 +95,21 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 
             // Assert.
             _telemetryAPI.Verify(mock => mock.RecordStats(It.IsAny<Stats>()), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.PopAuthRejections(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.GetEventsStats(EventsEnum.EventsDropped), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.GetEventsStats(EventsEnum.EventsQueued), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.PopHttpErrors(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.PopHttpLatencies(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.GetLastSynchronizations(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.PopExceptions(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.PopLatencies(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.GetSessionLength(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.PopStreamingEvents(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.PopTags(), Times.AtLeastOnce);
-            _telemetryStorage.Verify(mock => mock.PopTokenRefreshes(), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.PopAuthRejections(), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.GetEventsStats(EventsEnum.EventsDropped), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.GetEventsStats(EventsEnum.EventsQueued), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.PopHttpErrors(), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.PopHttpLatencies(), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.GetLastSynchronizations(), Times.AtLeastOnce);
+            _telemetryEvaluationConsumer.Verify(mock => mock.PopExceptions(), Times.AtLeastOnce);
+            _telemetryEvaluationConsumer.Verify(mock => mock.PopLatencies(), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.GetSessionLength(), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.PopStreamingEvents(), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.PopTags(), Times.AtLeastOnce);
+            _telemetryRuntimeConsumer.Verify(mock => mock.PopTokenRefreshes(), Times.AtLeastOnce);
             _splitCache.Verify(mock => mock.SplitsCount(), Times.AtLeastOnce);
             _segmentCache.Verify(mock => mock.SegmentsCount(), Times.AtLeastOnce);
             _segmentCache.Verify(mock => mock.SegmentKeysCount(), Times.AtLeastOnce);
@@ -113,10 +117,10 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 
         private SelfRefreshingConfig MockConfigInit()
         {
-            _telemetryStorage.Setup(mock => mock.GetBURTimeouts()).Returns(2);
+            _telemetryInitConsumer.Setup(mock => mock.GetBURTimeouts()).Returns(2);
             _factoryInstantiationsService.Setup(mock => mock.GetActiveFactories()).Returns(5);
             _factoryInstantiationsService.Setup(mock => mock.GetRedundantActiveFactories()).Returns(8);
-            _telemetryStorage.Setup(mock => mock.GetNonReadyUsages()).Returns(10);
+            _telemetryInitConsumer.Setup(mock => mock.GetNonReadyUsages()).Returns(10);
 
             return new SelfRefreshingConfig
             {
@@ -140,21 +144,21 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 
         private void MockRecordStats()
         {
-            _telemetryStorage.Setup(mock => mock.PopAuthRejections()).Returns(2);
-            _telemetryStorage.Setup(mock => mock.GetEventsStats(EventsEnum.EventsDropped)).Returns(3);
-            _telemetryStorage.Setup(mock => mock.GetEventsStats(EventsEnum.EventsQueued)).Returns(4);
-            _telemetryStorage.Setup(mock => mock.PopHttpErrors()).Returns(new HTTPErrors());
-            _telemetryStorage.Setup(mock => mock.PopHttpLatencies()).Returns(new HTTPLatencies());
-            _telemetryStorage.Setup(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped)).Returns(5);
-            _telemetryStorage.Setup(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped)).Returns(6);
-            _telemetryStorage.Setup(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued)).Returns(7);
-            _telemetryStorage.Setup(mock => mock.GetLastSynchronizations()).Returns(new LastSynchronization());
-            _telemetryStorage.Setup(mock => mock.PopExceptions()).Returns(new MethodExceptions());
-            _telemetryStorage.Setup(mock => mock.PopLatencies()).Returns(new MethodLatencies());
-            _telemetryStorage.Setup(mock => mock.GetSessionLength()).Returns(8);
-            _telemetryStorage.Setup(mock => mock.PopStreamingEvents()).Returns(new List<StreamingEvent>());
-            _telemetryStorage.Setup(mock => mock.PopTags()).Returns(new List<string>());
-            _telemetryStorage.Setup(mock => mock.PopTokenRefreshes()).Returns(9);
+            _telemetryRuntimeConsumer.Setup(mock => mock.PopAuthRejections()).Returns(2);
+            _telemetryRuntimeConsumer.Setup(mock => mock.GetEventsStats(EventsEnum.EventsDropped)).Returns(3);
+            _telemetryRuntimeConsumer.Setup(mock => mock.GetEventsStats(EventsEnum.EventsQueued)).Returns(4);
+            _telemetryRuntimeConsumer.Setup(mock => mock.PopHttpErrors()).Returns(new HTTPErrors());
+            _telemetryRuntimeConsumer.Setup(mock => mock.PopHttpLatencies()).Returns(new HTTPLatencies());
+            _telemetryRuntimeConsumer.Setup(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped)).Returns(5);
+            _telemetryRuntimeConsumer.Setup(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped)).Returns(6);
+            _telemetryRuntimeConsumer.Setup(mock => mock.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued)).Returns(7);
+            _telemetryRuntimeConsumer.Setup(mock => mock.GetLastSynchronizations()).Returns(new LastSynchronization());
+            _telemetryEvaluationConsumer.Setup(mock => mock.PopExceptions()).Returns(new MethodExceptions());
+            _telemetryEvaluationConsumer.Setup(mock => mock.PopLatencies()).Returns(new MethodLatencies());
+            _telemetryRuntimeConsumer.Setup(mock => mock.GetSessionLength()).Returns(8);
+            _telemetryRuntimeConsumer.Setup(mock => mock.PopStreamingEvents()).Returns(new List<StreamingEvent>());
+            _telemetryRuntimeConsumer.Setup(mock => mock.PopTags()).Returns(new List<string>());
+            _telemetryRuntimeConsumer.Setup(mock => mock.PopTokenRefreshes()).Returns(9);
             _splitCache.Setup(mock => mock.SplitsCount()).Returns(50);
             _segmentCache.Setup(mock => mock.SegmentsCount()).Returns(10);
             _segmentCache.Setup(mock => mock.SegmentKeysCount()).Returns(33);

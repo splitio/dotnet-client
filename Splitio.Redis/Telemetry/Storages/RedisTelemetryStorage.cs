@@ -6,11 +6,10 @@ using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
-using System.Collections.Generic;
 
 namespace Splitio.Redis.Telemetry.Storages
 {
-    public class RedisTelemetryStorage : ITelemetryStorage
+    public class RedisTelemetryStorage : ITelemetryInitProducer, ITelemetryEvaluationProducer
     {
         private readonly TimeSpan TelemetryConfigKeyTTL = new TimeSpan(1, 0, 0); // 1 hour.
 
@@ -74,137 +73,15 @@ namespace Splitio.Redis.Telemetry.Storages
         {
             _redisAdapter.HashIncrement(TelemetryLatencyKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method}/{bucket}", 1);
         }
-        #endregion
 
-        #region No-Op Methods
         public void RecordNonReadyUsages()
         {
-            // No-Op.
+            // No-Op
         }
 
         public void RecordBURTimeout()
         {
-            // No-Op.
-        }
-
-        public void AddTag(string tag)
-        {
-            // No-Op.
-        }
-
-        public void RecordImpressionsStats(ImpressionsEnum data, long count)
-        {
-            // No-Op.
-        }
-
-        public void RecordEventsStats(EventsEnum data, long count)
-        {
-            // No-Op.
-        }
-
-        public void RecordSuccessfulSync(ResourceEnum resource, long timestamp)
-        {
-            // No-Op.
-        }
-
-        public void RecordSyncError(ResourceEnum resuource, int status)
-        {
-            // No-Op.
-        }
-
-        public void RecordSyncLatency(ResourceEnum resource, int bucket)
-        {
-            // No-Op.
-        }
-
-        public void RecordAuthRejections()
-        {
-            // No-Op.
-        }
-
-        public void RecordTokenRefreshes()
-        {
-            // No-Op.
-        }
-
-        public void RecordStreamingEvent(StreamingEvent streamingEvent)
-        {
-            // No-Op.
-        }
-
-        public void RecordSessionLength(long session)
-        {
-            // No-Op.
-        }
-
-        public MethodLatencies PopLatencies()
-        {
-            return new MethodLatencies();
-        }
-
-        public MethodExceptions PopExceptions()
-        {
-            return new MethodExceptions();
-        }
-
-        public long GetNonReadyUsages()
-        {
-            return 0;
-        }
-
-        public long GetBURTimeouts()
-        {
-            return 0;
-        }
-
-        public long GetImpressionsStats(ImpressionsEnum data)
-        {
-            return 0;
-        }
-
-        public long GetEventsStats(EventsEnum data)
-        {
-            return 0;
-        }
-
-        public LastSynchronization GetLastSynchronizations()
-        {
-            return new LastSynchronization();
-        }
-
-        public HTTPErrors PopHttpErrors()
-        {
-            return new HTTPErrors();
-        }
-
-        public HTTPLatencies PopHttpLatencies()
-        {
-            return new HTTPLatencies();
-        }
-
-        public long PopAuthRejections()
-        {
-            return 0;
-        }
-
-        public long PopTokenRefreshes()
-        {
-            return 0;
-        }
-
-        public IList<StreamingEvent> PopStreamingEvents()
-        {
-            return new List<StreamingEvent>();
-        }
-
-        public IList<string> PopTags()
-        {
-            return new List<string>();
-        }
-
-        public long GetSessionLength()
-        {
-            return 0;
+            // No-Op
         }
         #endregion
     }

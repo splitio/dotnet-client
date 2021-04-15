@@ -3,10 +3,6 @@ using Splitio.Telemetry.Domain.Enums;
 
 namespace Splitio.Telemetry.Storages
 {
-    public interface ITelemetryStorageProducer : ITelemetryEvaluationProducer, ITelemetryRuntimeProducer, ITelemetryInitProducer
-    {
-    }
-
     public interface ITelemetryEvaluationProducer
     {
         void RecordLatency(MethodEnum method, int bucket);
@@ -29,8 +25,8 @@ namespace Splitio.Telemetry.Storages
 
     public interface ITelemetryInitProducer
     {
-        void RecordConfigInit(Config config);
-        void RecordNonReadyUsages();
+        void RecordConfigInit(Config config);        
         void RecordBURTimeout();
+        void RecordNonReadyUsages();
     }
 }
