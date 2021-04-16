@@ -1,11 +1,15 @@
 ﻿using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Telemetry.Domain;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System;
 
 namespace Splitio.Services.EventSource
 {
     public class NotificationManagerKeeper : INotificationManagerKeeper
     {
+        private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly ISplitLogger _log;
         private readonly object _eventOccupancyLock = new object();
 
@@ -15,8 +19,10 @@ namespace Splitio.Services.EventSource
 
         public event EventHandler<SSEActionsEventArgs> ActionEvent;
 
-        public NotificationManagerKeeper(ISplitLogger log = null)
+        public NotificationManagerKeeper(ITelemetryRuntimeProducer telemetryRuntimeProducer,
+            ISplitLogger log = null)
         {
+            _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _log = log ?? WrapperAdapter.GetLogger(typeof(NotificationManagerKeeper));
 
             _publisherAvailable = true;
@@ -48,15 +54,18 @@ namespace Splitio.Services.EventSource
             switch (controlEvent.ControlType)
             {
                 case ControlType.STREAMING_PAUSED:
+                    _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.StreamingStatus, (int)StreamingStatusEnum.Paused));
                     DispatchActionEvent(SSEClientActions.SUBSYSTEM_DOWN);
                     break;
-                case ControlType.STREAMING_RESUMED:                    
+                case ControlType.STREAMING_RESUMED:
                     lock (_eventOccupancyLock)
                     {
+                        _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.StreamingStatus, (int)StreamingStatusEnum.Enabled));
                         if (_publisherAvailable) DispatchActionEvent(SSEClientActions.SUBSYSTEM_READY);
                     }
                     break;
                 case ControlType.STREAMING_DISABLED:
+                    _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.StreamingStatus, (int)StreamingStatusEnum.Disabled));
                     DispatchActionEvent(SSEClientActions.SUBSYSTEM_OFF);
                     break;
                 default:
@@ -91,12 +100,14 @@ namespace Splitio.Services.EventSource
             if (channel.Equals(Constants.Push.ControlPri))
             {
                 _publishersPri = publishers;
+                _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.OccupancyPri, publishers));
                 return;
             }
 
             if (channel.Equals(Constants.Push.ControlSec))
             {
                 _publishersSec = publishers;
+                _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.OccupancySec, publishers));
                 return;
             }
         }

@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using Splitio.CommonLibraries;
+using Splitio.Telemetry.Domain.Enums;
 
 namespace Splitio.Telemetry.Domain
 {
@@ -10,5 +12,18 @@ namespace Splitio.Telemetry.Domain
         public long Data { get; set; }
         [JsonProperty("t")]
         public long Timestamp { get; set; }
+
+        public StreamingEvent(EventTypeEnum type, long data)
+        {
+            Timestamp = CurrentTimeHelper.CurrentTimeMillis();
+            Type = (int)type;
+            Data = data;
+        }
+
+        public StreamingEvent(EventTypeEnum type)
+        {
+            Timestamp = CurrentTimeHelper.CurrentTimeMillis();
+            Type = (int)type;
+        }
     }
 }

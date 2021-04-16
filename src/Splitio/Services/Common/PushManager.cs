@@ -1,7 +1,11 @@
-﻿using Splitio.Services.EventSource;
+﻿using Splitio.CommonLibraries;
+using Splitio.Services.EventSource;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Telemetry.Domain;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,22 +19,24 @@ namespace Splitio.Services.Common
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISSEHandler _sseHandler;
         private readonly IBackOff _backOff;
+        private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
 
         private CancellationTokenSource _cancellationTokenSourceRefreshToken;
         private Task _refreshTokenTask;
 
-        public PushManager(int authRetryBackOffBase,
-            ISSEHandler sseHandler,
+        public PushManager(ISSEHandler sseHandler,
             IAuthApiClient authApiClient,
-            IWrapperAdapter wrapperAdapter = null,
-            ISplitLogger log = null,
-            IBackOff backOff = null)
+            IWrapperAdapter wrapperAdapter,
+            ITelemetryRuntimeProducer telemetryRuntimeProducer,
+            IBackOff backOff,
+            ISplitLogger log = null)
         {
             _sseHandler = sseHandler;
             _authApiClient = authApiClient;
             _log = log ?? WrapperAdapter.GetLogger(typeof(PushManager));
-            _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
-            _backOff = backOff ?? new BackOff(authRetryBackOffBase, attempt: 1);
+            _wrapperAdapter = wrapperAdapter;
+            _backOff = backOff;
+            _telemetryRuntimeProducer = telemetryRuntimeProducer;
         }
 
         #region Public Methods
@@ -46,6 +52,7 @@ namespace Splitio.Services.Common
                 {                    
                     _backOff.Reset();
                     ScheduleNextTokenRefresh(response.Expiration.Value);
+                    _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.TokenRefresh, CalcularteNextTokenExpiration(response.Expiration.Value)));
                     return true;
                 }                
                 
@@ -111,6 +118,11 @@ namespace Splitio.Services.Common
         {
             if (_cancellationTokenSourceRefreshToken != null)
                 _cancellationTokenSourceRefreshToken.Cancel();            
+        }
+
+        private long CalcularteNextTokenExpiration(double time)
+        {
+            return CurrentTimeHelper.CurrentTimeMillis() + Convert.ToInt64(time * 1000);
         }
         #endregion
     }

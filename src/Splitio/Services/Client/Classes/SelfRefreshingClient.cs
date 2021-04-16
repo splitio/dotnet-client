@@ -1,4 +1,5 @@
-﻿using Splitio.Domain;
+﻿using Splitio.CommonLibraries;
+using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
@@ -35,6 +36,7 @@ namespace Splitio.Services.Client.Classes
         /// More details : https://msdn.microsoft.com/en-us/library/dd287171(v=vs.110).aspx
         /// </summary>
         private const int InitialCapacity = 31;
+        private readonly long _startSessingMs;
 
         private IReadinessGatesCache _gates;
         private ISplitFetcher _splitFetcher;
@@ -73,6 +75,7 @@ namespace Splitio.Services.Client.Classes
             BuildManager();            
             BuildSyncManager();
 
+            _startSessingMs = CurrentTimeHelper.CurrentTimeMillis();
             Start();
         }
 
@@ -81,6 +84,7 @@ namespace Splitio.Services.Client.Classes
         {
             if (!Destroyed)
             {
+                _telemetryRuntimeProducer.RecordSessionLength(CurrentTimeHelper.CurrentTimeMillis() - _startSessingMs);
                 Stop();
                 base.Destroy();
             }
@@ -204,14 +208,14 @@ namespace Splitio.Services.Client.Classes
                 var notificationParser = new NotificationParser();
 
                 // NotificationManagerKeeper
-                var notificationManagerKeeper = new NotificationManagerKeeper();
+                var notificationManagerKeeper = new NotificationManagerKeeper(_telemetryRuntimeProducer);
 
                 // EventSourceClient
                 var headers = GetHeaders();
                 headers.Add(Constants.Http.SplitSDKClientKey, ApiKey.Substring(ApiKey.Length - 4));
                 headers.Add(Constants.Http.Accept, Constants.Http.EventStream);
                 var sseHttpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, headers);
-                var eventSourceClient = new EventSourceClient(notificationParser, _wrapperAdapter, sseHttpClient);
+                var eventSourceClient = new EventSourceClient(notificationParser, _wrapperAdapter, sseHttpClient, _telemetryRuntimeProducer);
 
                 // SSEHandler
                 var sseHandler = new SSEHandler(_config.StreamingServiceURL, splitsWorker, segmentsWorker, notificationProcessor, notificationManagerKeeper, eventSourceClient: eventSourceClient);
@@ -221,10 +225,11 @@ namespace Splitio.Services.Client.Classes
                 var authApiClient = new AuthApiClient(_config.AuthServiceURL, ApiKey, httpClient, _telemetryRuntimeProducer);
 
                 // PushManager
-                var pushManager = new PushManager(_config.AuthRetryBackoffBase, sseHandler, authApiClient, _wrapperAdapter);
+                var backoff = new BackOff(_config.AuthRetryBackoffBase, attempt: 1);
+                var pushManager = new PushManager(sseHandler, authApiClient, _wrapperAdapter, _telemetryRuntimeProducer, backoff);
 
                 // SyncManager
-                _syncManager = new SyncManager(_config.StreamingEnabled, synchronizer, pushManager, sseHandler, notificationManagerKeeper);
+                _syncManager = new SyncManager(_config.StreamingEnabled, synchronizer, pushManager, sseHandler, notificationManagerKeeper, _telemetryRuntimeProducer);
             }
             catch (Exception ex)
             {
