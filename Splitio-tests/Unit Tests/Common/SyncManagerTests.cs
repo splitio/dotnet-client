@@ -3,6 +3,7 @@ using Moq;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource;
 using Splitio.Services.Logger;
+using Splitio.Telemetry.Storages;
 using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.Common
@@ -15,6 +16,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<ISSEHandler> _sseHandler;
         private readonly Mock<ISplitLogger> _log;
         private readonly Mock<INotificationManagerKeeper> _notificationManagerKeeper;
+        private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private ISyncManager _syncManager;
 
         public SyncManagerTests()
@@ -24,6 +26,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _sseHandler = new Mock<ISSEHandler>();
             _log = new Mock<ISplitLogger>();
             _notificationManagerKeeper = new Mock<INotificationManagerKeeper>();
+            _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
         }
 
         [TestMethod]
@@ -31,7 +34,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = false;
-            _syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _log.Object);
+            _syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _telemetryRuntimeProducer.Object, _log.Object);
 
             // Act.
             _syncManager.Start();
@@ -55,7 +58,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .ReturnsAsync(true);
 
             var streamingEnabled = true;
-            _syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _log.Object);
+            _syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _telemetryRuntimeProducer.Object, _log.Object);
 
             // Act.
             _syncManager.Start();
@@ -79,7 +82,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .ReturnsAsync(false);
 
             var streamingEnabled = true;
-            _syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _log.Object);
+            _syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _telemetryRuntimeProducer.Object, _log.Object);
 
             // Act.
             _syncManager.Start();
@@ -99,7 +102,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            _syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _log.Object);
+            _syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _telemetryRuntimeProducer.Object, _log.Object);
 
             // Act.
             _syncManager.Shutdown();
@@ -115,7 +118,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            var syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _log.Object);
+            var syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _telemetryRuntimeProducer.Object, _log.Object);
 
             // Act & Assert.
             syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.CONNECTED));
@@ -137,7 +140,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            var syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _log.Object);
+            var syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _telemetryRuntimeProducer.Object, _log.Object);
 
             // Act & Assert.
             syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.DISCONNECT));
@@ -162,7 +165,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            var syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _log.Object);
+            var syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _telemetryRuntimeProducer.Object, _log.Object);
 
             // Act & Assert.
             syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.RETRYABLE_ERROR));
@@ -187,7 +190,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            var syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _log.Object);
+            var syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _telemetryRuntimeProducer.Object, _log.Object);
 
             // Act & Assert.
             syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.NONRETRYABLE_ERROR));
@@ -212,7 +215,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            var syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _log.Object);
+            var syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _telemetryRuntimeProducer.Object, _log.Object);
 
             // Act.
             syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.SUBSYSTEM_DOWN));
@@ -228,7 +231,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            var syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _log.Object);
+            var syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _telemetryRuntimeProducer.Object, _log.Object);
 
             // Act.
             syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.SUBSYSTEM_READY));
@@ -244,7 +247,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            var syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _log.Object);
+            var syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _telemetryRuntimeProducer.Object, _log.Object);
 
             // Act.
             syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.SUBSYSTEM_OFF));

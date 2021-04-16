@@ -2,6 +2,7 @@
 using Splitio.Services.Common;
 using Splitio.Services.EventSource;
 using Splitio.Services.Shared.Classes;
+using Splitio.Telemetry.Storages;
 using System.Collections.Concurrent;
 using System.Threading;
 
@@ -28,8 +29,9 @@ namespace Splitio.Integration_tests.EventSource
                 var notificationParser = new NotificationParser();
                 var wrapperAdapter = new WrapperAdapter();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
+                var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient);
+                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);
@@ -58,8 +60,9 @@ namespace Splitio.Integration_tests.EventSource
                 var notificationParser = new NotificationParser();
                 var wrapperAdapter = new WrapperAdapter();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
+                var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient);
+                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);
@@ -89,8 +92,9 @@ namespace Splitio.Integration_tests.EventSource
                 var notificationParser = new NotificationParser();
                 var wrapperAdapter = new WrapperAdapter();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
+                var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient);
+                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);
@@ -119,8 +123,9 @@ namespace Splitio.Integration_tests.EventSource
                 var notificationParser = new NotificationParser();
                 var wrapperAdapter = new WrapperAdapter();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
+                var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient);
+                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);
@@ -149,8 +154,9 @@ namespace Splitio.Integration_tests.EventSource
                 var notificationParser = new NotificationParser();
                 var wrapperAdapter = new WrapperAdapter();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
+                var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient);
+                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);
@@ -178,8 +184,9 @@ namespace Splitio.Integration_tests.EventSource
                 var notificationParser = new NotificationParser();
                 var wrapperAdapter = new WrapperAdapter();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
+                var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient);
+                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);
@@ -217,8 +224,9 @@ namespace Splitio.Integration_tests.EventSource
                 var notificationParser = new NotificationParser();
                 var wrapperAdapter = new WrapperAdapter();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
+                var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient);
+                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);
@@ -244,8 +252,9 @@ namespace Splitio.Integration_tests.EventSource
                 var notificationParser = new NotificationParser();
                 var wrapperAdapter = new WrapperAdapter();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
+                var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient);
+                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);
@@ -269,8 +278,9 @@ namespace Splitio.Integration_tests.EventSource
                 var notificationParser = new NotificationParser();
                 var wrapperAdapter = new WrapperAdapter();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
+                var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient);
+                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);

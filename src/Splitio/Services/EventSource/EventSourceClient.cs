@@ -2,6 +2,9 @@
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Telemetry.Domain;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System;
 using System.IO;
 using System.Net.Http;
@@ -24,6 +27,7 @@ namespace Splitio.Services.EventSource
         private readonly CountdownEvent _disconnectSignal;
         private readonly CountdownEvent _connectedSignal;
         private readonly ISplitioHttpClient _splitHttpClient;
+        private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
 
         private string _url;
         private bool _connected;
@@ -35,12 +39,14 @@ namespace Splitio.Services.EventSource
         public EventSourceClient(INotificationParser notificationParser,
             IWrapperAdapter wrapperAdapter,
             ISplitioHttpClient splitHttpClient,
+            ITelemetryRuntimeProducer telemetryRuntimeProducer,
             ISplitLogger log = null)
         {            
             _notificationParser = notificationParser;
             _wrapperAdapter = wrapperAdapter;
             _splitHttpClient = splitHttpClient;
             _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
+            _telemetryRuntimeProducer = telemetryRuntimeProducer;
 
             _disconnectSignal = new CountdownEvent(1);
             _connectedSignal = new CountdownEvent(1);
@@ -252,6 +258,8 @@ namespace Splitio.Services.EventSource
             {
                 throw new ReadStreamException(SSEClientActions.NONRETRYABLE_ERROR, $"Ably Notification code: {notificationError.Code}");
             }
+
+            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.AblyError, notificationError.Code));
         }
 
         private void DispatchEvent(IncomingNotification incomingNotification)

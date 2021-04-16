@@ -11,4 +11,23 @@
         AblyError = 60,
         SyncMode = 70
     }
+
+    public enum StreamingStatusEnum
+    {
+        Disabled,
+        Enabled,
+        Paused
+    }
+
+    public enum ConnectionErrorEnum
+    {
+        Requested,
+        Non_Requested
+    }
+
+    public enum SyncModeEnum
+    {
+        Streaming,
+        Polling
+    }
 }

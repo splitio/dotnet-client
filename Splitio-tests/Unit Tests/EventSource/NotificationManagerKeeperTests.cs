@@ -2,6 +2,7 @@
 using Moq;
 using Splitio.Services.EventSource;
 using Splitio.Services.Logger;
+using Splitio.Telemetry.Storages;
 
 namespace Splitio_Tests.Unit_Tests.EventSource
 {
@@ -9,6 +10,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
     public class NotificationManagerKeeperTests
     {
         private readonly Mock<ISplitLogger> _log;
+        private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private SSEActionsEventArgs _event;
 
         private readonly INotificationManagerKeeper _notificationManagerKeeper;
@@ -16,8 +18,9 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         public NotificationManagerKeeperTests()
         {
             _log = new Mock<ISplitLogger>();
+            _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
 
-            _notificationManagerKeeper = new NotificationManagerKeeper(_log.Object);
+            _notificationManagerKeeper = new NotificationManagerKeeper(_telemetryRuntimeProducer.Object, _log.Object);
             _notificationManagerKeeper.ActionEvent += OnActionEvent;
         }
 

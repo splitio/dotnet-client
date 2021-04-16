@@ -140,7 +140,7 @@ namespace Splitio.Telemetry.Common
                     TokenRefreshes = _telemetryStorageConsumer.PopTokenRefreshes(),
                     SplitCount = _splitCache.SplitsCount(),
                     SegmentCount = _segmentCache.SegmentsCount(),
-                    SegmentKeyCount = _segmentCache.SegmentKeysCount()
+                    SegmentKeyCount = _segmentCache.SegmentKeysCount(),
                 };
 
                 _telemetryAPI.RecordStats(stats);
