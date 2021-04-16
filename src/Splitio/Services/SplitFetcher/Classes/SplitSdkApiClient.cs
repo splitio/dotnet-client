@@ -1,9 +1,11 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Services.Logger;
-using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
@@ -18,13 +20,14 @@ namespace Splitio.Services.SplitFetcher.Classes
         private const string UrlParameterSince = "?since=";
         private const string SplitFetcherTime = "splitChangeFetcher.time";
         private const string SplitFetcherStatus = "splitChangeFetcher.status.{0}";
-        private const string SplitFetcherException = "splitChangeFetcher.exception";
-        
-        public SplitSdkApiClient(HTTPHeader header,
+        private const string SplitFetcherException = "splitChangeFetcher.exception";        
+
+        public SplitSdkApiClient(string apiKey,
+            Dictionary<string, string> headers,
             string baseUrl,
             long connectionTimeOut,
             long readTimeout,
-            IMetricsLog metricsLog = null) : base(header, baseUrl, connectionTimeOut, readTimeout, metricsLog)
+            ITelemetryRuntimeProducer telemetryRuntimeProducer) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout, telemetryRuntimeProducer)
         { }
 
         public async Task<string> FetchSplitChanges(long since)
@@ -39,34 +42,20 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                 if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
                 {
-                    if (_metricsLog != null)
-                    {
-                        _metricsLog.Time(SplitFetcherTime, clock.ElapsedMilliseconds);
-                        _metricsLog.Count(string.Format(SplitFetcherStatus, response.statusCode), 1);
-                    }
+                    _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.SplitSync, CurrentTimeHelper.CurrentTimeMillis());
 
                     return response.content;
                 }
-                else
-                {
-                    _log.Error(string.Format("Http status executing FetchSplitChanges: {0} - {1}", response.statusCode.ToString(), response.content));
 
-                    if (_metricsLog != null)
-                    {
-                        _metricsLog.Count(string.Format(SplitFetcherStatus, response.statusCode), 1);
-                    }
+                _log.Error($"Http status executing FetchSplitChanges: {response.statusCode.ToString()} - {response.content}");
 
-                    return string.Empty;
-                }
+                _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.SplitSync, (int)response.statusCode);
+
+                return string.Empty;
             }
             catch (Exception e)
             {
                 _log.Error("Exception caught executing FetchSplitChanges", e);
-
-                if (_metricsLog != null)
-                {
-                    _metricsLog.Count(SplitFetcherException, 1);
-                }
 
                 return string.Empty;
             }

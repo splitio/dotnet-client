@@ -7,6 +7,6 @@ namespace Splitio.Services.Impressions.Interfaces
     {
         void Start();
         void Stop();
-        void Log(IList<KeyImpression> impressions);
+        int Log(IList<KeyImpression> impressions);
     }
 }

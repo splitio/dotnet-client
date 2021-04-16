@@ -111,39 +111,5 @@ namespace Splitio_Tests.Unit_Tests.Cache
             Assert.AreEqual(split.defaultTreatment, result.defaultTreatment);
             Assert.AreEqual(split.trafficTypeName, result.trafficTypeName);
         }
-
-        [TestMethod]
-        public void UseSplitioAndSdkMachinePrefix()
-        {
-            //Arrange
-            var redisAdapterMock = new Mock<IRedisAdapter>();
-            redisAdapterMock.Setup(x => x.IcrBy("SPLITIO/net-1.0.2/10.0.0.1/count.counter_test", 150)).Returns(150);
-            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2", "machine_name_test");
-
-            //Act
-            var result = cache.IncrementCount("counter_test", 150);
-
-            //Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.GetCount());
-            Assert.AreEqual(150, result.GetDelta());
-        }
-
-        [TestMethod]
-        public void UseSplitioAndSdkMachineAndUserPrefix()
-        {
-            //Arrange
-            var redisAdapterMock = new Mock<IRedisAdapter>();
-            redisAdapterMock.Setup(x => x.IcrBy("mycompany.SPLITIO/net-1.0.2/10.0.0.1/count.counter_test", 150)).Returns(150);
-            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2", "machine_name_test", "mycompany");
-
-            //Act
-            var result = cache.IncrementCount("counter_test", 150);
-
-            //Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.GetCount());
-            Assert.AreEqual(150, result.GetDelta());
-        }
     }
 }

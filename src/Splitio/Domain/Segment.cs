@@ -1,10 +1,11 @@
 ﻿using Splitio.Services.SegmentFetcher.Interfaces;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Splitio.Domain
 {
-    public class Segment: ISegment
+    public class Segment : ISegment
     {
         private string name;
         public long changeNumber { get; set; }
@@ -45,6 +46,14 @@ namespace Splitio.Domain
         {
             byte value;
             return keys.TryGetValue(key, out value);
+        }
+
+        public List<string> GetKeys()
+        {
+            if (keys == null)
+                return new List<string>();
+
+            return keys.Keys.ToList();
         }
     }
 }

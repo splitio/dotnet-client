@@ -7,8 +7,8 @@ namespace Splitio.Services.Shared.Classes
     public class FactoryInstantiationsService : IFactoryInstantiationsService
     {
         private static FactoryInstantiationsService _instance;
-        private static object _instanceLock = new object();
-        private static object _lock = new object();
+        private static readonly object _instanceLock = new object();
+        private static readonly object _lock = new object();
 
         private ISplitLogger _log;
         private ConcurrentDictionary<string, int> _factoryInstantiations;
@@ -84,10 +84,42 @@ namespace Splitio.Services.Shared.Classes
             }
         }
 
+        public int GetActiveFactories()
+        {
+            return _factoryInstantiations.Count;
+        }
+
+        public int GetRedundantActiveFactories()
+        {
+            var toReturn = 0;
+
+            var keys = _factoryInstantiations.Keys;
+
+            foreach (var key in keys)
+            {
+                var exists = _factoryInstantiations.TryGetValue(key, out int quantity);
+
+                if (!exists) continue;
+
+                if (quantity > 1)
+                {
+                    toReturn += quantity-1;
+                }
+            }
+
+            return toReturn;
+        }
+
         //This method is only for test
         public ConcurrentDictionary<string, int> GetInstantiations()
         {
             return _factoryInstantiations;
+        }
+
+        //This method is only for test
+        public void Clear()
+        {
+            _factoryInstantiations.Clear();
         }
     }
 }

@@ -4,5 +4,7 @@
     {
         void Decrease(string apiKey);
         void Increase(string apiKey);
+        int GetActiveFactories();
+        int GetRedundantActiveFactories();
     }
 }

@@ -175,5 +175,18 @@ namespace Splitio.Services.Cache.Classes
 
             AddOrUpdate(splitName, split);
         }
+
+        public List<string> GetSplitNames()
+        {
+            return _splits
+                .Keys
+                .Where(name => !string.IsNullOrEmpty(name))
+                .ToList();
+        }
+
+        public int SplitsCount()
+        {
+            return GetSplitNames().Count;
+        }
     }
 }

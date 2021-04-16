@@ -1,8 +1,11 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System;
 using System.Linq;
 using System.Net;
@@ -14,16 +17,18 @@ namespace Splitio.Services.Common
     {
         private readonly ISplitLogger _log;
         private readonly ISplitioHttpClient _splitioHttpClient;
+        private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly string _url;
 
         public AuthApiClient(string url,
             string apiKey,
-            long connectionTimeOut,
-            ISplitioHttpClient splitioHttpClient = null,
+            ISplitioHttpClient splitioHttpClient,
+            ITelemetryRuntimeProducer telemetryRuntimeProducer,
             ISplitLogger log = null)
         {
             _url = url;
-            _splitioHttpClient = splitioHttpClient ?? new SplitioHttpClient(apiKey, connectionTimeOut);
+            _splitioHttpClient = splitioHttpClient;
+            _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _log = log ?? WrapperAdapter.GetLogger(typeof(AuthApiClient));            
         }
 
@@ -38,15 +43,19 @@ namespace Splitio.Services.Common
                 {
                     _log.Debug($"Success connection to: {_url}");
 
+                    _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.TokenSync, CurrentTimeHelper.CurrentTimeMillis());
+
                     return GetSuccessResponse(response.content);
                 }
                 else if (response.statusCode >= HttpStatusCode.BadRequest && response.statusCode < HttpStatusCode.InternalServerError)
                 {
                     _log.Debug($"Problem to connect to : {_url}. Response status: {response.statusCode}");
 
+                    _telemetryRuntimeProducer.RecordAuthRejections();
                     return new AuthenticationResponse { PushEnabled = false, Retry = false };
                 }
 
+                _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.TokenSync, (int)response.statusCode);
                 return new AuthenticationResponse { PushEnabled = false, Retry = true };
             }
             catch (Exception ex)
@@ -70,6 +79,8 @@ namespace Splitio.Services.Common
 
                 authResponse.Channels = GetChannels(token);
                 authResponse.Expiration = GetExpirationSeconds(token);
+
+                _telemetryRuntimeProducer.RecordTokenRefreshes();
             }
 
             authResponse.Retry = false;
@@ -93,15 +104,15 @@ namespace Splitio.Services.Common
         private string AddPrefixControlChannels(string channels)
         {
             channels = channels
-                .Replace(Constans.PushControlPri, $"{Constans.PushOccupancyPrefix}{Constans.PushControlPri}")
-                .Replace(Constans.PushControlSec, $"{Constans.PushOccupancyPrefix}{Constans.PushControlSec}");
+                .Replace(Constants.Push.ControlPri, $"{Constants.Push.OccupancyPrefix}{Constants.Push.ControlPri}")
+                .Replace(Constants.Push.ControlSec, $"{Constants.Push.OccupancyPrefix}{Constants.Push.ControlSec}");
 
             return channels;
         }
 
         private double GetExpirationSeconds(Jwt token)
         {
-            return token.Expiration - token.IssuedAt - Constans.PushSecondsBeforeExpiration;
+            return token.Expiration - token.IssuedAt - Constants.Push.SecondsBeforeExpiration;
         }
 
         private string DecodeJwt(string token)

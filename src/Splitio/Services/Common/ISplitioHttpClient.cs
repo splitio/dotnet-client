@@ -10,5 +10,6 @@ namespace Splitio.Services.Common
     {
         Task<HTTPResult> GetAsync(string url);
         Task<HttpResponseMessage> GetAsync(string url, HttpCompletionOption completionOption, CancellationToken cancellationToken);
+        Task<HTTPResult> PostAsync(string url, string data);
     }
 }

@@ -4,6 +4,7 @@ using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Telemetry.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -12,14 +13,14 @@ namespace Splitio.Services.Impressions.Classes
 {
     public class ImpressionsLog : IImpressionsLog
     {
-        private readonly ITreatmentSdkApiClient _apiClient;
+        private readonly IImpressionsSdkApiClient _apiClient;
         private readonly ISimpleProducerCache<KeyImpression> _impressionsCache;
         private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly int _interval;
 
         protected static readonly ISplitLogger Logger = WrapperAdapter.GetLogger(typeof(ImpressionsLog));
 
-        public ImpressionsLog(ITreatmentSdkApiClient apiClient,
+        public ImpressionsLog(IImpressionsSdkApiClient apiClient,
             int interval,
             ISimpleCache<KeyImpression> impressionsCache,
             int maximumNumberOfKeysToCache = -1)
@@ -41,9 +42,9 @@ namespace Splitio.Services.Impressions.Classes
             SendBulkImpressions();
         }
 
-        public void Log(IList<KeyImpression> impressions)
+        public int Log(IList<KeyImpression> impressions)
         {
-            _impressionsCache.AddItems(impressions);
+            return _impressionsCache.AddItems(impressions);
         }
 
         private void SendBulkImpressions()

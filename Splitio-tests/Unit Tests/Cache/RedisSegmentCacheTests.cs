@@ -1,12 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
 using Moq;
-using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Cache.Classes;
-using StackExchange.Redis;
-using System.Linq;
-using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Cache.Classes;
+using Splitio.Redis.Services.Cache.Interfaces;
+using StackExchange.Redis;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
@@ -59,7 +57,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
             //Act
-            var result = segmentCache.GetRegisteredSegments();
+            var result = segmentCache.GetSegmentNames();
 
             //Assert
             Assert.IsNotNull(result);
@@ -168,6 +166,64 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             //Assert
             redisAdapterMock.Verify(mock => mock.Flush(), Times.Once());
+        }
+
+        [TestMethod]
+        public void GetSegmentKeysTest()
+        {
+            // Arrange.
+            var redisAdapterMock = new Mock<IRedisAdapter>();
+            var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
+
+            var keys = new List<string> { "abcd", "1234" };
+            var segmentName = "test";
+            segmentCache.AddToSegment(segmentName, keys);
+
+            redisAdapterMock
+                .Setup(mock => mock.SMembers($"SPLITIO.segment.{segmentName}"))
+                .Returns(new List<RedisValue>
+                {
+                    "abcd",
+                    "1234"
+                }.ToArray());
+
+            // Act & Assert.
+            var result = segmentCache.GetSegmentKeys(segmentName);
+            Assert.AreEqual(2, result.Count);
+            Assert.IsTrue(result.Contains("abcd"));
+            Assert.IsTrue(result.Contains("1234"));
+
+            result = segmentCache.GetSegmentKeys("segmentName");
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [TestMethod]
+        public void GetSegmentNamesTest()
+        {
+            // Arrange.
+            var redisAdapterMock = new Mock<IRedisAdapter>();
+            var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);            
+
+            // Act & Assert.
+            var result = segmentCache.GetSegmentNames();
+            Assert.AreEqual(0, result.Count);
+
+            var segmentName = "test";
+
+            redisAdapterMock
+                .Setup(mock => mock.SMembers("SPLITIO.segments.registered"))
+                .Returns(new List<RedisValue>
+                {
+                    segmentName,
+                    $"{segmentName}-1",
+                    $"{segmentName}-2"
+                }.ToArray());
+
+            result = segmentCache.GetSegmentNames();
+            Assert.AreEqual(3, result.Count);
+            Assert.IsTrue(result.Contains(segmentName));
+            Assert.IsTrue(result.Contains($"{segmentName}-1"));
+            Assert.IsTrue(result.Contains($"{segmentName}-2"));
         }
     }
 }

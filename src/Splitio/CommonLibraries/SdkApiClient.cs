@@ -1,8 +1,9 @@
-﻿using Splitio.Domain;
-using Splitio.Services.Logger;
-using Splitio.Services.Metrics.Interfaces;
+﻿using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -16,17 +17,19 @@ namespace Splitio.CommonLibraries
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SdkApiClient));
 
         private readonly HttpClient _httpClient;
-        protected readonly IMetricsLog _metricsLog;
+        protected readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
 
-        public SdkApiClient (HTTPHeader header,
+        public SdkApiClient (string apiKey,
+            Dictionary<string, string> headers,
             string baseUrl,
             long connectionTimeOut,
             long readTimeout,
-            IMetricsLog metricsLog = null)
+            ITelemetryRuntimeProducer telemetryRuntimeProducer)
         {
 #if NET40 || NET45
             ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
 #endif
+            _telemetryRuntimeProducer = telemetryRuntimeProducer;
             var handler = new HttpClientHandler()
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
@@ -36,32 +39,16 @@ namespace Splitio.CommonLibraries
             {
                 BaseAddress = new Uri(baseUrl),
                 //TODO: find a way to store it in sepparated parameters
-                Timeout = TimeSpan.FromMilliseconds((connectionTimeOut + readTimeout))
+                Timeout = TimeSpan.FromMilliseconds(connectionTimeOut + readTimeout)
             };
 
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", header.authorizationApiKey);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Constants.Http.Bearer, apiKey);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            _httpClient.DefaultRequestHeaders.Add("SplitSDKVersion", header.splitSDKVersion);
-            _httpClient.DefaultRequestHeaders.Add("SplitSDKSpecVersion", header.splitSDKSpecVersion);
-            _httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
-            _httpClient.DefaultRequestHeaders.Add("Keep-Alive", "true");
 
-            if (!string.IsNullOrEmpty(header.splitSDKMachineName) && !header.splitSDKMachineName.Equals(Constans.Unknown))
+            foreach (var header in headers)
             {
-                _httpClient.DefaultRequestHeaders.Add("SplitSDKMachineName", header.splitSDKMachineName);
+                _httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
             }
-
-            if (!string.IsNullOrEmpty(header.splitSDKMachineIP) && !header.splitSDKMachineIP.Equals(Constans.Unknown))
-            {
-                _httpClient.DefaultRequestHeaders.Add("SplitSDKMachineIP", header.splitSDKMachineIP);
-            }
-
-            if (header.SplitSDKImpressionsMode != null)
-            {
-                _httpClient.DefaultRequestHeaders.Add("SplitSDKImpressionsMode", header.SplitSDKImpressionsMode.Value.ToString());
-            }
-
-            _metricsLog = metricsLog;
         }
 
         public virtual async Task<HTTPResult> ExecuteGet(string requestUri)
@@ -73,7 +60,7 @@ namespace Splitio.CommonLibraries
                 using (var response = await _httpClient.GetAsync(requestUri))
                 {
                     result.statusCode = response.StatusCode;
-                    result.content = response.Content.ReadAsStringAsync().Result;
+                    result.content = await response.Content.ReadAsStringAsync();
                 }
             }
             catch(Exception e)
@@ -93,7 +80,7 @@ namespace Splitio.CommonLibraries
                 using (var response = await _httpClient.PostAsync(requestUri, new StringContent(data, Encoding.UTF8, "application/json")))
                 {
                     result.statusCode = response.StatusCode;
-                    result.content = response.Content.ReadAsStringAsync().Result;
+                    result.content = await response.Content.ReadAsStringAsync();
                 }
             }
             catch (Exception e)
@@ -102,6 +89,20 @@ namespace Splitio.CommonLibraries
             }
 
             return result;
+        }
+
+        protected void RecordTelemetry(string method, int statusCode, string content, ResourceEnum resource)
+        {
+            if (statusCode >= (int)HttpStatusCode.OK && statusCode < (int)HttpStatusCode.Ambiguous)
+            {
+                _telemetryRuntimeProducer.RecordSuccessfulSync(resource, CurrentTimeHelper.CurrentTimeMillis());
+            }
+            else
+            {
+                _log.Error($"Http status executing {method}: {statusCode.ToString()} - {content}");
+
+                _telemetryRuntimeProducer.RecordSyncError(resource, statusCode);
+            }
         }
     }
 }

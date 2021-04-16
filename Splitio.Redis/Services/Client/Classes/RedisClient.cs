@@ -4,14 +4,15 @@ using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Redis.Services.Events.Classes;
 using Splitio.Redis.Services.Impressions.Classes;
-using Splitio.Redis.Services.Metrics.Classes;
 using Splitio.Redis.Services.Parsing.Classes;
 using Splitio.Redis.Services.Shared;
+using Splitio.Redis.Telemetry.Storages;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Telemetry.Domain;
 using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Client.Classes
@@ -31,13 +32,15 @@ namespace Splitio.Redis.Services.Client.Classes
 
             ReadConfig(config);
             BuildRedisCache();
+            BuildTelemetryStorage();
             BuildTreatmentLog(config);
             BuildImpressionManager();
-            BuildEventLog(config);
-            BuildMetricsLog();            
+            BuildEventLog();
             BuildBlockUntilReadyService();
             BuildManager();
-            BuildEvaluator();
+            BuildEvaluator();            
+
+            RecordConfigInit();
         }
 
         #region Private Methods
@@ -45,7 +48,6 @@ namespace Splitio.Redis.Services.Client.Classes
         {            
             var baseConfig = _configService.ReadConfig(config, ConfingTypes.Redis);
             _config.SdkVersion = baseConfig.SdkVersion;
-            _config.SdkSpecVersion = baseConfig.SdkSpecVersion;
             _config.SdkMachineName = baseConfig.SdkMachineName;
             _config.SdkMachineIP = baseConfig.SdkMachineIP;
             LabelsEnabled = baseConfig.LabelsEnabled;
@@ -58,6 +60,7 @@ namespace Splitio.Redis.Services.Client.Classes
             _config.RedisSyncTimeout = config.CacheAdapterConfig.SyncTimeout ?? 0;
             _config.RedisConnectRetry = config.CacheAdapterConfig.ConnectRetry ?? 0;
             _config.RedisUserPrefix = config.CacheAdapterConfig.UserPrefix;
+            _config.Mode = config.Mode;
         }
 
         private void BuildRedisCache()
@@ -68,8 +71,7 @@ namespace Splitio.Redis.Services.Client.Classes
 
             _segmentCache = new RedisSegmentCache(_redisAdapter, _config.RedisUserPrefix);
             _splitParser = new RedisSplitParser(_segmentCache);
-            _splitCache = new RedisSplitCache(_redisAdapter, _splitParser, _config.RedisUserPrefix);
-            _metricsCache = new RedisMetricsCache(_redisAdapter, _config.SdkMachineIP, _config.SdkVersion, _config.SdkMachineName, _config.RedisUserPrefix);
+            _splitCache = new RedisSplitCache(_redisAdapter, _splitParser, _config.RedisUserPrefix);            
             _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
         }
 
@@ -84,18 +86,13 @@ namespace Splitio.Redis.Services.Client.Classes
         private void BuildImpressionManager()
         {
             var impressionsCounter = new ImpressionsCounter();
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, false, ImpressionsMode.Debug);
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, false, ImpressionsMode.Debug, telemetryRuntimeProducer: null);
         }
 
-        private void BuildEventLog(ConfigurationOptions config)
+        private void BuildEventLog()
         {
             var eventsCache = new RedisEventsCache(_redisAdapter, _config.SdkMachineName, _config.SdkMachineIP, _config.SdkVersion, _config.RedisUserPrefix);
             _eventsLog = new RedisEvenstLog(eventsCache);
-        }
-
-        private void BuildMetricsLog()
-        {
-            _metricsLog = new RedisMetricsLog(_metricsCache);
         }
         
         private void BuildManager()
@@ -106,6 +103,27 @@ namespace Splitio.Redis.Services.Client.Classes
         private void BuildBlockUntilReadyService()
         {
             _blockUntilReadyService = new RedisBlockUntilReadyService(_redisAdapter);
+        }
+
+        private void BuildTelemetryStorage()
+        {
+            var redisTelemetryStorage = new RedisTelemetryStorage(_redisAdapter, _config.RedisUserPrefix, _config.SdkVersion, _config.SdkMachineIP, _config.SdkMachineName);
+
+            _telemetryInitProducer = redisTelemetryStorage;
+            _telemetryEvaluationProducer = redisTelemetryStorage;
+        }
+
+        private void RecordConfigInit()
+        {
+            var config = new Config
+            {
+                OperationMode = (int)_config.Mode,
+                Storage = Constants.StorageType.Redis,
+                ActiveFactories = _factoryInstantiationsService.GetActiveFactories(),
+                RedundantActiveFactories = _factoryInstantiationsService.GetRedundantActiveFactories()
+            };
+
+            _telemetryInitProducer.RecordConfigInit(config);
         }
 
         private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)
