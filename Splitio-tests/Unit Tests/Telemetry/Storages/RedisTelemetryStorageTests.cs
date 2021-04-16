@@ -23,7 +23,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         private string _machineIp;
         private string _machineName;
 
-        private ITelemetryStorage _telemetryStorage;
+        private RedisTelemetryStorage _telemetryStorage;
 
         [TestInitialize]
         public void Initialization()

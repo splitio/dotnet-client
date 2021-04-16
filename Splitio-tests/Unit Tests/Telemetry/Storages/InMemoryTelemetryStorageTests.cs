@@ -7,7 +7,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
     [TestClass]
     public class InMemoryTelemetryStorageTests
     {
-        private ITelemetryStorage _telemetryStorage;
+        private InMemoryTelemetryStorage _telemetryStorage;
 
         [TestInitialize]
         public void Initialization()

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Splitio.Telemetry.Storages
 {
-    public class InMemoryTelemetryStorage : ITelemetryStorage
+    public class InMemoryTelemetryStorage : ITelemetryStorageProducer, ITelemetryStorageConsumer
     {
         // Latencies
         private readonly ConcurrentDictionary<MethodEnum, IList<long>> _methodLatencies = new ConcurrentDictionary<MethodEnum, IList<long>>();
