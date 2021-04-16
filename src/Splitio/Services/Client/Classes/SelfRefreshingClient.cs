@@ -36,7 +36,7 @@ namespace Splitio.Services.Client.Classes
         /// More details : https://msdn.microsoft.com/en-us/library/dd287171(v=vs.110).aspx
         /// </summary>
         private const int InitialCapacity = 31;
-        private readonly long _startSessingMs;
+        private readonly long _startSessionMs;
 
         private IReadinessGatesCache _gates;
         private ISplitFetcher _splitFetcher;
@@ -75,7 +75,7 @@ namespace Splitio.Services.Client.Classes
             BuildManager();            
             BuildSyncManager();
 
-            _startSessingMs = CurrentTimeHelper.CurrentTimeMillis();
+            _startSessionMs = CurrentTimeHelper.CurrentTimeMillis();
             Start();
         }
 
@@ -84,7 +84,7 @@ namespace Splitio.Services.Client.Classes
         {
             if (!Destroyed)
             {
-                _telemetryRuntimeProducer.RecordSessionLength(CurrentTimeHelper.CurrentTimeMillis() - _startSessingMs);
+                _telemetryRuntimeProducer.RecordSessionLength(CurrentTimeHelper.CurrentTimeMillis() - _startSessionMs);
                 Stop();
                 base.Destroy();
             }
