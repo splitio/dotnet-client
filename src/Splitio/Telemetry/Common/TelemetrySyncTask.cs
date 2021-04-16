@@ -16,7 +16,7 @@ namespace Splitio.Telemetry.Common
 {
     public class TelemetrySyncTask : ITelemetrySyncTask
     {
-        private readonly ITelemetryStorageConsumer _telemetryStorage;
+        private readonly ITelemetryStorageConsumer _telemetryStorageConsumer;
         private readonly ITelemetryAPI _telemetryAPI;
         private readonly ISplitCache _splitCache;
         private readonly ISegmentCache _segmentCache;
@@ -37,7 +37,7 @@ namespace Splitio.Telemetry.Common
             bool firstTime = true,
             ISplitLogger log = null)
         {
-            _telemetryStorage = telemetryStorage;
+            _telemetryStorageConsumer = telemetryStorage;
             _telemetryAPI = telemetryAPI;            
             _splitCache = splitCache;
             _segmentCache = segmentCache;
@@ -78,7 +78,7 @@ namespace Splitio.Telemetry.Common
 
                 var config = new Config
                 {
-                    BURTimeouts = _telemetryStorage.GetBURTimeouts(),
+                    BURTimeouts = _telemetryStorageConsumer.GetBURTimeouts(),
                     EventsQueueSize = _configurationOptions.EventLogSize,
                     Rates = new Rates
                     {
@@ -101,12 +101,12 @@ namespace Splitio.Telemetry.Common
                     ImpressionListenerEnabled = _configurationOptions.ImpressionListener != null,
                     OperationMode = (int)_configurationOptions.Mode,
                     ImpressionsQueueSize = _configurationOptions.TreatmentLogSize,
-                    Tags = _telemetryStorage.PopTags().ToList(),
+                    Tags = _telemetryStorageConsumer.PopTags().ToList(),
                     TimeUntilSDKReady = CurrentTimeHelper.CurrentTimeMillis() - _configurationOptions.SdkStartTime,
                     ActiveFactories = _factoryInstantiationsService.GetActiveFactories(),
                     RedundantActiveFactories = _factoryInstantiationsService.GetRedundantActiveFactories(),
                     Storage = Constants.StorageType.Memory,
-                    SDKNotReadyUsage = _telemetryStorage.GetNonReadyUsages(),
+                    SDKNotReadyUsage = _telemetryStorageConsumer.GetNonReadyUsages(),
                 };
 
                 _telemetryAPI.RecordConfigInit(config);
@@ -123,21 +123,21 @@ namespace Splitio.Telemetry.Common
             {
                 var stats = new Stats
                 {
-                    AuthRejections = _telemetryStorage.PopAuthRejections(),
-                    EventsDropped = _telemetryStorage.GetEventsStats(EventsEnum.EventsDropped),
-                    EventsQueued = _telemetryStorage.GetEventsStats(EventsEnum.EventsQueued),
-                    HTTPErrors = _telemetryStorage.PopHttpErrors(),
-                    HTTPLatencies = _telemetryStorage.PopHttpLatencies(),
-                    ImpressionsDeduped = _telemetryStorage.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped),
-                    ImpressionsDropped = _telemetryStorage.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped),
-                    ImpressionsQueued = _telemetryStorage.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued),
-                    LastSynchronizations = _telemetryStorage.GetLastSynchronizations(),
-                    MethodExceptions = _telemetryStorage.PopExceptions(),
-                    MethodLatencies = _telemetryStorage.PopLatencies(),
-                    SessionLengthMs = _telemetryStorage.GetSessionLength(),
-                    StreamingEvents = _telemetryStorage.PopStreamingEvents().ToList(),
-                    Tags = _telemetryStorage.PopTags().ToList(),
-                    TokenRefreshes = _telemetryStorage.PopTokenRefreshes(),
+                    AuthRejections = _telemetryStorageConsumer.PopAuthRejections(),
+                    EventsDropped = _telemetryStorageConsumer.GetEventsStats(EventsEnum.EventsDropped),
+                    EventsQueued = _telemetryStorageConsumer.GetEventsStats(EventsEnum.EventsQueued),
+                    HTTPErrors = _telemetryStorageConsumer.PopHttpErrors(),
+                    HTTPLatencies = _telemetryStorageConsumer.PopHttpLatencies(),
+                    ImpressionsDeduped = _telemetryStorageConsumer.GetImpressionsStats(ImpressionsEnum.ImpressionsDeduped),
+                    ImpressionsDropped = _telemetryStorageConsumer.GetImpressionsStats(ImpressionsEnum.ImpressionsDropped),
+                    ImpressionsQueued = _telemetryStorageConsumer.GetImpressionsStats(ImpressionsEnum.ImpressionsQueued),
+                    LastSynchronizations = _telemetryStorageConsumer.GetLastSynchronizations(),
+                    MethodExceptions = _telemetryStorageConsumer.PopExceptions(),
+                    MethodLatencies = _telemetryStorageConsumer.PopLatencies(),
+                    SessionLengthMs = _telemetryStorageConsumer.GetSessionLength(),
+                    StreamingEvents = _telemetryStorageConsumer.PopStreamingEvents().ToList(),
+                    Tags = _telemetryStorageConsumer.PopTags().ToList(),
+                    TokenRefreshes = _telemetryStorageConsumer.PopTokenRefreshes(),
                     SplitCount = _splitCache.SplitsCount(),
                     SegmentCount = _segmentCache.SegmentsCount(),
                     SegmentKeyCount = _segmentCache.SegmentKeysCount()

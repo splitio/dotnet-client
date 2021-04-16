@@ -49,7 +49,8 @@ namespace Splitio.Services.Client.Classes
         protected IEvaluator _evaluator;
         protected IImpressionListener _customerImpressionListener;
         protected IImpressionsManager _impressionsManager;
-        protected ITelemetryStorage _telemetryStorage;
+        protected ITelemetryEvaluationProducer _telemetryEvaluationProducer;
+        protected ITelemetryInitProducer _telemetryInitProducer;
 
         public SplitClient(ISplitLogger log)
         {
@@ -301,48 +302,48 @@ namespace Splitio.Services.Client.Classes
 
         private void RecordLatency(string method, long latency)
         {
-            if (_telemetryStorage == null) return;
+            if (_telemetryEvaluationProducer == null) return;
 
             switch (method)
             {
                 case nameof(GetTreatment):
-                    _telemetryStorage.RecordLatency(MethodEnum.Treatment, Util.Metrics.Bucket(latency));
+                    _telemetryEvaluationProducer.RecordLatency(MethodEnum.Treatment, Util.Metrics.Bucket(latency));
                     break;
                 case nameof(GetTreatments):
-                    _telemetryStorage.RecordLatency(MethodEnum.Treatments, Util.Metrics.Bucket(latency));
+                    _telemetryEvaluationProducer.RecordLatency(MethodEnum.Treatments, Util.Metrics.Bucket(latency));
                     break;
                 case nameof(GetTreatmentWithConfig):
-                    _telemetryStorage.RecordLatency(MethodEnum.TreatmentWithConfig, Util.Metrics.Bucket(latency));
+                    _telemetryEvaluationProducer.RecordLatency(MethodEnum.TreatmentWithConfig, Util.Metrics.Bucket(latency));
                     break;
                 case nameof(GetTreatmentsWithConfig):
-                    _telemetryStorage.RecordLatency(MethodEnum.TreatmentsWithConfig, Util.Metrics.Bucket(latency));
+                    _telemetryEvaluationProducer.RecordLatency(MethodEnum.TreatmentsWithConfig, Util.Metrics.Bucket(latency));
                     break;
                 case nameof(Track):
-                    _telemetryStorage.RecordLatency(MethodEnum.Track, Util.Metrics.Bucket(latency));
+                    _telemetryEvaluationProducer.RecordLatency(MethodEnum.Track, Util.Metrics.Bucket(latency));
                     break;
             }
         }
 
         private void RecordException(string method)
         {
-            if (_telemetryStorage == null) return;
+            if (_telemetryEvaluationProducer == null) return;
 
             switch (method)
             {
                 case nameof(GetTreatment):
-                    _telemetryStorage.RecordException(MethodEnum.Treatment);
+                    _telemetryEvaluationProducer.RecordException(MethodEnum.Treatment);
                     break;
                 case nameof(GetTreatments):
-                    _telemetryStorage.RecordException(MethodEnum.Treatments);
+                    _telemetryEvaluationProducer.RecordException(MethodEnum.Treatments);
                     break;
                 case nameof(GetTreatmentWithConfig):
-                    _telemetryStorage.RecordException(MethodEnum.TreatmentWithConfig);
+                    _telemetryEvaluationProducer.RecordException(MethodEnum.TreatmentWithConfig);
                     break;
                 case nameof(GetTreatmentsWithConfig):
-                    _telemetryStorage.RecordException(MethodEnum.TreatmentsWithConfig);
+                    _telemetryEvaluationProducer.RecordException(MethodEnum.TreatmentsWithConfig);
                     break;
                 case nameof(Track):
-                    _telemetryStorage.RecordException(MethodEnum.Track);
+                    _telemetryEvaluationProducer.RecordException(MethodEnum.Track);
                     break;
             }
         }

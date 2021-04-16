@@ -10,18 +10,6 @@ namespace Splitio.Telemetry.Storages
 
     public interface ITelemetryRuntimeConsumer
     {
-        MethodLatencies PopLatencies();
-        MethodExceptions PopExceptions();
-    }
-
-    public interface ITelemetryInitConsumer
-    {
-        long GetNonReadyUsages();
-        long GetBURTimeouts();
-    }
-
-    public interface ITelemetryEvaluationConsumer
-    {
         long GetImpressionsStats(ImpressionsEnum data);
         long GetEventsStats(EventsEnum data);
         LastSynchronization GetLastSynchronizations();
@@ -32,5 +20,17 @@ namespace Splitio.Telemetry.Storages
         IList<StreamingEvent> PopStreamingEvents();
         IList<string> PopTags();
         long GetSessionLength();
+    }
+
+    public interface ITelemetryInitConsumer
+    {
+        long GetNonReadyUsages();
+        long GetBURTimeouts();
+    }
+
+    public interface ITelemetryEvaluationConsumer
+    {
+        MethodExceptions PopExceptions();
+        MethodLatencies PopLatencies();
     }
 }

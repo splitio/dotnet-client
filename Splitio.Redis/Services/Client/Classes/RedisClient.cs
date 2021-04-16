@@ -86,7 +86,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private void BuildImpressionManager()
         {
             var impressionsCounter = new ImpressionsCounter();
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, false, ImpressionsMode.Debug, _telemetryStorage);
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, false, ImpressionsMode.Debug, telemetryRuntimeProducer: null);
         }
 
         private void BuildEventLog()
@@ -107,7 +107,10 @@ namespace Splitio.Redis.Services.Client.Classes
 
         private void BuildTelemetryStorage()
         {
-            _telemetryStorage = new RedisTelemetryStorage(_redisAdapter, _config.RedisUserPrefix, _config.SdkVersion, _config.SdkMachineIP, _config.SdkMachineName);
+            var redisTelemetryStorage = new RedisTelemetryStorage(_redisAdapter, _config.RedisUserPrefix, _config.SdkVersion, _config.SdkMachineIP, _config.SdkMachineName);
+
+            _telemetryInitProducer = redisTelemetryStorage;
+            _telemetryEvaluationProducer = redisTelemetryStorage;
         }
 
         private void RecordConfigInit()
@@ -120,7 +123,7 @@ namespace Splitio.Redis.Services.Client.Classes
                 RedundantActiveFactories = _factoryInstantiationsService.GetRedundantActiveFactories()
             };
 
-            _telemetryStorage.RecordConfigInit(config);
+            _telemetryInitProducer.RecordConfigInit(config);
         }
 
         private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)
