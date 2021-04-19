@@ -283,6 +283,7 @@ namespace Splitio.Services.EventSource
 
             _connected = true;
             _connectedSignal.Signal();
+            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SSEConnectionEstablished));
             DispatchActionEvent(SSEClientActions.CONNECTED);            
         }
         #endregion

@@ -56,9 +56,13 @@ namespace Splitio.Services.Client.Classes
                 return false;
             }
 
-            int timeLeft = milliseconds - (int)clock.ElapsedMilliseconds;
+            var timeLeft = milliseconds - (int)clock.ElapsedMilliseconds;
 
-            return AreSegmentsReady(timeLeft);
+            var ready = AreSegmentsReady(timeLeft);
+
+            if (ready) SdkInternalReady();
+
+            return ready;
         }       
 
         public void SplitsAreReady()

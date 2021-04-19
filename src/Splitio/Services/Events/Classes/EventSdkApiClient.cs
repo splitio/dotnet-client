@@ -7,6 +7,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 
 namespace Splitio.Services.Events.Classes
@@ -27,6 +28,9 @@ namespace Splitio.Services.Events.Classes
 
         public async void SendBulkEvents(List<Event> events)
         {
+            var clock = new Stopwatch();
+            clock.Start();
+
             var eventsJson = JsonConvert.SerializeObject(events, new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore
@@ -34,7 +38,7 @@ namespace Splitio.Services.Events.Classes
 
             var response = await ExecutePost(EventsUrlTemplate, eventsJson);
 
-            RecordTelemetry(nameof(SendBulkEvents), (int)response.statusCode, response.content, ResourceEnum.EventSync);
+            RecordTelemetry(nameof(SendBulkEvents), (int)response.statusCode, response.content, ResourceEnum.EventSync, clock);
         }
     }
 }

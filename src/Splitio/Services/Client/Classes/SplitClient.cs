@@ -16,6 +16,7 @@ using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -127,6 +128,9 @@ namespace Splitio.Services.Client.Classes
         {
             if (Destroyed) return false;
 
+            var clock = new Stopwatch();
+            clock.Start();
+
             var keyResult = _keyValidator.IsValid(new Key(key, null), nameof(Track));
             var eventTypeResult = _eventTypeValidator.IsValid(eventType, nameof(eventType));
             var eventPropertiesResult = _eventPropertiesValidator.IsValid(properties);
@@ -158,12 +162,15 @@ namespace Splitio.Services.Client.Classes
                         Size = eventPropertiesResult.EventSize
                     });
                 });
-                
+
+                RecordLatency(nameof(Track), clock.ElapsedMilliseconds);
+
                 return true;
             }
             catch (Exception e)
             {
                 _log.Error("Exception caught trying to track an event", e);
+                RecordException(nameof(Track));
                 return false;
             }
         }

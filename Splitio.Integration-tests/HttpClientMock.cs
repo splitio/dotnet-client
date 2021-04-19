@@ -292,7 +292,7 @@ namespace Splitio.Integration_tests
         }
 
         public List<LogEntry> GetImpressionLogs()
-        {
+        {          
             return _mockServer
                 .LogEntries
                 .Where(l => l.RequestMessage.AbsolutePath.Contains("api/testImpressions/bulk"))
@@ -312,6 +312,22 @@ namespace Splitio.Integration_tests
             return _mockServer
                 .LogEntries
                 .Where(l => l.RequestMessage.AbsolutePath.Contains("api/events/bulk"))
+                .ToList();
+        }
+
+        public List<LogEntry> GetMetricsConfigLog()
+        {
+            return _mockServer
+                .LogEntries
+                .Where(l => l.RequestMessage.AbsolutePath.Contains("metrics/config"))
+                .ToList();
+        }
+
+        public List<LogEntry> GetMetricsUsageLog()
+        {
+            return _mockServer
+                .LogEntries
+                .Where(l => l.RequestMessage.AbsolutePath.Contains("metrics/usage"))
                 .ToList();
         }
 

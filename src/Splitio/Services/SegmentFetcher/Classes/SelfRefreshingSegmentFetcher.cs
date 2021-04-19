@@ -41,14 +41,14 @@ namespace Splitio.Services.SegmentFetcher.Classes
             _interval = interval;
             _gates = gates;
             _wrappedAdapter = new WrapperAdapter();
-            _segmentTaskQueue = segmentTaskQueue;
-
-            StartWorker();
+            _segmentTaskQueue = segmentTaskQueue;            
         }
 
         #region Public Methods
         public void Start()
         {
+            StartWorker();
+
             Task.Factory.StartNew(() =>
             {
                 while (true)

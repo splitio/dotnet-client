@@ -311,6 +311,61 @@ namespace Splitio.Integration_tests
             ShutdownServer(httpClientMock);
         }
 
+        [TestMethod]
+        public void Telemetry_ValidatesConfigInitAndStats()
+        {
+            // Arrange.
+            var httpClientMock = GetHttpClientMock();
+            var configurations = GetConfigurationOptions(httpClientMock);
+
+            var apikey = "apikey-telemetry";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+            client.Track("test-key", "tt", "test");
+
+            try
+            {
+                client.BlockUntilReady(0);
+            }
+            catch
+            {
+                client.BlockUntilReady(20000);
+            }
+
+            // Act.
+            var result = client.GetTreatment("nico_test", "FACUNDO_TEST");
+
+            Thread.Sleep(2000);
+
+            // Assert.
+            Assert.AreEqual("on", result);
+
+            var sentConfig = GetMetricsConfigSentBackend(httpClientMock);
+            Assert.AreEqual(configurations.StreamingEnabled, sentConfig.StreamingEnabled);
+            Assert.AreEqual("memory", sentConfig.Storage);
+            Assert.AreEqual(configurations.FeaturesRefreshRate, (int)sentConfig.Rates.Splits);
+            Assert.AreEqual(configurations.SegmentsRefreshRate, (int)sentConfig.Rates.Events);
+            Assert.AreEqual(60, (int)sentConfig.Rates.Impressions);
+            Assert.AreEqual(3600, (int)sentConfig.Rates.Telemetry);
+            Assert.IsTrue(sentConfig.UrlOverrides.Telemetry);
+            Assert.IsTrue(sentConfig.UrlOverrides.Sdk);
+            Assert.IsTrue(sentConfig.UrlOverrides.Events);
+            Assert.IsFalse(sentConfig.UrlOverrides.Stream);
+            Assert.IsFalse(sentConfig.UrlOverrides.Auth);
+            Assert.AreEqual(30000, (int)sentConfig.ImpressionsQueueSize);
+            Assert.AreEqual(5000, (int)sentConfig.EventsQueueSize);
+            Assert.AreEqual(ImpressionsMode.Optimized, sentConfig.ImpressionsMode);
+            Assert.IsTrue(sentConfig.ImpressionListenerEnabled);
+            Assert.IsTrue(1 <= sentConfig.ActiveFactories);
+            Assert.AreEqual(1, sentConfig.BURTimeouts);
+
+            var sentStats = GetMetricsStatsSentBackend(httpClientMock);
+            Assert.AreEqual(0, sentStats.Count);
+
+            ShutdownServer(httpClientMock);
+        }
+
         #region Protected Methods
         protected override ConfigurationOptions GetConfigurationOptions(HttpClientMock httpClientMock = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null)
         {
@@ -320,17 +375,17 @@ namespace Splitio.Integration_tests
             {
                 Endpoint = $"http://localhost:{httpClientMock.GetPort()}",
                 EventsEndpoint = $"http://localhost:{httpClientMock.GetPort()}",
+                TelemetryServiceURL = $"http://localhost:{httpClientMock.GetPort()}",
                 ReadTimeout = 20000,
                 ConnectionTimeout = 20000,
                 ImpressionListener = _impressionListener,
                 FeaturesRefreshRate = featuresRefreshRate ?? 1,
                 SegmentsRefreshRate = 1,
                 ImpressionsRefreshRate = 1,
-                MetricsRefreshRate = 1,
                 EventsPushRate = eventsPushRate ?? 1,
                 EventsQueueSize = eventsQueueSize,
                 IPAddressesEnabled = ipAddressesEnabled,
-                StreamingEnabled = false
+                StreamingEnabled = false,
             };
         }
 
@@ -432,13 +487,32 @@ namespace Splitio.Integration_tests
             {
                 var _impressions = JsonConvert.DeserializeObject<List<KeyImpressionBackend>>(log.RequestMessage.Body);
 
-                foreach (var _imp in _impressions)
-                {
-                    impressions.Add(_imp);
-                }
+                impressions.AddRange(_impressions);
             }
 
             return impressions;
+        }
+
+        private Telemetry.Domain.Config GetMetricsConfigSentBackend(HttpClientMock httpClientMock)
+        {
+            var logs = httpClientMock.GetMetricsConfigLog();
+            
+            return JsonConvert.DeserializeObject<Telemetry.Domain.Config>(logs.First().RequestMessage.Body);
+        }
+
+        private List<Telemetry.Domain.Stats> GetMetricsStatsSentBackend(HttpClientMock httpClientMock)
+        {
+            var stats = new List<Telemetry.Domain.Stats>();
+            var logs = httpClientMock.GetMetricsUsageLog();
+
+            foreach (var item in logs)
+            {
+                var stat = JsonConvert.DeserializeObject<Telemetry.Domain.Stats>(item.RequestMessage.Body);
+
+                stats.Add(stat);
+            }
+
+            return stats;
         }
 
         private List<ImpressionCount> GetImpressionsCountsSentBackend(HttpClientMock httpClientMock = null)

@@ -9,7 +9,6 @@ namespace Splitio.Services.SplitFetcher.Classes
 {
     public abstract class SplitChangeFetcher : ISplitChangeFetcher
     {
-        private SplitChangesResult splitChanges;
         private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SplitChangeFetcher));
 
         protected abstract Task<SplitChangesResult> FetchFromBackend(long since);
@@ -18,15 +17,13 @@ namespace Splitio.Services.SplitFetcher.Classes
         {
             try
             {
-                splitChanges = await FetchFromBackend(since);
+                return await FetchFromBackend(since);
             }
             catch(Exception e)
             {
                 Log.Error(string.Format("Exception caught executing Fetch since={0}", since), e);
-                splitChanges = null; 
-            }                   
-
-            return splitChanges;
+                return null;
+            }
         }
     }
 }

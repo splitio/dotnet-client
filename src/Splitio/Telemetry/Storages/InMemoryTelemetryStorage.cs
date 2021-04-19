@@ -46,7 +46,10 @@ namespace Splitio.Telemetry.Storages
         {
             lock (_tagsLock)
             {
-                _tags.Add(tag);
+                if (_tags.Count < 30)
+                {
+                    _tags.Add(tag);
+                }
             }
         }        
 
@@ -62,6 +65,8 @@ namespace Splitio.Telemetry.Storages
 
         public void RecordEventsStats(EventsEnum data, long count)
         {
+            if (count <= 0) return;
+
             _eventsDataRecords.AddOrUpdate(data, count, (key, value) => value + count);
         }
 
@@ -96,7 +101,10 @@ namespace Splitio.Telemetry.Storages
         {
             lock (_streamingEventsLock)
             {
-                _streamingEvents.Add(streamingEvent);
+                if (_streamingEvents.Count < 20)
+                {
+                    _streamingEvents.Add(streamingEvent);
+                }
             }
         }
 
@@ -263,7 +271,7 @@ namespace Splitio.Telemetry.Storages
         {
             lock (_streamingEventsLock)
             {
-                var events = _streamingEvents;
+                var events = new List<StreamingEvent>(_streamingEvents);
                 _streamingEvents.Clear();
 
                 return events;
@@ -274,7 +282,7 @@ namespace Splitio.Telemetry.Storages
         {
             lock (_tagsLock)
             {
-                var tags = _tags;
+                var tags = new List<string>(_tags);
                 _tags.Clear();
 
                 return tags;
