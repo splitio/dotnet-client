@@ -46,7 +46,7 @@ namespace Splitio.Telemetry.Storages
         {
             lock (_tagsLock)
             {
-                if (_tags.Count < 30)
+                if (_tags.Count < 10)
                 {
                     _tags.Add(tag);
                 }
