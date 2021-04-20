@@ -32,7 +32,7 @@ namespace Splitio.Services.Common
             Dictionary<string, string> headers = null)
         {
 #if NET40 || NET45 || NET461
-            ServicePointManager.SecurityProtocol = (SecurityProtocolType)Constans.ProtocolTypeTls12;
+            ServicePointManager.SecurityProtocol = (SecurityProtocolType)Constants.Http.ProtocolTypeTls12;
 #endif
             _log = WrapperAdapter.GetLogger(typeof(SplitioHttpClient));
             _httpClient = new HttpClient()
