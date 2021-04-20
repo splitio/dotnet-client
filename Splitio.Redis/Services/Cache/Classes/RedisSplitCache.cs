@@ -100,32 +100,32 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public void AddSplit(string splitName, SplitBase split)
         {
-            throw new System.NotImplementedException();
+            // No-op
         }
 
         public bool RemoveSplit(string splitName)
         {
-            throw new System.NotImplementedException();
+            return false; // No-op
         }
 
         public void SetChangeNumber(long changeNumber)
         {
-            throw new System.NotImplementedException();
+            // No-op
         }
 
         public bool AddOrUpdate(string splitName, SplitBase split)
         {
-            throw new System.NotImplementedException();
+            return false; // No-op
         }
 
         public long RemoveSplits(List<string> splitNames)
         {
-            throw new System.NotImplementedException();
+            return 0;// No-op
         }
 
         public void Flush()
         {
-            throw new System.NotImplementedException();
+            // No-op
         }
 
         public List<ParsedSplit> FetchMany(List<string> splitNames)
@@ -166,7 +166,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public int SplitsCount()
         {
-            throw new System.NotImplementedException();
+            return 0; // No-op
         }
     }
 }

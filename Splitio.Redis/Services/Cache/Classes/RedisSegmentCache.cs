@@ -99,12 +99,12 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public int SegmentsCount()
         {
-            throw new System.NotImplementedException();
+            return 0; // No-op
         }
 
         public int SegmentKeysCount()
         {
-            throw new System.NotImplementedException();
+            return 0; // No-op
         }
     }
 }
