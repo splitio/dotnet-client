@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 
@@ -372,7 +373,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         [TestMethod]
         public void SdkRecordsRecordAndGetFirsTime()
         {
-            // Arrenge.
+            // Arrange.
             _telemetryStorage.RecordSessionLength(3333);
 
             // Act.
@@ -384,6 +385,43 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             _telemetryStorage.RecordSessionLength(565656);
             result = _telemetryStorage.GetSessionLength();
             Assert.AreEqual(565656, result);
+        }
+
+        [TestMethod]
+        public void StreamingEventsRecordAndPop()
+        {
+            // Arrange.
+            _telemetryStorage.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SSEConnectionEstablished, 0));
+            _telemetryStorage.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.OccupancyPri, 2));
+            _telemetryStorage.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.OccupancySec, 0));
+
+            // Act.
+            var result = _telemetryStorage.PopStreamingEvents();
+
+            // Assert.
+            Assert.AreEqual(3, result.Count);
+
+            result = _telemetryStorage.PopStreamingEvents();
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [TestMethod]
+        public void TagsEventsRecordAndPop()
+        {
+            // Arrange.
+            _telemetryStorage.AddTag("tag-1");
+            _telemetryStorage.AddTag("tag-2");
+            _telemetryStorage.AddTag("tag-3");
+            _telemetryStorage.AddTag("tag-4");
+
+            // Act.
+            var result = _telemetryStorage.PopTags();
+
+            // Assert.
+            Assert.AreEqual(4, result.Count);
+
+            result = _telemetryStorage.PopTags();
+            Assert.AreEqual(0, result.Count);
         }
     }
 }
