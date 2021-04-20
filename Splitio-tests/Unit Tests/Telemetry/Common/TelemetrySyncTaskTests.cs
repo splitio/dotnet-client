@@ -25,6 +25,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
         private Mock<ISplitLogger> _log;
         private Mock<IReadinessGatesCache> _gates;
         private Mock<IFactoryInstantiationsService> _factoryInstantiationsService;
+        private Mock<IWrapperAdapter> _wrapperAdapter;
 
         private ITelemetrySyncTask _telemetrySyncTask;
 
@@ -39,6 +40,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             _log = new Mock<ISplitLogger>();
             _gates = new Mock<IReadinessGatesCache>();
             _factoryInstantiationsService = new Mock<IFactoryInstantiationsService>();
+            _wrapperAdapter = new Mock<IWrapperAdapter>();
         }
 
         [TestMethod]
@@ -48,7 +50,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             MockRecordStats();
             var config = MockConfigInit();
 
-            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, _gates.Object, config, _factoryInstantiationsService.Object, log: _log.Object);
+            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, _gates.Object, config, _factoryInstantiationsService.Object, wrapperAdapter: _wrapperAdapter.Object, log: _log.Object);
 
             // Act.
             _telemetrySyncTask.Start();
@@ -83,7 +85,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             // Arrange.
             MockRecordStats();
 
-            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, _gates.Object, new SelfRefreshingConfig(), _factoryInstantiationsService.Object, log: _log.Object);
+            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, _gates.Object, new SelfRefreshingConfig(), _factoryInstantiationsService.Object, wrapperAdapter: _wrapperAdapter.Object, log: _log.Object);
 
             // Act.
             _telemetrySyncTask.Stop();

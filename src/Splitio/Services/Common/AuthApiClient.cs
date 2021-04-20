@@ -7,6 +7,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -35,6 +36,9 @@ namespace Splitio.Services.Common
         #region Public Methods
         public async Task<AuthenticationResponse> AuthenticateAsync()
         {
+            var clock = new Stopwatch();
+            clock.Start();
+
             try
             {
                 var response = await _splitioHttpClient.GetAsync(_url);
@@ -43,6 +47,7 @@ namespace Splitio.Services.Common
                 {
                     _log.Debug($"Success connection to: {_url}");
 
+                    _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.TokenSync, Util.Metrics.Bucket(clock.ElapsedMilliseconds));
                     _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.TokenSync, CurrentTimeHelper.CurrentTimeMillis());
 
                     return GetSuccessResponse(response.content);

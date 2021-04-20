@@ -186,7 +186,7 @@ namespace Splitio.Services.Client.Classes
             var httpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, GetHeaders());            
             var telemetryAPI = new TelemetryAPI(httpClient, _config.TelemetryServiceURL, _telemetryRuntimeProducer);
 
-            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorageConsumer, telemetryAPI, _splitCache, _segmentCache, _gates, _config, FactoryInstantiationsService.Instance());
+            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorageConsumer, telemetryAPI, _splitCache, _segmentCache, _gates, _config, FactoryInstantiationsService.Instance(), _wrapperAdapter);
         }
 
         private void BuildSyncManager()

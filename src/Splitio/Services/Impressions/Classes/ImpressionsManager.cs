@@ -73,11 +73,11 @@ namespace Splitio.Services.Impressions.Classes
 
                     if (_optimized)
                     {
-                        var optimizedImpressions = impressions.Where(i => i.Optimized).ToList();                        
+                        var optimizedImpressions = impressions.Where(i => i.Optimized).ToList();
+                        deduped = impressions.Count() - optimizedImpressions.Count;
 
                         if (optimizedImpressions.Any())
                         {
-                            deduped = impressions.Count() - optimizedImpressions.Count;
                             dropped = _impressionsLog.Log(optimizedImpressions);
                             queued = optimizedImpressions.Count - dropped;
                         }

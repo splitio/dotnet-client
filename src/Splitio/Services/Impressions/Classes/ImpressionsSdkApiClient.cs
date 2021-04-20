@@ -8,6 +8,7 @@ using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Splitio.Services.Impressions.Classes
@@ -29,20 +30,26 @@ namespace Splitio.Services.Impressions.Classes
 
         public async void SendBulkImpressions(List<KeyImpression> impressions)
         {
+            var clock = new Stopwatch();
+            clock.Start();
+
             var impressionsJson = ConvertToJson(impressions);
 
             var response = await ExecutePost(TestImpressionsUrlTemplate, impressionsJson);           
 
-            RecordTelemetry(nameof(SendBulkImpressions), (int)response.statusCode, response.content, ResourceEnum.ImpressionSync);
+            RecordTelemetry(nameof(SendBulkImpressions), (int)response.statusCode, response.content, ResourceEnum.ImpressionSync, clock);
         }
 
         public async void SendBulkImpressionsCount(ConcurrentDictionary<KeyCache, int> impressionsCount)
         {
+            var clock = new Stopwatch();
+            clock.Start();
+
             var json = ConvertToJson(impressionsCount);
 
             var response = await ExecutePost(ImpressionsCountUrlTemplate, json);
 
-            RecordTelemetry(nameof(SendBulkImpressionsCount), (int)response.statusCode, response.content, ResourceEnum.ImpressionCountSync);
+            RecordTelemetry(nameof(SendBulkImpressionsCount), (int)response.statusCode, response.content, ResourceEnum.ImpressionCountSync, clock);
         }
 
         // Public for tests

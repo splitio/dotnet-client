@@ -111,10 +111,6 @@ namespace Splitio.Services.Common
                 {
                     _synchronizer.StartPeriodicFetching();
                 }
-                else
-                {
-                    _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SSEConnectionEstablished));
-                }
             });
         }        
 

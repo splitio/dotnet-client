@@ -47,6 +47,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
                         _log.Debug($"FetchSegmentChanges with name '{name}' took {clock.ElapsedMilliseconds} milliseconds using uri '{requestUri}'");
                     }
 
+                    _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.SegmentSync, Util.Metrics.Bucket(clock.ElapsedMilliseconds));
                     _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.SegmentSync, CurrentTimeHelper.CurrentTimeMillis());
 
                     return response.content;

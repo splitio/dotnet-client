@@ -19,12 +19,13 @@ namespace Splitio.Telemetry.Common
         private readonly ITelemetryStorageConsumer _telemetryStorageConsumer;
         private readonly ITelemetryAPI _telemetryAPI;
         private readonly ISplitCache _splitCache;
-        private readonly ISegmentCache _segmentCache;
-        private readonly CancellationTokenSource _cancellationTokenSource;
+        private readonly ISegmentCache _segmentCache;        
         private readonly ISplitLogger _log;
         private readonly IReadinessGatesCache _gates;
         private readonly SelfRefreshingConfig _configurationOptions;
         private readonly IFactoryInstantiationsService _factoryInstantiationsService;
+        private readonly IWrapperAdapter _wrapperAdapter;
+        private CancellationTokenSource _cancellationTokenSource;
         private bool _firstTime;
 
         public TelemetrySyncTask(ITelemetryStorageConsumer telemetryStorage,
@@ -34,6 +35,7 @@ namespace Splitio.Telemetry.Common
             IReadinessGatesCache gates,
             SelfRefreshingConfig configurationOptions,
             IFactoryInstantiationsService factoryInstantiationsService,
+            IWrapperAdapter wrapperAdapter,
             bool firstTime = true,
             ISplitLogger log = null)
         {
@@ -47,11 +49,14 @@ namespace Splitio.Telemetry.Common
             _firstTime = firstTime;
             _cancellationTokenSource = new CancellationTokenSource();
             _log = log ?? WrapperAdapter.GetLogger(typeof(TelemetrySyncTask));
+            _wrapperAdapter = wrapperAdapter;
         }
 
         #region Public Methods
         public void Start()
         {
+            _cancellationTokenSource = new CancellationTokenSource();
+
             if (_firstTime)
             {
                 _firstTime = false;
@@ -59,7 +64,14 @@ namespace Splitio.Telemetry.Common
                 Task.Factory.StartNew(() => RecordConfigInit());
             }
 
-            PeriodicTaskFactory.Start(() => { RecordStats(); }, _configurationOptions.TelemetryRefreshRate * 1000, _cancellationTokenSource.Token);
+            Task.Factory.StartNew(() =>
+            {
+                //Delay first execution until expected time has passed
+                var intervalInMilliseconds = _configurationOptions.TelemetryRefreshRate * 1000;
+                _wrapperAdapter.TaskDelay(intervalInMilliseconds).Wait();
+
+                PeriodicTaskFactory.Start(() => { RecordStats(); }, intervalInMilliseconds, _cancellationTokenSource.Token);
+            });
         }
 
         public void Stop()
