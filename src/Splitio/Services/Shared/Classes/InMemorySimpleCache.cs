@@ -13,15 +13,20 @@ namespace Splitio.Services.Shared.Classes
             _queue = queue;
         }
 
-        public void AddItems(IList<T> items)
+        public int AddItems(IList<T> items)
         {
-            if (_queue != null)
+            if (_queue == null) return 0;
+
+            var droppedItems = 0;
+
+            foreach (var item in items)
             {
-                foreach (var item in items)
-                {
-                    _queue.Enqueue(item);
-                }
+                var added = _queue.Enqueue(item);
+
+                if (!added) droppedItems++;
             }
+
+            return droppedItems;
         }
 
         public List<T> FetchAllAndClear()

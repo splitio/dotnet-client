@@ -297,5 +297,22 @@ namespace Splitio_Tests.Integration_Tests
             //Assert
             Assert.AreEqual(0, result);
         }
+
+        [TestMethod]
+        public void ExecuteHashIncrementShouldReturnValue()
+        {
+            //Act & Assert
+            var result = adapter.HashIncrement("test_count", "hashField", 2);
+            Assert.AreEqual(2, result);
+
+            result = adapter.HashIncrement("test_count", "hashField", 2);
+            Assert.AreEqual(4, result);
+
+            result = adapter.HashIncrement("test_count", "hashField", 3);
+            Assert.AreEqual(7, result);
+
+            result = adapter.HashIncrement("test", "hashField", 1);
+            Assert.AreEqual(1, result);
+        }
     }
 }

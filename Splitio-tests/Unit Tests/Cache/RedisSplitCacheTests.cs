@@ -31,14 +31,6 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
-        [ExpectedException(typeof(NotImplementedException))]
-        public void AddSplit_ReturnsNotImplementedException()
-        {
-            //Act
-            _redisSplitCache.AddSplit("splitName", new Split());
-        }
-
-        [TestMethod]
         public void GetInexistentSplitOrRedisExceptionShouldReturnNull()
         {
             //Arrange
@@ -57,19 +49,13 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
-        [ExpectedException(typeof(NotImplementedException))]
         public void RemoveSplit_ReturnsNotImplementedException()
         {
             //Act
-            var isRemoved = _redisSplitCache.RemoveSplit("splitName");
-        }
+            var result = _redisSplitCache.RemoveSplit("splitName");
 
-        [TestMethod]
-        [ExpectedException(typeof(NotImplementedException))]
-        public void SetChangeNumber__ReturnsNotImplementedException()
-        {
-            //Act
-            _redisSplitCache.SetChangeNumber(changeNumber: 123);
+            // Assert.
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -159,14 +145,6 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(NotImplementedException))]
-        public void FlushTest()
-        {
-            //Act
-            _redisSplitCache.Flush();
         }
 
         [TestMethod]

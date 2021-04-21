@@ -41,14 +41,14 @@ namespace Splitio.Services.SegmentFetcher.Classes
             _interval = interval;
             _gates = gates;
             _wrappedAdapter = new WrapperAdapter();
-            _segmentTaskQueue = segmentTaskQueue;
-
-            StartWorker();
+            _segmentTaskQueue = segmentTaskQueue;            
         }
 
         #region Public Methods
         public void Start()
         {
+            StartWorker();
+
             Task.Factory.StartNew(() =>
             {
                 while (true)
@@ -106,7 +106,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             {
                 await segment.FetchSegment();
 
-                _log.Debug(string.Format("Segment fetched: {0}", segment.Name));
+                _log.Debug($"Segment fetched: {segment.Name}");
             }
         }
 
@@ -149,14 +149,14 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 if (_log.IsDebugEnabled)
                 {
-                    _log.Debug(string.Format("Segment queued: {0}", segment.Name));
+                    _log.Debug($"Segment queued: {segment.Name}");
                 }
             }
         }
 
         private void StartWorker()
         {
-            var workerTask = Task.Factory.StartNew(() => _worker.ExecuteTasks(_cancelTokenSource.Token), _cancelTokenSource.Token);
+            Task.Factory.StartNew(() => _worker.ExecuteTasks(_cancelTokenSource.Token), _cancelTokenSource.Token);
         }
         #endregion
     }

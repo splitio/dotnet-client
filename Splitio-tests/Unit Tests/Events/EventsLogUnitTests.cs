@@ -4,6 +4,9 @@ using Splitio.Domain;
 using Splitio.Services.Events.Classes;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -16,6 +19,7 @@ namespace Splitio_Tests.Unit_Tests.Events
         private BlockingQueue<WrappedEvent> _queue;
         private InMemorySimpleCache<WrappedEvent> _eventsCache;
         private Mock<IEventSdkApiClient> _apiClientMock;
+        private Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private EventsLog _eventLog;
 
         [TestInitialize]
@@ -24,8 +28,9 @@ namespace Splitio_Tests.Unit_Tests.Events
             _queue = new BlockingQueue<WrappedEvent>(10);
             _eventsCache = new InMemorySimpleCache<WrappedEvent>(_queue);
             _apiClientMock = new Mock<IEventSdkApiClient>();
+            _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
 
-            _eventLog = new EventsLog(_apiClientMock.Object, 1, 1, _eventsCache, 10);
+            _eventLog = new EventsLog(_apiClientMock.Object, 1, 1, _eventsCache, _telemetryRuntimeProducer.Object, 10);
         }
 
         [TestMethod]
@@ -190,6 +195,48 @@ namespace Splitio_Tests.Unit_Tests.Events
                                                                                               && l.value == null))), Times.Once);
 
             _apiClientMock.Verify(x => x.SendBulkEvents(It.IsAny<List<Event>>()), Times.Exactly(2));
+        }
+
+        [TestMethod]
+        public void Log_ShouldRecordQueuedEvent()
+        {
+            // Arrange.
+            var eventToLog = new Event { key = "Key1", eventTypeId = "testEventType", trafficTypeName = "testTrafficType", timestamp = 7000 };
+            
+            // Act.
+            _eventLog.Log(new WrappedEvent
+            {
+                Event = eventToLog,
+                Size = 1024
+            });
+
+            // Assert.
+            _telemetryRuntimeProducer.Verify(mock => mock.RecordEventsStats(EventsEnum.EventsQueued, 1), Times.Once);
+            _telemetryRuntimeProducer.Verify(mock => mock.RecordEventsStats(EventsEnum.EventsDropped, 0), Times.Once);
+        }
+
+        [TestMethod]
+        public void Log_ShouldRecordDroppedEvent()
+        {
+            // Arrange.
+            var eventToLog = new Event { key = "Key1", eventTypeId = "testEventType", trafficTypeName = "testTrafficType", timestamp = 7000 };
+            var wrappedEventsCache = new Mock<ISimpleProducerCache<WrappedEvent>>();          
+            var eventLog = new EventsLog(_apiClientMock.Object, 1, 1, wrappedEventsCache.Object, _telemetryRuntimeProducer.Object, 10);
+
+            wrappedEventsCache
+                .Setup(mock => mock.AddItems(It.IsAny<List<WrappedEvent>>()))
+                .Returns(1);
+
+            // Act.
+            eventLog.Log(new WrappedEvent
+            {
+                Event = eventToLog,
+                Size = 1024
+            });
+
+            // Assert.
+            _telemetryRuntimeProducer.Verify(mock => mock.RecordEventsStats(EventsEnum.EventsQueued, 0), Times.Once);
+            _telemetryRuntimeProducer.Verify(mock => mock.RecordEventsStats(EventsEnum.EventsDropped, 1), Times.Once);
         }
     }
 }

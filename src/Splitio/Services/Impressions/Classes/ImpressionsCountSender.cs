@@ -14,14 +14,14 @@ namespace Splitio.Services.Impressions.Classes
 
         protected static readonly ISplitLogger Logger = WrapperAdapter.GetLogger(typeof(ImpressionsCountSender));
 
-        private readonly ITreatmentSdkApiClient _apiClient;
+        private readonly IImpressionsSdkApiClient _apiClient;
         private readonly IImpressionsCounter _impressionsCounter;
         private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly int _interval;
 
         private bool _running;
 
-        public ImpressionsCountSender(ITreatmentSdkApiClient apiClient,
+        public ImpressionsCountSender(IImpressionsSdkApiClient apiClient,
             IImpressionsCounter impressionsCounter,
             int? interval = null)
         {

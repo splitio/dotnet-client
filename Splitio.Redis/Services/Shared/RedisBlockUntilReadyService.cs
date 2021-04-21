@@ -2,7 +2,6 @@
 using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Diagnostics;
-using System.Threading;
 
 namespace Splitio.Redis.Services.Shared
 {

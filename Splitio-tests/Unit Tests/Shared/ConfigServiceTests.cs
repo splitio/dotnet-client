@@ -33,7 +33,6 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 {
                     SdkMachineIP = "ip-test",
                     SdkMachineName = "name-test",
-                    SdkSpecVersion = "version-test",
                     SdkVersion = "version-test",
                 });
 
@@ -52,8 +51,6 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual(60, result.EventLogRefreshRate);
             Assert.AreEqual(5000, result.EventLogSize);
             Assert.AreEqual(10, result.EventsFirstPushWindow);
-            Assert.AreEqual(1000, result.MaxCountCalls);
-            Assert.AreEqual(60, result.MaxTimeBetweenCalls);
             Assert.AreEqual(5, result.NumberOfParalellSegmentTasks);
             Assert.AreEqual(true, result.StreamingEnabled);
             Assert.AreEqual(1, result.AuthRetryBackoffBase);
@@ -63,7 +60,6 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual(ImpressionsMode.Optimized, result.ImpressionsMode);
             Assert.AreEqual("ip-test", result.SdkMachineIP);
             Assert.AreEqual("name-test", result.SdkMachineName);
-            Assert.AreEqual("version-test", result.SdkSpecVersion);
             Assert.AreEqual("version-test", result.SdkVersion);
             Assert.AreEqual(true, result.LabelsEnabled);
         }
@@ -78,7 +74,6 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 {
                     SdkMachineIP = "ip-test",
                     SdkMachineName = "name-test",
-                    SdkSpecVersion = "version-test",
                     SdkVersion = "version-test",
                 });
 
@@ -108,8 +103,6 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual(60, result.EventLogRefreshRate);
             Assert.AreEqual(5000, result.EventLogSize);
             Assert.AreEqual(10, result.EventsFirstPushWindow);
-            Assert.AreEqual(1000, result.MaxCountCalls);
-            Assert.AreEqual(60, result.MaxTimeBetweenCalls);
             Assert.AreEqual(5, result.NumberOfParalellSegmentTasks);
             Assert.AreEqual(false, result.StreamingEnabled);
             Assert.AreEqual(1, result.AuthRetryBackoffBase);
@@ -119,7 +112,6 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual(ImpressionsMode.Debug, result.ImpressionsMode);
             Assert.AreEqual("ip-test", result.SdkMachineIP);
             Assert.AreEqual("name-test", result.SdkMachineName);
-            Assert.AreEqual("version-test", result.SdkSpecVersion);
             Assert.AreEqual("version-test", result.SdkVersion);
             Assert.AreEqual(true, result.LabelsEnabled);
         }
@@ -134,7 +126,6 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 {
                     SdkMachineIP = "ip-test",
                     SdkMachineName = "name-test",
-                    SdkSpecVersion = "version-test",
                     SdkVersion = "version-test",
                 });
 
@@ -144,7 +135,6 @@ namespace Splitio_Tests.Unit_Tests.Shared
             // Assert
             Assert.AreEqual("ip-test", result.SdkMachineIP);
             Assert.AreEqual("name-test", result.SdkMachineName);
-            Assert.AreEqual("version-test", result.SdkSpecVersion);
             Assert.AreEqual("version-test", result.SdkVersion);
             Assert.AreEqual(true, result.LabelsEnabled);
         }
@@ -159,7 +149,6 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 {
                     SdkMachineIP = "ip-test",
                     SdkMachineName = "name-test",
-                    SdkSpecVersion = "version-test",
                     SdkVersion = "version-test",
                 });
 
@@ -195,7 +184,6 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 {
                     SdkMachineIP = "ip-test",
                     SdkMachineName = "name-test",
-                    SdkSpecVersion = "version-test",
                     SdkVersion = "version-test",
                 });
 

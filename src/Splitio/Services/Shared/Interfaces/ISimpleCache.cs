@@ -4,6 +4,6 @@ namespace Splitio.Services.Shared.Interfaces
 {
     public interface ISimpleCache<T>
     {
-        void AddItems(IList<T> items);
+        int AddItems(IList<T> items);
     }
 }

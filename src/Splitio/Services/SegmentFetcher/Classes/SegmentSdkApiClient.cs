@@ -1,9 +1,11 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Services.Logger;
-using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
@@ -20,11 +22,12 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SegmentSdkApiClient));
 
-        public SegmentSdkApiClient(HTTPHeader header,
+        public SegmentSdkApiClient(string apiKey,
+            Dictionary<string, string> headers,
             string baseUrl,
             long connectionTimeOut,
             long readTimeout,
-            IMetricsLog metricsLog = null) : base(header, baseUrl, connectionTimeOut, readTimeout, metricsLog)
+            ITelemetryRuntimeProducer telemetryRuntimeProducer) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout, telemetryRuntimeProducer)
         { }
 
         public async Task<string> FetchSegmentChanges(string name, long since)
@@ -39,28 +42,22 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
                 {
-                    if (_metricsLog != null)
-                    {
-                        _metricsLog.Time(SegmentFetcherTime, clock.ElapsedMilliseconds);
-                        _metricsLog.Count(string.Format(SegmentFetcherStatus, response.statusCode), 1);
-                    }
-
                     if (_log.IsDebugEnabled)
                     {
                         _log.Debug($"FetchSegmentChanges with name '{name}' took {clock.ElapsedMilliseconds} milliseconds using uri '{requestUri}'");
                     }
 
-                    return response.content;
-                }
+                    _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.SegmentSync, Util.Metrics.Bucket(clock.ElapsedMilliseconds));
+                    _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.SegmentSync, CurrentTimeHelper.CurrentTimeMillis());
 
-                if (_metricsLog != null)
-                {
-                    _metricsLog.Count(string.Format(SegmentFetcherStatus, response.statusCode), 1);
+                    return response.content;
                 }
 
                 _log.Error(response.statusCode == HttpStatusCode.Forbidden
                     ? "factory instantiation: you passed a browser type api_key, please grab an api key from the Split console that is of type sdk"
-                    : string.Format("Http status executing FetchSegmentChanges: {0} - {1}", response.statusCode.ToString(), response.content));
+                    : $"Http status executing FetchSegmentChanges: {response.statusCode.ToString()} - {response.content}");
+
+                _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.SegmentSync, (int)response.statusCode);
 
                 return string.Empty;
                
@@ -68,11 +65,6 @@ namespace Splitio.Services.SegmentFetcher.Classes
             catch (Exception e)
             {
                 _log.Error("Exception caught executing FetchSegmentChanges", e);
-                
-                if (_metricsLog != null)
-                {
-                    _metricsLog.Count(SegmentFetcherException, 1);
-                }
 
                 return string.Empty;
             }

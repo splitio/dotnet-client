@@ -101,9 +101,7 @@ namespace Splitio.Services.Client.Classes
                 return null;
             }
 
-            var currentSplits = _splitCache.GetAllSplits();
-
-            return currentSplits.Select(x => x?.name).ToList();
+            return _splitCache.GetSplitNames();
         }
 
         private bool IsSdkReady(string methodName)

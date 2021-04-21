@@ -30,6 +30,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var cache = new InMemorySegmentCache(segments);
             var segmentTaskQueue = new SegmentTaskQueue();
             var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, gates, 10, cache, 1, segmentTaskQueue);
+            segmentFetcher.Start();
 
             apiClient
                 .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>()))

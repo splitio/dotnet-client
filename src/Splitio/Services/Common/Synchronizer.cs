@@ -1,11 +1,12 @@
-﻿using Splitio.Services.Events.Interfaces;
+﻿using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
-using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
+using Splitio.Telemetry.Common;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
@@ -16,36 +17,39 @@ namespace Splitio.Services.Common
         private readonly ISelfRefreshingSegmentFetcher _segmentFetcher;
         private readonly IImpressionsLog _impressionsLog;
         private readonly IEventsLog _eventsLog;
-        private readonly IMetricsLog _metricsLog;
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISplitLogger _log;
         private readonly IImpressionsCountSender _impressionsCountSender;
+        private readonly IReadinessGatesCache _gates;
+        private readonly ITelemetrySyncTask _telemetrySyncTask;
 
         public Synchronizer(ISplitFetcher splitFetcher,
             ISelfRefreshingSegmentFetcher segmentFetcher,
             IImpressionsLog impressionsLog,
             IEventsLog eventsLog,
-            IMetricsLog metricsLog,
             IImpressionsCountSender impressionsCountSender,
-            IWrapperAdapter wrapperAdapter = null,
+            IWrapperAdapter wrapperAdapter,
+            IReadinessGatesCache gates,
+            ITelemetrySyncTask telemetrySyncTask,
             ISplitLogger log = null)
         {
             _splitFetcher = splitFetcher;
             _segmentFetcher = segmentFetcher;
             _impressionsLog = impressionsLog;
             _eventsLog = eventsLog;
-            _metricsLog = metricsLog;
-            _impressionsCountSender = impressionsCountSender;
-            _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
+            _impressionsCountSender = impressionsCountSender;            
+            _wrapperAdapter = wrapperAdapter;
+            _gates = gates;
+            _telemetrySyncTask = telemetrySyncTask;
             _log = log ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
         }
 
         #region Public Methods
         public void StartPeriodicDataRecording()
         {
+            _telemetrySyncTask.Start();
             _impressionsLog.Start();
             _eventsLog.Start();
-            _metricsLog.Start();
             _impressionsCountSender.Start();
             _log.Debug("Periodic Data Recording started...");
         }
@@ -59,9 +63,9 @@ namespace Splitio.Services.Common
 
         public void StopPeriodicDataRecording()
         {
+            _telemetrySyncTask.Stop();
             _impressionsLog.Stop();
             _eventsLog.Stop();
-            _metricsLog.Clear();
             _impressionsCountSender.Stop();
             _log.Debug("Periodic Data Recording stopped...");
         }
@@ -84,6 +88,7 @@ namespace Splitio.Services.Common
             Task.Factory
                 .StartNew(() => _splitFetcher.FetchSplits().Wait())
                 .ContinueWith((x) => _segmentFetcher.FetchAll().Wait())
+                .ContinueWith((x) => _gates.SdkInternalReady())
                 .ContinueWith((x) => _log.Debug("Spltis and Segments synchronized..."));
         }
 

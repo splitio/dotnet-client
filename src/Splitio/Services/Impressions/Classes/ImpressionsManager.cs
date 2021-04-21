@@ -1,5 +1,7 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,6 +14,7 @@ namespace Splitio.Services.Impressions.Classes
         private readonly IImpressionsLog _impressionsLog;
         private readonly IImpressionListener _customerImpressionListener;
         private readonly IImpressionsCounter _impressionsCounter;
+        private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly bool _optimized;
         private readonly bool _addPreviousTime;
 
@@ -20,6 +23,7 @@ namespace Splitio.Services.Impressions.Classes
             IImpressionsCounter impressionsCounter,
             bool addPreviousTime,
             ImpressionsMode impressionsMode,
+            ITelemetryRuntimeProducer telemetryRuntimeProducer,
             IImpressionsObserver impressionsObserver = null)
         {            
             _impressionsLog = impressionsLog;
@@ -28,6 +32,7 @@ namespace Splitio.Services.Impressions.Classes
             _addPreviousTime = addPreviousTime;
             _optimized = impressionsMode == ImpressionsMode.Optimized && addPreviousTime;
             _impressionsObserver = impressionsObserver;
+            _telemetryRuntimeProducer = telemetryRuntimeProducer;
         }
 
         public KeyImpression BuildImpression(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey)
@@ -62,16 +67,28 @@ namespace Splitio.Services.Impressions.Classes
             {
                 if (_impressionsLog != null)
                 {
+                    var dropped = 0;
+                    var queued = 0;
+                    var deduped = 0;
+
                     if (_optimized)
                     {
                         var optimizedImpressions = impressions.Where(i => i.Optimized).ToList();
+                        deduped = impressions.Count() - optimizedImpressions.Count;
 
-                        if (optimizedImpressions.Any()) _impressionsLog.Log(optimizedImpressions);
+                        if (optimizedImpressions.Any())
+                        {
+                            dropped = _impressionsLog.Log(optimizedImpressions);
+                            queued = optimizedImpressions.Count - dropped;
+                        }
                     }
                     else
                     {
-                        _impressionsLog.Log(impressions);
+                        dropped = _impressionsLog.Log(impressions);
+                        queued = impressions.Count - dropped;
                     }
+
+                    RecordStats(queued, dropped, deduped);
                 }
 
                 if (_customerImpressionListener != null)
@@ -90,6 +107,15 @@ namespace Splitio.Services.Impressions.Classes
         public bool ShouldQueueImpression(KeyImpression impression)
         {
             return impression.previousTime == null || (ImpressionsHelper.TruncateTimeFrame(impression.previousTime.Value) != ImpressionsHelper.TruncateTimeFrame(impression.time));
+        }
+
+        private void RecordStats(int queued, int dropped, int deduped)
+        {
+            if (_telemetryRuntimeProducer == null) return;
+
+            _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, deduped);
+            _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, dropped);
+            _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsQueued, queued);
         }
     }
 }

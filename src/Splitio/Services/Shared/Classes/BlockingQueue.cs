@@ -4,56 +4,55 @@ namespace Splitio.Services.Shared.Classes
 {
     public class BlockingQueue<T>
     {
-        private ConcurrentQueue<T> queue = new ConcurrentQueue<T>();
-        private object lockingObject = new object();
+        private ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
+        private readonly object _lockingObject = new object();
 
-        private readonly int maxSize;
+        private readonly int _maxSize;
 
         public BlockingQueue(int maxSize)
         {
-            this.maxSize = maxSize;
+            _maxSize = maxSize;
         }
 
         public bool HasReachedMaxSize()
         {
-            return queue.Count >= maxSize;
+            return _queue.Count >= _maxSize;
         }
 
         public ConcurrentQueue<T> FetchAll()
         {
-            lock (lockingObject)
+            lock (_lockingObject)
             {
-                var existingItems = new ConcurrentQueue<T>(queue);
+                var existingItems = new ConcurrentQueue<T>(_queue);
                 return existingItems;
             }
         }
 
         public ConcurrentQueue<T> FetchAllAndClear()
         {
-            lock (lockingObject)
+            lock (_lockingObject)
             {
-                var existingItems = new ConcurrentQueue<T>(queue);
-                queue = new ConcurrentQueue<T>();
+                var existingItems = new ConcurrentQueue<T>(_queue);
+                _queue = new ConcurrentQueue<T>();
                 return existingItems;
             }
         }
 
-        public void Enqueue(T item)
+        public bool Enqueue(T item)
         {
-            lock (lockingObject)
+            lock (_lockingObject)
             {
-                if (!HasReachedMaxSize())
-                {
-                    queue.Enqueue(item);
-                }
+                if (HasReachedMaxSize()) return false;
+
+                _queue.Enqueue(item);
+                return true;
             }
         }
         public T Dequeue()
         {
-            lock (lockingObject)
+            lock (_lockingObject)
             {
-                T item;
-                queue.TryDequeue(out item);
+                _queue.TryDequeue(out T item);
                 return item;
             }
         }

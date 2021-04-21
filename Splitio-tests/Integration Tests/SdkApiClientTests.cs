@@ -1,5 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.CommonLibraries;
+using Splitio.Telemetry.Storages;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -14,15 +16,15 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var baseUrl = "http://demo7064886.mockable.io";
-            var httpHeader = new HTTPHeader()
+            var headers = new Dictionary<string, string>
             {
-                authorizationApiKey = "ABCD",
-                splitSDKMachineIP = "1.0.0.0",
-                splitSDKMachineName = "localhost",
-                splitSDKVersion = "1",
-                splitSDKSpecVersion = "2"
+                { "SplitSDKMachineIP", "1.0.0.0" },
+                { "SplitSDKMachineName", "localhost" },
+                { "SplitSDKVersion", "1" }
             };
-            var SdkApiClient = new SdkApiClient(httpHeader, baseUrl, 10000, 10000);
+
+            var telemetryStorage = new InMemoryTelemetryStorage();
+            var SdkApiClient = new SdkApiClient("ABCD", headers, baseUrl, 10000, 10000, telemetryStorage);
 
             //Act
             var result = await SdkApiClient.ExecuteGet("/messages?item=msg1");
@@ -38,14 +40,15 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var baseUrl = "http://demo7064886.mockable.io";
-            var httpHeader = new HTTPHeader()
+            var headers = new Dictionary<string, string>
             {
-                splitSDKMachineIP = "1.0.0.0",
-                splitSDKMachineName = "localhost",
-                splitSDKVersion = "1",
-                splitSDKSpecVersion = "2"
+                { "SplitSDKMachineIP", "1.0.0.0" },
+                { "SplitSDKMachineName", "localhost" },
+                { "SplitSDKVersion", "1" }
             };
-            var SdkApiClient = new SdkApiClient(httpHeader, baseUrl, 10000, 10000);
+
+            var telemetryStorage = new InMemoryTelemetryStorage();
+            var SdkApiClient = new SdkApiClient(string.Empty, headers, baseUrl, 10000, 10000, telemetryStorage);
 
             //Act
             var result = await SdkApiClient.ExecuteGet("/messages?item=msg2");
@@ -60,15 +63,15 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var baseUrl = "http://demo706abcd.mockable.io";
-            var httpHeader = new HTTPHeader()
+            var headers = new Dictionary<string, string>
             {
-                authorizationApiKey = "ABCD",
-                splitSDKMachineIP = "1.0.0.0",
-                splitSDKMachineName = "localhost",
-                splitSDKVersion = "1",
-                splitSDKSpecVersion = "2"
+                { "SplitSDKMachineIP", "1.0.0.0" },
+                { "SplitSDKMachineName", "localhost" },
+                { "SplitSDKVersion", "1" }
             };
-            var SdkApiClient = new SdkApiClient(httpHeader, baseUrl, 10000, 10000);
+
+            var telemetryStorage = new InMemoryTelemetryStorage();
+            var SdkApiClient = new SdkApiClient("ABCD", headers, baseUrl, 10000, 10000, telemetryStorage);
 
             //Act
             var result = await SdkApiClient.ExecuteGet("/messages?item=msg2");
@@ -82,15 +85,15 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var baseUrl = "http://demo70e.iio";
-            var httpHeader = new HTTPHeader()
+            var headers = new Dictionary<string, string>
             {
-                authorizationApiKey = "ABCD",
-                splitSDKMachineIP = "1.0.0.0",
-                splitSDKMachineName = "localhost",
-                splitSDKVersion = "1",
-                splitSDKSpecVersion = "2"
+                { "SplitSDKMachineIP", "1.0.0.0" },
+                { "SplitSDKMachineName", "localhost" },
+                { "SplitSDKVersion", "1" }
             };
-            var SdkApiClient = new SdkApiClient(httpHeader, baseUrl, 10000, 10000);
+
+            var telemetryStorage = new InMemoryTelemetryStorage();
+            var SdkApiClient = new SdkApiClient("ABCD", headers, baseUrl, 10000, 10000, telemetryStorage);
 
             //Act
             var result = await SdkApiClient.ExecuteGet("/messages?item=msg2");
