@@ -518,55 +518,5 @@ namespace Splitio.Integration_tests
                 client.Destroy();
             }
         }
-
-        [TestMethod]
-        public void GetTreatment_SplitUpdate_ShouldFetch_v2()
-        {
-            using (var httpClientMock = new HttpClientMock())
-            {
-                httpClientMock.SplitChangesSequence("splits_push.json", "-1", "First_Time_2");
-                httpClientMock.SplitChangesSequence("splits_push2.json", "1585948850109", "First_Time", "splits_push3.json", "1585948850109", "Second_Time");
-                httpClientMock.SplitChangesSequence("splits_push4.json", "1585948850111", "First_Time_1");
-                httpClientMock.SegmentChangesOk("-1", "segment4");
-                httpClientMock.SegmentChangesOk("1470947453878", "segment4", "split_segment4_empty");
-
-                var notification = "fb\r\nid: 123\nevent: message\ndata: {\"id\":\"1\",\"clientId\":\"emptyClientId\",\"connectionId\":\"1\",\"timestamp\":1582045421733,\"channel\":\"mauroc\",\"data\":\"{\\\"type\\\" : \\\"SPLIT_UPDATE\\\",\\\"changeNumber\\\": 1585948850111}\",\"name\":\"asdasd\"}\n\n\r\n";
-                httpClientMock.SSE_Channels_Response_WithPath(EventSourcePath, notification);
-
-                var authResponse = new AuthenticationResponse
-                {
-                    PushEnabled = true,
-                    Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ4LWFibHktY2FwYWJpbGl0eSI6IntcInh4eHhfeHh4eF9zZWdtZW50c1wiOltcInN1YnNjcmliZVwiXSxcInh4eHhfeHh4eF9zcGxpdHNcIjpbXCJzdWJzY3JpYmVcIl0sXCJjb250cm9sXCI6W1wic3Vic2NyaWJlXCJdfSJ9"
-                };
-
-                httpClientMock.AuthService_Response(JsonConvert.SerializeObject(authResponse));
-
-                var url = httpClientMock.GetUrl();
-                var config = new ConfigurationOptions
-                {
-                    Endpoint = url,
-                    EventsEndpoint = url,
-                    FeaturesRefreshRate = 3000,
-                    SegmentsRefreshRate = 3000,
-                    AuthServiceURL = $"{url}/api/auth",
-                    StreamingServiceURL = $"{url}{EventSourcePath}",
-                    StreamingEnabled = true
-                };
-
-                var apikey = "apikey1";
-
-                var splitFactory = new SplitFactory(apikey, config);
-                var client = splitFactory.Client();
-
-                client.BlockUntilReady(10000);
-                Thread.Sleep(2000);
-
-                var result = client.GetTreatment("admin", "push_test");
-
-                Assert.AreEqual("after_fetch", result);
-
-                client.Destroy();
-            }
-        }
     }
 }
