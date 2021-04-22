@@ -32,9 +32,27 @@
     <DefineConstants>NETCORE</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0' or '$(TargetFramework)' == 'netcoreapp1.1' or '$(TargetFramework)' == 'netcoreapp2.0' or '$(TargetFramework)' == 'netcoreapp2.1' or '$(TargetFramework)' == 'netcoreapp2.2'">
     <ProjectReference Include="..\Splitio.Redis\Splitio.Redis.csproj" />
     <ProjectReference Include="..\src\Splitio\Splitio.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472' or '$(TargetFramework)' == 'net471' or '$(TargetFramework)' == 'net47' or '$(TargetFramework)' == 'net462' or '$(TargetFramework)' == 'net461'">
+    <ProjectReference Include="..\Splitio.Redis\Splitio.Redis.csproj">
+      <SetTargetFramework>TargetFramework=net461</SetTargetFramework>
+    </ProjectReference>
+    <ProjectReference Include="..\src\Splitio\Splitio.csproj">
+      <SetTargetFramework>TargetFramework=net461</SetTargetFramework>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net46' or '$(TargetFramework)' == 'net452' or '$(TargetFramework)' == 'net451' or '$(TargetFramework)' == 'net45'">
+    <ProjectReference Include="..\Splitio.Redis\Splitio.Redis.csproj">
+      <SetTargetFramework>TargetFramework=net45</SetTargetFramework>
+    </ProjectReference>
+    <ProjectReference Include="..\src\Splitio\Splitio.csproj">
+      <SetTargetFramework>TargetFramework=net45</SetTargetFramework>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
