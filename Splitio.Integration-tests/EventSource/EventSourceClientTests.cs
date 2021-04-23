@@ -40,8 +40,7 @@ namespace Splitio.Integration_tests.EventSource
 
                 eventSourceClient.ConnectAsync(url);
 
-                eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
-                Assert.IsTrue(eventSourceClient.IsConnected());
+                eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);                
                 Assert.AreEqual(NotificationType.SPLIT_UPDATE, ev.Event.Type);
                 Assert.AreEqual(1585867723838, ((SplitChangeNotifiaction)ev.Event).ChangeNumber);
                 actionEvent.TryTake(out SSEActionsEventArgs action, 10000);
@@ -75,6 +74,7 @@ namespace Splitio.Integration_tests.EventSource
                 {
                     actionEvent.TryAdd(e);
                 };
+
                 eventSourceClient.ConnectAsync(url);
 
                 eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
