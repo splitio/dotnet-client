@@ -72,9 +72,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Act.            
             _splitsWorker.AddToQueue(1585956698457);
-            Thread.Sleep(1000);
-
-            _splitsWorker.Stop();
+            Thread.Sleep(2000);
 
             // Assert.
             _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Exactly(11));
