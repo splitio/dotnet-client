@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net472;net451;netcoreapp2.2;netcoreapp1.0</TargetFrameworks>
+    <TargetFrameworks>net472;netcoreapp2.2</TargetFrameworks>
     <RootNamespace>Splitio.Integration_tests</RootNamespace>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
