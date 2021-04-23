@@ -1,9 +1,13 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -296,6 +300,43 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             Assert.AreEqual(0, result);
+        }
+
+        [TestMethod]
+        public void GetConfigWithoutTls()
+        {
+            //Arrange
+            var adapter = new RedisAdapter("localhost", "6379", "", 0, 1000, 5, 1000);
+
+            //Act
+            var result = adapter.GetConfig();
+
+            //Assert
+            Assert.AreEqual(1, result.EndPoints.Count);
+            Assert.AreEqual(string.Empty, result.Password);
+            Assert.AreEqual(1000, result.ConnectTimeout);
+            Assert.AreEqual(1000, result.SyncTimeout);
+            Assert.IsFalse(result.Ssl);
+        }
+
+        [TestMethod]
+        public void GetConfigWithTls()
+        {
+            //Arrange
+            var tlsConfig = new TlsConfig(ssl: true);
+
+            var adapter = new RedisAdapter("localhost", "6379", "", 0, 1000, 5, 1000, tlsConfig);
+
+            //Act
+            var result = adapter.GetConfig();
+
+            //Assert
+            Assert.AreEqual(1, result.EndPoints.Count);
+            Assert.AreEqual(string.Empty, result.Password);
+            Assert.AreEqual(1000, result.ConnectTimeout);
+            Assert.AreEqual(1000, result.SyncTimeout);
+            Assert.IsTrue(result.Ssl);
+            Assert.AreEqual("localhost", result.SslHost);
         }
 
         [TestMethod]

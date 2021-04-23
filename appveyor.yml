@@ -24,22 +24,22 @@ build_script:
 
 after_build:
  - Redis-64\tools\redis-server.exe --service-start
+ - dotnet test .\Splitio.Integration-tests\Splitio.Integration-tests.csproj --configuration Release --framework netcoreapp2.2
+ - Redis-64\tools\redis-server.exe --service-stop
+ - Redis-64\tools\redis-server.exe --service-start
+ - dotnet test .\Splitio.Integration-tests\Splitio.Integration-tests.csproj --configuration Release --framework net472
+ - Redis-64\tools\redis-server.exe --service-stop
+ - Redis-64\tools\redis-server.exe --service-start
  - dotnet test .\Splitio-tests\Splitio-tests.csproj --configuration Release --framework netcoreapp2.2
- - Redis-64\tools\redis-server.exe --service-stop
- - Redis-64\tools\redis-server.exe --service-start
- - dotnet test .\Splitio-tests\Splitio-tests.csproj --configuration Release --framework netcoreapp1.0
- - Redis-64\tools\redis-server.exe --service-stop
- - Redis-64\tools\redis-server.exe --service-start
- - dotnet test .\Splitio-tests\Splitio-tests.csproj --configuration Release --framework net472
- - Redis-64\tools\redis-server.exe --service-stop
- - Redis-64\tools\redis-server.exe --service-start
- - dotnet test .\Splitio-tests\Splitio-tests.csproj --configuration Release --framework net462
  - Redis-64\tools\redis-server.exe --service-stop
  - Redis-64\tools\redis-server.exe --service-start
  - dotnet test .\Splitio-tests\Splitio-tests.csproj --configuration Release --framework net45
  - Redis-64\tools\redis-server.exe --service-stop
  - Redis-64\tools\redis-server.exe --service-start
- - dotnet test .\Splitio.Integration-tests\Splitio.Integration-tests.csproj --configuration Release --framework netcoreapp2.2
+ - dotnet test .\Splitio-tests\Splitio-tests.csproj --configuration Release --framework net472
+ - Redis-64\tools\redis-server.exe --service-stop
+ - Redis-64\tools\redis-server.exe --service-start
+ - dotnet test .\Splitio-tests\Splitio-tests.csproj --configuration Release --framework net462 
  - dotnet test .\Splitio.TestSupport\Splitio.TestSupport.csproj --configuration Release
  - dotnet pack .\src\Splitio --configuration Release
  - dotnet pack .\Splitio.Redis --configuration Release

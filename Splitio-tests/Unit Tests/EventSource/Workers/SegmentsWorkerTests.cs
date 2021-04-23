@@ -86,7 +86,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Act.
             _segmentsWorker.AddToQueue(changeNumber, segmentName);
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
 
             // Assert.
             _segmentCache.Verify(mock => mock.GetChangeNumber(segmentName), Times.Exactly(11));
