@@ -1,5 +1,8 @@
-﻿using Splitio.Telemetry.Domain;
+﻿using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
+using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
@@ -7,6 +10,8 @@ namespace Splitio.Telemetry.Storages
 {
     public class InMemoryTelemetryStorage : ITelemetryStorageProducer, ITelemetryStorageConsumer
     {
+        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(InMemoryTelemetryStorage));
+
         // Latencies
         private readonly ConcurrentDictionary<MethodEnum, IList<long>> _methodLatencies = new ConcurrentDictionary<MethodEnum, IList<long>>();
         private readonly ConcurrentDictionary<ResourceEnum, IList<long>> _httpLatencies = new ConcurrentDictionary<ResourceEnum, IList<long>>();
@@ -44,88 +49,186 @@ namespace Splitio.Telemetry.Storages
         #region Public Methods - Producer
         public void AddTag(string tag)
         {
-            lock (_tagsLock)
+            try
             {
-                if (_tags.Count < 10)
+                lock (_tagsLock)
                 {
-                    _tags.Add(tag);
+                    if (_tags.Count < 10)
+                    {
+                        _tags.Add(tag);
+                    }
                 }
             }
-        }        
+            catch (Exception ex)
+            {
+                _log.Warn("Exception caught executing AddTag", ex);
+            }
+        }
 
         public void RecordAuthRejections()
         {
-            _pushCounters.AddOrUpdate(PushCountersEnum.AuthRejecttions, 1, (key, value) => value + 1);
+            try
+            { 
+                _pushCounters.AddOrUpdate(PushCountersEnum.AuthRejecttions, 1, (key, value) => value + 1);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Exception caught executing RecordAuthRejections", ex);
+            }
         }
 
         public void RecordBURTimeout()
         {
-            _factoryCounters.AddOrUpdate(FactoryCountersEnum.BurTimeouts, 1, (key, value) => value + 1);
+            try
+            {
+                _factoryCounters.AddOrUpdate(FactoryCountersEnum.BurTimeouts, 1, (key, value) => value + 1);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Exception caught executing RecordBURTimeout", ex);
+            }
         }
 
         public void RecordEventsStats(EventsEnum data, long count)
         {
-            if (count <= 0) return;
+            try
+            { 
+                if (count <= 0) return;
 
-            _eventsDataRecords.AddOrUpdate(data, count, (key, value) => value + count);
+                _eventsDataRecords.AddOrUpdate(data, count, (key, value) => value + count);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Exception caught executing RecordEventsStats", ex);
+            }
         }
 
         public void RecordException(MethodEnum method)
         {
-            _exceptionsCounters.AddOrUpdate(method, 1, (key, count) => count + 1);
+            try
+            { 
+                _exceptionsCounters.AddOrUpdate(method, 1, (key, count) => count + 1);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Exception caught executing RecordException", ex);
+            }
         }
 
         public void RecordImpressionsStats(ImpressionsEnum data, long count)
         {
-            if (count <= 0) return;
+            try
+            {
+                if (count <= 0) return;
 
-            _impressionsDataRecords.AddOrUpdate(data, count, (key, value) => value + count);
+                _impressionsDataRecords.AddOrUpdate(data, count, (key, value) => value + count);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Exception caught executing RecordImpressionsStats", ex);
+            }
         }
 
         public void RecordLatency(MethodEnum method, int bucket)
         {
-            _methodLatencies[method].Add(bucket);
+            try
+            { 
+                _methodLatencies[method].Add(bucket);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Exception caught executing RecordLatency", ex);
+            }
         }
 
         public void RecordNonReadyUsages()
         {
-            _factoryCounters.AddOrUpdate(FactoryCountersEnum.NonReadyUsages, 1, (key, value) => value + 1);
+            try
+            { 
+                _factoryCounters.AddOrUpdate(FactoryCountersEnum.NonReadyUsages, 1, (key, value) => value + 1);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Exception caught executing RecordNonReadyUsages", ex);
+            }
         }
 
         public void RecordSessionLength(long session)
         {
-            _sdkRecords.AddOrUpdate(SdkRecordsEnum.Session, session, (key, value) => session);
+            try
+            { 
+                _sdkRecords.AddOrUpdate(SdkRecordsEnum.Session, session, (key, value) => session);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Exception caught executing RecordSessionLength", ex);
+            }
         }
 
         public void RecordStreamingEvent(StreamingEvent streamingEvent)
         {
-            lock (_streamingEventsLock)
-            {
-                if (_streamingEvents.Count < 20)
+            try
+            { 
+                lock (_streamingEventsLock)
                 {
-                    _streamingEvents.Add(streamingEvent);
+                    if (_streamingEvents.Count < 20)
+                    {
+                        _streamingEvents.Add(streamingEvent);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Exception caught executing RecordStreamingEvent", ex);
             }
         }
 
         public void RecordSuccessfulSync(ResourceEnum resource, long timestamp)
         {
-            _lastSynchronizationRecords.AddOrUpdate(resource, timestamp, (key, value) => timestamp);
+            try
+            {
+                _lastSynchronizationRecords.AddOrUpdate(resource, timestamp, (key, value) => timestamp);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Exception caught executing RecordSuccessfulSync", ex);
+            }
         }
 
         public void RecordSyncError(ResourceEnum resource, int status)
         {
-            _httpErrors[resource].AddOrUpdate(status, 1, (key, count) => count + 1);
+            try
+            {
+                _httpErrors[resource].AddOrUpdate(status, 1, (key, count) => count + 1);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Exception caught executing RecordSyncError", ex);
+            }
         }
 
         public void RecordSyncLatency(ResourceEnum resource, int bucket)
         {
-            _httpLatencies[resource].Add(bucket);
+            try
+            {
+                _httpLatencies[resource].Add(bucket);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Exception caught executing RecordSyncLatency", ex);
+            }
         }
 
         public void RecordTokenRefreshes()
         {
-            _pushCounters.AddOrUpdate(PushCountersEnum.TokenRefreshes, 1, (key, value) => value + 1);
+            try
+            {
+                _pushCounters.AddOrUpdate(PushCountersEnum.TokenRefreshes, 1, (key, value) => value + 1);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Exception caught executing RecordTokenRefreshes", ex);
+            }
         }
 
         public void RecordConfigInit(Config config)
