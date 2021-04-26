@@ -2,8 +2,8 @@ CHANGES
 
 6.3.0 (Apr 26, 2021)
 - Added SSL/TLS support for Redis Client.
-- Added net461 target framework.
-- Added Telemetry V2.
+- Added net461 target framework to avoid a vulnerability in StackExchange.Redis at least from this version forward. We will keep supporting net40 & net45 with the old one.
+- Updated SDK telemetry storage, metrics and updater to be more effective and send less often.
 
 6.2.3 (Dec 22, 2020)
 - Fixed package strong name
