@@ -301,12 +301,7 @@ namespace Splitio.Telemetry.Storages
 
         public long PopAuthRejections()
         {
-            if (!_pushCounters.TryGetValue(PushCountersEnum.AuthRejecttions, out long authRejections))
-            {
-                return 0;
-            }
-
-            _pushCounters[PushCountersEnum.AuthRejecttions] = 0;
+            _pushCounters.TryRemove(PushCountersEnum.AuthRejecttions, out long authRejections);
 
             return authRejections;
         }
@@ -329,7 +324,7 @@ namespace Splitio.Telemetry.Storages
 
         public HTTPErrors PopHttpErrors()
         {
-            var erros = new HTTPErrors
+            var errors = new HTTPErrors
             {
                 Events = _httpErrors.TryGetValue(ResourceEnum.EventSync, out ConcurrentDictionary<int, long> events) ? events.ToDictionary(e => e.Key, e => e.Value) : new Dictionary<int, long>(),
                 Impressions = _httpErrors.TryGetValue(ResourceEnum.ImpressionSync, out ConcurrentDictionary<int, long> impressions) ? impressions.ToDictionary(e => e.Key, e => e.Value) : new Dictionary<int, long>(),
@@ -342,7 +337,7 @@ namespace Splitio.Telemetry.Storages
 
             _httpErrors.Clear();
 
-            return erros;
+            return errors;
         }
 
         public HTTPLatencies PopHttpLatencies()
@@ -397,12 +392,7 @@ namespace Splitio.Telemetry.Storages
 
         public long PopTokenRefreshes()
         {
-            if (!_pushCounters.TryGetValue(PushCountersEnum.TokenRefreshes, out long tokenRefreshes))
-            {
-                return 0;
-            }
-
-            _pushCounters[PushCountersEnum.TokenRefreshes] = 0;
+            _pushCounters.TryRemove(PushCountersEnum.TokenRefreshes, out long tokenRefreshes);
 
             return tokenRefreshes;
         }
