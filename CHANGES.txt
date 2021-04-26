@@ -1,8 +1,9 @@
 CHANGES
 
-6.2.4 (Mar 29, 2021)
+6.3.0 (Apr 26, 2021)
 - Added SSL/TLS support for Redis Client.
 - Added net461 target framework.
+- Added Telemetry V2.
 
 6.2.3 (Dec 22, 2020)
 - Fixed package strong name

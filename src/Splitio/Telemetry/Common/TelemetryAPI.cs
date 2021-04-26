@@ -57,6 +57,7 @@ namespace Splitio.Telemetry.Common
             if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
             {
                 _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.TelemetrySync, CurrentTimeHelper.CurrentTimeMillis());
+                _log.Debug($"Telemetry post success. {method}");
             }
             else
             {
