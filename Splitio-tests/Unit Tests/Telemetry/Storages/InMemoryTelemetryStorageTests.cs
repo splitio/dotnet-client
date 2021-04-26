@@ -57,6 +57,22 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             Assert.AreEqual(0, result.Treatments.Count);
             Assert.AreEqual(0, result.TreatmenstWithConfig.Count);
             Assert.AreEqual(0, result.Track.Count);
+
+            _telemetryStorage.RecordLatency(MethodEnum.Treatment, 55555);
+            _telemetryStorage.RecordLatency(MethodEnum.Treatment, 6666);
+            _telemetryStorage.RecordLatency(MethodEnum.Treatments, 777);
+            _telemetryStorage.RecordLatency(MethodEnum.TreatmentsWithConfig, 888);
+            _telemetryStorage.RecordLatency(MethodEnum.Track, 09987);
+            _telemetryStorage.RecordLatency(MethodEnum.Track, 678678);
+
+            result = _telemetryStorage.PopLatencies();
+
+            // Assert.
+            Assert.AreEqual(2, result.Treatment.Count);
+            Assert.AreEqual(0, result.TreatmentWithConfig.Count);
+            Assert.AreEqual(1, result.Treatments.Count);
+            Assert.AreEqual(1, result.TreatmenstWithConfig.Count);
+            Assert.AreEqual(2, result.Track.Count);
         }
 
         [TestMethod]
