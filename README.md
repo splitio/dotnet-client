@@ -1,6 +1,6 @@
 # Split SDK for .NET
 
-![CI Status](https://ci.appveyor.com/api/projects/status/hi6g2vl7s34vc225?svg=true)
+![CI Status](https://ci.appveyor.com/api/projects/status/hi6g2vl7s34vc225/branch/main?svg=true)
 
 ## Overview
 This SDK is designed to work with Split, the platform for controlled rollouts, which serves features to your users via a Split feature flag to manage your complete customer experience.
