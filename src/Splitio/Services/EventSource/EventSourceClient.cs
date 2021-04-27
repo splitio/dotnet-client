@@ -233,18 +233,18 @@ namespace Splitio.Services.EventSource
             }
             catch (ReadStreamException ex)
             {
-                _log.Debug($"ReadStreamException: {ex.Message}");
+                _log.Debug("ReadStreamException", ex);
                 throw ex;
             }
             catch (Exception ex)
             {
-                if (ex.Message.Contains(ConnectionResetByPeer))
+                if (!_streamReadcancellationTokenSource.IsCancellationRequested)
                 {
-                    _log.Debug("ConnectionResetByPeer", ex);
+                    _log.Debug("EventSourceClient RETRYABLE_ERROR:", ex);
                     throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, ex.Message);
                 }
 
-                _log.Debug($"Stream Token canceled. {ex.Message}");
+                _log.Debug("Stream Token canceled.", ex);
             }
             finally
             {
