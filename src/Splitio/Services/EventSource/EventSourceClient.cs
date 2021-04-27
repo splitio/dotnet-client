@@ -17,7 +17,6 @@ namespace Splitio.Services.EventSource
     public class EventSourceClient : IEventSourceClient
     {
         private const string KeepAliveResponse = ":keepalive\n\n";
-        private const string ConnectionResetByPeer = "Connection reset by peer";
         private const int ReadTimeoutMs = 70000;
         private const int ConnectTimeoutMs = 30000;
         private const int BufferSize = 10000;
