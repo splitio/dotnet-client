@@ -17,6 +17,7 @@ namespace Splitio.Services.EventSource
     public class EventSourceClient : IEventSourceClient
     {
         private const string KeepAliveResponse = ":keepalive\n\n";
+        private const string ConnectionResetByPeer = "Connection reset by peer";
         private const int ReadTimeoutMs = 70000;
         private const int ConnectTimeoutMs = 30000;
         private const int BufferSize = 10000;
@@ -185,7 +186,7 @@ namespace Splitio.Services.EventSource
                         {
                             throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Streaming read time out after {ReadTimeoutMs} seconds.");
                         }
-                        
+
                         int len = streamReadTask.Result;
 
                         if (len == 0)
@@ -237,6 +238,12 @@ namespace Splitio.Services.EventSource
             }
             catch (Exception ex)
             {
+                if (ex.Message.Contains(ConnectionResetByPeer))
+                {
+                    _log.Debug("ConnectionResetByPeer", ex);
+                    throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, ex.Message);
+                }
+
                 _log.Debug($"Stream Token canceled. {ex.Message}");
             }
             finally
