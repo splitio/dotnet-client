@@ -239,11 +239,11 @@ namespace Splitio.Services.EventSource
             {
                 if (!_streamReadcancellationTokenSource.IsCancellationRequested)
                 {
-                    _log.Debug("EventSourceClient RETRYABLE_ERROR:", ex);
+                    _log.Debug("Stream ended abruptly, proceeding to reconnect.", ex);
                     throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, ex.Message);
                 }
 
-                _log.Debug("Stream Token canceled.", ex);
+                _log.Debug("Stream Token cancelled.", ex);
             }
             finally
             {
