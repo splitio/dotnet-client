@@ -54,7 +54,7 @@ namespace Splitio.Services.Common
                     ScheduleNextTokenRefresh(response.Expiration.Value);
                     _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.TokenRefresh, CalcularteNextTokenExpiration(response.Expiration.Value)));
                     return true;
-                }                
+                }
                 
                 StopSse();
 

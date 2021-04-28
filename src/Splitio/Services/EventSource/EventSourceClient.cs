@@ -185,7 +185,7 @@ namespace Splitio.Services.EventSource
                         {
                             throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Streaming read time out after {ReadTimeoutMs} seconds.");
                         }
-                        
+
                         int len = streamReadTask.Result;
 
                         if (len == 0)
@@ -232,12 +232,18 @@ namespace Splitio.Services.EventSource
             }
             catch (ReadStreamException ex)
             {
-                _log.Debug($"ReadStreamException: {ex.Message}");
+                _log.Debug("ReadStreamException", ex);
                 throw ex;
             }
             catch (Exception ex)
             {
-                _log.Debug($"Stream Token canceled. {ex.Message}");
+                if (!_streamReadcancellationTokenSource.IsCancellationRequested)
+                {
+                    _log.Debug("Stream ended abruptly, proceeding to reconnect.", ex);
+                    throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, ex.Message);
+                }
+
+                _log.Debug("Stream Token cancelled.", ex);
             }
             finally
             {
