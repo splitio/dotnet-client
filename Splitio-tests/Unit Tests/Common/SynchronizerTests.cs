@@ -62,6 +62,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Act.
             _synchronizer.StartPeriodicFetching();
+            Thread.Sleep(1000);
 
             // Assert.
             _splitFetcher.Verify(mock => mock.Start(), Times.Once);

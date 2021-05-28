@@ -56,9 +56,14 @@ namespace Splitio.Services.Common
 
         public void StartPeriodicFetching()
         {
-            _splitFetcher.Start();
-            _segmentFetcher.Start();
-            _log.Debug("Spltis and Segments fetchers started...");
+            Task.Factory.StartNew(() =>
+            {
+                _gates.WaitUntilSdkInternalReady();
+
+                _splitFetcher.Start();
+                _segmentFetcher.Start();
+                _log.Debug("Spltis and Segments fetchers started...");
+            });
         }
 
         public void StopPeriodicDataRecording()

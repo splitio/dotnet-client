@@ -44,7 +44,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _synchronizer.Verify(mock => mock.StartPeriodicDataRecording(), Times.Once);
 
             Thread.Sleep(200);
-            _synchronizer.Verify(mock => mock.SyncAll(), Times.Never);
+            _synchronizer.Verify(mock => mock.SyncAll(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicDataRecording(), Times.Once);
             _pushManager.Verify(mock => mock.StartSse(), Times.Never);
         }

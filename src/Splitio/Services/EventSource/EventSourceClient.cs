@@ -255,6 +255,8 @@ namespace Splitio.Services.EventSource
         {
             _log.Debug($"Notification error: {notificationError.Message}. Status Server: {notificationError.StatusCode}.");
 
+            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.AblyError, notificationError.Code));
+
             if (notificationError.Code >= 40140 && notificationError.Code <= 40149)
             {
                 throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Ably Notification code: {notificationError.Code}");
@@ -263,9 +265,7 @@ namespace Splitio.Services.EventSource
             if (notificationError.Code >= 40000 && notificationError.Code <= 49999)
             {
                 throw new ReadStreamException(SSEClientActions.NONRETRYABLE_ERROR, $"Ably Notification code: {notificationError.Code}");
-            }
-
-            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.AblyError, notificationError.Code));
+            }            
         }
 
         private void DispatchEvent(IncomingNotification incomingNotification)

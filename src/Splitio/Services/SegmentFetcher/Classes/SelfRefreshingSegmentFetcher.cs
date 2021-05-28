@@ -53,7 +53,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             {
                 while (true)
                 {
-                    if (_gates.IsSDKReady(0))
+                    if (_gates.AreSplitsReady(0))
                     {
                         //Delay first execution until expected time has passed
                         var intervalInMilliseconds = _interval * 1000;
