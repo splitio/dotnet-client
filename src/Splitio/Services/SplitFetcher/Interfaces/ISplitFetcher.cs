@@ -7,7 +7,7 @@ namespace Splitio.Services.SplitFetcher.Interfaces
     {
         void Start();
         void Stop();
-        Task<IList<string>> FetchSplits();
+        Task<IList<string>> FetchSplits(bool cacheControlHeaders = false);
         void Clear();
     }
 }

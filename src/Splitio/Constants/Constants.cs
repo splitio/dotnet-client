@@ -22,6 +22,9 @@
         public static string KeepAlive => "Keep-Alive";
         public static string EventStream = "text/event-stream";
         public static string Gzip => "gzip";
+        public static string CacheControlKey => "Cache-Control";
+        public static string CacheControlValue => "no-cache";
+        public static string MediaTypeJson => "application/json";
     }
 
     public class Gral

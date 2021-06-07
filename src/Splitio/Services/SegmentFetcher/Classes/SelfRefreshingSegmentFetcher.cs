@@ -110,13 +110,13 @@ namespace Splitio.Services.SegmentFetcher.Classes
             }
         }
 
-        public async Task Fetch(string segmentName)
+        public async Task Fetch(string segmentName, bool cacheControlHeaders = false)
         {
             try
             {
                 InitializeSegment(segmentName);
                 _segments.TryGetValue(segmentName, out SelfRefreshingSegment fetcher);
-                await fetcher.FetchSegment();
+                await fetcher.FetchSegment(cacheControlHeaders);
             }
             catch (Exception ex)
             {

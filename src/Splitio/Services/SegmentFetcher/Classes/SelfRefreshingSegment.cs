@@ -27,7 +27,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             _gates.RegisterSegment(name);
         }
 
-        public async Task FetchSegment()
+        public async Task FetchSegment(bool cacheControlHeaders = false)
         {
             while (true)
             {
@@ -35,7 +35,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 try
                 {
-                    var response = await _segmentChangeFetcher.Fetch(Name, changeNumber);
+                    var response = await _segmentChangeFetcher.Fetch(Name, changeNumber, cacheControlHeaders);
 
                     if (response == null)
                     {

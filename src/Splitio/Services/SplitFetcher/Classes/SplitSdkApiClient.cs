@@ -30,7 +30,7 @@ namespace Splitio.Services.SplitFetcher.Classes
             ITelemetryRuntimeProducer telemetryRuntimeProducer) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout, telemetryRuntimeProducer)
         { }
 
-        public async Task<string> FetchSplitChanges(long since)
+        public async Task<string> FetchSplitChanges(long since, bool cacheControlHeaders = false)
         {
             var clock = new Stopwatch();
             clock.Start();
@@ -38,7 +38,7 @@ namespace Splitio.Services.SplitFetcher.Classes
             try
             {
                 var requestUri = GetRequestUri(since);
-                var response = await ExecuteGet(requestUri);
+                var response = await ExecuteGet(requestUri, cacheControlHeaders);
 
                 if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
                 {

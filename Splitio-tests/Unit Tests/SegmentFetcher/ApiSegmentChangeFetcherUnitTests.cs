@@ -16,7 +16,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             //Arrange
             var apiClient = new Mock<ISegmentSdkApiClient>();
             apiClient
-            .Setup(x=>x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>()))
+            .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), false))
             .Returns(Task.FromResult(@"{
                           'name': 'payed',
                           'added': [
@@ -47,7 +47,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         {
             var apiClient = new Mock<ISegmentSdkApiClient>();
             apiClient
-            .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>()))
+            .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), false))
             .Throws(new Exception());
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
            

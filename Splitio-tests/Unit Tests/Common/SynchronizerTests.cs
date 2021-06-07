@@ -101,7 +101,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Assert.
             Thread.Sleep(1000);
-            _splitFetcher.Verify(mock => mock.FetchSplits(), Times.Once);            
+            _splitFetcher.Verify(mock => mock.FetchSplits(false), Times.Once);            
             _segmentFetcher.Verify(mock => mock.FetchAll(), Times.Once);
             _gates.Verify(mock => mock.SdkInternalReady(), Times.Once);
         }
@@ -116,7 +116,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _synchronizer.SynchronizeSegment(segmentName);
 
             // Assert.
-            _segmentFetcher.Verify(mock => mock.Fetch(segmentName), Times.Once);
+            _segmentFetcher.Verify(mock => mock.Fetch(segmentName, true), Times.Once);
         }
 
         [TestMethod]
@@ -126,7 +126,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _synchronizer.SynchronizeSplits();
 
             // Assert.
-            _splitFetcher.Verify(mock => mock.FetchSplits(), Times.Once);
+            _splitFetcher.Verify(mock => mock.FetchSplits(true), Times.Once);
             _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExists(It.IsAny<IList<string>>()), Times.Once);
         }
     }
