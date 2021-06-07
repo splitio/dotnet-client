@@ -33,16 +33,30 @@ namespace Splitio.Services.Client.Classes
         #region Internal Ready
         public void SdkInternalReady()
         {
-            if (_sdkInternalReady.IsSet) return;
+            try
+            {
+                if (_sdkInternalReady.IsSet) return;
 
-            _sdkInternalReady.Signal();
+                _sdkInternalReady.Signal();
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex.Message);
+            }
         }
 
         public void WaitUntilSdkInternalReady()
         {
-            if (_sdkInternalReady.IsSet) return;
+            try
+            {
+                if (_sdkInternalReady.IsSet) return;
 
-            _sdkInternalReady.Wait();
+                _sdkInternalReady.Wait();
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex.Message);
+            }
         }
         #endregion
 
@@ -58,11 +72,7 @@ namespace Splitio.Services.Client.Classes
 
             var timeLeft = milliseconds - (int)clock.ElapsedMilliseconds;
 
-            var ready = AreSegmentsReady(timeLeft);
-
-            if (ready) SdkInternalReady();
-
-            return ready;
+            return AreSegmentsReady(timeLeft);
         }       
 
         public void SplitsAreReady()
