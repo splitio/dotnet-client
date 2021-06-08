@@ -61,7 +61,9 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
                 .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), false))
                 .Returns(Task.FromResult(PayedSplitJson));
 
-            gates.Setup(mock => mock.IsSDKReady(0)).Returns(true);
+            gates
+                .Setup(mock => mock.AreSplitsReady(0))
+                .Returns(true);
 
             // Act
             segmentFetcher.InitializeSegment("payed");
