@@ -99,13 +99,13 @@ namespace Splitio.Services.Common
 
         public async Task SynchronizeSegment(string segmentName)
         {
-            await _segmentFetcher.Fetch(segmentName);
+            await _segmentFetcher.Fetch(segmentName, cacheControlHeaders: true);
             _log.Debug($"Segment fetched: {segmentName}...");
         }
 
         public async Task SynchronizeSplits()
         {
-            var segmentNames = await _splitFetcher.FetchSplits();
+            var segmentNames = await _splitFetcher.FetchSplits(cacheControlHeaders: true);
             await _segmentFetcher.FetchSegmentsIfNotExists(segmentNames);
             _log.Debug("Splits fetched...");
         }

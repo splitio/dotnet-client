@@ -5,6 +5,6 @@ namespace Splitio.Services.SplitFetcher.Interfaces
 {
     public interface ISplitChangeFetcher
     {
-        Task<SplitChangesResult> Fetch(long since);
+        Task<SplitChangesResult> Fetch(long since, bool cacheControlHeaders = false);
     }
 }

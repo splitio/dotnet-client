@@ -4,6 +4,6 @@ namespace Splitio.Services.SplitFetcher.Interfaces
 {
     public interface ISegmentSdkApiClient
     {
-        Task<string> FetchSegmentChanges(string name, long since);
+        Task<string> FetchSegmentChanges(string name, long since, bool cacheControlHeaders = false);
     }
 }

@@ -60,7 +60,7 @@ namespace Splitio.Services.SplitFetcher.Classes
             _splitCache.Clear();
         }
 
-        public async Task<IList<string>> FetchSplits()
+        public async Task<IList<string>> FetchSplits(bool cacheControlHeaders = false)
         {
             var segmentNames = new List<string>();
             var names = new Dictionary<string, string>();
@@ -71,7 +71,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                 try
                 {
-                    var result = await _splitChangeFetcher.Fetch(changeNumber);
+                    var result = await _splitChangeFetcher.Fetch(changeNumber, cacheControlHeaders);
 
                     if (result == null)
                     {
