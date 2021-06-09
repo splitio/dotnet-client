@@ -35,10 +35,10 @@ namespace Splitio.Telemetry.Storages
         private readonly ConcurrentDictionary<ResourceEnum, ConcurrentDictionary<int, long>> _httpErrors = new ConcurrentDictionary<ResourceEnum, ConcurrentDictionary<int, long>>();
 
         // Tags
-        private ConcurrentQueue<string> _tags = new ConcurrentQueue<string>();
+        private readonly ConcurrentDictionary<string, string> _tags = new ConcurrentDictionary<string, string>();
 
         // Streaming Events
-        private ConcurrentQueue<StreamingEvent> _streamingEvents = new ConcurrentQueue<StreamingEvent>();
+        private readonly ConcurrentDictionary<string, StreamingEvent> _streamingEvents = new ConcurrentDictionary<string, StreamingEvent>();
 
         #region Public Methods - Producer
         public void AddTag(string tag)
@@ -47,7 +47,7 @@ namespace Splitio.Telemetry.Storages
             {
                 if (_tags.Count < 10)
                 {
-                    _tags.Enqueue(tag);
+                    _tags.TryAdd(tag, tag);
                 }
             }
             catch (Exception ex)
@@ -131,7 +131,6 @@ namespace Splitio.Telemetry.Storages
                         values[bucket]++;
                         return;
                     }
-                    var dic = new ConcurrentDictionary<int, long>();
 
                     var latencies = new long[Util.Metrics.Buckets.Length];
                     latencies[bucket]++;
@@ -175,7 +174,7 @@ namespace Splitio.Telemetry.Storages
             {
                 if (_streamingEvents.Count < 20)
                 {
-                    _streamingEvents.Enqueue(streamingEvent);
+                    _streamingEvents.TryAdd(streamingEvent.ToString(), streamingEvent);
                 }
             }
             catch (Exception ex)
@@ -208,6 +207,7 @@ namespace Splitio.Telemetry.Storages
 
                 var errors = new ConcurrentDictionary<int, long>();
                 errors.TryAdd(status, 1);
+
                 _httpErrors.TryAdd(resource, errors);
             }
             catch (Exception ex)
@@ -391,16 +391,16 @@ namespace Splitio.Telemetry.Storages
 
         public IList<StreamingEvent> PopStreamingEvents()
         {
-            var events = new List<StreamingEvent>(_streamingEvents);
-            _streamingEvents = new ConcurrentQueue<StreamingEvent>();
+            var events = new List<StreamingEvent>(_streamingEvents.Values);
+            _streamingEvents.Clear();
 
             return events;
         }
 
         public IList<string> PopTags()
         {
-            var tags = new List<string>(_tags);
-            _tags = new ConcurrentQueue<string>();
+            var tags = new List<string>(_tags.Values);
+            _tags.Clear();
 
             return tags;
         }

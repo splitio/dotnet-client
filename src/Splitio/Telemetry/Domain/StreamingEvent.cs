@@ -25,5 +25,10 @@ namespace Splitio.Telemetry.Domain
             Timestamp = CurrentTimeHelper.CurrentTimeMillis();
             Type = (int)type;
         }
+
+        public override string ToString()
+        {
+            return $"{Type}::{Data}::{Timestamp}::{GetHashCode()}";
+        }
     }
 }
