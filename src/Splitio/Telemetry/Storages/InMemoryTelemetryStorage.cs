@@ -391,7 +391,7 @@ namespace Splitio.Telemetry.Storages
 
         public IList<StreamingEvent> PopStreamingEvents()
         {
-            var events = new List<StreamingEvent>(_streamingEvents.Values);
+            var events = _streamingEvents.Values.ToList();
             _streamingEvents.Clear();
 
             return events;
@@ -399,7 +399,7 @@ namespace Splitio.Telemetry.Storages
 
         public IList<string> PopTags()
         {
-            var tags = new List<string>(_tags.Values);
+            var tags = _tags.Values.ToList();
             _tags.Clear();
 
             return tags;
