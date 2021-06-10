@@ -81,10 +81,15 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
                 {
                     Events = new List<long> { 55, 66, 77 },
                     Segments = new List<long> { 88, 22, 99 },
+                },
+                HTTPErrors = new HTTPErrors
+                {
+                    Splits = new Dictionary<int, long> { { 500, 5 }, { 400, 5 } },
+                    Events = new Dictionary<int, long> { { 500, 2 }, { 400, 2 } }
                 }
             };
 
-            var data = "{\"hL\":{\"se\":[88,22,99],\"ev\":[55,66,77]},\"tR\":0,\"aR\":2,\"iQ\":0,\"iDe\":0,\"iDr\":0,\"spC\":0,\"seC\":0,\"skC\":0,\"sL\":0,\"eQ\":0,\"eD\":0}";
+            var data = "{\"hE\":{\"sp\":{\"500\":5,\"400\":5},\"ev\":{\"500\":2,\"400\":2}},\"hL\":{\"se\":[88,22,99],\"ev\":[55,66,77]},\"tR\":0,\"aR\":2,\"iQ\":0,\"iDe\":0,\"iDr\":0,\"spC\":0,\"seC\":0,\"skC\":0,\"sL\":0,\"eQ\":0,\"eD\":0}";
 
             _splitioHttpClient
                 .Setup(mock => mock.PostAsync("www.fake-url.com/metrics/usage", data))

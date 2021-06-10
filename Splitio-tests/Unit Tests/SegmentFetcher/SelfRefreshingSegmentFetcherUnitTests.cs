@@ -33,7 +33,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             segmentFetcher.Start();
 
             apiClient
-                .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>()))
+                .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), false))
                 .Returns(Task.FromResult(PayedSplitJson));
 
             // Act
@@ -58,10 +58,12 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, gates.Object, 10, cache, 1, segmentTaskQueue);
 
             apiClient
-                .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>()))
+                .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), false))
                 .Returns(Task.FromResult(PayedSplitJson));
 
-            gates.Setup(mock => mock.IsSDKReady(0)).Returns(true);
+            gates
+                .Setup(mock => mock.AreSplitsReady(0))
+                .Returns(true);
 
             // Act
             segmentFetcher.InitializeSegment("payed");
@@ -96,10 +98,10 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             cache.Verify(mock => mock.GetChangeNumber(segment2), Times.Once);
             cache.Verify(mock => mock.GetChangeNumber(segment3), Times.Exactly(2));
 
-            apiFetcher.Verify(mock => mock.Fetch(segment1, -1), Times.Once);
-            apiFetcher.Verify(mock => mock.Fetch(segment3, -1), Times.Once);
-            apiFetcher.Verify(mock => mock.Fetch(segment2, -1), Times.Never);
-            apiFetcher.Verify(mock => mock.Fetch(segment2, 30), Times.Never);
+            apiFetcher.Verify(mock => mock.Fetch(segment1, -1, false), Times.Once);
+            apiFetcher.Verify(mock => mock.Fetch(segment3, -1, false), Times.Once);
+            apiFetcher.Verify(mock => mock.Fetch(segment2, -1, false), Times.Never);
+            apiFetcher.Verify(mock => mock.Fetch(segment2, 30, false), Times.Never);
         }
     }
 }

@@ -56,9 +56,14 @@ namespace Splitio.Services.Common
 
         public void StartPeriodicFetching()
         {
-            _splitFetcher.Start();
-            _segmentFetcher.Start();
-            _log.Debug("Spltis and Segments fetchers started...");
+            Task.Factory.StartNew(() =>
+            {
+                _gates.WaitUntilSdkInternalReady();
+
+                _splitFetcher.Start();
+                _segmentFetcher.Start();
+                _log.Debug("Spltis and Segments fetchers started...");
+            });
         }
 
         public void StopPeriodicDataRecording()
@@ -94,13 +99,13 @@ namespace Splitio.Services.Common
 
         public async Task SynchronizeSegment(string segmentName)
         {
-            await _segmentFetcher.Fetch(segmentName);
+            await _segmentFetcher.Fetch(segmentName, cacheControlHeaders: true);
             _log.Debug($"Segment fetched: {segmentName}...");
         }
 
         public async Task SynchronizeSplits()
         {
-            var segmentNames = await _splitFetcher.FetchSplits();
+            var segmentNames = await _splitFetcher.FetchSplits(cacheControlHeaders: true);
             await _segmentFetcher.FetchSegmentsIfNotExists(segmentNames);
             _log.Debug("Splits fetched...");
         }

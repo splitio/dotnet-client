@@ -331,7 +331,7 @@ namespace Splitio.Integration_tests
             catch
             {
                 client.BlockUntilReady(20000);
-            }
+            }            
 
             // Act.
             var result = client.GetTreatment("nico_test", "FACUNDO_TEST");

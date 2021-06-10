@@ -19,7 +19,7 @@ namespace Splitio_Tests.Unit_Tests
             //Arrange
             Mock<ISplitSdkApiClient> apiMock = new Mock<ISplitSdkApiClient>();
             apiMock
-                .Setup(x => x.FetchSplitChanges(-1))
+                .Setup(x => x.FetchSplitChanges(-1, false))
                 .Returns(Task.FromResult("{\"splits\": [ { \"trafficType\": \"user\", \"name\": \"Reset_Seed_UI\", \"seed\": 1552577712, \"status\": \"ACTIVE\", \"defaultTreatment\": \"off\", \"changeNumber\": 1469827821322, \"conditions\": [ { \"matcherGroup\": { \"combiner\": \"AND\", \"matchers\": [ { \"keySelector\": { \"trafficType\": \"user\", \"attribute\": null }, \"matcherType\": \"ALL_KEYS\", \"negate\": false, \"userDefinedSegmentMatcherData\": null, \"whitelistMatcherData\": null, \"unaryNumericMatcherData\": null, \"betweenMatcherData\": null } ] }, \"partitions\": [ { \"treatment\": \"on\", \"size\": 100 }, { \"treatment\": \"off\", \"size\": 0, \"addedField\": \"test\"  } ] } ] } ], \"since\": 1469817846929, \"till\": 1469827821322 }\r\n"));
 
             ApiSplitChangeFetcher apiSplitChangeFetcher = new ApiSplitChangeFetcher(apiMock.Object);
@@ -38,7 +38,7 @@ namespace Splitio_Tests.Unit_Tests
             //Arrange
             var apiClient = new Mock<ISplitSdkApiClient>();
             apiClient
-            .Setup(x => x.FetchSplitChanges(It.IsAny<long>()))
+            .Setup(x => x.FetchSplitChanges(It.IsAny<long>(), false))
             .Returns(Task.FromResult(@"{
                           'splits': [
                             {
@@ -110,7 +110,7 @@ namespace Splitio_Tests.Unit_Tests
             //Arrange
             var apiClient = new Mock<ISplitSdkApiClient>();
             apiClient
-            .Setup(x => x.FetchSplitChanges(It.IsAny<long>()))
+            .Setup(x => x.FetchSplitChanges(It.IsAny<long>(), false))
             .Returns(Task.FromResult(@"{
                           'splits': [
                             {
@@ -175,7 +175,7 @@ namespace Splitio_Tests.Unit_Tests
             //Arrange
             var apiClient = new Mock<ISplitSdkApiClient>();
             apiClient
-            .Setup(x => x.FetchSplitChanges(It.IsAny<long>()))
+            .Setup(x => x.FetchSplitChanges(It.IsAny<long>(), false))
             .Returns(Task.FromResult(@"{
                           'splits': [
                             {
@@ -239,7 +239,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             var apiClient = new Mock<ISplitSdkApiClient>();
             apiClient
-            .Setup(x => x.FetchSplitChanges(It.IsAny<long>()))
+            .Setup(x => x.FetchSplitChanges(It.IsAny<long>(), false))
             .Throws(new Exception());
             var apiFetcher = new ApiSplitChangeFetcher(apiClient.Object);
 
@@ -256,7 +256,7 @@ namespace Splitio_Tests.Unit_Tests
             //Arrange
             var apiClient = new Mock<ISplitSdkApiClient>();
             apiClient
-            .Setup(x => x.FetchSplitChanges(It.IsAny<long>()))
+            .Setup(x => x.FetchSplitChanges(It.IsAny<long>(), false))
             .Returns(Task.FromResult(@"{
                           'splits': [
                             {

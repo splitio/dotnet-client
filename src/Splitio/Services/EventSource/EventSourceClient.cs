@@ -21,6 +21,9 @@ namespace Splitio.Services.EventSource
         private const int ConnectTimeoutMs = 30000;
         private const int BufferSize = 10000;
 
+        private readonly string[] _notificationSplitArray = new[] { "\n\n" };
+        private readonly byte[] _buffer = new byte[BufferSize];
+
         private readonly ISplitLogger _log;
         private readonly INotificationParser _notificationParser;
         private readonly IWrapperAdapter _wrapperAdapter;
@@ -28,7 +31,8 @@ namespace Splitio.Services.EventSource
         private readonly CountdownEvent _connectedSignal;
         private readonly ISplitioHttpClient _splitHttpClient;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
-
+        private readonly UTF8Encoding _encoder;
+        
         private string _url;
         private bool _connected;
         private bool _firstEvent;
@@ -51,6 +55,8 @@ namespace Splitio.Services.EventSource
             _disconnectSignal = new CountdownEvent(1);
             _connectedSignal = new CountdownEvent(1);
             _firstEvent = true;
+
+            _encoder = new UTF8Encoding();
         }
 
         public event EventHandler<EventReceivedEventArgs> EventReceived;
@@ -161,8 +167,7 @@ namespace Splitio.Services.EventSource
         }
 
         private async Task ReadStreamAsync(Stream stream)
-        {
-            var encoder = new UTF8Encoding();
+        {            
             _streamReadcancellationTokenSource = new CancellationTokenSource();
 
             _log.Debug($"Reading stream ....");
@@ -173,10 +178,10 @@ namespace Splitio.Services.EventSource
                 {
                     if (stream.CanRead && (IsConnected() || _firstEvent))
                     {
-                        var buffer = new byte[BufferSize];
+                        Array.Clear(_buffer, 0, BufferSize);
 
                         var timeoutTask = _wrapperAdapter.TaskDelay(ReadTimeoutMs);
-                        var streamReadTask = stream.ReadAsync(buffer, 0, BufferSize, _streamReadcancellationTokenSource.Token);
+                        var streamReadTask = stream.ReadAsync(_buffer, 0, BufferSize, _streamReadcancellationTokenSource.Token);
                         // Creates a task that will complete when any of the supplied tasks have completed.
                         // Returns: A task that represents the completion of one of the supplied tasks. The return task's Result is the task that completed.
                         var finishedTask = await _wrapperAdapter.WhenAny(streamReadTask, timeoutTask);
@@ -193,7 +198,7 @@ namespace Splitio.Services.EventSource
                             throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, "Streaming end of the file.");
                         }
 
-                        var notificationString = encoder.GetString(buffer, 0, len);
+                        var notificationString = _encoder.GetString(_buffer, 0, len);
                         _log.Debug($"Read stream encoder buffer: {notificationString}");
 
                         if (_firstEvent)
@@ -203,7 +208,7 @@ namespace Splitio.Services.EventSource
 
                         if (notificationString != KeepAliveResponse && IsConnected())
                         {
-                            var lines = notificationString.Split(new[] { "\n\n" }, StringSplitOptions.None);
+                            var lines = notificationString.Split(_notificationSplitArray, StringSplitOptions.None);
 
                             foreach (var line in lines)
                             {
@@ -255,6 +260,8 @@ namespace Splitio.Services.EventSource
         {
             _log.Debug($"Notification error: {notificationError.Message}. Status Server: {notificationError.StatusCode}.");
 
+            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.AblyError, notificationError.Code));
+
             if (notificationError.Code >= 40140 && notificationError.Code <= 40149)
             {
                 throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Ably Notification code: {notificationError.Code}");
@@ -263,9 +270,7 @@ namespace Splitio.Services.EventSource
             if (notificationError.Code >= 40000 && notificationError.Code <= 49999)
             {
                 throw new ReadStreamException(SSEClientActions.NONRETRYABLE_ERROR, $"Ably Notification code: {notificationError.Code}");
-            }
-
-            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.AblyError, notificationError.Code));
+            }            
         }
 
         private void DispatchEvent(IncomingNotification incomingNotification)

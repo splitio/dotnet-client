@@ -41,6 +41,8 @@ namespace Splitio.Services.Common
         #region Public Methods
         public void Start()
         {
+            _synchronizer.SyncAll();
+
             if (_streamingEnabled)
             {
                  StartStream();
@@ -104,7 +106,7 @@ namespace Splitio.Services.Common
             _log.Debug("Starting streaming mode...");            
 
             _synchronizer.StartPeriodicDataRecording();
-            _synchronizer.SyncAll();
+
             Task.Factory.StartNew(async () =>
             {
                 if (!await _pushManager.StartSse())
@@ -161,6 +163,7 @@ namespace Splitio.Services.Common
             _synchronizer.StopPeriodicFetching();
             _synchronizer.SyncAll();
             _sseHandler.StartWorkers();
+            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Streaming));
         }
 
         private void ProcessSubsystemOff()

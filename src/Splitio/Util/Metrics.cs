@@ -6,7 +6,7 @@ namespace Splitio.Util
     {
         private static readonly long MaxLatency = 7481828;
 
-        private static readonly long[] LatencyBuckets = {
+        public static readonly long[] Buckets = {
             1000,    1500,    2250,   3375,    5063,
             7594,    11391,   17086,  25629,   38443,
             57665,   86498,   129746, 194620,  291929,
@@ -20,10 +20,10 @@ namespace Splitio.Util
 
             if (latency > MaxLatency)
             {
-                return LatencyBuckets.Length - 1;
+                return Buckets.Length - 1;
             }
 
-            int index = Array.BinarySearch(LatencyBuckets, latency);
+            int index = Array.BinarySearch(Buckets, latency);
 
             if (index < 0)
             {

@@ -242,7 +242,7 @@ namespace Splitio.Services.Client.Classes
             var headers = new Dictionary<string, string>
             {
                 { Constants.Http.SplitSDKVersion, _config.SdkVersion },
-                { Constants.Http.SplitSDKImpressionsMode, _config.ImpressionsMode.Equals(ImpressionsMode.Optimized).ToString() }
+                { Constants.Http.SplitSDKImpressionsMode, _config.ImpressionsMode.ToString() }
             };
 
             if (!string.IsNullOrEmpty(_config.SdkMachineName) && !_config.SdkMachineName.Equals(Constants.Gral.Unknown))

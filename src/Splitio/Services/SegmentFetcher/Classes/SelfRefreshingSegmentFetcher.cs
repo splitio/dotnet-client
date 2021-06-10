@@ -53,7 +53,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             {
                 while (true)
                 {
-                    if (_gates.IsSDKReady(0))
+                    if (_gates.AreSplitsReady(0))
                     {
                         //Delay first execution until expected time has passed
                         var intervalInMilliseconds = _interval * 1000;
@@ -110,13 +110,13 @@ namespace Splitio.Services.SegmentFetcher.Classes
             }
         }
 
-        public async Task Fetch(string segmentName)
+        public async Task Fetch(string segmentName, bool cacheControlHeaders = false)
         {
             try
             {
                 InitializeSegment(segmentName);
                 _segments.TryGetValue(segmentName, out SelfRefreshingSegment fetcher);
-                await fetcher.FetchSegment();
+                await fetcher.FetchSegment(cacheControlHeaders);
             }
             catch (Exception ex)
             {

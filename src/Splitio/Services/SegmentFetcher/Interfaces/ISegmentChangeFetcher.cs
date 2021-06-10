@@ -5,6 +5,6 @@ namespace Splitio.Services.SegmentFetcher.Interfaces
 {
     public interface ISegmentChangeFetcher
     {
-        Task<SegmentChange> Fetch(string name, long change_number);
+        Task<SegmentChange> Fetch(string name, long change_number, bool cacheControlHeaders = false);
     }
 }

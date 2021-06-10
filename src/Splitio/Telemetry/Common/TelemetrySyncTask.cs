@@ -61,7 +61,7 @@ namespace Splitio.Telemetry.Common
             {
                 _firstTime = false;
 
-                Task.Factory.StartNew(() => RecordConfigInit());
+                Task.Factory.StartNew(() => RecordConfigInit(), _cancellationTokenSource.Token);
             }
 
             Task.Factory.StartNew(() =>

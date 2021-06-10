@@ -2,6 +2,7 @@
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
+using System.Linq;
 
 namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
 {
@@ -34,22 +35,27 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void MethodLatenciesRecordAndPop()
         {
             // Arrange.
-            _telemetryStorage.RecordLatency(MethodEnum.Treatment, 2343);
-            _telemetryStorage.RecordLatency(MethodEnum.Treatment, 2344);
-            _telemetryStorage.RecordLatency(MethodEnum.Treatments, 2345);
-            _telemetryStorage.RecordLatency(MethodEnum.TreatmentsWithConfig, 2346);
-            _telemetryStorage.RecordLatency(MethodEnum.Track, 78787);
-            _telemetryStorage.RecordLatency(MethodEnum.Track, 678678);
+            _telemetryStorage.RecordLatency(MethodEnum.Treatment, 5);
+            _telemetryStorage.RecordLatency(MethodEnum.Treatment, 2);
+            _telemetryStorage.RecordLatency(MethodEnum.Treatments, 3);
+            _telemetryStorage.RecordLatency(MethodEnum.TreatmentsWithConfig, 4);
+            _telemetryStorage.RecordLatency(MethodEnum.Track, 8);
+            _telemetryStorage.RecordLatency(MethodEnum.Track, 1);
+
+            var treatmentExpected = new long[] { 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            var treatmentsExpected = new long[] { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            var treatmentsWithConfigExpected = new long[] { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            var trackExpected = new long[] { 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
             // Act.
             var result = _telemetryStorage.PopLatencies();
 
             // Assert.
-            Assert.AreEqual(2, result.Treatment.Count);
+            CollectionAssert.AreEqual(treatmentExpected, result.Treatment.ToArray());
+            CollectionAssert.AreEqual(treatmentsExpected, result.Treatments.ToArray());
+            CollectionAssert.AreEqual(treatmentsWithConfigExpected, result.TreatmenstWithConfig.ToArray());
+            CollectionAssert.AreEqual(trackExpected, result.Track.ToArray());
             Assert.AreEqual(0, result.TreatmentWithConfig.Count);
-            Assert.AreEqual(1, result.Treatments.Count);
-            Assert.AreEqual(1, result.TreatmenstWithConfig.Count);
-            Assert.AreEqual(2, result.Track.Count);
 
             result = _telemetryStorage.PopLatencies();
             Assert.AreEqual(0, result.Treatment.Count);
@@ -58,21 +64,26 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             Assert.AreEqual(0, result.TreatmenstWithConfig.Count);
             Assert.AreEqual(0, result.Track.Count);
 
-            _telemetryStorage.RecordLatency(MethodEnum.Treatment, 55555);
-            _telemetryStorage.RecordLatency(MethodEnum.Treatment, 6666);
-            _telemetryStorage.RecordLatency(MethodEnum.Treatments, 777);
-            _telemetryStorage.RecordLatency(MethodEnum.TreatmentsWithConfig, 888);
-            _telemetryStorage.RecordLatency(MethodEnum.Track, 09987);
-            _telemetryStorage.RecordLatency(MethodEnum.Track, 678678);
+            _telemetryStorage.RecordLatency(MethodEnum.Treatment, 1);
+            _telemetryStorage.RecordLatency(MethodEnum.Treatment, 2);
+            _telemetryStorage.RecordLatency(MethodEnum.Treatments, 3);
+            _telemetryStorage.RecordLatency(MethodEnum.TreatmentsWithConfig, 4);
+            _telemetryStorage.RecordLatency(MethodEnum.Track, 5);
+            _telemetryStorage.RecordLatency(MethodEnum.Track, 6);
+
+            treatmentExpected = new long[] { 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            treatmentsExpected = new long[] { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            treatmentsWithConfigExpected = new long[] { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            trackExpected = new long[] { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
             result = _telemetryStorage.PopLatencies();
 
             // Assert.
-            Assert.AreEqual(2, result.Treatment.Count);
+            CollectionAssert.AreEqual(treatmentExpected, result.Treatment.ToArray());
+            CollectionAssert.AreEqual(treatmentsExpected, result.Treatments.ToArray());
+            CollectionAssert.AreEqual(treatmentsWithConfigExpected, result.TreatmenstWithConfig.ToArray());
+            CollectionAssert.AreEqual(trackExpected, result.Track.ToArray());
             Assert.AreEqual(0, result.TreatmentWithConfig.Count);
-            Assert.AreEqual(1, result.Treatments.Count);
-            Assert.AreEqual(1, result.TreatmenstWithConfig.Count);
-            Assert.AreEqual(2, result.Track.Count);
         }
 
         [TestMethod]
@@ -95,26 +106,34 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         {
             // Arrange.
             _telemetryStorage.RecordSyncLatency(ResourceEnum.EventSync, 2);
+            _telemetryStorage.RecordSyncLatency(ResourceEnum.EventSync, 2);
             _telemetryStorage.RecordSyncLatency(ResourceEnum.EventSync, 4);
             _telemetryStorage.RecordSyncLatency(ResourceEnum.ImpressionSync, 2);
             _telemetryStorage.RecordSyncLatency(ResourceEnum.ImpressionSync, 2);
-            _telemetryStorage.RecordSyncLatency(ResourceEnum.SegmentSync, 2);
+            _telemetryStorage.RecordSyncLatency(ResourceEnum.SegmentSync, 3);
             _telemetryStorage.RecordSyncLatency(ResourceEnum.SplitSync, 2);
             _telemetryStorage.RecordSyncLatency(ResourceEnum.SplitSync, 3);
             _telemetryStorage.RecordSyncLatency(ResourceEnum.SplitSync, 4);
             _telemetryStorage.RecordSyncLatency(ResourceEnum.TelemetrySync, 2);
             _telemetryStorage.RecordSyncLatency(ResourceEnum.TelemetrySync, 7);
 
+            var eventsExpected = new long[] { 0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            var impressionsExpected = new long[] { 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            var segmentsExpected = new long[] { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            var splitsExpected = new long[] { 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            var telemetryExpected = new long[] { 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
             // Act.
             var result = _telemetryStorage.PopHttpLatencies();
 
             // Assert.
-            Assert.AreEqual(2, result.Events.Count);
-            Assert.AreEqual(2, result.Impressions.Count);
-            Assert.AreEqual(1, result.Segments.Count);
-            Assert.AreEqual(3, result.Splits.Count);
-            Assert.AreEqual(2, result.Telemetry.Count);
+            CollectionAssert.AreEqual(eventsExpected, result.Events.ToArray());
+            CollectionAssert.AreEqual(impressionsExpected, result.Impressions.ToArray());
+            CollectionAssert.AreEqual(segmentsExpected, result.Segments.ToArray());
+            CollectionAssert.AreEqual(splitsExpected, result.Splits.ToArray());
+            CollectionAssert.AreEqual(telemetryExpected, result.Telemetry.ToArray());
             Assert.AreEqual(0, result.Token.Count);
+            Assert.AreEqual(0, result.ImpressionCount.Count);
 
             result = _telemetryStorage.PopHttpLatencies();
             Assert.AreEqual(0, result.Events.Count);
