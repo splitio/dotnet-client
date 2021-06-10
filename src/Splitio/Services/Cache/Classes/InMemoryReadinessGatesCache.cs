@@ -3,7 +3,6 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 
 namespace Splitio.Services.Client.Classes
@@ -15,19 +14,14 @@ namespace Splitio.Services.Client.Classes
         private readonly CountdownEvent _sdkInternalReady;
         private readonly CountdownEvent _splitsAreReady;
         private readonly Dictionary<string, CountdownEvent> _segmentsAreReady;
-        private readonly Stopwatch _splitsReadyTimer;
-        private readonly Stopwatch _segmentsReadyTimer;
+        private readonly Util.SplitStopwatch _splitsReadyTimer;
 
         public InMemoryReadinessGatesCache()
         {
             _sdkInternalReady = new CountdownEvent(1);
             _splitsAreReady = new CountdownEvent(1);
             _segmentsAreReady = new Dictionary<string, CountdownEvent>();
-            _splitsReadyTimer = new Stopwatch();
-            _segmentsReadyTimer = new Stopwatch();
-
-            _segmentsReadyTimer.Start();
-            _splitsReadyTimer.Start();
+            _splitsReadyTimer = new Util.SplitStopwatch();
         }
 
         #region Internal Ready
@@ -62,33 +56,34 @@ namespace Splitio.Services.Client.Classes
 
         public bool IsSDKReady(int milliseconds)
         {
-            var clock = new Stopwatch();
-            clock.Start();
-
-            if (!AreSplitsReady(milliseconds))
+            using (var clock = new Util.SplitStopwatch())
             {
-                return false;
+                clock.Start();
+
+                if (!AreSplitsReady(milliseconds))
+                {
+                    return false;
+                }
+
+                var timeLeft = milliseconds - (int)clock.ElapsedMilliseconds;
+
+                return AreSegmentsReady(timeLeft);
             }
-
-            var timeLeft = milliseconds - (int)clock.ElapsedMilliseconds;
-
-            return AreSegmentsReady(timeLeft);
-        }       
+        }
 
         public void SplitsAreReady()
         {
-            if (!_splitsAreReady.IsSet)
+            if (_splitsAreReady.IsSet) return;
+            
+            _splitsAreReady.Signal();
+
+            if (_splitsAreReady.IsSet)
             {
-                _splitsAreReady.Signal();
+                _splitsReadyTimer.Dispose();
 
-                if (_splitsAreReady.IsSet)
+                if (_log.IsDebugEnabled)
                 {
-                    _splitsReadyTimer.Stop();
-
-                    if (_log.IsDebugEnabled)
-                    {
-                        _log.Debug($"Splits are ready in {_splitsReadyTimer.ElapsedMilliseconds} milliseconds");
-                    }
+                    _log.Debug($"Splits are ready in {_splitsReadyTimer.ElapsedMilliseconds} milliseconds");
                 }
             }
         }
@@ -141,36 +136,36 @@ namespace Splitio.Services.Client.Classes
 
         public bool AreSegmentsReady(int milliseconds)
         {
-            var clock = new Stopwatch();
-            clock.Start();
-            int timeLeft = milliseconds;
-
-            foreach (var entry in _segmentsAreReady)
+            using (var clock = new Util.SplitStopwatch())
             {
-                var segmentName = entry.Key;
-                var countdown = entry.Value;
+                clock.Start();
+                int timeLeft = milliseconds;
 
-                if (timeLeft >= 0 && !countdown.Wait(timeLeft))
+                foreach (var entry in _segmentsAreReady)
                 {
-                    return false;
+                    var segmentName = entry.Key;
+                    var countdown = entry.Value;
+
+                    if (timeLeft >= 0 && !countdown.Wait(timeLeft))
+                    {
+                        return false;
+                    }
+
+                    if (timeLeft < 0 && !countdown.Wait(0))
+                    {
+                        return false;
+                    }
+
+                    timeLeft = timeLeft - (int)clock.ElapsedMilliseconds;
                 }
 
-                if (timeLeft < 0 && !countdown.Wait(0))
+                if (_log.IsDebugEnabled)
                 {
-                    return false;
+                    _log.Debug($"Segments are ready in {clock.ElapsedMilliseconds} milliseconds");
                 }
 
-                timeLeft = timeLeft - (int)clock.ElapsedMilliseconds;
+                return true;
             }
-
-            _segmentsReadyTimer.Stop();
-
-            if (_log.IsDebugEnabled)
-            {
-                _log.Debug($"Segments are ready in {_segmentsReadyTimer.ElapsedMilliseconds} milliseconds");
-            }
-
-            return true;
         }
     }
 }

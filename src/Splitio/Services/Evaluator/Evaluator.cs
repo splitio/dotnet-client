@@ -4,10 +4,8 @@ using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Classes;
-using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Splitio.Services.Evaluator
@@ -35,20 +33,22 @@ namespace Splitio.Services.Evaluator
         #region Public Method
         public TreatmentResult EvaluateFeature(Key key, string featureName, Dictionary<string, object> attributes = null)
         {
-            var clock = new Stopwatch();
-            clock.Start();
-
-            try
+            using (var clock = new Util.SplitStopwatch())
             {
-                var parsedSplit = _splitCache.GetSplit(featureName);
+                clock.Start();
 
-                return EvaluateTreatment(key, parsedSplit, featureName, clock, attributes);
-            }
-            catch (Exception e)
-            {
-                _log.Error($"Exception caught getting treatment for feature: {featureName}", e);
+                try
+                {
+                    var parsedSplit = _splitCache.GetSplit(featureName);
 
-                return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds, exception: true);
+                    return EvaluateTreatment(key, parsedSplit, featureName, clock, attributes);
+                }
+                catch (Exception e)
+                {
+                    _log.Error($"Exception caught getting treatment for feature: {featureName}", e);
+
+                    return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds, exception: true);
+                }
             }
         }
 
@@ -56,51 +56,53 @@ namespace Splitio.Services.Evaluator
         {
             var exception = false;
             var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();            
-            var clock = new Stopwatch();
-            clock.Start();            
-
-            try
+            using(var clock = new Util.SplitStopwatch())
             {
-                var splits = _splitCache.FetchMany(featureNames);
+                clock.Start();
 
-                foreach (var feature in featureNames)
+                try
                 {
-                    var split = splits.FirstOrDefault(s => feature.Equals(s?.name));
+                    var splits = _splitCache.FetchMany(featureNames);
 
-                    var result = EvaluateTreatment(key, split, feature, attributes: attributes);
+                    foreach (var feature in featureNames)
+                    {
+                        var split = splits.FirstOrDefault(s => feature.Equals(s?.name));
 
-                    treatmentsForFeatures.Add(feature, result);
+                        var result = EvaluateTreatment(key, split, feature, attributes: attributes);
+
+                        treatmentsForFeatures.Add(feature, result);
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                _log.Error($"Exception caught getting treatments", e);
-
-                foreach (var name in featureNames)
+                catch (Exception e)
                 {
-                    treatmentsForFeatures.Add(name, new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds));
+                    _log.Error($"Exception caught getting treatments", e);
+
+                    foreach (var name in featureNames)
+                    {
+                        treatmentsForFeatures.Add(name, new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds));
+                    }
+
+                    exception = true;
                 }
 
-                exception = true;
+                return new MultipleEvaluatorResult
+                {
+                    TreatmentResults = treatmentsForFeatures,
+                    ElapsedMilliseconds = clock.ElapsedMilliseconds,
+                    Exception = exception
+                };
             }
-
-            return new MultipleEvaluatorResult
-            {
-                TreatmentResults = treatmentsForFeatures,
-                ElapsedMilliseconds = clock.ElapsedMilliseconds,
-                Exception = exception
-            };
         }
         #endregion
 
         #region Private Methods
-        private TreatmentResult EvaluateTreatment(Key key, ParsedSplit parsedSplit, string featureName, Stopwatch clock = null, Dictionary<string, object> attributes = null)
+        private TreatmentResult EvaluateTreatment(Key key, ParsedSplit parsedSplit, string featureName, Util.SplitStopwatch clock = null, Dictionary<string, object> attributes = null)
         {
             try
             {
                 if (clock == null)
                 {
-                    clock = new Stopwatch();
+                    clock = new Util.SplitStopwatch();
                     clock.Start();
                 }
 
@@ -127,6 +129,10 @@ namespace Splitio.Services.Evaluator
                 _log.Error($"Exception caught getting treatment for feature: {featureName}", e);
 
                 return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
+            }
+            finally
+            {
+                clock.Dispose();
             }
         }
 

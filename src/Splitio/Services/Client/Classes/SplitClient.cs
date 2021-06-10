@@ -16,7 +16,6 @@ using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -128,50 +127,52 @@ namespace Splitio.Services.Client.Classes
         {
             if (Destroyed) return false;
 
-            var clock = new Stopwatch();
-            clock.Start();
-
-            var keyResult = _keyValidator.IsValid(new Key(key, null), nameof(Track));
-            var eventTypeResult = _eventTypeValidator.IsValid(eventType, nameof(eventType));
-            var eventPropertiesResult = _eventPropertiesValidator.IsValid(properties);
-
-            var trafficTypeResult = _blockUntilReadyService.IsSdkReady()
-                ? _trafficTypeValidator.IsValid(trafficType, nameof(trafficType))
-                : new ValidatorResult { Success = true, Value = trafficType };
-
-            if (!keyResult || !trafficTypeResult.Success || !eventTypeResult || !eventPropertiesResult.Success)
-                return false;
-
-            try
+            using (var clock = new Util.SplitStopwatch())
             {
-                var eventToLog = new Event
-                {
-                    key = key,
-                    trafficTypeName = trafficTypeResult.Value,
-                    eventTypeId = eventType,
-                    value = value,
-                    timestamp = CurrentTimeHelper.CurrentTimeMillis(),
-                    properties = (Dictionary<string, object>)eventPropertiesResult.Value
-                };
+                clock.Start();
 
-                Task.Factory.StartNew(() =>
+                var keyResult = _keyValidator.IsValid(new Key(key, null), nameof(Track));
+                var eventTypeResult = _eventTypeValidator.IsValid(eventType, nameof(eventType));
+                var eventPropertiesResult = _eventPropertiesValidator.IsValid(properties);
+
+                var trafficTypeResult = _blockUntilReadyService.IsSdkReady()
+                    ? _trafficTypeValidator.IsValid(trafficType, nameof(trafficType))
+                    : new ValidatorResult { Success = true, Value = trafficType };
+
+                if (!keyResult || !trafficTypeResult.Success || !eventTypeResult || !eventPropertiesResult.Success)
+                    return false;
+
+                try
                 {
-                    _eventsLog.Log(new WrappedEvent
+                    var eventToLog = new Event
                     {
-                        Event = eventToLog,
-                        Size = eventPropertiesResult.EventSize
+                        key = key,
+                        trafficTypeName = trafficTypeResult.Value,
+                        eventTypeId = eventType,
+                        value = value,
+                        timestamp = CurrentTimeHelper.CurrentTimeMillis(),
+                        properties = (Dictionary<string, object>)eventPropertiesResult.Value
+                    };
+
+                    Task.Factory.StartNew(() =>
+                    {
+                        _eventsLog.Log(new WrappedEvent
+                        {
+                            Event = eventToLog,
+                            Size = eventPropertiesResult.EventSize
+                        });
                     });
-                });
 
-                RecordLatency(nameof(Track), clock.ElapsedMilliseconds);
+                    RecordLatency(nameof(Track), clock.ElapsedMilliseconds);
 
-                return true;
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception caught trying to track an event", e);
-                RecordException(nameof(Track));
-                return false;
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    _log.Error("Exception caught trying to track an event", e);
+                    RecordException(nameof(Track));
+                    return false;
+                }
             }
         }
 
