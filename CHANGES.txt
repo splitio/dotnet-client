@@ -2,8 +2,8 @@ CHANGES
 
 6.3.1 (Jun 14, 2021)
 - Fixed buckets count in Telemetry.
-- Added improvements in streaming architecture.
-- Added disposable Stopwach.
+- Added improvements for streaming functionality, including a header to force a local cache refresh when applicable.
+- Added disposable Stopwatch for better memory management.
 
 6.3.0 (Apr 26, 2021)
 - Added SSL/TLS support for Redis Client.
