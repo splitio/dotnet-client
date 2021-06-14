@@ -1,5 +1,10 @@
 CHANGES
 
+6.3.1 (Jun 14, 2021)
+- Fixed buckets count in Telemetry.
+- Added improvements for streaming functionality, including a header to force a local cache refresh when applicable.
+- Added disposable Stopwatch for better memory management.
+
 6.3.0 (Apr 26, 2021)
 - Added SSL/TLS support for Redis Client.
 - Added net461 target framework to avoid a vulnerability in StackExchange.Redis at least from this version forward. We will keep supporting net40 & net45 with the old one.
