@@ -7,7 +7,6 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -36,38 +35,40 @@ namespace Splitio.Services.Common
         #region Public Methods
         public async Task<AuthenticationResponse> AuthenticateAsync()
         {
-            var clock = new Stopwatch();
-            clock.Start();
-
-            try
+            using (var clock = new Util.SplitStopwatch())
             {
-                var response = await _splitioHttpClient.GetAsync(_url);
+                clock.Start();
 
-                if (response.statusCode == HttpStatusCode.OK)
+                try
                 {
-                    _log.Debug($"Success connection to: {_url}");
+                    var response = await _splitioHttpClient.GetAsync(_url);
 
-                    _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.TokenSync, Util.Metrics.Bucket(clock.ElapsedMilliseconds));
-                    _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.TokenSync, CurrentTimeHelper.CurrentTimeMillis());
+                    if (response.statusCode == HttpStatusCode.OK)
+                    {
+                        _log.Debug($"Success connection to: {_url}");
 
-                    return GetSuccessResponse(response.content);
+                        _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.TokenSync, Util.Metrics.Bucket(clock.ElapsedMilliseconds));
+                        _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.TokenSync, CurrentTimeHelper.CurrentTimeMillis());
+
+                        return GetSuccessResponse(response.content);
+                    }
+                    else if (response.statusCode >= HttpStatusCode.BadRequest && response.statusCode < HttpStatusCode.InternalServerError)
+                    {
+                        _log.Debug($"Problem to connect to : {_url}. Response status: {response.statusCode}");
+
+                        _telemetryRuntimeProducer.RecordAuthRejections();
+                        return new AuthenticationResponse { PushEnabled = false, Retry = false };
+                    }
+
+                    _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.TokenSync, (int)response.statusCode);
+                    return new AuthenticationResponse { PushEnabled = false, Retry = true };
                 }
-                else if (response.statusCode >= HttpStatusCode.BadRequest && response.statusCode < HttpStatusCode.InternalServerError)
+                catch (Exception ex)
                 {
-                    _log.Debug($"Problem to connect to : {_url}. Response status: {response.statusCode}");
+                    _log.Error(ex.Message);
 
-                    _telemetryRuntimeProducer.RecordAuthRejections();
                     return new AuthenticationResponse { PushEnabled = false, Retry = false };
                 }
-
-                _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.TokenSync, (int)response.statusCode);
-                return new AuthenticationResponse { PushEnabled = false, Retry = true };
-            }
-            catch (Exception ex)
-            {
-                _log.Error(ex.Message);
-
-                return new AuthenticationResponse { PushEnabled = false, Retry = false };
             }
         }
         #endregion

@@ -1,7 +1,6 @@
 ﻿using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using System;
-using System.Diagnostics;
 
 namespace Splitio.Redis.Services.Shared
 {
@@ -19,19 +18,21 @@ namespace Splitio.Redis.Services.Shared
             if (!IsSdkReady())
             {
                 var ready = false;
-                var clock = new Stopwatch();
-                clock.Start();
-
-                while (clock.ElapsedMilliseconds <= blockMilisecondsUntilReady)
+                using(var clock = new Util.SplitStopwatch())
                 {
-                    if (IsSdkReady())
-                    {
-                        ready = true;
-                        break;
-                    }
-                }
+                    clock.Start();
 
-                if (!ready) throw new TimeoutException($"SDK was not ready in {blockMilisecondsUntilReady}. Could not connect to Redis");
+                    while (clock.ElapsedMilliseconds <= blockMilisecondsUntilReady)
+                    {
+                        if (IsSdkReady())
+                        {
+                            ready = true;
+                            break;
+                        }
+                    }
+
+                    if (!ready) throw new TimeoutException($"SDK was not ready in {blockMilisecondsUntilReady}. Could not connect to Redis");
+                }
             }
         }
 

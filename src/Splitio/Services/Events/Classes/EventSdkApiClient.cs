@@ -28,17 +28,19 @@ namespace Splitio.Services.Events.Classes
 
         public async void SendBulkEvents(List<Event> events)
         {
-            var clock = new Stopwatch();
-            clock.Start();
-
-            var eventsJson = JsonConvert.SerializeObject(events, new JsonSerializerSettings
+            using (var clock = new Util.SplitStopwatch())
             {
-                NullValueHandling = NullValueHandling.Ignore
-            });
+                clock.Start();
 
-            var response = await ExecutePost(EventsUrlTemplate, eventsJson);
+                var eventsJson = JsonConvert.SerializeObject(events, new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                });
 
-            RecordTelemetry(nameof(SendBulkEvents), (int)response.statusCode, response.content, ResourceEnum.EventSync, clock);
+                var response = await ExecutePost(EventsUrlTemplate, eventsJson);
+
+                RecordTelemetry(nameof(SendBulkEvents), (int)response.statusCode, response.content, ResourceEnum.EventSync, clock);
+            }
         }
     }
 }

@@ -23,16 +23,16 @@ namespace Splitio.Services.EventSource
 
         private readonly string[] _notificationSplitArray = new[] { "\n\n" };
         private readonly byte[] _buffer = new byte[BufferSize];
+        private readonly UTF8Encoding _encoder = new UTF8Encoding();
+        private readonly CountdownEvent _disconnectSignal = new CountdownEvent(1);
+        private readonly CountdownEvent _connectedSignal = new CountdownEvent(1);
 
         private readonly ISplitLogger _log;
         private readonly INotificationParser _notificationParser;
-        private readonly IWrapperAdapter _wrapperAdapter;
-        private readonly CountdownEvent _disconnectSignal;
-        private readonly CountdownEvent _connectedSignal;
+        private readonly IWrapperAdapter _wrapperAdapter;        
         private readonly ISplitioHttpClient _splitHttpClient;
-        private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
-        private readonly UTF8Encoding _encoder;
-        
+        private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;        
+
         private string _url;
         private bool _connected;
         private bool _firstEvent;
@@ -52,11 +52,7 @@ namespace Splitio.Services.EventSource
             _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
 
-            _disconnectSignal = new CountdownEvent(1);
-            _connectedSignal = new CountdownEvent(1);
             _firstEvent = true;
-
-            _encoder = new UTF8Encoding();
         }
 
         public event EventHandler<EventReceivedEventArgs> EventReceived;

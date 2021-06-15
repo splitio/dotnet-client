@@ -32,33 +32,35 @@ namespace Splitio.Services.SplitFetcher.Classes
 
         public async Task<string> FetchSplitChanges(long since, bool cacheControlHeaders = false)
         {
-            var clock = new Stopwatch();
-            clock.Start();
-
-            try
+            using (var clock = new Util.SplitStopwatch())
             {
-                var requestUri = GetRequestUri(since);
-                var response = await ExecuteGet(requestUri, cacheControlHeaders);
+                clock.Start();
 
-                if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
+                try
                 {
-                    _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.SplitSync, Util.Metrics.Bucket(clock.ElapsedMilliseconds));
-                    _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.SplitSync, CurrentTimeHelper.CurrentTimeMillis());                    
+                    var requestUri = GetRequestUri(since);
+                    var response = await ExecuteGet(requestUri, cacheControlHeaders);
 
-                    return response.content;
+                    if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
+                    {
+                        _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.SplitSync, Util.Metrics.Bucket(clock.ElapsedMilliseconds));
+                        _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.SplitSync, CurrentTimeHelper.CurrentTimeMillis());
+
+                        return response.content;
+                    }
+
+                    _log.Error($"Http status executing FetchSplitChanges: {response.statusCode.ToString()} - {response.content}");
+
+                    _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.SplitSync, (int)response.statusCode);
+
+                    return string.Empty;
                 }
+                catch (Exception e)
+                {
+                    _log.Error("Exception caught executing FetchSplitChanges", e);
 
-                _log.Error($"Http status executing FetchSplitChanges: {response.statusCode.ToString()} - {response.content}");
-
-                _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.SplitSync, (int)response.statusCode);
-
-                return string.Empty;
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception caught executing FetchSplitChanges", e);
-
-                return string.Empty;
+                    return string.Empty;
+                }
             }
         }
 

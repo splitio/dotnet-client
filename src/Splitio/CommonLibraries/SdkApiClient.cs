@@ -100,7 +100,7 @@ namespace Splitio.CommonLibraries
             return result;
         }
 
-        protected void RecordTelemetry(string method, int statusCode, string content, ResourceEnum resource, Stopwatch clock)
+        protected void RecordTelemetry(string method, int statusCode, string content, ResourceEnum resource, Util.SplitStopwatch clock)
         {
             if (statusCode >= (int)HttpStatusCode.OK && statusCode < (int)HttpStatusCode.Ambiguous)
             {
