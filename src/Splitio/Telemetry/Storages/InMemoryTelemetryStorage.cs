@@ -14,8 +14,10 @@ namespace Splitio.Telemetry.Storages
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(InMemoryTelemetryStorage));
 
         // Latencies
-        private readonly ConcurrentDictionary<MethodEnum, ConcurrentQueue<long>> _methodLatencies = new ConcurrentDictionary<MethodEnum, ConcurrentQueue<long>>();
-        private readonly ConcurrentDictionary<ResourceEnum, ConcurrentQueue<long>> _httpLatencies = new ConcurrentDictionary<ResourceEnum, ConcurrentQueue<long>>();
+        private readonly ConcurrentDictionary<MethodEnum, long[]> _methodLatencies = new ConcurrentDictionary<MethodEnum, long[]>();
+        private readonly ConcurrentDictionary<ResourceEnum, long[]> _httpLatencies = new ConcurrentDictionary<ResourceEnum, long[]>();
+        private readonly object _methodLatenciesLock = new object();
+        private readonly object _httpLatenciesLock = new object();
 
         // Counters
         private readonly ConcurrentDictionary<MethodEnum, long> _exceptionsCounters = new ConcurrentDictionary<MethodEnum, long>();
@@ -33,10 +35,10 @@ namespace Splitio.Telemetry.Storages
         private readonly ConcurrentDictionary<ResourceEnum, ConcurrentDictionary<int, long>> _httpErrors = new ConcurrentDictionary<ResourceEnum, ConcurrentDictionary<int, long>>();
 
         // Tags
-        private ConcurrentQueue<string> _tags = new ConcurrentQueue<string>();
+        private readonly ConcurrentDictionary<string, string> _tags = new ConcurrentDictionary<string, string>();
 
         // Streaming Events
-        private ConcurrentQueue<StreamingEvent> _streamingEvents = new ConcurrentQueue<StreamingEvent>();
+        private readonly ConcurrentDictionary<string, StreamingEvent> _streamingEvents = new ConcurrentDictionary<string, StreamingEvent>();
 
         #region Public Methods - Producer
         public void AddTag(string tag)
@@ -45,7 +47,7 @@ namespace Splitio.Telemetry.Storages
             {
                 if (_tags.Count < 10)
                 {
-                    _tags.Enqueue(tag);
+                    _tags.TryAdd(tag, tag);
                 }
             }
             catch (Exception ex)
@@ -120,22 +122,25 @@ namespace Splitio.Telemetry.Storages
 
         public void RecordLatency(MethodEnum method, int bucket)
         {
-            try
+            lock (_methodLatencies)
             {
-                if (_methodLatencies.TryGetValue(method, out ConcurrentQueue<long> queue))
+                try
                 {
-                    queue.Enqueue(bucket);
-                    return;
+                    if (_methodLatencies.TryGetValue(method, out long[] values))
+                    {
+                        values[bucket]++;
+                        return;
+                    }
+
+                    var latencies = new long[Util.Metrics.Buckets.Length];
+                    latencies[bucket]++;
+
+                    _methodLatencies.TryAdd(method, latencies);
                 }
-
-                var latencies = new ConcurrentQueue<long>();
-                latencies.Enqueue(bucket);
-
-                _methodLatencies.TryAdd(method, latencies);
-            }
-            catch (Exception ex)
-            {
-                _log.Warn("Exception caught executing RecordLatency", ex);
+                catch (Exception ex)
+                {
+                    _log.Warn("Exception caught executing RecordLatency", ex);
+                }
             }
         }
 
@@ -169,7 +174,7 @@ namespace Splitio.Telemetry.Storages
             {
                 if (_streamingEvents.Count < 20)
                 {
-                    _streamingEvents.Enqueue(streamingEvent);
+                    _streamingEvents.TryAdd(streamingEvent.ToString(), streamingEvent);
                 }
             }
             catch (Exception ex)
@@ -202,6 +207,7 @@ namespace Splitio.Telemetry.Storages
 
                 var errors = new ConcurrentDictionary<int, long>();
                 errors.TryAdd(status, 1);
+
                 _httpErrors.TryAdd(resource, errors);
             }
             catch (Exception ex)
@@ -212,22 +218,25 @@ namespace Splitio.Telemetry.Storages
 
         public void RecordSyncLatency(ResourceEnum resource, int bucket)
         {
-            try
+            lock (_httpLatenciesLock)
             {
-                if (_httpLatencies.TryGetValue(resource, out ConcurrentQueue<long> queue))
+                try
                 {
-                    queue.Enqueue(bucket);
-                    return;
+                    if (_httpLatencies.TryGetValue(resource, out long[] value))
+                    {
+                        value[bucket]++;
+                        return;
+                    }
+
+                    var latencies = new long[Util.Metrics.Buckets.Length];
+                    latencies[bucket]++;
+
+                    _httpLatencies.TryAdd(resource, latencies);
                 }
-
-                var latencies = new ConcurrentQueue<long>();
-                latencies.Enqueue(bucket);
-
-                _httpLatencies.TryAdd(resource, latencies);
-            }
-            catch (Exception ex)
-            {
-                _log.Warn("Exception caught executing RecordSyncLatency", ex);
+                catch (Exception ex)
+                {
+                    _log.Warn("Exception caught executing RecordSyncLatency", ex);
+                }
             }
         }
 
@@ -342,50 +351,56 @@ namespace Splitio.Telemetry.Storages
 
         public HTTPLatencies PopHttpLatencies()
         {
-            var latencies = new HTTPLatencies
+            lock (_httpLatenciesLock)
             {
-                Events = _httpLatencies.TryGetValue(ResourceEnum.EventSync, out ConcurrentQueue<long> events) ? events.ToList() : new List<long>(),
-                Impressions = _httpLatencies.TryGetValue(ResourceEnum.ImpressionSync, out ConcurrentQueue<long> impressions) ? impressions.ToList() : new List<long>(),
-                ImpressionCount = _httpLatencies.TryGetValue(ResourceEnum.ImpressionCountSync, out ConcurrentQueue<long> impCounts) ? impCounts.ToList() : new List<long>(),
-                Segments = _httpLatencies.TryGetValue(ResourceEnum.SegmentSync, out ConcurrentQueue<long> segments) ? segments.ToList() : new List<long>(),
-                Splits = _httpLatencies.TryGetValue(ResourceEnum.SplitSync, out ConcurrentQueue<long> splits) ? splits.ToList() : new List<long>(),
-                Telemetry = _httpLatencies.TryGetValue(ResourceEnum.TelemetrySync, out ConcurrentQueue<long> telemetries) ? telemetries.ToList() : new List<long>(),
-                Token = _httpLatencies.TryGetValue(ResourceEnum.TokenSync, out ConcurrentQueue<long> tokens) ? tokens.ToList() : new List<long>()
-            };            
+                var latencies = new HTTPLatencies
+                {
+                    Events = _httpLatencies.TryGetValue(ResourceEnum.EventSync, out long[] events) ? events.ToList() : new List<long>(),
+                    Impressions = _httpLatencies.TryGetValue(ResourceEnum.ImpressionSync, out long[] impressions) ? impressions.ToList() : new List<long>(),
+                    ImpressionCount = _httpLatencies.TryGetValue(ResourceEnum.ImpressionCountSync, out long[] impCounts) ? impCounts.ToList() : new List<long>(),
+                    Segments = _httpLatencies.TryGetValue(ResourceEnum.SegmentSync, out long[] segments) ? segments.ToList() : new List<long>(),
+                    Splits = _httpLatencies.TryGetValue(ResourceEnum.SplitSync, out long[] splits) ? splits.ToList() : new List<long>(),
+                    Telemetry = _httpLatencies.TryGetValue(ResourceEnum.TelemetrySync, out long[] telemetries) ? telemetries.ToList() : new List<long>(),
+                    Token = _httpLatencies.TryGetValue(ResourceEnum.TokenSync, out long[] tokens) ? tokens.ToList() : new List<long>()
+                };
 
-            _httpLatencies.Clear();
+                _httpLatencies.Clear();
 
-            return latencies;
+                return latencies;
+            }
         }
 
         public MethodLatencies PopLatencies()
         {
-            var latencies = new MethodLatencies
+            lock (_methodLatencies)
             {
-                Treatment = _methodLatencies.TryGetValue(MethodEnum.Treatment, out ConcurrentQueue<long> treatment) ? treatment.ToList() : new List<long>(),
-                Treatments = _methodLatencies.TryGetValue(MethodEnum.Treatments, out ConcurrentQueue<long> treatments) ? treatments.ToList() : new List<long>(),
-                TreatmenstWithConfig = _methodLatencies.TryGetValue(MethodEnum.TreatmentsWithConfig, out ConcurrentQueue<long> treatmentsConfig) ? treatmentsConfig.ToList() : new List<long>(),
-                TreatmentWithConfig = _methodLatencies.TryGetValue(MethodEnum.TreatmentWithConfig, out ConcurrentQueue<long> treatmentConfig) ? treatmentConfig.ToList() : new List<long>(),
-                Track = _methodLatencies.TryGetValue(MethodEnum.Track, out ConcurrentQueue<long> track) ? track.ToList() : new List<long>()
-            };
+                var latencies = new MethodLatencies
+                {
+                    Treatment = _methodLatencies.TryGetValue(MethodEnum.Treatment, out long[] treatment) ? treatment.ToList() : new List<long>(),
+                    Treatments = _methodLatencies.TryGetValue(MethodEnum.Treatments, out long[] treatments) ? treatments.ToList() : new List<long>(),
+                    TreatmenstWithConfig = _methodLatencies.TryGetValue(MethodEnum.TreatmentsWithConfig, out long[] treatmentsConfig) ? treatmentsConfig.ToList() : new List<long>(),
+                    TreatmentWithConfig = _methodLatencies.TryGetValue(MethodEnum.TreatmentWithConfig, out long[] treatmentConfig) ? treatmentConfig.ToList() : new List<long>(),
+                    Track = _methodLatencies.TryGetValue(MethodEnum.Track, out long[] track) ? track.ToList() : new List<long>()
+                };
 
-            _methodLatencies.Clear();
+                _methodLatencies.Clear();
 
-            return latencies;
+                return latencies;
+            }
         }
 
         public IList<StreamingEvent> PopStreamingEvents()
         {
-            var events = new List<StreamingEvent>(_streamingEvents);
-            _streamingEvents = new ConcurrentQueue<StreamingEvent>();
+            var events = _streamingEvents.Values.ToList();
+            _streamingEvents.Clear();
 
             return events;
         }
 
         public IList<string> PopTags()
         {
-            var tags = new List<string>(_tags);
-            _tags = new ConcurrentQueue<string>();
+            var tags = _tags.Values.ToList();
+            _tags.Clear();
 
             return tags;
         }

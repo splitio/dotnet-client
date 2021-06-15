@@ -5,18 +5,18 @@ using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {
-    public class ApiSplitChangeFetcher: SplitChangeFetcher, ISplitChangeFetcher 
+    public class ApiSplitChangeFetcher : SplitChangeFetcher, ISplitChangeFetcher 
     {
-        private readonly ISplitSdkApiClient apiClient;
+        private readonly ISplitSdkApiClient _apiClient;
 
         public ApiSplitChangeFetcher(ISplitSdkApiClient apiClient)
         {
-            this.apiClient = apiClient;
+            _apiClient = apiClient;
         }
 
-        protected override async Task<SplitChangesResult> FetchFromBackend(long since)
+        protected override async Task<SplitChangesResult> FetchFromBackend(long since, bool cacheControlHeaders = false)
         {
-            var fetchResult = await apiClient.FetchSplitChanges(since);
+            var fetchResult = await _apiClient.FetchSplitChanges(since, cacheControlHeaders);
 
             var splitChangesResult = JsonConvert.DeserializeObject<SplitChangesResult>(fetchResult);
             return splitChangesResult;

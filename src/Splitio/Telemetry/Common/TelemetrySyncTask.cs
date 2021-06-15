@@ -61,7 +61,7 @@ namespace Splitio.Telemetry.Common
             {
                 _firstTime = false;
 
-                Task.Factory.StartNew(() => RecordConfigInit());
+                Task.Factory.StartNew(() => RecordConfigInit(), _cancellationTokenSource.Token);
             }
 
             Task.Factory.StartNew(() =>
@@ -119,6 +119,7 @@ namespace Splitio.Telemetry.Common
                     RedundantActiveFactories = _factoryInstantiationsService.GetRedundantActiveFactories(),
                     Storage = Constants.StorageType.Memory,
                     SDKNotReadyUsage = _telemetryStorageConsumer.GetNonReadyUsages(),
+                    HTTPProxyDetected = IsHTTPProxyDetected()
                 };
 
                 _telemetryAPI.RecordConfigInit(config);
@@ -152,7 +153,7 @@ namespace Splitio.Telemetry.Common
                     TokenRefreshes = _telemetryStorageConsumer.PopTokenRefreshes(),
                     SplitCount = _splitCache.SplitsCount(),
                     SegmentCount = _segmentCache.SegmentsCount(),
-                    SegmentKeyCount = _segmentCache.SegmentKeysCount(),
+                    SegmentKeyCount = _segmentCache.SegmentKeysCount()
                 };
 
                 _telemetryAPI.RecordStats(stats);
@@ -161,6 +162,11 @@ namespace Splitio.Telemetry.Common
             {
                 _log.Error("Something were wrong posting Stats.", ex);
             }
+        }
+
+        private bool IsHTTPProxyDetected()
+        {
+            return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HTTP_PROXY")) || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HTTPS_PROXY"));
         }
         #endregion
     }

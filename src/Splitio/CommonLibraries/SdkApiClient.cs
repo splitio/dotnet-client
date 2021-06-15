@@ -44,7 +44,7 @@ namespace Splitio.CommonLibraries
             };
 
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Constants.Http.Bearer, apiKey);
-            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(Constants.Http.MediaTypeJson));
 
             foreach (var header in headers)
             {
@@ -52,13 +52,21 @@ namespace Splitio.CommonLibraries
             }
         }
 
-        public virtual async Task<HTTPResult> ExecuteGet(string requestUri)
+        public virtual async Task<HTTPResult> ExecuteGet(string requestUri, bool cacheControlHeadersEnabled = false)
         {
             var result = new HTTPResult();
 
+            var request = new HttpRequestMessage
+            {
+                RequestUri = new Uri(_httpClient.BaseAddress, requestUri),
+                Method = HttpMethod.Get
+            };
+
+            if (cacheControlHeadersEnabled) request.Headers.Add(Constants.Http.CacheControlKey, Constants.Http.CacheControlValue);
+
             try
             {
-                using (var response = await _httpClient.GetAsync(requestUri))
+                using (var response = await _httpClient.SendAsync(request))
                 {
                     result.statusCode = response.StatusCode;
                     result.content = await response.Content.ReadAsStringAsync();
@@ -92,7 +100,7 @@ namespace Splitio.CommonLibraries
             return result;
         }
 
-        protected void RecordTelemetry(string method, int statusCode, string content, ResourceEnum resource, Stopwatch clock)
+        protected void RecordTelemetry(string method, int statusCode, string content, ResourceEnum resource, Util.SplitStopwatch clock)
         {
             if (statusCode >= (int)HttpStatusCode.OK && statusCode < (int)HttpStatusCode.Ambiguous)
             {

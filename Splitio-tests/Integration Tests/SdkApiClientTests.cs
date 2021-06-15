@@ -96,7 +96,7 @@ namespace Splitio_Tests.Integration_Tests
             var SdkApiClient = new SdkApiClient("ABCD", headers, baseUrl, 10000, 10000, telemetryStorage);
 
             //Act
-            var result = await SdkApiClient.ExecuteGet("/messages?item=msg2");
+            var result = await SdkApiClient.ExecuteGet("http://demo70e.iio/messages?item=msg2");
 
             //Assert
             Assert.IsNotNull(result);

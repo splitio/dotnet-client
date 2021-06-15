@@ -8,7 +8,7 @@ namespace Splitio.Services.SegmentFetcher.Interfaces
         void Start();
         void Stop();
         Task FetchAll();
-        Task Fetch(string segmentName);
+        Task Fetch(string segmentName, bool cacheControlHeaders = false);
         Task FetchSegmentsIfNotExists(IList<string> names);
         void Clear();
     }

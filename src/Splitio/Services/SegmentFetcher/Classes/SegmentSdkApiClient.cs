@@ -30,43 +30,45 @@ namespace Splitio.Services.SegmentFetcher.Classes
             ITelemetryRuntimeProducer telemetryRuntimeProducer) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout, telemetryRuntimeProducer)
         { }
 
-        public async Task<string> FetchSegmentChanges(string name, long since)
+        public async Task<string> FetchSegmentChanges(string name, long since, bool cacheControlHeaders = false)
         {
-            var clock = new Stopwatch();
-            clock.Start();
-
-            try
+            using (var clock = new Util.SplitStopwatch())
             {
-                var requestUri = GetRequestUri(name, since);
-                var response = await ExecuteGet(requestUri);
+                clock.Start();
 
-                if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
+                try
                 {
-                    if (_log.IsDebugEnabled)
+                    var requestUri = GetRequestUri(name, since);
+                    var response = await ExecuteGet(requestUri, cacheControlHeaders);
+
+                    if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
                     {
-                        _log.Debug($"FetchSegmentChanges with name '{name}' took {clock.ElapsedMilliseconds} milliseconds using uri '{requestUri}'");
+                        if (_log.IsDebugEnabled)
+                        {
+                            _log.Debug($"FetchSegmentChanges with name '{name}' took {clock.ElapsedMilliseconds} milliseconds using uri '{requestUri}'");
+                        }
+
+                        _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.SegmentSync, Util.Metrics.Bucket(clock.ElapsedMilliseconds));
+                        _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.SegmentSync, CurrentTimeHelper.CurrentTimeMillis());
+
+                        return response.content;
                     }
 
-                    _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.SegmentSync, Util.Metrics.Bucket(clock.ElapsedMilliseconds));
-                    _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.SegmentSync, CurrentTimeHelper.CurrentTimeMillis());
+                    _log.Error(response.statusCode == HttpStatusCode.Forbidden
+                        ? "factory instantiation: you passed a browser type api_key, please grab an api key from the Split console that is of type sdk"
+                        : $"Http status executing FetchSegmentChanges: {response.statusCode.ToString()} - {response.content}");
 
-                    return response.content;
+                    _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.SegmentSync, (int)response.statusCode);
+
+                    return string.Empty;
+
                 }
+                catch (Exception e)
+                {
+                    _log.Error("Exception caught executing FetchSegmentChanges", e);
 
-                _log.Error(response.statusCode == HttpStatusCode.Forbidden
-                    ? "factory instantiation: you passed a browser type api_key, please grab an api key from the Split console that is of type sdk"
-                    : $"Http status executing FetchSegmentChanges: {response.statusCode.ToString()} - {response.content}");
-
-                _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.SegmentSync, (int)response.statusCode);
-
-                return string.Empty;
-               
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception caught executing FetchSegmentChanges", e);
-
-                return string.Empty;
+                    return string.Empty;
+                }
             }
         }
 
