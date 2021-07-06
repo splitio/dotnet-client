@@ -4,6 +4,7 @@ using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Common;
 using Splitio.Telemetry.Domain;
@@ -50,7 +51,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             MockRecordStats();
             var config = MockConfigInit();
 
-            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, _gates.Object, config, _factoryInstantiationsService.Object, wrapperAdapter: _wrapperAdapter.Object, log: _log.Object);
+            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, _gates.Object, config, _factoryInstantiationsService.Object, wrapperAdapter: _wrapperAdapter.Object, log: _log.Object, tasksManager: new TasksManager(_wrapperAdapter.Object));
 
             // Act.
             _telemetrySyncTask.Start();
@@ -85,9 +86,10 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             // Arrange.
             MockRecordStats();
 
-            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, _gates.Object, new SelfRefreshingConfig(), _factoryInstantiationsService.Object, wrapperAdapter: _wrapperAdapter.Object, log: _log.Object);
+            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, _gates.Object, new SelfRefreshingConfig(), _factoryInstantiationsService.Object, wrapperAdapter: _wrapperAdapter.Object, log: _log.Object, tasksManager: new TasksManager(_wrapperAdapter.Object));
 
             // Act.
+            _telemetrySyncTask.Start();
             _telemetrySyncTask.Stop();
             Thread.Sleep(2000);
 

@@ -16,7 +16,7 @@ namespace Splitio.Integration_tests
         [TestMethod]
         public void GetTreatment_WithoutBUR_ReturnsControl()
         {
-            // Arrange.           
+            // Arrange.
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
@@ -31,6 +31,8 @@ namespace Splitio.Integration_tests
             // Assert.
             Assert.AreEqual("control", treatmentResult);
 
+            client.BlockUntilReady(10000);
+            client.Destroy();
             ShutdownServer(httpClientMock);
         }
 
@@ -41,7 +43,7 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey1";
+            var apikey = "apikey2";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
@@ -53,6 +55,8 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("control", treatmentResult.Treatment);
             Assert.IsNull(treatmentResult.Config);
 
+            client.BlockUntilReady(10000);
+            client.Destroy();
             ShutdownServer(httpClientMock);
         }
 
@@ -63,7 +67,7 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey1";
+            var apikey = "apikey3";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
@@ -75,6 +79,8 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("control", treatmentResults["FACUNDO_TEST"]);
             Assert.AreEqual("control", treatmentResults["MAURO_TEST"]);
 
+            client.BlockUntilReady(10000);
+            client.Destroy();
             ShutdownServer(httpClientMock);
         }
 
@@ -85,7 +91,7 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey1";
+            var apikey = "apikey4";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
@@ -99,6 +105,8 @@ namespace Splitio.Integration_tests
             Assert.IsNull(treatmentResults["FACUNDO_TEST"].Config);
             Assert.IsNull(treatmentResults["MAURO_TEST"].Config);
 
+            client.BlockUntilReady(10000);
+            client.Destroy();
             ShutdownServer(httpClientMock);
         }
 
@@ -109,7 +117,7 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey2";
+            var apikey = "apikey5";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
@@ -133,6 +141,7 @@ namespace Splitio.Integration_tests
             Assert.IsFalse(isSdkReady);
             Assert.AreEqual("SDK was not ready in 1 miliseconds", exceptionMessage);
 
+            client.Destroy();
             ShutdownServer(httpClientMock);
         }
 
@@ -143,7 +152,7 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey2";
+            var apikey = "apikey6";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var manager = splitFactory.Manager();
@@ -154,6 +163,8 @@ namespace Splitio.Integration_tests
             // Assert.
             Assert.IsNull(result);
 
+            manager.BlockUntilReady(10000);
+            splitFactory.Client().Destroy();
             ShutdownServer(httpClientMock);
         }
 
@@ -164,7 +175,7 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey1";
+            var apikey = "apikey7";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
@@ -188,7 +199,8 @@ namespace Splitio.Integration_tests
                     .Headers
                     .Any(h => h.Key.Equals("SplitSDKMachineIP") || h.Key.Equals("SplitSDKMachineName")));
             }
-            
+
+            client.Destroy();
             ShutdownServer(httpClientMock);
         }
 
@@ -199,7 +211,7 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock, ipAddressesEnabled: false);
 
-            var apikey = "apikey1";
+            var apikey = "apikey8";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
@@ -224,6 +236,7 @@ namespace Splitio.Integration_tests
                     .Any(h => h.Key.Equals("SplitSDKMachineIP") || h.Key.Equals("SplitSDKMachineName")));
             }
 
+            client.Destroy();
             ShutdownServer(httpClientMock);
         }
 
@@ -234,12 +247,12 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey3";
+            var apikey = "apikey9";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            client.BlockUntilReady(20000);
+            client.BlockUntilReady(10000);
 
             // Act.
             client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
@@ -279,12 +292,12 @@ namespace Splitio.Integration_tests
             var configurations = GetConfigurationOptions(httpClientMock);
             configurations.ImpressionsMode = ImpressionsMode.Debug;
 
-            var apikey = "apikey3";
+            var apikey = "apikey10";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            client.BlockUntilReady(20000);
+            client.BlockUntilReady(10000);
 
             // Act.
             client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
@@ -330,7 +343,7 @@ namespace Splitio.Integration_tests
             }
             catch
             {
-                client.BlockUntilReady(20000);
+                client.BlockUntilReady(10000);
             }            
 
             // Act.
@@ -363,6 +376,7 @@ namespace Splitio.Integration_tests
             var sentStats = GetMetricsStatsSentBackend(httpClientMock);
             Assert.AreEqual(0, sentStats.Count);
 
+            client.Destroy();
             ShutdownServer(httpClientMock);
         }
 

@@ -5,7 +5,6 @@ using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource.Workers
 {
@@ -16,17 +15,21 @@ namespace Splitio.Services.EventSource.Workers
         private readonly ISplitLogger _log;
         private readonly ISplitCache _splitCache;
         private readonly ISynchronizer _synchronizer;
+        private readonly ITasksManager _tasksManager;
         private readonly BlockingCollection<long> _queue;
+        private readonly object _lock = new object();
 
         private CancellationTokenSource _cancellationTokenSource;
         private bool _running;
 
         public SplitsWorker(ISplitCache splitCache,
             ISynchronizer synchronizer,
+            ITasksManager tasksManager,
             ISplitLogger log = null)
         {
             _splitCache = splitCache;
             _synchronizer = synchronizer;
+            _tasksManager = tasksManager;
             _log = log ?? WrapperAdapter.GetLogger(typeof(SplitsWorker));
             _queue = new BlockingCollection<long>(new ConcurrentQueue<long>());
         }
@@ -75,44 +78,50 @@ namespace Splitio.Services.EventSource.Workers
 
         public void Start()
         {
-            try
+            lock (_lock)
             {
-                if (_running)
+                try
                 {
-                    _log.Debug("Splits Worker already running.");
-                    return;
-                }
+                    if (_running)
+                    {
+                        _log.Debug("Splits Worker already running.");
+                        return;
+                    }
 
-                _log.Debug("SplitsWorker starting ...");                
-                _cancellationTokenSource = new CancellationTokenSource();
-                Task.Factory.StartNew(() => ExecuteAsync(), _cancellationTokenSource.Token);
-                _running = true;
-            }
-            catch (Exception ex)
-            {
-                _log.Error($"Start: {ex.Message}");
+                    _log.Debug("SplitsWorker starting ...");
+                    _cancellationTokenSource = new CancellationTokenSource();
+                    _tasksManager.Start(() => ExecuteAsync(), _cancellationTokenSource);
+                    _running = true;
+                }
+                catch (Exception ex)
+                {
+                    _log.Error($"Start: {ex.Message}");
+                }
             }
         }
 
         public void Stop()
         {
-            try
+            lock (_lock)
             {
-                if (!_running)
+                try
                 {
-                    _log.Debug("Splits Worker not running.");
-                    return;
+                    if (!_running)
+                    {
+                        _log.Debug("Splits Worker not running.");
+                        return;
+                    }
+
+                    _cancellationTokenSource?.Cancel();
+                    _cancellationTokenSource?.Dispose();
+
+                    _log.Debug("SplitsWorker stopped ...");
+                    _running = false;
                 }
-
-                _cancellationTokenSource?.Cancel();
-                _cancellationTokenSource?.Dispose();
-
-                _log.Debug("SplitsWorker stopped ...");
-                _running = false;
-            }
-            catch (Exception ex)
-            {
-                _log.Error($"Stop: {ex.Message}");
+                catch (Exception ex)
+                {
+                    _log.Error($"Stop: {ex.Message}");
+                }
             }
         }
         #endregion
@@ -125,7 +134,7 @@ namespace Splitio.Services.EventSource.Workers
                 while (!_cancellationTokenSource.IsCancellationRequested && _running)
                 {
                     // Wait indefinitely until a segment is queued
-                    if (_queue.TryTake(out long changeNumber, -1))
+                    if (_queue.TryTake(out long changeNumber, -1, _cancellationTokenSource.Token))
                     {
                         _log.Debug($"ChangeNumber dequeue: {changeNumber}");
 

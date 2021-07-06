@@ -10,7 +10,6 @@ using Splitio.Telemetry.Storages;
 using System;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Splitio.Telemetry.Common
 {
@@ -25,7 +24,11 @@ namespace Splitio.Telemetry.Common
         private readonly SelfRefreshingConfig _configurationOptions;
         private readonly IFactoryInstantiationsService _factoryInstantiationsService;
         private readonly IWrapperAdapter _wrapperAdapter;
-        private CancellationTokenSource _cancellationTokenSource;
+        private readonly ITasksManager _tasksManager;
+        private readonly CancellationTokenSource _cancellationTokenSource;
+        private readonly object _lock = new object();
+
+        private bool _running;        
         private bool _firstTime;
 
         public TelemetrySyncTask(ITelemetryStorageConsumer telemetryStorage,
@@ -36,6 +39,7 @@ namespace Splitio.Telemetry.Common
             SelfRefreshingConfig configurationOptions,
             IFactoryInstantiationsService factoryInstantiationsService,
             IWrapperAdapter wrapperAdapter,
+            ITasksManager tasksManager,
             bool firstTime = true,
             ISplitLogger log = null)
         {
@@ -46,38 +50,51 @@ namespace Splitio.Telemetry.Common
             _gates = gates;
             _configurationOptions = configurationOptions;
             _factoryInstantiationsService = factoryInstantiationsService;
-            _firstTime = firstTime;
-            _cancellationTokenSource = new CancellationTokenSource();
+            _firstTime = firstTime;            
             _log = log ?? WrapperAdapter.GetLogger(typeof(TelemetrySyncTask));
             _wrapperAdapter = wrapperAdapter;
+            _tasksManager = tasksManager;
+
+            _cancellationTokenSource = new CancellationTokenSource();
         }
 
         #region Public Methods
         public void Start()
         {
-            _cancellationTokenSource = new CancellationTokenSource();
-
-            if (_firstTime)
+            lock (_lock)
             {
-                _firstTime = false;
+                if (_running) return;
 
-                Task.Factory.StartNew(() => RecordConfigInit(), _cancellationTokenSource.Token);
+                _running = true;
+
+                if (_firstTime)
+                {
+                    _firstTime = false;
+
+                    _tasksManager.Start(() => RecordConfigInit(), _cancellationTokenSource);
+                }
+
+                _tasksManager.Start(() =>
+                {
+                    //Delay first execution until expected time has passed
+                    var intervalInMilliseconds = _configurationOptions.TelemetryRefreshRate * 1000;
+                    _wrapperAdapter.TaskDelay(intervalInMilliseconds).Wait();
+
+                    _tasksManager.StartPeriodic(() => RecordStats(), intervalInMilliseconds, _cancellationTokenSource);
+                }, _cancellationTokenSource);
             }
-
-            Task.Factory.StartNew(() =>
-            {
-                //Delay first execution until expected time has passed
-                var intervalInMilliseconds = _configurationOptions.TelemetryRefreshRate * 1000;
-                _wrapperAdapter.TaskDelay(intervalInMilliseconds).Wait();
-
-                PeriodicTaskFactory.Start(() => { RecordStats(); }, intervalInMilliseconds, _cancellationTokenSource.Token);
-            });
         }
 
         public void Stop()
         {
-            _cancellationTokenSource.Cancel();
-            RecordStats();
+            lock (_lock)
+            {
+                if (!_running) return;
+
+                _running = false;
+                _cancellationTokenSource.Cancel();
+                RecordStats();
+            }            
         }
         #endregion
 

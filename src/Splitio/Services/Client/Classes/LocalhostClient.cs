@@ -62,7 +62,7 @@ namespace Splitio.Services.Client.Classes
 
             BuildEvaluator();
 
-            _impressionsManager = new ImpressionsManager(null, null, null, false, ImpressionsMode.Debug, telemetryRuntimeProducer: null);
+            _impressionsManager = new ImpressionsManager(null, null, null, false, ImpressionsMode.Debug, telemetryRuntimeProducer: null, tasksManager: _tasksManager);
         }
 
         #region Public Methods

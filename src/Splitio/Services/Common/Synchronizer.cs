@@ -7,6 +7,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Common;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
@@ -22,6 +23,7 @@ namespace Splitio.Services.Common
         private readonly IImpressionsCountSender _impressionsCountSender;
         private readonly IReadinessGatesCache _gates;
         private readonly ITelemetrySyncTask _telemetrySyncTask;
+        private readonly ITasksManager _tasksManager;
 
         public Synchronizer(ISplitFetcher splitFetcher,
             ISelfRefreshingSegmentFetcher segmentFetcher,
@@ -31,6 +33,7 @@ namespace Splitio.Services.Common
             IWrapperAdapter wrapperAdapter,
             IReadinessGatesCache gates,
             ITelemetrySyncTask telemetrySyncTask,
+            ITasksManager tasksManager,
             ISplitLogger log = null)
         {
             _splitFetcher = splitFetcher;
@@ -41,6 +44,7 @@ namespace Splitio.Services.Common
             _wrapperAdapter = wrapperAdapter;
             _gates = gates;
             _telemetrySyncTask = telemetrySyncTask;
+            _tasksManager = tasksManager;
             _log = log ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
         }
 
@@ -56,14 +60,9 @@ namespace Splitio.Services.Common
 
         public void StartPeriodicFetching()
         {
-            Task.Factory.StartNew(() =>
-            {
-                _gates.WaitUntilSdkInternalReady();
-
-                _splitFetcher.Start();
-                _segmentFetcher.Start();
-                _log.Debug("Spltis and Segments fetchers started...");
-            });
+            _splitFetcher.Start();
+            _segmentFetcher.Start();
+            _log.Debug("Spltis and Segments fetchers started...");
         }
 
         public void StopPeriodicDataRecording()
@@ -88,13 +87,15 @@ namespace Splitio.Services.Common
             _segmentFetcher.Clear();
         }
 
-        public void SyncAll()
+        public void SyncAll(CancellationTokenSource cancellationTokenSource)
         {
-            Task.Factory
-                .StartNew(() => _splitFetcher.FetchSplits().Wait())
-                .ContinueWith((x) => _segmentFetcher.FetchAll().Wait())
-                .ContinueWith((x) => _gates.SdkInternalReady())
-                .ContinueWith((x) => _log.Debug("Spltis and Segments synchronized..."));
+            _tasksManager.Start(() =>
+            {
+                _splitFetcher.FetchSplits().Wait();
+                _segmentFetcher.FetchAll().Wait();
+                _gates.SdkInternalReady();
+                _log.Debug("Spltis and Segments synchronized...");
+            }, cancellationTokenSource);
         }
 
         public async Task SynchronizeSegment(string segmentName)

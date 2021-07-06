@@ -176,7 +176,7 @@ namespace Splitio.Integration_tests
                 FeaturesRefreshRate = featuresRefreshRate ?? 1,
                 SegmentsRefreshRate = 1,
                 ImpressionsRefreshRate = 1,
-                MetricsRefreshRate = 1,
+                //MetricsRefreshRate = 1,
                 EventsPushRate = eventsPushRate ?? 1,
                 IPAddressesEnabled = ipAddressesEnabled,
                 CacheAdapterConfig = cacheConfig,

@@ -5,7 +5,6 @@ using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource.Workers
 {
@@ -16,17 +15,21 @@ namespace Splitio.Services.EventSource.Workers
         private readonly ISplitLogger _log;
         private readonly ISegmentCache _segmentCache;
         private readonly ISynchronizer _synchronizer;
+        private readonly ITasksManager _tasksManager;
         private readonly BlockingCollection<SegmentQueueDto> _queue;
+        private readonly object _lock = new object();
 
         private CancellationTokenSource _cancellationTokenSource;
         private bool _running;
 
         public SegmentsWorker(ISegmentCache segmentCache,
             ISynchronizer synchronizer,
+            ITasksManager tasksManager,
             ISplitLogger log = null)
         {
             _segmentCache = segmentCache;
             _synchronizer = synchronizer;
+            _tasksManager = tasksManager;
             _log = log ?? WrapperAdapter.GetLogger(typeof(SegmentsWorker));
             _queue = new BlockingCollection<SegmentQueueDto>(new ConcurrentQueue<SegmentQueueDto>());
         }
@@ -53,44 +56,50 @@ namespace Splitio.Services.EventSource.Workers
 
         public void Start()
         {
-            try
+            lock (_lock)
             {
-                if (_running)
+                try
                 {
-                    _log.Error("Segments Worker already running.");
-                    return;
-                }
+                    if (_running)
+                    {
+                        _log.Error("Segments Worker already running.");
+                        return;
+                    }
 
-                _log.Debug($"Segments worker starting ...");
-                _cancellationTokenSource = new CancellationTokenSource();
-                Task.Factory.StartNew(() => Execute(), _cancellationTokenSource.Token);
-                _running = true;
-            }
-            catch (Exception ex)
-            {
-                _log.Error($"Start: {ex.Message}");
+                    _log.Debug($"Segments worker starting ...");
+                    _cancellationTokenSource = new CancellationTokenSource();
+                    _tasksManager.Start(() => Execute(), _cancellationTokenSource);
+                    _running = true;
+                }
+                catch (Exception ex)
+                {
+                    _log.Error($"Start: {ex.Message}");
+                }
             }
         }
 
         public void Stop()
         {
-            try
+            lock (_lock)
             {
-                if (!_running)
+                try
                 {
-                    _log.Error("Segments Worker not running.");
-                    return;
+                    if (!_running)
+                    {
+                        _log.Error("Segments Worker not running.");
+                        return;
+                    }
+
+                    _cancellationTokenSource?.Cancel();
+                    _cancellationTokenSource?.Dispose();
+
+                    _log.Debug($"Segments worker stoped ...");
+                    _running = false;
                 }
-
-                _cancellationTokenSource?.Cancel();
-                _cancellationTokenSource?.Dispose();
-
-                _log.Debug($"Segments worker stoped ...");
-                _running = false;
-            }
-            catch (Exception ex)
-            {
-                _log.Error($"Stop: {ex.Message}");
+                catch (Exception ex)
+                {
+                    _log.Error($"Stop: {ex.Message}");
+                }
             }
         }
         #endregion
@@ -103,7 +112,7 @@ namespace Splitio.Services.EventSource.Workers
                 while (!_cancellationTokenSource.IsCancellationRequested)
                 {
                     // Wait indefinitely until a segment is queued
-                    if (_queue.TryTake(out SegmentQueueDto segment, -1))
+                    if (_queue.TryTake(out SegmentQueueDto segment, -1, _cancellationTokenSource.Token))
                     {
                         _log.Debug($"Segment dequeue: {segment.SegmentName}");
 

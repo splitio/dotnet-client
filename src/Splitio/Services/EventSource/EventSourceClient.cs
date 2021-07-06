@@ -31,19 +31,20 @@ namespace Splitio.Services.EventSource
         private readonly INotificationParser _notificationParser;
         private readonly IWrapperAdapter _wrapperAdapter;        
         private readonly ISplitioHttpClient _splitHttpClient;
-        private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;        
+        private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
+        private readonly ITasksManager _tasksManager;
 
         private string _url;
         private bool _connected;
         private bool _firstEvent;
         
         private CancellationTokenSource _cancellationTokenSource;
-        private CancellationTokenSource _streamReadcancellationTokenSource;        
 
         public EventSourceClient(INotificationParser notificationParser,
             IWrapperAdapter wrapperAdapter,
             ISplitioHttpClient splitHttpClient,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
+            ITasksManager tasksManager,
             ISplitLogger log = null)
         {            
             _notificationParser = notificationParser;
@@ -51,6 +52,7 @@ namespace Splitio.Services.EventSource
             _splitHttpClient = splitHttpClient;
             _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
+            _tasksManager = tasksManager;
 
             _firstEvent = true;
         }
@@ -71,8 +73,9 @@ namespace Splitio.Services.EventSource
             _url = url;
             _disconnectSignal.Reset();
             _connectedSignal.Reset();
+            _cancellationTokenSource = new CancellationTokenSource();
 
-            Task.Factory.StartNew(() => ConnectAsync());
+            _tasksManager.Start(() => ConnectAsync(_cancellationTokenSource.Token).Wait(), _cancellationTokenSource);
 
             try
             {
@@ -99,7 +102,6 @@ namespace Splitio.Services.EventSource
         {
             if (_cancellationTokenSource.IsCancellationRequested) return;
 
-            _streamReadcancellationTokenSource.Cancel();
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
             
@@ -113,15 +115,13 @@ namespace Splitio.Services.EventSource
         #endregion
 
         #region Private Methods
-        private async Task ConnectAsync()
+        private async Task ConnectAsync(CancellationToken cancellationToken)
         {
             var action = SSEClientActions.DISCONNECT;
 
             try
             {
-                _cancellationTokenSource = new CancellationTokenSource();
-
-                using (var response = await _splitHttpClient.GetAsync(_url, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token))
+                using (var response = await _splitHttpClient.GetAsync(_url, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
                 {
                     _log.Debug($"Response from {_url}: {response.StatusCode}");
 
@@ -133,7 +133,7 @@ namespace Splitio.Services.EventSource
                             {
                                 _log.Info($"Connected to {_url}");
 
-                                await ReadStreamAsync(stream);
+                                await ReadStreamAsync(stream, cancellationToken);
                             }
                         }
                         catch (ReadStreamException ex)
@@ -162,71 +162,79 @@ namespace Splitio.Services.EventSource
             }            
         }
 
-        private async Task ReadStreamAsync(Stream stream)
-        {            
-            _streamReadcancellationTokenSource = new CancellationTokenSource();
-
+        private async Task ReadStreamAsync(Stream stream, CancellationToken cancellationToken)
+        {
             _log.Debug($"Reading stream ....");
 
             try
             {
-                while (!_streamReadcancellationTokenSource.IsCancellationRequested && (IsConnected() || _firstEvent))
+                while (!cancellationToken.IsCancellationRequested && (IsConnected() || _firstEvent))
                 {
                     if (stream.CanRead && (IsConnected() || _firstEvent))
                     {
                         Array.Clear(_buffer, 0, BufferSize);
 
-                        var timeoutTask = _wrapperAdapter.TaskDelay(ReadTimeoutMs);
-                        var streamReadTask = stream.ReadAsync(_buffer, 0, BufferSize, _streamReadcancellationTokenSource.Token);
+                        var timeoutToken = new CancellationTokenSource();
+                        var timeoutTask = _wrapperAdapter.TaskDelay(ReadTimeoutMs, timeoutToken.Token);
+                        var streamReadTask = stream.ReadAsync(_buffer, 0, BufferSize, cancellationToken);
                         // Creates a task that will complete when any of the supplied tasks have completed.
                         // Returns: A task that represents the completion of one of the supplied tasks. The return task's Result is the task that completed.
                         var finishedTask = await _wrapperAdapter.WhenAny(streamReadTask, timeoutTask);
 
-                        if (finishedTask == timeoutTask)
+                        try
                         {
-                            throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Streaming read time out after {ReadTimeoutMs} seconds.");
-                        }
-
-                        int len = streamReadTask.Result;
-
-                        if (len == 0)
-                        {
-                            throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, "Streaming end of the file.");
-                        }
-
-                        var notificationString = _encoder.GetString(_buffer, 0, len);
-                        _log.Debug($"Read stream encoder buffer: {notificationString}");
-
-                        if (_firstEvent)
-                        {
-                            ProcessFirtsEvent(notificationString);
-                        }
-
-                        if (notificationString != KeepAliveResponse && IsConnected())
-                        {
-                            var lines = notificationString.Split(_notificationSplitArray, StringSplitOptions.None);
-
-                            foreach (var line in lines)
+                            if (finishedTask == timeoutTask)
                             {
-                                if (!string.IsNullOrEmpty(line))
+                                throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Streaming read time out after {ReadTimeoutMs} seconds.");
+                            }
+
+                            int len = streamReadTask.Result;
+
+                            if (len == 0)
+                            {
+                                throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, "Streaming end of the file.");
+                            }
+
+                            var notificationString = _encoder.GetString(_buffer, 0, len);
+                            _log.Debug($"Read stream encoder buffer: {notificationString}");
+
+                            if (_firstEvent)
+                            {
+                                ProcessFirtsEvent(notificationString);
+                            }
+
+                            if (notificationString != KeepAliveResponse && IsConnected())
+                            {
+                                var lines = notificationString.Split(_notificationSplitArray, StringSplitOptions.None);
+
+                                foreach (var line in lines)
                                 {
-                                    var eventData = _notificationParser.Parse(line);
-
-                                    if (eventData != null)
+                                    if (!string.IsNullOrEmpty(line))
                                     {
-                                        if (eventData.Type == NotificationType.ERROR)
-                                        {
-                                            var notificationError = (NotificationError)eventData;
+                                        var eventData = _notificationParser.Parse(line);
 
-                                            ProcessErrorNotification(notificationError);
-                                        }
-                                        else
+                                        if (eventData != null)
                                         {
-                                            DispatchEvent(eventData);
+                                            if (eventData.Type == NotificationType.ERROR)
+                                            {
+                                                var notificationError = (NotificationError)eventData;
+
+                                                ProcessErrorNotification(notificationError);
+                                            }
+                                            else
+                                            {
+                                                DispatchEvent(eventData);
+                                            }
                                         }
                                     }
                                 }
                             }
+                        }
+                        finally
+                        {
+                            timeoutToken.Cancel();
+                            timeoutToken.Dispose();
+                            _wrapperAdapter.TaskWaitAndDispose(timeoutTask, streamReadTask, finishedTask);
                         }
                     }
                 }
@@ -238,7 +246,7 @@ namespace Splitio.Services.EventSource
             }
             catch (Exception ex)
             {
-                if (!_streamReadcancellationTokenSource.IsCancellationRequested)
+                if (!cancellationToken.IsCancellationRequested)
                 {
                     _log.Debug("Stream ended abruptly, proceeding to reconnect.", ex);
                     throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, ex.Message);
