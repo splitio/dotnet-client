@@ -65,6 +65,8 @@ namespace Splitio.Services.Shared.Classes
 
         private void ClearTasks()
         {
+            _log.Debug("Start Cleaning tasks list.");
+
             var tasks = _tasks.Keys;
 
             foreach (var t in tasks)
