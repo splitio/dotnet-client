@@ -1,4 +1,5 @@
 ﻿using Splitio.CommonLibraries;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Concurrent;
@@ -9,6 +10,8 @@ namespace Splitio.Services.Shared.Classes
 {
     public class TasksManager : ITasksManager
     {
+        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(IWrapperAdapter));
+
         private readonly ConcurrentDictionary<Task, CancellationTokenSource> _tasks = new ConcurrentDictionary< Task, CancellationTokenSource>();
         private readonly object _lock = new object();
         private readonly int _maxCapacity = 30;
@@ -76,9 +79,9 @@ namespace Splitio.Services.Shared.Classes
                         _wrapperAdapter.TaskWaitAndDispose();
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // do something
+                    _log.Debug(ex.Message);
                 }
             }
         }

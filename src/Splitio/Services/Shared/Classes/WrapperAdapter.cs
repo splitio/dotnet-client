@@ -15,6 +15,8 @@ namespace Splitio.Services.Shared.Classes
 {
     public class WrapperAdapter : IWrapperAdapter
     {
+        private static readonly ISplitLogger _log = GetLogger(typeof(IWrapperAdapter));
+
         public ReadConfigData ReadConfig(ConfigurationOptions config, ISplitLogger log)
         {
             var data = new ReadConfigData();
@@ -44,9 +46,9 @@ namespace Splitio.Services.Shared.Classes
                     t.Dispose();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // log here
+                _log.Debug(ex.Message);
             }
 #endif
         }
