@@ -59,9 +59,9 @@ namespace Splitio.Services.SplitFetcher.Classes
                     _taskManager.StartPeriodic(() =>
                     {
                         FetchSplits().Wait();
-                    }, _interval * 1000, _cancelTokenSource);
+                    }, _interval * 1000, _cancelTokenSource, "Splits Fetcher.");
                 }
-            }, new CancellationTokenSource());
+            }, new CancellationTokenSource(), "Main Splits Fetcher.");
         }
 
         public void Stop()

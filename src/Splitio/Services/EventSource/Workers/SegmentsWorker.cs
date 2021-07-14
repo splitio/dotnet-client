@@ -68,7 +68,7 @@ namespace Splitio.Services.EventSource.Workers
 
                     _log.Debug($"Segments worker starting ...");
                     _cancellationTokenSource = new CancellationTokenSource();
-                    _tasksManager.Start(() => Execute(), _cancellationTokenSource);
+                    _tasksManager.Start(() => Execute(), _cancellationTokenSource, "Segments Workersss");
                     _running = true;
                 }
                 catch (Exception ex)

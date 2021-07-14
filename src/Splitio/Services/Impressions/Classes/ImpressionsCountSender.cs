@@ -43,7 +43,7 @@ namespace Splitio.Services.Impressions.Classes
                 if (_running) return;
 
                 _running = true;
-                _tasksManager.StartPeriodic(() => SendBulkImpressionsCount(), CounterRefreshRateSeconds * 1000, _cancellationTokenSource);
+                _tasksManager.StartPeriodic(() => SendBulkImpressionsCount(), CounterRefreshRateSeconds * 1000, _cancellationTokenSource, "Main Impressions Count.");
             }
         }
 

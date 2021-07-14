@@ -349,12 +349,13 @@ namespace Splitio.Integration_tests
             // Act.
             var result = client.GetTreatment("nico_test", "FACUNDO_TEST");
 
-            Thread.Sleep(2000);
+            Thread.Sleep(3000);
 
             // Assert.
             Assert.AreEqual("on", result);
 
             var sentConfig = GetMetricsConfigSentBackend(httpClientMock);
+            Assert.IsNotNull(sentConfig);
             Assert.AreEqual(configurations.StreamingEnabled, sentConfig.StreamingEnabled);
             Assert.AreEqual("memory", sentConfig.Storage);
             Assert.AreEqual(configurations.FeaturesRefreshRate, (int)sentConfig.Rates.Splits);
@@ -450,7 +451,7 @@ namespace Splitio.Integration_tests
 
             foreach (var expectedImp in expectedImpressions)
             {                
-                var keyImpressions = sentImpressions.First(si => si.F.Equals(expectedImp.feature)).I;
+                var keyImpressions = sentImpressions.FirstOrDefault(si => si.F.Equals(expectedImp.feature)).I;
 
                 AssertImpression(expectedImp, keyImpressions);
             }
@@ -510,8 +511,10 @@ namespace Splitio.Integration_tests
         private Telemetry.Domain.Config GetMetricsConfigSentBackend(HttpClientMock httpClientMock)
         {
             var logs = httpClientMock.GetMetricsConfigLog();
+
+            if (logs.FirstOrDefault() == null) return null;
             
-            return JsonConvert.DeserializeObject<Telemetry.Domain.Config>(logs.First().RequestMessage.Body);
+            return JsonConvert.DeserializeObject<Telemetry.Domain.Config>(logs.FirstOrDefault().RequestMessage.Body);
         }
 
         private List<Telemetry.Domain.Stats> GetMetricsStatsSentBackend(HttpClientMock httpClientMock)

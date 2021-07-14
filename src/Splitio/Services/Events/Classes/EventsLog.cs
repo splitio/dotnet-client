@@ -62,8 +62,8 @@ namespace Splitio.Services.Events.Classes
                 _tasksManager.Start(() =>
                 {
                     _wrapperAdapter.TaskDelay(_firstPushWindow * 1000).Wait();
-                    _tasksManager.StartPeriodic(() => SendBulkEvents(), _interval * 1000, _cancellationTokenSource);
-                }, new CancellationTokenSource());
+                    _tasksManager.StartPeriodic(() => SendBulkEvents(), _interval * 1000, _cancellationTokenSource, "Send Bulk Events.");
+                }, new CancellationTokenSource(), "Main Events Log.");
             }
         }
 

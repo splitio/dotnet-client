@@ -90,7 +90,7 @@ namespace Splitio.Services.EventSource.Workers
 
                     _log.Debug("SplitsWorker starting ...");
                     _cancellationTokenSource = new CancellationTokenSource();
-                    _tasksManager.Start(() => ExecuteAsync(), _cancellationTokenSource);
+                    _tasksManager.Start(() => ExecuteAsync(), _cancellationTokenSource, "Splits Worker.");
                     _running = true;
                 }
                 catch (Exception ex)

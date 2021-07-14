@@ -127,7 +127,7 @@ namespace Splitio.Services.Common
                 {
                     _synchronizer.StartPeriodicFetching();
                 }
-            }, _shutdownCancellationTokenSource);
+            }, _shutdownCancellationTokenSource, "Start Streaming");
         }        
 
         private void ProcessConnected()

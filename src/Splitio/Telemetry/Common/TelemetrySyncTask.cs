@@ -71,7 +71,7 @@ namespace Splitio.Telemetry.Common
                 {
                     _firstTime = false;
 
-                    _tasksManager.Start(() => RecordConfigInit(), _cancellationTokenSource);
+                    _tasksManager.Start(() => RecordConfigInit(), _cancellationTokenSource, "Telemetry ConfigInit.");
                 }
 
                 _tasksManager.Start(() =>
@@ -80,8 +80,8 @@ namespace Splitio.Telemetry.Common
                     var intervalInMilliseconds = _configurationOptions.TelemetryRefreshRate * 1000;
                     _wrapperAdapter.TaskDelay(intervalInMilliseconds).Wait();
 
-                    _tasksManager.StartPeriodic(() => RecordStats(), intervalInMilliseconds, _cancellationTokenSource);
-                }, _cancellationTokenSource);
+                    _tasksManager.StartPeriodic(() => RecordStats(), intervalInMilliseconds, _cancellationTokenSource, "Telemetry Stats.");
+                }, _cancellationTokenSource, "Main Telemetry.");
             }
         }
 

@@ -71,8 +71,8 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                             if (_running)
                             {
-                                _tasksManager.Start(() => _worker.ExecuteTasks(_cancelTokenSource.Token), _cancelTokenSource);
-                                _tasksManager.StartPeriodic(() => AddSegmentsToQueue(), intervalInMilliseconds, _cancelTokenSource);
+                                _tasksManager.Start(() => _worker.ExecuteTasks(_cancelTokenSource.Token), _cancelTokenSource, "Segments Fetcher Worker.");
+                                _tasksManager.StartPeriodic(() => AddSegmentsToQueue(), intervalInMilliseconds, _cancelTokenSource, "Segmennnnts Fetcher Add to Queue.");
                             }
 
                             break;
@@ -82,7 +82,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                         _wrappedAdapter.TaskDelay(500).Wait();
                     }
-                }, _cancelTokenSource);
+                }, _cancelTokenSource, "Main Segments Fetcher.");
             }
         }
 

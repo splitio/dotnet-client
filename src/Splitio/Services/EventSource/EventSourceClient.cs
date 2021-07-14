@@ -75,7 +75,7 @@ namespace Splitio.Services.EventSource
             _connectedSignal.Reset();
             _cancellationTokenSource = new CancellationTokenSource();
 
-            _tasksManager.Start(() => ConnectAsync(_cancellationTokenSource.Token).Wait(), _cancellationTokenSource);
+            _tasksManager.Start(() => ConnectAsync(_cancellationTokenSource.Token).Wait(), _cancellationTokenSource, "SSE - ConnectAsync");
 
             try
             {
@@ -232,6 +232,7 @@ namespace Splitio.Services.EventSource
                         }
                         finally
                         {
+                            _log.Debug("Disposing Stream Read Task...");
                             timeoutToken.Cancel();
                             timeoutToken.Dispose();
                             _wrapperAdapter.TaskWaitAndDispose(timeoutTask, streamReadTask, finishedTask);

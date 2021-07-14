@@ -163,7 +163,7 @@ namespace Splitio.Services.Client.Classes
                             Event = eventToLog,
                             Size = eventPropertiesResult.EventSize
                         });
-                    }, new CancellationTokenSource());
+                    }, new CancellationTokenSource(), "Track");
 
                     RecordLatency(nameof(Track), clock.ElapsedMilliseconds);
 

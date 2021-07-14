@@ -95,7 +95,7 @@ namespace Splitio.Services.Common
                 _segmentFetcher.FetchAll().Wait();
                 _gates.SdkInternalReady();
                 _log.Debug("Spltis and Segments synchronized...");
-            }, cancellationTokenSource);
+            }, cancellationTokenSource, "SyncAll");
         }
 
         public async Task SynchronizeSegment(string segmentName)

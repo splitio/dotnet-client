@@ -23,10 +23,12 @@ namespace Splitio.Services.Shared.Classes
             _wrapperAdapter = wrapperAdapter;
         }
 
-        public void Start(Action action, CancellationTokenSource cancellationToken)
+        public void Start(Action action, CancellationTokenSource cancellationToken, string description)
         {
             lock (_lock)
             {
+                _log.Debug($"Starting Task: {description}");
+
                 if (_tasks.Count >= _maxCapacity)
                 {
                     ClearTasks();
@@ -37,10 +39,12 @@ namespace Splitio.Services.Shared.Classes
             }
         }
 
-        public void StartPeriodic(Action action, int intervalInMilliseconds, CancellationTokenSource cancellationToken)
+        public void StartPeriodic(Action action, int intervalInMilliseconds, CancellationTokenSource cancellationToken, string description)
         {
             lock (_lock)
             {
+                _log.Debug($"Starting Periodic Task: {description}");
+
                 if (_tasks.Count >= _maxCapacity)
                 {
                     ClearTasks();
