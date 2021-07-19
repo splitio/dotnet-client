@@ -2,6 +2,7 @@
 using Moq;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.Shared.Classes;
 using Splitio_Tests.Resources;
 using System;
 using System.Collections.Concurrent;
@@ -12,6 +13,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     [TestClass]
     public class ImpressionsCountSenderTests
     {
+        private readonly WrapperAdapter wrapperAdapter = new WrapperAdapter();
+
         private readonly Mock<IImpressionsSdkApiClient> _apiClient;
 
         public ImpressionsCountSenderTests()
@@ -30,7 +33,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             impressionsCounter.Inc("feature2", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 50, 11, DateTimeKind.Utc)));
             impressionsCounter.Inc("feature3", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 10, 50, 11, DateTimeKind.Utc)));
 
-            var impressionsCountSender = new ImpressionsCountSender(_apiClient.Object, impressionsCounter, 1);
+            var impressionsCountSender = new ImpressionsCountSender(_apiClient.Object, impressionsCounter, new TasksManager(wrapperAdapter), 1);
 
             // Act.
             impressionsCountSender.Start();
@@ -45,7 +48,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         {
             // Arrange.
             var impressionsCounter = new ImpressionsCounter();
-            var impressionsCountSender = new ImpressionsCountSender(_apiClient.Object, impressionsCounter, 1);
+            var impressionsCountSender = new ImpressionsCountSender(_apiClient.Object, impressionsCounter, new TasksManager(wrapperAdapter), 1);
 
             // Act.
             impressionsCountSender.Start();
@@ -65,7 +68,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             impressionsCounter.Inc("feature2", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 50, 11, DateTimeKind.Utc)));
             impressionsCounter.Inc("feature3", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 10, 50, 11, DateTimeKind.Utc)));
 
-            var impressionsCountSender = new ImpressionsCountSender(_apiClient.Object, impressionsCounter);
+            var impressionsCountSender = new ImpressionsCountSender(_apiClient.Object, impressionsCounter, new TasksManager(wrapperAdapter));
 
             // Act.
             impressionsCountSender.Start();

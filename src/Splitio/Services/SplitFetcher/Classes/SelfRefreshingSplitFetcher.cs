@@ -20,39 +20,60 @@ namespace Splitio.Services.SplitFetcher.Classes
         private readonly ISplitChangeFetcher _splitChangeFetcher;
         private readonly ISplitParser _splitParser;
         private readonly IReadinessGatesCache _gates;
-        private readonly ISplitCache _splitCache;
-        private readonly CancellationTokenSource _cancelTokenSource;
+        private readonly ISplitCache _splitCache;        
         private readonly int _interval;
+        private readonly ITasksManager _taskManager;
+
+        private readonly object _lock = new object();
+        private CancellationTokenSource _cancelTokenSource;
+        private bool _running;
 
         public SelfRefreshingSplitFetcher(ISplitChangeFetcher splitChangeFetcher,
-            ISplitParser splitParser, 
-            IReadinessGatesCache gates, 
-            int interval, 
+            ISplitParser splitParser,
+            IReadinessGatesCache gates,
+            int interval,
+            ITasksManager taskManager,
             ISplitCache splitCache = null)
         {
-            _cancelTokenSource = new CancellationTokenSource();
-
             _splitChangeFetcher = splitChangeFetcher;
             _splitParser = splitParser;
             _gates = gates;
             _interval = interval;
             _splitCache = splitCache;
+            _taskManager = taskManager;
         }
 
         #region Public Methods
         public void Start()
         {
-            var periodicTask = PeriodicTaskFactory.Start(async() =>
+            _taskManager.Start(() =>
             {
-                await FetchSplits();
-            },
-            intervalInMilliseconds: _interval * 1000,
-            cancelToken: _cancelTokenSource.Token);
+                lock (_lock)
+                {
+                    if (_running) return;
+
+                    _running = true;
+                    _cancelTokenSource = new CancellationTokenSource();
+                    _gates.WaitUntilSdkInternalReady();
+
+                    _taskManager.StartPeriodic(() =>
+                    {
+                        FetchSplits().Wait();
+                    }, _interval * 1000, _cancelTokenSource, "Splits Fetcher.");
+                }
+            }, new CancellationTokenSource(), "Main Splits Fetcher.");
         }
 
         public void Stop()
         {
-            _cancelTokenSource.Cancel();
+            lock (_lock)
+            {
+                if (!_running) return;
+
+                _running = false;
+                _cancelTokenSource.Cancel();
+                _cancelTokenSource.Dispose();
+            }
         }
 
         public void Clear()

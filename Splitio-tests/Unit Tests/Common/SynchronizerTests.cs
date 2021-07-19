@@ -6,6 +6,7 @@ using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Common;
@@ -26,7 +27,6 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<IWrapperAdapter> _wrapperAdapter;
         private readonly Mock<IReadinessGatesCache> _gates;
         private readonly Mock<ITelemetrySyncTask> _telemetrySyncTask;
-
         private readonly ISynchronizer _synchronizer;
 
         public SynchronizerTests()
@@ -41,7 +41,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _gates = new Mock<IReadinessGatesCache>();
             _telemetrySyncTask = new Mock<ITelemetrySyncTask>();
 
-            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCountSender.Object, _wrapperAdapter.Object, _gates.Object, _telemetrySyncTask.Object, _log.Object);
+            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCountSender.Object, _wrapperAdapter.Object, _gates.Object, _telemetrySyncTask.Object, new TasksManager(_wrapperAdapter.Object), _log.Object);
         }
 
         [TestMethod]
@@ -97,10 +97,10 @@ namespace Splitio_Tests.Unit_Tests.Common
         public void SyncAll_ShouldStartFetchSplitsAndSegments()
         {
             // Act.
-            _synchronizer.SyncAll();
+            _synchronizer.SyncAll(new CancellationTokenSource());
 
             // Assert.
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
             _splitFetcher.Verify(mock => mock.FetchSplits(false), Times.Once);            
             _segmentFetcher.Verify(mock => mock.FetchAll(), Times.Once);
             _gates.Verify(mock => mock.SdkInternalReady(), Times.Once);

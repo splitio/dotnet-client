@@ -4,6 +4,7 @@ using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
@@ -15,6 +16,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     [TestClass]
     public class ImpressionsManagerTests
     {
+        private readonly WrapperAdapter wrapperAdapter = new WrapperAdapter();
+
         private readonly Mock<IImpressionsObserver> _impressionsObserver;
         private readonly Mock<IImpressionsLog> _impressionsLog;
         private readonly Mock<IImpressionListener> _customerImpressionListener;
