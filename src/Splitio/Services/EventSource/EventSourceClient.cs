@@ -56,7 +56,7 @@ namespace Splitio.Services.EventSource
 
             _firstEvent = true;
         }
-
+        
         public event EventHandler<EventReceivedEventArgs> EventReceived;
         public event EventHandler<SSEActionsEventArgs> ActionEvent;
 
@@ -151,7 +151,7 @@ namespace Splitio.Services.EventSource
             }
             catch (Exception ex)
             {
-                _log.Debug($"Error connecting to {_url}: {ex.Message}");
+                _log.Debug($"Error connecting to {_url}.", ex);
             }
             finally
             {
