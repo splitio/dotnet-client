@@ -7,6 +7,5 @@ namespace Splitio.Services.Shared.Classes
     {
         void Start(Action action, CancellationTokenSource cancellationToken, string description);
         void StartPeriodic(Action action, int intervalInMilliseconds, CancellationTokenSource cancellationToken, string description);
-        void CancelAll();
     }
 }
