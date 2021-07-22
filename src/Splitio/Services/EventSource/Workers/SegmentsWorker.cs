@@ -68,8 +68,8 @@ namespace Splitio.Services.EventSource.Workers
 
                     _log.Debug($"Segments worker starting ...");
                     _cancellationTokenSource = new CancellationTokenSource();
-                    _tasksManager.Start(() => Execute(), _cancellationTokenSource, "Segments Workersss");
                     _running = true;
+                    _tasksManager.Start(() => Execute(), _cancellationTokenSource, "Segments Workers.");
                 }
                 catch (Exception ex)
                 {
@@ -109,7 +109,8 @@ namespace Splitio.Services.EventSource.Workers
         {
             try
             {
-                while (!_cancellationTokenSource.IsCancellationRequested)
+                _log.Debug($"Segments Worker, Token: {_cancellationTokenSource.IsCancellationRequested}; Running: {_running}.");
+                while (!_cancellationTokenSource.IsCancellationRequested && _running)
                 {
                     // Wait indefinitely until a segment is queued
                     if (_queue.TryTake(out SegmentQueueDto segment, -1, _cancellationTokenSource.Token))
@@ -129,6 +130,10 @@ namespace Splitio.Services.EventSource.Workers
             catch (Exception ex)
             {
                 _log.Error($"Execute: {ex.Message}");
+            }
+            finally
+            {
+                _log.Debug("Segments Workers excecute finished.");
             }
         }
         #endregion
