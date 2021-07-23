@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Domain;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
@@ -91,7 +92,7 @@ namespace Splitio.Services.Common
         {
             _tasksManager.Start(() =>
             {
-                _splitFetcher.FetchSplits().Wait();
+                _splitFetcher.FetchSplits(new FetchOptions()).Wait();
                 _segmentFetcher.FetchAll().Wait();
                 _gates.SdkInternalReady();
                 _log.Debug("Spltis and Segments synchronized...");
@@ -100,13 +101,13 @@ namespace Splitio.Services.Common
 
         public async Task SynchronizeSegment(string segmentName)
         {
-            await _segmentFetcher.Fetch(segmentName, cacheControlHeaders: true);
+            await _segmentFetcher.Fetch(segmentName, new FetchOptions { CacheControlHeaders = true });
             _log.Debug($"Segment fetched: {segmentName}...");
         }
 
         public async Task SynchronizeSplits()
         {
-            var segmentNames = await _splitFetcher.FetchSplits(cacheControlHeaders: true);
+            var segmentNames = await _splitFetcher.FetchSplits(new FetchOptions { CacheControlHeaders = true });
             await _segmentFetcher.FetchSegmentsIfNotExists(segmentNames);
             _log.Debug("Splits fetched...");
         }

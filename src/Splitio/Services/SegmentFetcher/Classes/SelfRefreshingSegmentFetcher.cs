@@ -1,4 +1,5 @@
 ﻿using Splitio.CommonLibraries;
+using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
@@ -46,7 +47,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             _gates = gates;
             _wrappedAdapter = wrapperAdapter;
             _segmentTaskQueue = segmentTaskQueue;
-            _tasksManager = tasksManager;            
+            _tasksManager = tasksManager;
         }
 
         #region Public Methods
@@ -129,19 +130,19 @@ namespace Splitio.Services.SegmentFetcher.Classes
         {
             foreach (var segment in _segments.Values)
             {
-                await segment.FetchSegment();
+                await segment.FetchSegment(new FetchOptions());
 
                 _log.Debug($"Segment fetched: {segment.Name}");
             }
         }
 
-        public async Task Fetch(string segmentName, bool cacheControlHeaders = false)
+        public async Task Fetch(string segmentName, FetchOptions fetchOptions)
         {
             try
             {
                 InitializeSegment(segmentName);
                 _segments.TryGetValue(segmentName, out SelfRefreshingSegment fetcher);
-                await fetcher.FetchSegment(cacheControlHeaders);
+                await fetcher.FetchSegment(fetchOptions);
             }
             catch (Exception ex)
             {
@@ -160,7 +161,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             {
                 var changeNumber = _segmentCache.GetChangeNumber(name);
 
-                if (changeNumber == -1) await Fetch(name);
+                if (changeNumber == -1) await Fetch(name, new FetchOptions());
             }
         }
         #endregion

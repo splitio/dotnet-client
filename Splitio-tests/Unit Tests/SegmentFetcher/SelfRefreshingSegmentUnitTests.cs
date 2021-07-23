@@ -21,7 +21,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var gates = new InMemoryReadinessGatesCache();
             var apiClient = new Mock<ISegmentSdkApiClient>();
             apiClient
-            .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), false))
+            .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
             .Throws(new Exception());
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments  = new ConcurrentDictionary<string, Segment>();
@@ -29,7 +29,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, gates, cache);
             
             //Act
-            segmentFetcher.FetchSegment();
+            segmentFetcher.FetchSegment(new FetchOptions());
 
             //Assert
             Assert.AreEqual(0, segments.Count);
@@ -42,7 +42,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var gates = new InMemoryReadinessGatesCache();
             var apiClient = new Mock<ISegmentSdkApiClient>();
             apiClient
-            .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), false))
+            .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
             .Returns(Task.FromResult(@"{
                           'name': 'payed',
                           'added': [
@@ -60,7 +60,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, gates, cache);
 
             //Act
-            segmentFetcher.FetchSegment();
+            segmentFetcher.FetchSegment(new FetchOptions());
 
             //Assert
             Assert.IsTrue(gates.AreSegmentsReady(1));
@@ -73,7 +73,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var gates = new InMemoryReadinessGatesCache();
             var apiClient = new Mock<ISegmentSdkApiClient>();
             apiClient
-            .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), false))
+            .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
             .Returns(Task.FromResult(@"{
                           'name': 'payed',
                           'added': [
@@ -91,7 +91,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, gates, cache);
 
             //Act
-            segmentFetcher.FetchSegment();
+            segmentFetcher.FetchSegment(new FetchOptions());
 
             //Assert
             Assert.AreEqual(1, segments.Count);

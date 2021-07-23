@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Splitio.Domain;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace Splitio_Tests.Integration_Tests
             var SplitSdkApiClient = new SplitSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000, telemetryStorage);
 
             //Act
-            var result = await SplitSdkApiClient.FetchSplitChanges(-1);
+            var result = await SplitSdkApiClient.FetchSplitChanges(-1, new FetchOptions());
   
             //Assert
             Assert.IsTrue(result.Contains("splits"));            
@@ -48,7 +49,7 @@ namespace Splitio_Tests.Integration_Tests
             var SplitSdkApiClient = new SplitSdkApiClient(string.Empty, headers, baseUrl, 10000, 10000, telemetryStorage);
 
             //Act
-            var result = await SplitSdkApiClient.FetchSplitChanges(-1);
+            var result = await SplitSdkApiClient.FetchSplitChanges(-1, new FetchOptions());
 
             //Assert
             Assert.IsTrue(result == string.Empty);

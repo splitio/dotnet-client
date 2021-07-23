@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Logger;
+﻿using Splitio.Domain;
+using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System;
@@ -57,7 +58,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
                             if (!token.IsCancellationRequested)
                             {
                                 IncrementCounter();
-                                Task task = new Task(async () => await segment.FetchSegment(), token);
+                                Task task = new Task(async () => await segment.FetchSegment(new FetchOptions()), token);
                                 task.ContinueWith((x) => { DecrementCounter(); }, token);
                                 task.Start();
                             }
