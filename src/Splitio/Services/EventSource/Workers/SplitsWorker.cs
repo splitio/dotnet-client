@@ -155,7 +155,7 @@ namespace Splitio.Services.EventSource.Workers
             }
             finally
             {
-                _log.Debug("Split Workers excecute finished.");
+                _log.Debug("Split Worker execution finished.");
             }
         }
         #endregion

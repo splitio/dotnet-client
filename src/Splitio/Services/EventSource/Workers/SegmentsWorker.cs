@@ -133,7 +133,7 @@ namespace Splitio.Services.EventSource.Workers
             }
             finally
             {
-                _log.Debug("Segments Workers excecute finished.");
+                _log.Debug("Segment Worker execution finished.");
             }
         }
         #endregion
