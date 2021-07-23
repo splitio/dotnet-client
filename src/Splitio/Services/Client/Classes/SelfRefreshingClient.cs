@@ -195,7 +195,8 @@ namespace Splitio.Services.Client.Classes
             {
                 // Synchronizer
                 var impressionsCountSender = new ImpressionsCountSender(_impressionsSdkApiClient, _impressionsCounter, _tasksManager);
-                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, impressionsCountSender, _wrapperAdapter, _gates, _telemetrySyncTask, _tasksManager);
+                var backOff = new BackOff(backOffBase: 10, attempt: 0, maxAllowed: 60);
+                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, impressionsCountSender, _wrapperAdapter, _gates, _telemetrySyncTask, _tasksManager, _splitCache, backOff, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs);
 
                 // Workers
                 var splitsWorker = new SplitsWorker(_splitCache, synchronizer, _tasksManager);

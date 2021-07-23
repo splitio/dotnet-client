@@ -10,8 +10,6 @@ namespace Splitio.Services.EventSource.Workers
 {
     public class SplitsWorker : ISplitsWorker
     {
-        private readonly static int MaxRetriesAllowed = 10;
-
         private readonly ISplitLogger _log;
         private readonly ISplitCache _splitCache;
         private readonly ISynchronizer _synchronizer;
@@ -139,13 +137,7 @@ namespace Splitio.Services.EventSource.Workers
                     {
                         _log.Debug($"ChangeNumber dequeue: {changeNumber}");
 
-                        var attempt = 0;
-
-                        while (changeNumber > _splitCache.GetChangeNumber() && (attempt < MaxRetriesAllowed))
-                        {
-                            await _synchronizer.SynchronizeSplits();
-                            attempt++;
-                        }
+                        await _synchronizer.SynchronizeSplits(changeNumber);
                     }
                 }
             }

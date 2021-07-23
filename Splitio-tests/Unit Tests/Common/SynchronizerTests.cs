@@ -28,6 +28,8 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<IWrapperAdapter> _wrapperAdapter;
         private readonly Mock<IReadinessGatesCache> _gates;
         private readonly Mock<ITelemetrySyncTask> _telemetrySyncTask;
+        private readonly Mock<ISplitCache> _splitCache;
+        private readonly Mock<IBackOff> _backOff;
         private readonly ISynchronizer _synchronizer;
 
         public SynchronizerTests()
@@ -41,8 +43,10 @@ namespace Splitio_Tests.Unit_Tests.Common
             _wrapperAdapter = new Mock<IWrapperAdapter>();
             _gates = new Mock<IReadinessGatesCache>();
             _telemetrySyncTask = new Mock<ITelemetrySyncTask>();
+            _splitCache = new Mock<ISplitCache>();
+            _backOff = new Mock<IBackOff>();
 
-            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCountSender.Object, _wrapperAdapter.Object, _gates.Object, _telemetrySyncTask.Object, new TasksManager(_wrapperAdapter.Object), _log.Object);
+            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCountSender.Object, _wrapperAdapter.Object, _gates.Object, _telemetrySyncTask.Object, new TasksManager(_wrapperAdapter.Object), _splitCache.Object, _backOff.Object, 10, 10, _log.Object);
         }
 
         [TestMethod]
@@ -123,8 +127,14 @@ namespace Splitio_Tests.Unit_Tests.Common
         [TestMethod]
         public void SynchronizeSplits_ShouldFetchSplits()
         {
+            // Arrange.
+            _splitCache
+                .SetupSequence(mock => mock.GetChangeNumber())
+                .Returns(-1)
+                .Returns(2);
+
             // Act.
-            _synchronizer.SynchronizeSplits();
+            _synchronizer.SynchronizeSplits(1);
 
             // Assert.
             _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Once);

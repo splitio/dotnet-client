@@ -6,7 +6,7 @@ namespace Splitio.Services.Common
     public interface ISynchronizer
     {
         void SyncAll(CancellationTokenSource cancellationTokenSource);
-        Task SynchronizeSplits();
+        Task SynchronizeSplits(long targetChangeNumber);
         Task SynchronizeSegment(string segmentName);
         void StartPeriodicFetching();
         void StopPeriodicFetching();
