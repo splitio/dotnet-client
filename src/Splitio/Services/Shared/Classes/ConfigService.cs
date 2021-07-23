@@ -76,7 +76,9 @@ namespace Splitio.Services.Shared.Classes
                 EventsBaseUrl = string.IsNullOrEmpty(config.EventsEndpoint) ? Constants.Urls.EventsBaseUrl : config.EventsEndpoint,
                 StreamingServiceURL = string.IsNullOrEmpty(config.StreamingServiceURL) ? Constants.Urls.StreamingServiceURL : config.StreamingServiceURL,
                 TelemetryServiceURL = string.IsNullOrEmpty(config.TelemetryServiceURL) ? Constants.Urls.TelemetryServiceURL : config.TelemetryServiceURL,
-                SdkStartTime = CurrentTimeHelper.CurrentTimeMillis()
+                SdkStartTime = CurrentTimeHelper.CurrentTimeMillis(),
+                OnDemandFetchMaxRetries = 10,
+                OnDemandFetchRetryDelayMs = 50
             };
 
             selfRefreshingConfig.TreatmentLogRefreshRate = GetImpressionRefreshRate(selfRefreshingConfig.ImpressionsMode, config.ImpressionsRefreshRate);

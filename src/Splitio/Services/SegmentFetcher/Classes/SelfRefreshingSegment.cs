@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Domain;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
@@ -27,7 +28,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             _gates.RegisterSegment(name);
         }
 
-        public async Task FetchSegment(bool cacheControlHeaders = false)
+        public async Task FetchSegment(FetchOptions fetchOptions)
         {
             while (true)
             {
@@ -35,7 +36,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 try
                 {
-                    var response = await _segmentChangeFetcher.Fetch(Name, changeNumber, cacheControlHeaders);
+                    var response = await _segmentChangeFetcher.Fetch(Name, changeNumber, fetchOptions);
 
                     if (response == null)
                     {

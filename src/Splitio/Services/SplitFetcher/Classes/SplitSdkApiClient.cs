@@ -1,4 +1,5 @@
 ﻿using Splitio.CommonLibraries;
+using Splitio.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
@@ -16,12 +17,6 @@ namespace Splitio.Services.SplitFetcher.Classes
     {
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SplitSdkApiClient));
 
-        private const string SplitChangesUrlTemplate = "/api/splitChanges";
-        private const string UrlParameterSince = "?since=";
-        private const string SplitFetcherTime = "splitChangeFetcher.time";
-        private const string SplitFetcherStatus = "splitChangeFetcher.status.{0}";
-        private const string SplitFetcherException = "splitChangeFetcher.exception";        
-
         public SplitSdkApiClient(string apiKey,
             Dictionary<string, string> headers,
             string baseUrl,
@@ -30,7 +25,7 @@ namespace Splitio.Services.SplitFetcher.Classes
             ITelemetryRuntimeProducer telemetryRuntimeProducer) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout, telemetryRuntimeProducer)
         { }
 
-        public async Task<string> FetchSplitChanges(long since, bool cacheControlHeaders = false)
+        public async Task<string> FetchSplitChanges(long since, FetchOptions fetchOptions)
         {
             using (var clock = new Util.SplitStopwatch())
             {
@@ -38,8 +33,8 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                 try
                 {
-                    var requestUri = GetRequestUri(since);
-                    var response = await ExecuteGet(requestUri, cacheControlHeaders);
+                    var requestUri = GetRequestUri(since, fetchOptions.Till);
+                    var response = await ExecuteGet(requestUri, fetchOptions.CacheControlHeaders);
 
                     if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
                     {
@@ -64,9 +59,14 @@ namespace Splitio.Services.SplitFetcher.Classes
             }
         }
 
-        private string GetRequestUri(long since)
+        private string GetRequestUri(long since, long? till = null)
         {
-            return string.Concat(SplitChangesUrlTemplate, UrlParameterSince, Uri.EscapeDataString(since.ToString()));
+            var uri = $"/api/splitChanges?since={Uri.EscapeDataString(since.ToString())}";
+
+            if (till.HasValue)
+                return $"{uri}&till={Uri.EscapeDataString(till.Value.ToString())}";
+
+            return uri;
         }
     }
 }

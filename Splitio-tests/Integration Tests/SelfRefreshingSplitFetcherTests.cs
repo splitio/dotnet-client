@@ -36,7 +36,7 @@ namespace Splitio_Tests.Integration_Tests
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var splitParser = new InMemorySplitParser(new JSONFileSegmentFetcher($"{rootFilePath}segment_payed.json", segmentCache), segmentCache);
             var splitChangeFetcher = new JSONFileSplitChangeFetcher($"{rootFilePath}splits_staging.json");
-            var splitChangesResult = splitChangeFetcher.Fetch(-1);
+            var splitChangesResult = splitChangeFetcher.Fetch(-1, new FetchOptions());
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
             var gates = new InMemoryReadinessGatesCache();
             gates.SdkInternalReady();
@@ -63,7 +63,7 @@ namespace Splitio_Tests.Integration_Tests
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var splitParser = new InMemorySplitParser(new JSONFileSegmentFetcher($"{rootFilePath}segment_payed.json", segmentCache), segmentCache);
             var splitChangeFetcher = new JSONFileSplitChangeFetcher($"{rootFilePath}splits_staging_4.json");
-            var splitChangesResult = splitChangeFetcher.Fetch(-1);
+            var splitChangesResult = splitChangeFetcher.Fetch(-1, new FetchOptions());
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
             var gates = new InMemoryReadinessGatesCache();
             gates.SdkInternalReady();

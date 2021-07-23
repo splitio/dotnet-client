@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.Events.Interfaces;
@@ -101,7 +102,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Assert.
             Thread.Sleep(2000);
-            _splitFetcher.Verify(mock => mock.FetchSplits(false), Times.Once);            
+            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Once);            
             _segmentFetcher.Verify(mock => mock.FetchAll(), Times.Once);
             _gates.Verify(mock => mock.SdkInternalReady(), Times.Once);
         }
@@ -116,7 +117,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _synchronizer.SynchronizeSegment(segmentName);
 
             // Assert.
-            _segmentFetcher.Verify(mock => mock.Fetch(segmentName, true), Times.Once);
+            _segmentFetcher.Verify(mock => mock.Fetch(segmentName, It.IsAny<FetchOptions>()), Times.Once);
         }
 
         [TestMethod]
@@ -126,7 +127,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _synchronizer.SynchronizeSplits();
 
             // Assert.
-            _splitFetcher.Verify(mock => mock.FetchSplits(true), Times.Once);
+            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Once);
             _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExists(It.IsAny<IList<string>>()), Times.Once);
         }
     }

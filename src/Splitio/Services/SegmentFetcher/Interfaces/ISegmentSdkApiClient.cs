@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using Splitio.Domain;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Interfaces
 {
     public interface ISegmentSdkApiClient
     {
-        Task<string> FetchSegmentChanges(string name, long since, bool cacheControlHeaders = false);
+        Task<string> FetchSegmentChanges(string name, long since, FetchOptions fetchOptions);
     }
 }
