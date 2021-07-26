@@ -71,8 +71,7 @@ namespace Splitio.Services.Common
             _synchronizer.StopPeriodicFetching();
             _synchronizer.ClearFetchersCache();
             _synchronizer.StopPeriodicDataRecording();
-            _pushManager.StopSse();            
-            _tasksManager.CancelAll();
+            _pushManager.StopSse();
         }
 
         // public for tests

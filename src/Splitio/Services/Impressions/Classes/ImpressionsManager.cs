@@ -1,5 +1,6 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace Splitio.Services.Impressions.Classes
         private readonly IImpressionListener _customerImpressionListener;
         private readonly IImpressionsCounter _impressionsCounter;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
+        private readonly ITasksManager _taskManager;
         private readonly bool _optimized;
         private readonly bool _addPreviousTime;
 
@@ -24,6 +26,7 @@ namespace Splitio.Services.Impressions.Classes
             bool addPreviousTime,
             ImpressionsMode impressionsMode,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
+            ITasksManager taskManager,
             IImpressionsObserver impressionsObserver = null)
         {            
             _impressionsLog = impressionsLog;
@@ -33,6 +36,7 @@ namespace Splitio.Services.Impressions.Classes
             _optimized = impressionsMode == ImpressionsMode.Optimized && addPreviousTime;
             _impressionsObserver = impressionsObserver;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
+            _taskManager = taskManager;
         }
 
         public KeyImpression BuildImpression(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey)
