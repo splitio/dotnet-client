@@ -7,7 +7,7 @@ namespace Splitio.Services.Common
     {
         void SyncAll(CancellationTokenSource cancellationTokenSource);
         Task SynchronizeSplits(long targetChangeNumber);
-        Task SynchronizeSegment(string segmentName);
+        Task SynchronizeSegment(string segmentName, long targetChangeNumber);
         void StartPeriodicFetching();
         void StopPeriodicFetching();
         void StartPeriodicDataRecording();

@@ -128,9 +128,10 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
         public async Task FetchAll()
         {
+            var fetchOptions = new FetchOptions();
             foreach (var segment in _segments.Values)
             {
-                await segment.FetchSegment(new FetchOptions());
+                await segment.FetchSegment(fetchOptions);
 
                 _log.Debug($"Segment fetched: {segment.Name}");
             }
