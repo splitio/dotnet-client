@@ -18,7 +18,7 @@ namespace Splitio.Integration_tests
     public abstract class BaseIntegrationTests
     {
         protected IImpressionListener _impressionListener;
-                
+
         #region GetTreatment
         [TestMethod]
         public void GetTreatment_WithtBUR_WithMultipleCalls_ReturnsTreatments()
@@ -27,12 +27,12 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey3";
+            var apikey = "base-apikey1";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            client.BlockUntilReady(1000000);
+            client.BlockUntilReady(10000);
 
             // Act.
             var result1 = client.GetTreatment("nico_test", "FACUNDO_TEST");
@@ -58,22 +58,22 @@ namespace Splitio.Integration_tests
             var impression1 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
                 .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
+                .FirstOrDefault();
 
             var impression2 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
                 .Where(ki => ki.keyName.Equals("mauro_test"))
-                .First();
+                .FirstOrDefault();
 
             var impression3 = keyImpressions
                 .Where(ki => ki.feature.Equals("Test_Save_1"))
                 .Where(ki => ki.keyName.Equals("1"))
-                .First();
+                .FirstOrDefault();
 
             var impression4 = keyImpressions
                 .Where(ki => ki.feature.Equals("Test_Save_1"))
                 .Where(ki => ki.keyName.Equals("24"))
-                .First();
+                .FirstOrDefault();
 
             AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
             AssertImpression(impression2, 1506703262916, "FACUNDO_TEST", "mauro_test", "in segment all", "off");
@@ -83,6 +83,7 @@ namespace Splitio.Integration_tests
             //Validate impressions sent to the be.
             AssertSentImpressions(4, httpClientMock, impression1, impression2, impression3, impression4);
 
+            client.Destroy();
             ShutdownServer(httpClientMock);
         }
 
@@ -94,7 +95,7 @@ namespace Splitio.Integration_tests
             {
                 var configurations = GetConfigurationOptions(httpClientMock);
 
-                var apikey = "apikey3";
+                var apikey = "base-apikey2";
 
                 var splitFactory = new SplitFactory(apikey, configurations);
                 var client = splitFactory.Client();
@@ -125,18 +126,20 @@ namespace Splitio.Integration_tests
                 var impression1 = keyImpressions
                     .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
                     .Where(ki => ki.keyName.Equals("nico_test"))
-                    .First();
+                    .FirstOrDefault();
 
                 var impression2 = keyImpressions
                     .Where(ki => ki.feature.Equals("Test_Save_1"))
                     .Where(ki => ki.keyName.Equals("24"))
-                    .First();
+                    .FirstOrDefault();
 
                 AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
                 AssertImpression(impression2, 1503956389520, "Test_Save_1", "24", "in segment all", "off");
 
                 //Validate impressions sent to the be.
                 AssertSentImpressions(2, httpClientMock, impression1, impression2);
+
+                client.Destroy();
             }
         }
 
@@ -147,7 +150,7 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey3";
+            var apikey = "base-apikey3";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
@@ -170,6 +173,7 @@ namespace Splitio.Integration_tests
             //Validate impressions sent to the be.
             AssertSentImpressions(0, httpClientMock);
 
+            client.Destroy();
             ShutdownServer(httpClientMock);
         }
         #endregion
@@ -182,19 +186,12 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey3";
+            var apikey = "base-apikey4";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);
 
             // Act.
             var result1 = client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
@@ -225,22 +222,22 @@ namespace Splitio.Integration_tests
             var impression1 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
                 .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
+                .FirstOrDefault();
 
             var impression2 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
                 .Where(ki => ki.keyName.Equals("mauro_test"))
-                .First();
+                .FirstOrDefault();
 
             var impression3 = keyImpressions
                 .Where(ki => ki.feature.Equals("MAURO_TEST"))
                 .Where(ki => ki.keyName.Equals("mauro"))
-                .First();
+                .FirstOrDefault();
 
             var impression4 = keyImpressions
                 .Where(ki => ki.feature.Equals("MAURO_TEST"))
                 .Where(ki => ki.keyName.Equals("test"))
-                .First();
+                .FirstOrDefault();
 
             AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
             AssertImpression(impression2, 1506703262916, "FACUNDO_TEST", "mauro_test", "in segment all", "off");
@@ -250,6 +247,7 @@ namespace Splitio.Integration_tests
             //Validate impressions sent to the be.
             AssertSentImpressions(4, httpClientMock, impression1, impression2, impression3, impression4);
 
+            client.Destroy();
             ShutdownServer(httpClientMock);
         }
 
@@ -260,19 +258,12 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey3";
+            var apikey = "base-apikey5";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);
 
             // Act.
             var result1 = client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
@@ -303,12 +294,12 @@ namespace Splitio.Integration_tests
             var impression1 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
                 .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
+                .FirstOrDefault();
 
             var impression2 = keyImpressions
                 .Where(ki => ki.feature.Equals("MAURO_TEST"))
                 .Where(ki => ki.keyName.Equals("mauro"))
-                .First();
+                .FirstOrDefault();
 
             AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
             AssertImpression(impression2, 1506703262966, "MAURO_TEST", "mauro", "whitelisted", "on");
@@ -316,6 +307,7 @@ namespace Splitio.Integration_tests
             //Validate impressions sent to the be.
             AssertSentImpressions(2, httpClientMock, impression1, impression2);
 
+            client.Destroy();
             ShutdownServer(httpClientMock);
         }
 
@@ -326,7 +318,7 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey3";
+            var apikey = "base-apikey6";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
@@ -349,6 +341,7 @@ namespace Splitio.Integration_tests
             //Validate impressions sent to the be.
             AssertSentImpressions(0, httpClientMock);
 
+            client.Destroy();
             ShutdownServer(httpClientMock);
         }
         #endregion
@@ -362,19 +355,12 @@ namespace Splitio.Integration_tests
             {
                 var configurations = GetConfigurationOptions(httpClientMock);
 
-                var apikey = "apikey3";
+                var apikey = "base-apikey7";
 
                 var splitFactory = new SplitFactory(apikey, configurations);
                 var client = splitFactory.Client();
 
-                try
-                {
-                    client.BlockUntilReady(10000);
-                }
-                catch
-                {
-                    client.BlockUntilReady(100000);
-                }
+                client.BlockUntilReady(10000);
 
                 // Act.
                 var result = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
@@ -396,24 +382,26 @@ namespace Splitio.Integration_tests
                 var impression1 = keyImpressions
                     .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
                     .Where(ki => ki.keyName.Equals("nico_test"))
-                    .First();
+                    .FirstOrDefault();
 
                 var impression2 = keyImpressions
                     .Where(ki => ki.feature.Equals("MAURO_TEST"))
                     .Where(ki => ki.keyName.Equals("nico_test"))
-                    .First();
+                    .FirstOrDefault();
 
                 var impression3 = keyImpressions
                     .Where(ki => ki.feature.Equals("Test_Save_1"))
                     .Where(ki => ki.keyName.Equals("nico_test"))
-                    .First();
+                    .FirstOrDefault();
 
                 AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
                 AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
                 AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
 
-                //Validate impressions sent to the be.            
+                //Validate impressions sent to the be.
                 AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
+
+                client.Destroy();
             }
         }
 
@@ -424,19 +412,12 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey3";
+            var apikey = "base-apikey8";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);
 
             // Act.
             var result1 = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", string.Empty, "Test_Save_1" });
@@ -464,22 +445,22 @@ namespace Splitio.Integration_tests
             var impression1 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
                 .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
+                .FirstOrDefault();
 
             var impression2 = keyImpressions
                 .Where(ki => ki.feature.Equals("Test_Save_1"))
                 .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
+                .FirstOrDefault();
 
             var impression3 = keyImpressions
                 .Where(ki => ki.feature.Equals("MAURO_TEST"))
                 .Where(ki => ki.keyName.Equals("mauro"))
-                .First();
+                .FirstOrDefault();
 
             var impression4 = keyImpressions
                 .Where(ki => ki.feature.Equals("Test_Save_1"))
                 .Where(ki => ki.keyName.Equals("mauro"))
-                .First();
+                .FirstOrDefault();
 
             AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
             AssertImpression(impression2, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
@@ -489,6 +470,7 @@ namespace Splitio.Integration_tests
             //Validate impressions sent to the be.
             AssertSentImpressions(4, httpClientMock, impression1, impression2, impression3, impression4);
 
+            client.Destroy();
             ShutdownServer(httpClientMock);
         }
 
@@ -499,19 +481,12 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey3";
+            var apikey = "base-apikey9";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);
 
             // Act.
             var result = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", "Random_Treatment", "MAURO_TEST", "Test_Save_1", "Random_Treatment_2", });
@@ -528,22 +503,22 @@ namespace Splitio.Integration_tests
             // Validate impressions.
             Thread.Sleep(2000);
             var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();            
+            var keyImpressions = impressionQueue.FetchAll();
 
             var impression1 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
                 .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
+                .FirstOrDefault();
 
             var impression2 = keyImpressions
                 .Where(ki => ki.feature.Equals("MAURO_TEST"))
                 .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
+                .FirstOrDefault();
 
             var impression3 = keyImpressions
                 .Where(ki => ki.feature.Equals("Test_Save_1"))
                 .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
+                .FirstOrDefault();
 
             AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
             AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
@@ -554,6 +529,7 @@ namespace Splitio.Integration_tests
             //Validate impressions sent to the be.            
             AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
 
+            client.Destroy();
             ShutdownServer(httpClientMock);
         }
         #endregion
@@ -567,7 +543,7 @@ namespace Splitio.Integration_tests
             {
                 var configurations = GetConfigurationOptions(httpClientMock);
 
-                var apikey = "apikey3";
+                var apikey = "base-apikey10";
 
                 var splitFactory = new SplitFactory(apikey, configurations);
                 var client = splitFactory.Client();
@@ -596,17 +572,17 @@ namespace Splitio.Integration_tests
                 var impression1 = keyImpressions
                     .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
                     .Where(ki => ki.keyName.Equals("nico_test"))
-                    .First();
+                    .FirstOrDefault();
 
                 var impression2 = keyImpressions
                     .Where(ki => ki.feature.Equals("MAURO_TEST"))
                     .Where(ki => ki.keyName.Equals("nico_test"))
-                    .First();
+                    .FirstOrDefault();
 
                 var impression3 = keyImpressions
                     .Where(ki => ki.feature.Equals("Test_Save_1"))
                     .Where(ki => ki.keyName.Equals("nico_test"))
-                    .First();
+                    .FirstOrDefault();
 
                 AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
                 AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
@@ -616,6 +592,8 @@ namespace Splitio.Integration_tests
 
                 //Validate impressions sent to the be.
                 AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
+
+                client.Destroy();
             }
         }
 
@@ -626,19 +604,12 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey2";
+            var apikey = "base-apikey11";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);
 
             // Act.
             var result1 = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", string.Empty, "Test_Save_1" });
@@ -674,22 +645,22 @@ namespace Splitio.Integration_tests
             var impression1 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
                 .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
+                .FirstOrDefault();
 
             var impression2 = keyImpressions
                 .Where(ki => ki.feature.Equals("Test_Save_1"))
                 .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
+                .FirstOrDefault();
 
             var impression3 = keyImpressions
                 .Where(ki => ki.feature.Equals("MAURO_TEST"))
                 .Where(ki => ki.keyName.Equals("mauro"))
-                .First();
+                .FirstOrDefault();
 
             var impression4 = keyImpressions
                 .Where(ki => ki.feature.Equals("Test_Save_1"))
                 .Where(ki => ki.keyName.Equals("mauro"))
-                .First();
+                .FirstOrDefault();
 
             AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
             AssertImpression(impression2, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
@@ -699,6 +670,7 @@ namespace Splitio.Integration_tests
             //Validate impressions sent to the be.
             AssertSentImpressions(4, httpClientMock, impression1, impression2, impression3, impression4);
 
+            client.Destroy();
             ShutdownServer(httpClientMock);
         }
 
@@ -710,12 +682,12 @@ namespace Splitio.Integration_tests
             {
                 var configurations = GetConfigurationOptions(httpClientMock);
 
-                var apikey = "apikey3";
+                var apikey = "base-apikey12";
 
                 var splitFactory = new SplitFactory(apikey, configurations);
                 var client = splitFactory.Client();
 
-                client.BlockUntilReady(100000);
+                client.BlockUntilReady(10000);
 
                 // Act.
                 var result = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "Random_Treatment", "MAURO_TEST", "Test_Save_1", "Random_Treatment_1" });
@@ -743,17 +715,17 @@ namespace Splitio.Integration_tests
                 var impression1 = keyImpressions
                     .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
                     .Where(ki => ki.keyName.Equals("nico_test"))
-                    .First();
+                    .FirstOrDefault();
 
                 var impression2 = keyImpressions
                     .Where(ki => ki.feature.Equals("MAURO_TEST"))
                     .Where(ki => ki.keyName.Equals("nico_test"))
-                    .First();
+                    .FirstOrDefault();
 
                 var impression3 = keyImpressions
                     .Where(ki => ki.feature.Equals("Test_Save_1"))
                     .Where(ki => ki.keyName.Equals("nico_test"))
-                    .First();
+                    .FirstOrDefault();
 
                 AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
                 AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
@@ -761,6 +733,8 @@ namespace Splitio.Integration_tests
 
                 //Validate impressions sent to the be.
                 AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
+
+                client.Destroy();
             }
         }
         #endregion
@@ -773,7 +747,7 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey22";
+            var apikey = "base-apikey13";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
@@ -789,6 +763,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual(30, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<string>));
 
+            client.Destroy();
             ShutdownServer(httpClientMock);
         }
 
@@ -799,7 +774,7 @@ namespace Splitio.Integration_tests
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey23";
+            var apikey = "base-apikey14";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var manager = splitFactory.Manager();
@@ -813,6 +788,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual(30, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<SplitView>));
 
+            splitFactory.Client().Destroy();
             ShutdownServer(httpClientMock);
         }
 
@@ -824,7 +800,7 @@ namespace Splitio.Integration_tests
             var configurations = GetConfigurationOptions(httpClientMock);
 
             var splitName = "MAURO_TEST";
-            var apikey = "apikey24";
+            var apikey = "base-apikey15";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var manager = splitFactory.Manager();
@@ -838,6 +814,7 @@ namespace Splitio.Integration_tests
             Assert.IsNotNull(result);
             Assert.AreEqual(splitName, result.name);
 
+            splitFactory.Client().Destroy();
             ShutdownServer(httpClientMock);
         }
 
@@ -849,7 +826,7 @@ namespace Splitio.Integration_tests
             var configurations = GetConfigurationOptions(httpClientMock);
 
             var splitName = "Split_Name";
-            var apikey = "apikey25";
+            var apikey = "base-apikey16";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var manager = splitFactory.Manager();
@@ -862,6 +839,7 @@ namespace Splitio.Integration_tests
             // Assert.
             Assert.IsNull(result);
 
+            splitFactory.Client().Destroy();
             ShutdownServer(httpClientMock);
         }
         #endregion
@@ -871,131 +849,142 @@ namespace Splitio.Integration_tests
         public void Track_WithValidData_ReturnsTrue()
         {
             // Arrange.           
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
-
-            var properties = new Dictionary<string, object>
+            using (var httpClientMock = GetHttpClientMock())
             {
-                { "property_1",  1 },
-                { "property_2",  2 }
-            };
+                var configurations = GetConfigurationOptions(httpClientMock);
 
-            var events = new List<EventBackend>
-            {
-                new EventBackend { Key = "key_1", TrafficTypeName = "traffic_type_1", EventTypeId = "event_type_1", Value = 123, Properties = properties },
-                new EventBackend { Key = "key_2", TrafficTypeName = "traffic_type_2", EventTypeId = "event_type_2", Value = 222 },
-                new EventBackend { Key = "key_3", TrafficTypeName = "traffic_type_3", EventTypeId = "event_type_3", Value = 333 },
-                new EventBackend { Key = "key_4", TrafficTypeName = "traffic_type_4", EventTypeId = "event_type_4", Value = 444, Properties = properties }
-            };
+                var properties = new Dictionary<string, object>
+                {
+                    { "property_1",  1 },
+                    { "property_2",  2 }
+                };
 
-            var apikey = "apikey3";
+                var events = new List<EventBackend>
+                {
+                    new EventBackend { Key = "key_1", TrafficTypeName = "traffic_type_1", EventTypeId = "event_type_1", Value = 123, Properties = properties },
+                    new EventBackend { Key = "key_2", TrafficTypeName = "traffic_type_2", EventTypeId = "event_type_2", Value = 222 },
+                    new EventBackend { Key = "key_3", TrafficTypeName = "traffic_type_3", EventTypeId = "event_type_3", Value = 333 },
+                    new EventBackend { Key = "key_4", TrafficTypeName = "traffic_type_4", EventTypeId = "event_type_4", Value = 444, Properties = properties }
+                };
 
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
+                var apikey = "base-apikey17";
 
-            client.BlockUntilReady(10000);
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
 
-            foreach (var _event in events)
-            {
-                // Act.
-                var result = client.Track(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
+                client.BlockUntilReady(10000);
 
-                // Assert. 
-                Assert.IsTrue(result);
+                foreach (var _event in events)
+                {
+                    // Act.
+                    var result = client.Track(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
+
+                    // Assert. 
+                    Assert.IsTrue(result);
+                }
+
+                //Validate Events sent to the be.
+                AssertSentEvents(events, httpClientMock);
+
+                client.Destroy();
             }
-
-            //Validate Events sent to the be.
-            AssertSentEvents(events, httpClientMock);
         }
 
         [TestMethod]
         public void Track_WithBUR_ReturnsTrue()
         {
             // Arrange.           
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
-
-            var properties = new Dictionary<string, object>
+            using (var httpClientMock = GetHttpClientMock())
             {
-                { "property_1",  1 },
-                { "property_2",  2 }
-            };
+                var configurations = GetConfigurationOptions(httpClientMock);
 
-            var events = new List<EventBackend>
-            {
-                new EventBackend { Key = "key_1", TrafficTypeName = "traffic_type_1", EventTypeId = "event_type_1", Value = 123, Properties = properties },
-                new EventBackend { Key = "key_2", TrafficTypeName = "traffic_type_2", EventTypeId = "event_type_2", Value = 222 },
-                new EventBackend { Key = "key_3", TrafficTypeName = "traffic_type_3", EventTypeId = "event_type_3", Value = 333 },
-                new EventBackend { Key = "key_4", TrafficTypeName = "traffic_type_4", EventTypeId = "event_type_4", Value = 444, Properties = properties }
-            };
+                var properties = new Dictionary<string, object>
+                {
+                    { "property_1",  1 },
+                    { "property_2",  2 }
+                };
 
-            var apikey = "apikey3";
+                var events = new List<EventBackend>
+                {
+                    new EventBackend { Key = "key_1", TrafficTypeName = "traffic_type_1", EventTypeId = "event_type_1", Value = 123, Properties = properties },
+                    new EventBackend { Key = "key_2", TrafficTypeName = "traffic_type_2", EventTypeId = "event_type_2", Value = 222 },
+                    new EventBackend { Key = "key_3", TrafficTypeName = "traffic_type_3", EventTypeId = "event_type_3", Value = 333 },
+                    new EventBackend { Key = "key_4", TrafficTypeName = "traffic_type_4", EventTypeId = "event_type_4", Value = 444, Properties = properties }
+                };
 
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
+                var apikey = "base-apikey18";
 
-            client.BlockUntilReady(10000);
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
 
-            foreach (var _event in events)
-            {
-                // Act.
-                var result = client.Track(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
+                client.BlockUntilReady(10000);
 
-                // Assert. 
-                Assert.IsTrue(result);
+                foreach (var _event in events)
+                {
+                    // Act.
+                    var result = client.Track(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
+
+                    // Assert. 
+                    Assert.IsTrue(result);
+                }
+
+                //Validate Events sent to the be.
+                AssertSentEvents(events, httpClientMock);
+                client.Destroy();
             }
-
-            //Validate Events sent to the be.
-            AssertSentEvents(events, httpClientMock);
         }
 
         [TestMethod]
         public void Track_WithInvalidData_ReturnsFalse()
         {
             // Arrange.           
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
-
-            var properties = new Dictionary<string, object>
+            using (var httpClientMock = GetHttpClientMock())
             {
-                { "property_1",  1 },
-                { "property_2",  2 }
-            };
+                var configurations = GetConfigurationOptions(httpClientMock);
 
-            var events = new List<EventBackend>
-            {
-                new EventBackend { Key = string.Empty, TrafficTypeName = "traffic_type_1", EventTypeId = "event_type_1", Value = 123, Properties = properties },
-                new EventBackend { Key = "key_2", TrafficTypeName = string.Empty, EventTypeId = "event_type_2", Value = 222 },
-                new EventBackend { Key = "key_3", TrafficTypeName = "traffic_type_3", EventTypeId = string.Empty, Value = 333 },
-                new EventBackend { Key = "key_4", TrafficTypeName = "traffic_type_4", EventTypeId = "event_type_4", Value = 444, Properties = properties },
-                new EventBackend { Key = "key_5", TrafficTypeName = "traffic_type_5", EventTypeId = "event_type_5"}
-            };
+                var properties = new Dictionary<string, object>
+                {
+                    { "property_1",  1 },
+                    { "property_2",  2 }
+                };
 
-            var apikey = "apikey33";
+                var events = new List<EventBackend>
+                {
+                    new EventBackend { Key = string.Empty, TrafficTypeName = "traffic_type_1", EventTypeId = "event_type_1", Value = 123, Properties = properties },
+                    new EventBackend { Key = "key_2", TrafficTypeName = string.Empty, EventTypeId = "event_type_2", Value = 222 },
+                    new EventBackend { Key = "key_3", TrafficTypeName = "traffic_type_3", EventTypeId = string.Empty, Value = 333 },
+                    new EventBackend { Key = "key_4", TrafficTypeName = "traffic_type_4", EventTypeId = "event_type_4", Value = 444, Properties = properties },
+                    new EventBackend { Key = "key_5", TrafficTypeName = "traffic_type_5", EventTypeId = "event_type_5"}
+                };
 
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
+                var apikey = "base-apikey19";
 
-            client.BlockUntilReady(10000);
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
 
-            foreach (var _event in events)
-            {
-                // Act.
-                var result = client.Track(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
+                client.BlockUntilReady(10000);
 
-                // Assert. 
-                if (string.IsNullOrEmpty(_event.Key) || _event.Key.Equals("key_2") || _event.Key.Equals("key_3"))
-                    Assert.IsFalse(result);
-                else
-                    Assert.IsTrue(result);
+                foreach (var _event in events)
+                {
+                    // Act.
+                    var result = client.Track(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
+
+                    // Assert. 
+                    if (string.IsNullOrEmpty(_event.Key) || _event.Key.Equals("key_2") || _event.Key.Equals("key_3"))
+                        Assert.IsFalse(result);
+                    else
+                        Assert.IsTrue(result);
+                }
+
+                events = events
+                    .Where(e => e.Key.Equals("key_4") || e.Key.Equals("key_5"))
+                    .ToList();
+
+                //Validate Events sent to the be.
+                AssertSentEvents(events, httpClientMock);
+
+                client.Destroy();
             }
-                        
-            events = events
-                .Where(e => e.Key.Equals("key_4") || e.Key.Equals("key_5"))
-                .ToList();
-            
-            //Validate Events sent to the be.
-            AssertSentEvents(events, httpClientMock);
         }
 
         [TestMethod]
@@ -1003,42 +992,46 @@ namespace Splitio.Integration_tests
         public void Track_WithLowQueue_ReturnsTrue()
         {
             // Arrange.           
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock, eventsPushRate: 60, eventsQueueSize: 3);
-
-            var properties = new Dictionary<string, object>
+            using (var httpClientMock = GetHttpClientMock())
             {
-                { "property_1",  1 },
-                { "property_2",  2 }
-            };
+                var configurations = GetConfigurationOptions(httpClientMock, eventsPushRate: 60, eventsQueueSize: 3);
 
-            var events = new List<EventBackend>
-            {
-                new EventBackend { Key = "key_1", TrafficTypeName = "traffic_type_1", EventTypeId = "event_type_1", Value = 123, Properties = properties },
-                new EventBackend { Key = "key_2", TrafficTypeName = "traffic_type_2", EventTypeId = "event_type_2", Value = 222 },
-                new EventBackend { Key = "key_3", TrafficTypeName = "traffic_type_3", EventTypeId = "event_type_3", Value = 333 },
-                new EventBackend { Key = "key_4", TrafficTypeName = "traffic_type_4", EventTypeId = "event_type_4", Value = 444, Properties = properties },
-                new EventBackend { Key = "key_5", TrafficTypeName = "traffic_type_5", EventTypeId = "event_type_5"}
-            };
+                var properties = new Dictionary<string, object>
+                {
+                    { "property_1",  1 },
+                    { "property_2",  2 }
+                };
 
-            var apikey = "apikey53";
+                var events = new List<EventBackend>
+                {
+                    new EventBackend { Key = "key_1", TrafficTypeName = "traffic_type_1", EventTypeId = "event_type_1", Value = 123, Properties = properties },
+                    new EventBackend { Key = "key_2", TrafficTypeName = "traffic_type_2", EventTypeId = "event_type_2", Value = 222 },
+                    new EventBackend { Key = "key_3", TrafficTypeName = "traffic_type_3", EventTypeId = "event_type_3", Value = 333 },
+                    new EventBackend { Key = "key_4", TrafficTypeName = "traffic_type_4", EventTypeId = "event_type_4", Value = 444, Properties = properties },
+                    new EventBackend { Key = "key_5", TrafficTypeName = "traffic_type_5", EventTypeId = "event_type_5"}
+                };
 
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
+                var apikey = "base-apikey20";
 
-            client.BlockUntilReady(10000);
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
 
-            foreach (var _event in events)
-            {
-                // Act.
-                var result = client.Track(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
+                client.BlockUntilReady(10000);
 
-                // Assert. 
-                Assert.IsTrue(result);
+                foreach (var _event in events)
+                {
+                    // Act.
+                    var result = client.Track(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
+
+                    // Assert. 
+                    Assert.IsTrue(result);
+                }
+
+                //Validate Events sent to the be.
+                AssertSentEvents(events, httpClientMock, sleepTime: 1000, eventsCount: 3, validateEvents: false);
+
+                client.Destroy();
             }
-
-            //Validate Events sent to the be.
-            AssertSentEvents(events, httpClientMock, sleepTime: 1000, eventsCount: 3, validateEvents: false);
         }
         #endregion
 
@@ -1047,38 +1040,38 @@ namespace Splitio.Integration_tests
         public void Destroy()
         {
             // Arrange.           
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
+            using (var httpClientMock = GetHttpClientMock())
+            {
+                var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey";
+                var apikey = "base-apikey21";
 
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
 
-            client.BlockUntilReady(10000);
+                client.BlockUntilReady(10000);
 
-            var manager = client.GetSplitManager();
+                var manager = client.GetSplitManager();
 
-            // Act.
-            var treatmentResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
-            var managerResult = manager.Split("MAURO_TEST");
+                // Act.
+                var treatmentResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
+                var managerResult = manager.Split("MAURO_TEST");
 
-            client.Destroy();
+                client.Destroy();
 
-            var destroyResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
-            var managerDestroyResult = manager.Split("MAURO_TEST");
+                var destroyResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
+                var managerDestroyResult = manager.Split("MAURO_TEST");
 
-            // Assert.
-            Assert.AreEqual("on", treatmentResult);
-            Assert.AreEqual("control", destroyResult);
-            Assert.IsTrue(client.IsDestroyed());
+                // Assert.
+                Assert.AreEqual("on", treatmentResult);
+                Assert.AreEqual("control", destroyResult);
+                Assert.IsTrue(client.IsDestroyed());
 
-            Assert.IsNotNull(managerResult);
-            Assert.AreEqual("MAURO_TEST", managerResult.name);
-            // TODO : Redis destroy doesn't work. Refactor this and uncomment assert
-            //Assert.IsNull(managerDestroyResult);
-
-            ShutdownServer(httpClientMock);
+                Assert.IsNotNull(managerResult);
+                Assert.AreEqual("MAURO_TEST", managerResult.name);
+                // TODO : Redis destroy doesn't work. Refactor this and uncomment assert
+                //Assert.IsNull(managerDestroyResult);
+            }
         }
         #endregion
 

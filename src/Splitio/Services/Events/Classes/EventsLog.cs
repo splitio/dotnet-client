@@ -21,11 +21,15 @@ namespace Splitio.Services.Events.Classes
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly IEventSdkApiClient _apiClient;
         private readonly ISimpleProducerCache<WrappedEvent> _wrappedEventsCache;
-        private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
+        private readonly ITasksManager _tasksManager;
+        private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly int _interval;
         private readonly int _firstPushWindow;
         
+        private readonly object _lock = new object();
+
+        private bool _running;
         private long _acumulateSize;
         
         public EventsLog(IEventSdkApiClient apiClient, 
@@ -33,6 +37,7 @@ namespace Splitio.Services.Events.Classes
             int interval, 
             ISimpleCache<WrappedEvent> eventsCache,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
+            ITasksManager tasksManager,
             int maximumNumberOfKeysToCache = -1)
         {
             _cancellationTokenSource = new CancellationTokenSource();
@@ -42,24 +47,36 @@ namespace Splitio.Services.Events.Classes
             _interval = interval;
             _firstPushWindow = firstPushWindow;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
+            _tasksManager = tasksManager;
 
             _wrapperAdapter = new WrapperAdapter();
         }
 
         public void Start()
         {
-            _wrapperAdapter
-                .TaskDelay(_firstPushWindow * 1000)
-                .ContinueWith((t) => {
-                    SendBulkEvents();
-                    PeriodicTaskFactory.Start(() => { SendBulkEvents(); }, _interval * 1000, _cancellationTokenSource.Token);
-                });
+            lock (_lock)
+            {
+                if (_running) return;
+
+                _running = true;
+                _tasksManager.Start(() =>
+                {
+                    _wrapperAdapter.TaskDelay(_firstPushWindow * 1000).Wait();
+                    _tasksManager.StartPeriodic(() => SendBulkEvents(), _interval * 1000, _cancellationTokenSource, "Send Bulk Events.");
+                }, new CancellationTokenSource(), "Main Events Log.");
+            }
         }
 
         public void Stop()
         {
-            _cancellationTokenSource.Cancel();
-            SendBulkEvents();
+            lock (_lock)
+            {
+                if (!_running) return;
+
+                _running = false;
+                _cancellationTokenSource.Cancel();
+                SendBulkEvents();
+            }
         }
 
         public void Log(WrappedEvent wrappedEvent)

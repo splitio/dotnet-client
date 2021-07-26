@@ -4,6 +4,7 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource.Workers;
 using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.EventSource.Workers
@@ -11,6 +12,8 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
     [TestClass]
     public class SegmentsWorkerTests
     {
+        private readonly WrapperAdapter wrapperAdapter = new WrapperAdapter();
+
         private readonly Mock<ISplitLogger> _log;
         private readonly Mock<ISegmentCache> _segmentCache;
         private readonly Mock<ISynchronizer> _synchronizer;
@@ -23,7 +26,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _segmentCache = new Mock<ISegmentCache>();
             _synchronizer = new Mock<ISynchronizer>();
 
-            _segmentsWorker = new SegmentsWorker(_segmentCache.Object, _synchronizer.Object, _log.Object);
+            _segmentsWorker = new SegmentsWorker(_segmentCache.Object, _synchronizer.Object, new TasksManager(wrapperAdapter), _log.Object);
         }
 
         [TestMethod]

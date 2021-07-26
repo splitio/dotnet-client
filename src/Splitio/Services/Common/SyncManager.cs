@@ -1,10 +1,11 @@
-﻿using Splitio.Services.EventSource;
+﻿using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.EventSource;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace Splitio.Services.Common
 {
@@ -16,6 +17,10 @@ namespace Splitio.Services.Common
         private readonly ISSEHandler _sseHandler;
         private readonly ISplitLogger _log;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
+        private readonly IReadinessGatesCache _gates;
+        private readonly ITasksManager _tasksManager;
+        private readonly CancellationTokenSource _shutdownCancellationTokenSource;
+        private readonly object _lock = new object();
 
         private bool _streamingConnected;
 
@@ -25,6 +30,8 @@ namespace Splitio.Services.Common
             ISSEHandler sseHandler,
             INotificationManagerKeeper notificationManagerKeeper,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
+            IReadinessGatesCache gates,
+            ITasksManager tasksManager,
             ISplitLogger log = null)
         {
             _streamingEnabled = streamingEnabled;
@@ -33,15 +40,19 @@ namespace Splitio.Services.Common
             _sseHandler = sseHandler;
             _log = log ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
+            _gates = gates;
+            _tasksManager = tasksManager;
 
             _sseHandler.ActionEvent += OnProcessFeedbackSSE;
             notificationManagerKeeper.ActionEvent += OnProcessFeedbackSSE;
+
+            _shutdownCancellationTokenSource = new CancellationTokenSource();
         }
 
         #region Public Methods
         public void Start()
         {
-            _synchronizer.SyncAll();
+            _synchronizer.SyncAll(_shutdownCancellationTokenSource);
 
             if (_streamingEnabled)
             {
@@ -55,6 +66,8 @@ namespace Splitio.Services.Common
 
         public void Shutdown()
         {
+            _shutdownCancellationTokenSource.Cancel();
+            _shutdownCancellationTokenSource.Dispose();
             _synchronizer.StopPeriodicFetching();
             _synchronizer.ClearFetchersCache();
             _synchronizer.StopPeriodicDataRecording();
@@ -94,7 +107,7 @@ namespace Splitio.Services.Common
         #region Private Methods
         private void StartPoll()
         {
-            _log.Debug("Starting polling mode ...");            
+            _log.Debug("Starting polling mode ...");
 
             _synchronizer.StartPeriodicFetching();
             _synchronizer.StartPeriodicDataRecording();
@@ -107,47 +120,53 @@ namespace Splitio.Services.Common
 
             _synchronizer.StartPeriodicDataRecording();
 
-            Task.Factory.StartNew(async () =>
+            _tasksManager.Start(() =>
             {
-                if (!await _pushManager.StartSse())
+                if (!_pushManager.StartSse().Result)
                 {
                     _synchronizer.StartPeriodicFetching();
                 }
-            });
+            }, _shutdownCancellationTokenSource, "Start Streaming");
         }        
 
         private void ProcessConnected()
         {
-            if (_streamingConnected)
+            lock (_lock)
             {
-                _log.Debug("Streaming already connected.");
-                return;
+                if (_streamingConnected)
+                {
+                    _log.Debug("Streaming already connected.");
+                    return;
+                }
+
+                _streamingConnected = true;
+                _sseHandler.StartWorkers();
+                _synchronizer.SyncAll(_shutdownCancellationTokenSource);
+                _synchronizer.StopPeriodicFetching();
+                _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Streaming));
             }
-            
-            _streamingConnected = true;
-            _sseHandler.StartWorkers();
-            _synchronizer.SyncAll();
-            _synchronizer.StopPeriodicFetching();
-            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Streaming));
         }
 
         private void ProcessDisconnect(bool retry)
         {
-            if (!_streamingConnected)
+            lock (_lock)
             {
-                _log.Debug("Streaming already disconnected.");
-                return;
-            }
+                if (!_streamingConnected)
+                {
+                    _log.Debug("Streaming already disconnected.");
+                    return;
+                }
 
-            _streamingConnected = false;
-            _sseHandler.StopWorkers();
-            _synchronizer.SyncAll();
-            _synchronizer.StartPeriodicFetching();
-            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
+                _streamingConnected = false;
+                _sseHandler.StopWorkers();
+                _synchronizer.SyncAll(_shutdownCancellationTokenSource);
+                _synchronizer.StartPeriodicFetching();
+                _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
 
-            if (retry)
-            {
-                _pushManager.StartSse();
+                if (retry)
+                {
+                    _pushManager.StartSse();
+                }
             }
         }
 
@@ -161,7 +180,7 @@ namespace Splitio.Services.Common
         private void ProcessSubsystemReady()
         {
             _synchronizer.StopPeriodicFetching();
-            _synchronizer.SyncAll();
+            _synchronizer.SyncAll(_shutdownCancellationTokenSource);
             _sseHandler.StartWorkers();
             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Streaming));
         }

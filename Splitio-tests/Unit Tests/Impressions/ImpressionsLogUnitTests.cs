@@ -12,6 +12,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     [TestClass]
     public class ImpressionsLogUnitTests
     {
+        private readonly WrapperAdapter wrapperAdapter = new WrapperAdapter();
+
         private Mock<IImpressionsSdkApiClient> _apiClientMock;
         private BlockingQueue<KeyImpression> _queue;
         private InMemorySimpleCache<KeyImpression> _impressionsCache;
@@ -24,7 +26,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _queue = new BlockingQueue<KeyImpression>(10);
             _impressionsCache = new InMemorySimpleCache<KeyImpression>(_queue);
 
-            _impressionsLog = new ImpressionsLog(_apiClientMock.Object, 1, _impressionsCache, 10);
+            _impressionsLog = new ImpressionsLog(_apiClientMock.Object, 1, _impressionsCache, new TasksManager(wrapperAdapter), 10);
         }
 
         [TestMethod]

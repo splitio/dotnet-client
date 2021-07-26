@@ -21,56 +21,81 @@ namespace Splitio.Services.SegmentFetcher.Classes
         private readonly IReadinessGatesCache _gates;
         private readonly IWrapperAdapter _wrappedAdapter;
         private readonly ISegmentTaskQueue _segmentTaskQueue;
+        private readonly ITasksManager _tasksManager;
         private readonly ConcurrentDictionary<string, SelfRefreshingSegment> _segments;
         private readonly SegmentTaskWorker _worker;
-        private readonly CancellationTokenSource _cancelTokenSource;
         private readonly int _interval;
+        private readonly object _lock = new object();
+
+        private CancellationTokenSource _cancelTokenSource;
+        private bool _running;
 
         public SelfRefreshingSegmentFetcher(ISegmentChangeFetcher segmentChangeFetcher, 
             IReadinessGatesCache gates, 
             int interval, 
             ISegmentCache segmentsCache, 
             int numberOfParallelSegments,
-            ISegmentTaskQueue segmentTaskQueue) : base(segmentsCache)
+            ISegmentTaskQueue segmentTaskQueue,
+            ITasksManager tasksManager,
+            IWrapperAdapter wrapperAdapter) : base(segmentsCache)
         {
-            _cancelTokenSource = new CancellationTokenSource();
-
             _segmentChangeFetcher = segmentChangeFetcher;
             _segments = new ConcurrentDictionary<string, SelfRefreshingSegment>();
             _worker = new SegmentTaskWorker(numberOfParallelSegments, segmentTaskQueue);
             _interval = interval;
             _gates = gates;
-            _wrappedAdapter = new WrapperAdapter();
-            _segmentTaskQueue = segmentTaskQueue;            
+            _wrappedAdapter = wrapperAdapter;
+            _segmentTaskQueue = segmentTaskQueue;
+            _tasksManager = tasksManager;            
         }
 
         #region Public Methods
         public void Start()
         {
-            StartWorker();
-
-            Task.Factory.StartNew(() =>
+            lock (_lock)
             {
-                while (true)
+                if (_running) return;
+
+                _running = true;
+                _cancelTokenSource = new CancellationTokenSource();
+
+                _tasksManager.Start(() =>
                 {
-                    if (_gates.AreSplitsReady(0))
+                    while (_running)
                     {
-                        //Delay first execution until expected time has passed
-                        var intervalInMilliseconds = _interval * 1000;
-                        _wrappedAdapter.TaskDelay(intervalInMilliseconds).Wait();
+                        if (_gates.AreSplitsReady(0) && _running)
+                        {
+                            //Delay first execution until expected time has passed
+                            var intervalInMilliseconds = _interval * 1000;
+                            _wrappedAdapter.TaskDelay(intervalInMilliseconds).Wait();
 
-                        PeriodicTaskFactory.Start(() => AddSegmentsToQueue(), intervalInMilliseconds, _cancelTokenSource.Token);
-                        break;
+                            if (_running)
+                            {
+                                _tasksManager.Start(() => _worker.ExecuteTasks(_cancelTokenSource.Token), _cancelTokenSource, "Segments Fetcher Worker.");
+                                _tasksManager.StartPeriodic(() => AddSegmentsToQueue(), intervalInMilliseconds, _cancelTokenSource, "Segmennnnts Fetcher Add to Queue.");
+                            }
+
+                            break;
+                        }
+
+                        if (!_running) break;
+
+                        _wrappedAdapter.TaskDelay(500).Wait();
                     }
-
-                    _wrappedAdapter.TaskDelay(500).Wait();
-                }
-            });
+                }, _cancelTokenSource, "Main Segments Fetcher.");
+            }
         }
 
         public void Stop()
         {
-            _cancelTokenSource.Cancel();
+            lock (_lock)
+            {
+                if (!_running) return;
+
+                _running = false;
+                _cancelTokenSource.Cancel();
+                _cancelTokenSource.Dispose();
+            }
         }
 
         public void Clear()
@@ -152,11 +177,6 @@ namespace Splitio.Services.SegmentFetcher.Classes
                     _log.Debug($"Segment queued: {segment.Name}");
                 }
             }
-        }
-
-        private void StartWorker()
-        {
-            Task.Factory.StartNew(() => _worker.ExecuteTasks(_cancelTokenSource.Token), _cancelTokenSource.Token);
         }
         #endregion
     }

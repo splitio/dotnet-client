@@ -16,13 +16,16 @@ namespace Splitio.Services.Impressions.Classes
 
         private readonly IImpressionsSdkApiClient _apiClient;
         private readonly IImpressionsCounter _impressionsCounter;
+        private readonly ITasksManager _tasksManager;
         private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly int _interval;
+        private readonly object _lock = new object();
 
         private bool _running;
 
         public ImpressionsCountSender(IImpressionsSdkApiClient apiClient,
             IImpressionsCounter impressionsCounter,
+            ITasksManager tasksManager,
             int? interval = null)
         {
             _apiClient = apiClient;
@@ -30,22 +33,30 @@ namespace Splitio.Services.Impressions.Classes
             _cancellationTokenSource = new CancellationTokenSource();
             _interval = interval ?? CounterRefreshRateSeconds;
             _running = false;
+            _tasksManager = tasksManager;
         }
 
         public void Start()
         {
-            PeriodicTaskFactory.Start(() => { SendBulkImpressionsCount(); _running = true; }, CounterRefreshRateSeconds * 1000, _cancellationTokenSource.Token);
+            lock (_lock)
+            {
+                if (_running) return;
+
+                _running = true;
+                _tasksManager.StartPeriodic(() => SendBulkImpressionsCount(), CounterRefreshRateSeconds * 1000, _cancellationTokenSource, "Main Impressions Count.");
+            }
         }
 
         public void Stop()
         {
-            if (!_running)
+            lock (_lock)
             {
-                return;
-            }
+                if (!_running) return;
 
-            _cancellationTokenSource.Cancel();
-            SendBulkImpressionsCount();
+                _running = false;
+                _cancellationTokenSource.Cancel();
+                SendBulkImpressionsCount();
+            }
         }
 
         private void SendBulkImpressionsCount()

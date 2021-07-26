@@ -17,7 +17,7 @@ using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -51,6 +51,7 @@ namespace Splitio.Services.Client.Classes
         protected IImpressionsManager _impressionsManager;
         protected ITelemetryEvaluationProducer _telemetryEvaluationProducer;
         protected ITelemetryInitProducer _telemetryInitProducer;
+        protected ITasksManager _tasksManager;
 
         public SplitClient(ISplitLogger log)
         {
@@ -62,6 +63,7 @@ namespace Splitio.Services.Client.Classes
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
             _wrapperAdapter = new WrapperAdapter();
             _configService = new ConfigService(_wrapperAdapter, _log);
+            _tasksManager = new TasksManager(_wrapperAdapter);
         }
 
         #region Public Methods
@@ -154,14 +156,14 @@ namespace Splitio.Services.Client.Classes
                         properties = (Dictionary<string, object>)eventPropertiesResult.Value
                     };
 
-                    Task.Factory.StartNew(() =>
+                    _tasksManager.Start(() =>
                     {
                         _eventsLog.Log(new WrappedEvent
                         {
                             Event = eventToLog,
                             Size = eventPropertiesResult.EventSize
                         });
-                    });
+                    }, new CancellationTokenSource(), "Track");
 
                     RecordLatency(nameof(Track), clock.ElapsedMilliseconds);
 

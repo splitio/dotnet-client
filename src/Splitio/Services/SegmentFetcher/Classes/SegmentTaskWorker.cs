@@ -22,9 +22,9 @@ namespace Splitio.Services.SegmentFetcher.Classes
         public SegmentTaskWorker(int numberOfParallelTasks,
             ISegmentTaskQueue segmentTaskQueue)
         {
-            _numberOfParallelTasks = numberOfParallelTasks;
-            _counter = 0;
+            _numberOfParallelTasks = numberOfParallelTasks;            
             _segmentTaskQueue = segmentTaskQueue;
+            _counter = 0;
         }
 
         private void IncrementCounter()
@@ -40,24 +40,27 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
         public void ExecuteTasks(CancellationToken token)
         {
-            while (true)
+            while (!token.IsCancellationRequested)
             {
                 if (_counter < _numberOfParallelTasks)
                 {
                     try
                     {
                         //Wait indefinitely until a segment is queued
-                        if (_segmentTaskQueue.GetQueue().TryTake(out SelfRefreshingSegment segment, -1))
+                        if (_segmentTaskQueue.GetQueue().TryTake(out SelfRefreshingSegment segment, -1, token))
                         {
                             if (Log.IsDebugEnabled)
                             {
                                 Log.Debug(string.Format("Segment dequeued: {0}", segment.Name));
                             }
 
-                            IncrementCounter();
-                            Task task = new Task(async () => await segment.FetchSegment(), token);
-                            task.ContinueWith((x) => { DecrementCounter(); });
-                            task.Start();
+                            if (!token.IsCancellationRequested)
+                            {
+                                IncrementCounter();
+                                Task task = new Task(async () => await segment.FetchSegment(), token);
+                                task.ContinueWith((x) => { DecrementCounter(); }, token);
+                                task.Start();
+                            }
                         }
                     }
                     catch (Exception ex)

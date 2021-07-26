@@ -8,12 +8,15 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Shared.Classes
 {
     public class WrapperAdapter : IWrapperAdapter
     {
+        private static readonly ISplitLogger _log = GetLogger(typeof(IWrapperAdapter));
+
         public ReadConfigData ReadConfig(ConfigurationOptions config, ISplitLogger log)
         {
             var data = new ReadConfigData();
@@ -28,6 +31,35 @@ namespace Splitio.Services.Shared.Classes
             data.SdkMachineIP = GetSdkMachineIP(config, ipAddressesEnabled, log);
 
             return data;
+        }
+
+        public void TaskWaitAndDispose(params Task[] tasks)
+        {
+#if !NETSTANDARD1_6
+            try
+            {
+                foreach (var t in tasks)
+                {
+                    if (t == null || t.Status == TaskStatus.Canceled) continue;
+
+                    t.Wait();
+                    t.Dispose();
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Debug(ex.Message);
+            }
+#endif
+        }
+
+        public Task TaskDelay(int millisecondsDelay, CancellationToken cancellationToken)
+        {
+#if NETSTANDARD || NET45 || NET461
+            return Task.Delay(millisecondsDelay, cancellationToken);
+#else
+            return TaskEx.Delay(millisecondsDelay, cancellationToken);
+#endif
         }
 
         public Task TaskDelay(int millisecondsDelay)

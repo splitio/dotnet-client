@@ -81,7 +81,7 @@ namespace Splitio.Services.Client.Classes
             {
                 _splitsReadyTimer.Dispose();
 
-                if (_log.IsDebugEnabled)
+                if (_log.IsDebugEnabled && (int)_splitsReadyTimer.ElapsedMilliseconds != 0)
                 {
                     _log.Debug($"Splits are ready in {_splitsReadyTimer.ElapsedMilliseconds} milliseconds");
                 }
@@ -159,7 +159,7 @@ namespace Splitio.Services.Client.Classes
                     timeLeft = timeLeft - (int)clock.ElapsedMilliseconds;
                 }
 
-                if (_log.IsDebugEnabled)
+                if (_log.IsDebugEnabled && (int)clock.ElapsedMilliseconds != 0)
                 {
                     _log.Debug($"Segments are ready in {clock.ElapsedMilliseconds} milliseconds");
                 }
