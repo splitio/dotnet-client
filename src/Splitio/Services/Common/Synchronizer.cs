@@ -121,61 +121,74 @@ namespace Splitio.Services.Common
 
         public async Task SynchronizeSegment(string segmentName, long targetChangeNumber)
         {
-            if (targetChangeNumber <= _segmentCache.GetChangeNumber(segmentName)) return;
-
-            var fetchOptions = new FetchOptions { CacheControlHeaders = true };
-
-            var result = await AttempSegmentSync(segmentName, targetChangeNumber, fetchOptions, _onDemandFetchMaxRetries, _onDemandFetchRetryDelayMs, false);
-
-            if (result.Success)
+            try
             {
-                _log.Debug($"Segment #{segmentName} refresh completed in #{_onDemandFetchRetryDelayMs - result.RemainingAttempts} attempts.");
+                if (targetChangeNumber <= _segmentCache.GetChangeNumber(segmentName)) return;
 
-                return;
+                var fetchOptions = new FetchOptions { CacheControlHeaders = true };
+
+                var result = await AttempSegmentSync(segmentName, targetChangeNumber, fetchOptions, _onDemandFetchMaxRetries, _onDemandFetchRetryDelayMs, false);
+
+                if (result.Success)
+                {
+                    _log.Debug($"Segment {segmentName} refresh completed in {_onDemandFetchMaxRetries - result.RemainingAttempts} attempts.");
+
+                    return;
+                }
+
+                fetchOptions.Till = targetChangeNumber;
+
+                var withCDNBypassed = await AttempSegmentSync(segmentName, targetChangeNumber, fetchOptions, OnDemandFetchBackoffMaxRetries, null, true);
+
+                if (withCDNBypassed.Success)
+                {
+                    _log.Debug($"Segment {segmentName} refresh completed bypassing the CDN in {OnDemandFetchBackoffMaxRetries - withCDNBypassed.RemainingAttempts} attempts.");
+                }
+                else
+                {
+                    _log.Debug($"No changes fetched for segment {segmentName} after {OnDemandFetchBackoffMaxRetries - withCDNBypassed.RemainingAttempts} attempts with CDN bypassed.");
+                }
             }
-
-            fetchOptions.Till = targetChangeNumber;
-
-            var withCDNBypassed = await AttempSegmentSync(segmentName, targetChangeNumber, fetchOptions, OnDemandFetchBackoffMaxRetries, null, true);
-
-            if (withCDNBypassed.Success)
+            catch (Exception ex)
             {
-                _log.Debug($"Segment #{segmentName} refresh completed bypassing the CDN in #{OnDemandFetchBackoffMaxRetries - withCDNBypassed.RemainingAttempts} attempts.");
-
-            }
-            else
-            {
-                _log.Debug($"No changes fetched for segment {segmentName} after {OnDemandFetchBackoffMaxRetries - withCDNBypassed.RemainingAttempts} attempts with CDN bypassed.");
+                _log.Error($"Exception caught executing SynchronizeSegment: {segmentName}-{targetChangeNumber}", ex);
             }
         }
 
         public async Task SynchronizeSplits(long targetChangeNumber)
         {
-            if (targetChangeNumber <= _splitCache.GetChangeNumber()) return;
-
-            var fetchOptions = new FetchOptions { CacheControlHeaders = true };
-
-            var result = await AttempSplitsSync(targetChangeNumber, fetchOptions, _onDemandFetchMaxRetries, _onDemandFetchRetryDelayMs, false);
-
-            if (result.Success)
+            try
             {
-                await _segmentFetcher.FetchSegmentsIfNotExists(result.SegmentNames);
-                _log.Debug($"Refresh completed in {_onDemandFetchMaxRetries - result.RemainingAttempts} attempts.");
+                if (targetChangeNumber <= _splitCache.GetChangeNumber()) return;
 
-                return;
+                var fetchOptions = new FetchOptions { CacheControlHeaders = true };
+
+                var result = await AttempSplitsSync(targetChangeNumber, fetchOptions, _onDemandFetchMaxRetries, _onDemandFetchRetryDelayMs, false);
+
+                if (result.Success)
+                {
+                    await _segmentFetcher.FetchSegmentsIfNotExists(result.SegmentNames);
+                    _log.Debug($"Refresh completed in {_onDemandFetchMaxRetries - result.RemainingAttempts} attempts.");
+
+                    return;
+                }
+
+                fetchOptions.Till = targetChangeNumber;
+                var withCDNBypassed = await AttempSplitsSync(targetChangeNumber, fetchOptions, OnDemandFetchBackoffMaxRetries, null, true);
+
+                if (withCDNBypassed.Success)
+                {
+                    await _segmentFetcher.FetchSegmentsIfNotExists(withCDNBypassed.SegmentNames);
+                    _log.Debug($"Refresh completed bypassing the CDN in {OnDemandFetchBackoffMaxRetries - withCDNBypassed.RemainingAttempts} attempts.");
+                }
+                else
+                {
+                    _log.Debug($"No changes fetched after {OnDemandFetchBackoffMaxRetries - withCDNBypassed.RemainingAttempts} attempts with CDN bypassed.");
+                }
             }
-
-            fetchOptions.Till = targetChangeNumber;
-            var withCDNBypassed = await AttempSplitsSync(targetChangeNumber, fetchOptions, OnDemandFetchBackoffMaxRetries, null, true);
-
-            if (withCDNBypassed.Success)
+            catch (Exception ex)
             {
-                await _segmentFetcher.FetchSegmentsIfNotExists(withCDNBypassed.SegmentNames);
-                _log.Debug($"Refresh completed bypassing the CDN in {OnDemandFetchBackoffMaxRetries - withCDNBypassed.RemainingAttempts} attempts.");
-            }
-            else
-            {
-                _log.Debug($"No changes fetched after #{OnDemandFetchBackoffMaxRetries - withCDNBypassed.RemainingAttempts} attempts with CDN bypassed.");
+                _log.Error($"Exception caught executing SynchronizeSplits. {targetChangeNumber}", ex);
             }
         }
         #endregion

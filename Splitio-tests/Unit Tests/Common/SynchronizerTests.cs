@@ -48,7 +48,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _backOff = new Mock<IBackOff>();
             _segmentCache = new Mock<ISegmentCache>();
 
-            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCountSender.Object, _wrapperAdapter.Object, _gates.Object, _telemetrySyncTask.Object, new TasksManager(_wrapperAdapter.Object), _splitCache.Object, _backOff.Object, 10, 10, _segmentCache.Object, _log.Object);
+            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCountSender.Object, _wrapperAdapter.Object, _gates.Object, _telemetrySyncTask.Object, new TasksManager(_wrapperAdapter.Object), _splitCache.Object, _backOff.Object, 10, 5, _segmentCache.Object, _log.Object);
         }
 
         [TestMethod]
@@ -132,6 +132,85 @@ namespace Splitio_Tests.Unit_Tests.Common
         }
 
         [TestMethod]
+        public void SynchronizeSegment_NoChangesFetched()
+        {
+            // Arrange.
+            var segmentName = "segment-test";
+
+            _segmentCache
+                .Setup(mock => mock.GetChangeNumber(segmentName))
+                .Returns(2);
+
+            // Act.
+            _synchronizer.SynchronizeSegment(segmentName, 100);
+
+            // Assert.
+            _segmentFetcher.Verify(mock => mock.Fetch(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(20));
+            _log.Verify(mock => mock.Debug($"No changes fetched for segment {segmentName} after 10 attempts with CDN bypassed."), Times.Once);
+            _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        public void SynchronizeSegment_With5Attempts()
+        {
+            // Arrange.
+            var segmentName = "segment-test";
+
+            _segmentCache
+                .SetupSequence(mock => mock.GetChangeNumber(segmentName))
+                .Returns(-1)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(110);
+
+            // Act.
+            _synchronizer.SynchronizeSegment(segmentName, 100);
+
+            // Assert.
+            _segmentFetcher.Verify(mock => mock.Fetch(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(5));
+            _log.Verify(mock => mock.Debug($"Segment {segmentName} refresh completed in 5 attempts."), Times.Once);
+            _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        public void SynchronizeSegment_WithCDNBypassed()
+        {
+            // Arrange.
+            var segmentName = "segment-test";
+
+            _segmentCache
+                .SetupSequence(mock => mock.GetChangeNumber(segmentName))
+                .Returns(-1)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(110);
+
+            // Act.
+            _synchronizer.SynchronizeSegment(segmentName, 100);
+
+            // Assert.
+            _segmentFetcher.Verify(mock => mock.Fetch(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(17));
+            _log.Verify(mock => mock.Debug($"Segment {segmentName} refresh completed bypassing the CDN in 7 attempts."), Times.Once);
+            _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
         public void SynchronizeSplits_ShouldFetchSplits()
         {
             // Arrange.
@@ -146,6 +225,79 @@ namespace Splitio_Tests.Unit_Tests.Common
             // Assert.
             _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Once);
             _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExists(It.IsAny<IList<string>>()), Times.Once);
+        }
+
+        [TestMethod]
+        public void SynchronizeSplits_NoChangesFetched()
+        {
+            // Arrange.
+            _splitCache
+                .Setup(mock => mock.GetChangeNumber())
+                .Returns(2);
+
+            // Act.
+            _synchronizer.SynchronizeSplits(100);
+
+            // Assert.
+            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Exactly(20));
+            _log.Verify(mock => mock.Debug($"No changes fetched after 10 attempts with CDN bypassed."), Times.Once);
+            _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        public void SynchronizeSplits_With5Attempts()
+        {
+            // Arrange.
+            _splitCache
+                .SetupSequence(mock => mock.GetChangeNumber())
+                .Returns(-1)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(110);
+
+            // Act.
+            _synchronizer.SynchronizeSplits(100);
+
+            // Assert.
+            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Exactly(5));
+            _log.Verify(mock => mock.Debug($"Refresh completed in 5 attempts."), Times.Once);
+            _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        public void SynchronizeSplits_WithCDNBypassed()
+        {
+            // Arrange.
+            _splitCache
+                .SetupSequence(mock => mock.GetChangeNumber())
+                .Returns(-1)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(110);
+
+            // Act.
+            _synchronizer.SynchronizeSplits(100);
+
+            // Assert.
+            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Exactly(17));
+            _log.Verify(mock => mock.Debug($"Refresh completed bypassing the CDN in 7 attempts."), Times.Once);
+            _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
         }
     }
 }
