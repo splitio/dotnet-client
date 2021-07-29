@@ -1,5 +1,8 @@
 CHANGES
 
+6.3.3 (Jul 29, 2021)
+- Updated the synchronization flow to be more reliable in the event of an edge case generating delay in cache purge propagation, keeping the SDK cache properly synced.
+
 6.3.2 (Jul 21, 2021)
 - Fixed memory and thread leak. Issue ref: https://github.com/splitio/dotnet-client/issues/40.
 

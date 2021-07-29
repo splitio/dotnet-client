@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Domain;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
@@ -7,6 +8,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Common;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,6 +16,8 @@ namespace Splitio.Services.Common
 {
     public class Synchronizer : ISynchronizer
     {
+        private readonly static int OnDemandFetchBackoffMaxRetries = 10;
+
         private readonly ISplitFetcher _splitFetcher;
         private readonly ISelfRefreshingSegmentFetcher _segmentFetcher;
         private readonly IImpressionsLog _impressionsLog;
@@ -24,6 +28,12 @@ namespace Splitio.Services.Common
         private readonly IReadinessGatesCache _gates;
         private readonly ITelemetrySyncTask _telemetrySyncTask;
         private readonly ITasksManager _tasksManager;
+        private readonly ISplitCache _splitCache;
+        private readonly ISegmentCache _segmentCache;
+        private readonly IBackOff _backOffSplits;
+        private readonly IBackOff _backOffSegments;
+        private readonly int _onDemandFetchMaxRetries;
+        private readonly int _onDemandFetchRetryDelayMs;
 
         public Synchronizer(ISplitFetcher splitFetcher,
             ISelfRefreshingSegmentFetcher segmentFetcher,
@@ -34,6 +44,11 @@ namespace Splitio.Services.Common
             IReadinessGatesCache gates,
             ITelemetrySyncTask telemetrySyncTask,
             ITasksManager tasksManager,
+            ISplitCache splitCache,
+            IBackOff backOff,
+            int onDemandFetchMaxRetries,
+            int onDemandFetchRetryDelayMs,
+            ISegmentCache segmentCache,
             ISplitLogger log = null)
         {
             _splitFetcher = splitFetcher;
@@ -45,6 +60,12 @@ namespace Splitio.Services.Common
             _gates = gates;
             _telemetrySyncTask = telemetrySyncTask;
             _tasksManager = tasksManager;
+            _splitCache = splitCache;
+            _backOffSplits = backOff;
+            _backOffSegments = backOff;
+            _onDemandFetchMaxRetries = onDemandFetchMaxRetries;
+            _onDemandFetchRetryDelayMs = onDemandFetchRetryDelayMs;
+            _segmentCache = segmentCache;
             _log = log ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
         }
 
@@ -91,24 +112,154 @@ namespace Splitio.Services.Common
         {
             _tasksManager.Start(() =>
             {
-                _splitFetcher.FetchSplits().Wait();
+                _splitFetcher.FetchSplits(new FetchOptions()).Wait();
                 _segmentFetcher.FetchAll().Wait();
                 _gates.SdkInternalReady();
                 _log.Debug("Spltis and Segments synchronized...");
             }, cancellationTokenSource, "SyncAll");
         }
 
-        public async Task SynchronizeSegment(string segmentName)
+        public async Task SynchronizeSegment(string segmentName, long targetChangeNumber)
         {
-            await _segmentFetcher.Fetch(segmentName, cacheControlHeaders: true);
-            _log.Debug($"Segment fetched: {segmentName}...");
+            try
+            {
+                if (targetChangeNumber <= _segmentCache.GetChangeNumber(segmentName)) return;
+
+                var fetchOptions = new FetchOptions { CacheControlHeaders = true };
+
+                var result = await AttempSegmentSync(segmentName, targetChangeNumber, fetchOptions, _onDemandFetchMaxRetries, _onDemandFetchRetryDelayMs, false);
+
+                if (result.Success)
+                {
+                    _log.Debug($"Segment {segmentName} refresh completed in {_onDemandFetchMaxRetries - result.RemainingAttempts} attempts.");
+
+                    return;
+                }
+
+                fetchOptions.Till = targetChangeNumber;
+
+                var withCDNBypassed = await AttempSegmentSync(segmentName, targetChangeNumber, fetchOptions, OnDemandFetchBackoffMaxRetries, null, true);
+
+                if (withCDNBypassed.Success)
+                {
+                    _log.Debug($"Segment {segmentName} refresh completed bypassing the CDN in {OnDemandFetchBackoffMaxRetries - withCDNBypassed.RemainingAttempts} attempts.");
+                }
+                else
+                {
+                    _log.Debug($"No changes fetched for segment {segmentName} after {OnDemandFetchBackoffMaxRetries - withCDNBypassed.RemainingAttempts} attempts with CDN bypassed.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Exception caught executing SynchronizeSegment: {segmentName}-{targetChangeNumber}", ex);
+            }
         }
 
-        public async Task SynchronizeSplits()
+        public async Task SynchronizeSplits(long targetChangeNumber)
         {
-            var segmentNames = await _splitFetcher.FetchSplits(cacheControlHeaders: true);
-            await _segmentFetcher.FetchSegmentsIfNotExists(segmentNames);
-            _log.Debug("Splits fetched...");
+            try
+            {
+                if (targetChangeNumber <= _splitCache.GetChangeNumber()) return;
+
+                var fetchOptions = new FetchOptions { CacheControlHeaders = true };
+
+                var result = await AttempSplitsSync(targetChangeNumber, fetchOptions, _onDemandFetchMaxRetries, _onDemandFetchRetryDelayMs, false);
+
+                if (result.Success)
+                {
+                    await _segmentFetcher.FetchSegmentsIfNotExists(result.SegmentNames);
+                    _log.Debug($"Refresh completed in {_onDemandFetchMaxRetries - result.RemainingAttempts} attempts.");
+
+                    return;
+                }
+
+                fetchOptions.Till = targetChangeNumber;
+                var withCDNBypassed = await AttempSplitsSync(targetChangeNumber, fetchOptions, OnDemandFetchBackoffMaxRetries, null, true);
+
+                if (withCDNBypassed.Success)
+                {
+                    await _segmentFetcher.FetchSegmentsIfNotExists(withCDNBypassed.SegmentNames);
+                    _log.Debug($"Refresh completed bypassing the CDN in {OnDemandFetchBackoffMaxRetries - withCDNBypassed.RemainingAttempts} attempts.");
+                }
+                else
+                {
+                    _log.Debug($"No changes fetched after {OnDemandFetchBackoffMaxRetries - withCDNBypassed.RemainingAttempts} attempts with CDN bypassed.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Exception caught executing SynchronizeSplits. {targetChangeNumber}", ex);
+            }
+        }
+        #endregion
+
+        #region Private Methods
+        private async Task<SyncResult> AttempSegmentSync(string name, long targetChangeNumber, FetchOptions fetchOptions, int maxRetries, int? retryDelayMs, bool withBackoff)
+        {
+            try
+            {
+                var remainingAttempts = maxRetries;
+
+                if (withBackoff) _backOffSplits.Reset();
+
+                while (true)
+                {
+                    remainingAttempts--;
+                    await _segmentFetcher.Fetch(name, fetchOptions);
+
+                    if (targetChangeNumber <= _segmentCache.GetChangeNumber(name))
+                    {
+                        return new SyncResult(true, remainingAttempts);
+                    }
+                    else if (remainingAttempts <= 0)
+                    {
+                        return new SyncResult(false, remainingAttempts);
+                    }
+
+                    var delay = withBackoff ? _backOffSplits.GetInterval(inMiliseconds: true) : retryDelayMs.Value;
+                    _wrapperAdapter.TaskDelay((int)delay).Wait();
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Debug("Exception while AttempSplitsSync.", ex);
+            }
+
+            return new SyncResult(false, 0);
+        }
+
+        private async Task<SyncResult> AttempSplitsSync(long targetChangeNumber, FetchOptions fetchOptions, int maxRetries, int? retryDelayMs, bool withBackoff)
+        {
+            try
+            {
+                var remainingAttempts = maxRetries;
+
+                if (withBackoff) _backOffSplits.Reset();
+
+                while (true)
+                {
+                    remainingAttempts--;
+                    var segmentNames = await _splitFetcher.FetchSplits(fetchOptions);
+
+                    if (targetChangeNumber <= _splitCache.GetChangeNumber())
+                    {
+                        return new SyncResult(true, remainingAttempts, segmentNames);
+                    }
+                    else if (remainingAttempts <= 0)
+                    {
+                        return new SyncResult(false, remainingAttempts, segmentNames);
+                    }
+
+                    var delay = withBackoff ? _backOffSplits.GetInterval(inMiliseconds: true) : retryDelayMs.Value;
+                    _wrapperAdapter.TaskDelay((int)delay).Wait();
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Debug("Exception while AttempSplitsSync.", ex);
+            }
+
+            return new SyncResult(false, 0);
         }
         #endregion
     }
