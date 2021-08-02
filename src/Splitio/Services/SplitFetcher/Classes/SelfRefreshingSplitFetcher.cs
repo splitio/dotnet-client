@@ -58,7 +58,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                     _taskManager.StartPeriodic(() =>
                     {
-                        FetchSplits().Wait();
+                        FetchSplits(new FetchOptions()).Wait();
                     }, _interval * 1000, _cancelTokenSource, "Splits Fetcher.");
                 }
             }, new CancellationTokenSource(), "Main Splits Fetcher.");
@@ -81,7 +81,7 @@ namespace Splitio.Services.SplitFetcher.Classes
             _splitCache.Clear();
         }
 
-        public async Task<IList<string>> FetchSplits(bool cacheControlHeaders = false)
+        public async Task<IList<string>> FetchSplits(FetchOptions fetchOptions)
         {
             var segmentNames = new List<string>();
             var names = new Dictionary<string, string>();
@@ -92,7 +92,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                 try
                 {
-                    var result = await _splitChangeFetcher.Fetch(changeNumber, cacheControlHeaders);
+                    var result = await _splitChangeFetcher.Fetch(changeNumber, fetchOptions);
 
                     if (result == null)
                     {

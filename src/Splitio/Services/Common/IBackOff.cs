@@ -2,7 +2,7 @@
 {
     public interface IBackOff
     {
-        double GetInterval();
+        double GetInterval(bool inMiliseconds = false);
         void Reset();
         int GetAttempt();
     }

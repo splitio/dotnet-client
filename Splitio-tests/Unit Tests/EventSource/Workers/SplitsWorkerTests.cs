@@ -32,24 +32,11 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         [TestMethod]        
         public void AddToQueue_WithElements_ShouldTriggerFetch()
         {
-            // Arrange.
+            // Act.
             _splitsWorker.Start();
-            _splitCache
-                .SetupSequence(mock => mock.GetChangeNumber())
-                .Returns(1585956698447)
-                .Returns(1585956698458)
-                .Returns(1585956698458)
-                .Returns(1585956698468)
-                .Returns(1585956698468)
-                .Returns(1585956698478)
-                .Returns(1585956698478);
-
-            // Act.            
             _splitsWorker.AddToQueue(1585956698457);
             _splitsWorker.AddToQueue(1585956698467);
             _splitsWorker.AddToQueue(1585956698477);
-            Thread.Sleep(50);
-
             _splitsWorker.AddToQueue(1585956698476);
             Thread.Sleep(1000);
 
@@ -57,30 +44,9 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _splitsWorker.AddToQueue(1585956698486);
             Thread.Sleep(100);
             _splitsWorker.AddToQueue(1585956698496);
-            Thread.Sleep(100);
 
-            // Assert.
-            _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Exactly(7));
-            _synchronizer.Verify(mock => mock.SynchronizeSplits(), Times.Exactly(3));
-        }
-
-        [TestMethod]
-        public void AddToQueue_MaxAttemptsAllowed()
-        {
-            // Arrange.
-            _splitsWorker.Start();
-            _splitCache
-                .Setup(mock => mock.GetChangeNumber())
-                .Returns(1585956698447);
-
-            // Act.            
-            _splitsWorker.AddToQueue(1585956698457);
-            Thread.Sleep(2000);
-
-            // Assert.
-            _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Exactly(11));
-            _synchronizer.Verify(mock => mock.SynchronizeSplits(), Times.Exactly(10));
-
+            // Assert
+            _synchronizer.Verify(mock => mock.SynchronizeSplits(It.IsAny<long>()), Times.Exactly(4));
         }
 
         [TestMethod]
@@ -92,7 +58,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Assert.
             _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Never);
-            _synchronizer.Verify(mock => mock.SynchronizeSplits(), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchronizeSplits(It.IsAny<long>()), Times.Never);
         }
 
         [TestMethod]

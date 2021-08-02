@@ -32,7 +32,7 @@ namespace Splitio.Services.Client.Classes
 
             var segmentFetcher = new JSONFileSegmentFetcher(segmentsFilePath, _segmentCache);
             var splitChangeFetcher = new JSONFileSplitChangeFetcher(splitsFilePath);
-            var task = splitChangeFetcher.Fetch(-1);
+            var task = splitChangeFetcher.Fetch(-1, new FetchOptions());
             task.Wait();
             
             var splitChangesResult = task.Result;

@@ -1,4 +1,5 @@
 ﻿using Splitio.CommonLibraries;
+using Splitio.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
@@ -14,11 +15,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class SegmentSdkApiClient : SdkApiClient, ISegmentSdkApiClient
     {
-        private const string SegmentChangesUrlTemplate = "/api/segmentChanges/{segment_name}";
         private const string UrlParameterSince = "?since=";
-        private const string SegmentFetcherTime = "segmentChangeFetcher.time";
-        private const string SegmentFetcherStatus = "segmentChangeFetcher.status.{0}";
-        private const string SegmentFetcherException = "segmentChangeFetcher.exception";
 
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SegmentSdkApiClient));
 
@@ -30,7 +27,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             ITelemetryRuntimeProducer telemetryRuntimeProducer) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout, telemetryRuntimeProducer)
         { }
 
-        public async Task<string> FetchSegmentChanges(string name, long since, bool cacheControlHeaders = false)
+        public async Task<string> FetchSegmentChanges(string name, long since, FetchOptions fetchOptions)
         {
             using (var clock = new Util.SplitStopwatch())
             {
@@ -38,8 +35,8 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 try
                 {
-                    var requestUri = GetRequestUri(name, since);
-                    var response = await ExecuteGet(requestUri, cacheControlHeaders);
+                    var requestUri = GetRequestUri(name, since, fetchOptions.Till);
+                    var response = await ExecuteGet(requestUri, fetchOptions.CacheControlHeaders);
 
                     if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
                     {
@@ -72,11 +69,14 @@ namespace Splitio.Services.SegmentFetcher.Classes
             }
         }
 
-        private string GetRequestUri(string name, long since)
+        private string GetRequestUri(string name, long since, long? till = null)
         {
-            var segmentChangesUrl = SegmentChangesUrlTemplate.Replace("{segment_name}", name);
+            var uri = $"/api/segmentChanges/{name}?since={Uri.EscapeDataString(since.ToString())}";
 
-            return string.Concat(segmentChangesUrl, UrlParameterSince, Uri.EscapeDataString(since.ToString()));
+            if (till.HasValue)
+                return $"{uri}&till={Uri.EscapeDataString(till.Value.ToString())}";
+
+            return uri;
         }
     }
 }

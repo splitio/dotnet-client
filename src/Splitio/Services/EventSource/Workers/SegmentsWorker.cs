@@ -1,5 +1,4 @@
-﻿using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Common;
+﻿using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
@@ -10,10 +9,7 @@ namespace Splitio.Services.EventSource.Workers
 {
     public class SegmentsWorker : ISegmentsWorker
     {
-        private readonly static int MaxRetriesAllowed = 10;
-
         private readonly ISplitLogger _log;
-        private readonly ISegmentCache _segmentCache;
         private readonly ISynchronizer _synchronizer;
         private readonly ITasksManager _tasksManager;
         private readonly BlockingCollection<SegmentQueueDto> _queue;
@@ -22,12 +18,10 @@ namespace Splitio.Services.EventSource.Workers
         private CancellationTokenSource _cancellationTokenSource;
         private bool _running;
 
-        public SegmentsWorker(ISegmentCache segmentCache,
-            ISynchronizer synchronizer,
+        public SegmentsWorker(ISynchronizer synchronizer,
             ITasksManager tasksManager,
             ISplitLogger log = null)
         {
-            _segmentCache = segmentCache;
             _synchronizer = synchronizer;
             _tasksManager = tasksManager;
             _log = log ?? WrapperAdapter.GetLogger(typeof(SegmentsWorker));
@@ -116,14 +110,7 @@ namespace Splitio.Services.EventSource.Workers
                     if (_queue.TryTake(out SegmentQueueDto segment, -1, _cancellationTokenSource.Token))
                     {
                         _log.Debug($"Segment dequeue: {segment.SegmentName}");
-
-                        var attempt = 0;
-
-                        while (segment.ChangeNumber > _segmentCache.GetChangeNumber(segment.SegmentName) && (attempt < MaxRetriesAllowed))
-                        {
-                            await _synchronizer.SynchronizeSegment(segment.SegmentName);
-                            attempt++;
-                        }
+                        await _synchronizer.SynchronizeSegment(segment.SegmentName, segment.ChangeNumber);
                     }
                 }
             }
@@ -133,7 +120,7 @@ namespace Splitio.Services.EventSource.Workers
             }
             finally
             {
-                _log.Debug("Segments Workers excecute finished.");
+                _log.Debug("Segment Worker execution finished.");
             }
         }
         #endregion
