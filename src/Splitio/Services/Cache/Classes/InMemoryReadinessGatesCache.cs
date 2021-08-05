@@ -136,35 +136,42 @@ namespace Splitio.Services.Client.Classes
 
         public bool AreSegmentsReady(int milliseconds)
         {
-            using (var clock = new Util.SplitStopwatch())
+            try
+            { 
+                using (var clock = new Util.SplitStopwatch())
+                {
+                    clock.Start();
+                    int timeLeft = milliseconds;
+
+                    foreach (var entry in _segmentsAreReady)
+                    {
+                        var segmentName = entry.Key;
+                        var countdown = entry.Value;
+
+                        if (timeLeft >= 0 && !countdown.Wait(timeLeft))
+                        {
+                            return false;
+                        }
+
+                        if (timeLeft < 0 && !countdown.Wait(0))
+                        {
+                            return false;
+                        }
+
+                        timeLeft = timeLeft - (int)clock.ElapsedMilliseconds;
+                    }
+
+                    if (_log.IsDebugEnabled && (int)clock.ElapsedMilliseconds != 0)
+                    {
+                        _log.Debug($"Segments are ready in {clock.ElapsedMilliseconds} milliseconds");
+                    }
+
+                    return true;
+                }
+            }
+            catch (Exception ex)
             {
-                clock.Start();
-                int timeLeft = milliseconds;
-
-                foreach (var entry in _segmentsAreReady)
-                {
-                    var segmentName = entry.Key;
-                    var countdown = entry.Value;
-
-                    if (timeLeft >= 0 && !countdown.Wait(timeLeft))
-                    {
-                        return false;
-                    }
-
-                    if (timeLeft < 0 && !countdown.Wait(0))
-                    {
-                        return false;
-                    }
-
-                    timeLeft = timeLeft - (int)clock.ElapsedMilliseconds;
-                }
-
-                if (_log.IsDebugEnabled && (int)clock.ElapsedMilliseconds != 0)
-                {
-                    _log.Debug($"Segments are ready in {clock.ElapsedMilliseconds} milliseconds");
-                }
-
-                return true;
+                return false;
             }
         }
     }
