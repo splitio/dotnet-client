@@ -56,54 +56,76 @@ namespace Splitio.Services.Client.Classes
 
         public bool IsSDKReady(int milliseconds)
         {
-            using (var clock = new Util.SplitStopwatch())
+            try
             {
-                clock.Start();
-
-                if (!AreSplitsReady(milliseconds))
+                using (var clock = new Util.SplitStopwatch())
                 {
-                    return false;
+                    clock.Start();
+
+                    if (!AreSplitsReady(milliseconds))
+                    {
+                        return false;
+                    }
+
+                    var timeLeft = milliseconds - (int)clock.ElapsedMilliseconds;
+
+                    return AreSegmentsReady(timeLeft);
                 }
-
-                var timeLeft = milliseconds - (int)clock.ElapsedMilliseconds;
-
-                return AreSegmentsReady(timeLeft);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn($"Something went wrong checking if sdk is ready.", ex);
+                return false;
             }
         }
 
         public void SplitsAreReady()
         {
-            if (_splitsAreReady.IsSet) return;
-            
-            _splitsAreReady.Signal();
-
-            if (_splitsAreReady.IsSet)
+            try
             {
-                _splitsReadyTimer.Dispose();
+                if (_splitsAreReady.IsSet) return;
 
-                if (_log.IsDebugEnabled && (int)_splitsReadyTimer.ElapsedMilliseconds != 0)
+                _splitsAreReady.Signal();
+
+                if (_splitsAreReady.IsSet)
                 {
-                    _log.Debug($"Splits are ready in {_splitsReadyTimer.ElapsedMilliseconds} milliseconds");
+                    _splitsReadyTimer.Dispose();
+
+                    if (_log.IsDebugEnabled && (int)_splitsReadyTimer.ElapsedMilliseconds != 0)
+                    {
+                        _log.Debug($"Splits are ready in {_splitsReadyTimer.ElapsedMilliseconds} milliseconds");
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                _log.Warn($"Something went wrong in SplitsAreReady.", ex);
             }
         }
 
         public void SegmentIsReady(string segmentName)
         {
-            _segmentsAreReady.TryGetValue(segmentName, out CountdownEvent countDown);
-
-            if ((countDown == null) || (countDown.IsSet))
+            try
             {
-                return;
+                _segmentsAreReady.TryGetValue(segmentName, out CountdownEvent countDown);
+
+                if ((countDown == null) || (countDown.IsSet))
+                {
+                    return;
+                }
+
+                countDown.Signal();
+
+                if (countDown.IsSet && _log.IsDebugEnabled)
+                {
+                    _log.Debug($"{segmentName} segment is ready");
+                }
             }
-
-            countDown.Signal();
-
-            if (countDown.IsSet && _log.IsDebugEnabled)
+            catch (Exception ex)
             {
-                _log.Debug($"{segmentName} segment is ready");
+                _log.Warn($"Something went wrong in SegmentIsReady, Segment: {segmentName}.", ex);
             }
-        }
+}
 
         public bool AreSplitsReady(int milliseconds)
         {
@@ -171,6 +193,7 @@ namespace Splitio.Services.Client.Classes
             }
             catch (Exception ex)
             {
+                _log.Warn($"Something went wrong checking if segments are ready.", ex);
                 return false;
             }
         }
