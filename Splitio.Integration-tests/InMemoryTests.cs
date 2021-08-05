@@ -31,7 +31,6 @@ namespace Splitio.Integration_tests
             // Assert.
             Assert.AreEqual("control", treatmentResult);
 
-            client.BlockUntilReady(10000);
             client.Destroy();
             ShutdownServer(httpClientMock);
         }

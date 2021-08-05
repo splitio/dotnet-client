@@ -1,5 +1,4 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
@@ -126,14 +125,14 @@ namespace Splitio.Services.SegmentFetcher.Classes
             }
         }
 
-        public async Task FetchAll()
+        public void FetchAll()
         {
             var fetchOptions = new FetchOptions();
-            foreach (var segment in _segments.Values)
-            {
-                await segment.FetchSegment(fetchOptions);
+            var fetchers = _segments.Values;
 
-                _log.Debug($"Segment fetched: {segment.Name}");
+            foreach (var segment in fetchers)
+            {
+                _ = segment.FetchSegment(fetchOptions);
             }
         }
 
