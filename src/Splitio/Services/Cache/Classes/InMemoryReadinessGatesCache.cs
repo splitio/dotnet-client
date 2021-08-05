@@ -2,7 +2,7 @@
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
 
 namespace Splitio.Services.Client.Classes
@@ -13,14 +13,14 @@ namespace Splitio.Services.Client.Classes
 
         private readonly CountdownEvent _sdkInternalReady;
         private readonly CountdownEvent _splitsAreReady;
-        private readonly Dictionary<string, CountdownEvent> _segmentsAreReady;
+        private readonly ConcurrentDictionary<string, CountdownEvent> _segmentsAreReady;
         private readonly Util.SplitStopwatch _splitsReadyTimer;
 
         public InMemoryReadinessGatesCache()
         {
             _sdkInternalReady = new CountdownEvent(1);
             _splitsAreReady = new CountdownEvent(1);
-            _segmentsAreReady = new Dictionary<string, CountdownEvent>();
+            _segmentsAreReady = new ConcurrentDictionary<string, CountdownEvent>();
             _splitsReadyTimer = new Util.SplitStopwatch();
         }
 
@@ -134,26 +134,34 @@ namespace Splitio.Services.Client.Classes
 
         public bool RegisterSegment(string segmentName)
         {
-            if (string.IsNullOrEmpty(segmentName) || AreSplitsReady(0))
-            {
-                return false;
-            }
-
             try
             {
-                _segmentsAreReady.Add(segmentName, new CountdownEvent(1));
+                if (string.IsNullOrEmpty(segmentName) || AreSplitsReady(0))
+                {
+                    return false;
+                }
+            
+                var success = _segmentsAreReady.TryAdd(segmentName, new CountdownEvent(1));
 
                 if (_log.IsDebugEnabled)
                 {
-                    _log.Debug("Registered segment: " + segmentName);
+                    if (success)
+                    {
+                        _log.Debug("Registered segment: " + segmentName);
+                    }
+                    else
+                    {
+                        _log.Warn("Already registered segment: " + segmentName);
+                    }                    
                 }
-            }
-            catch (ArgumentException e)
-            {
-                _log.Warn("Already registered segment: " + segmentName, e);
-            }
 
-            return true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _log.Warn($"Something went wrong Registering {segmentName} Segment.", ex);
+                return false;
+            }
         }
 
         public bool AreSegmentsReady(int milliseconds)
@@ -165,10 +173,13 @@ namespace Splitio.Services.Client.Classes
                     clock.Start();
                     int timeLeft = milliseconds;
 
-                    foreach (var entry in _segmentsAreReady)
+                    var values = _segmentsAreReady.Values;
+                    foreach (var countdown in values)
                     {
-                        var segmentName = entry.Key;
-                        var countdown = entry.Value;
+                        if (countdown == null)
+                        {
+                            return false;
+                        }
 
                         if (timeLeft >= 0 && !countdown.Wait(timeLeft))
                         {
