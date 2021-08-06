@@ -1,5 +1,8 @@
 CHANGES
 
+6.3.4 (Aug 6, 2021)
+- Fixed an issue in SplitClient.IsClientReady which sometimes threw NullReferenceException by properly handling the exception and logging.
+
 6.3.3 (Aug 2, 2021)
 - Updated the synchronization flow to be more reliable in the event of an edge case generating delay in cache purge propagation, keeping the SDK cache properly synced.
 
