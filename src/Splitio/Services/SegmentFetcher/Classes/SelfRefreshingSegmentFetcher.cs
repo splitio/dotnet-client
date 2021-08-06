@@ -126,15 +126,19 @@ namespace Splitio.Services.SegmentFetcher.Classes
             }
         }
 
-        public async Task FetchAll()
+        public void FetchAll()
         {
+            if (_segments.Count == 0) return;
+
             var fetchOptions = new FetchOptions();
+            var tasks = new List<Task>();
+
             foreach (var segment in _segments.Values)
             {
-                await segment.FetchSegment(fetchOptions);
-
-                _log.Debug($"Segment fetched: {segment.Name}");
+                tasks.Add(segment.FetchSegment(fetchOptions));
             }
+
+            Task.WaitAll(tasks.ToArray());
         }
 
         public async Task Fetch(string segmentName, FetchOptions fetchOptions)
