@@ -113,7 +113,7 @@ namespace Splitio.Services.Common
             _tasksManager.Start(() =>
             {
                 _splitFetcher.FetchSplits(new FetchOptions()).Wait();
-                _segmentFetcher.FetchAll().Wait();
+                _segmentFetcher.FetchAll();
                 _gates.SdkInternalReady();
                 _log.Debug("Spltis and Segments synchronized...");
             }, cancellationTokenSource, "SyncAll");

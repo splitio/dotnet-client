@@ -40,7 +40,15 @@ namespace Splitio.Services.Shared.Classes
 
         public bool IsSdkReady()
         {
-            return _gates.IsSDKReady(0);
+            try
+            {
+                return _gates.IsSDKReady(0);
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Somenthing went wrong in checking if the sdk is ready.", ex);
+                return false;
+            }
         }
     }
 }
