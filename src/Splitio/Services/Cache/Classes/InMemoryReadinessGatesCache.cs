@@ -22,6 +22,7 @@ namespace Splitio.Services.Client.Classes
             _splitsAreReady = new CountdownEvent(1);
             _segmentsAreReady = new ConcurrentDictionary<string, CountdownEvent>();
             _splitsReadyTimer = new Util.SplitStopwatch();
+            _splitsReadyTimer.Start();
         }
 
         #region Internal Ready
@@ -67,9 +68,9 @@ namespace Splitio.Services.Client.Classes
                         return false;
                     }
 
-                    var timeLeft = milliseconds - (int)clock.ElapsedMilliseconds;
+                    milliseconds -= (int)clock.ElapsedMilliseconds;
 
-                    return AreSegmentsReady(timeLeft);
+                    return AreSegmentsReady(milliseconds);
                 }
             }
             catch (Exception ex)
@@ -164,39 +165,43 @@ namespace Splitio.Services.Client.Classes
             }
         }
 
-        public bool AreSegmentsReady(int milliseconds)
+        public bool AreSegmentsReady(int timeLeft)
         {
             try
             { 
-                using (var clock = new Util.SplitStopwatch())
+                using (var segmentsClock = new Util.SplitStopwatch())
                 {
-                    clock.Start();
-                    int timeLeft = milliseconds;
+                    segmentsClock.Start();
 
                     var values = _segmentsAreReady.Values;
                     foreach (var countdown in values)
                     {
-                        if (countdown == null)
+                        using (var clock = new Util.SplitStopwatch())
                         {
-                            return false;
-                        }
+                            clock.Start();
 
-                        if (timeLeft >= 0 && !countdown.Wait(timeLeft))
-                        {
-                            return false;
-                        }
+                            if (countdown == null)
+                            {
+                                return false;
+                            }
 
-                        if (timeLeft < 0 && !countdown.Wait(0))
-                        {
-                            return false;
-                        }
+                            if (timeLeft >= 0 && !countdown.Wait(timeLeft))
+                            {
+                                return false;
+                            }
 
-                        timeLeft = timeLeft - (int)clock.ElapsedMilliseconds;
+                            if (timeLeft < 0 && !countdown.IsSet)
+                            {
+                                return false;
+                            }
+
+                            timeLeft -= (int)clock.ElapsedMilliseconds;
+                        }
                     }
 
-                    if (_log.IsDebugEnabled && (int)clock.ElapsedMilliseconds != 0)
+                    if (_log.IsDebugEnabled && (int)segmentsClock.ElapsedMilliseconds != 0)
                     {
-                        _log.Debug($"Segments are ready in {clock.ElapsedMilliseconds} milliseconds");
+                        _log.Debug($"Segments are ready in {segmentsClock.ElapsedMilliseconds} milliseconds");
                     }
 
                     return true;
