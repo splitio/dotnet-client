@@ -16,6 +16,8 @@ namespace Splitio.Services.Client.Classes
         private readonly ConcurrentDictionary<string, CountdownEvent> _segmentsAreReady;
         private readonly Util.SplitStopwatch _splitsReadyTimer;
 
+        private bool _isReady;
+
         public InMemoryReadinessGatesCache()
         {
             _sdkInternalReady = new CountdownEvent(1);
@@ -59,6 +61,11 @@ namespace Splitio.Services.Client.Classes
         {
             try
             {
+                if (_isReady)
+                {
+                    return true;
+                }
+
                 using (var clock = new Util.SplitStopwatch())
                 {
                     clock.Start();
@@ -70,7 +77,9 @@ namespace Splitio.Services.Client.Classes
 
                     milliseconds -= (int)clock.ElapsedMilliseconds;
 
-                    return AreSegmentsReady(milliseconds);
+                    _isReady = AreSegmentsReady(milliseconds);
+
+                    return _isReady;
                 }
             }
             catch (Exception ex)
