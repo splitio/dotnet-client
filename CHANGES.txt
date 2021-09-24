@@ -1,6 +1,6 @@
 CHANGES
 
-6.3.5 (Sep 23, 2021)
+6.3.6 (Sep 24, 2021)
 - Fixed an issue in the calculation for the remaining block until ready time when syncing segment information, causing SDK Not Ready without waiting for the configured time.
 
 6.3.4 (Aug 6, 2021)
