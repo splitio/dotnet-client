@@ -39,11 +39,10 @@ namespace Splitio_Tests.Integration_Tests
             var splitChangesResult = splitChangeFetcher.Fetch(-1, new FetchOptions());
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
             var gates = new InMemoryReadinessGatesCache();
-            gates.SdkInternalReady();
             var wrapperAdapter = new WrapperAdapter();
             var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, splitParser, gates, 30, new TasksManager(wrapperAdapter), splitCache);
             selfRefreshingSplitFetcher.Start();
-            gates.IsSDKReady(1000);
+            gates.WaitUntilReady(1000);
 
             //Act           
             ParsedSplit result = (ParsedSplit)splitCache.GetSplit("Pato_Test_1");
@@ -66,11 +65,10 @@ namespace Splitio_Tests.Integration_Tests
             var splitChangesResult = splitChangeFetcher.Fetch(-1, new FetchOptions());
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
             var gates = new InMemoryReadinessGatesCache();
-            gates.SdkInternalReady();
             var wrapperAdapter = new WrapperAdapter();
             var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, splitParser, gates, 30, new TasksManager(wrapperAdapter), splitCache);
             selfRefreshingSplitFetcher.Start();
-            gates.IsSDKReady(1000);
+            gates.WaitUntilReady(1000);
 
             //Act           
             ParsedSplit result = (ParsedSplit)splitCache.GetSplit("Traffic_Allocation_UI");
@@ -115,7 +113,7 @@ namespace Splitio_Tests.Integration_Tests
             selfRefreshingSplitFetcher.Start();
 
             //Act           
-            gates.IsSDKReady(1000);
+            gates.WaitUntilReady(1000);
             selfRefreshingSplitFetcher.Stop();
             ParsedSplit result = (ParsedSplit)splitCache.GetSplit("Pato_Test_1");
             ParsedSplit result2 = (ParsedSplit)splitCache.GetSplit("Manu_Test_1");
@@ -144,7 +142,6 @@ namespace Splitio_Tests.Integration_Tests
             var sdkSegmentApiClient = new SegmentSdkApiClient("0", headers, baseUrl, 10000, 10000, telemetryStorage);
             var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkSegmentApiClient);
             var gates = new InMemoryReadinessGatesCache();
-            gates.SdkInternalReady();
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var segmentTaskQueue = new SegmentTaskQueue();
             var wrapperAdapter = new WrapperAdapter();
@@ -155,7 +152,7 @@ namespace Splitio_Tests.Integration_Tests
             selfRefreshingSplitFetcher.Start();
 
             //Act
-            gates.IsSDKReady(10);
+            gates.WaitUntilReady(10);
 
             var result = splitCache.GetSplit("condition_and");
 

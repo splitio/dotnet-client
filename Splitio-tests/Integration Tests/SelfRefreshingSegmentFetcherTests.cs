@@ -69,11 +69,6 @@ namespace Splitio_Tests.Integration_Tests
             var name = "payed";
             selfRefreshingSegmentFetcher.InitializeSegment(name);
 
-            while(!gates.AreSegmentsReady(1000))
-            {
-                Thread.Sleep(10);
-            }
-
             //Assert
             Assert.IsTrue(segmentCache.IsInSegment(name, "abcdz"));
         }

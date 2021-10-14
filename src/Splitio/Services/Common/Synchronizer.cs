@@ -34,6 +34,7 @@ namespace Splitio.Services.Common
         private readonly IBackOff _backOffSegments;
         private readonly int _onDemandFetchMaxRetries;
         private readonly int _onDemandFetchRetryDelayMs;
+        private readonly FetchOptions _defaultFetchOptions;
 
         public Synchronizer(ISplitFetcher splitFetcher,
             ISelfRefreshingSegmentFetcher segmentFetcher,
@@ -67,6 +68,7 @@ namespace Splitio.Services.Common
             _onDemandFetchRetryDelayMs = onDemandFetchRetryDelayMs;
             _segmentCache = segmentCache;
             _log = log ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
+            _defaultFetchOptions = new FetchOptions();
         }
 
         #region Public Methods
@@ -108,15 +110,15 @@ namespace Splitio.Services.Common
             _segmentFetcher.Clear();
         }
 
-        public void SyncAll(CancellationTokenSource cancellationTokenSource)
+        public bool SyncAll(CancellationTokenSource cancellationTokenSource, bool async = true)
         {
-            _tasksManager.Start(() =>
+            if (async)
             {
-                _splitFetcher.FetchSplits(new FetchOptions()).Wait();
-                _segmentFetcher.FetchAll();
-                _gates.SdkInternalReady();
-                _log.Debug("Spltis and Segments synchronized...");
-            }, cancellationTokenSource, "SyncAll");
+                _tasksManager.Start(() => SyncAll(), cancellationTokenSource, "SyncAll");
+                return true;
+            }
+            
+            return SyncAll();
         }
 
         public async Task SynchronizeSegment(string segmentName, long targetChangeNumber)
@@ -239,15 +241,15 @@ namespace Splitio.Services.Common
                 while (true)
                 {
                     remainingAttempts--;
-                    var segmentNames = await _splitFetcher.FetchSplits(fetchOptions);
+                    var result = await _splitFetcher.FetchSplits(fetchOptions);
 
                     if (targetChangeNumber <= _splitCache.GetChangeNumber())
                     {
-                        return new SyncResult(true, remainingAttempts, segmentNames);
+                        return new SyncResult(true, remainingAttempts, result.SegmentNames);
                     }
                     else if (remainingAttempts <= 0)
                     {
-                        return new SyncResult(false, remainingAttempts, segmentNames);
+                        return new SyncResult(false, remainingAttempts, result.SegmentNames);
                     }
 
                     var delay = withBackoff ? _backOffSplits.GetInterval(inMiliseconds: true) : retryDelayMs.Value;
@@ -260,6 +262,13 @@ namespace Splitio.Services.Common
             }
 
             return new SyncResult(false, 0);
+        }
+
+        private bool SyncAll()
+        {
+            var splitsResult = _splitFetcher.FetchSplits(_defaultFetchOptions).Result;
+
+            return splitsResult.Success && _segmentFetcher.FetchAll();
         }
         #endregion
     }

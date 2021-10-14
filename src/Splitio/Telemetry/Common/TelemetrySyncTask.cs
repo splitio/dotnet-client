@@ -20,16 +20,15 @@ namespace Splitio.Telemetry.Common
         private readonly ISplitCache _splitCache;
         private readonly ISegmentCache _segmentCache;        
         private readonly ISplitLogger _log;
-        private readonly IReadinessGatesCache _gates;
-        private readonly SelfRefreshingConfig _configurationOptions;
+        private readonly IReadinessGatesCache _gates;        
         private readonly IFactoryInstantiationsService _factoryInstantiationsService;
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ITasksManager _tasksManager;
         private readonly CancellationTokenSource _cancellationTokenSource;
+        private readonly SelfRefreshingConfig _configurationOptions;
         private readonly object _lock = new object();
 
-        private bool _running;        
-        private bool _firstTime;
+        private bool _running;
 
         public TelemetrySyncTask(ITelemetryStorageConsumer telemetryStorage,
             ITelemetryAPI telemetryAPI,            
@@ -40,7 +39,6 @@ namespace Splitio.Telemetry.Common
             IFactoryInstantiationsService factoryInstantiationsService,
             IWrapperAdapter wrapperAdapter,
             ITasksManager tasksManager,
-            bool firstTime = true,
             ISplitLogger log = null)
         {
             _telemetryStorageConsumer = telemetryStorage;
@@ -50,7 +48,6 @@ namespace Splitio.Telemetry.Common
             _gates = gates;
             _configurationOptions = configurationOptions;
             _factoryInstantiationsService = factoryInstantiationsService;
-            _firstTime = firstTime;            
             _log = log ?? WrapperAdapter.GetLogger(typeof(TelemetrySyncTask));
             _wrapperAdapter = wrapperAdapter;
             _tasksManager = tasksManager;
@@ -66,13 +63,6 @@ namespace Splitio.Telemetry.Common
                 if (_running) return;
 
                 _running = true;
-
-                if (_firstTime)
-                {
-                    _firstTime = false;
-
-                    _tasksManager.Start(() => RecordConfigInit(), _cancellationTokenSource, "Telemetry ConfigInit.");
-                }
 
                 _tasksManager.Start(() =>
                 {
@@ -96,15 +86,11 @@ namespace Splitio.Telemetry.Common
                 RecordStats();
             }            
         }
-        #endregion
 
-        #region Private Methods
-        private void RecordConfigInit()
+        public void RecordConfigInit()
         {
             try
             {
-                _gates.WaitUntilSdkInternalReady();
-
                 var config = new Config
                 {
                     BURTimeouts = _telemetryStorageConsumer.GetBURTimeouts(),
@@ -146,7 +132,9 @@ namespace Splitio.Telemetry.Common
                 _log.Error("Something were wrong posting Config.", ex);
             }
         }
+        #endregion
 
+        #region Private Methods
         private void RecordStats()
         {
             try

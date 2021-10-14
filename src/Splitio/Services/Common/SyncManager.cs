@@ -2,6 +2,8 @@
 using Splitio.Services.EventSource;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
+using Splitio.Telemetry.Common;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
@@ -19,6 +21,8 @@ namespace Splitio.Services.Common
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly IReadinessGatesCache _gates;
         private readonly ITasksManager _tasksManager;
+        private readonly IWrapperAdapter _wrapperAdapter;
+        private readonly ITelemetrySyncTask _telemetrySyncTask;
         private readonly CancellationTokenSource _shutdownCancellationTokenSource;
         private readonly object _lock = new object();
 
@@ -32,6 +36,8 @@ namespace Splitio.Services.Common
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
             IReadinessGatesCache gates,
             ITasksManager tasksManager,
+            IWrapperAdapter wrapperAdapter,
+            ITelemetrySyncTask telemetrySyncTask,
             ISplitLogger log = null)
         {
             _streamingEnabled = streamingEnabled;
@@ -42,6 +48,8 @@ namespace Splitio.Services.Common
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _gates = gates;
             _tasksManager = tasksManager;
+            _wrapperAdapter = wrapperAdapter;
+            _telemetrySyncTask = telemetrySyncTask;
 
             _sseHandler.ActionEvent += OnProcessFeedbackSSE;
             notificationManagerKeeper.ActionEvent += OnProcessFeedbackSSE;
@@ -52,16 +60,26 @@ namespace Splitio.Services.Common
         #region Public Methods
         public void Start()
         {
-            _synchronizer.SyncAll(_shutdownCancellationTokenSource);
+            _tasksManager.Start(() =>
+            {
+                while (!_synchronizer.SyncAll(_shutdownCancellationTokenSource, async: false))
+                {
+                    _wrapperAdapter.TaskDelay(1000, _shutdownCancellationTokenSource.Token).Wait();
+                }
 
-            if (_streamingEnabled)
-            {
-                 StartStream();
-            }
-            else
-            {
-                StartPoll();
-            }
+                _gates.SetReady();
+
+                _tasksManager.Start(() => _telemetrySyncTask.RecordConfigInit(), new CancellationTokenSource(), "Telemetry ConfigInit.");
+
+                if (_streamingEnabled)
+                {
+                    StartStream();
+                }
+                else
+                {
+                    StartPoll();
+                }
+            }, _shutdownCancellationTokenSource, "SDK Initialization");            
         }
 
         public void Shutdown()

@@ -55,6 +55,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 
             // Act.
             _telemetrySyncTask.Start();
+            _telemetrySyncTask.RecordConfigInit();
             Thread.Sleep(2000);
 
             // Assert.

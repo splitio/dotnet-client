@@ -30,7 +30,7 @@ namespace Splitio.Services.Shared.Classes
                     _log.Warn("The blockMilisecondsUntilReady param has to be higher than 0.");
                 }
                 
-                if (!_gates.IsSDKReady(blockMilisecondsUntilReady))
+                if (!_gates.WaitUntilReady(blockMilisecondsUntilReady))
                 {
                     _telemetryInitProducer.RecordBURTimeout();
                     throw new TimeoutException(string.Format($"SDK was not ready in {blockMilisecondsUntilReady} miliseconds"));
@@ -42,7 +42,7 @@ namespace Splitio.Services.Shared.Classes
         {
             try
             {
-                return _gates.IsSDKReady(0);
+                return _gates.IsReady();
             }
             catch (Exception ex)
             {

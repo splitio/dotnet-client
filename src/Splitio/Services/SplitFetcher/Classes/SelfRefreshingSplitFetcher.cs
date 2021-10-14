@@ -1,5 +1,4 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Interfaces;
@@ -54,7 +53,6 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                     _running = true;
                     _cancelTokenSource = new CancellationTokenSource();
-                    _gates.WaitUntilSdkInternalReady();
 
                     _taskManager.StartPeriodic(() =>
                     {
@@ -81,10 +79,11 @@ namespace Splitio.Services.SplitFetcher.Classes
             _splitCache.Clear();
         }
 
-        public async Task<IList<string>> FetchSplits(FetchOptions fetchOptions)
+        public async Task<FetchResult> FetchSplits(FetchOptions fetchOptions)
         {
             var segmentNames = new List<string>();
             var names = new Dictionary<string, string>();
+            var success = false;
 
             while (true)
             {
@@ -101,7 +100,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                     if (changeNumber >= result.till)
                     {
-                        _gates.SplitsAreReady();
+                        success = true;
                         //There are no new split changes
                         break;
                     }
@@ -126,7 +125,11 @@ namespace Splitio.Services.SplitFetcher.Classes
                 }
             }
 
-            return segmentNames;
+            return new FetchResult
+            {
+                Success = success,
+                SegmentNames = segmentNames
+            };
         }
         #endregion
 

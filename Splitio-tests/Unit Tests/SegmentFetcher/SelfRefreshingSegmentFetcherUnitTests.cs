@@ -27,7 +27,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         {
             // Arrange
             var gates = new InMemoryReadinessGatesCache();
-            gates.SplitsAreReady();
+            gates.SetReady();
             var apiClient = new Mock<ISegmentSdkApiClient>();            
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments = new ConcurrentDictionary<string, Segment>();
@@ -45,7 +45,6 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
 
             // Assert
             Thread.Sleep(5000);
-            Assert.IsTrue(gates.AreSegmentsReady(1));
             Assert.IsTrue(cache.IsInSegment("payed", "abcdz"));
         }
 
@@ -64,10 +63,6 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             apiClient
                 .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
                 .Returns(Task.FromResult(PayedSplitJson));
-
-            gates
-                .Setup(mock => mock.AreSplitsReady(0))
-                .Returns(true);
 
             // Act
             segmentFetcher.InitializeSegment("payed");

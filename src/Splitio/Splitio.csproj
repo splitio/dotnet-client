@@ -10,7 +10,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>6.3.5</Version>
+    <Version>100.0.8-mauro</Version>
     <RootNamespace>Splitio</RootNamespace>    
   </PropertyGroup>
 

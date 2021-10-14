@@ -2,12 +2,8 @@
 {
     public interface IReadinessGatesCache
     {
-        bool AreSplitsReady(int milliseconds);
-        bool IsSDKReady(int milliseconds);
-        bool RegisterSegment(string segmentName);
-        void SegmentIsReady(string segmentName);
-        void SplitsAreReady();
-        void SdkInternalReady();
-        void WaitUntilSdkInternalReady();
+        bool IsReady();
+        bool WaitUntilReady(int milliseconds);
+        void SetReady();
     }
 }

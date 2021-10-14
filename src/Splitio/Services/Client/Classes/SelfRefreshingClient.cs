@@ -230,7 +230,7 @@ namespace Splitio.Services.Client.Classes
                 var pushManager = new PushManager(sseHandler, authApiClient, _wrapperAdapter, _telemetryRuntimeProducer, backoff);
 
                 // SyncManager
-                _syncManager = new SyncManager(_config.StreamingEnabled, synchronizer, pushManager, sseHandler, notificationManagerKeeper, _telemetryRuntimeProducer, _gates, _tasksManager);
+                _syncManager = new SyncManager(_config.StreamingEnabled, synchronizer, pushManager, sseHandler, notificationManagerKeeper, _telemetryRuntimeProducer, _gates, _tasksManager, _wrapperAdapter, _telemetrySyncTask);
             }
             catch (Exception ex)
             {

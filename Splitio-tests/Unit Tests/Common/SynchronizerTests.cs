@@ -104,13 +104,16 @@ namespace Splitio_Tests.Unit_Tests.Common
         public void SyncAll_ShouldStartFetchSplitsAndSegments()
         {
             // Act.
+            _splitFetcher
+                .Setup(mock => mock.FetchSplits(It.IsAny<FetchOptions>()))
+                .ReturnsAsync(new FetchResult { Success = true });
+
             _synchronizer.SyncAll(new CancellationTokenSource());
 
             // Assert.
             Thread.Sleep(2000);
             _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Once);            
             _segmentFetcher.Verify(mock => mock.FetchAll(), Times.Once);
-            _gates.Verify(mock => mock.SdkInternalReady(), Times.Once);
         }
 
         [TestMethod]
@@ -214,6 +217,10 @@ namespace Splitio_Tests.Unit_Tests.Common
         public void SynchronizeSplits_ShouldFetchSplits()
         {
             // Arrange.
+            _splitFetcher
+                .Setup(mock => mock.FetchSplits(It.IsAny<FetchOptions>()))
+                .ReturnsAsync(new FetchResult());
+
             _splitCache
                 .SetupSequence(mock => mock.GetChangeNumber())
                 .Returns(-1)
@@ -248,6 +255,10 @@ namespace Splitio_Tests.Unit_Tests.Common
         public void SynchronizeSplits_With5Attempts()
         {
             // Arrange.
+            _splitFetcher
+                .Setup(mock => mock.FetchSplits(It.IsAny<FetchOptions>()))
+                .ReturnsAsync(new FetchResult());
+
             _splitCache
                 .SetupSequence(mock => mock.GetChangeNumber())
                 .Returns(-1)
@@ -270,6 +281,10 @@ namespace Splitio_Tests.Unit_Tests.Common
         public void SynchronizeSplits_WithCDNBypassed()
         {
             // Arrange.
+            _splitFetcher
+                .Setup(mock => mock.FetchSplits(It.IsAny<FetchOptions>()))
+                .ReturnsAsync(new FetchResult());
+
             _splitCache
                 .SetupSequence(mock => mock.GetChangeNumber())
                 .Returns(-1)

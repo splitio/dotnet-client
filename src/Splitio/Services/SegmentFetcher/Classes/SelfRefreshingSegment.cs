@@ -25,11 +25,12 @@ namespace Splitio.Services.SegmentFetcher.Classes
             _segmentChangeFetcher = segmentChangeFetcher;
             _segmentCache = segmentCache;
             _gates = gates;
-            _gates.RegisterSegment(name);
         }
 
-        public async Task FetchSegment(FetchOptions fetchOptions)
+        public async Task<bool> FetchSegment(FetchOptions fetchOptions)
         {
+            var success = false;
+
             while (true)
             {
                 var changeNumber = _segmentCache.GetChangeNumber(Name);
@@ -45,7 +46,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                     if (changeNumber >= response.till)
                     {
-                        _gates.SegmentIsReady(Name);
+                        success = true;
                         break;
                     }
 
@@ -82,6 +83,8 @@ namespace Splitio.Services.SegmentFetcher.Classes
                     }
                 }
             }
+
+            return success;
         }
     }
 }

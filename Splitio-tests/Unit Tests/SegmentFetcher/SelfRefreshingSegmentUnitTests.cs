@@ -36,37 +36,6 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         }
 
         [TestMethod]
-        public void FetchSegmentShouldUpdateReadinessGatesWhenNoMoreChanges()
-        {
-            //Arrange
-            var gates = new InMemoryReadinessGatesCache();
-            var apiClient = new Mock<ISegmentSdkApiClient>();
-            apiClient
-            .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
-            .Returns(Task.FromResult(@"{
-                          'name': 'payed',
-                          'added': [
-                            'abcdz',
-                            'bcadz',
-                            'xzydz'
-                          ],
-                          'removed': [],
-                          'since': -1,
-                          'till': -1
-                        }"));
-            var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
-            var segments = new ConcurrentDictionary<string, Segment>();
-            var cache = new InMemorySegmentCache(segments);
-            var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, gates, cache);
-
-            //Act
-            segmentFetcher.FetchSegment(new FetchOptions());
-
-            //Assert
-            Assert.IsTrue(gates.AreSegmentsReady(1));
-        }
-
-        [TestMethod]
         public void FetchSegmentShouldUpdateSegmentsCache()
         {
             //Arrange

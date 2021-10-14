@@ -62,26 +62,14 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 _tasksManager.Start(() =>
                 {
-                    while (_running)
+                    //Delay first execution until expected time has passed
+                    var intervalInMilliseconds = _interval * 1000;
+                    _wrappedAdapter.TaskDelay(intervalInMilliseconds).Wait();
+
+                    if (_running)
                     {
-                        if (_gates.AreSplitsReady(0) && _running)
-                        {
-                            //Delay first execution until expected time has passed
-                            var intervalInMilliseconds = _interval * 1000;
-                            _wrappedAdapter.TaskDelay(intervalInMilliseconds).Wait();
-
-                            if (_running)
-                            {
-                                _tasksManager.Start(() => _worker.ExecuteTasks(_cancelTokenSource.Token), _cancelTokenSource, "Segments Fetcher Worker.");
-                                _tasksManager.StartPeriodic(() => AddSegmentsToQueue(), intervalInMilliseconds, _cancelTokenSource, "Segmennnnts Fetcher Add to Queue.");
-                            }
-
-                            break;
-                        }
-
-                        if (!_running) break;
-
-                        _wrappedAdapter.TaskDelay(500).Wait();
+                        _tasksManager.Start(() => _worker.ExecuteTasks(_cancelTokenSource.Token), _cancelTokenSource, "Segments Fetcher Worker.");
+                        _tasksManager.StartPeriodic(() => AddSegmentsToQueue(), intervalInMilliseconds, _cancelTokenSource, "Segmennnnts Fetcher Add to Queue.");
                     }
                 }, _cancelTokenSource, "Main Segments Fetcher.");
             }
@@ -126,12 +114,12 @@ namespace Splitio.Services.SegmentFetcher.Classes
             }
         }
 
-        public void FetchAll()
+        public bool FetchAll()
         {
-            if (_segments.Count == 0) return;
+            if (_segments.Count == 0) return true;
 
             var fetchOptions = new FetchOptions();
-            var tasks = new List<Task>();
+            var tasks = new List<Task<bool>>();
 
             foreach (var segment in _segments.Values)
             {
@@ -139,6 +127,8 @@ namespace Splitio.Services.SegmentFetcher.Classes
             }
 
             Task.WaitAll(tasks.ToArray());
+
+            return tasks.All(t => t.Result == true);
         }
 
         public async Task Fetch(string segmentName, FetchOptions fetchOptions)
