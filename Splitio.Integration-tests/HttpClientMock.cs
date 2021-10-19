@@ -12,7 +12,7 @@ namespace Splitio.Integration_tests
 {
     public class HttpClientMock : IDisposable
     {
-        private readonly FluentMockServer _mockServer;
+        private readonly WireMockServer _mockServer;
         private readonly string rootFilePath;
 
         public HttpClientMock()
@@ -23,7 +23,7 @@ namespace Splitio.Integration_tests
             rootFilePath = @"Resources\";
 #endif
 
-            _mockServer = FluentMockServer.Start();
+            _mockServer = WireMockServer.Start();
         }
 
         #region SplitChanges
@@ -276,64 +276,45 @@ namespace Splitio.Integration_tests
             return _mockServer.Urls.FirstOrDefault();
         }
 
-        public void ShutdownServer()
+        public IEnumerable<ILogEntry> GetLogs()
         {
-            _mockServer.Stop();
+            return _mockServer.LogEntries;
         }
 
-        public int GetPort()
-        {
-            return _mockServer.Ports.First();
-        }
-
-        public List<LogEntry> GetLogs()
-        {
-            return _mockServer.LogEntries.ToList();
-        }
-
-        public List<LogEntry> GetImpressionLogs()
-        {          
-            return _mockServer
-                .LogEntries
-                .Where(l => l.RequestMessage.AbsolutePath.Contains("api/testImpressions/bulk"))
-                .ToList();
-        }
-
-        public List<LogEntry> GetImpressionCountsLogs()
+        public IEnumerable<LogEntry> GetImpressionLogs()
         {
             return _mockServer
-                .LogEntries
-                .Where(l => l.RequestMessage.AbsolutePath.Contains("api/testImpressions/count"))
-                .ToList();
+                .FindLogEntries(Request.Create().WithPath("/api/testImpressions/bulk").UsingPost());
         }
 
-        public List<LogEntry> GetEventsLog()
+        public IEnumerable<LogEntry> GetImpressionCountsLogs()
         {
             return _mockServer
-                .LogEntries
-                .Where(l => l.RequestMessage.AbsolutePath.Contains("api/events/bulk"))
-                .ToList();
+                .FindLogEntries(Request.Create().WithPath("/api/testImpressions/count").UsingPost());
         }
 
-        public List<LogEntry> GetMetricsConfigLog()
+        public IEnumerable<ILogEntry> GetEventsLog()
         {
             return _mockServer
-                .LogEntries
-                .Where(l => l.RequestMessage.AbsolutePath.Contains("metrics/config"))
-                .ToList();
+                .FindLogEntries(Request.Create().WithPath("/api/events/bulk").UsingPost());
         }
 
-        public List<LogEntry> GetMetricsUsageLog()
+        public IEnumerable<ILogEntry> GetMetricsConfigLog()
         {
             return _mockServer
-                .LogEntries
-                .Where(l => l.RequestMessage.AbsolutePath.Contains("metrics/usage"))
-                .ToList();
+                .FindLogEntries(Request.Create().WithPath("/metrics/config").UsingPost());
+        }
+
+        public IEnumerable<ILogEntry> GetMetricsUsageLog()
+        {
+            return _mockServer
+                .FindLogEntries(Request.Create().WithPath("/metrics/usage").UsingPost());
         }
 
         public void Dispose()
         {
             _mockServer.Stop();
+            _mockServer.Dispose();
         }
     }
 }

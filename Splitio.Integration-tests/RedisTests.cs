@@ -93,7 +93,7 @@ namespace Splitio.Integration_tests
                 Assert.IsFalse(key.ToString().Contains("/NA/"));
             }
 
-            ShutdownServer();
+            _redisAdapter.Flush();
         }
 
         [TestMethod]
@@ -154,11 +154,11 @@ namespace Splitio.Integration_tests
                 Assert.IsTrue(key.ToString().Contains("/NA/"));
             }
 
-            ShutdownServer();
+            _redisAdapter.Flush();
         }
 
         #region Protected Methods
-        protected override ConfigurationOptions GetConfigurationOptions(HttpClientMock httpClientMock = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null)
+        protected override ConfigurationOptions GetConfigurationOptions(string url = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null)
         {
             _impressionListener = new IntegrationTestsImpressionListener(50);
 
@@ -176,7 +176,6 @@ namespace Splitio.Integration_tests
                 FeaturesRefreshRate = featuresRefreshRate ?? 1,
                 SegmentsRefreshRate = 1,
                 ImpressionsRefreshRate = 1,
-                //MetricsRefreshRate = 1,
                 EventsPushRate = eventsPushRate ?? 1,
                 IPAddressesEnabled = ipAddressesEnabled,
                 CacheAdapterConfig = cacheConfig,
@@ -189,11 +188,6 @@ namespace Splitio.Integration_tests
             LoadSplits();
 
             return null;
-        }
-
-        protected override void ShutdownServer(HttpClientMock httpClientMock = null)
-        {
-            _redisAdapter.Flush();
         }
 
         protected override void AssertSentImpressions(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)

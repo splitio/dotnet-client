@@ -2,7 +2,6 @@
 using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
-using Splitio.Services.Client.Interfaces;
 using System.Threading;
 
 namespace Splitio.Integration_tests
@@ -517,27 +516,6 @@ namespace Splitio.Integration_tests
                 Assert.AreEqual("after_fetch", result);
 
                 client.Destroy();
-            }
-        }
-
-        private void BlockUntilReady(ISplitClient client)
-        {
-            var maxBUR = 100000;
-            var time = 1000;            
-
-            while (time < maxBUR)
-            {
-
-                try
-                {
-                    client.BlockUntilReady(time);
-                    break;
-                }
-                catch
-                {
-                    time += time;
-                    continue;
-                }
             }
         }
     }
