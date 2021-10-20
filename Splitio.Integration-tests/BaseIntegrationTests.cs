@@ -17,8 +17,6 @@ namespace Splitio.Integration_tests
     [TestClass]
     public abstract class BaseIntegrationTests
     {
-        protected IImpressionListener _impressionListener;
-
         #region GetTreatment
         [TestMethod]
         public void GetTreatment_WithtBUR_WithMultipleCalls_ReturnsTreatments()
@@ -26,7 +24,8 @@ namespace Splitio.Integration_tests
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
             {
-                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
+                var impressionListener = new IntegrationTestsImpressionListener(50);
+                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
 
                 var apikey = "base-apikey1";
 
@@ -51,7 +50,7 @@ namespace Splitio.Integration_tests
 
                 // Validate impressions in listener.
                 Thread.Sleep(2000);
-                var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
+                var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
                 Assert.AreEqual(4, keyImpressions.Count);
@@ -92,7 +91,8 @@ namespace Splitio.Integration_tests
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
             {
-                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
+                var impressionListener = new IntegrationTestsImpressionListener(50);
+                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
 
                 var apikey = "base-apikey2";
 
@@ -117,7 +117,7 @@ namespace Splitio.Integration_tests
 
                 // Validate impressions in listener.
                 Thread.Sleep(2000);
-                var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
+                var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
                 Assert.AreEqual(2, keyImpressions.Count);
@@ -148,7 +148,8 @@ namespace Splitio.Integration_tests
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
             {
-                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
+                var impressionListener = new IntegrationTestsImpressionListener(50);
+                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
 
                 var apikey = "base-apikey3";
 
@@ -165,7 +166,7 @@ namespace Splitio.Integration_tests
 
                 // Validate impressions in listener.
                 Thread.Sleep(2000);
-                var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
+                var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
                 Assert.AreEqual(0, keyImpressions.Count);
@@ -185,7 +186,8 @@ namespace Splitio.Integration_tests
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
             {
-                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
+                var impressionListener = new IntegrationTestsImpressionListener(50);
+                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
 
                 var apikey = "base-apikey4";
 
@@ -215,7 +217,7 @@ namespace Splitio.Integration_tests
 
                 // Validate impressions.
                 Thread.Sleep(2000);
-                var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
+                var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
                 Assert.AreEqual(4, keyImpressions.Count);
@@ -256,7 +258,8 @@ namespace Splitio.Integration_tests
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
             {
-                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
+                var impressionListener = new IntegrationTestsImpressionListener(50);
+                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
 
                 var apikey = "base-apikey5";
 
@@ -286,7 +289,7 @@ namespace Splitio.Integration_tests
 
                 // Validate impressions.
                 Thread.Sleep(3000);
-                var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
+                var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
                 Assert.AreEqual(2, keyImpressions.Count);
@@ -315,7 +318,8 @@ namespace Splitio.Integration_tests
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
             {
-                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
+                var impressionListener = new IntegrationTestsImpressionListener(50);
+                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
 
                 var apikey = "base-apikey6";
 
@@ -332,7 +336,7 @@ namespace Splitio.Integration_tests
 
                 // Validate impressions in listener.
                 Thread.Sleep(2000);
-                var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
+                var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
                 Assert.AreEqual(0, keyImpressions.Count);
@@ -352,7 +356,8 @@ namespace Splitio.Integration_tests
             // Arrange.
             using (var httpClientMock = GetHttpClientMock())
             {
-                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
+                var impressionListener = new IntegrationTestsImpressionListener(50);
+                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
 
                 var apikey = "base-apikey7";
 
@@ -373,7 +378,7 @@ namespace Splitio.Integration_tests
 
                 // Validate impressions.
                 Thread.Sleep(2000);
-                var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
+                var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
                 Assert.AreEqual(3, keyImpressions.Count);
@@ -408,7 +413,8 @@ namespace Splitio.Integration_tests
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
             {
-                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
+                var impressionListener = new IntegrationTestsImpressionListener(50);
+                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
 
                 var apikey = "base-apikey8";
 
@@ -435,7 +441,7 @@ namespace Splitio.Integration_tests
 
                 // Validate impressions.
                 Thread.Sleep(2000);
-                var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
+                var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
                 Assert.AreEqual(4, keyImpressions.Count);
@@ -476,7 +482,8 @@ namespace Splitio.Integration_tests
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
             {
-                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
+                var impressionListener = new IntegrationTestsImpressionListener(50);
+                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
 
                 var apikey = "base-apikey9";
 
@@ -499,7 +506,7 @@ namespace Splitio.Integration_tests
 
                 // Validate impressions.
                 Thread.Sleep(2000);
-                var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
+                var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
                 var impression1 = keyImpressions
@@ -536,7 +543,8 @@ namespace Splitio.Integration_tests
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
             {
-                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
+                var impressionListener = new IntegrationTestsImpressionListener(50);
+                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
 
                 var apikey = "base-apikey10";
 
@@ -561,7 +569,7 @@ namespace Splitio.Integration_tests
 
                 // Validate impressions.
                 Thread.Sleep(2000);
-                var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
+                var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
                 var impression1 = keyImpressions
@@ -596,7 +604,8 @@ namespace Splitio.Integration_tests
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
             {
-                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
+                var impressionListener = new IntegrationTestsImpressionListener(50);
+                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
 
                 var apikey = "base-apikey11";
 
@@ -631,7 +640,7 @@ namespace Splitio.Integration_tests
 
                 // Validate impressions.
                 Thread.Sleep(2000);
-                var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
+                var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
                 Assert.AreEqual(4, keyImpressions.Count);
@@ -672,7 +681,8 @@ namespace Splitio.Integration_tests
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
             {
-                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
+                var impressionListener = new IntegrationTestsImpressionListener(50);
+                var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
 
                 var apikey = "base-apikey12";
 
@@ -699,7 +709,7 @@ namespace Splitio.Integration_tests
 
                 // Validate impressions.
                 Thread.Sleep(2000);
-                var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
+                var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
                 Assert.AreEqual(3, keyImpressions.Count);
@@ -1079,7 +1089,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual(treatment, impression.treatment);
         }
         
-        protected abstract ConfigurationOptions GetConfigurationOptions(string url = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null);
+        protected abstract ConfigurationOptions GetConfigurationOptions(string url = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null);
 
         protected abstract void AssertSentImpressions(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions);
 

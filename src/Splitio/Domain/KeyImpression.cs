@@ -30,6 +30,10 @@ namespace Splitio.Domain
         public long? previousTime { get; set; }
         [JsonIgnore]
         public bool Optimized { get; set; }
+
+        public override string ToString()
+        {
+            return feature + "::" + keyName + "::" + treatment + "::" + label + "::" + bucketingKey;
+        }
     }
-    
 }
