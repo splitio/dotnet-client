@@ -45,21 +45,18 @@ namespace Splitio.Services.SplitFetcher.Classes
         #region Public Methods
         public void Start()
         {
-            _taskManager.Start(() =>
+            lock (_lock)
             {
-                lock (_lock)
+                if (_running) return;
+
+                _running = true;
+                _cancelTokenSource = new CancellationTokenSource();
+
+                _taskManager.StartPeriodic(async () =>
                 {
-                    if (_running) return;
-
-                    _running = true;
-                    _cancelTokenSource = new CancellationTokenSource();
-
-                    _taskManager.StartPeriodic(() =>
-                    {
-                        FetchSplits(new FetchOptions()).Wait();
-                    }, _interval * 1000, _cancelTokenSource, "Splits Fetcher.");
-                }
-            }, new CancellationTokenSource(), "Main Splits Fetcher.");
+                    await FetchSplits(new FetchOptions());
+                }, _interval * 1000, _cancelTokenSource, "Splits Fetcher.");
+            }
         }
 
         public void Stop()

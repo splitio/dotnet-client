@@ -89,6 +89,13 @@ namespace Splitio.Telemetry.Common
 
         public void RecordConfigInit()
         {
+            _tasksManager.Start(() => RecordInit(), new CancellationTokenSource(), "Telemetry ConfigInit.");
+        }
+        #endregion
+
+        #region Private Methods
+        private void RecordInit()
+        {
             try
             {
                 var config = new Config
@@ -132,9 +139,7 @@ namespace Splitio.Telemetry.Common
                 _log.Error("Something were wrong posting Config.", ex);
             }
         }
-        #endregion
 
-        #region Private Methods
         private void RecordStats()
         {
             try

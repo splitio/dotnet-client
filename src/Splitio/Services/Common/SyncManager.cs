@@ -7,6 +7,7 @@ using Splitio.Telemetry.Common;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
+using System;
 using System.Threading;
 
 namespace Splitio.Services.Common
@@ -60,26 +61,37 @@ namespace Splitio.Services.Common
         #region Public Methods
         public void Start()
         {
-            _tasksManager.Start(() =>
+            _tasksManager.Start(async () =>
             {
-                while (!_synchronizer.SyncAll(_shutdownCancellationTokenSource, async: false))
+                try
                 {
-                    _wrapperAdapter.TaskDelay(1000, _shutdownCancellationTokenSource.Token).Wait();
+                    while (!_synchronizer.SyncAll(_shutdownCancellationTokenSource, async: false))
+                    {
+                        await _wrapperAdapter.TaskDelay(500);
+                    }
+
+                    _gates.SetReady();
+                    _telemetrySyncTask.RecordConfigInit();
+                    _synchronizer.StartPeriodicDataRecording();
+
+                    if (_streamingEnabled)
+                    {
+                        _log.Debug("Starting streaming mode...");
+                        var connected = await _pushManager.StartSse();
+
+                        if (connected) return;
+                    }
+
+                    _log.Debug("Starting polling mode ...");
+                    _synchronizer.StartPeriodicFetching();
+                    _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
                 }
-
-                _gates.SetReady();
-
-                _tasksManager.Start(() => _telemetrySyncTask.RecordConfigInit(), new CancellationTokenSource(), "Telemetry ConfigInit.");
-
-                if (_streamingEnabled)
+                catch (Exception ex)
                 {
-                    StartStream();
+                    _log.Debug("Exception initialization SDK.", ex);
                 }
-                else
-                {
-                    StartPoll();
-                }
-            }, _shutdownCancellationTokenSource, "SDK Initialization");            
+                
+            }, _shutdownCancellationTokenSource, "SDK Initialization");
         }
 
         public void Shutdown()
@@ -123,30 +135,6 @@ namespace Splitio.Services.Common
         #endregion
 
         #region Private Methods
-        private void StartPoll()
-        {
-            _log.Debug("Starting polling mode ...");
-
-            _synchronizer.StartPeriodicFetching();
-            _synchronizer.StartPeriodicDataRecording();
-            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
-        }
-
-        private void StartStream()
-        {
-            _log.Debug("Starting streaming mode...");            
-
-            _synchronizer.StartPeriodicDataRecording();
-
-            _tasksManager.Start(() =>
-            {
-                if (!_pushManager.StartSse().Result)
-                {
-                    _synchronizer.StartPeriodicFetching();
-                }
-            }, _shutdownCancellationTokenSource, "Start Streaming");
-        }        
-
         private void ProcessConnected()
         {
             lock (_lock)
