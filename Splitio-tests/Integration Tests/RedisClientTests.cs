@@ -51,7 +51,7 @@ namespace Splitio_Tests.Integration_Tests
             //Arrange
             var client = new RedisClient(config, API_KEY, _logMock.Object);
 
-            client.BlockUntilReady(1000);
+            client.BlockUntilReady(5000);
 
             //Act           
             var result = client.GetTreatment("test", "always_on", null);
@@ -67,7 +67,7 @@ namespace Splitio_Tests.Integration_Tests
             //Arrange
             var client = new RedisClient(config, API_KEY, _logMock.Object);
 
-            client.BlockUntilReady(1000);
+            client.BlockUntilReady(5000);
 
             //Act           
             var result = client.GetTreatment("test", "always_off", null);
@@ -82,7 +82,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var client = new RedisClient(config, API_KEY, _logMock.Object);
-            client.BlockUntilReady(1000);
+            client.BlockUntilReady(5000);
 
             //Act           
             var result = client.GetTreatment("test", "always_control", null);
@@ -103,7 +103,7 @@ namespace Splitio_Tests.Integration_Tests
 
             var client = new RedisClient(config, API_KEY, _logMock.Object);
 
-            client.BlockUntilReady(1000);
+            client.BlockUntilReady(5000);
 
             //Act           
             var result = client.GetTreatments("test", features, null);
@@ -126,7 +126,7 @@ namespace Splitio_Tests.Integration_Tests
 
             var client = new RedisClient(config, API_KEY, _logMock.Object);
 
-            client.BlockUntilReady(1000);
+            client.BlockUntilReady(5000);
 
             //Act           
             var result = client.GetTreatments("test", features, null);
@@ -222,7 +222,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var client = new RedisClient(config, API_KEY, _logMock.Object);
-            client.BlockUntilReady(1000);
+            client.BlockUntilReady(5000);
 
             //Act
             client.Destroy();
