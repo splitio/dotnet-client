@@ -59,12 +59,11 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 _running = true;
                 _cancelTokenSource = new CancellationTokenSource();
-                
-                //Delay first execution until expected time has passed
-                var intervalInMilliseconds = _interval * 1000;
 
                 _tasksManager.Start(() =>
                 {
+                    //Delay first execution until expected time has passed
+                    var intervalInMilliseconds = _interval * 1000;
                     _wrappedAdapter.TaskDelay(intervalInMilliseconds).Wait();
 
                     if (_running)
