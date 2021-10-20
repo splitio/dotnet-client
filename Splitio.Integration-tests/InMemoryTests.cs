@@ -335,7 +335,8 @@ namespace Splitio.Integration_tests
             // Arrange.
             using (var httpClientMock = GetHttpClientMock())
             {
-                var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
+                var impressionListener = new IntegrationTestsImpressionListener(50);
+                var configurations = GetConfigurationOptions(httpClientMock.GetUrl(), impressionListener: impressionListener);
 
                 var apikey = "apikey-telemetry";
 
