@@ -47,7 +47,7 @@ namespace Splitio.Services.SplitFetcher.Classes
         {
             lock (_lock)
             {
-                if (_running) return;
+                if (_running || _gates.IsDestroyed()) return;
 
                 _running = true;
                 _cancelTokenSource = new CancellationTokenSource();

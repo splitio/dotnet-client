@@ -1,7 +1,6 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.Events.Classes;
 using Splitio.Services.Events.Interfaces;
@@ -38,7 +37,6 @@ namespace Splitio.Services.Client.Classes
         private const int InitialCapacity = 31;
         private readonly long _startSessionMs;
 
-        private IReadinessGatesCache _gates;
         private ISplitFetcher _splitFetcher;
         private ISplitSdkApiClient _splitSdkApiClient;
         private ISegmentSdkApiClient _segmentSdkApiClient;
@@ -57,10 +55,8 @@ namespace Splitio.Services.Client.Classes
         {
             _config = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
             LabelsEnabled = _config.LabelsEnabled;
-            Destroyed = false;
             
             ApiKey = apiKey;
-            BuildSdkReadinessGates();
             BuildSplitCache();
             BuildSegmentCache();
             BuildTelemetryStorage();
@@ -82,7 +78,7 @@ namespace Splitio.Services.Client.Classes
         #region Public Methods
         public override void Destroy()
         {
-            if (!Destroyed)
+            if (!_gates.IsDestroyed())
             {
                 _telemetryRuntimeProducer.RecordSessionLength(CurrentTimeHelper.CurrentTimeMillis() - _startSessionMs);
                 Stop();
@@ -92,11 +88,6 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Private Methods
-        private void BuildSdkReadinessGates()
-        {
-            _gates = new InMemoryReadinessGatesCache();
-        }
-
         private void BuildSplitCache()
         {
             _splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(_config.ConcurrencyLevel, InitialCapacity));

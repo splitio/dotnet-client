@@ -61,13 +61,13 @@ namespace Splitio.Services.Common
         #region Public Methods
         public void Start()
         {
-            _tasksManager.Start(async () =>
+            _tasksManager.Start(() =>
             {
                 try
                 {
                     while (!_synchronizer.SyncAll(_shutdownCancellationTokenSource, async: false))
                     {
-                        await _wrapperAdapter.TaskDelay(500);
+                        _wrapperAdapter.TaskDelay(500).Wait();
                     }
 
                     _gates.SetReady();
@@ -77,7 +77,7 @@ namespace Splitio.Services.Common
                     if (_streamingEnabled)
                     {
                         _log.Debug("Starting streaming mode...");
-                        var connected = await _pushManager.StartSse();
+                        var connected = _pushManager.StartSse().Result;
 
                         if (connected) return;
                     }
@@ -96,12 +96,12 @@ namespace Splitio.Services.Common
 
         public void Shutdown()
         {
-            _shutdownCancellationTokenSource.Cancel();
-            _shutdownCancellationTokenSource.Dispose();
             _synchronizer.StopPeriodicFetching();
             _synchronizer.ClearFetchersCache();
             _synchronizer.StopPeriodicDataRecording();
             _pushManager.StopSse();
+            _shutdownCancellationTokenSource.Cancel();
+            _shutdownCancellationTokenSource.Dispose();
         }
 
         // public for tests

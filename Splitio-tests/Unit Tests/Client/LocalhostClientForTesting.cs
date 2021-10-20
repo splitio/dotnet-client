@@ -8,10 +8,7 @@ namespace Splitio_Tests.Unit_Tests.Client
     {
         public LocalhostClientForTesting(string filePath,
             ISplitLogger log = null,
-            ISplitter splitter = null,
-            bool isDestroyed = false) : base(filePath, log)
-        {
-            Destroyed = isDestroyed;
-        }
+            ISplitter splitter = null) : base(filePath, log)
+        { }
     }
 }

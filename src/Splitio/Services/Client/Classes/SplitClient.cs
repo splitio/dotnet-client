@@ -34,7 +34,6 @@ namespace Splitio.Services.Client.Classes
         protected readonly IConfigService _configService;
 
         protected bool LabelsEnabled;
-        protected bool Destroyed;
         protected string ApiKey;
 
         protected ISplitManager _manager;
@@ -52,6 +51,7 @@ namespace Splitio.Services.Client.Classes
         protected ITelemetryEvaluationProducer _telemetryEvaluationProducer;
         protected ITelemetryInitProducer _telemetryInitProducer;
         protected ITasksManager _tasksManager;
+        protected IReadinessGatesCache _gates;
 
         public SplitClient(ISplitLogger log)
         {
@@ -64,6 +64,7 @@ namespace Splitio.Services.Client.Classes
             _wrapperAdapter = new WrapperAdapter();
             _configService = new ConfigService(_wrapperAdapter, _log);
             _tasksManager = new TasksManager(_wrapperAdapter);
+            _gates = new InMemoryReadinessGatesCache();
         }
 
         #region Public Methods
@@ -127,7 +128,7 @@ namespace Splitio.Services.Client.Classes
 
         public virtual bool Track(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null)
         {
-            if (Destroyed) return false;
+            if (_gates.IsDestroyed()) return false;
 
             using (var clock = new Util.SplitStopwatch())
             {
@@ -180,15 +181,15 @@ namespace Splitio.Services.Client.Classes
 
         public bool IsDestroyed()
         {
-            return Destroyed;
+            return _gates.IsDestroyed();
         }
 
         public virtual void Destroy()
         {
-            if (!Destroyed)
+            if (!_gates.IsDestroyed())
             {
                 _factoryInstantiationsService.Decrease(ApiKey);
-                Destroyed = true;
+                _gates.SetDestroy();
             }
         }
 
@@ -301,7 +302,7 @@ namespace Splitio.Services.Client.Classes
                 return false;
             }
 
-            if (Destroyed)
+            if (_gates.IsDestroyed())
             {
                 _log.Error("Client has already been destroyed - No calls possible");
                 return false;

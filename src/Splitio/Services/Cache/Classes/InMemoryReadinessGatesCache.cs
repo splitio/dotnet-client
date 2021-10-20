@@ -9,6 +9,7 @@ namespace Splitio.Services.Client.Classes
     {
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(InMemoryReadinessGatesCache));
         private readonly CountdownEvent _sdkReady = new CountdownEvent(1);
+        private readonly CountdownEvent _sdkDestroyed = new CountdownEvent(1);
 
         public bool IsReady()
         {
@@ -23,6 +24,16 @@ namespace Splitio.Services.Client.Classes
         public void SetReady()
         {
             _sdkReady.Signal();
+        }
+
+        public void SetDestroy()
+        {
+            _sdkDestroyed.Signal();
+        }
+
+        public bool IsDestroyed()
+        {
+            return _sdkDestroyed.IsSet;
         }
     }
 }

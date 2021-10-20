@@ -5,5 +5,7 @@
         bool IsReady();
         bool WaitUntilReady(int milliseconds);
         void SetReady();
+        void SetDestroy();
+        bool IsDestroyed();
     }
 }
