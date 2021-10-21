@@ -465,7 +465,7 @@ namespace Splitio.Integration_tests
                 .Where(si => impressionExpected.keyName == si.K)
                 .Where(si => impressionExpected.label == si.R)
                 .Where(si => impressionExpected.treatment == si.T)
-                .Any(), impressionExpected.ToString());
+                .Any());
         }
 
         protected override void AssertSentEvents(List<EventBackend> eventsExpected, HttpClientMock httpClientMock = null, int sleepTime = 5000, int? eventsCount = null, bool validateEvents = true)

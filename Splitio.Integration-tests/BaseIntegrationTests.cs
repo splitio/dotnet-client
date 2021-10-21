@@ -885,11 +885,11 @@ namespace Splitio.Integration_tests
 
                     // Assert. 
                     Assert.IsTrue(result);
+                    Thread.Sleep(1000);
                 }
 
                 //Validate Events sent to the be.
                 AssertSentEvents(events, httpClientMock);
-
                 client.Destroy();
             }
         }
@@ -930,6 +930,7 @@ namespace Splitio.Integration_tests
 
                     // Assert. 
                     Assert.IsTrue(result);
+                    Thread.Sleep(1000);
                 }
 
                 //Validate Events sent to the be.
@@ -978,6 +979,8 @@ namespace Splitio.Integration_tests
                         Assert.IsFalse(result);
                     else
                         Assert.IsTrue(result);
+
+                    Thread.Sleep(1000);
                 }
 
                 events = events
@@ -986,7 +989,6 @@ namespace Splitio.Integration_tests
 
                 //Validate Events sent to the be.
                 AssertSentEvents(events, httpClientMock);
-
                 client.Destroy();
             }
         }
@@ -1033,7 +1035,6 @@ namespace Splitio.Integration_tests
 
                 //Validate Events sent to the be.
                 AssertSentEvents(events, httpClientMock, sleepTime: 1000, eventsCount: 3, validateEvents: false);
-
                 client.Destroy();
             }
         }
