@@ -468,7 +468,7 @@ namespace Splitio.Integration_tests
                 .Any(), impressionExpected.ToString());
         }
 
-        protected override void AssertSentEvents(List<EventBackend> eventsExpected, HttpClientMock httpClientMock = null, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true)
+        protected override void AssertSentEvents(List<EventBackend> eventsExpected, HttpClientMock httpClientMock = null, int sleepTime = 5000, int? eventsCount = null, bool validateEvents = true)
         {
             Thread.Sleep(sleepTime);
 

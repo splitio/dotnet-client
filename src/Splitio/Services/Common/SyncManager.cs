@@ -65,7 +65,7 @@ namespace Splitio.Services.Common
             {
                 try
                 {
-                    while (!_synchronizer.SyncAll(_shutdownCancellationTokenSource, async: false))
+                    while (!_synchronizer.SyncAll(_shutdownCancellationTokenSource, asynchronous: false))
                     {
                         _wrapperAdapter.TaskDelay(500).Wait();
                     }

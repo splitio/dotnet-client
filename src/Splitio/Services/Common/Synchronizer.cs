@@ -110,9 +110,9 @@ namespace Splitio.Services.Common
             _segmentFetcher.Clear();
         }
 
-        public bool SyncAll(CancellationTokenSource cancellationTokenSource, bool async = true)
+        public bool SyncAll(CancellationTokenSource cancellationTokenSource, bool asynchronous = true)
         {
-            if (async)
+            if (asynchronous)
             {
                 _tasksManager.Start(() => SyncAll(), cancellationTokenSource, "SyncAll");
                 return true;
