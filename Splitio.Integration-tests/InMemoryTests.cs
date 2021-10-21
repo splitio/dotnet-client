@@ -451,9 +451,14 @@ namespace Splitio.Integration_tests
 
             foreach (var expectedImp in expectedImpressions)
             {
-                var keyImpressions = sentImpressions.FirstOrDefault(si => si.F.Equals(expectedImp.feature)).I;
+                var impressions = new List<ImpressionData>();
 
-                AssertImpression(expectedImp, keyImpressions);
+                foreach (var ki in sentImpressions.Where(si => si.F.Equals(expectedImp.feature)))
+                {
+                    impressions.AddRange(ki.I);
+                }
+
+                AssertImpression(expectedImp, impressions);
             }
         }
 
