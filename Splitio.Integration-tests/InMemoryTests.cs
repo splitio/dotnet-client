@@ -272,20 +272,22 @@ namespace Splitio.Integration_tests
                 client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
                 client.Destroy();
-                Thread.Sleep(2000);
+                Thread.Sleep(3000);
 
                 // Assert.
                 var sentImpressions = GetImpressionsSentBackend(httpClientMock);
-                Assert.AreEqual(3, sentImpressions.Select(x => x.F).Distinct().Count());
-                Assert.AreEqual(2, sentImpressions.Where(x => x.F.Equals("FACUNDO_TEST")).Sum(x => x.I.Count));
-                Assert.AreEqual(3, sentImpressions.Where(x => x.F.Equals("MAURO_TEST")).Sum(x => x.I.Count));
-                Assert.AreEqual(1, sentImpressions.Where(x => x.F.Equals("Test_Save_1")).Sum(x => x.I.Count));
+                Assert.AreEqual(3, sentImpressions.Select(x => x.F).Distinct().Count(), "1");
+                Assert.AreEqual(2, sentImpressions.Where(x => x.F.Equals("FACUNDO_TEST")).Sum(x => x.I.Count), "2");
+                Assert.AreEqual(3, sentImpressions.Where(x => x.F.Equals("MAURO_TEST")).Sum(x => x.I.Count), "3");
+                Assert.AreEqual(1, sentImpressions.Where(x => x.F.Equals("Test_Save_1")).Sum(x => x.I.Count), "4");
 
                 var impressionCounts = GetImpressionsCountsSentBackend(httpClientMock);
-                //Assert.AreEqual(5, impressionCounts.Sum(x => x.Pf.Count()));                
-                //Assert.AreEqual(5, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("FACUNDO_TEST")).Sum(z => z.Rc)));
-                //Assert.AreEqual(4, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("MAURO_TEST")).Sum(z => z.Rc)));
-                //Assert.AreEqual(2, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("Test_Save_1")).Sum(z => z.Rc)));
+                var names = new List<string>();
+                impressionCounts.ForEach(item => names.AddRange(item.Pf.Select(x => x.F)));
+                Assert.AreEqual(3, names.Distinct().Count(), "5");
+                Assert.AreEqual(5, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("FACUNDO_TEST")).Sum(z => z.Rc)), "6");
+                Assert.AreEqual(4, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("MAURO_TEST")).Sum(z => z.Rc)), "7");
+                Assert.AreEqual(2, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("Test_Save_1")).Sum(z => z.Rc)), "8");
             }
         }
 
@@ -315,7 +317,7 @@ namespace Splitio.Integration_tests
                 client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
                 client.Destroy();
-                Thread.Sleep(2000);
+                Thread.Sleep(3000);
 
                 // Assert.
                 var sentImpressions = GetImpressionsSentBackend(httpClientMock);
