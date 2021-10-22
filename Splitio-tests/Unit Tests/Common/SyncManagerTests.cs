@@ -67,7 +67,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _syncManager.Start();
 
             // Assert.
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
             _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicDataRecording(), Times.Once);
@@ -103,7 +103,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _syncManager.Start();
 
             // Assert.            
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
             _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
             _pushManager.Verify(mock => mock.StartSse(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Never);
@@ -139,7 +139,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _syncManager.Start();
 
             // Assert.            
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
             _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);            
             _pushManager.Verify(mock => mock.StartSse(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
