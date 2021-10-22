@@ -76,7 +76,7 @@ namespace Splitio.Services.Client.Classes
 
         public override void Destroy()
         {
-            if (!_gates.IsDestroyed())
+            if (!_statusManager.IsDestroyed())
             {
                 _splitCache.Clear();
                 _segmentCache.Clear();

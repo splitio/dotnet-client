@@ -25,7 +25,7 @@ namespace Splitio.Services.Common
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISplitLogger _log;
         private readonly IImpressionsCountSender _impressionsCountSender;
-        private readonly IReadinessGatesCache _gates;
+        private readonly IStatusManager _statusManager;
         private readonly ITelemetrySyncTask _telemetrySyncTask;
         private readonly ITasksManager _tasksManager;
         private readonly ISplitCache _splitCache;
@@ -42,7 +42,7 @@ namespace Splitio.Services.Common
             IEventsLog eventsLog,
             IImpressionsCountSender impressionsCountSender,
             IWrapperAdapter wrapperAdapter,
-            IReadinessGatesCache gates,
+            IStatusManager statusManager,
             ITelemetrySyncTask telemetrySyncTask,
             ITasksManager tasksManager,
             ISplitCache splitCache,
@@ -58,7 +58,7 @@ namespace Splitio.Services.Common
             _eventsLog = eventsLog;
             _impressionsCountSender = impressionsCountSender;            
             _wrapperAdapter = wrapperAdapter;
-            _gates = gates;
+            _statusManager = statusManager;
             _telemetrySyncTask = telemetrySyncTask;
             _tasksManager = tasksManager;
             _splitCache = splitCache;

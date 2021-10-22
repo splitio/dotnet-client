@@ -51,7 +51,7 @@ namespace Splitio.Services.Client.Classes
         protected ITelemetryEvaluationProducer _telemetryEvaluationProducer;
         protected ITelemetryInitProducer _telemetryInitProducer;
         protected ITasksManager _tasksManager;
-        protected IReadinessGatesCache _gates;
+        protected IStatusManager _statusManager;
 
         public SplitClient(ISplitLogger log)
         {
@@ -64,7 +64,7 @@ namespace Splitio.Services.Client.Classes
             _wrapperAdapter = new WrapperAdapter();
             _configService = new ConfigService(_wrapperAdapter, _log);
             _tasksManager = new TasksManager(_wrapperAdapter);
-            _gates = new InMemoryReadinessGatesCache();
+            _statusManager = new InMemoryReadinessGatesCache();
         }
 
         #region Public Methods
@@ -128,7 +128,7 @@ namespace Splitio.Services.Client.Classes
 
         public virtual bool Track(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null)
         {
-            if (_gates.IsDestroyed()) return false;
+            if (_statusManager.IsDestroyed()) return false;
 
             using (var clock = new Util.SplitStopwatch())
             {
@@ -181,15 +181,15 @@ namespace Splitio.Services.Client.Classes
 
         public bool IsDestroyed()
         {
-            return _gates.IsDestroyed();
+            return _statusManager.IsDestroyed();
         }
 
         public virtual void Destroy()
         {
-            if (!_gates.IsDestroyed())
+            if (!_statusManager.IsDestroyed())
             {
                 _factoryInstantiationsService.Decrease(ApiKey);
-                _gates.SetDestroy();
+                _statusManager.SetDestroy();
             }
         }
 
@@ -302,7 +302,7 @@ namespace Splitio.Services.Client.Classes
                 return false;
             }
 
-            if (_gates.IsDestroyed())
+            if (_statusManager.IsDestroyed())
             {
                 _log.Error("Client has already been destroyed - No calls possible");
                 return false;

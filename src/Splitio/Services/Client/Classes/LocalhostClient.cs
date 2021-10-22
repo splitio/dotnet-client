@@ -72,7 +72,7 @@ namespace Splitio.Services.Client.Classes
 
         public override void Destroy()
         {
-            if (!_gates.IsDestroyed())
+            if (!_statusManager.IsDestroyed())
             {
                 _watcher.Dispose();
                 _splitCache.Clear();

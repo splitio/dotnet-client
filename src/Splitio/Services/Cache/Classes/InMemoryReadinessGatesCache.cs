@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace Splitio.Services.Client.Classes
 {
-    public class InMemoryReadinessGatesCache : IReadinessGatesCache
+    public class InMemoryReadinessGatesCache : IStatusManager
     {
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(InMemoryReadinessGatesCache));
         private readonly CountdownEvent _sdkReady = new CountdownEvent(1);

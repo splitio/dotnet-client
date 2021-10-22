@@ -19,7 +19,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SelfRefreshingSegmentFetcher));
 
         private readonly ISegmentChangeFetcher _segmentChangeFetcher;
-        private readonly IReadinessGatesCache _gates;
+        private readonly IStatusManager _statusManager;
         private readonly IWrapperAdapter _wrappedAdapter;
         private readonly ISegmentTaskQueue _segmentTaskQueue;
         private readonly ITasksManager _tasksManager;
@@ -32,7 +32,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
         private bool _running;
 
         public SelfRefreshingSegmentFetcher(ISegmentChangeFetcher segmentChangeFetcher, 
-            IReadinessGatesCache gates, 
+            IStatusManager statusManager, 
             int interval, 
             ISegmentCache segmentsCache, 
             int numberOfParallelSegments,
@@ -44,7 +44,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             _segments = new ConcurrentDictionary<string, SelfRefreshingSegment>();
             _worker = new SegmentTaskWorker(numberOfParallelSegments, segmentTaskQueue);
             _interval = interval;
-            _gates = gates;
+            _statusManager = statusManager;
             _wrappedAdapter = wrapperAdapter;
             _segmentTaskQueue = segmentTaskQueue;
             _tasksManager = tasksManager;
@@ -55,7 +55,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
         {
             lock (_lock)
             {
-                if (_running || _gates.IsDestroyed()) return;
+                if (_running || _statusManager.IsDestroyed()) return;
 
                 _running = true;
                 _cancelTokenSource = new CancellationTokenSource();
@@ -100,7 +100,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
             if (segment == null)
             {
-                segment = new SelfRefreshingSegment(name, _segmentChangeFetcher, _gates, _segmentCache);
+                segment = new SelfRefreshingSegment(name, _segmentChangeFetcher, _segmentCache);
 
                 if (_segments.TryAdd(name, segment))
                 {

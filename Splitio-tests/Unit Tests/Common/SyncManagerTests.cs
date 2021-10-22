@@ -23,7 +23,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<ISplitLogger> _log;
         private readonly Mock<INotificationManagerKeeper> _notificationManagerKeeper;
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
-        private readonly Mock<IReadinessGatesCache> _gates;
+        private readonly Mock<IStatusManager> _statusManager;
         private readonly Mock<ITelemetrySyncTask> _telemetrySyncTask;
         private ISyncManager _syncManager;
 
@@ -39,7 +39,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _notificationManagerKeeper = new Mock<INotificationManagerKeeper>();
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _telemetrySyncTask = new Mock<ITelemetrySyncTask>();
-            _gates = new Mock<IReadinessGatesCache>();
+            _statusManager = new Mock<IStatusManager>();
         }
 
         [TestMethod]
@@ -57,7 +57,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _sseHandler.Object,
                 _notificationManagerKeeper.Object,
                 _telemetryRuntimeProducer.Object,
-                _gates.Object,
+                _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
                 _telemetrySyncTask.Object,
@@ -93,7 +93,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _sseHandler.Object,
                 _notificationManagerKeeper.Object,
                 _telemetryRuntimeProducer.Object,
-                _gates.Object,
+                _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
                 _telemetrySyncTask.Object,
@@ -129,7 +129,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _sseHandler.Object,
                 _notificationManagerKeeper.Object,
                 _telemetryRuntimeProducer.Object,
-                _gates.Object,
+                _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
                 _telemetrySyncTask.Object,
@@ -157,7 +157,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _sseHandler.Object,
                 _notificationManagerKeeper.Object,
                 _telemetryRuntimeProducer.Object,
-                _gates.Object,
+                _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
                 _telemetrySyncTask.Object,
@@ -183,7 +183,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _sseHandler.Object,
                 _notificationManagerKeeper.Object,
                 _telemetryRuntimeProducer.Object,
-                _gates.Object,
+                _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
                 _telemetrySyncTask.Object,
@@ -215,7 +215,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _sseHandler.Object,
                 _notificationManagerKeeper.Object,
                 _telemetryRuntimeProducer.Object,
-                _gates.Object,
+                _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
                 _telemetrySyncTask.Object,
@@ -250,7 +250,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _sseHandler.Object,
                 _notificationManagerKeeper.Object,
                 _telemetryRuntimeProducer.Object,
-                _gates.Object,
+                _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
                 _telemetrySyncTask.Object,
@@ -285,7 +285,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _sseHandler.Object,
                 _notificationManagerKeeper.Object,
                 _telemetryRuntimeProducer.Object,
-                _gates.Object,
+                _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
                 _telemetrySyncTask.Object,
@@ -320,7 +320,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _sseHandler.Object,
                 _notificationManagerKeeper.Object,
                 _telemetryRuntimeProducer.Object,
-                _gates.Object,
+                _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
                 _telemetrySyncTask.Object,
@@ -346,7 +346,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _sseHandler.Object,
                 _notificationManagerKeeper.Object,
                 _telemetryRuntimeProducer.Object,
-                _gates.Object,
+                _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
                 _telemetrySyncTask.Object,
@@ -372,7 +372,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _sseHandler.Object,
                 _notificationManagerKeeper.Object,
                 _telemetryRuntimeProducer.Object,
-                _gates.Object,
+                _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
                 _telemetrySyncTask.Object,

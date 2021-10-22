@@ -1,6 +1,6 @@
 ﻿namespace Splitio.Services.Cache.Interfaces
 {
-    public interface IReadinessGatesCache
+    public interface IStatusManager
     {
         bool IsReady();
         bool WaitUntilReady(int milliseconds);

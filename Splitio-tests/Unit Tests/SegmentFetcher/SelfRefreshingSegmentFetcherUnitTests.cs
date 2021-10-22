@@ -52,13 +52,13 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         public void StartSchedullerSuccessfully()
         {
             // Arrange
-            var gates = new Mock<IReadinessGatesCache>();
+            var statusManager = new Mock<IStatusManager>();
             var apiClient = new Mock<ISegmentSdkApiClient>();         
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments = new ConcurrentDictionary<string, Segment>();
             var cache = new InMemorySegmentCache(segments);
             var segmentTaskQueue = new SegmentTaskQueue();
-            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, gates.Object, 10, cache, 1, segmentTaskQueue, new TasksManager(wrapperAdapter), wrapperAdapter);
+            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, statusManager.Object, 10, cache, 1, segmentTaskQueue, new TasksManager(wrapperAdapter), wrapperAdapter);
 
             apiClient
                 .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
@@ -76,11 +76,11 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         public async Task FetchSegmentsIfNotExists()
         {
             // Arrange            
-            var gates = new Mock<IReadinessGatesCache>();
+            var statusManager = new Mock<IStatusManager>();
             var apiFetcher = new Mock<ISegmentChangeFetcher>();
             var cache = new Mock<ISegmentCache>();
             var segmentTaskQueue = new Mock<ISegmentTaskQueue>();
-            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher.Object, gates.Object, 10, cache.Object, 1, segmentTaskQueue.Object, new TasksManager(wrapperAdapter), wrapperAdapter);
+            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher.Object, statusManager.Object, 10, cache.Object, 1, segmentTaskQueue.Object, new TasksManager(wrapperAdapter), wrapperAdapter);
             var segment1 = "segment-1";
             var segment2 = "segment-2";
             var segment3 = "segment-3";

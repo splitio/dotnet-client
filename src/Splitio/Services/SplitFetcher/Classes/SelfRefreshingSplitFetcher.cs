@@ -18,7 +18,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
         private readonly ISplitChangeFetcher _splitChangeFetcher;
         private readonly ISplitParser _splitParser;
-        private readonly IReadinessGatesCache _gates;
+        private readonly IStatusManager _statusManager;
         private readonly ISplitCache _splitCache;        
         private readonly int _interval;
         private readonly ITasksManager _taskManager;
@@ -29,14 +29,14 @@ namespace Splitio.Services.SplitFetcher.Classes
 
         public SelfRefreshingSplitFetcher(ISplitChangeFetcher splitChangeFetcher,
             ISplitParser splitParser,
-            IReadinessGatesCache gates,
+            IStatusManager statusManager,
             int interval,
             ITasksManager taskManager,
             ISplitCache splitCache = null)
         {
             _splitChangeFetcher = splitChangeFetcher;
             _splitParser = splitParser;
-            _gates = gates;
+            _statusManager = statusManager;
             _interval = interval;
             _splitCache = splitCache;
             _taskManager = taskManager;
@@ -47,7 +47,7 @@ namespace Splitio.Services.SplitFetcher.Classes
         {
             lock (_lock)
             {
-                if (_running || _gates.IsDestroyed()) return;
+                if (_running || _statusManager.IsDestroyed()) return;
 
                 _running = true;
                 _cancelTokenSource = new CancellationTokenSource();

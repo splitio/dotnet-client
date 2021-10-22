@@ -14,17 +14,15 @@ namespace Splitio.Services.SegmentFetcher.Classes
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SelfRefreshingSegment));
 
         public string Name;
-        private readonly IReadinessGatesCache _gates;
         private readonly ISegmentChangeFetcher _segmentChangeFetcher;
         private readonly ISegmentCache _segmentCache;
 
-        public SelfRefreshingSegment(string name, ISegmentChangeFetcher segmentChangeFetcher, IReadinessGatesCache gates, ISegmentCache segmentCache)
+        public SelfRefreshingSegment(string name, ISegmentChangeFetcher segmentChangeFetcher, ISegmentCache segmentCache)
         {
             Name = name;
 
             _segmentChangeFetcher = segmentChangeFetcher;
             _segmentCache = segmentCache;
-            _gates = gates;
         }
 
         public async Task<bool> FetchSegment(FetchOptions fetchOptions)

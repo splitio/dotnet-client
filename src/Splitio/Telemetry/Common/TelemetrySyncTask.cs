@@ -20,7 +20,6 @@ namespace Splitio.Telemetry.Common
         private readonly ISplitCache _splitCache;
         private readonly ISegmentCache _segmentCache;        
         private readonly ISplitLogger _log;
-        private readonly IReadinessGatesCache _gates;        
         private readonly IFactoryInstantiationsService _factoryInstantiationsService;
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ITasksManager _tasksManager;
@@ -34,7 +33,6 @@ namespace Splitio.Telemetry.Common
             ITelemetryAPI telemetryAPI,            
             ISplitCache splitCache,
             ISegmentCache segmentCache,
-            IReadinessGatesCache gates,
             SelfRefreshingConfig configurationOptions,
             IFactoryInstantiationsService factoryInstantiationsService,
             IWrapperAdapter wrapperAdapter,
@@ -45,7 +43,6 @@ namespace Splitio.Telemetry.Common
             _telemetryAPI = telemetryAPI;            
             _splitCache = splitCache;
             _segmentCache = segmentCache;
-            _gates = gates;
             _configurationOptions = configurationOptions;
             _factoryInstantiationsService = factoryInstantiationsService;
             _log = log ?? WrapperAdapter.GetLogger(typeof(TelemetrySyncTask));

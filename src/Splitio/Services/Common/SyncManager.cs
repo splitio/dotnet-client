@@ -20,7 +20,7 @@ namespace Splitio.Services.Common
         private readonly ISSEHandler _sseHandler;
         private readonly ISplitLogger _log;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
-        private readonly IReadinessGatesCache _gates;
+        private readonly IStatusManager _statusManager;
         private readonly ITasksManager _tasksManager;
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ITelemetrySyncTask _telemetrySyncTask;
@@ -35,7 +35,7 @@ namespace Splitio.Services.Common
             ISSEHandler sseHandler,
             INotificationManagerKeeper notificationManagerKeeper,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
-            IReadinessGatesCache gates,
+            IStatusManager statusManager,
             ITasksManager tasksManager,
             IWrapperAdapter wrapperAdapter,
             ITelemetrySyncTask telemetrySyncTask,
@@ -47,7 +47,7 @@ namespace Splitio.Services.Common
             _sseHandler = sseHandler;
             _log = log ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
-            _gates = gates;
+            _statusManager = statusManager;
             _tasksManager = tasksManager;
             _wrapperAdapter = wrapperAdapter;
             _telemetrySyncTask = telemetrySyncTask;
@@ -70,7 +70,7 @@ namespace Splitio.Services.Common
                         _wrapperAdapter.TaskDelay(500).Wait();
                     }
 
-                    _gates.SetReady();
+                    _statusManager.SetReady();
                     _telemetrySyncTask.RecordConfigInit();
                     _synchronizer.StartPeriodicDataRecording();
 

@@ -18,7 +18,6 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         public void FetchSegmentNullChangesFetcherResponseShouldNotUpdateCache()
         {
             //Arrange
-            var gates = new InMemoryReadinessGatesCache();
             var apiClient = new Mock<ISegmentSdkApiClient>();
             apiClient
             .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
@@ -26,7 +25,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments  = new ConcurrentDictionary<string, Segment>();
             var cache = new InMemorySegmentCache(segments);
-            var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, gates, cache);
+            var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, cache);
             
             //Act
             segmentFetcher.FetchSegment(new FetchOptions());
@@ -39,7 +38,6 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         public void FetchSegmentShouldUpdateSegmentsCache()
         {
             //Arrange
-            var gates = new InMemoryReadinessGatesCache();
             var apiClient = new Mock<ISegmentSdkApiClient>();
             apiClient
             .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
@@ -57,7 +55,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments = new ConcurrentDictionary<string, Segment>();
             var cache = new InMemorySegmentCache(segments);
-            var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, gates, cache);
+            var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, cache);
 
             //Act
             segmentFetcher.FetchSegment(new FetchOptions());
