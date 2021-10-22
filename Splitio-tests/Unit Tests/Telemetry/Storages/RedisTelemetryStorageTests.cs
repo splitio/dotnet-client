@@ -71,7 +71,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
                 t = new { oM = config.OperationMode, st = config.Storage, aF = config.ActiveFactories, rF = config.RedundantActiveFactories, t = config.Tags },
                 m = new { i = _machineIp, n = _machineName, s = _sdkVersion }
             });
-            var key = $"{_userPrefix}.SPLITIO.telemetry.config";
+            var key = $"{_userPrefix}.SPLITIO.telemetry.init";
 
             _redisAdapter
                 .Setup(mock => mock.ListRightPush(key, redisValue))
@@ -81,40 +81,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             _telemetryStorage.RecordConfigInit(config);
 
             // Assert.
-            _redisAdapter.Verify(mock => mock.ListRightPush(key, redisValue), Times.Once);
-            _redisAdapter.Verify(mock => mock.KeyExpire(key, It.IsAny<TimeSpan>()), Times.Once);
-        }
-
-        [TestMethod]
-        public void RecordConfigInitShouldOnlyRecordConfig()
-        {
-            // Assert.
-            var config = new Config
-            {
-                ActiveFactories = 2,
-                EventsQueueSize = 1,
-                OperationMode = (int)Mode.Consumer,
-                ImpressionsMode = ImpressionsMode.Optimized,
-                BURTimeouts = 5
-            };
-
-            var redisValue = JsonConvert.SerializeObject(new
-            {
-                t = new { oM = config.OperationMode, st = config.Storage, aF = config.ActiveFactories, rF = config.RedundantActiveFactories, t = config.Tags },
-                m = new { i = _machineIp, n = _machineName, s = _sdkVersion }
-            });
-            var key = $"{_userPrefix}.SPLITIO.telemetry.config";
-
-            _redisAdapter
-                .Setup(mock => mock.ListRightPush(key, redisValue))
-                .Returns(2);
-
-            // Act.
-            _telemetryStorage.RecordConfigInit(config);
-
-            // Assert.
-            _redisAdapter.Verify(mock => mock.ListRightPush(key, redisValue), Times.Once);
-            _redisAdapter.Verify(mock => mock.KeyExpire(key, It.IsAny<TimeSpan>()), Times.Never);
+            _redisAdapter.Verify(mock => mock.HashSet(key, $"{_sdkVersion}/{_machineName}/{_machineIp}", redisValue), Times.Once);
         }
 
         [TestMethod]

@@ -5,14 +5,11 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
-using System;
 
 namespace Splitio.Redis.Telemetry.Storages
 {
     public class RedisTelemetryStorage : ITelemetryInitProducer, ITelemetryEvaluationProducer
     {
-        private readonly TimeSpan TelemetryConfigKeyTTL = new TimeSpan(1, 0, 0); // 1 hour.
-
         private readonly IRedisAdapter _redisAdapter;
         private readonly ISplitLogger _log;
         private readonly string _userPrefix;
@@ -26,7 +23,7 @@ namespace Splitio.Redis.Telemetry.Storages
         private string TelemetryExceptionKey => "{prefix}.SPLITIO.telemetry.exceptions"
             .Replace("{prefix}.", string.IsNullOrEmpty(_userPrefix) ? string.Empty : $"{_userPrefix}.");
 
-        private string TelemetryConfigQueueKey => "{prefix}.SPLITIO.telemetry.config"
+        private string TelemetryInitKey => "{prefix}.SPLITIO.telemetry.init"
             .Replace("{prefix}.", string.IsNullOrEmpty(_userPrefix) ? string.Empty : $"{_userPrefix}.");
 
         public RedisTelemetryStorage(IRedisAdapter redisAdapter,
@@ -52,15 +49,7 @@ namespace Splitio.Redis.Telemetry.Storages
                 m = new { i = _machineIp, n = _machineName, s = _sdkVersion }
             });
 
-            var result = _redisAdapter.ListRightPush(TelemetryConfigQueueKey, jsonData);
-
-            if (result == 1)
-            {
-                if (!_redisAdapter.KeyExpire(TelemetryConfigQueueKey, TelemetryConfigKeyTTL))
-                {
-                    _log.Error("Something were wrong setting expiration");
-                }
-            }
+            _redisAdapter.HashSet(TelemetryInitKey, $"{_sdkVersion}/{_machineName}/{_machineIp}", jsonData);
         }
 
         public void RecordLatency(MethodEnum method, int bucket)
