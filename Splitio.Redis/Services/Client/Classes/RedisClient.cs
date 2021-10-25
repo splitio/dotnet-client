@@ -38,9 +38,7 @@ namespace Splitio.Redis.Services.Client.Classes
             BuildEventLog();
             BuildBlockUntilReadyService();
             BuildManager();
-            BuildEvaluator();            
-
-            RecordConfigInit();
+            BuildEvaluator();
         }
 
         #region Private Methods
@@ -68,7 +66,11 @@ namespace Splitio.Redis.Services.Client.Classes
         {
             _redisAdapter = new RedisAdapter(_config.RedisHost, _config.RedisPort, _config.RedisPassword, _config.RedisDatabase, _config.RedisConnectTimeout, _config.RedisConnectRetry, _config.RedisSyncTimeout, _config.TlsConfig);
 
-            Task.Factory.StartNew(() => _redisAdapter.Connect());
+            Task.Factory.StartNew(() =>
+            {
+                _redisAdapter.Connect();
+                RecordConfigInit();
+            });
 
             _segmentCache = new RedisSegmentCache(_redisAdapter, _config.RedisUserPrefix);
             _splitParser = new RedisSplitParser(_segmentCache);
