@@ -1,6 +1,7 @@
 ﻿using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using System;
+using System.Threading;
 
 namespace Splitio.Redis.Services.Shared
 {
@@ -29,6 +30,8 @@ namespace Splitio.Redis.Services.Shared
                             ready = true;
                             break;
                         }
+
+                        Thread.Sleep(500);
                     }
 
                     if (!ready) throw new TimeoutException($"SDK was not ready in {blockMilisecondsUntilReady}. Could not connect to Redis");
