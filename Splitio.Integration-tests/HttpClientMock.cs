@@ -276,23 +276,13 @@ namespace Splitio.Integration_tests
             return _mockServer.Urls.FirstOrDefault();
         }
 
-        public void ShutdownServer()
-        {
-            _mockServer.Stop();
-        }
-
-        public int GetPort()
-        {
-            return _mockServer.Ports.First();
-        }
-
         public List<LogEntry> GetLogs()
         {
             return _mockServer.LogEntries.ToList();
         }
 
         public List<LogEntry> GetImpressionLogs()
-        {          
+        {
             return _mockServer
                 .LogEntries
                 .Where(l => l.RequestMessage.AbsolutePath.Contains("api/testImpressions/bulk"))
@@ -334,6 +324,7 @@ namespace Splitio.Integration_tests
         public void Dispose()
         {
             _mockServer.Stop();
+            _mockServer.Dispose();
         }
     }
 }

@@ -14,22 +14,21 @@ namespace Splitio.Services.SegmentFetcher.Classes
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SelfRefreshingSegment));
 
         public string Name;
-        private readonly IReadinessGatesCache _gates;
         private readonly ISegmentChangeFetcher _segmentChangeFetcher;
         private readonly ISegmentCache _segmentCache;
 
-        public SelfRefreshingSegment(string name, ISegmentChangeFetcher segmentChangeFetcher, IReadinessGatesCache gates, ISegmentCache segmentCache)
+        public SelfRefreshingSegment(string name, ISegmentChangeFetcher segmentChangeFetcher, ISegmentCache segmentCache)
         {
             Name = name;
 
             _segmentChangeFetcher = segmentChangeFetcher;
             _segmentCache = segmentCache;
-            _gates = gates;
-            _gates.RegisterSegment(name);
         }
 
-        public async Task FetchSegment(FetchOptions fetchOptions)
+        public async Task<bool> FetchSegment(FetchOptions fetchOptions)
         {
+            var success = false;
+
             while (true)
             {
                 var changeNumber = _segmentCache.GetChangeNumber(Name);
@@ -45,7 +44,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                     if (changeNumber >= response.till)
                     {
-                        _gates.SegmentIsReady(Name);
+                        success = true;
                         break;
                     }
 
@@ -82,6 +81,8 @@ namespace Splitio.Services.SegmentFetcher.Classes
                     }
                 }
             }
+
+            return success;
         }
     }
 }

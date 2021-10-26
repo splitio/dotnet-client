@@ -31,5 +31,4 @@ namespace Splitio.Domain
         [JsonIgnore]
         public bool Optimized { get; set; }
     }
-    
 }

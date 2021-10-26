@@ -8,15 +8,15 @@ namespace Splitio.Services.Shared.Classes
 {
     public class SelfRefreshingBlockUntilReadyService : IBlockUntilReadyService
     {
-        private readonly IReadinessGatesCache _gates;
+        private readonly IStatusManager _statusManager;
         private readonly ISplitLogger _log;
         private readonly ITelemetryInitProducer _telemetryInitProducer;
 
-        public SelfRefreshingBlockUntilReadyService(IReadinessGatesCache gates,
+        public SelfRefreshingBlockUntilReadyService(IStatusManager statusManager,
             ITelemetryInitProducer telemetryInitProducer,
             ISplitLogger log = null)
         {
-            _gates = gates;
+            _statusManager = statusManager;
             _telemetryInitProducer = telemetryInitProducer;
             _log = log ?? WrapperAdapter.GetLogger(typeof(SelfRefreshingBlockUntilReadyService));
         }
@@ -30,7 +30,7 @@ namespace Splitio.Services.Shared.Classes
                     _log.Warn("The blockMilisecondsUntilReady param has to be higher than 0.");
                 }
                 
-                if (!_gates.IsSDKReady(blockMilisecondsUntilReady))
+                if (!_statusManager.WaitUntilReady(blockMilisecondsUntilReady))
                 {
                     _telemetryInitProducer.RecordBURTimeout();
                     throw new TimeoutException(string.Format($"SDK was not ready in {blockMilisecondsUntilReady} miliseconds"));
@@ -42,7 +42,7 @@ namespace Splitio.Services.Shared.Classes
         {
             try
             {
-                return _gates.IsSDKReady(0);
+                return _statusManager.IsReady();
             }
             catch (Exception ex)
             {

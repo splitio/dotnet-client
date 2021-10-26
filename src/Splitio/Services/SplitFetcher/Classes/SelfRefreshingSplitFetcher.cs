@@ -1,5 +1,4 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Interfaces;
@@ -19,7 +18,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
         private readonly ISplitChangeFetcher _splitChangeFetcher;
         private readonly ISplitParser _splitParser;
-        private readonly IReadinessGatesCache _gates;
+        private readonly IStatusManager _statusManager;
         private readonly ISplitCache _splitCache;        
         private readonly int _interval;
         private readonly ITasksManager _taskManager;
@@ -30,14 +29,14 @@ namespace Splitio.Services.SplitFetcher.Classes
 
         public SelfRefreshingSplitFetcher(ISplitChangeFetcher splitChangeFetcher,
             ISplitParser splitParser,
-            IReadinessGatesCache gates,
+            IStatusManager statusManager,
             int interval,
             ITasksManager taskManager,
             ISplitCache splitCache = null)
         {
             _splitChangeFetcher = splitChangeFetcher;
             _splitParser = splitParser;
-            _gates = gates;
+            _statusManager = statusManager;
             _interval = interval;
             _splitCache = splitCache;
             _taskManager = taskManager;
@@ -46,22 +45,18 @@ namespace Splitio.Services.SplitFetcher.Classes
         #region Public Methods
         public void Start()
         {
-            _taskManager.Start(() =>
+            lock (_lock)
             {
-                lock (_lock)
+                if (_running || _statusManager.IsDestroyed()) return;
+
+                _running = true;
+                _cancelTokenSource = new CancellationTokenSource();
+
+                _taskManager.StartPeriodic(async () =>
                 {
-                    if (_running) return;
-
-                    _running = true;
-                    _cancelTokenSource = new CancellationTokenSource();
-                    _gates.WaitUntilSdkInternalReady();
-
-                    _taskManager.StartPeriodic(() =>
-                    {
-                        FetchSplits(new FetchOptions()).Wait();
-                    }, _interval * 1000, _cancelTokenSource, "Splits Fetcher.");
-                }
-            }, new CancellationTokenSource(), "Main Splits Fetcher.");
+                    await FetchSplits(new FetchOptions());
+                }, _interval * 1000, _cancelTokenSource, "Splits Fetcher.");
+            }
         }
 
         public void Stop()
@@ -81,10 +76,11 @@ namespace Splitio.Services.SplitFetcher.Classes
             _splitCache.Clear();
         }
 
-        public async Task<IList<string>> FetchSplits(FetchOptions fetchOptions)
+        public async Task<FetchResult> FetchSplits(FetchOptions fetchOptions)
         {
             var segmentNames = new List<string>();
             var names = new Dictionary<string, string>();
+            var success = false;
 
             while (true)
             {
@@ -101,7 +97,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                     if (changeNumber >= result.till)
                     {
-                        _gates.SplitsAreReady();
+                        success = true;
                         //There are no new split changes
                         break;
                     }
@@ -126,7 +122,11 @@ namespace Splitio.Services.SplitFetcher.Classes
                 }
             }
 
-            return segmentNames;
+            return new FetchResult
+            {
+                Success = success,
+                SegmentNames = segmentNames
+            };
         }
         #endregion
 
