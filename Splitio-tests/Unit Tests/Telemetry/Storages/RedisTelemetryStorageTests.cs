@@ -8,8 +8,6 @@ using Splitio.Services.Client.Classes;
 using Splitio.Services.Logger;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
-using Splitio.Telemetry.Storages;
-using System;
 
 namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
 {
@@ -48,9 +46,9 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             _telemetryStorage.RecordException(MethodEnum.TreatmentsWithConfig);
 
             // Assert.
-            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.exceptions", $"{_sdkVersion}/{_machineName}/{_machineIp}/Track", 1), Times.Once);
-            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.exceptions", $"{_sdkVersion}/{_machineName}/{_machineIp}/Treatment", 1), Times.Exactly(2));
-            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.exceptions", $"{_sdkVersion}/{_machineName}/{_machineIp}/TreatmentsWithConfig", 1), Times.Once);
+            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.exceptions", $"{_sdkVersion}/{_machineName}/{_machineIp}/track", 1), Times.Once);
+            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.exceptions", $"{_sdkVersion}/{_machineName}/{_machineIp}/treatment", 1), Times.Exactly(2));
+            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.exceptions", $"{_sdkVersion}/{_machineName}/{_machineIp}/treatmentsWithConfig", 1), Times.Once);
         }
 
         [TestMethod]
@@ -95,11 +93,11 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             _telemetryStorage.RecordLatency(MethodEnum.TreatmentWithConfig, 5);
 
             // Assert.
-            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/Track/1", 1), Times.Once);
-            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/Track/2", 1), Times.Once);
-            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/Treatments/3", 1), Times.Once);
-            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/TreatmentsWithConfig/4", 1), Times.Once);
-            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/TreatmentWithConfig/5", 1), Times.Once);
+            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/track/1", 1), Times.Once);
+            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/track/2", 1), Times.Once);
+            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/treatments/3", 1), Times.Once);
+            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/treatmentsWithConfig/4", 1), Times.Once);
+            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/treatmentWithConfig/5", 1), Times.Once);
         }
     }
 }
