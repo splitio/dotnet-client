@@ -54,12 +54,12 @@ namespace Splitio.Redis.Telemetry.Storages
 
         public void RecordLatency(MethodEnum method, int bucket)
         {
-            _redisAdapter.HashIncrement(TelemetryLatencyKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method}/{bucket}", 1);
+            _redisAdapter.HashIncrement(TelemetryLatencyKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}/{bucket}", 1);
         }
 
         public void RecordException(MethodEnum method)
         {
-            _redisAdapter.HashIncrement(TelemetryExceptionKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method}", 1);
+            _redisAdapter.HashIncrement(TelemetryExceptionKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}", 1);
         }
 
         public void RecordNonReadyUsages()
