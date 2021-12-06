@@ -159,7 +159,7 @@ namespace Splitio.Services.Client.Classes
             _splitSdkApiClient = new SplitSdkApiClient(ApiKey, headers, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout, _telemetryRuntimeProducer);
             _segmentSdkApiClient = new SegmentSdkApiClient(ApiKey, headers, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout, _telemetryRuntimeProducer);
             _impressionsSdkApiClient = new ImpressionsSdkApiClient(ApiKey, headers, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout, _telemetryRuntimeProducer);
-            _eventSdkApiClient = new EventSdkApiClient(ApiKey, headers, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout, _telemetryRuntimeProducer);
+            _eventSdkApiClient = new EventSdkApiClient(ApiKey, headers, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout, _telemetryRuntimeProducer, _tasksManager, _wrapperAdapter, 500);
         }
 
         private void BuildManager()

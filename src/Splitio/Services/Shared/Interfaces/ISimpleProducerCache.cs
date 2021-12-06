@@ -6,5 +6,6 @@ namespace Splitio.Services.Shared.Interfaces
     {
         List<T> FetchAllAndClear();
         bool HasReachedMaxSize();
+        bool IsEmpty();
     }
 }

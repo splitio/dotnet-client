@@ -271,6 +271,23 @@ namespace Splitio.Integration_tests
         }
         #endregion
 
+        #region Posts
+        public void Post_Response(string url, int statusCode, string data, string bodyResponse)
+        {
+            _mockServer
+                .Given(
+                    Request.Create()
+                    .WithPath(url)
+                    .UsingPost()
+                    .WithBody(data)
+                )
+                .RespondWith(
+                    Response.Create()
+                    .WithStatusCode(statusCode)
+                    .WithBody(bodyResponse));
+        }
+        #endregion
+
         public string GetUrl()
         {
             return _mockServer.Urls.FirstOrDefault();

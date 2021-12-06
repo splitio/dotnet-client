@@ -102,7 +102,7 @@ namespace Splitio_Tests.Unit_Tests.Events
 
             //Assert
             Thread.Sleep(2000);
-            _apiClientMock.Verify(x => x.SendBulkEvents(It.Is<List<Event>>(list => list.Count == 1 && list[0].value == null)));
+            _apiClientMock.Verify(x => x.SendBulkEventsTask(It.Is<List<Event>>(list => list.Count == 1 && list[0].value == null)));
         }
 
         [TestMethod]
@@ -120,11 +120,11 @@ namespace Splitio_Tests.Unit_Tests.Events
 
             //Assert
             Thread.Sleep(2000);
-            _apiClientMock.Verify(x => x.SendBulkEvents(It.Is<List<Event>>(list => list.Count == 1 && list[0].value != null)));
+            _apiClientMock.Verify(x => x.SendBulkEventsTask(It.Is<List<Event>>(list => list.Count == 1 && list[0].value != null)));
         }
 
         [TestMethod]
-        public void LogEvent_WhenEventSizeIsbiggerThatWeSupport_ShouldsSendBulkEventsOnce()
+        public void LogEvent_WhenEventSizeIsbiggerThatWeSupport_ShouldsSendBulkEventsTaskOnce()
         {
             // Arrange.
             var eventCountExpected = 3;
@@ -141,7 +141,7 @@ namespace Splitio_Tests.Unit_Tests.Events
             _eventLog.Log(new WrappedEvent { Event = eventToLog4, Size = 1747627 });
 
             // Assert.
-            _apiClientMock.Verify(x => x.SendBulkEvents(It.Is<List<Event>>(list => list.Count == eventCountExpected
+            _apiClientMock.Verify(x => x.SendBulkEventsTask(It.Is<List<Event>>(list => list.Count == eventCountExpected
                                                                                 && list.Any(l => l.key.Equals(eventToLog1.key)
                                                                                               && l.eventTypeId.Equals(eventToLog1.eventTypeId)
                                                                                               && l.trafficTypeName.Equals(eventToLog1.trafficTypeName)
@@ -155,11 +155,11 @@ namespace Splitio_Tests.Unit_Tests.Events
                                                                                               && l.trafficTypeName.Equals(eventToLog3.trafficTypeName)
                                                                                               && l.value == eventToLog3.value))), Times.Once);
 
-            _apiClientMock.Verify(x => x.SendBulkEvents(It.IsAny<List<Event>>()), Times.Exactly(1));
+            _apiClientMock.Verify(x => x.SendBulkEventsTask(It.IsAny<List<Event>>()), Times.Exactly(1));
         }
 
         [TestMethod]
-        public void LogEvent_WhenEventSizeIsbiggerThatWeSupport_ShouldsSendBulkEventsTwice()
+        public void LogEvent_WhenEventSizeIsbiggerThatWeSupport_ShouldsSendBulkEventsTaskTwice()
         {
             // Arrange.
             var eventToLog1 = new Event { key = "Key1", eventTypeId = "testEventType1", trafficTypeName = "testTrafficType1", timestamp = 7000, value = 12.34 };
@@ -175,7 +175,7 @@ namespace Splitio_Tests.Unit_Tests.Events
             _eventLog.Start();
 
             // Assert.
-            _apiClientMock.Verify(x => x.SendBulkEvents(It.Is<List<Event>>(list => list.Count == 3
+            _apiClientMock.Verify(x => x.SendBulkEventsTask(It.Is<List<Event>>(list => list.Count == 3
                                                                                 && list.Any(l => l.key.Equals(eventToLog1.key)
                                                                                               && l.eventTypeId.Equals(eventToLog1.eventTypeId)
                                                                                               && l.trafficTypeName.Equals(eventToLog1.trafficTypeName)
@@ -190,13 +190,13 @@ namespace Splitio_Tests.Unit_Tests.Events
                                                                                               && l.value == eventToLog3.value))), Times.Once);
 
             Thread.Sleep(2000);
-            _apiClientMock.Verify(x => x.SendBulkEvents(It.Is<List<Event>>(list => list.Count == 1
+            _apiClientMock.Verify(x => x.SendBulkEventsTask(It.Is<List<Event>>(list => list.Count == 1
                                                                                 && list.Any(l => l.key.Equals(eventToLog4.key)
                                                                                               && l.eventTypeId.Equals(eventToLog4.eventTypeId)
                                                                                               && l.trafficTypeName.Equals(eventToLog4.trafficTypeName)
                                                                                               && l.value == null))), Times.Once);
 
-            _apiClientMock.Verify(x => x.SendBulkEvents(It.IsAny<List<Event>>()), Times.Exactly(2));
+            _apiClientMock.Verify(x => x.SendBulkEventsTask(It.IsAny<List<Event>>()), Times.Exactly(2));
         }
 
         [TestMethod]
