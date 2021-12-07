@@ -38,5 +38,10 @@ namespace Splitio.Services.Shared.Classes
         {
             return _queue != null ? _queue.HasReachedMaxSize() : false;
         }
+
+        public bool IsEmpty()
+        {
+            return _queue?.IsEmpty ?? false;
+        }
     }
 }

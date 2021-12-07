@@ -5,6 +5,6 @@ namespace Splitio.Services.Events.Interfaces
 {
     public interface IEventSdkApiClient
     {
-        void SendBulkEvents(List<Event> events);
+        void SendBulkEventsTask(List<Event> events);
     }
 }

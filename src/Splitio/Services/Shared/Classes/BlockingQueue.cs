@@ -4,10 +4,12 @@ namespace Splitio.Services.Shared.Classes
 {
     public class BlockingQueue<T>
     {
-        private ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
         private readonly object _lockingObject = new object();
 
+        private ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
         private readonly int _maxSize;
+
+        public bool IsEmpty => _queue.IsEmpty;
 
         public BlockingQueue(int maxSize)
         {
@@ -17,7 +19,7 @@ namespace Splitio.Services.Shared.Classes
         public bool HasReachedMaxSize()
         {
             return _queue.Count >= _maxSize;
-        }
+        }        
 
         public ConcurrentQueue<T> FetchAll()
         {

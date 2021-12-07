@@ -62,7 +62,7 @@ namespace Splitio.Services.Shared.Classes
                 RandomizeRefreshRates = config.RandomizeRefreshRates,ConcurrencyLevel = config.SplitsStorageConcurrencyLevel ?? 4,
                 TreatmentLogSize = config.MaxImpressionsLogSize ?? 30000,
                 EventLogRefreshRate = config.EventsPushRate ?? 60,
-                EventLogSize = config.EventsQueueSize ?? 5000,
+                EventLogSize = config.EventsQueueSize ?? 500,
                 EventsFirstPushWindow = config.EventsFirstPushWindow ?? 10,
                 NumberOfParalellSegmentTasks = config.NumberOfParalellSegmentTasks ?? 5,
                 StreamingEnabled = config.StreamingEnabled ?? true,

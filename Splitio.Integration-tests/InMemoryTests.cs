@@ -377,7 +377,7 @@ namespace Splitio.Integration_tests
                 Assert.IsFalse(sentConfig.UrlOverrides.Stream);
                 Assert.IsFalse(sentConfig.UrlOverrides.Auth);
                 Assert.AreEqual(30000, (int)sentConfig.ImpressionsQueueSize);
-                Assert.AreEqual(5000, (int)sentConfig.EventsQueueSize);
+                Assert.AreEqual(500, (int)sentConfig.EventsQueueSize);
                 Assert.AreEqual(ImpressionsMode.Optimized, sentConfig.ImpressionsMode);
                 Assert.IsTrue(sentConfig.ImpressionListenerEnabled);
                 Assert.IsTrue(1 <= sentConfig.ActiveFactories);
