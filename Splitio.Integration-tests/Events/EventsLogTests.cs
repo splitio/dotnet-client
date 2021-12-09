@@ -2,7 +2,6 @@
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.Events.Classes;
-using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Storages;
@@ -19,8 +18,6 @@ namespace Splitio.Integration_tests.Events
         private readonly ITasksManager _tasksManger;
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly int _bulkSize = 5;
-
-        private IEventSdkApiClient _eventSdkApiClient;
 
         public EventsLogTests()
         {
@@ -59,9 +56,8 @@ namespace Splitio.Integration_tests.Events
                 httpClientMock.Post_Response("/api/events/bulk", 200, data2, "ok");
                 httpClientMock.Post_Response("/api/events/bulk", 200, data3, "ok");
 
-                _eventSdkApiClient = new EventSdkApiClient("api-key-test", new Dictionary<string, string>(), httpClientMock.GetUrl(), 10000, 10000, _telemetryRuntimeProducer.Object, _tasksManger, _wrapperAdapter, _bulkSize);
-
-                _eventSdkApiClient.SendBulkEventsTask(events);
+                var eventSdkApiClient = new EventSdkApiClient("api-key-test", new Dictionary<string, string>(), httpClientMock.GetUrl(), 10000, 10000, _telemetryRuntimeProducer.Object, _tasksManger, _wrapperAdapter, _bulkSize);
+                eventSdkApiClient.SendBulkEventsTask(events);
 
                 Thread.Sleep(5000);
 
@@ -93,9 +89,8 @@ namespace Splitio.Integration_tests.Events
             {
                 httpClientMock.Post_Response("/api/events/bulk", 200, data, "ok");
 
-                _eventSdkApiClient = new EventSdkApiClient("api-key-test", new Dictionary<string, string>(), httpClientMock.GetUrl(), 10000, 10000, _telemetryRuntimeProducer.Object, _tasksManger, _wrapperAdapter, 6);
-
-                _eventSdkApiClient.SendBulkEventsTask(events);
+                var eventSdkApiClient = new EventSdkApiClient("api-key-test", new Dictionary<string, string>(), httpClientMock.GetUrl(), 10000, 10000, _telemetryRuntimeProducer.Object, _tasksManger, _wrapperAdapter, 6);
+                eventSdkApiClient.SendBulkEventsTask(events);
 
                 Thread.Sleep(5000);
 
@@ -125,9 +120,8 @@ namespace Splitio.Integration_tests.Events
             {
                 httpClientMock.Post_Response("/api/events/bulk", 500, data, "fail");
 
-                _eventSdkApiClient = new EventSdkApiClient("api-key-test", new Dictionary<string, string>(), httpClientMock.GetUrl(), 10000, 10000, _telemetryRuntimeProducer.Object, _tasksManger, _wrapperAdapter, 6);
-
-                _eventSdkApiClient.SendBulkEventsTask(events);
+                var eventSdkApiClient = new EventSdkApiClient("api-key-test", new Dictionary<string, string>(), httpClientMock.GetUrl(), 10000, 10000, _telemetryRuntimeProducer.Object, _tasksManger, _wrapperAdapter, 6);
+                eventSdkApiClient.SendBulkEventsTask(events);
 
                 Thread.Sleep(5000);
 

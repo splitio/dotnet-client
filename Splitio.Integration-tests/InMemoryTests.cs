@@ -377,7 +377,7 @@ namespace Splitio.Integration_tests
                 Assert.IsFalse(sentConfig.UrlOverrides.Stream);
                 Assert.IsFalse(sentConfig.UrlOverrides.Auth);
                 Assert.AreEqual(30000, (int)sentConfig.ImpressionsQueueSize);
-                Assert.AreEqual(500, (int)sentConfig.EventsQueueSize);
+                Assert.AreEqual(10000, (int)sentConfig.EventsQueueSize);
                 Assert.AreEqual(ImpressionsMode.Optimized, sentConfig.ImpressionsMode);
                 Assert.IsTrue(sentConfig.ImpressionListenerEnabled);
                 Assert.IsTrue(1 <= sentConfig.ActiveFactories);
@@ -425,6 +425,9 @@ namespace Splitio.Integration_tests
 
             httpClientMock.SegmentChangesOk("-1", "segment3");
             httpClientMock.SegmentChangesOk("1470947453879", "segment3");
+
+            httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
+            httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 
             return httpClientMock;
         }
