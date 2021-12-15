@@ -855,7 +855,6 @@ namespace Splitio.Integration_tests
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
             {
-                httpClientMock?.Post_Response("/api/events/bulk", 200, "ok");
                 var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
 
                 var properties = new Dictionary<string, object>
@@ -901,7 +900,6 @@ namespace Splitio.Integration_tests
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
             {
-                httpClientMock?.Post_Response("/api/events/bulk", 200, "ok");
                 var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
 
                 var properties = new Dictionary<string, object>
@@ -947,7 +945,6 @@ namespace Splitio.Integration_tests
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
             {
-                httpClientMock?.Post_Response("/api/events/bulk", 200, "ok");
                 var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
 
                 var properties = new Dictionary<string, object>
@@ -1003,7 +1000,6 @@ namespace Splitio.Integration_tests
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
             {
-                httpClientMock?.Post_Response("/api/events/bulk", 200, "ok");
                 var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), eventsPushRate: 60, eventsQueueSize: 3);
 
                 var properties = new Dictionary<string, object>

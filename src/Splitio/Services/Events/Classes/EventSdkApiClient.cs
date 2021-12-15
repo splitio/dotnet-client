@@ -62,7 +62,7 @@ namespace Splitio.Services.Events.Classes
 
                     while (events.Count > 0)
                     {
-                        var bulkToPost = BuildEventsBulk(events);
+                        var bulkToPost = Util.Helper.TakeFromList(events, _maxBulkSize);
 
                         await BuildJsonAndPost(bulkToPost, clock);
                     }
@@ -72,21 +72,6 @@ namespace Splitio.Services.Events.Classes
             {
                 _log.Error("Exception caught sending bulk of events", ex);
             }
-        }
-
-        private List<Event> BuildEventsBulk(List<Event> events)
-        {
-            var count = _maxBulkSize;
-
-            if (events.Count < _maxBulkSize)
-            {
-                count = events.Count;
-            }
-
-            var bulk = events.GetRange(0, count);
-            events.RemoveRange(0, count);
-
-            return bulk;
         }
 
         private async Task BuildJsonAndPost(List<Event> events, Util.SplitStopwatch clock)

@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Services.Impressions.Classes;
+using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Storages;
 using Splitio_Tests.Resources;
 using System;
@@ -12,6 +14,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     [TestClass]
     public class ImpressionsSdkApiClientTests
     {
+        private readonly IWrapperAdapter _wrapperAdapter = new WrapperAdapter();
+
         [TestMethod]
         public void CorrectFormatSendCounts()
         {
@@ -23,7 +27,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             impressions.TryAdd(new KeyCache("featur1", time9am), 2);
 
             var telemetryStorage = new InMemoryTelemetryStorage();
-            var impressionsSdkApiClient = new ImpressionsSdkApiClient(string.Empty, new Dictionary<string, string>(), "http://www.fake-test-split.com", 5, 5, telemetryStorage);
+            var impressionsSdkApiClient = new ImpressionsSdkApiClient(string.Empty, new Dictionary<string, string>(), "http://www.fake-test-split.com", 5, 5, telemetryStorage, _wrapperAdapter, 5);
             
             // Act.
             var result = impressionsSdkApiClient.ConvertToJson(impressions);
@@ -45,7 +49,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             };
 
             var telemetryStorage = new InMemoryTelemetryStorage();
-            var impressionsSdkApiClient = new ImpressionsSdkApiClient(string.Empty, new Dictionary<string, string>(), "http://www.fake-test-split.com", 5, 5, telemetryStorage);
+            var impressionsSdkApiClient = new ImpressionsSdkApiClient(string.Empty, new Dictionary<string, string>(), "http://www.fake-test-split.com", 5, 5, telemetryStorage, _wrapperAdapter, 5);
 
             // Act.
             var result = impressionsSdkApiClient.ConvertToJson(impressions);
