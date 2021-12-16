@@ -1,9 +1,9 @@
 CHANGES
 
 6.3.7 (Dec 16, 2021)
+- Updated the logic that posts events and impressions data to have a maximum bulk size.
 - Updated the readiness flow to be more consistent with the other sdks and improve the readiness time.
-- Added max bulk size when posting events/impressions data.
-- Updated murmurhash dependency to murmurhash-signed >= 1.0.3.
+- Updated murmurhash dependency to use the signed version, murmurhash-signed >= 1.0.3.
 
 6.3.6 (Sep 24, 2021)
 - Fixed an issue in the calculation for the remaining block until ready time when syncing segment information, causing SDK Not Ready without waiting for the configured time.
