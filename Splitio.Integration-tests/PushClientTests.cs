@@ -61,7 +61,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();               
 
                 client.BlockUntilReady(10000);
-                Thread.Sleep(5000);
+                Thread.Sleep(8000);
 
                 var result = client.GetTreatment("admin", "push_test");
 

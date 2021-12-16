@@ -2,7 +2,6 @@
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.Impressions.Classes;
-using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Storages;
