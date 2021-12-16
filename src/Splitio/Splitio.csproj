@@ -35,7 +35,7 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
-    <PackageReference Include="murmurhash" Version="1.0.3" />
+    <PackageReference Include="murmurhash-signed" Version="1.0.3" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6' Or '$(TargetFramework)' == 'netstandard2.0'">
@@ -46,7 +46,7 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net40' Or '$(TargetFramework)' == 'net45' Or '$(TargetFramework)' == 'net461'">
     <PackageReference Include="Common.Logging" version="3.3.1" />
     <PackageReference Include="Common.Logging.Core" version="3.3.1" />
-    <PackageReference Include="murmurhash-signed" version="1.0.2" />
+    <PackageReference Include="murmurhash-signed" version="1.0.3" />
   </ItemGroup>  
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net45' Or '$(TargetFramework)' == 'net461'">
