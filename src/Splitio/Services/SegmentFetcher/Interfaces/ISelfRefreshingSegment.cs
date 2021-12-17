@@ -5,6 +5,6 @@ namespace Splitio.Services.SegmentFetcher.Interfaces
 {
     public interface ISelfRefreshingSegment
     {
-        Task FetchSegment(FetchOptions fetchOptions);
+        Task<bool> FetchSegment(FetchOptions fetchOptions);
     }
 }

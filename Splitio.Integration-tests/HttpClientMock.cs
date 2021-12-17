@@ -271,19 +271,40 @@ namespace Splitio.Integration_tests
         }
         #endregion
 
+        #region Posts
+        public void Post_Response(string url, int statusCode, string bodyResponse)
+        {
+            _mockServer
+                .Given(
+                    Request.Create()
+                    .WithPath(url)
+                    .UsingPost()
+                )
+                .RespondWith(
+                    Response.Create()
+                    .WithStatusCode(statusCode)
+                    .WithBody(bodyResponse));
+        }
+
+        public void Post_Response(string url, int statusCode, string data, string bodyResponse)
+        {
+            _mockServer
+                .Given(
+                    Request.Create()
+                    .WithPath(url)
+                    .UsingPost()
+                    .WithBody(data)
+                )
+                .RespondWith(
+                    Response.Create()
+                    .WithStatusCode(statusCode)
+                    .WithBody(bodyResponse));
+        }
+        #endregion
+
         public string GetUrl()
         {
             return _mockServer.Urls.FirstOrDefault();
-        }
-
-        public void ShutdownServer()
-        {
-            _mockServer.Stop();
-        }
-
-        public int GetPort()
-        {
-            return _mockServer.Ports.First();
         }
 
         public List<LogEntry> GetLogs()
@@ -292,7 +313,7 @@ namespace Splitio.Integration_tests
         }
 
         public List<LogEntry> GetImpressionLogs()
-        {          
+        {
             return _mockServer
                 .LogEntries
                 .Where(l => l.RequestMessage.AbsolutePath.Contains("api/testImpressions/bulk"))
@@ -334,6 +355,7 @@ namespace Splitio.Integration_tests
         public void Dispose()
         {
             _mockServer.Stop();
+            _mockServer.Dispose();
         }
     }
 }

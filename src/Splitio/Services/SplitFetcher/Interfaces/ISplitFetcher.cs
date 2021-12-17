@@ -8,7 +8,13 @@ namespace Splitio.Services.SplitFetcher.Interfaces
     {
         void Start();
         void Stop();
-        Task<IList<string>> FetchSplits(FetchOptions fetchOptions);
+        Task<FetchResult> FetchSplits(FetchOptions fetchOptions);
         void Clear();
+    }
+
+    public class FetchResult
+    {
+        public List<string> SegmentNames { get; set; }
+        public bool Success { get; set; }
     }
 }

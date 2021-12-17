@@ -44,5 +44,7 @@ namespace Splitio.Redis.Services.Cache.Interfaces
         void Connect();
 
         double HashIncrement(string key, string field, double value);
+
+        bool HashSet(RedisKey key, RedisValue hashField, RedisValue value);
     }
 }

@@ -1,5 +1,4 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
@@ -28,6 +27,7 @@ namespace Splitio.Services.Events.Classes
         private readonly int _firstPushWindow;
         
         private readonly object _lock = new object();
+        private readonly object _sendBulkEventsLock = new object();
 
         private bool _running;
         private long _acumulateSize;
@@ -98,22 +98,26 @@ namespace Splitio.Services.Events.Classes
 
         private void SendBulkEvents()
         {
-            if (_wrappedEventsCache.HasReachedMaxSize())
+            lock (_sendBulkEventsLock)
             {
-                Logger.Warn("Split SDK events queue is full. Events may have been dropped. Consider increasing capacity.");
-            }
+                if (_wrappedEventsCache.IsEmpty()) return;
 
-            var wrappedEvents = _wrappedEventsCache.FetchAllAndClear();
+                if (_wrappedEventsCache.HasReachedMaxSize())
+                {
+                    Logger.Warn("Split SDK events queue is full. Events may have been dropped. Consider increasing capacity.");
+                }
 
-            if (wrappedEvents.Count > 0)
-            {
+                var wrappedEvents = _wrappedEventsCache.FetchAllAndClear();
+
+                if (wrappedEvents.Count <= 0) return;
+
                 try
                 {
                     var events = wrappedEvents
                         .Select(x => x.Event)
                         .ToList();
 
-                    _apiClient.SendBulkEvents(events);
+                    _apiClient.SendBulkEventsTask(events);
 
                     _acumulateSize = 0;
                 }
@@ -128,7 +132,7 @@ namespace Splitio.Services.Events.Classes
         {
             if (_telemetryRuntimeProducer == null) return;
 
-            _telemetryRuntimeProducer.RecordEventsStats(EventsEnum.EventsQueued, 1  - dropped);
+            _telemetryRuntimeProducer.RecordEventsStats(EventsEnum.EventsQueued, 1 - dropped);
             _telemetryRuntimeProducer.RecordEventsStats(EventsEnum.EventsDropped, dropped);
         }
     }

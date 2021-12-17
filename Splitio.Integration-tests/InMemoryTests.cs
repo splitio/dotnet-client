@@ -1,8 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Splitio.Domain;
-using Splitio.Services.Client.Classes;
 using Splitio.Integration_tests.Resources;
+using Splitio.Services.Client.Classes;
+using Splitio.Services.Impressions.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,383 +18,389 @@ namespace Splitio.Integration_tests
         public void GetTreatment_WithoutBUR_ReturnsControl()
         {
             // Arrange.
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
+            using (var httpClientMock = GetHttpClientMock())
+            {
+                var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
 
-            var apikey = "apikey1";
+                var apikey = "apikey1";
 
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
 
-            // Act.
-            var treatmentResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
+                // Act.
+                var treatmentResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
 
-            // Assert.
-            Assert.AreEqual("control", treatmentResult);
+                // Assert.
+                Assert.AreEqual("control", treatmentResult);
 
-            client.BlockUntilReady(10000);
-            client.Destroy();
-            ShutdownServer(httpClientMock);
+                client.Destroy();
+            }
         }
 
         [TestMethod]
         public void GetTreatmentWithConfig_WithoutBUR_ReturnsControl()
         {
             // Arrange.           
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
+            using (var httpClientMock = GetHttpClientMock())
+            {
+                var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
 
-            var apikey = "apikey2";
+                var apikey = "apikey2";
 
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
 
-            // Act.
-            var treatmentResult = client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+                // Act.
+                var treatmentResult = client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
 
-            // Assert.
-            Assert.AreEqual("control", treatmentResult.Treatment);
-            Assert.IsNull(treatmentResult.Config);
+                // Assert.
+                Assert.AreEqual("control", treatmentResult.Treatment);
+                Assert.IsNull(treatmentResult.Config);
 
-            client.BlockUntilReady(10000);
-            client.Destroy();
-            ShutdownServer(httpClientMock);
+                client.BlockUntilReady(10000);
+                client.Destroy();
+            }
         }
 
         [TestMethod]
         public void GetTreatments_WithoutBUR_ReturnsControl()
         {
             // Arrange.           
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
+            using (var httpClientMock = GetHttpClientMock())
+            {
+                var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
 
-            var apikey = "apikey3";
+                var apikey = "apikey3";
 
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
 
-            // Act.
-            var treatmentResults = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
+                // Act.
+                var treatmentResults = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
-            // Assert.            
-            Assert.AreEqual("control", treatmentResults["FACUNDO_TEST"]);
-            Assert.AreEqual("control", treatmentResults["MAURO_TEST"]);
+                // Assert.            
+                Assert.AreEqual("control", treatmentResults["FACUNDO_TEST"]);
+                Assert.AreEqual("control", treatmentResults["MAURO_TEST"]);
 
-            client.BlockUntilReady(10000);
-            client.Destroy();
-            ShutdownServer(httpClientMock);
+                client.Destroy();
+            }
         }
 
         [TestMethod]
         public void GetTreatmentsWithConfig_WithoutBUR_ReturnsControl()
         {
             // Arrange.           
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
+            using (var httpClientMock = GetHttpClientMock())
+            {
+                var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
 
-            var apikey = "apikey4";
+                var apikey = "apikey4";
 
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
 
-            // Act.
-            var treatmentResults = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
+                // Act.
+                var treatmentResults = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
-            // Assert.            
-            Assert.AreEqual("control", treatmentResults["FACUNDO_TEST"].Treatment);
-            Assert.AreEqual("control", treatmentResults["MAURO_TEST"].Treatment);
-            Assert.IsNull(treatmentResults["FACUNDO_TEST"].Config);
-            Assert.IsNull(treatmentResults["MAURO_TEST"].Config);
+                // Assert.            
+                Assert.AreEqual("control", treatmentResults["FACUNDO_TEST"].Treatment);
+                Assert.AreEqual("control", treatmentResults["MAURO_TEST"].Treatment);
+                Assert.IsNull(treatmentResults["FACUNDO_TEST"].Config);
+                Assert.IsNull(treatmentResults["MAURO_TEST"].Config);
 
-            client.BlockUntilReady(10000);
-            client.Destroy();
-            ShutdownServer(httpClientMock);
+                client.Destroy();
+            }
         }
 
         [TestMethod]
         public void GetTreatment_WithtBUR_ReturnsTimeOutException()
         {
             // Arrange.           
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
-
-            var apikey = "apikey5";
-
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
-
-            // Act.
-            var exceptionMessage = "";
-            var isSdkReady = false;
-
-            try
+            using (var httpClientMock = GetHttpClientMock())
             {
-                client.BlockUntilReady(1);
-                isSdkReady = true;
-            }
-            catch (Exception ex)
-            {
-                isSdkReady = false;
-                exceptionMessage = ex.Message;
-            }
+                var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
 
-            // Assert.
-            Assert.IsFalse(isSdkReady);
-            Assert.AreEqual("SDK was not ready in 1 miliseconds", exceptionMessage);
+                var apikey = "apikey5";
 
-            client.Destroy();
-            ShutdownServer(httpClientMock);
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
+
+                // Act.
+                var exceptionMessage = "";
+                var isSdkReady = false;
+
+                try
+                {
+                    client.BlockUntilReady(1);
+                    isSdkReady = true;
+                }
+                catch (Exception ex)
+                {
+                    isSdkReady = false;
+                    exceptionMessage = ex.Message;
+                }
+
+                // Assert.
+                Assert.IsFalse(isSdkReady);
+                Assert.AreEqual("SDK was not ready in 1 miliseconds", exceptionMessage);
+
+                client.Destroy();
+            }
         }
 
         [TestMethod]
         public void Manager_SplitNames_WithoutBUR_ReturnsNull()
         {
             // Arrange.
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
+            using (var httpClientMock = GetHttpClientMock())
+            {
+                var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
 
-            var apikey = "apikey6";
+                var apikey = "apikey6";
 
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var manager = splitFactory.Manager();
-            
-            // Act.
-            var result = manager.SplitNames();
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var manager = splitFactory.Manager();
 
-            // Assert.
-            Assert.IsNull(result);
+                // Act.
+                var result = manager.SplitNames();
 
-            manager.BlockUntilReady(10000);
-            splitFactory.Client().Destroy();
-            ShutdownServer(httpClientMock);
+                // Assert.
+                Assert.IsNull(result);
+
+                splitFactory.Client().Destroy();
+            }
         }
 
         [TestMethod]
         public void CheckingHeaders_WithIPAddressesEnabled_ReturnsWithIpAndName()
         {
-            // Arrange.           
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
-
-            var apikey = "apikey7";
-
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
-
-            client.BlockUntilReady(10000);
-
-            // Act.
-            var treatmentResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
-
-            // Assert.
-            Assert.AreEqual("on", treatmentResult);
-
-            Thread.Sleep(5000);
-
-            var requests = httpClientMock.GetLogs();
-            
-            foreach (var req in requests)
+            // Arrange.
+            using (var httpClientMock = GetHttpClientMock())
             {
-                Assert.IsTrue(req
-                    .RequestMessage
-                    .Headers
-                    .Any(h => h.Key.Equals("SplitSDKMachineIP") || h.Key.Equals("SplitSDKMachineName")));
-            }
+                var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
 
-            client.Destroy();
-            ShutdownServer(httpClientMock);
+                var apikey = "apikey7";
+
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
+
+                client.BlockUntilReady(10000);
+
+                // Act.
+                var treatmentResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
+
+                // Assert.
+                Assert.AreEqual("on", treatmentResult);
+
+                Thread.Sleep(5000);
+
+                var requests = httpClientMock.GetLogs();
+
+                foreach (var req in requests)
+                {
+                    Assert.IsTrue(req
+                        .RequestMessage
+                        .Headers
+                        .Any(h => h.Key.Equals("SplitSDKMachineIP") || h.Key.Equals("SplitSDKMachineName")));
+                }
+
+                client.Destroy();
+            }
         }
 
         [TestMethod]
         public void CheckingHeaders_WithIPAddressesDisabled_ReturnsWithoutIpAndName()
         {
             // Arrange.           
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock, ipAddressesEnabled: false);
-
-            var apikey = "apikey8";
-
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
-
-            client.BlockUntilReady(10000);
-
-            // Act.
-            var treatmentResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
-
-            // Assert.
-            Assert.AreEqual("on", treatmentResult);
-
-            Thread.Sleep(5000);
-
-            var requests = httpClientMock.GetLogs();
-
-            foreach (var req in requests)
+            using (var httpClientMock = GetHttpClientMock())
             {
-                Assert.IsFalse(req
-                    .RequestMessage
-                    .Headers
-                    .Any(h => h.Key.Equals("SplitSDKMachineIP") || h.Key.Equals("SplitSDKMachineName")));
-            }
+                var configurations = GetConfigurationOptions(httpClientMock.GetUrl(), ipAddressesEnabled: false);
 
-            client.Destroy();
-            ShutdownServer(httpClientMock);
+                var apikey = "apikey8";
+
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
+
+                client.BlockUntilReady(10000);
+
+                // Act.
+                var treatmentResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
+
+                // Assert.
+                Assert.AreEqual("on", treatmentResult);
+
+                Thread.Sleep(5000);
+
+                var requests = httpClientMock.GetLogs();
+
+                foreach (var req in requests)
+                {
+                    Assert.IsFalse(req
+                        .RequestMessage
+                        .Headers
+                        .Any(h => h.Key.Equals("SplitSDKMachineIP") || h.Key.Equals("SplitSDKMachineName")));
+                }
+
+                client.Destroy();
+            }
         }
 
         [TestMethod]
         public void GetTreatments_ValidateDedupeImpressions_Optimized()
         {
             // Arrange.           
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
+            using (var httpClientMock = GetHttpClientMock())
+            {
+                var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
 
-            var apikey = "apikey9";
+                var apikey = "apikey9";
 
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
 
-            client.BlockUntilReady(10000);
+                client.BlockUntilReady(10000);
 
-            // Act.
-            client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
-            client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
-            client.GetTreatmentWithConfig("test", "MAURO_TEST");
-            client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
-            client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
-            client.GetTreatments("admin", new List<string> { "FACUNDO_TEST", "Test_Save_1" });
-            client.GetTreatment("admin", "FACUNDO_TEST");
-            client.GetTreatment("admin", "Test_Save_1");
-            client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
+                // Act.
+                client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+                client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+                client.GetTreatmentWithConfig("test", "MAURO_TEST");
+                client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
+                client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
+                client.GetTreatments("admin", new List<string> { "FACUNDO_TEST", "Test_Save_1" });
+                client.GetTreatment("admin", "FACUNDO_TEST");
+                client.GetTreatment("admin", "Test_Save_1");
+                client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
-            client.Destroy();
-            Thread.Sleep(3000);
+                client.Destroy();
+                Thread.Sleep(3000);
 
-            // Assert.
-            var sentImpressions = GetImpressionsSentBackend(httpClientMock);
-            Assert.AreEqual(3, sentImpressions.Count);
-            Assert.AreEqual(2, sentImpressions.FirstOrDefault(i => i.F.Equals("FACUNDO_TEST")).I.Count);
-            Assert.AreEqual(3, sentImpressions.FirstOrDefault(i => i.F.Equals("MAURO_TEST")).I.Count);
-            Assert.AreEqual(1, sentImpressions.FirstOrDefault(i => i.F.Equals("Test_Save_1")).I.Count);
+                // Assert.
+                var sentImpressions = GetImpressionsSentBackend(httpClientMock);
+                Assert.AreEqual(3, sentImpressions.Select(x => x.F).Distinct().Count(), "1");
+                Assert.AreEqual(2, sentImpressions.Where(x => x.F.Equals("FACUNDO_TEST")).Sum(x => x.I.Count), "2");
+                Assert.AreEqual(3, sentImpressions.Where(x => x.F.Equals("MAURO_TEST")).Sum(x => x.I.Count), "3");
+                Assert.AreEqual(1, sentImpressions.Where(x => x.F.Equals("Test_Save_1")).Sum(x => x.I.Count), "4");
 
-            var impressionCounts = GetImpressionsCountsSentBackend(httpClientMock);
-            Assert.AreEqual(3, impressionCounts.FirstOrDefault().Pf.Count);
-            Assert.AreEqual(5, impressionCounts.FirstOrDefault().Pf.FirstOrDefault(i => i.F.Equals("FACUNDO_TEST")).Rc);
-            Assert.AreEqual(4, impressionCounts.FirstOrDefault().Pf.FirstOrDefault(i => i.F.Equals("MAURO_TEST")).Rc);
-            Assert.AreEqual(2, impressionCounts.FirstOrDefault().Pf.FirstOrDefault(i => i.F.Equals("Test_Save_1")).Rc);
-
-            ShutdownServer(httpClientMock);
+                var impressionCounts = GetImpressionsCountsSentBackend(httpClientMock);
+                var names = new List<string>();
+                impressionCounts.ForEach(item => names.AddRange(item.Pf.Select(x => x.F)));
+                Assert.AreEqual(3, names.Distinct().Count(), "5");
+                Assert.AreEqual(5, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("FACUNDO_TEST")).Sum(z => z.Rc)), "6");
+                Assert.AreEqual(4, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("MAURO_TEST")).Sum(z => z.Rc)), "7");
+                Assert.AreEqual(2, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("Test_Save_1")).Sum(z => z.Rc)), "8");
+            }
         }
 
         [TestMethod]
         public void GetTreatments_ValidateDedupeImpressions_Debug()
         {
-            // Arrange.           
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
-            configurations.ImpressionsMode = ImpressionsMode.Debug;
+            // Arrange.
+            using (var httpClientMock = GetHttpClientMock())
+            {
+                var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
+                configurations.ImpressionsMode = ImpressionsMode.Debug;
 
-            var apikey = "apikey10";
+                var apikey = "apikey10";
 
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
 
-            client.BlockUntilReady(10000);
+                client.BlockUntilReady(10000);
 
-            // Act.
-            client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
-            client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
-            client.GetTreatmentWithConfig("test", "MAURO_TEST");
-            client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
-            client.GetTreatments("admin", new List<string> { "FACUNDO_TEST", "Test_Save_1" });
-            client.GetTreatment("admin", "FACUNDO_TEST");
-            client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
+                // Act.
+                client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+                client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+                client.GetTreatmentWithConfig("test", "MAURO_TEST");
+                client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
+                client.GetTreatments("admin", new List<string> { "FACUNDO_TEST", "Test_Save_1" });
+                client.GetTreatment("admin", "FACUNDO_TEST");
+                client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
-            client.Destroy();
-            Thread.Sleep(3000);
+                client.Destroy();
+                Thread.Sleep(3000);
 
-            // Assert.
-            var sentImpressions = GetImpressionsSentBackend(httpClientMock);
-            Assert.AreEqual(3, sentImpressions.Count);
-            Assert.AreEqual(5, sentImpressions.FirstOrDefault(i => i.F.Equals("FACUNDO_TEST")).I.Count);
-            Assert.AreEqual(3, sentImpressions.FirstOrDefault(i => i.F.Equals("MAURO_TEST")).I.Count);
-            Assert.AreEqual(1, sentImpressions.FirstOrDefault(i => i.F.Equals("Test_Save_1")).I.Count);
+                // Assert.
+                var sentImpressions = GetImpressionsSentBackend(httpClientMock);
+                Assert.AreEqual(3, sentImpressions.Select(x => x.F).Distinct().Count());
+                Assert.AreEqual(5, sentImpressions.Where(x => x.F.Equals("FACUNDO_TEST")).Sum(x => x.I.Count));
+                Assert.AreEqual(3, sentImpressions.Where(x => x.F.Equals("MAURO_TEST")).Sum(x => x.I.Count));
+                Assert.AreEqual(1, sentImpressions.Where(x => x.F.Equals("Test_Save_1")).Sum(x => x.I.Count));
 
-            var impressionCounts = GetImpressionsCountsSentBackend(httpClientMock);
-            Assert.AreEqual(0, impressionCounts.Count);
-
-            ShutdownServer(httpClientMock);
+                var impressionCounts = GetImpressionsCountsSentBackend(httpClientMock);
+                Assert.AreEqual(0, impressionCounts.Count);
+            }
         }
 
         [TestMethod]
         public void Telemetry_ValidatesConfigInitAndStats()
         {
             // Arrange.
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
-
-            var apikey = "apikey-telemetry";
-
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
-            client.Track("test-key", "tt", "test");
-
-            try
+            using (var httpClientMock = GetHttpClientMock())
             {
-                client.BlockUntilReady(0);
+                var impressionListener = new IntegrationTestsImpressionListener(50);
+                var configurations = GetConfigurationOptions(httpClientMock.GetUrl(), impressionListener: impressionListener);
+
+                var apikey = "apikey-telemetry";
+
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
+                client.Track("test-key", "tt", "test");
+
+                try
+                {
+                    client.BlockUntilReady(0);
+                }
+                catch
+                {
+                    client.BlockUntilReady(10000);
+                }
+
+                // Act.
+                var result = client.GetTreatment("nico_test", "FACUNDO_TEST");
+
+                Thread.Sleep(3000);
+
+                // Assert.
+                Assert.AreEqual("on", result);
+
+                var sentConfig = GetMetricsConfigSentBackend(httpClientMock);
+                Assert.IsNotNull(sentConfig);
+                Assert.AreEqual(configurations.StreamingEnabled, sentConfig.StreamingEnabled);
+                Assert.AreEqual("memory", sentConfig.Storage);
+                Assert.AreEqual(configurations.FeaturesRefreshRate, (int)sentConfig.Rates.Splits);
+                Assert.AreEqual(configurations.SegmentsRefreshRate, (int)sentConfig.Rates.Events);
+                Assert.AreEqual(60, (int)sentConfig.Rates.Impressions);
+                Assert.AreEqual(3600, (int)sentConfig.Rates.Telemetry);
+                Assert.IsTrue(sentConfig.UrlOverrides.Telemetry);
+                Assert.IsTrue(sentConfig.UrlOverrides.Sdk);
+                Assert.IsTrue(sentConfig.UrlOverrides.Events);
+                Assert.IsFalse(sentConfig.UrlOverrides.Stream);
+                Assert.IsFalse(sentConfig.UrlOverrides.Auth);
+                Assert.AreEqual(30000, (int)sentConfig.ImpressionsQueueSize);
+                Assert.AreEqual(10000, (int)sentConfig.EventsQueueSize);
+                Assert.AreEqual(ImpressionsMode.Optimized, sentConfig.ImpressionsMode);
+                Assert.IsTrue(sentConfig.ImpressionListenerEnabled);
+                Assert.IsTrue(1 <= sentConfig.ActiveFactories);
+                Assert.AreEqual(1, sentConfig.BURTimeouts);
+
+                var sentStats = GetMetricsStatsSentBackend(httpClientMock);
+                Assert.AreEqual(0, sentStats.Count);
+
+                client.Destroy();
             }
-            catch
-            {
-                client.BlockUntilReady(10000);
-            }            
-
-            // Act.
-            var result = client.GetTreatment("nico_test", "FACUNDO_TEST");
-
-            Thread.Sleep(3000);
-
-            // Assert.
-            Assert.AreEqual("on", result);
-
-            var sentConfig = GetMetricsConfigSentBackend(httpClientMock);
-            Assert.IsNotNull(sentConfig);
-            Assert.AreEqual(configurations.StreamingEnabled, sentConfig.StreamingEnabled);
-            Assert.AreEqual("memory", sentConfig.Storage);
-            Assert.AreEqual(configurations.FeaturesRefreshRate, (int)sentConfig.Rates.Splits);
-            Assert.AreEqual(configurations.SegmentsRefreshRate, (int)sentConfig.Rates.Events);
-            Assert.AreEqual(60, (int)sentConfig.Rates.Impressions);
-            Assert.AreEqual(3600, (int)sentConfig.Rates.Telemetry);
-            Assert.IsTrue(sentConfig.UrlOverrides.Telemetry);
-            Assert.IsTrue(sentConfig.UrlOverrides.Sdk);
-            Assert.IsTrue(sentConfig.UrlOverrides.Events);
-            Assert.IsFalse(sentConfig.UrlOverrides.Stream);
-            Assert.IsFalse(sentConfig.UrlOverrides.Auth);
-            Assert.AreEqual(30000, (int)sentConfig.ImpressionsQueueSize);
-            Assert.AreEqual(5000, (int)sentConfig.EventsQueueSize);
-            Assert.AreEqual(ImpressionsMode.Optimized, sentConfig.ImpressionsMode);
-            Assert.IsTrue(sentConfig.ImpressionListenerEnabled);
-            Assert.IsTrue(1 <= sentConfig.ActiveFactories);
-            Assert.AreEqual(1, sentConfig.BURTimeouts);
-
-            var sentStats = GetMetricsStatsSentBackend(httpClientMock);
-            Assert.AreEqual(0, sentStats.Count);
-
-            client.Destroy();
-            ShutdownServer(httpClientMock);
         }
 
         #region Protected Methods
-        protected override ConfigurationOptions GetConfigurationOptions(HttpClientMock httpClientMock = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null)
+        protected override ConfigurationOptions GetConfigurationOptions(string url = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)
         {
-            _impressionListener = new IntegrationTestsImpressionListener(50);
-
             return new ConfigurationOptions
             {
-                Endpoint = $"http://localhost:{httpClientMock.GetPort()}",
-                EventsEndpoint = $"http://localhost:{httpClientMock.GetPort()}",
-                TelemetryServiceURL = $"http://localhost:{httpClientMock.GetPort()}",
+                Endpoint = url,
+                EventsEndpoint = url,
+                TelemetryServiceURL = url,
                 ReadTimeout = 20000,
                 ConnectionTimeout = 20000,
-                ImpressionListener = _impressionListener,
+                ImpressionListener = impressionListener,
                 FeaturesRefreshRate = featuresRefreshRate ?? 1,
                 SegmentsRefreshRate = 1,
                 ImpressionsRefreshRate = 1,
@@ -419,12 +426,10 @@ namespace Splitio.Integration_tests
             httpClientMock.SegmentChangesOk("-1", "segment3");
             httpClientMock.SegmentChangesOk("1470947453879", "segment3");
 
-            return httpClientMock;
-        }
+            httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
+            httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 
-        protected override void ShutdownServer(HttpClientMock httpClientMock = null)
-        {
-            httpClientMock.ShutdownServer();
+            return httpClientMock;
         }
 
         protected override void AssertSentImpressions(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
@@ -443,20 +448,25 @@ namespace Splitio.Integration_tests
 
                 Thread.Sleep(time);
 
-                time = time + 1000;
+                time = time + 100;
                 sentImpressions = GetImpressionsSentBackend(httpClientMock);
             }
 
             Assert.AreEqual(sentImpressionsCount, sentImpressions.Sum(si => si.I.Count));
 
             foreach (var expectedImp in expectedImpressions)
-            {                
-                var keyImpressions = sentImpressions.FirstOrDefault(si => si.F.Equals(expectedImp.feature)).I;
+            {
+                var impressions = new List<ImpressionData>();
 
-                AssertImpression(expectedImp, keyImpressions);
+                foreach (var ki in sentImpressions.Where(si => si.F.Equals(expectedImp.feature)))
+                {
+                    impressions.AddRange(ki.I);
+                }
+
+                AssertImpression(expectedImp, impressions);
             }
         }
-        
+
         protected void AssertImpression(KeyImpression impressionExpected, List<ImpressionData> sentImpressions)
         {
             Assert.IsTrue(sentImpressions
@@ -468,7 +478,7 @@ namespace Splitio.Integration_tests
                 .Any());
         }
 
-        protected override void AssertSentEvents(List<EventBackend> eventsExpected, HttpClientMock httpClientMock = null, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true)
+        protected override void AssertSentEvents(List<EventBackend> eventsExpected, HttpClientMock httpClientMock = null, int sleepTime = 5000, int? eventsCount = null, bool validateEvents = true)
         {
             Thread.Sleep(sleepTime);
 
@@ -513,7 +523,7 @@ namespace Splitio.Integration_tests
             var logs = httpClientMock.GetMetricsConfigLog();
 
             if (logs.FirstOrDefault() == null) return null;
-            
+
             return JsonConvert.DeserializeObject<Telemetry.Domain.Config>(logs.FirstOrDefault().RequestMessage.Body);
         }
 
@@ -542,7 +552,6 @@ namespace Splitio.Integration_tests
                 var _impression = JsonConvert.DeserializeObject<ImpressionCount>(log.RequestMessage.Body);
 
                 impressions.Add(_impression);
-
             }
 
             return impressions;

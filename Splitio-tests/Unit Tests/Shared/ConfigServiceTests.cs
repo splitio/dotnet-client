@@ -48,8 +48,10 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual(false, result.RandomizeRefreshRates);
             Assert.AreEqual(300, result.TreatmentLogRefreshRate);
             Assert.AreEqual(30000, result.TreatmentLogSize);
+            Assert.AreEqual(5000, result.ImpressionsBulkSize);
             Assert.AreEqual(60, result.EventLogRefreshRate);
-            Assert.AreEqual(5000, result.EventLogSize);
+            Assert.AreEqual(10000, result.EventLogSize);
+            Assert.AreEqual(500, result.EventsBulkSize);
             Assert.AreEqual(10, result.EventsFirstPushWindow);
             Assert.AreEqual(5, result.NumberOfParalellSegmentTasks);
             Assert.AreEqual(true, result.StreamingEnabled);
@@ -100,8 +102,10 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual(false, result.RandomizeRefreshRates);
             Assert.AreEqual(150, result.TreatmentLogRefreshRate);
             Assert.AreEqual(30000, result.TreatmentLogSize);
+            Assert.AreEqual(5000, result.ImpressionsBulkSize);
             Assert.AreEqual(60, result.EventLogRefreshRate);
-            Assert.AreEqual(5000, result.EventLogSize);
+            Assert.AreEqual(10000, result.EventLogSize);
+            Assert.AreEqual(500, result.EventsBulkSize);
             Assert.AreEqual(10, result.EventsFirstPushWindow);
             Assert.AreEqual(5, result.NumberOfParalellSegmentTasks);
             Assert.AreEqual(false, result.StreamingEnabled);

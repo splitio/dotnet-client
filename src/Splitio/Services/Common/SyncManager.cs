@@ -2,9 +2,12 @@
 using Splitio.Services.EventSource;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
+using Splitio.Telemetry.Common;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
+using System;
 using System.Threading;
 
 namespace Splitio.Services.Common
@@ -17,8 +20,10 @@ namespace Splitio.Services.Common
         private readonly ISSEHandler _sseHandler;
         private readonly ISplitLogger _log;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
-        private readonly IReadinessGatesCache _gates;
+        private readonly IStatusManager _statusManager;
         private readonly ITasksManager _tasksManager;
+        private readonly IWrapperAdapter _wrapperAdapter;
+        private readonly ITelemetrySyncTask _telemetrySyncTask;
         private readonly CancellationTokenSource _shutdownCancellationTokenSource;
         private readonly object _lock = new object();
 
@@ -30,8 +35,10 @@ namespace Splitio.Services.Common
             ISSEHandler sseHandler,
             INotificationManagerKeeper notificationManagerKeeper,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
-            IReadinessGatesCache gates,
+            IStatusManager statusManager,
             ITasksManager tasksManager,
+            IWrapperAdapter wrapperAdapter,
+            ITelemetrySyncTask telemetrySyncTask,
             ISplitLogger log = null)
         {
             _streamingEnabled = streamingEnabled;
@@ -40,8 +47,10 @@ namespace Splitio.Services.Common
             _sseHandler = sseHandler;
             _log = log ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
-            _gates = gates;
+            _statusManager = statusManager;
             _tasksManager = tasksManager;
+            _wrapperAdapter = wrapperAdapter;
+            _telemetrySyncTask = telemetrySyncTask;
 
             _sseHandler.ActionEvent += OnProcessFeedbackSSE;
             notificationManagerKeeper.ActionEvent += OnProcessFeedbackSSE;
@@ -52,26 +61,47 @@ namespace Splitio.Services.Common
         #region Public Methods
         public void Start()
         {
-            _synchronizer.SyncAll(_shutdownCancellationTokenSource);
+            _tasksManager.Start(() =>
+            {
+                try
+                {
+                    while (!_synchronizer.SyncAll(_shutdownCancellationTokenSource, asynchronous: false))
+                    {
+                        _wrapperAdapter.TaskDelay(500).Wait();
+                    }
 
-            if (_streamingEnabled)
-            {
-                 StartStream();
-            }
-            else
-            {
-                StartPoll();
-            }
+                    _statusManager.SetReady();
+                    _telemetrySyncTask.RecordConfigInit();
+                    _synchronizer.StartPeriodicDataRecording();
+
+                    if (_streamingEnabled)
+                    {
+                        _log.Debug("Starting streaming mode...");
+                        var connected = _pushManager.StartSse().Result;
+
+                        if (connected) return;
+                    }
+
+                    _log.Debug("Starting polling mode ...");
+                    _synchronizer.StartPeriodicFetching();
+                    _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
+                }
+                catch (Exception ex)
+                {
+                    _log.Debug("Exception initialization SDK.", ex);
+                }
+                
+            }, _shutdownCancellationTokenSource, "SDK Initialization");
         }
 
         public void Shutdown()
         {
-            _shutdownCancellationTokenSource.Cancel();
-            _shutdownCancellationTokenSource.Dispose();
             _synchronizer.StopPeriodicFetching();
             _synchronizer.ClearFetchersCache();
             _synchronizer.StopPeriodicDataRecording();
             _pushManager.StopSse();
+            _shutdownCancellationTokenSource.Cancel();
+            _shutdownCancellationTokenSource.Dispose();
         }
 
         // public for tests
@@ -105,30 +135,6 @@ namespace Splitio.Services.Common
         #endregion
 
         #region Private Methods
-        private void StartPoll()
-        {
-            _log.Debug("Starting polling mode ...");
-
-            _synchronizer.StartPeriodicFetching();
-            _synchronizer.StartPeriodicDataRecording();
-            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
-        }
-
-        private void StartStream()
-        {
-            _log.Debug("Starting streaming mode...");            
-
-            _synchronizer.StartPeriodicDataRecording();
-
-            _tasksManager.Start(() =>
-            {
-                if (!_pushManager.StartSse().Result)
-                {
-                    _synchronizer.StartPeriodicFetching();
-                }
-            }, _shutdownCancellationTokenSource, "Start Streaming");
-        }        
-
         private void ProcessConnected()
         {
             lock (_lock)

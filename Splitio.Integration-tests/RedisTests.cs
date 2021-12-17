@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Splitio.Services.Impressions.Interfaces;
 
 namespace Splitio.Integration_tests
 {
@@ -93,7 +94,7 @@ namespace Splitio.Integration_tests
                 Assert.IsFalse(key.ToString().Contains("/NA/"));
             }
 
-            ShutdownServer();
+            _redisAdapter.Flush();
         }
 
         [TestMethod]
@@ -154,14 +155,12 @@ namespace Splitio.Integration_tests
                 Assert.IsTrue(key.ToString().Contains("/NA/"));
             }
 
-            ShutdownServer();
+            _redisAdapter.Flush();
         }
 
         #region Protected Methods
-        protected override ConfigurationOptions GetConfigurationOptions(HttpClientMock httpClientMock = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null)
+        protected override ConfigurationOptions GetConfigurationOptions(string url = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)
         {
-            _impressionListener = new IntegrationTestsImpressionListener(50);
-
             var cacheConfig = new CacheAdapterConfigurationOptions
             {
                 Host = Host,
@@ -172,11 +171,10 @@ namespace Splitio.Integration_tests
 
             return new ConfigurationOptions
             {
-                ImpressionListener = _impressionListener,
+                ImpressionListener = impressionListener,
                 FeaturesRefreshRate = featuresRefreshRate ?? 1,
                 SegmentsRefreshRate = 1,
                 ImpressionsRefreshRate = 1,
-                //MetricsRefreshRate = 1,
                 EventsPushRate = eventsPushRate ?? 1,
                 IPAddressesEnabled = ipAddressesEnabled,
                 CacheAdapterConfig = cacheConfig,
@@ -189,11 +187,6 @@ namespace Splitio.Integration_tests
             LoadSplits();
 
             return null;
-        }
-
-        protected override void ShutdownServer(HttpClientMock httpClientMock = null)
-        {
-            _redisAdapter.Flush();
         }
 
         protected override void AssertSentImpressions(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)

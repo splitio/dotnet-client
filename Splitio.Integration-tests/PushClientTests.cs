@@ -2,7 +2,6 @@
 using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
-using Splitio.Services.Client.Interfaces;
 using System.Threading;
 
 namespace Splitio.Integration_tests
@@ -30,6 +29,8 @@ namespace Splitio.Integration_tests
                 httpClientMock.SplitChangesSequence("splits_push4.json", "1585948850111", "First_Time_1");
                 httpClientMock.SegmentChangesOk("-1", "segment4");
                 httpClientMock.SegmentChangesOk("1470947453878", "segment4", "split_segment4_empty");
+                httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
+                httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 
                 var notification = "fb\r\nid: 123\nevent: message\ndata: {\"id\":\"1\",\"clientId\":\"emptyClientId\",\"connectionId\":\"1\",\"timestamp\":1582045421733,\"channel\":\"mauroc\",\"data\":\"{\\\"type\\\" : \\\"SPLIT_UPDATE\\\",\\\"changeNumber\\\": 1585948850111}\",\"name\":\"asdasd\"}\n\n\r\n";
                 httpClientMock.SSE_Channels_Response_WithPath(EventSourcePath, notification);
@@ -60,7 +61,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();               
 
                 client.BlockUntilReady(10000);
-                Thread.Sleep(2000);
+                Thread.Sleep(8000);
 
                 var result = client.GetTreatment("admin", "push_test");
 
@@ -79,6 +80,8 @@ namespace Splitio.Integration_tests
                 httpClientMock.SplitChangesSequence("splits_push2.json", "1585948850109", "First_Time");
                 httpClientMock.SegmentChangesOk("-1", "segment4");
                 httpClientMock.SegmentChangesOk("1470947453878", "segment4", "split_segment4_empty");
+                httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
+                httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 
                 var notification = "fb\r\nid: 123\nevent: message\ndata: {\"id\":\"1\",\"clientId\":\"emptyClientId\",\"connectionId\":\"1\",\"timestamp\":1582045421733,\"channel\":\"mauroc\",\"data\":\"{\\\"type\\\" : \\\"SPLIT_UPDATE\\\",\\\"changeNumber\\\": 1585948850100}\",\"name\":\"asdasd\"}\n\n\r\n";
                 httpClientMock.SSE_Channels_Response_WithPath(EventSourcePath, notification);
@@ -109,7 +112,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
 
                 var result = client.GetTreatment("admin", "push_test");
 
@@ -130,6 +133,8 @@ namespace Splitio.Integration_tests
                 httpClientMock.SplitChangesSequence("splits_push4.json", "1585948850111", "First_Time_1");
                 httpClientMock.SegmentChangesOk("-1", "segment4");
                 httpClientMock.SegmentChangesOk("1470947453878", "segment4", "split_segment4_empty");
+                httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
+                httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 
                 var notification = "fb\r\nid: 123\nevent: message\ndata: {\"id\":\"1\",\"clientId\":\"emptyClientId\",\"connectionId\":\"1\",\"timestamp\":1582045421733,\"channel\":\"mauroc\",\"data\":\"{\\\"type\\\" : \\\"SPLIT_KILL\\\",\\\"changeNumber\\\": 1585948850111, \\\"defaultTreatment\\\" : \\\"off_kill\\\", \\\"splitName\\\" : \\\"push_test\\\"}\",\"name\":\"asdasd\"}\n\n\r\n";
                 httpClientMock.SSE_Channels_Response_WithPath(EventSourcePath, notification);
@@ -160,7 +165,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
 
                 var result = client.GetTreatment("admin", "push_test");
 
@@ -179,6 +184,8 @@ namespace Splitio.Integration_tests
                 httpClientMock.SplitChangesSequence("splits_push2.json", "1585948850109", "First_Time");
                 httpClientMock.SegmentChangesOk("-1", "segment4");
                 httpClientMock.SegmentChangesOk("1470947453878", "segment4", "split_segment4_empty");
+                httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
+                httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 
                 var notification = "fb\r\nid: 123\nevent: message\ndata: {\"id\":\"1\",\"clientId\":\"emptyClientId\",\"connectionId\":\"1\",\"timestamp\":1582045421733,\"channel\":\"mauroc\",\"data\":\"{\\\"type\\\" : \\\"SPLIT_KILL\\\",\\\"changeNumber\\\": 1585948850110, \\\"defaultTreatment\\\" : \\\"off_kill\\\", \\\"splitName\\\" : \\\"push_test\\\"}\",\"name\":\"asdasd\"}\n\n\r\n";
                 httpClientMock.SSE_Channels_Response_WithPath(EventSourcePath, notification);
@@ -209,7 +216,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
 
                 var result = client.GetTreatment("admin", "push_test");
 
@@ -229,7 +236,8 @@ namespace Splitio.Integration_tests
                 httpClientMock.SplitChangesSequence("splits_push2.json", "1585948850109", "First_Time");
                 httpClientMock.SegmentChangesSequence("-1", "segment4", "split_segment4", "First_time", "1470947453878", "split_segment4_empty", "Second_time", "1470947453878", "split_segment4_updated", "Third_time");
                 httpClientMock.SegmentChangesOk("1470947453879", "segment4", "split_segment4_updated_empty");
-
+                httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
+                httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 
                 var notification = "fb\r\nid: 123\nevent: message\ndata: {\"id\":\"1\",\"clientId\":\"emptyClientId\",\"connectionId\":\"1\",\"timestamp\":1582045421733,\"channel\":\"mauroc\",\"data\":\"{\\\"type\\\" : \\\"SEGMENT_UPDATE\\\",\\\"changeNumber\\\": 1470947453879, \\\"segmentName\\\" : \\\"segment4\\\"}\",\"name\":\"asdasd\"}\n\n\r\n";
                 httpClientMock.SSE_Channels_Response_WithPath(EventSourcePath, notification);
@@ -260,7 +268,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                Thread.Sleep(20000);
+                Thread.Sleep(5000);
 
                 var result = client.GetTreatment("test_in_segment", "feature_segment");
 
@@ -280,6 +288,8 @@ namespace Splitio.Integration_tests
                 httpClientMock.SplitChangesSequence("splits_push4.json", "1585948850111", "First_Time_1");
                 httpClientMock.SegmentChangesOk("-1", "segment4");
                 httpClientMock.SegmentChangesOk("1470947453878", "segment4", "split_segment4_empty");
+                httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
+                httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 
                 var notification = "d4\r\nevent: message\ndata: {\"id\":\"123\",\"timestamp\":1586803930362,\"encoding\":\"json\",\"channel\":\"[?occupancy=metrics.publishers]control_pri\",\"data\":\"{\\\"metrics\\\":{\\\"publishers\\\":2}}\",\"name\":\"[meta]occupancy\"}\n\n\r\nfb\r\nid: 123\nevent: message\ndata: {\"id\":\"1\",\"clientId\":\"emptyClientId\",\"connectionId\":\"1\",\"timestamp\":1582045421733,\"channel\":\"mauroc\",\"data\":\"{\\\"type\\\" : \\\"SPLIT_UPDATE\\\",\\\"changeNumber\\\": 1585948850111}\",\"name\":\"asdasd\"}\n\n\r\n";
                 httpClientMock.SSE_Channels_Response_WithPath(EventSourcePath, notification);
@@ -310,7 +320,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                Thread.Sleep(20000);
+                Thread.Sleep(5000);
 
                 var result = client.GetTreatment("admin", "push_test");
 
@@ -330,6 +340,8 @@ namespace Splitio.Integration_tests
                 httpClientMock.SplitChangesSequence("splits_push4.json", "1585948850111", "First_Time_1");
                 httpClientMock.SegmentChangesOk("-1", "segment4");
                 httpClientMock.SegmentChangesOk("1470947453878", "segment4", "split_segment4_empty");
+                httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
+                httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 
                 var notification = "d4\r\nevent: message\ndata: {\"id\":\"123\",\"timestamp\":1586803930362,\"encoding\":\"json\",\"channel\":\"[?occupancy=metrics.publishers]control_pri\",\"data\":\"{\\\"metrics\\\":{\\\"publishers\\\":0}}\",\"name\":\"[meta]occupancy\"}\n\n\r\n";
                 httpClientMock.SSE_Channels_Response_WithPath(EventSourcePath, notification);
@@ -360,7 +372,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                Thread.Sleep(20000);
+                Thread.Sleep(5000);
 
                 var result = client.GetTreatment("admin", "push_test");
 
@@ -380,8 +392,10 @@ namespace Splitio.Integration_tests
                 httpClientMock.SplitChangesSequence("splits_push4.json", "1585948850111", "First_Time_1");
                 httpClientMock.SegmentChangesOk("-1", "segment4");
                 httpClientMock.SegmentChangesOk("1470947453878", "segment4", "split_segment4_empty");
+                httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
+                httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 
-                var notification = "d4\r\nevent: message\ndata: {\"id\":\"123\",\"clientId\":\"emptyClientId\",\"timestamp\":1582056812285,\"encoding\":\"json\",\"channel\":\"control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_PAUSED\\\"}\"}\n\n\r\n";
+                var notification = "d4\r\nevent: message\ndata: {\"id\":\"123\",\"clientId\":\"emptyClientId\",\"timestamp\":1582056812285,\"encoding\":\"json\",\"channel\":\"[?occupancy=metrics.publishers]control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_PAUSED\\\"}\"}\n\n\r\n";
                 httpClientMock.SSE_Channels_Response_WithPath(EventSourcePath, notification);
 
                 var authResponse = new AuthenticationResponse
@@ -410,11 +424,11 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                Thread.Sleep(20000);
+                Thread.Sleep(500);
 
                 var result = client.GetTreatment("admin", "push_test");
 
-                Assert.AreEqual("after_fetch", result);
+                Assert.AreEqual("on", result);
 
                 client.Destroy();
             }
@@ -430,8 +444,10 @@ namespace Splitio.Integration_tests
                 httpClientMock.SplitChangesSequence("splits_push4.json", "1585948850111", "First_Time_1");
                 httpClientMock.SegmentChangesOk("-1", "segment4");
                 httpClientMock.SegmentChangesOk("1470947453878", "segment4", "split_segment4_empty");
+                httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
+                httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 
-                var notification = "d4\r\nevent: message\ndata: {\"id\":\"123\",\"clientId\":\"emptyClientId\",\"timestamp\":1582056812285,\"encoding\":\"json\",\"channel\":\"control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_RESUMED\\\"}\"}\n\n\r\n";
+                var notification = "d4\r\nevent: message\ndata: {\"id\":\"123\",\"clientId\":\"emptyClientId\",\"timestamp\":1582056812285,\"encoding\":\"json\",\"channel\":\"[?occupancy=metrics.publishers]control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_RESUMED\\\"}\"}\n\n\r\n";
                 httpClientMock.SSE_Channels_Response_WithPath(EventSourcePath, notification);
 
                 var authResponse = new AuthenticationResponse
@@ -460,11 +476,11 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                Thread.Sleep(20000);
+                Thread.Sleep(500);
 
                 var result = client.GetTreatment("admin", "push_test");
 
-                Assert.AreEqual("after_fetch", result);
+                Assert.AreEqual("on", result);
 
                 client.Destroy();
             }
@@ -480,8 +496,10 @@ namespace Splitio.Integration_tests
                 httpClientMock.SplitChangesSequence("splits_push4.json", "1585948850111", "First_Time_1");
                 httpClientMock.SegmentChangesOk("-1", "segment4");
                 httpClientMock.SegmentChangesOk("1470947453878", "segment4", "split_segment4_empty");
-
-                var notification = "d4\r\nevent: message\ndata: {\"id\":\"123\",\"clientId\":\"emptyClientId\",\"timestamp\":1582056812285,\"encoding\":\"json\",\"channel\":\"control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_DISABLED\\\"}\"}\n\n\r\n";
+                httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
+                httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
+                
+                var notification = "d4\r\nevent: message\ndata: {\"id\":\"123\",\"clientId\":\"emptyClientId\",\"timestamp\":1582056812285,\"encoding\":\"json\",\"channel\":\"[?occupancy=metrics.publishers]control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_DISABLED\\\"}\"}\n\n\r\n";
                 httpClientMock.SSE_Channels_Response_WithPath(EventSourcePath, notification);
 
                 var authResponse = new AuthenticationResponse
@@ -510,34 +528,13 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                Thread.Sleep(20000);
+                Thread.Sleep(500);
 
                 var result = client.GetTreatment("admin", "push_test");
 
-                Assert.AreEqual("after_fetch", result);
+                Assert.AreEqual("on", result);
 
                 client.Destroy();
-            }
-        }
-
-        private void BlockUntilReady(ISplitClient client)
-        {
-            var maxBUR = 100000;
-            var time = 1000;            
-
-            while (time < maxBUR)
-            {
-
-                try
-                {
-                    client.BlockUntilReady(time);
-                    break;
-                }
-                catch
-                {
-                    time += time;
-                    continue;
-                }
             }
         }
     }

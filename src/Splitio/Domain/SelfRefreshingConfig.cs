@@ -22,6 +22,8 @@ namespace Splitio.Domain
         public long SdkStartTime { get; set; }
         public int OnDemandFetchRetryDelayMs { get; set; }
         public int OnDemandFetchMaxRetries { get; set; }
+        public int ImpressionsBulkSize { get; set; }
+        public int EventsBulkSize { get; set; }
 
         // Urls.
         public string BaseUrl { get; set; }

@@ -297,6 +297,19 @@ namespace Splitio.Redis.Services.Cache.Classes
                 return 0;
             }
         }
+
+        public bool HashSet(RedisKey key, RedisValue hashField, RedisValue value)
+        {
+            try
+            {
+                return _database.HashSet(key, hashField, value);
+            }
+            catch (Exception e)
+            {
+                _log.Error("Exception calling Redis Adapter HashIncrement, ", e);
+                return false;
+            }
+        }
         #endregion
 
         #region Private Methods

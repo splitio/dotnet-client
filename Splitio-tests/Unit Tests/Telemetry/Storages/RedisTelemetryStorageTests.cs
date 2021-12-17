@@ -8,8 +8,6 @@ using Splitio.Services.Client.Classes;
 using Splitio.Services.Logger;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
-using Splitio.Telemetry.Storages;
-using System;
 
 namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
 {
@@ -48,9 +46,9 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             _telemetryStorage.RecordException(MethodEnum.TreatmentsWithConfig);
 
             // Assert.
-            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.exceptions", $"{_sdkVersion}/{_machineName}/{_machineIp}/Track", 1), Times.Once);
-            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.exceptions", $"{_sdkVersion}/{_machineName}/{_machineIp}/Treatment", 1), Times.Exactly(2));
-            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.exceptions", $"{_sdkVersion}/{_machineName}/{_machineIp}/TreatmentsWithConfig", 1), Times.Once);
+            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.exceptions", $"{_sdkVersion}/{_machineName}/{_machineIp}/track", 1), Times.Once);
+            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.exceptions", $"{_sdkVersion}/{_machineName}/{_machineIp}/treatment", 1), Times.Exactly(2));
+            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.exceptions", $"{_sdkVersion}/{_machineName}/{_machineIp}/treatmentsWithConfig", 1), Times.Once);
         }
 
         [TestMethod]
@@ -71,7 +69,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
                 t = new { oM = config.OperationMode, st = config.Storage, aF = config.ActiveFactories, rF = config.RedundantActiveFactories, t = config.Tags },
                 m = new { i = _machineIp, n = _machineName, s = _sdkVersion }
             });
-            var key = $"{_userPrefix}.SPLITIO.telemetry.config";
+            var key = $"{_userPrefix}.SPLITIO.telemetry.init";
 
             _redisAdapter
                 .Setup(mock => mock.ListRightPush(key, redisValue))
@@ -81,40 +79,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             _telemetryStorage.RecordConfigInit(config);
 
             // Assert.
-            _redisAdapter.Verify(mock => mock.ListRightPush(key, redisValue), Times.Once);
-            _redisAdapter.Verify(mock => mock.KeyExpire(key, It.IsAny<TimeSpan>()), Times.Once);
-        }
-
-        [TestMethod]
-        public void RecordConfigInitShouldOnlyRecordConfig()
-        {
-            // Assert.
-            var config = new Config
-            {
-                ActiveFactories = 2,
-                EventsQueueSize = 1,
-                OperationMode = (int)Mode.Consumer,
-                ImpressionsMode = ImpressionsMode.Optimized,
-                BURTimeouts = 5
-            };
-
-            var redisValue = JsonConvert.SerializeObject(new
-            {
-                t = new { oM = config.OperationMode, st = config.Storage, aF = config.ActiveFactories, rF = config.RedundantActiveFactories, t = config.Tags },
-                m = new { i = _machineIp, n = _machineName, s = _sdkVersion }
-            });
-            var key = $"{_userPrefix}.SPLITIO.telemetry.config";
-
-            _redisAdapter
-                .Setup(mock => mock.ListRightPush(key, redisValue))
-                .Returns(2);
-
-            // Act.
-            _telemetryStorage.RecordConfigInit(config);
-
-            // Assert.
-            _redisAdapter.Verify(mock => mock.ListRightPush(key, redisValue), Times.Once);
-            _redisAdapter.Verify(mock => mock.KeyExpire(key, It.IsAny<TimeSpan>()), Times.Never);
+            _redisAdapter.Verify(mock => mock.HashSet(key, $"{_sdkVersion}/{_machineName}/{_machineIp}", redisValue), Times.Once);
         }
 
         [TestMethod]
@@ -128,11 +93,11 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             _telemetryStorage.RecordLatency(MethodEnum.TreatmentWithConfig, 5);
 
             // Assert.
-            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/Track/1", 1), Times.Once);
-            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/Track/2", 1), Times.Once);
-            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/Treatments/3", 1), Times.Once);
-            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/TreatmentsWithConfig/4", 1), Times.Once);
-            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/TreatmentWithConfig/5", 1), Times.Once);
+            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/track/1", 1), Times.Once);
+            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/track/2", 1), Times.Once);
+            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/treatments/3", 1), Times.Once);
+            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/treatmentsWithConfig/4", 1), Times.Once);
+            _redisAdapter.Verify(mock => mock.HashIncrement($"{_userPrefix}.SPLITIO.telemetry.latencies", $"{_sdkVersion}/{_machineName}/{_machineIp}/treatmentWithConfig/5", 1), Times.Once);
         }
     }
 }

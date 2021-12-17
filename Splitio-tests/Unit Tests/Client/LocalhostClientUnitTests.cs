@@ -81,23 +81,5 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.IsTrue(splitClient.IsDestroyed());
             Assert.IsFalse(result.IsEmpty);            
         }
-
-        [TestMethod]
-        [DeploymentItem(@"Resources\test.splits")]
-        public void Destroy_WhenIsDestroyed()
-        {
-            //Arrange
-            var _factoryInstantiationsService = FactoryInstantiationsService.Instance();
-            var splitClient = new LocalhostClientForTesting($"{rootFilePath}test.splits", isDestroyed: true);
-
-            //Act
-            splitClient.BlockUntilReady(1000);
-            splitClient.Destroy();
-            var result = ((FactoryInstantiationsService)_factoryInstantiationsService).GetInstantiations();
-
-            //Assert
-            Assert.IsTrue(splitClient.IsDestroyed());
-            Assert.IsFalse(result.IsEmpty);
-        }
     }
 }
