@@ -50,6 +50,8 @@ namespace Splitio_Tests.Unit_Tests.Cache.Filter
             {
                 Assert.IsFalse(bf.Contains($"{item}-fail"));
             }
+
+            bf.Clear();
         }
     }
 }
