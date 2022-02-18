@@ -113,12 +113,10 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             // Arrange.
             var values = new ConcurrentDictionary<string, HashSet<string>>();
             values.TryAdd("feature-01", new HashSet<string> { "key-01", "key-02", "key-03", "key-04" });
-            values.TryAdd("feature-02", new HashSet<string> { "key-01", "key-02", "key-03", "key-04" });
-            values.TryAdd("feature-03", new HashSet<string> { "key-01", "key-02", "key-03", "key-04" });
-            values.TryAdd("feature-04", new HashSet<string> { "key-01", "key-02", "key-03", "key-04" });
+
             var uniqueKeys = new UniqueKeys(values);
 
-            var data = "{\"mtks\":[{\"feature\":\"feature-04\",\"keys\":[\"key-01\",\"key-02\",\"key-03\",\"key-04\"]},{\"feature\":\"feature-01\",\"keys\":[\"key-01\",\"key-02\",\"key-03\",\"key-04\"]},{\"feature\":\"feature-03\",\"keys\":[\"key-01\",\"key-02\",\"key-03\",\"key-04\"]},{\"feature\":\"feature-02\",\"keys\":[\"key-01\",\"key-02\",\"key-03\",\"key-04\"]}]}";
+            var data = "{\"mtks\":[{\"feature\":\"feature-01\",\"keys\":[\"key-01\",\"key-02\",\"key-03\",\"key-04\"]}]}";
             _splitioHttpClient
                 .Setup(mock => mock.PostAsync("www.fake-url.com/mtks/bulk", data))
                 .ReturnsAsync(new HTTPResult
