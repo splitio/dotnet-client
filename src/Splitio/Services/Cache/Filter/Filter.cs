@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 
 namespace Splitio.Services.Cache.Filter
 {
-    public abstract class Filter : IBloomFilter
+    public abstract class Filter : IFilter
     {        
         private int _hashes { get; }
         protected int _capacity { get; }
