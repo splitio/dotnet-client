@@ -15,6 +15,7 @@ namespace Splitio.Telemetry.Common
     {
         private const string ConfigURL = "/metrics/config";
         private const string UsageURL = "/metrics/usage";
+        private const string UniqueKeysURL = "/mtks/bulk";
 
         private readonly ISplitioHttpClient _splitioHttpClient;
         private readonly ISplitLogger _log;
@@ -42,7 +43,12 @@ namespace Splitio.Telemetry.Common
         {
             await ExecutePost(UsageURL, stats, nameof(RecordStats));
         }
-        #endregion        
+
+        public async void RecordUniqueKeys(UniqueKeys uniqueKeys)
+        {
+            await ExecutePost(UniqueKeysURL, uniqueKeys, nameof(RecordUniqueKeys));
+        }
+        #endregion
 
         #region Private Methods
         private async Task ExecutePost(string url, object data, string method)
