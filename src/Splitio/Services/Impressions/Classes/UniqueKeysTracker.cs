@@ -52,7 +52,7 @@ namespace Splitio.Services.Impressions.Classes
                 if (_running) return;
 
                 _running = true;
-                _tasksManager.StartPeriodic(() => SendBulkMTKs(), _interval * 1000, _cancellationTokenSource, "MTKs sender.");
+                _tasksManager.StartPeriodic(() => SendBulkUniques(), _interval * 1000, _cancellationTokenSource, "MTKs sender.");
                 _tasksManager.StartPeriodic(() => _filterAdapter.Clear(), IntervalToClearLongTermCache, _cancellationTokenSource, "Cache Long Term clear.");
             }
         }
@@ -65,7 +65,7 @@ namespace Splitio.Services.Impressions.Classes
 
                 _running = false;
                 _cancellationTokenSource.Cancel();
-                SendBulkMTKs();
+                SendBulkUniques();
             }
         }
 
@@ -83,7 +83,7 @@ namespace Splitio.Services.Impressions.Classes
 
             if (_cache.Count >= _cacheMaxSize)
             {
-                _tasksManager.Start(() => SendBulkMTKs(), new CancellationTokenSource(), "Uniques cache reached max size.");
+                SendBulkUniques();
             }
 
             return true;
@@ -91,17 +91,19 @@ namespace Splitio.Services.Impressions.Classes
         #endregion
 
         #region Private Methods
-        private void SendBulkMTKs()
+        private void SendBulkUniques()
         {
             lock (_lock)
             {
-                var uniques = PopAll();
+                var uniques = new ConcurrentDictionary<string, HashSet<string>>(_cache);
+
+                _cache.Clear();
 
                 if (uniques.Count > 0)
                 {
                     try
                     {
-                        //_telemetryApi.RecordUniqueKeys(new UniqueKeys(uniques));
+                        _telemetryApi.RecordUniqueKeys(new UniqueKeys(uniques));
                     }
                     catch (Exception e)
                     {
@@ -109,15 +111,6 @@ namespace Splitio.Services.Impressions.Classes
                     }
                 }
             }
-        }
-
-        private ConcurrentDictionary<string, HashSet<string>> PopAll()
-        {
-            var values = new ConcurrentDictionary<string, HashSet<string>>(_cache);
-
-            _cache.Clear();
-
-            return values;
         }
         #endregion
     }
