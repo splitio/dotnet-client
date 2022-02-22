@@ -192,7 +192,13 @@ namespace Splitio.Services.EventSource
 
                             if (len == 0)
                             {
-                                throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, "Streaming end of the file.");
+                                var exception = new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, "Streaming end of the file.");
+
+                                // Added for tests. 
+                                if (_url.StartsWith("http://localhost"))
+                                    exception = new ReadStreamException(SSEClientActions.DISCONNECT, "Streaming end of the file - for tests.");
+
+                                throw exception;
                             }
 
                             var notificationString = _encoder.GetString(_buffer, 0, len);
@@ -243,6 +249,7 @@ namespace Splitio.Services.EventSource
             catch (ReadStreamException ex)
             {
                 _log.Debug("ReadStreamException", ex);
+
                 throw ex;
             }
             catch (Exception ex)
