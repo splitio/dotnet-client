@@ -372,7 +372,6 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                Thread.Sleep(2000);
 
                 var result = client.GetTreatment("admin", "push_test");
 
@@ -424,7 +423,6 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                Thread.Sleep(500);
 
                 var result = client.GetTreatment("admin", "push_test");
 
@@ -476,8 +474,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                Thread.Sleep(500);
-
+                
                 var result = client.GetTreatment("admin", "push_test");
 
                 Assert.AreEqual("on", result);
@@ -528,8 +525,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                Thread.Sleep(500);
-
+                
                 var result = client.GetTreatment("admin", "push_test");
 
                 Assert.AreEqual("on", result);
