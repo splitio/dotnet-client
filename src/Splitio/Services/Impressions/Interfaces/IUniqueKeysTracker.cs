@@ -4,6 +4,6 @@ namespace Splitio.Services.Impressions.Interfaces
 {
     public interface IUniqueKeysTracker : IPeriodicTask
     {
-        void Track(string key, string featureName);
+        bool Track(string key, string featureName);
     }
 }

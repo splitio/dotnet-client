@@ -14,13 +14,14 @@ namespace Splitio.Services.Impressions.Classes
     public class UniqueKeysTracker : IUniqueKeysTracker
     {
         private static readonly ISplitLogger _logger = WrapperAdapter.GetLogger(typeof(UniqueKeysTracker));
-        private static readonly int IntervalToClearLongTermCache = 3600000;
+        private static readonly int IntervalToClearLongTermCache = 3600000;        
 
         private readonly IFilterAdapter _filterAdapter;
         private readonly ConcurrentDictionary<string, HashSet<string>> _cache;
         private readonly ITelemetryAPI _telemetryApi;
         private readonly ITasksManager _tasksManager;
         private readonly int _interval;
+        private readonly int _cacheMaxSize;
 
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private readonly object _lock = new object();
@@ -30,12 +31,14 @@ namespace Splitio.Services.Impressions.Classes
 
         public UniqueKeysTracker(IFilterAdapter filterAdapter,
             ConcurrentDictionary<string, HashSet<string>> cache,
+            int cacheMaxSize,
             ITelemetryAPI telemetryApi,
             ITasksManager tasksManager,
             int intervalSeconds)
         {
             _filterAdapter = filterAdapter;
             _cache = cache;
+            _cacheMaxSize = cacheMaxSize;
             _telemetryApi = telemetryApi;
             _tasksManager = tasksManager;
             _interval = intervalSeconds;
@@ -66,51 +69,55 @@ namespace Splitio.Services.Impressions.Classes
             }
         }
 
-        public void Track(string key, string featureName)
+        public bool Track(string key, string featureName)
         {
-            lock (_lock)
+            if (_filterAdapter.Contains(featureName, key)) return false;
+
+            _filterAdapter.Add(featureName, key);
+
+            _cache.AddOrUpdate(featureName, new HashSet<string>() { key }, (_, hashSet) =>
             {
-                if (_filterAdapter.Contains(featureName, key)) return;
+                hashSet.Add(key);
+                return hashSet;
+            });
 
-                _filterAdapter.Add(featureName, key);
-
-                _cache.AddOrUpdate(featureName, new HashSet<string>() { key }, (_, hashSet) =>
-                {
-                    hashSet.Add(key);
-                    return hashSet;
-                });
+            if (_cache.Count >= _cacheMaxSize)
+            {
+                _tasksManager.Start(() => SendBulkMTKs(), new CancellationTokenSource(), "Uniques cache reached max size.");
             }
+
+            return true;
         }
         #endregion
 
         #region Private Methods
-        private ConcurrentDictionary<string, HashSet<string>> PopAll()
+        private void SendBulkMTKs()
         {
             lock (_lock)
             {
-                var values = new ConcurrentDictionary<string, HashSet<string>>(_cache);
+                var uniques = PopAll();
 
-                _cache.Clear();
-
-                return values;
+                if (uniques.Count > 0)
+                {
+                    try
+                    {
+                        //_telemetryApi.RecordUniqueKeys(new UniqueKeys(uniques));
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error("Exception caught sending Unique Keys.", e);
+                    }
+                }
             }
         }
 
-        private void SendBulkMTKs()
+        private ConcurrentDictionary<string, HashSet<string>> PopAll()
         {
-            var impressions = PopAll();
+            var values = new ConcurrentDictionary<string, HashSet<string>>(_cache);
 
-            if (impressions.Count > 0)
-            {
-                try
-                {
-                    //_telemetryApi.RecordUniqueKeys(new UniqueKeys(impressions));
-                }
-                catch (Exception e)
-                {
-                    _logger.Error("Exception caught sending Unique Keys.", e);
-                }
-            }
+            _cache.Clear();
+
+            return values;
         }
         #endregion
     }
