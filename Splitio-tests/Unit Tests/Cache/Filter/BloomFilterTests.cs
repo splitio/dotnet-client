@@ -32,23 +32,23 @@ namespace Splitio_Tests.Unit_Tests.Cache.Filter
 
             foreach (var item in expectedKeys)
             {
-                Assert.IsTrue(bf.Add(item));
+                Assert.IsTrue(bf.Add(item), $"Keys added should be true: {item}");
             }
 
             // Assert.
             foreach (var item in expectedKeys)
             {
-                Assert.IsFalse(bf.Add(item));
+                Assert.IsFalse(bf.Add(item), $"Keys added should be false: {item}");
             }
 
             foreach (var item in expectedKeys)
             {
-                Assert.IsTrue(bf.Contains(item));
+                Assert.IsTrue(bf.Contains(item), $"Bf Contains should be true: {item}");
             }
 
             foreach (var item in expectedKeys)
             {
-                Assert.IsFalse(bf.Contains($"{item}-fail"));
+                Assert.IsFalse(bf.Contains($"{item}-fail"), $"Bf Contains should be false: {item}-fail");
             }
 
             bf.Clear();

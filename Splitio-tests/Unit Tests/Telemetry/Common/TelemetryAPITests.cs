@@ -8,6 +8,7 @@ using Splitio.Telemetry.Common;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Telemetry.Common
@@ -103,6 +104,31 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 
             // Assert.
             _splitioHttpClient.Verify(mock => mock.PostAsync("www.fake-url.com/metrics/usage", data), Times.Once);
+            _log.Verify(mock => mock.Error(It.IsAny<string>()), Times.Never);
+        }
+
+        [TestMethod]
+        public void RecordUniqueKeys()
+        {
+            // Arrange.
+            var values = new ConcurrentDictionary<string, HashSet<string>>();
+            values.TryAdd("feature-01", new HashSet<string> { "key-01", "key-02", "key-03", "key-04" });
+
+            var uniqueKeys = new UniqueKeys(values);
+
+            var data = "{\"mtks\":[{\"feature\":\"feature-01\",\"keys\":[\"key-01\",\"key-02\",\"key-03\",\"key-04\"]}]}";
+            _splitioHttpClient
+                .Setup(mock => mock.PostAsync("www.fake-url.com/mtks/bulk", data))
+                .ReturnsAsync(new HTTPResult
+                {
+                    statusCode = System.Net.HttpStatusCode.OK
+                });
+
+            // Act.
+            _telemetryAPI.RecordUniqueKeys(uniqueKeys);
+
+            // Assert.
+            _splitioHttpClient.Verify(mock => mock.PostAsync("www.fake-url.com/mtks/bulk", data), Times.Once);
             _log.Verify(mock => mock.Error(It.IsAny<string>()), Times.Never);
         }
     }
