@@ -7,12 +7,15 @@ using Splitio.Redis.Services.Impressions.Classes;
 using Splitio.Redis.Services.Parsing.Classes;
 using Splitio.Redis.Services.Shared;
 using Splitio.Redis.Telemetry.Storages;
+using Splitio.Services.Cache.Filter;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Client.Classes
@@ -86,10 +89,18 @@ namespace Splitio.Redis.Services.Client.Classes
             _customerImpressionListener = config.ImpressionListener;
         }
 
+        private void BuildUniqueKeysTracker()
+        {
+            var bloomFilter = new BloomFilter(expectedElements: 10000000, errorRate: 0.01);
+            var adapter = new FilterAdapter(bloomFilter);
+            var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
+            _uniqueKeysTracker = new UniqueKeysTracker(adapter, trackerCache, 50000, null /*TODO: implement adapter for API*/, _tasksManager, periodicTaskIntervalSeconds: 3600);
+        }
+
         private void BuildImpressionManager()
         {
             var impressionsCounter = new ImpressionsCounter();
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, false, ImpressionsMode.Debug, telemetryRuntimeProducer: null, taskManager: _tasksManager);
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, false, ImpressionsMode.Debug, telemetryRuntimeProducer: null, taskManager: _tasksManager, uniqueKeysTracker: _uniqueKeysTracker);
         }
 
         private void BuildEventLog()

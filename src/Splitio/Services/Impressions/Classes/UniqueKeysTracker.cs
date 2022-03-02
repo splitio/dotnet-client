@@ -34,14 +34,14 @@ namespace Splitio.Services.Impressions.Classes
             int cacheMaxSize,
             ITelemetryAPI telemetryApi,
             ITasksManager tasksManager,
-            int intervalSeconds)
+            int periodicTaskIntervalSeconds)
         {
             _filterAdapter = filterAdapter;
             _cache = cache;
             _cacheMaxSize = cacheMaxSize;
             _telemetryApi = telemetryApi;
             _tasksManager = tasksManager;
-            _interval = intervalSeconds;
+            _interval = periodicTaskIntervalSeconds;
         }
 
         #region Public Methods
