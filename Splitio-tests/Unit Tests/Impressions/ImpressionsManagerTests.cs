@@ -412,5 +412,95 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, 0), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsQueued, 4), Times.Once);
         }
+
+        [TestMethod]
+        public void BuildImpressionWithNoneMode()
+        {
+            // Arrange.
+            var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
+                null,
+                _impressionsCounter.Object,
+                true,
+                ImpressionsMode.None,
+                _telemetryRuntimeProducer.Object,
+                _tasksManager,
+                _uniqueKeysTracker.Object,
+                _impressionsObserver.Object);
+
+            var impTime = CurrentTimeHelper.CurrentTimeMillis();
+
+            // Act.
+            var result = impressionsManager.BuildImpression("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key");
+
+            // Assert.
+            Assert.AreEqual("matching-key", result.keyName);
+            Assert.AreEqual("feature", result.feature);
+            Assert.AreEqual("off", result.treatment);
+            Assert.AreEqual(impTime, result.time);
+            Assert.AreEqual("label", result.label);
+            Assert.AreEqual("bucketing-key", result.bucketingKey);
+            Assert.IsNull(result.previousTime);
+
+            _impressionsObserver.Verify(mock => mock.TestAndSet(It.IsAny<KeyImpression>()), Times.Never);
+            _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Once);
+            _uniqueKeysTracker.Verify(mock => mock.Track("matching-key", "feature"), Times.Once);
+        }
+
+        [TestMethod]
+        public void BuildAndTrackWithNoneMode()
+        {
+            // Arrange.
+            var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
+                null,
+                _impressionsCounter.Object,
+                true,
+                ImpressionsMode.None,
+                _telemetryRuntimeProducer.Object,
+                _tasksManager,
+                _uniqueKeysTracker.Object,
+                _impressionsObserver.Object);
+
+            var impTime = CurrentTimeHelper.CurrentTimeMillis();
+
+
+            // Act.
+            impressionsManager.BuildAndTrack("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key");
+
+            // Assert.
+            _impressionsObserver.Verify(mock => mock.TestAndSet(It.IsAny<KeyImpression>()), Times.Never);
+            _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Once);
+            _uniqueKeysTracker.Verify(mock => mock.Track("matching-key", "feature"), Times.Once);
+        }
+
+        [TestMethod]
+        public void TrackWithNoneMode()
+        {
+            // Arrange.
+            var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
+                null,
+                _impressionsCounter.Object,
+                true,
+                ImpressionsMode.None,
+                _telemetryRuntimeProducer.Object,
+                _tasksManager,
+                _uniqueKeysTracker.Object,
+                _impressionsObserver.Object);
+
+            var impTime = CurrentTimeHelper.CurrentTimeMillis();
+
+            var impressions = new List<KeyImpression>
+            {
+                impressionsManager.BuildImpression("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key"),
+                impressionsManager.BuildImpression("matching-key-2", "feature-2", "off", impTime, 432543, "label-2", "bucketing-key"),
+                impressionsManager.BuildImpression("matching-key-2", "feature-2", "off", impTime, 432543, "label-2", "bucketing-key"),
+                impressionsManager.BuildImpression("matching-key-2", "feature-2", "off", impTime, 432543, "label-2", "bucketing-key")
+            };
+
+            // Act.
+            impressionsManager.Track(impressions);
+
+            // Assert.
+            _impressionsLog.Verify(mock => mock.Log(It.IsAny<List<KeyImpression>>()), Times.Never);
+        }
     }
 }
