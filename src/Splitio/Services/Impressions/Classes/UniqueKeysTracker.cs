@@ -2,11 +2,10 @@
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
-using Splitio.Telemetry.Common;
-using Splitio.Telemetry.Domain;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace Splitio.Services.Impressions.Classes
@@ -18,7 +17,7 @@ namespace Splitio.Services.Impressions.Classes
 
         private readonly IFilterAdapter _filterAdapter;
         private readonly ConcurrentDictionary<string, HashSet<string>> _cache;
-        private readonly ITelemetryAPI _telemetryApi;
+        private readonly IUniqueKeysSenderAdapter _senderAdapter;
         private readonly ITasksManager _tasksManager;
         private readonly int _interval;
         private readonly int _cacheMaxSize;
@@ -32,14 +31,14 @@ namespace Splitio.Services.Impressions.Classes
         public UniqueKeysTracker(IFilterAdapter filterAdapter,
             ConcurrentDictionary<string, HashSet<string>> cache,
             int cacheMaxSize,
-            ITelemetryAPI telemetryApi,
+            IUniqueKeysSenderAdapter senderAdapter,
             ITasksManager tasksManager,
             int periodicTaskIntervalSeconds)
         {
             _filterAdapter = filterAdapter;
             _cache = cache;
             _cacheMaxSize = cacheMaxSize;
-            _telemetryApi = telemetryApi;
+            _senderAdapter = senderAdapter;
             _tasksManager = tasksManager;
             _interval = periodicTaskIntervalSeconds;
         }
@@ -99,16 +98,15 @@ namespace Splitio.Services.Impressions.Classes
 
                 _cache.Clear();
 
-                if (uniques.Count > 0)
+                if (!uniques.Any()) return;
+
+                try
                 {
-                    try
-                    {
-                        _telemetryApi.RecordUniqueKeys(new UniqueKeys(uniques));
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.Error("Exception caught sending Unique Keys.", e);
-                    }
+                    _senderAdapter.RecordUniqueKeys(uniques);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error("Exception caught sending Unique Keys.", e);
                 }
             }
         }

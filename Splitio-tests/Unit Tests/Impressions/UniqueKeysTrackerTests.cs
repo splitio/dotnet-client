@@ -16,7 +16,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     public class UniqueKeysTrackerTests
     {
         private readonly Mock<IFilterAdapter> _filterAdapter;
-        private readonly Mock<ITelemetryAPI> _telemetryApi;
+        private readonly Mock<IUniqueKeysSenderAdapter> _senderAdapter;
         private readonly ITasksManager _tasksManager;
         private readonly ConcurrentDictionary<string, HashSet<string>> _cache;
 
@@ -25,7 +25,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public UniqueKeysTrackerTests()
         {
             _filterAdapter = new Mock<IFilterAdapter>();
-            _telemetryApi = new Mock<ITelemetryAPI>();
+            _senderAdapter = new Mock<IUniqueKeysSenderAdapter>();
             _tasksManager = new TasksManager(new WrapperAdapter());
             _cache = new ConcurrentDictionary<string, HashSet<string>>();
         }
@@ -36,7 +36,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Arrange.
             _cache.Clear();
 
-            _uniqueKeysTracker = new UniqueKeysTracker(_filterAdapter.Object, _cache, 5, _telemetryApi.Object, _tasksManager, 1);
+            _uniqueKeysTracker = new UniqueKeysTracker(_filterAdapter.Object, _cache, 5, _senderAdapter.Object, _tasksManager, 1);
 
             // Act.
             _uniqueKeysTracker.Start();
@@ -46,12 +46,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             Thread.Sleep(1500);
 
-            _telemetryApi.Verify(mock => mock.RecordUniqueKeys(It.IsAny<UniqueKeys>()), Times.Once);
+            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<ConcurrentDictionary<string, HashSet<string>>>()), Times.Once);
 
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test", "feature-name-test"));
             _uniqueKeysTracker.Stop();
 
-            _telemetryApi.Verify(mock => mock.RecordUniqueKeys(It.IsAny<UniqueKeys>()), Times.Exactly(2));
+            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<ConcurrentDictionary<string, HashSet<string>>>()), Times.Exactly(2));
 
             _cache.Clear();
         }
@@ -62,7 +62,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Arrange.
             _cache.Clear();
 
-            _uniqueKeysTracker = new UniqueKeysTracker(_filterAdapter.Object, _cache, 5, _telemetryApi.Object, _tasksManager, 1);
+            _uniqueKeysTracker = new UniqueKeysTracker(_filterAdapter.Object, _cache, 5, _senderAdapter.Object, _tasksManager, 1);
 
             _filterAdapter
                 .SetupSequence(mock => mock.Contains("feature-name-test", "key-test"))
@@ -91,7 +91,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Assert.AreEqual(1, values3.Count);
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-5"));
 
-            _telemetryApi.Verify(mock => mock.RecordUniqueKeys(It.IsAny<UniqueKeys>()), Times.Once);
+            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<ConcurrentDictionary<string, HashSet<string>>>()), Times.Once);
 
             _cache.Clear();
         }
