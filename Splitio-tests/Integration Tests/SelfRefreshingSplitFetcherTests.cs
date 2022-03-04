@@ -100,23 +100,33 @@ namespace Splitio_Tests.Integration_Tests
             var sdkApiClient = new SplitSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000, telemetryStorage);
             var apiSplitChangeFetcher = new ApiSplitChangeFetcher(sdkApiClient);
             var sdkSegmentApiClient = new SegmentSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000, telemetryStorage);
-            var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkSegmentApiClient);
-            var gates = new InMemoryReadinessGatesCache();
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            var segmentTaskQueue = new SegmentTaskQueue();
+            var statusManager = new InMemoryReadinessGatesCache();
             var wrapperAdapter = new WrapperAdapter();
-            var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, gates, 30, segmentCache, 4, segmentTaskQueue, new TasksManager(wrapperAdapter), wrapperAdapter);
 
-            var splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, segmentCache);
+            var config = new SegmentFetcherConfig
+            {
+                Interval = 30,
+                NumberOfParallelSegments = 4,
+                SegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkSegmentApiClient),
+                SegmentsCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>()),
+                SegmentTaskQueue = new SegmentTaskQueue(),
+                StatusManager = statusManager,
+                TasksManager = new TasksManager(wrapperAdapter),
+                WrapperAdapter = wrapperAdapter
+            };
+
+            var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(config);
+
+            var splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, config.SegmentsCache);
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(apiSplitChangeFetcher, splitParser, gates, 30, new TasksManager(wrapperAdapter), splitCache);
+            var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(apiSplitChangeFetcher, splitParser, statusManager, 30, new TasksManager(wrapperAdapter), splitCache);
             selfRefreshingSplitFetcher.Start();
 
             //Act           
-            gates.WaitUntilReady(1000);
+            statusManager.WaitUntilReady(1000);
             selfRefreshingSplitFetcher.Stop();
-            ParsedSplit result = (ParsedSplit)splitCache.GetSplit("Pato_Test_1");
-            ParsedSplit result2 = (ParsedSplit)splitCache.GetSplit("Manu_Test_1");
+            ParsedSplit result = splitCache.GetSplit("Pato_Test_1");
+            ParsedSplit result2 = splitCache.GetSplit("Manu_Test_1");
             //Assert
             Assert.IsNotNull(result);
             Assert.IsTrue(result.name == "Pato_Test_1");
@@ -140,19 +150,29 @@ namespace Splitio_Tests.Integration_Tests
             var sdkApiClient = new SplitSdkApiClient("0", headers, baseUrl, 10000, 10000, telemetryStorage);
             var apiSplitChangeFetcher = new ApiSplitChangeFetcher(sdkApiClient);
             var sdkSegmentApiClient = new SegmentSdkApiClient("0", headers, baseUrl, 10000, 10000, telemetryStorage);
-            var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkSegmentApiClient);
-            var gates = new InMemoryReadinessGatesCache();
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            var segmentTaskQueue = new SegmentTaskQueue();
+            var statusManager = new InMemoryReadinessGatesCache();
+
             var wrapperAdapter = new WrapperAdapter();
-            var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, gates, 30, segmentCache, 4, segmentTaskQueue, new TasksManager(wrapperAdapter), wrapperAdapter);
-            var splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, segmentCache);
+            var config = new SegmentFetcherConfig
+            {
+                Interval = 30,
+                NumberOfParallelSegments = 4,
+                SegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkSegmentApiClient),
+                SegmentsCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>()),
+                SegmentTaskQueue = new SegmentTaskQueue(),
+                StatusManager = statusManager,
+                TasksManager = new TasksManager(wrapperAdapter),
+                WrapperAdapter = wrapperAdapter
+            };
+
+            var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(config);
+            var splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, config.SegmentsCache);
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(apiSplitChangeFetcher, splitParser, gates, 30, new TasksManager(wrapperAdapter), splitCache);
+            var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(apiSplitChangeFetcher, splitParser, statusManager, 30, new TasksManager(wrapperAdapter), splitCache);
             selfRefreshingSplitFetcher.Start();
 
             //Act
-            gates.WaitUntilReady(10);
+            statusManager.WaitUntilReady(10);
 
             var result = splitCache.GetSplit("condition_and");
 

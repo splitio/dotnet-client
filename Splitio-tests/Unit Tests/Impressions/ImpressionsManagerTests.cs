@@ -42,7 +42,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void BuildImpressionWithOptimizedAndWithPreviousTime()
         {
             // Arrange.
-            var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
+            var config = new ImpressionsManagerConfig(_impressionsLog.Object,
                 _customerImpressionListener.Object,
                 _impressionsCounter.Object,
                 true,
@@ -51,6 +51,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 _tasksManager,
                 _uniqueKeysTracker.Object,
                 _impressionsObserver.Object);
+
+            var impressionsManager = new ImpressionsManager(config);
 
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
             var ptTime = impTime - 150;
@@ -79,7 +81,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void BuildImpressionWithDebugAndWithPreviousTime()
         {
             // Arrange.
-            var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
+            var config = new ImpressionsManagerConfig(_impressionsLog.Object,
                 _customerImpressionListener.Object,
                 _impressionsCounter.Object,
                 true,
@@ -88,6 +90,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 _tasksManager,
                 _uniqueKeysTracker.Object,
                 _impressionsObserver.Object);
+
+            var impressionsManager = new ImpressionsManager(config);
 
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
@@ -115,7 +119,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void BuildImpressionWithDebugAndWithoutPreviousTime()
         {
             // Arrange.
-            var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
+            var config = new ImpressionsManagerConfig(_impressionsLog.Object,
                 _customerImpressionListener.Object,
                 _impressionsCounter.Object,
                 false,
@@ -124,6 +128,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 _tasksManager,
                 _uniqueKeysTracker.Object,
                 _impressionsObserver.Object);
+
+            var impressionsManager = new ImpressionsManager(config);
 
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
@@ -147,7 +153,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void BuildAndTrack()
         {
             // Arrange.
-            var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
+            var config = new ImpressionsManagerConfig(_impressionsLog.Object,
                 _customerImpressionListener.Object,
                 _impressionsCounter.Object,
                 true,
@@ -156,6 +162,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 _tasksManager,
                 _uniqueKeysTracker.Object,
                 _impressionsObserver.Object);
+
+            var impressionsManager = new ImpressionsManager(config);
 
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
@@ -175,7 +183,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void BuildAndTrackWithoutCustomerListener()
         {
             // Arrange.
-            var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
+            var config = new ImpressionsManagerConfig(_impressionsLog.Object,
                 null,
                 _impressionsCounter.Object,
                 true,
@@ -184,6 +192,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 _tasksManager,
                 _uniqueKeysTracker.Object,
                 _impressionsObserver.Object);
+
+            var impressionsManager = new ImpressionsManager(config);
 
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
@@ -203,7 +213,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void Track_Optimized()
         {
             // Arrange.
-            var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
+            var config = new ImpressionsManagerConfig(_impressionsLog.Object,
                 _customerImpressionListener.Object,
                 _impressionsCounter.Object,
                 true,
@@ -212,6 +222,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 _tasksManager,
                 _uniqueKeysTracker.Object,
                 _impressionsObserver.Object);
+
+            var impressionsManager = new ImpressionsManager(config);
 
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
             var impressions = new List<KeyImpression>
@@ -236,7 +248,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void Track_Optimized_WithOneImpressionDropped()
         {
             // Arrange.
-            var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
+            var config = new ImpressionsManagerConfig(_impressionsLog.Object,
                 _customerImpressionListener.Object,
                 _impressionsCounter.Object,
                 true,
@@ -245,6 +257,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 _tasksManager,
                 _uniqueKeysTracker.Object,
                 _impressionsObserver.Object);
+
+            var impressionsManager = new ImpressionsManager(config);
 
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
             var impressions = new List<KeyImpression>
@@ -273,7 +287,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void Track_Optimized_ShouldnotLog()
         {
             // Arrange.
-            var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
+            var config = new ImpressionsManagerConfig(_impressionsLog.Object,
                 _customerImpressionListener.Object,
                 _impressionsCounter.Object,
                 true,
@@ -282,6 +296,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 _tasksManager,
                 _uniqueKeysTracker.Object,
                 _impressionsObserver.Object);
+
+            var impressionsManager = new ImpressionsManager(config);
 
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
             var impressions = new List<KeyImpression>
@@ -306,7 +322,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void Track_Debug()
         {
             // Arrange.
-            var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
+            var config = new ImpressionsManagerConfig(_impressionsLog.Object,
                 _customerImpressionListener.Object,
                 _impressionsCounter.Object,
                 true,
@@ -315,6 +331,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 _tasksManager,
                 _uniqueKeysTracker.Object,
                 _impressionsObserver.Object);
+
+            var impressionsManager = new ImpressionsManager(config);
 
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
             var impressions = new List<KeyImpression>
@@ -339,17 +357,17 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void TrackWithoutCustomerListener_Optimized()
         {
             // Arrange.
-            var impressionsObserver = new ImpressionsObserver(new ImpressionHasher());
-            var impressionsCounter = new ImpressionsCounter();
-            var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
+            var config = new ImpressionsManagerConfig(_impressionsLog.Object,
                 null,
-                impressionsCounter,
+                new ImpressionsCounter(),
                 true,
                 ImpressionsMode.Optimized,
                 _telemetryRuntimeProducer.Object,
                 _tasksManager,
                 _uniqueKeysTracker.Object,
-                impressionsObserver);
+                new ImpressionsObserver(new ImpressionHasher()));
+
+            var impressionsManager = new ImpressionsManager(config);
 
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
             var impressions = new List<KeyImpression>
@@ -380,17 +398,17 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void TrackWithoutCustomerListener_Debug()
         {
             // Arrange.
-            var impressionsObserver = new ImpressionsObserver(new ImpressionHasher());
-            var impressionsCounter = new ImpressionsCounter();
-            var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
+            var config = new ImpressionsManagerConfig(_impressionsLog.Object,
                 null,
-                impressionsCounter,
+                new ImpressionsCounter(),
                 true,
                 ImpressionsMode.Debug,
                 _telemetryRuntimeProducer.Object,
                 _tasksManager,
                 _uniqueKeysTracker.Object,
-                impressionsObserver);
+                new ImpressionsObserver(new ImpressionHasher()));
+
+            var impressionsManager = new ImpressionsManager(config);
 
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
             var impressions = new List<KeyImpression>
@@ -417,7 +435,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void BuildImpressionWithNoneMode()
         {
             // Arrange.
-            var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
+            var config = new ImpressionsManagerConfig(_impressionsLog.Object,
                 null,
                 _impressionsCounter.Object,
                 true,
@@ -426,6 +444,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 _tasksManager,
                 _uniqueKeysTracker.Object,
                 _impressionsObserver.Object);
+
+            var impressionsManager = new ImpressionsManager(config);
 
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
@@ -450,7 +470,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void BuildAndTrackWithNoneMode()
         {
             // Arrange.
-            var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
+            var config = new ImpressionsManagerConfig(_impressionsLog.Object,
                 null,
                 _impressionsCounter.Object,
                 true,
@@ -459,6 +479,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 _tasksManager,
                 _uniqueKeysTracker.Object,
                 _impressionsObserver.Object);
+
+            var impressionsManager = new ImpressionsManager(config);
 
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
@@ -476,7 +498,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void TrackWithNoneMode()
         {
             // Arrange.
-            var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
+            var config = new ImpressionsManagerConfig(_impressionsLog.Object,
                 null,
                 _impressionsCounter.Object,
                 true,
@@ -485,6 +507,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 _tasksManager,
                 _uniqueKeysTracker.Object,
                 _impressionsObserver.Object);
+
+            var impressionsManager = new ImpressionsManager(config);
 
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 

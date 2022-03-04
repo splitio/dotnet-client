@@ -30,7 +30,8 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<ITelemetrySyncTask> _telemetrySyncTask;
         private readonly Mock<ISplitCache> _splitCache;
         private readonly Mock<ISegmentCache> _segmentCache;
-        private readonly Mock<IBackOff> _backOff;
+        private readonly Mock<IBackOff> _backOffSplits;
+        private readonly Mock<IBackOff> _backOffSegments;
         private readonly Mock<IUniqueKeysTracker> _uniqueKeysTracker;
         private readonly ISynchronizer _synchronizer;
 
@@ -46,11 +47,33 @@ namespace Splitio_Tests.Unit_Tests.Common
             _statusManager = new Mock<IStatusManager>();
             _telemetrySyncTask = new Mock<ITelemetrySyncTask>();
             _splitCache = new Mock<ISplitCache>();
-            _backOff = new Mock<IBackOff>();
+            _backOffSplits = new Mock<IBackOff>();
+            _backOffSegments = new Mock<IBackOff>();
             _segmentCache = new Mock<ISegmentCache>();
             _uniqueKeysTracker = new Mock<IUniqueKeysTracker>();
 
-            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCountSender.Object, _wrapperAdapter.Object, _statusManager.Object, _telemetrySyncTask.Object, new TasksManager(_wrapperAdapter.Object), _splitCache.Object, _backOff.Object, 10, 5, _segmentCache.Object, _uniqueKeysTracker.Object, _log.Object);
+            var synchronizerConfig = new SynchronizerConfig
+            {
+                SplitFetcher = _splitFetcher.Object,
+                SegmentFetcher = _segmentFetcher.Object,
+                ImpressionsLog = _impressionsLog.Object,
+                EventsLog = _eventsLog.Object,
+                ImpressionsCountSender = _impressionsCountSender.Object,
+                WrapperAdapter = _wrapperAdapter.Object,
+                StatusManager = _statusManager.Object,
+                TelemetrySyncTask = _telemetrySyncTask.Object,
+                TasksManager = new TasksManager(_wrapperAdapter.Object),
+                SplitCache = _splitCache.Object,
+                BackOffSplits = _backOffSplits.Object,
+                BackOffSegments = _backOffSegments.Object,
+                OnDemandFetchMaxRetries = 10,
+                OnDemandFetchRetryDelayMs = 5,
+                SegmentCache = _segmentCache.Object,
+                UniqueKeysTracker = _uniqueKeysTracker.Object,
+                Loggger = _log.Object
+            };
+
+            _synchronizer = new Synchronizer(synchronizerConfig);
         }
 
         [TestMethod]

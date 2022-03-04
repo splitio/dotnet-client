@@ -26,14 +26,23 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         public void InitializeSegmentNotExistent()
         {
             // Arrange
-            var gates = new InMemoryReadinessGatesCache();
-            gates.SetReady();
-            var apiClient = new Mock<ISegmentSdkApiClient>();            
-            var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
-            var segments = new ConcurrentDictionary<string, Segment>();
-            var cache = new InMemorySegmentCache(segments);
-            var segmentTaskQueue = new SegmentTaskQueue();
-            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, gates, 1, cache, 1, segmentTaskQueue, new TasksManager(wrapperAdapter), wrapperAdapter);
+            var apiClient = new Mock<ISegmentSdkApiClient>();
+            var statusManager = new InMemoryReadinessGatesCache();
+            statusManager.SetReady();
+
+            var config = new SegmentFetcherConfig
+            {
+                Interval = 1,
+                NumberOfParallelSegments = 1,
+                SegmentChangeFetcher = new ApiSegmentChangeFetcher(apiClient.Object),
+                SegmentsCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>()),
+                SegmentTaskQueue = new SegmentTaskQueue(),
+                StatusManager = statusManager,
+                TasksManager = new TasksManager(wrapperAdapter),
+                WrapperAdapter = wrapperAdapter
+            };
+
+            var segmentFetcher = new SelfRefreshingSegmentFetcher(config);
             segmentFetcher.Start();
 
             apiClient
@@ -45,20 +54,28 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
 
             // Assert
             Thread.Sleep(5000);
-            Assert.IsTrue(cache.IsInSegment("payed", "abcdz"));
+            Assert.IsTrue(config.SegmentsCache.IsInSegment("payed", "abcdz"));
         }
 
         [TestMethod]
         public void StartSchedullerSuccessfully()
         {
             // Arrange
-            var statusManager = new Mock<IStatusManager>();
-            var apiClient = new Mock<ISegmentSdkApiClient>();         
-            var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
-            var segments = new ConcurrentDictionary<string, Segment>();
-            var cache = new InMemorySegmentCache(segments);
-            var segmentTaskQueue = new SegmentTaskQueue();
-            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, statusManager.Object, 10, cache, 1, segmentTaskQueue, new TasksManager(wrapperAdapter), wrapperAdapter);
+            var apiClient = new Mock<ISegmentSdkApiClient>();
+
+            var config = new SegmentFetcherConfig
+            {
+                Interval = 10,
+                NumberOfParallelSegments = 1,
+                SegmentChangeFetcher = new ApiSegmentChangeFetcher(apiClient.Object),
+                SegmentsCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>()),
+                SegmentTaskQueue = new SegmentTaskQueue(),
+                StatusManager = new Mock<IStatusManager>().Object,
+                TasksManager = new TasksManager(wrapperAdapter),
+                WrapperAdapter = wrapperAdapter
+            };
+
+            var segmentFetcher = new SelfRefreshingSegmentFetcher(config);
 
             apiClient
                 .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
@@ -69,38 +86,49 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             segmentFetcher.Start();
 
             // Assert
-            Assert.IsTrue(segmentTaskQueue.GetQueue().TryTake(out SelfRefreshingSegment segment, -1));
+            Assert.IsTrue(config.SegmentTaskQueue.GetQueue().TryTake(out SelfRefreshingSegment segment, -1));
         }
 
         [TestMethod]
         public async Task FetchSegmentsIfNotExists()
         {
-            // Arrange            
-            var statusManager = new Mock<IStatusManager>();
-            var apiFetcher = new Mock<ISegmentChangeFetcher>();
-            var cache = new Mock<ISegmentCache>();
-            var segmentTaskQueue = new Mock<ISegmentTaskQueue>();
-            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher.Object, statusManager.Object, 10, cache.Object, 1, segmentTaskQueue.Object, new TasksManager(wrapperAdapter), wrapperAdapter);
+            // Arrange
+            var segmentChangeFetcher = new Mock<ISegmentChangeFetcher>();
+            var segmentsCache = new Mock<ISegmentCache>();
+
+            var config = new SegmentFetcherConfig
+            {
+                Interval = 10,
+                NumberOfParallelSegments = 1,
+                SegmentChangeFetcher = segmentChangeFetcher.Object,
+                SegmentsCache = segmentsCache.Object,
+                SegmentTaskQueue = new Mock<ISegmentTaskQueue>().Object,
+                StatusManager = new Mock<IStatusManager>().Object,
+                TasksManager = new TasksManager(wrapperAdapter),
+                WrapperAdapter = wrapperAdapter
+            };
+
+            var segmentFetcher = new SelfRefreshingSegmentFetcher(config);
             var segment1 = "segment-1";
             var segment2 = "segment-2";
             var segment3 = "segment-3";
 
-            cache.Setup(mock => mock.GetChangeNumber(segment1)).Returns(-1);
-            cache.Setup(mock => mock.GetChangeNumber(segment2)).Returns(30);
-            cache.Setup(mock => mock.GetChangeNumber(segment3)).Returns(-1);
+            segmentsCache.Setup(mock => mock.GetChangeNumber(segment1)).Returns(-1);
+            segmentsCache.Setup(mock => mock.GetChangeNumber(segment2)).Returns(30);
+            segmentsCache.Setup(mock => mock.GetChangeNumber(segment3)).Returns(-1);
 
             // Act
             await segmentFetcher.FetchSegmentsIfNotExists(new List<string> { segment1, segment2, segment3, segment2, segment3, segment3, segment3 });
 
             // Assert
-            cache.Verify(mock => mock.GetChangeNumber(segment1), Times.Exactly(2));
-            cache.Verify(mock => mock.GetChangeNumber(segment2), Times.Once);
-            cache.Verify(mock => mock.GetChangeNumber(segment3), Times.Exactly(2));
+            segmentsCache.Verify(mock => mock.GetChangeNumber(segment1), Times.Exactly(2));
+            segmentsCache.Verify(mock => mock.GetChangeNumber(segment2), Times.Once);
+            segmentsCache.Verify(mock => mock.GetChangeNumber(segment3), Times.Exactly(2));
 
-            apiFetcher.Verify(mock => mock.Fetch(segment1, -1, It.IsAny<FetchOptions>()), Times.Once);
-            apiFetcher.Verify(mock => mock.Fetch(segment3, -1, It.IsAny<FetchOptions>()), Times.Once);
-            apiFetcher.Verify(mock => mock.Fetch(segment2, -1, It.IsAny<FetchOptions>()), Times.Never);
-            apiFetcher.Verify(mock => mock.Fetch(segment2, 30, It.IsAny<FetchOptions>()), Times.Never);
+            segmentChangeFetcher.Verify(mock => mock.Fetch(segment1, -1, It.IsAny<FetchOptions>()), Times.Once);
+            segmentChangeFetcher.Verify(mock => mock.Fetch(segment3, -1, It.IsAny<FetchOptions>()), Times.Once);
+            segmentChangeFetcher.Verify(mock => mock.Fetch(segment2, -1, It.IsAny<FetchOptions>()), Times.Never);
+            segmentChangeFetcher.Verify(mock => mock.Fetch(segment2, 30, It.IsAny<FetchOptions>()), Times.Never);
         }
     }
 }

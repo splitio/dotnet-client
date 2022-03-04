@@ -61,8 +61,20 @@ namespace Splitio.Services.Client.Classes
 
             BuildEvaluator();
 
-            _uniqueKeysTracker = new NoopUniqueKeysTracker();
-            _impressionsManager = new ImpressionsManager(null, null, null, false, ImpressionsMode.Debug, telemetryRuntimeProducer: null, taskManager: _tasksManager, uniqueKeysTracker: _uniqueKeysTracker);
+            var config = new ImpressionsManagerConfig
+            {
+                ImpressionsLog = null,
+                CustomerImpressionListener = null,
+                ImpressionsCounter = null,
+                AddPreviousTime = false,
+                ImpressionsMode = ImpressionsMode.Debug,
+                TelemetryRuntimeProducer = null,
+                TaskManager = _tasksManager,
+                UniqueKeysTracker = new NoopUniqueKeysTracker(),
+                ImpressionsObserver = null
+            };
+
+            _impressionsManager = new ImpressionsManager(config);
         }
 
         #region Public Methods

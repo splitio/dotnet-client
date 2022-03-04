@@ -4,8 +4,6 @@ using Splitio.Services.Cache.Filter;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
-using Splitio.Telemetry.Common;
-using Splitio.Telemetry.Domain;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -19,6 +17,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         private readonly Mock<IUniqueKeysSenderAdapter> _senderAdapter;
         private readonly ITasksManager _tasksManager;
         private readonly ConcurrentDictionary<string, HashSet<string>> _cache;
+        private readonly TrackerConfig _config;
 
         private IUniqueKeysTracker _uniqueKeysTracker;
 
@@ -28,6 +27,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _senderAdapter = new Mock<IUniqueKeysSenderAdapter>();
             _tasksManager = new TasksManager(new WrapperAdapter());
             _cache = new ConcurrentDictionary<string, HashSet<string>>();
+            _config = new TrackerConfig
+            {
+                Cache = _cache,
+                CacheMaxSize = 5,
+                PeriodicTaskIntervalSeconds = 1
+            };
         }
 
         [TestMethod]
@@ -35,8 +40,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         {
             // Arrange.
             _cache.Clear();
-
-            _uniqueKeysTracker = new UniqueKeysTracker(_filterAdapter.Object, _cache, 5, _senderAdapter.Object, _tasksManager, 1);
+            
+            _uniqueKeysTracker = new UniqueKeysTracker(_config, _filterAdapter.Object, _senderAdapter.Object, _tasksManager);
 
             // Act.
             _uniqueKeysTracker.Start();
@@ -62,7 +67,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Arrange.
             _cache.Clear();
 
-            _uniqueKeysTracker = new UniqueKeysTracker(_filterAdapter.Object, _cache, 5, _senderAdapter.Object, _tasksManager, 1);
+            _uniqueKeysTracker = new UniqueKeysTracker(_config, _filterAdapter.Object, _senderAdapter.Object, _tasksManager);
 
             _filterAdapter
                 .SetupSequence(mock => mock.Contains("feature-name-test", "key-test"))

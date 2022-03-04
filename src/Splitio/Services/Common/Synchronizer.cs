@@ -37,40 +37,25 @@ namespace Splitio.Services.Common
         private readonly int _onDemandFetchRetryDelayMs;
         private readonly FetchOptions _defaultFetchOptions;
 
-        public Synchronizer(ISplitFetcher splitFetcher,
-            ISelfRefreshingSegmentFetcher segmentFetcher,
-            IImpressionsLog impressionsLog,
-            IEventsLog eventsLog,
-            IImpressionsCountSender impressionsCountSender,
-            IWrapperAdapter wrapperAdapter,
-            IStatusManager statusManager,
-            ITelemetrySyncTask telemetrySyncTask,
-            ITasksManager tasksManager,
-            ISplitCache splitCache,
-            IBackOff backOff,
-            int onDemandFetchMaxRetries,
-            int onDemandFetchRetryDelayMs,
-            ISegmentCache segmentCache,
-            IUniqueKeysTracker uniqueKeysTracker,
-            ISplitLogger log = null)
+        public Synchronizer(SynchronizerConfig config)
         {
-            _splitFetcher = splitFetcher;
-            _segmentFetcher = segmentFetcher;
-            _impressionsLog = impressionsLog;
-            _eventsLog = eventsLog;
-            _impressionsCountSender = impressionsCountSender;            
-            _wrapperAdapter = wrapperAdapter;
-            _statusManager = statusManager;
-            _telemetrySyncTask = telemetrySyncTask;
-            _tasksManager = tasksManager;
-            _splitCache = splitCache;
-            _backOffSplits = backOff;
-            _backOffSegments = backOff;
-            _onDemandFetchMaxRetries = onDemandFetchMaxRetries;
-            _onDemandFetchRetryDelayMs = onDemandFetchRetryDelayMs;
-            _segmentCache = segmentCache;
-            _uniqueKeysTracker = uniqueKeysTracker;
-            _log = log ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
+            _splitFetcher = config.SplitFetcher;
+            _segmentFetcher = config.SegmentFetcher;
+            _impressionsLog = config.ImpressionsLog;
+            _eventsLog = config.EventsLog;
+            _impressionsCountSender = config.ImpressionsCountSender;
+            _wrapperAdapter = config.WrapperAdapter;
+            _statusManager = config.StatusManager;
+            _telemetrySyncTask = config.TelemetrySyncTask;
+            _tasksManager = config.TasksManager;
+            _splitCache = config.SplitCache;
+            _backOffSplits = config.BackOffSplits;
+            _backOffSegments = config.BackOffSegments;
+            _onDemandFetchMaxRetries = config.OnDemandFetchMaxRetries;
+            _onDemandFetchRetryDelayMs = config.OnDemandFetchRetryDelayMs;
+            _segmentCache = config.SegmentCache;
+            _uniqueKeysTracker = config.UniqueKeysTracker;
+            _log = config.Loggger ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
             _defaultFetchOptions = new FetchOptions();
         }
 
@@ -122,7 +107,7 @@ namespace Splitio.Services.Common
                 _tasksManager.Start(() => SyncAll(), cancellationTokenSource, "SyncAll");
                 return true;
             }
-            
+
             return SyncAll();
         }
 
@@ -276,5 +261,26 @@ namespace Splitio.Services.Common
             return splitsResult.Success && _segmentFetcher.FetchAll();
         }
         #endregion
+    }
+
+    public class SynchronizerConfig
+    {
+        public ISplitFetcher SplitFetcher { get; set; }
+        public ISelfRefreshingSegmentFetcher SegmentFetcher { get; set; }
+        public IImpressionsLog ImpressionsLog { get; set; }
+        public IEventsLog EventsLog { get; set; }
+        public IImpressionsCountSender ImpressionsCountSender { get; set; }
+        public IWrapperAdapter WrapperAdapter { get; set; }
+        public IStatusManager StatusManager { get; set; }
+        public ITelemetrySyncTask TelemetrySyncTask { get; set; }
+        public ITasksManager TasksManager { get; set; }
+        public ISplitCache SplitCache { get; set; }
+        public IBackOff BackOffSplits { get; set; }
+        public IBackOff BackOffSegments { get; set; }
+        public int OnDemandFetchMaxRetries { get; set; }
+        public int OnDemandFetchRetryDelayMs { get; set; }
+        public ISegmentCache SegmentCache { get; set; }
+        public IUniqueKeysTracker UniqueKeysTracker { get; set; }
+        public ISplitLogger Loggger { get; set; }
     }
 }

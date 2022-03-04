@@ -49,7 +49,8 @@ namespace Splitio.Services.Client.Classes
         private ITelemetrySyncTask _telemetrySyncTask;        
         private ITelemetryStorageConsumer _telemetryStorageConsumer;
         private ITelemetryRuntimeProducer _telemetryRuntimeProducer;
-        private ITelemetryAPI _telemetryAPI; 
+        private ITelemetryAPI _telemetryAPI;
+        private IUniqueKeysTracker _uniqueKeysTracker;
 
         public SelfRefreshingClient(string apiKey, 
             ConfigurationOptions config, 
@@ -113,10 +114,19 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildSplitFetcher()
         {
-            var segmentRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SegmentRefreshRate) : _config.SegmentRefreshRate;
-            var segmentChangeFetcher = new ApiSegmentChangeFetcher(_segmentSdkApiClient);
-            var segmentTaskQueue = new SegmentTaskQueue();
-            _selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, _statusManager, segmentRefreshRate, _segmentCache, _config.NumberOfParalellSegmentTasks, segmentTaskQueue, _tasksManager, _wrapperAdapter);
+            var config = new SegmentFetcherConfig
+            {
+                Interval = _config.RandomizeRefreshRates ? Random(_config.SegmentRefreshRate) : _config.SegmentRefreshRate,
+                NumberOfParallelSegments = _config.NumberOfParalellSegmentTasks,
+                SegmentChangeFetcher = new ApiSegmentChangeFetcher(_segmentSdkApiClient),
+                SegmentsCache = _segmentCache,
+                SegmentTaskQueue = new SegmentTaskQueue(),
+                StatusManager = _statusManager,
+                TasksManager = _tasksManager,
+                WrapperAdapter = _wrapperAdapter
+            };
+
+            _selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(config);
 
             var splitChangeFetcher = new ApiSplitChangeFetcher(_splitSdkApiClient);
             var splitsRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SplitsRefreshRate) : _config.SplitsRefreshRate;
@@ -137,19 +147,35 @@ namespace Splitio.Services.Client.Classes
         {
             var bloomFilter = new BloomFilter(_config.BfExpectedElements, _config.BfErrorRate);
             var adapter = new FilterAdapter(bloomFilter);
-            var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
             var senderAdapter = new InMemoryUniqueKeysSenderAdapter(_telemetryAPI);
+            var config = new TrackerConfig
+            {
+                Cache = new ConcurrentDictionary<string, HashSet<string>>(),
+                CacheMaxSize =_config.UniqueKeysCacheMaxSize,
+                PeriodicTaskIntervalSeconds = _config.UniqueKeysRefreshRate
+            };
 
-            _uniqueKeysTracker = new UniqueKeysTracker(adapter, trackerCache, _config.UniqueKeysCacheMaxSize, senderAdapter, _tasksManager, _config.UniqueKeysRefreshRate);
+            _uniqueKeysTracker = new UniqueKeysTracker(config, adapter, senderAdapter, _tasksManager);
         }
 
         private void BuildImpressionManager()
         {
-            var impressionsHasher = new ImpressionHasher();
-            var impressionsObserver = new ImpressionsObserver(impressionsHasher);
-            
             _impressionsCounter = new ImpressionsCounter();
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, true, _config.ImpressionsMode, _telemetryRuntimeProducer, _tasksManager, _uniqueKeysTracker, impressionsObserver);
+
+            var config = new ImpressionsManagerConfig
+            {
+                ImpressionsLog = _impressionsLog,
+                CustomerImpressionListener = _customerImpressionListener,
+                ImpressionsCounter = _impressionsCounter,
+                AddPreviousTime = true,
+                ImpressionsMode = _config.ImpressionsMode,
+                TelemetryRuntimeProducer = _telemetryRuntimeProducer,
+                TaskManager = _tasksManager,
+                UniqueKeysTracker = _uniqueKeysTracker,
+                ImpressionsObserver = new ImpressionsObserver(new ImpressionHasher())
+            };
+
+            _impressionsManager = new ImpressionsManager(config);
         }
 
         private void BuildEventLog(ConfigurationOptions config)
@@ -200,8 +226,27 @@ namespace Splitio.Services.Client.Classes
             {
                 // Synchronizer
                 var impressionsCountSender = new ImpressionsCountSender(_impressionsSdkApiClient, _impressionsCounter, _tasksManager);
-                var backOff = new BackOff(backOffBase: 10, attempt: 0, maxAllowed: 60);
-                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, impressionsCountSender, _wrapperAdapter, _statusManager, _telemetrySyncTask, _tasksManager, _splitCache, backOff, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs, _segmentCache, _uniqueKeysTracker);
+                var synchronizerConfig = new SynchronizerConfig
+                {
+                    SplitFetcher = _splitFetcher,
+                    SegmentFetcher = _selfRefreshingSegmentFetcher,
+                    ImpressionsLog = _impressionsLog,
+                    EventsLog = _eventsLog,
+                    ImpressionsCountSender = impressionsCountSender,
+                    WrapperAdapter = _wrapperAdapter,
+                    StatusManager = _statusManager,
+                    TelemetrySyncTask = _telemetrySyncTask,
+                    TasksManager = _tasksManager,
+                    SplitCache = _splitCache,
+                    BackOffSplits = new BackOff(backOffBase: 10, attempt: 0, maxAllowed: 60),
+                    BackOffSegments = new BackOff(backOffBase: 10, attempt: 0, maxAllowed: 60),
+                    OnDemandFetchMaxRetries = _config.OnDemandFetchMaxRetries,
+                    OnDemandFetchRetryDelayMs = _config.OnDemandFetchRetryDelayMs,
+                    SegmentCache = _segmentCache,
+                    UniqueKeysTracker = _uniqueKeysTracker
+                };
+
+                var synchronizer = new Synchronizer(synchronizerConfig);
 
                 // Workers
                 var splitsWorker = new SplitsWorker(_splitCache, synchronizer, _tasksManager);

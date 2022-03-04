@@ -26,26 +26,18 @@ namespace Splitio.Services.Impressions.Classes
         private readonly bool _optimized;
         private readonly bool _addPreviousTime;
 
-        public ImpressionsManager(IImpressionsLog impressionsLog,
-            IImpressionListener customerImpressionListener,
-            IImpressionsCounter impressionsCounter,
-            bool addPreviousTime,
-            ImpressionsMode impressionsMode,
-            ITelemetryRuntimeProducer telemetryRuntimeProducer,
-            ITasksManager taskManager,
-            IUniqueKeysTracker uniqueKeysTracker,
-            IImpressionsObserver impressionsObserver = null)
+        public ImpressionsManager(ImpressionsManagerConfig config)
         {            
-            _impressionsLog = impressionsLog;
-            _customerImpressionListener = customerImpressionListener;
-            _impressionsCounter = impressionsCounter;
-            _addPreviousTime = addPreviousTime;
-            _optimized = impressionsMode == ImpressionsMode.Optimized && addPreviousTime;
-            _impressionsObserver = impressionsObserver;
-            _telemetryRuntimeProducer = telemetryRuntimeProducer;
-            _taskManager = taskManager;
-            _impressionsMode = impressionsMode;
-            _uniqueKeysTracker = uniqueKeysTracker;
+            _impressionsLog = config.ImpressionsLog;
+            _customerImpressionListener = config.CustomerImpressionListener;
+            _impressionsCounter = config.ImpressionsCounter;
+            _addPreviousTime = config.AddPreviousTime;
+            _optimized = config.ImpressionsMode == ImpressionsMode.Optimized && _addPreviousTime;
+            _impressionsObserver = config.ImpressionsObserver;
+            _telemetryRuntimeProducer = config.TelemetryRuntimeProducer;
+            _taskManager = config.TaskManager;
+            _impressionsMode = config.ImpressionsMode;
+            _uniqueKeysTracker = config.UniqueKeysTracker;
         }
 
         #region Public Methods
@@ -175,6 +167,42 @@ namespace Splitio.Services.Impressions.Classes
             telemetryStats.Queued = impressions.Count - telemetryStats.Dropped;
         }
         #endregion
+    }
+
+    public class ImpressionsManagerConfig
+    {
+        public ImpressionsManagerConfig() { }
+
+        public ImpressionsManagerConfig(IImpressionsLog impressionsLog,
+            IImpressionListener customerImpressionListener,
+            IImpressionsCounter impressionsCounter,
+            bool addPreviousTime,
+            ImpressionsMode impressionsMode,
+            ITelemetryRuntimeProducer telemetryRuntimeProducer,
+            ITasksManager taskManager,
+            IUniqueKeysTracker uniqueKeysTracker,
+            IImpressionsObserver impressionsObserver)
+        {
+            ImpressionsLog = impressionsLog;
+            CustomerImpressionListener = customerImpressionListener;
+            ImpressionsCounter = impressionsCounter;
+            AddPreviousTime = addPreviousTime;
+            ImpressionsObserver = impressionsObserver;
+            TelemetryRuntimeProducer = telemetryRuntimeProducer;
+            TaskManager = taskManager;
+            ImpressionsMode = impressionsMode;
+            UniqueKeysTracker = uniqueKeysTracker;
+        }
+
+        public IImpressionsLog ImpressionsLog { get; set; }
+        public IImpressionListener CustomerImpressionListener { get; set; }
+        public IImpressionsCounter ImpressionsCounter { get; set; }
+        public bool AddPreviousTime { get; set; }
+        public ImpressionsMode ImpressionsMode { get; set; }
+        public ITelemetryRuntimeProducer TelemetryRuntimeProducer { get; set; }
+        public ITasksManager TaskManager { get; set; }
+        public IUniqueKeysTracker UniqueKeysTracker { get; set; }
+        public IImpressionsObserver ImpressionsObserver { get; set; }
     }
 
     public class TelemetryStats

@@ -31,23 +31,17 @@ namespace Splitio.Services.SegmentFetcher.Classes
         private CancellationTokenSource _cancelTokenSource;
         private bool _running;
 
-        public SelfRefreshingSegmentFetcher(ISegmentChangeFetcher segmentChangeFetcher, 
-            IStatusManager statusManager, 
-            int interval, 
-            ISegmentCache segmentsCache, 
-            int numberOfParallelSegments,
-            ISegmentTaskQueue segmentTaskQueue,
-            ITasksManager tasksManager,
-            IWrapperAdapter wrapperAdapter) : base(segmentsCache)
+        public SelfRefreshingSegmentFetcher(SegmentFetcherConfig config)
+            : base(config.SegmentsCache)
         {
-            _segmentChangeFetcher = segmentChangeFetcher;
+            _segmentChangeFetcher = config.SegmentChangeFetcher;
             _segments = new ConcurrentDictionary<string, SelfRefreshingSegment>();
-            _worker = new SegmentTaskWorker(numberOfParallelSegments, segmentTaskQueue);
-            _interval = interval;
-            _statusManager = statusManager;
-            _wrappedAdapter = wrapperAdapter;
-            _segmentTaskQueue = segmentTaskQueue;
-            _tasksManager = tasksManager;
+            _worker = new SegmentTaskWorker(config.NumberOfParallelSegments, config.SegmentTaskQueue);
+            _interval = config.Interval;
+            _statusManager = config.StatusManager;
+            _wrappedAdapter = config.WrapperAdapter;
+            _segmentTaskQueue = config.SegmentTaskQueue;
+            _tasksManager = config.TasksManager;
         }
 
         #region Public Methods
@@ -175,5 +169,17 @@ namespace Splitio.Services.SegmentFetcher.Classes
             }
         }
         #endregion
+    }
+
+    public class SegmentFetcherConfig
+    {
+        public ISegmentChangeFetcher SegmentChangeFetcher { get; set; }
+        public IStatusManager StatusManager { get; set; }
+        public ISegmentCache SegmentsCache  { get; set; }
+        public int NumberOfParallelSegments { get; set; }
+        public ISegmentTaskQueue SegmentTaskQueue { get; set; }
+        public ITasksManager TasksManager { get; set; }
+        public IWrapperAdapter WrapperAdapter { get; set; }
+        public int Interval { get; set; }
     }
 }
