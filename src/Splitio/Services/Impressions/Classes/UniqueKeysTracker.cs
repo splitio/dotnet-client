@@ -28,19 +28,18 @@ namespace Splitio.Services.Impressions.Classes
 
         private bool _running = false;
 
-        public UniqueKeysTracker(IFilterAdapter filterAdapter,
+        public UniqueKeysTracker(TrackerConfig config,
+            IFilterAdapter filterAdapter,
             ConcurrentDictionary<string, HashSet<string>> cache,
-            int cacheMaxSize,
             IUniqueKeysSenderAdapter senderAdapter,
-            ITasksManager tasksManager,
-            int periodicTaskIntervalSeconds)
+            ITasksManager tasksManager)
         {
             _filterAdapter = filterAdapter;
             _cache = cache;
-            _cacheMaxSize = cacheMaxSize;
+            _cacheMaxSize = config.CacheMaxSize;
             _senderAdapter = senderAdapter;
             _tasksManager = tasksManager;
-            _interval = periodicTaskIntervalSeconds;
+            _interval = config.PeriodicTaskIntervalSeconds;
         }
 
         #region Public Methods
@@ -111,5 +110,11 @@ namespace Splitio.Services.Impressions.Classes
             }
         }
         #endregion
+    }
+
+    public class TrackerConfig
+    {
+        public int PeriodicTaskIntervalSeconds { get; set; }
+        public int CacheMaxSize { get; set; }
     }
 }

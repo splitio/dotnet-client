@@ -139,8 +139,13 @@ namespace Splitio.Services.Client.Classes
             var adapter = new FilterAdapter(bloomFilter);
             var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
             var senderAdapter = new InMemoryUniqueKeysSenderAdapter(_telemetryAPI);
+            var config = new TrackerConfig
+            {
+                CacheMaxSize = _config.UniqueKeysCacheMaxSize,
+                PeriodicTaskIntervalSeconds = _config.UniqueKeysRefreshRate
+            };
 
-            _uniqueKeysTracker = new UniqueKeysTracker(adapter, trackerCache, _config.UniqueKeysCacheMaxSize, senderAdapter, _tasksManager, _config.UniqueKeysRefreshRate);
+            _uniqueKeysTracker = new UniqueKeysTracker(config, adapter, trackerCache, senderAdapter, _tasksManager);
         }
 
         private void BuildImpressionManager()

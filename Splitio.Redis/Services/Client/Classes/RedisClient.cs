@@ -110,8 +110,13 @@ namespace Splitio.Redis.Services.Client.Classes
             var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
             var uniqueStorage = new RedisUniqueKeysStorage(_redisAdapter, _config.RedisUserPrefix);
             var senderAdapter = new RedisUniqueKeysSenderAdapter(uniqueStorage);
+            var config = new TrackerConfig
+            {
+                CacheMaxSize = _config.UniqueKeysCacheMaxSize,
+                PeriodicTaskIntervalSeconds = _config.UniqueKeysRefreshRate
+            };
 
-            _uniqueKeysTracker = new UniqueKeysTracker(adapter, trackerCache, _config.UniqueKeysCacheMaxSize, senderAdapter, _tasksManager, _config.UniqueKeysRefreshRate);
+            _uniqueKeysTracker = new UniqueKeysTracker(config, adapter, trackerCache, senderAdapter, _tasksManager);
             _uniqueKeysTracker.Start();
         }
 
