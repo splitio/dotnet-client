@@ -52,6 +52,7 @@ namespace Splitio.Services.Client.Classes
         protected ITelemetryInitProducer _telemetryInitProducer;
         protected ITasksManager _tasksManager;
         protected IStatusManager _statusManager;
+        protected IUniqueKeysTracker _uniqueKeysTracker;
 
         public SplitClient(ISplitLogger log)
         {

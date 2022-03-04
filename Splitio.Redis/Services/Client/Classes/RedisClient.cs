@@ -7,12 +7,15 @@ using Splitio.Redis.Services.Impressions.Classes;
 using Splitio.Redis.Services.Parsing.Classes;
 using Splitio.Redis.Services.Shared;
 using Splitio.Redis.Telemetry.Storages;
+using Splitio.Services.Cache.Filter;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Client.Classes
@@ -48,6 +51,11 @@ namespace Splitio.Redis.Services.Client.Classes
             _config.SdkVersion = baseConfig.SdkVersion;
             _config.SdkMachineName = baseConfig.SdkMachineName;
             _config.SdkMachineIP = baseConfig.SdkMachineIP;
+            _config.BfExpectedElements = baseConfig.BfExpectedElements;
+            _config.BfErrorRate = baseConfig.BfErrorRate;
+            _config.UniqueKeysRefreshRate = baseConfig.UniqueKeysRefreshRate;
+            _config.UniqueKeysCacheMaxSize = baseConfig.UniqueKeysCacheMaxSize;
+            _config.ImpressionsMode = baseConfig.ImpressionsMode;
             LabelsEnabled = baseConfig.LabelsEnabled;
 
             _config.RedisHost = config.CacheAdapterConfig.Host;
@@ -86,10 +94,19 @@ namespace Splitio.Redis.Services.Client.Classes
             _customerImpressionListener = config.ImpressionListener;
         }
 
+        private void BuildUniqueKeysTracker()
+        {
+            var bloomFilter = new BloomFilter(_config.BfExpectedElements, _config.BfErrorRate);
+            var adapter = new FilterAdapter(bloomFilter);
+            var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
+
+            _uniqueKeysTracker = new UniqueKeysTracker(adapter, trackerCache, _config.UniqueKeysCacheMaxSize, null /*TODO: implement adapter for API*/, _tasksManager, _config.UniqueKeysRefreshRate);
+        }
+
         private void BuildImpressionManager()
         {
             var impressionsCounter = new ImpressionsCounter();
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, false, ImpressionsMode.Debug, telemetryRuntimeProducer: null, taskManager: _tasksManager);
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, false, _config.ImpressionsMode, telemetryRuntimeProducer: null, taskManager: _tasksManager, uniqueKeysTracker: _uniqueKeysTracker);
         }
 
         private void BuildEventLog()
