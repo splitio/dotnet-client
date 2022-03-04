@@ -77,7 +77,6 @@ namespace Splitio.Redis.Services.Client.Classes
             _config.RedisUserPrefix = config.CacheAdapterConfig.UserPrefix;
             _config.Mode = config.Mode;
             _config.TlsConfig = config.CacheAdapterConfig.TlsConfig;
-            _config.ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Debug;
         }
 
         private void BuildRedisCache()
