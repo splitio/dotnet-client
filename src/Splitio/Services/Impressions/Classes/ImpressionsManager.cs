@@ -48,6 +48,7 @@ namespace Splitio.Services.Impressions.Classes
             _uniqueKeysTracker = uniqueKeysTracker;
         }
 
+        #region Public Methods
         public KeyImpression BuildImpression(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey)
         {
             var impression = new KeyImpression(matchingKey, feature, treatment, time, changeNumber, label, bucketingKey);
@@ -56,16 +57,19 @@ namespace Splitio.Services.Impressions.Classes
             {
                 switch (_impressionsMode)
                 {
-                    case ImpressionsMode.Debug:
+                    // In DEBUG mode we should calculate the pt only. 
+                    case ImpressionsMode.Debug: 
                         if (_addPreviousTime && _impressionsObserver != null)
                         {
                             impression.previousTime = _impressionsObserver.TestAndSet(impression);
                         }
                         break;
-                    case ImpressionsMode.None:
+                    // In NONE mode we should track the total amount of evaluations and the unique keys.
+                    case ImpressionsMode.None:   
                         _impressionsCounter.Inc(feature, time);
                         _uniqueKeysTracker.Track(matchingKey, feature);
                         break;
+                    // In OPTIMIZED mode we should track the total amount of evaluations and deduplicate the impressions.
                     case ImpressionsMode.Optimized:
                     default:
                         if (_addPreviousTime && _impressionsObserver != null)
@@ -80,7 +84,7 @@ namespace Splitio.Services.Impressions.Classes
             }
             catch (Exception ex)
             {
-                _logger.Error("Exception caught building impression.", ex);
+                _logger.Error("Exception caught processing impressions.", ex);
             }
 
             return impression;
@@ -136,10 +140,12 @@ namespace Splitio.Services.Impressions.Classes
             }
         }
 
+        // Public only for tests
         public bool ShouldQueueImpression(KeyImpression impression)
         {
             return impression.previousTime == null || (ImpressionsHelper.TruncateTimeFrame(impression.previousTime.Value) != ImpressionsHelper.TruncateTimeFrame(impression.time));
         }
+        #endregion
 
         #region Private Methods
         private void RecordStats(TelemetryStats telemetryStats)

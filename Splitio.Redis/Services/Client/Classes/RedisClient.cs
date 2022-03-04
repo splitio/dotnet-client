@@ -51,6 +51,11 @@ namespace Splitio.Redis.Services.Client.Classes
             _config.SdkVersion = baseConfig.SdkVersion;
             _config.SdkMachineName = baseConfig.SdkMachineName;
             _config.SdkMachineIP = baseConfig.SdkMachineIP;
+            _config.BfExpectedElements = baseConfig.BfExpectedElements;
+            _config.BfErrorRate = baseConfig.BfErrorRate;
+            _config.UniqueKeysRefreshRate = baseConfig.UniqueKeysRefreshRate;
+            _config.UniqueKeysCacheMaxSize = baseConfig.UniqueKeysCacheMaxSize;
+            _config.ImpressionsMode = baseConfig.ImpressionsMode;
             LabelsEnabled = baseConfig.LabelsEnabled;
 
             _config.RedisHost = config.CacheAdapterConfig.Host;
@@ -91,16 +96,17 @@ namespace Splitio.Redis.Services.Client.Classes
 
         private void BuildUniqueKeysTracker()
         {
-            var bloomFilter = new BloomFilter(expectedElements: 10000000, errorRate: 0.01);
+            var bloomFilter = new BloomFilter(_config.BfExpectedElements, _config.BfErrorRate);
             var adapter = new FilterAdapter(bloomFilter);
             var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
-            _uniqueKeysTracker = new UniqueKeysTracker(adapter, trackerCache, 50000, null /*TODO: implement adapter for API*/, _tasksManager, periodicTaskIntervalSeconds: 3600);
+
+            _uniqueKeysTracker = new UniqueKeysTracker(adapter, trackerCache, _config.UniqueKeysCacheMaxSize, null /*TODO: implement adapter for API*/, _tasksManager, _config.UniqueKeysRefreshRate);
         }
 
         private void BuildImpressionManager()
         {
             var impressionsCounter = new ImpressionsCounter();
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, false, ImpressionsMode.Debug, telemetryRuntimeProducer: null, taskManager: _tasksManager, uniqueKeysTracker: _uniqueKeysTracker);
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, false, _config.ImpressionsMode, telemetryRuntimeProducer: null, taskManager: _tasksManager, uniqueKeysTracker: _uniqueKeysTracker);
         }
 
         private void BuildEventLog()

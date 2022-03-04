@@ -135,10 +135,10 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildUniqueKeysTracker()
         {
-            var bloomFilter = new BloomFilter(expectedElements: 10000000, errorRate: 0.01);
+            var bloomFilter = new BloomFilter(_config.BfExpectedElements, _config.BfErrorRate);
             var adapter = new FilterAdapter(bloomFilter);
             var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
-            _uniqueKeysTracker = new UniqueKeysTracker(adapter, trackerCache, 50000, _telemetryAPI, _tasksManager, periodicTaskIntervalSeconds: 3600);
+            _uniqueKeysTracker = new UniqueKeysTracker(adapter, trackerCache, _config.UniqueKeysCacheMaxSize, _telemetryAPI, _tasksManager, _config.UniqueKeysRefreshRate);
         }
 
         private void BuildImpressionManager()
