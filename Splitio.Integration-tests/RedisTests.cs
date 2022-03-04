@@ -100,7 +100,7 @@ namespace Splitio.Integration_tests
         [TestMethod]
         public void CheckingMachineIpAndMachineName_WithIPAddressesDisabled_ReturnsNA()
         {
-            // Arrange.           
+            // Arrange.
             GetHttpClientMock();
             var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
 
@@ -154,6 +154,41 @@ namespace Splitio.Integration_tests
             {
                 Assert.IsTrue(key.ToString().Contains("/NA/"));
             }
+
+            _redisAdapter.Flush();
+        }
+
+        [TestMethod]
+        public void GetTreatment_WithImpressionModeInNone_ShouldGetUniqueKeys()
+        {
+            // Arrange.
+            GetHttpClientMock();
+            
+            var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
+            configurations.ImpressionsMode = ImpressionsMode.None;
+            var apikey = "apikey1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            client.GetTreatment("mauro_test", "FACUNDO_TEST");
+            client.GetTreatment("nico_test", "FACUNDO_TEST");
+            client.GetTreatment("redo_test", "FACUNDO_TEST");
+            client.GetTreatment("redo_test", "MAURO_TEST");
+
+            client.Destroy();
+            Thread.Sleep(500);
+            var result = _redisAdapter.SMembers("SPLITIO.uniquekeys");
+
+            // Assert.
+            Assert.AreEqual(4, result.Count());
+            Assert.IsTrue(result.Contains("FACUNDO_TEST::mauro_test"));
+            Assert.IsTrue(result.Contains("FACUNDO_TEST::nico_test"));
+            Assert.IsTrue(result.Contains("FACUNDO_TEST::redo_test"));
+            Assert.IsTrue(result.Contains("MAURO_TEST::redo_test"));
 
             _redisAdapter.Flush();
         }

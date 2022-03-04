@@ -32,6 +32,7 @@ namespace Splitio.Services.Common
         private readonly ISegmentCache _segmentCache;
         private readonly IBackOff _backOffSplits;
         private readonly IBackOff _backOffSegments;
+        private readonly IUniqueKeysTracker _uniqueKeysTracker;
         private readonly int _onDemandFetchMaxRetries;
         private readonly int _onDemandFetchRetryDelayMs;
         private readonly FetchOptions _defaultFetchOptions;
@@ -50,6 +51,7 @@ namespace Splitio.Services.Common
             int onDemandFetchMaxRetries,
             int onDemandFetchRetryDelayMs,
             ISegmentCache segmentCache,
+            IUniqueKeysTracker uniqueKeysTracker,
             ISplitLogger log = null)
         {
             _splitFetcher = splitFetcher;
@@ -67,6 +69,7 @@ namespace Splitio.Services.Common
             _onDemandFetchMaxRetries = onDemandFetchMaxRetries;
             _onDemandFetchRetryDelayMs = onDemandFetchRetryDelayMs;
             _segmentCache = segmentCache;
+            _uniqueKeysTracker = uniqueKeysTracker;
             _log = log ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
             _defaultFetchOptions = new FetchOptions();
         }
@@ -78,6 +81,7 @@ namespace Splitio.Services.Common
             _impressionsLog.Start();
             _eventsLog.Start();
             _impressionsCountSender.Start();
+            _uniqueKeysTracker.Start();
             _log.Debug("Periodic Data Recording started...");
         }
 
@@ -94,6 +98,7 @@ namespace Splitio.Services.Common
             _impressionsLog.Stop();
             _eventsLog.Stop();
             _impressionsCountSender.Stop();
+            _uniqueKeysTracker.Stop();
             _log.Debug("Periodic Data Recording stopped...");
         }
 

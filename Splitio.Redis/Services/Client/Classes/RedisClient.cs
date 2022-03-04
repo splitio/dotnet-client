@@ -37,11 +37,20 @@ namespace Splitio.Redis.Services.Client.Classes
             BuildRedisCache();
             BuildTelemetryStorage();
             BuildTreatmentLog(config);
+            BuildUniqueKeysTracker();
             BuildImpressionManager();
             BuildEventLog();
             BuildBlockUntilReadyService();
             BuildManager();
             BuildEvaluator();
+        }
+
+        public override void Destroy()
+        {
+            if (_statusManager.IsDestroyed()) return;
+
+            _uniqueKeysTracker.Stop();
+            base.Destroy();
         }
 
         #region Private Methods
@@ -99,8 +108,11 @@ namespace Splitio.Redis.Services.Client.Classes
             var bloomFilter = new BloomFilter(_config.BfExpectedElements, _config.BfErrorRate);
             var adapter = new FilterAdapter(bloomFilter);
             var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
+            var uniqueStorage = new RedisUniqueKeysStorage(_redisAdapter, _config.RedisUserPrefix);
+            var senderAdapter = new RedisUniqueKeysSenderAdapter(uniqueStorage);
 
-            _uniqueKeysTracker = new UniqueKeysTracker(adapter, trackerCache, _config.UniqueKeysCacheMaxSize, null /*TODO: implement adapter for API*/, _tasksManager, _config.UniqueKeysRefreshRate);
+            _uniqueKeysTracker = new UniqueKeysTracker(adapter, trackerCache, _config.UniqueKeysCacheMaxSize, senderAdapter, _tasksManager, _config.UniqueKeysRefreshRate);
+            _uniqueKeysTracker.Start();
         }
 
         private void BuildImpressionManager()
