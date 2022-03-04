@@ -36,7 +36,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Arrange.
             _cache.Clear();
 
-            _uniqueKeysTracker = new UniqueKeysTracker(_filterAdapter.Object, _cache, 5, _senderAdapter.Object, _tasksManager, 1);
+            var config = new TrackerConfig
+            {
+                CacheMaxSize = 5,
+                PeriodicTaskIntervalSeconds = 1
+            };
+            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, _tasksManager);
 
             // Act.
             _uniqueKeysTracker.Start();
@@ -62,7 +67,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Arrange.
             _cache.Clear();
 
-            _uniqueKeysTracker = new UniqueKeysTracker(_filterAdapter.Object, _cache, 5, _senderAdapter.Object, _tasksManager, 1);
+            var config = new TrackerConfig
+            {
+                CacheMaxSize = 5,
+                PeriodicTaskIntervalSeconds = 1
+            };
+            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, _tasksManager);
 
             _filterAdapter
                 .SetupSequence(mock => mock.Contains("feature-name-test", "key-test"))
