@@ -38,6 +38,7 @@ namespace Splitio.Services.Shared.Classes
 
             baseConfig.ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Debug;
             baseConfig.UniqueKeysRefreshRate = 300;
+            baseConfig.ImpressionsCounterRefreshRate = 300;
 
             return baseConfig;
         }

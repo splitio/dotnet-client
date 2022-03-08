@@ -1,7 +1,6 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
-using Splitio.Services.Cache.Filter;
 using Splitio.Services.Common;
 using Splitio.Services.Events.Classes;
 using Splitio.Services.Events.Interfaces;
@@ -45,7 +44,6 @@ namespace Splitio.Services.Client.Classes
         private IEventSdkApiClient _eventSdkApiClient;
         private ISelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
         private ISyncManager _syncManager;
-        private IImpressionsCounter _impressionsCounter;        
         private ITelemetrySyncTask _telemetrySyncTask;        
         private ITelemetryStorageConsumer _telemetryStorageConsumer;
         private ITelemetryRuntimeProducer _telemetryRuntimeProducer;
@@ -66,9 +64,13 @@ namespace Splitio.Services.Client.Classes
             BuildSdkApiClients();
             BuildSplitFetcher();            
             BuildTreatmentLog(config);
+
             BuildSenderAdapter();
-            BuildUniqueKeysTracker();
+            BuildUniqueKeysTracker(_config);
+            BuildImpressionsCounter(_config);
+            BuildImpressionsObserver(_config);
             BuildImpressionManager();
+
             BuildEventLog(config);
             BuildEvaluator();
             BuildBlockUntilReadyService();
@@ -139,27 +141,9 @@ namespace Splitio.Services.Client.Classes
             _impressionsSenderAdapter = new InMemorySenderAdapter(_telemetryAPI, _impressionsSdkApiClient);
         }
 
-        private void BuildUniqueKeysTracker()
-        {
-            var bloomFilter = new BloomFilter(_config.BfExpectedElements, _config.BfErrorRate);
-            var adapter = new FilterAdapter(bloomFilter);
-            var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
-            var config = new TrackerConfig
-            {
-                CacheMaxSize = _config.UniqueKeysCacheMaxSize,
-                PeriodicTaskIntervalSeconds = _config.UniqueKeysRefreshRate
-            };
-
-            _uniqueKeysTracker = new UniqueKeysTracker(config, adapter, trackerCache, _impressionsSenderAdapter, _tasksManager);
-        }
-
         private void BuildImpressionManager()
         {
-            var impressionsHasher = new ImpressionHasher();
-            var impressionsObserver = new ImpressionsObserver(impressionsHasher);
-            
-            _impressionsCounter = new ImpressionsCounter();
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, true, _config.ImpressionsMode, _telemetryRuntimeProducer, _tasksManager, _uniqueKeysTracker, impressionsObserver);
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, true, _config.ImpressionsMode, _telemetryRuntimeProducer, _tasksManager, _uniqueKeysTracker, _impressionsObserver);
         }
 
         private void BuildEventLog(ConfigurationOptions config)
