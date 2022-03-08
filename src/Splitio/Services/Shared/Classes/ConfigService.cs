@@ -58,6 +58,7 @@ namespace Splitio.Services.Shared.Classes
                 BfExpectedElements = baseConfig.BfExpectedElements,
                 UniqueKeysCacheMaxSize = baseConfig.UniqueKeysCacheMaxSize,
                 UniqueKeysRefreshRate = 3600,
+                ImpressionsCounterRefreshRate = 1800, // Send bulk impressions count - Refresh rate: 30 min.
                 ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Optimized,
                 SplitsRefreshRate = config.FeaturesRefreshRate ?? 5,
                 SegmentRefreshRate = config.SegmentsRefreshRate ?? 60,
