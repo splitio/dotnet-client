@@ -15,12 +15,11 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     {
         private readonly WrapperAdapter wrapperAdapter = new WrapperAdapter();
 
-        private readonly Mock<IImpressionsSdkApiClient> _apiClient;
+        private readonly Mock<IImpressionsSenderAdapter> _senderAdapter;
 
         public ImpressionsCountSenderTests()
         {
-            _apiClient = new Mock<IImpressionsSdkApiClient>();
-            
+            _senderAdapter = new Mock<IImpressionsSenderAdapter>();
         }
 
         [TestMethod]
@@ -33,14 +32,14 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             impressionsCounter.Inc("feature2", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 50, 11, DateTimeKind.Utc)));
             impressionsCounter.Inc("feature3", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 10, 50, 11, DateTimeKind.Utc)));
 
-            var impressionsCountSender = new ImpressionsCountSender(_apiClient.Object, impressionsCounter, new TasksManager(wrapperAdapter), 1);
+            var impressionsCountSender = new ImpressionsCountSender(_senderAdapter.Object, impressionsCounter, new TasksManager(wrapperAdapter), 1);
 
             // Act.
             impressionsCountSender.Start();
 
             // Assert.
             Thread.Sleep(1500);
-            _apiClient.Verify(mock => mock.SendBulkImpressionsCount(It.IsAny<ConcurrentDictionary<KeyCache, int>>()), Times.Once);
+            _senderAdapter.Verify(mock => mock.RecordImpressionsCount(It.IsAny<ConcurrentDictionary<KeyCache, int>>()), Times.Once);
         }
 
         [TestMethod]
@@ -48,14 +47,14 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         {
             // Arrange.
             var impressionsCounter = new ImpressionsCounter();
-            var impressionsCountSender = new ImpressionsCountSender(_apiClient.Object, impressionsCounter, new TasksManager(wrapperAdapter), 1);
+            var impressionsCountSender = new ImpressionsCountSender(_senderAdapter.Object, impressionsCounter, new TasksManager(wrapperAdapter), 1);
 
             // Act.
             impressionsCountSender.Start();
 
             // Assert.
             Thread.Sleep(1500);
-            _apiClient.Verify(mock => mock.SendBulkImpressionsCount(It.IsAny<ConcurrentDictionary<KeyCache, int>>()), Times.Never);
+            _senderAdapter.Verify(mock => mock.RecordImpressionsCount(It.IsAny<ConcurrentDictionary<KeyCache, int>>()), Times.Never);
         }
 
         [TestMethod]
@@ -68,7 +67,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             impressionsCounter.Inc("feature2", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 50, 11, DateTimeKind.Utc)));
             impressionsCounter.Inc("feature3", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 10, 50, 11, DateTimeKind.Utc)));
 
-            var impressionsCountSender = new ImpressionsCountSender(_apiClient.Object, impressionsCounter, new TasksManager(wrapperAdapter));
+            var impressionsCountSender = new ImpressionsCountSender(_senderAdapter.Object, impressionsCounter, new TasksManager(wrapperAdapter));
 
             // Act.
             impressionsCountSender.Start();
@@ -76,7 +75,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             impressionsCountSender.Stop();
 
             // Assert.
-            _apiClient.Verify(mock => mock.SendBulkImpressionsCount(It.IsAny<ConcurrentDictionary<KeyCache, int>>()), Times.Once);
+            _senderAdapter.Verify(mock => mock.RecordImpressionsCount(It.IsAny<ConcurrentDictionary<KeyCache, int>>()), Times.Once);
         }
     }
 }
