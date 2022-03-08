@@ -246,21 +246,11 @@ namespace Splitio.Services.Client.Classes
             {
                 _impressionsCounter = new NoopImpressionsCounter();
                 _impressionCounterSender = new NoopImpressionsCountSender();
+                return;
             }
 
             _impressionsCounter = new ImpressionsCounter();
             _impressionCounterSender = new ImpressionsCountSender(_impressionsSenderAdapter, _impressionsCounter, _tasksManager, config.ImpressionsCounterRefreshRate);
-        }
-
-        protected void BuildImpressionsObserver(BaseConfig config)
-        {
-            if (config.ImpressionsMode != ImpressionsMode.Optimized)
-            {
-                _impressionsObserver = new NoopImpressionsObserver();
-            }
-
-            var impressionHasher = new ImpressionHasher();
-            _impressionsObserver = new ImpressionsObserver(impressionHasher);
         }
         #endregion
 

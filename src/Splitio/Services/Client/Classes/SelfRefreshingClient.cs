@@ -68,7 +68,7 @@ namespace Splitio.Services.Client.Classes
             BuildSenderAdapter();
             BuildUniqueKeysTracker(_config);
             BuildImpressionsCounter(_config);
-            BuildImpressionsObserver(_config);
+            BuildImpressionsObserver();
             BuildImpressionManager();
 
             BuildEventLog(config);
@@ -139,6 +139,18 @@ namespace Splitio.Services.Client.Classes
         private void BuildSenderAdapter()
         {
             _impressionsSenderAdapter = new InMemorySenderAdapter(_telemetryAPI, _impressionsSdkApiClient);
+        }
+
+        private void BuildImpressionsObserver()
+        {
+            if (_config.ImpressionsMode == ImpressionsMode.None)
+            {
+                _impressionsObserver = new NoopImpressionsObserver();
+                return;
+            }
+
+            var impressionHasher = new ImpressionHasher();
+            _impressionsObserver = new ImpressionsObserver(impressionHasher);
         }
 
         private void BuildImpressionManager()

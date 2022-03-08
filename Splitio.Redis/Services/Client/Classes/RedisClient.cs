@@ -40,7 +40,7 @@ namespace Splitio.Redis.Services.Client.Classes
             BuildSenderAdapter();
             BuildUniqueKeysTracker(_config);
             BuildImpressionsCounter(_config);
-            BuildImpressionsObserver(_config);
+            BuildImpressionsObserver();
             BuildImpressionManager();
 
             BuildEventLog();
@@ -114,7 +114,19 @@ namespace Splitio.Redis.Services.Client.Classes
         {
             _impressionsSenderAdapter = new RedisSenderAdapter(_impressionsCache);
         }
-        
+
+        private void BuildImpressionsObserver()
+        {
+            if (_config.ImpressionsMode != ImpressionsMode.Optimized)
+            {
+                _impressionsObserver = new NoopImpressionsObserver();
+                return;
+            }
+
+            var impressionHasher = new ImpressionHasher();
+            _impressionsObserver = new ImpressionsObserver(impressionHasher);
+        }
+
         private void BuildImpressionManager()
         {
             var shouldCalculatePreviousTime = _config.ImpressionsMode == ImpressionsMode.Optimized;
