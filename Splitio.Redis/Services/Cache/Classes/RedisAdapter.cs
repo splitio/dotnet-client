@@ -4,7 +4,9 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
@@ -295,6 +297,28 @@ namespace Splitio.Redis.Services.Cache.Classes
             {
                 _log.Error("Exception calling Redis Adapter HashIncrement, ", e);
                 return 0;
+            }
+        }
+
+        public void HashIncrementAsyncBatch(string key, Dictionary<string, int> values)
+        {
+            var tasks = new List<Task>();
+
+            try
+            {
+                foreach (var item in values)
+                {
+                    tasks.Add(_database.HashIncrementAsync(key, item.Key, item.Value));
+                }
+            }
+            catch (Exception e)
+            {
+                _log.Error("Exception calling Redis Adapter HashIncrementAsync", e);
+            }
+            finally
+            {
+                if (tasks.Any())
+                    Task.WaitAll(tasks.ToArray());
             }
         }
 

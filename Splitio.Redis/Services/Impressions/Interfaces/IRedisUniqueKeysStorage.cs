@@ -6,4 +6,9 @@ namespace Splitio.Redis.Services.Impressions.Interfaces
     {
         void RecordUniqueKeys(List<string> uniqueKeys);
     }
+
+    public interface IRedisImpressionCountStorage
+    {
+        void RecordImpressionsCount(Dictionary<string, int> impressionsCount);
+    }
 }

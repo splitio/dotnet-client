@@ -1,5 +1,4 @@
-﻿using Splitio.Domain;
-using Splitio.Redis.Services.Cache.Classes;
+﻿using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Redis.Services.Events.Classes;
@@ -10,6 +9,7 @@ using Splitio.Redis.Telemetry.Storages;
 using Splitio.Services.Cache.Filter;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Classes;
+using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
@@ -25,6 +25,8 @@ namespace Splitio.Redis.Services.Client.Classes
         private readonly RedisConfig _config;
 
         private IRedisAdapter _redisAdapter;
+        private IImpressionsCountSender _impressionCounterSender;
+        private IImpressionsCache _impressionsCache;
 
         public RedisClient(ConfigurationOptions config,
             string apiKey,
@@ -43,6 +45,8 @@ namespace Splitio.Redis.Services.Client.Classes
             BuildBlockUntilReadyService();
             BuildManager();
             BuildEvaluator();
+
+            Start();
         }
 
         public override void Destroy()
@@ -50,6 +54,7 @@ namespace Splitio.Redis.Services.Client.Classes
             if (_statusManager.IsDestroyed()) return;
 
             _uniqueKeysTracker.Stop();
+            _impressionCounterSender.Stop();
             base.Destroy();
         }
 
@@ -97,9 +102,8 @@ namespace Splitio.Redis.Services.Client.Classes
 
         private void BuildTreatmentLog(ConfigurationOptions config)
         {
-            var impressionsCache = new RedisImpressionsCache(_redisAdapter, _config.SdkMachineIP, _config.SdkVersion, _config.SdkMachineName, _config.RedisUserPrefix);
-            _impressionsLog = new RedisImpressionLog(impressionsCache);
-
+            _impressionsCache = new RedisImpressionsCache(_redisAdapter, _config.SdkMachineIP, _config.SdkVersion, _config.SdkMachineName, _config.RedisUserPrefix);
+            _impressionsLog = new RedisImpressionLog(_impressionsCache);
             _customerImpressionListener = config.ImpressionListener;
         }
 
@@ -108,8 +112,8 @@ namespace Splitio.Redis.Services.Client.Classes
             var bloomFilter = new BloomFilter(_config.BfExpectedElements, _config.BfErrorRate);
             var adapter = new FilterAdapter(bloomFilter);
             var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
-            var uniqueStorage = new RedisUniqueKeysStorage(_redisAdapter, _config.RedisUserPrefix);
-            var senderAdapter = new RedisUniqueKeysSenderAdapter(uniqueStorage);
+
+            var senderAdapter = new RedisSenderAdapter(_impressionsCache);
             var config = new TrackerConfig
             {
                 CacheMaxSize = _config.UniqueKeysCacheMaxSize,
@@ -117,12 +121,15 @@ namespace Splitio.Redis.Services.Client.Classes
             };
 
             _uniqueKeysTracker = new UniqueKeysTracker(config, adapter, trackerCache, senderAdapter, _tasksManager);
-            _uniqueKeysTracker.Start();
+            
         }
 
         private void BuildImpressionManager()
         {
             var impressionsCounter = new ImpressionsCounter();
+            var senderAdapter = new RedisSenderAdapter(_impressionsCache);
+
+            _impressionCounterSender = new ImpressionsCountSender(senderAdapter, impressionsCounter, _tasksManager, interval: 300);
             _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, false, _config.ImpressionsMode, telemetryRuntimeProducer: null, taskManager: _tasksManager, uniqueKeysTracker: _uniqueKeysTracker);
         }
 
@@ -161,6 +168,12 @@ namespace Splitio.Redis.Services.Client.Classes
             };
 
             _telemetryInitProducer.RecordConfigInit(config);
+        }
+
+        private void Start()
+        {
+            _uniqueKeysTracker.Start();
+            _impressionCounterSender.Start();
         }
 
         private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)

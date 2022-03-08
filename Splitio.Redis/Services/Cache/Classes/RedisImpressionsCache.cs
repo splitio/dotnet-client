@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
-using Splitio.Services.Shared.Interfaces;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -9,7 +8,7 @@ using System.Linq;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
-    public class RedisImpressionsCache : RedisCacheBase, ISimpleCache<KeyImpression>
+    public class RedisImpressionsCache : RedisCacheBase, IImpressionsCache
     {
         public RedisImpressionsCache(IRedisAdapter redisAdapter, 
             string machineIP, 
@@ -36,6 +35,21 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
 
             return 0;
+        }
+
+        public void RecordUniqueKeys(List<string> uniqueKeys)
+        {
+            var key = "{prefix}.SPLITIO.uniquekeys".Replace("{prefix}.", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
+            var uniques = uniqueKeys.Select(x => (RedisValue)x).ToArray();
+
+            _redisAdapter.SAdd(key, uniques);
+        }
+
+        public void RecordImpressionsCount(Dictionary<string, int> impressionsCount)
+        {
+            var key = "{prefix}.SPLITIO.impressions.count".Replace("{prefix}.", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
+
+            _redisAdapter.HashIncrementAsyncBatch(key, impressionsCount);
         }
     }
 }
