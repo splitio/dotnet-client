@@ -322,6 +322,19 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
         }
 
+        public HashEntry[] HashGetAll(RedisKey key)
+        {
+            try
+            {
+                return _database.HashGetAll(key);
+            }
+            catch (Exception e)
+            {
+                _log.Error("Exception calling Redis Adapter HashGet", e);
+                return new HashEntry[0];
+            }
+        }
+
         public bool HashSet(RedisKey key, RedisValue hashField, RedisValue value)
         {
             try

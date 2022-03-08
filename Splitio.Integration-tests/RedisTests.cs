@@ -193,6 +193,50 @@ namespace Splitio.Integration_tests
             _redisAdapter.Flush();
         }
 
+        [TestMethod]
+        public void GetTreatment_WithImpressionModeOptimized_ShouldGetImpressionCount()
+        {
+            // Arrange.
+            GetHttpClientMock();
+
+            var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
+            configurations.ImpressionsMode = ImpressionsMode.Optimized;
+            var apikey = "apikey1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            client.GetTreatment("mauro_test", "FACUNDO_TEST");
+            client.GetTreatment("nico_test", "FACUNDO_TEST");
+            client.GetTreatment("redo_test", "FACUNDO_TEST");
+            client.GetTreatment("nico_test", "FACUNDO_TEST");
+
+            client.GetTreatment("redo_test", "MAURO_TEST");
+            client.GetTreatment("test_test", "MAURO_TEST");
+            client.GetTreatment("redo_test", "MAURO_TEST");
+
+            client.Destroy();
+            Thread.Sleep(500);
+            var result = _redisAdapter.HashGetAll("SPLITIO.impressions.count");
+            var redisImpressions = _redisAdapter.ListRange("SPLITIO.impressions");
+
+            // Assert.
+            Assert.AreEqual(4, result.FirstOrDefault(x => ((string)x.Name).Contains("FACUNDO_TEST")).Value);
+            Assert.AreEqual(3, result.FirstOrDefault(x => ((string)x.Name).Contains("MAURO_TEST")).Value);
+            Assert.AreEqual(5, redisImpressions.Count());
+
+            Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("FACUNDO_TEST") && ((string)x).Contains("mauro_test")));
+            Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("FACUNDO_TEST") && ((string)x).Contains("nico_test")));
+            Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("FACUNDO_TEST") && ((string)x).Contains("redo_test")));
+            Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("MAURO_TEST") && ((string)x).Contains("redo_test")));
+            Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("MAURO_TEST") && ((string)x).Contains("test_test")));
+
+            _redisAdapter.Flush();
+        }
+
         #region Protected Methods
         protected override ConfigurationOptions GetConfigurationOptions(string url = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)
         {
