@@ -48,7 +48,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             var uniques = uniqueKeys.Select(x => (RedisValue)x).ToArray();
 
-            _redisAdapter.SAdd(UniqueKeysKey, uniques);
+            _redisAdapter.ListRightPush(UniqueKeysKey, uniques);
         }
 
         public void RecordImpressionsCount(Dictionary<string, int> impressionsCount)
