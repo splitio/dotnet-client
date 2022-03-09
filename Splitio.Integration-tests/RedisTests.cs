@@ -348,7 +348,10 @@ namespace Splitio.Integration_tests
 
         private void LoadSplits(string prefix = null)
         {
-            _redisAdapter.Flush();
+            if (!string.IsNullOrEmpty(prefix))
+            {
+                CleanKeys(prefix);
+            }
 
             var splitsJson = File.ReadAllText($"{rootFilePath}split_changes.json");
 
