@@ -183,7 +183,7 @@ namespace Splitio.Integration_tests
 
             client.Destroy();
             Thread.Sleep(500);
-            var result = _redisAdapter.SMembers($"{userPrefix}.SPLITIO.uniquekeys");
+            var result = _redisAdapter.ListRange($"{userPrefix}.SPLITIO.uniquekeys");
 
             // Assert.
             Assert.AreEqual(4, result.Count());
