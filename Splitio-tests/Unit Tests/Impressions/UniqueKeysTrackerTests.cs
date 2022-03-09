@@ -4,8 +4,6 @@ using Splitio.Services.Cache.Filter;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
-using Splitio.Telemetry.Common;
-using Splitio.Telemetry.Domain;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -16,7 +14,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     public class UniqueKeysTrackerTests
     {
         private readonly Mock<IFilterAdapter> _filterAdapter;
-        private readonly Mock<IUniqueKeysSenderAdapter> _senderAdapter;
+        private readonly Mock<IImpressionsSenderAdapter> _senderAdapter;
         private readonly ITasksManager _tasksManager;
         private readonly ConcurrentDictionary<string, HashSet<string>> _cache;
 
@@ -25,7 +23,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public UniqueKeysTrackerTests()
         {
             _filterAdapter = new Mock<IFilterAdapter>();
-            _senderAdapter = new Mock<IUniqueKeysSenderAdapter>();
+            _senderAdapter = new Mock<IImpressionsSenderAdapter>();
             _tasksManager = new TasksManager(new WrapperAdapter());
             _cache = new ConcurrentDictionary<string, HashSet<string>>();
         }

@@ -66,6 +66,7 @@ namespace Splitio.Services.Client.Classes
             BuildSdkApiClients();
             BuildSplitFetcher();            
             BuildTreatmentLog(config);
+            BuildSenderAdapter();
             BuildUniqueKeysTracker();
             BuildImpressionManager();
             BuildEventLog(config);
@@ -133,19 +134,23 @@ namespace Splitio.Services.Client.Classes
             _customerImpressionListener = config.ImpressionListener;
         }
 
+        private void BuildSenderAdapter()
+        {
+            _impressionsSenderAdapter = new InMemorySenderAdapter(_telemetryAPI, _impressionsSdkApiClient);
+        }
+
         private void BuildUniqueKeysTracker()
         {
             var bloomFilter = new BloomFilter(_config.BfExpectedElements, _config.BfErrorRate);
             var adapter = new FilterAdapter(bloomFilter);
             var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
-            var senderAdapter = new InMemoryUniqueKeysSenderAdapter(_telemetryAPI);
             var config = new TrackerConfig
             {
                 CacheMaxSize = _config.UniqueKeysCacheMaxSize,
                 PeriodicTaskIntervalSeconds = _config.UniqueKeysRefreshRate
             };
 
-            _uniqueKeysTracker = new UniqueKeysTracker(config, adapter, trackerCache, senderAdapter, _tasksManager);
+            _uniqueKeysTracker = new UniqueKeysTracker(config, adapter, trackerCache, _impressionsSenderAdapter, _tasksManager);
         }
 
         private void BuildImpressionManager()
@@ -204,7 +209,7 @@ namespace Splitio.Services.Client.Classes
             try
             {
                 // Synchronizer
-                var impressionsCountSender = new ImpressionsCountSender(_impressionsSdkApiClient, _impressionsCounter, _tasksManager);
+                var impressionsCountSender = new ImpressionsCountSender(_impressionsSenderAdapter, _impressionsCounter, _tasksManager);
                 var backOff = new BackOff(backOffBase: 10, attempt: 0, maxAllowed: 60);
                 var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, impressionsCountSender, _wrapperAdapter, _statusManager, _telemetrySyncTask, _tasksManager, _splitCache, backOff, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs, _segmentCache, _uniqueKeysTracker);
 

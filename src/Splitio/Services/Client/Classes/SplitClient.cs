@@ -53,6 +53,7 @@ namespace Splitio.Services.Client.Classes
         protected ITasksManager _tasksManager;
         protected IStatusManager _statusManager;
         protected IUniqueKeysTracker _uniqueKeysTracker;
+        protected IImpressionsSenderAdapter _impressionsSenderAdapter;
 
         public SplitClient(ISplitLogger log)
         {

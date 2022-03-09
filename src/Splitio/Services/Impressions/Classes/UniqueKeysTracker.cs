@@ -17,7 +17,7 @@ namespace Splitio.Services.Impressions.Classes
 
         private readonly IFilterAdapter _filterAdapter;
         private readonly ConcurrentDictionary<string, HashSet<string>> _cache;
-        private readonly IUniqueKeysSenderAdapter _senderAdapter;
+        private readonly IImpressionsSenderAdapter _senderAdapter;
         private readonly ITasksManager _tasksManager;
         private readonly int _interval;
         private readonly int _cacheMaxSize;
@@ -31,7 +31,7 @@ namespace Splitio.Services.Impressions.Classes
         public UniqueKeysTracker(TrackerConfig config,
             IFilterAdapter filterAdapter,
             ConcurrentDictionary<string, HashSet<string>> cache,
-            IUniqueKeysSenderAdapter senderAdapter,
+            IImpressionsSenderAdapter senderAdapter,
             ITasksManager tasksManager)
         {
             _filterAdapter = filterAdapter;

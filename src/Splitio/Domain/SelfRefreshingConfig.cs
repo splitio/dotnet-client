@@ -18,7 +18,6 @@ namespace Splitio.Domain
         public int AuthRetryBackoffBase { get; set; }
         public int StreamingReconnectBackoffBase { get; set; }
         public IImpressionListener ImpressionListener { get; set; }
-        public ImpressionsMode ImpressionsMode { get; set; }
         public long SdkStartTime { get; set; }
         public int OnDemandFetchRetryDelayMs { get; set; }
         public int OnDemandFetchMaxRetries { get; set; }

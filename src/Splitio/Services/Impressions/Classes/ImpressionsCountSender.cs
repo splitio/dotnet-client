@@ -1,5 +1,4 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Services.Impressions.Interfaces;
+﻿using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
@@ -14,7 +13,7 @@ namespace Splitio.Services.Impressions.Classes
 
         protected static readonly ISplitLogger Logger = WrapperAdapter.GetLogger(typeof(ImpressionsCountSender));
 
-        private readonly IImpressionsSdkApiClient _apiClient;
+        private readonly IImpressionsSenderAdapter _senderAdapter;
         private readonly IImpressionsCounter _impressionsCounter;
         private readonly ITasksManager _tasksManager;
         private readonly CancellationTokenSource _cancellationTokenSource;
@@ -23,12 +22,12 @@ namespace Splitio.Services.Impressions.Classes
 
         private bool _running;
 
-        public ImpressionsCountSender(IImpressionsSdkApiClient apiClient,
+        public ImpressionsCountSender(IImpressionsSenderAdapter senderAdapter,
             IImpressionsCounter impressionsCounter,
             ITasksManager tasksManager,
             int? interval = null)
         {
-            _apiClient = apiClient;
+            _senderAdapter = senderAdapter;
             _impressionsCounter = impressionsCounter;            
             _cancellationTokenSource = new CancellationTokenSource();
             _interval = interval ?? CounterRefreshRateSeconds;
@@ -43,7 +42,7 @@ namespace Splitio.Services.Impressions.Classes
                 if (_running) return;
 
                 _running = true;
-                _tasksManager.StartPeriodic(() => SendBulkImpressionsCount(), CounterRefreshRateSeconds * 1000, _cancellationTokenSource, "Main Impressions Count.");
+                _tasksManager.StartPeriodic(() => SendBulkImpressionsCount(), _interval * 1000, _cancellationTokenSource, "Main Impressions Count Sender.");
             }
         }
 
@@ -67,7 +66,7 @@ namespace Splitio.Services.Impressions.Classes
             {
                 try
                 {
-                    _apiClient.SendBulkImpressionsCount(impressions);
+                    _senderAdapter.RecordImpressionsCount(impressions);
                 }
                 catch (Exception e)
                 {
