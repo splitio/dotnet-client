@@ -31,7 +31,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             var impressions = items.Select(item => JsonConvert.SerializeObject(new
             {
                 m = new { s = SdkVersion, i = MachineIp, n = MachineName },
-                i = new { k = item.keyName, b = item.bucketingKey, f = item.feature, t = item.treatment, r = item.label, c = item.changeNumber, m = item.time }
+                i = new { k = item.keyName, b = item.bucketingKey, f = item.feature, t = item.treatment, r = item.label, c = item.changeNumber, m = item.time, pt = item.previousTime }
             }));
 
             var lengthRedis = _redisAdapter.ListRightPush(ImpressionsKey, impressions.Select(i => (RedisValue)i).ToArray());
@@ -48,7 +48,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             var uniques = uniqueKeys.Select(x => (RedisValue)x).ToArray();
 
-            _redisAdapter.SAdd(UniqueKeysKey, uniques);
+            _redisAdapter.ListRightPush(UniqueKeysKey, uniques);
         }
 
         public void RecordImpressionsCount(Dictionary<string, int> impressionsCount)

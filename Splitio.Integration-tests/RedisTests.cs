@@ -20,6 +20,7 @@ namespace Splitio.Integration_tests
         private const string Port = "6379";
         private const string Password = "";
         private const int Database = 0;
+        private const string UserPrefix = "prefix-test";
 
         private readonly IRedisAdapter _redisAdapter;
         private readonly string rootFilePath;
@@ -40,7 +41,8 @@ namespace Splitio.Integration_tests
         public void CheckingMachineIpAndMachineName_WithIPAddressesEnabled_ReturnsIpAndName()
         {
             // Arrange.
-            GetHttpClientMock();
+            LoadSplits();
+
             var configurations = GetConfigurationOptions();
 
             var apikey = "apikey1";
@@ -74,7 +76,7 @@ namespace Splitio.Integration_tests
 
             // Events 
             var sdkVersion = string.Empty;
-            var redisEvents = _redisAdapter.ListRange("SPLITIO.events");
+            var redisEvents = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.events");
 
             foreach (var item in redisEvents)
             {
@@ -87,21 +89,23 @@ namespace Splitio.Integration_tests
             }
 
             // Metrics
-            var keys = _redisAdapter.Keys($"SPLITIO/{sdkVersion}/*");
+            var keys = _redisAdapter.Keys($"{UserPrefix}.SPLITIO/{sdkVersion}/*");
 
             foreach (var key in keys)
             {
                 Assert.IsFalse(key.ToString().Contains("/NA/"));
             }
 
-            _redisAdapter.Flush();
+            CleanKeys();
         }
 
         [TestMethod]
         public void CheckingMachineIpAndMachineName_WithIPAddressesDisabled_ReturnsNA()
         {
             // Arrange.
-            GetHttpClientMock();
+            
+            LoadSplits();
+
             var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
 
             var apikey = "apikey1";
@@ -123,7 +127,7 @@ namespace Splitio.Integration_tests
             Thread.Sleep(1500);
 
             // Impressions
-            var redisImpressions = _redisAdapter.ListRange("SPLITIO.impressions");
+            var redisImpressions = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.impressions");
 
             foreach (var item in redisImpressions)
             {
@@ -135,7 +139,7 @@ namespace Splitio.Integration_tests
 
             // Events 
             var sdkVersion = string.Empty;
-            var redisEvents = _redisAdapter.ListRange("SPLITIO.events");
+            var redisEvents = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.events");
 
             foreach (var item in redisEvents)
             {
@@ -148,24 +152,26 @@ namespace Splitio.Integration_tests
             }
 
             // Metrics
-            var keys = _redisAdapter.Keys($"SPLITIO/{sdkVersion}/*");
+            var keys = _redisAdapter.Keys($"{UserPrefix}.SPLITIO/{sdkVersion}/*");
 
             foreach (var key in keys)
             {
                 Assert.IsTrue(key.ToString().Contains("/NA/"));
             }
 
-            _redisAdapter.Flush();
+            CleanKeys();
         }
 
         [TestMethod]
         public void GetTreatment_WithImpressionModeInNone_ShouldGetUniqueKeys()
         {
             // Arrange.
-            GetHttpClientMock();
             
+            LoadSplits();
+
             var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
             configurations.ImpressionsMode = ImpressionsMode.None;
+
             var apikey = "apikey1";
 
             var splitFactory = new SplitFactory(apikey, configurations);
@@ -181,7 +187,7 @@ namespace Splitio.Integration_tests
 
             client.Destroy();
             Thread.Sleep(500);
-            var result = _redisAdapter.SMembers("SPLITIO.uniquekeys");
+            var result = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.uniquekeys");
 
             // Assert.
             Assert.AreEqual(4, result.Count());
@@ -190,7 +196,53 @@ namespace Splitio.Integration_tests
             Assert.IsTrue(result.Contains("FACUNDO_TEST::redo_test"));
             Assert.IsTrue(result.Contains("MAURO_TEST::redo_test"));
 
-            _redisAdapter.Flush();
+            CleanKeys();
+        }
+
+        [TestMethod]
+        public void GetTreatment_WithImpressionModeOptimized_ShouldGetImpressionCount()
+        {
+            // Arrange.
+            
+            LoadSplits();
+
+            var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
+            configurations.ImpressionsMode = ImpressionsMode.Optimized;
+
+            var apikey = "apikey1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            client.GetTreatment("mauro_test", "FACUNDO_TEST");
+            client.GetTreatment("nico_test", "FACUNDO_TEST");
+            client.GetTreatment("redo_test", "FACUNDO_TEST");
+            client.GetTreatment("nico_test", "FACUNDO_TEST");
+
+            client.GetTreatment("redo_test", "MAURO_TEST");
+            client.GetTreatment("test_test", "MAURO_TEST");
+            client.GetTreatment("redo_test", "MAURO_TEST");
+
+            client.Destroy();
+            Thread.Sleep(500);
+            var result = _redisAdapter.HashGetAll($"{UserPrefix}.SPLITIO.impressions.count");
+            var redisImpressions = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.impressions");
+
+            // Assert.
+            Assert.AreEqual(4, result.FirstOrDefault(x => ((string)x.Name).Contains("FACUNDO_TEST")).Value);
+            Assert.AreEqual(3, result.FirstOrDefault(x => ((string)x.Name).Contains("MAURO_TEST")).Value);
+            Assert.AreEqual(5, redisImpressions.Count());
+
+            Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("FACUNDO_TEST") && ((string)x).Contains("mauro_test")));
+            Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("FACUNDO_TEST") && ((string)x).Contains("nico_test")));
+            Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("FACUNDO_TEST") && ((string)x).Contains("redo_test")));
+            Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("MAURO_TEST") && ((string)x).Contains("redo_test")));
+            Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("MAURO_TEST") && ((string)x).Contains("test_test")));
+
+            CleanKeys();
         }
 
         #region Protected Methods
@@ -201,8 +253,9 @@ namespace Splitio.Integration_tests
                 Host = Host,
                 Port = Port,
                 Password = Password,
-                Database = Database                
-            };            
+                Database = Database,
+                UserPrefix = UserPrefix
+            };
 
             return new ConfigurationOptions
             {
@@ -228,7 +281,7 @@ namespace Splitio.Integration_tests
         {
             Thread.Sleep(1500);
 
-            var redisImpressions = _redisAdapter.ListRange("SPLITIO.impressions");
+            var redisImpressions = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.impressions");
 
             Assert.AreEqual(sentImpressionsCount, redisImpressions.Length);
 
@@ -244,7 +297,7 @@ namespace Splitio.Integration_tests
         {
             Thread.Sleep(sleepTime);
 
-            var redisEvents = _redisAdapter.ListRange("SPLITIO.events");
+            var redisEvents = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.events");
 
             Assert.AreEqual(eventsExcpected.Count, redisEvents.Length);
 
@@ -257,7 +310,17 @@ namespace Splitio.Integration_tests
         }
         #endregion
 
-        #region Private Methods        
+        #region Private Methods
+        private void CleanKeys(string pattern = UserPrefix)
+        {
+            var keys = _redisAdapter.Keys($"{pattern}*");
+
+            foreach (var k in keys)
+            {
+                _redisAdapter.Del(k);
+            }
+        }
+
         private void AssertImpression(KeyImpressionRedis impressionActual, List<KeyImpression> sentImpressions)
         {
             Assert.IsFalse(string.IsNullOrEmpty(impressionActual.M.I));
@@ -290,18 +353,15 @@ namespace Splitio.Integration_tests
 
         private void LoadSplits()
         {
-            _redisAdapter.Flush();
+            CleanKeys(UserPrefix);
 
             var splitsJson = File.ReadAllText($"{rootFilePath}split_changes.json");
-            var segmentJson1 = File.ReadAllText($"{rootFilePath}split_segment1.json");
-            var segmentJson2 = File.ReadAllText($"{rootFilePath}split_segment2.json");
-            var segmentJson3 = File.ReadAllText($"{rootFilePath}split_segment3.json");
 
             var splitResult = JsonConvert.DeserializeObject<SplitChangesResult>(splitsJson);
 
             foreach (var split in splitResult.splits)
             {
-                _redisAdapter.Set($"SPLITIO.split.{split.name}", JsonConvert.SerializeObject(split));
+                _redisAdapter.Set($"{UserPrefix}.SPLITIO.split.{split.name}", JsonConvert.SerializeObject(split));
             }
         }
         #endregion
