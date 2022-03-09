@@ -7,15 +7,13 @@ using Splitio.Redis.Services.Impressions.Classes;
 using Splitio.Redis.Services.Parsing.Classes;
 using Splitio.Redis.Services.Shared;
 using Splitio.Redis.Telemetry.Storages;
-using Splitio.Services.Cache.Filter;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Classes;
+using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Client.Classes
@@ -25,6 +23,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private readonly RedisConfig _config;
 
         private IRedisAdapter _redisAdapter;
+        private IImpressionsCache _impressionsCache;
 
         public RedisClient(ConfigurationOptions config,
             string apiKey,
@@ -36,13 +35,20 @@ namespace Splitio.Redis.Services.Client.Classes
             ReadConfig(config);
             BuildRedisCache();
             BuildTelemetryStorage();
-            BuildTreatmentLog(config);
-            BuildUniqueKeysTracker();
+            BuildTreatmentLog(config.ImpressionListener);
+
+            BuildSenderAdapter();
+            BuildUniqueKeysTracker(_config);
+            BuildImpressionsCounter(_config);
+            BuildImpressionsObserver();
             BuildImpressionManager();
+
             BuildEventLog();
             BuildBlockUntilReadyService();
             BuildManager();
             BuildEvaluator();
+
+            Start();
         }
 
         public override void Destroy()
@@ -50,6 +56,7 @@ namespace Splitio.Redis.Services.Client.Classes
             if (_statusManager.IsDestroyed()) return;
 
             _uniqueKeysTracker.Stop();
+            _impressionCounterSender.Stop();
             base.Destroy();
         }
 
@@ -65,6 +72,7 @@ namespace Splitio.Redis.Services.Client.Classes
             _config.UniqueKeysRefreshRate = baseConfig.UniqueKeysRefreshRate;
             _config.UniqueKeysCacheMaxSize = baseConfig.UniqueKeysCacheMaxSize;
             _config.ImpressionsMode = baseConfig.ImpressionsMode;
+            _config.ImpressionsCounterRefreshRate = baseConfig.ImpressionsCounterRefreshRate;
             LabelsEnabled = baseConfig.LabelsEnabled;
 
             _config.RedisHost = config.CacheAdapterConfig.Host;
@@ -95,35 +103,35 @@ namespace Splitio.Redis.Services.Client.Classes
             _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
         }
 
-        private void BuildTreatmentLog(ConfigurationOptions config)
+        private void BuildTreatmentLog(IImpressionListener impressionListener)
         {
-            var impressionsCache = new RedisImpressionsCache(_redisAdapter, _config.SdkMachineIP, _config.SdkVersion, _config.SdkMachineName, _config.RedisUserPrefix);
-            _impressionsLog = new RedisImpressionLog(impressionsCache);
-
-            _customerImpressionListener = config.ImpressionListener;
+            _impressionsCache = new RedisImpressionsCache(_redisAdapter, _config.SdkMachineIP, _config.SdkVersion, _config.SdkMachineName, _config.RedisUserPrefix);
+            _impressionsLog = new RedisImpressionLog(_impressionsCache);
+            _customerImpressionListener = impressionListener;
         }
 
-        private void BuildUniqueKeysTracker()
+        private void BuildSenderAdapter()
         {
-            var bloomFilter = new BloomFilter(_config.BfExpectedElements, _config.BfErrorRate);
-            var adapter = new FilterAdapter(bloomFilter);
-            var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
-            var uniqueStorage = new RedisUniqueKeysStorage(_redisAdapter, _config.RedisUserPrefix);
-            var senderAdapter = new RedisUniqueKeysSenderAdapter(uniqueStorage);
-            var config = new TrackerConfig
-            {
-                CacheMaxSize = _config.UniqueKeysCacheMaxSize,
-                PeriodicTaskIntervalSeconds = _config.UniqueKeysRefreshRate
-            };
+            _impressionsSenderAdapter = new RedisSenderAdapter(_impressionsCache);
+        }
 
-            _uniqueKeysTracker = new UniqueKeysTracker(config, adapter, trackerCache, senderAdapter, _tasksManager);
-            _uniqueKeysTracker.Start();
+        private void BuildImpressionsObserver()
+        {
+            if (_config.ImpressionsMode != ImpressionsMode.Optimized)
+            {
+                _impressionsObserver = new NoopImpressionsObserver();
+                return;
+            }
+
+            var impressionHasher = new ImpressionHasher();
+            _impressionsObserver = new ImpressionsObserver(impressionHasher);
         }
 
         private void BuildImpressionManager()
         {
-            var impressionsCounter = new ImpressionsCounter();
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, false, _config.ImpressionsMode, telemetryRuntimeProducer: null, taskManager: _tasksManager, uniqueKeysTracker: _uniqueKeysTracker);
+            var shouldCalculatePreviousTime = _config.ImpressionsMode == ImpressionsMode.Optimized;
+
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, shouldCalculatePreviousTime, _config.ImpressionsMode, null, _tasksManager, _uniqueKeysTracker, _impressionsObserver);
         }
 
         private void BuildEventLog()
@@ -161,6 +169,12 @@ namespace Splitio.Redis.Services.Client.Classes
             };
 
             _telemetryInitProducer.RecordConfigInit(config);
+        }
+
+        private void Start()
+        {
+            _uniqueKeysTracker.Start();
+            _impressionCounterSender.Start();
         }
 
         private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)

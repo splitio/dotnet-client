@@ -16,6 +16,7 @@ namespace Splitio.Domain
 
         // Rates
         public int UniqueKeysRefreshRate { get; set; }
+        public int ImpressionsCounterRefreshRate { get; set; }
 
         // Cache Max Size Allowed
         public int UniqueKeysCacheMaxSize { get; set; }

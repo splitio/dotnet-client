@@ -34,8 +34,8 @@ namespace Splitio.Services.Impressions.Classes
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
             ITasksManager taskManager,
             IUniqueKeysTracker uniqueKeysTracker,
-            IImpressionsObserver impressionsObserver = null)
-        {            
+            IImpressionsObserver impressionsObserver)
+        {
             _impressionsLog = impressionsLog;
             _customerImpressionListener = customerImpressionListener;
             _impressionsCounter = impressionsCounter;
@@ -58,24 +58,18 @@ namespace Splitio.Services.Impressions.Classes
                 switch (_impressionsMode)
                 {
                     // In DEBUG mode we should calculate the pt only. 
-                    case ImpressionsMode.Debug: 
-                        if (_addPreviousTime && _impressionsObserver != null)
-                        {
-                            impression.previousTime = _impressionsObserver.TestAndSet(impression);
-                        }
+                    case ImpressionsMode.Debug:
+                        ShouldCalculatePreviousTime(impression);
                         break;
                     // In NONE mode we should track the total amount of evaluations and the unique keys.
-                    case ImpressionsMode.None:   
+                    case ImpressionsMode.None:
                         _impressionsCounter.Inc(feature, time);
                         _uniqueKeysTracker.Track(matchingKey, feature);
                         break;
                     // In OPTIMIZED mode we should track the total amount of evaluations and deduplicate the impressions.
                     case ImpressionsMode.Optimized:
                     default:
-                        if (_addPreviousTime && _impressionsObserver != null)
-                        {
-                            impression.previousTime = _impressionsObserver.TestAndSet(impression);
-                        }
+                        ShouldCalculatePreviousTime(impression);
 
                         _impressionsCounter.Inc(feature, time);
                         impression.Optimized = ShouldQueueImpression(impression);
@@ -173,6 +167,11 @@ namespace Splitio.Services.Impressions.Classes
         {
             telemetryStats.Dropped = _impressionsLog.Log(impressions);
             telemetryStats.Queued = impressions.Count - telemetryStats.Dropped;
+        }
+
+        private void ShouldCalculatePreviousTime(KeyImpression impression)
+        {
+            if (_addPreviousTime) impression.previousTime = _impressionsObserver.TestAndSet(impression);
         }
         #endregion
     }

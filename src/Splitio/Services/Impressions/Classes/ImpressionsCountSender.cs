@@ -8,9 +8,6 @@ namespace Splitio.Services.Impressions.Classes
 {
     public class ImpressionsCountSender : IImpressionsCountSender
     {
-        // Send bulk impressions count - Refresh rate: 30 min.
-        private const int CounterRefreshRateSeconds = 1800;
-
         protected static readonly ISplitLogger Logger = WrapperAdapter.GetLogger(typeof(ImpressionsCountSender));
 
         private readonly IImpressionsSenderAdapter _senderAdapter;
@@ -25,12 +22,12 @@ namespace Splitio.Services.Impressions.Classes
         public ImpressionsCountSender(IImpressionsSenderAdapter senderAdapter,
             IImpressionsCounter impressionsCounter,
             ITasksManager tasksManager,
-            int? interval = null)
+            int interval)
         {
             _senderAdapter = senderAdapter;
             _impressionsCounter = impressionsCounter;            
             _cancellationTokenSource = new CancellationTokenSource();
-            _interval = interval ?? CounterRefreshRateSeconds;
+            _interval = interval;
             _running = false;
             _tasksManager = tasksManager;
         }

@@ -1,5 +1,6 @@
 ﻿using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
 
 namespace Splitio.Redis.Services.Cache.Interfaces
 {
@@ -46,5 +47,7 @@ namespace Splitio.Redis.Services.Cache.Interfaces
         double HashIncrement(string key, string field, double value);
 
         bool HashSet(RedisKey key, RedisValue hashField, RedisValue value);
+
+        void HashIncrementAsyncBatch(string key, Dictionary<string, int> values);
     }
 }

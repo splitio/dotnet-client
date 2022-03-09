@@ -67,7 +67,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             impressionsCounter.Inc("feature2", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 50, 11, DateTimeKind.Utc)));
             impressionsCounter.Inc("feature3", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 10, 50, 11, DateTimeKind.Utc)));
 
-            var impressionsCountSender = new ImpressionsCountSender(_senderAdapter.Object, impressionsCounter, new TasksManager(wrapperAdapter));
+            var impressionsCountSender = new ImpressionsCountSender(_senderAdapter.Object, impressionsCounter, new TasksManager(wrapperAdapter), 100);
 
             // Act.
             impressionsCountSender.Start();
