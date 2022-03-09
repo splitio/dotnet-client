@@ -162,10 +162,12 @@ namespace Splitio.Integration_tests
         public void GetTreatment_WithImpressionModeInNone_ShouldGetUniqueKeys()
         {
             // Arrange.
-            GetHttpClientMock();
-            
+            var userPrefix = "prefix-test";
+            LoadSplits(userPrefix);
+
             var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
             configurations.ImpressionsMode = ImpressionsMode.None;
+            configurations.CacheAdapterConfig.UserPrefix = userPrefix;
             var apikey = "apikey1";
 
             var splitFactory = new SplitFactory(apikey, configurations);
@@ -181,7 +183,7 @@ namespace Splitio.Integration_tests
 
             client.Destroy();
             Thread.Sleep(500);
-            var result = _redisAdapter.SMembers("SPLITIO.uniquekeys");
+            var result = _redisAdapter.SMembers($"{userPrefix}.SPLITIO.uniquekeys");
 
             // Assert.
             Assert.AreEqual(4, result.Count());
@@ -190,17 +192,19 @@ namespace Splitio.Integration_tests
             Assert.IsTrue(result.Contains("FACUNDO_TEST::redo_test"));
             Assert.IsTrue(result.Contains("MAURO_TEST::redo_test"));
 
-            _redisAdapter.Flush();
+            CleanKeys(userPrefix);
         }
 
         [TestMethod]
         public void GetTreatment_WithImpressionModeOptimized_ShouldGetImpressionCount()
         {
             // Arrange.
-            GetHttpClientMock();
+            var userPrefix = "prefix-test";
+            LoadSplits(userPrefix);
 
             var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
             configurations.ImpressionsMode = ImpressionsMode.Optimized;
+            configurations.CacheAdapterConfig.UserPrefix = userPrefix;
             var apikey = "apikey1";
 
             var splitFactory = new SplitFactory(apikey, configurations);
@@ -220,8 +224,8 @@ namespace Splitio.Integration_tests
 
             client.Destroy();
             Thread.Sleep(500);
-            var result = _redisAdapter.HashGetAll("SPLITIO.impressions.count");
-            var redisImpressions = _redisAdapter.ListRange("SPLITIO.impressions");
+            var result = _redisAdapter.HashGetAll($"{userPrefix}.SPLITIO.impressions.count");
+            var redisImpressions = _redisAdapter.ListRange($"{userPrefix}.SPLITIO.impressions");
 
             // Assert.
             Assert.AreEqual(4, result.FirstOrDefault(x => ((string)x.Name).Contains("FACUNDO_TEST")).Value);
@@ -234,7 +238,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("MAURO_TEST") && ((string)x).Contains("redo_test")));
             Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("MAURO_TEST") && ((string)x).Contains("test_test")));
 
-            _redisAdapter.Flush();
+            CleanKeys(userPrefix);
         }
 
         #region Protected Methods
@@ -301,7 +305,17 @@ namespace Splitio.Integration_tests
         }
         #endregion
 
-        #region Private Methods        
+        #region Private Methods
+        private void CleanKeys(string pattern)
+        {
+            var keys = _redisAdapter.Keys($"{pattern}*");
+
+            foreach (var k in keys)
+            {
+                _redisAdapter.Del(k);
+            }
+        }
+
         private void AssertImpression(KeyImpressionRedis impressionActual, List<KeyImpression> sentImpressions)
         {
             Assert.IsFalse(string.IsNullOrEmpty(impressionActual.M.I));
@@ -332,20 +346,20 @@ namespace Splitio.Integration_tests
                 .Any());
         }
 
-        private void LoadSplits()
+        private void LoadSplits(string prefix = null)
         {
             _redisAdapter.Flush();
 
             var splitsJson = File.ReadAllText($"{rootFilePath}split_changes.json");
-            var segmentJson1 = File.ReadAllText($"{rootFilePath}split_segment1.json");
-            var segmentJson2 = File.ReadAllText($"{rootFilePath}split_segment2.json");
-            var segmentJson3 = File.ReadAllText($"{rootFilePath}split_segment3.json");
 
             var splitResult = JsonConvert.DeserializeObject<SplitChangesResult>(splitsJson);
 
+            var key = "{prefix}.SPLITIO.split"
+                .Replace("{prefix}.", string.IsNullOrEmpty(prefix) ? string.Empty : $"{prefix}.");
+
             foreach (var split in splitResult.splits)
             {
-                _redisAdapter.Set($"SPLITIO.split.{split.name}", JsonConvert.SerializeObject(split));
+                _redisAdapter.Set($"{key}.{split.name}", JsonConvert.SerializeObject(split));
             }
         }
         #endregion
