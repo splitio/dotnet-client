@@ -111,12 +111,11 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
         public void RecordUniqueKeys()
         {
             // Arrange.
-            var values = new ConcurrentDictionary<string, HashSet<string>>();
-            values.TryAdd("feature-01", new HashSet<string> { "key-01", "key-02", "key-03", "key-04" });
+            var values = new List<Mtks> { new Mtks("feature-01", new HashSet<string> { "key-01", "key-02", "key-03", "key-04" }) };
 
             var uniqueKeys = new UniqueKeys(values);
 
-            var data = "{\"mtks\":[{\"feature\":\"feature-01\",\"keys\":[\"key-01\",\"key-02\",\"key-03\",\"key-04\"]}]}";
+            var data = "{\"mtks\":[{\"f\":\"feature-01\",\"k\":[\"key-01\",\"key-02\",\"key-03\",\"key-04\"]}]}";
             _splitioHttpClient
                 .Setup(mock => mock.PostAsync("www.fake-url.com/mtks/bulk", data))
                 .ReturnsAsync(new HTTPResult

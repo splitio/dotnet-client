@@ -1,7 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Splitio.Telemetry.Domain
 {
@@ -10,19 +8,17 @@ namespace Splitio.Telemetry.Domain
         [JsonProperty("mtks")]
         public List<Mtks> Mtks { get; }
 
-        public UniqueKeys(ConcurrentDictionary<string, HashSet<string>> values)
+        public UniqueKeys(List<Mtks> values)
         {
-            Mtks = values
-                .Select(v => new Mtks(v.Key, v.Value))
-                .ToList();
+            Mtks = values;
         }
     }
 
     public class Mtks
     {
-        [JsonProperty("feature")]
+        [JsonProperty("f")]
         public string Feature { get; }
-        [JsonProperty("keys")]
+        [JsonProperty("k")]
         public HashSet<string> Keys { get; }
 
         public Mtks(string feature, HashSet<string> keys)

@@ -162,7 +162,7 @@ namespace Splitio.Services.Client.Classes
         {
             var eventsCache = new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(_config.EventLogSize));
             _eventsLog = new EventsLog(_eventSdkApiClient, _config.EventsFirstPushWindow, _config.EventLogRefreshRate, eventsCache, _telemetryRuntimeProducer, _tasksManager);
-        }        
+        }
 
         private int Random(int refreshRate)
         {
@@ -206,7 +206,7 @@ namespace Splitio.Services.Client.Classes
             {
                 // Synchronizer
                 var backOff = new BackOff(backOffBase: 10, attempt: 0, maxAllowed: 60);
-                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _impressionCounterSender, _wrapperAdapter, _statusManager, _telemetrySyncTask, _tasksManager, _splitCache, backOff, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs, _segmentCache, _uniqueKeysTracker);
+                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _impressionsCounter, _wrapperAdapter, _statusManager, _telemetrySyncTask, _tasksManager, _splitCache, backOff, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs, _segmentCache, _uniqueKeysTracker);
 
                 // Workers
                 var splitsWorker = new SplitsWorker(_splitCache, synchronizer, _tasksManager);

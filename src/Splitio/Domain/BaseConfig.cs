@@ -1,6 +1,4 @@
-﻿using Splitio.Services.Impressions.Interfaces;
-
-namespace Splitio.Domain
+﻿namespace Splitio.Domain
 {
     public class BaseConfig
     {
@@ -20,5 +18,10 @@ namespace Splitio.Domain
 
         // Cache Max Size Allowed
         public int UniqueKeysCacheMaxSize { get; set; }
+        public int ImpressionsCounterCacheMaxSize { get; set; }
+
+        // Sender Bulk size
+        public int UniqueKeysBulkSize { get; set; }
+        public int ImpressionsCountBulkSize { get; set; }
     }
 }

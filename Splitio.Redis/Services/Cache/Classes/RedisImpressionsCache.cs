@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Telemetry.Domain;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -44,16 +45,26 @@ namespace Splitio.Redis.Services.Cache.Classes
             return 0;
         }
 
-        public void RecordUniqueKeys(List<string> uniqueKeys)
+        public void RecordUniqueKeys(List<Mtks> uniqueKeys)
         {
-            var uniques = uniqueKeys.Select(x => (RedisValue)x).ToArray();
+            var uniques = uniqueKeys.Select(i => JsonConvert.SerializeObject(i)); ;
 
-            _redisAdapter.ListRightPush(UniqueKeysKey, uniques);
+            var lengthRedis = _redisAdapter.ListRightPush(UniqueKeysKey, uniques.Select(i => (RedisValue)i).ToArray());
+
+            if (lengthRedis == uniqueKeys.Count)
+            {
+                _redisAdapter.KeyExpire(UniqueKeysKey, new TimeSpan(0, 0, 3600));
+            }
         }
 
         public void RecordImpressionsCount(Dictionary<string, int> impressionsCount)
         {
-            _redisAdapter.HashIncrementAsyncBatch(ImpressionsCountKey, impressionsCount);
+            var result = _redisAdapter.HashIncrementAsyncBatch(ImpressionsCountKey, impressionsCount);
+
+            if (result == impressionsCount.Sum(i => i.Value))
+            {
+                _redisAdapter.KeyExpire(UniqueKeysKey, new TimeSpan(0, 0, 3600));
+            }
         }
     }
 }

@@ -3,8 +3,8 @@ using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Telemetry.Domain;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Splitio.Redis.Services.Impressions.Classes
@@ -20,23 +20,11 @@ namespace Splitio.Redis.Services.Impressions.Classes
             _impressionsCache = impressionsCache;
         }
 
-        public void RecordUniqueKeys(ConcurrentDictionary<string, HashSet<string>> uniques)
+        public void RecordUniqueKeys(List<Mtks> uniques)
         {
             try
             {
-                var values = new List<string>();
-
-                var featureNames = uniques.Keys;
-
-                foreach (var unique in uniques)
-                {
-                    foreach (var key in unique.Value)
-                    {
-                        values.Add($"{unique.Key}::{key}");
-                    }
-                }
-
-                _impressionsCache.RecordUniqueKeys(values);
+                _impressionsCache.RecordUniqueKeys(uniques);
             }
             catch (Exception ex)
             {
@@ -44,7 +32,7 @@ namespace Splitio.Redis.Services.Impressions.Classes
             }
         }
 
-        public void RecordImpressionsCount(ConcurrentDictionary<KeyCache, int> impressionsCount)
+        public void RecordImpressionsCount(List<ImpressionsCountModel> impressionsCount)
         {
             try
             {
@@ -52,7 +40,7 @@ namespace Splitio.Redis.Services.Impressions.Classes
 
                 foreach (var item in impressionsCount)
                 {
-                    values.Add($"{item.Key.SplitName}::{item.Key.TimeFrame}", item.Value);
+                    values.Add($"{item.SplitName}::{item.TimeFrame}", item.Count);
                 }
 
                 _impressionsCache.RecordImpressionsCount(values);

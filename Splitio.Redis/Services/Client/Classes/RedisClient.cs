@@ -14,7 +14,6 @@ using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
-using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Client.Classes
 {
@@ -56,7 +55,7 @@ namespace Splitio.Redis.Services.Client.Classes
             if (_statusManager.IsDestroyed()) return;
 
             _uniqueKeysTracker.Stop();
-            _impressionCounterSender.Stop();
+            _impressionsCounter.Stop();
             base.Destroy();
         }
 
@@ -69,10 +68,17 @@ namespace Splitio.Redis.Services.Client.Classes
             _config.SdkMachineIP = baseConfig.SdkMachineIP;
             _config.BfExpectedElements = baseConfig.BfExpectedElements;
             _config.BfErrorRate = baseConfig.BfErrorRate;
+
             _config.UniqueKeysRefreshRate = baseConfig.UniqueKeysRefreshRate;
             _config.UniqueKeysCacheMaxSize = baseConfig.UniqueKeysCacheMaxSize;
+            _config.UniqueKeysBulkSize = baseConfig.UniqueKeysBulkSize;
+
             _config.ImpressionsMode = baseConfig.ImpressionsMode;
+
             _config.ImpressionsCounterRefreshRate = baseConfig.ImpressionsCounterRefreshRate;
+            _config.ImpressionsCounterCacheMaxSize = baseConfig.ImpressionsCounterCacheMaxSize;
+            _config.ImpressionsCountBulkSize = baseConfig.ImpressionsCountBulkSize;
+
             LabelsEnabled = baseConfig.LabelsEnabled;
 
             _config.RedisHost = config.CacheAdapterConfig.Host;
@@ -91,11 +97,11 @@ namespace Splitio.Redis.Services.Client.Classes
         {
             _redisAdapter = new RedisAdapter(_config.RedisHost, _config.RedisPort, _config.RedisPassword, _config.RedisDatabase, _config.RedisConnectTimeout, _config.RedisConnectRetry, _config.RedisSyncTimeout, _config.TlsConfig);
 
-            Task.Factory.StartNew(() =>
+            _tasksManager.Start(()=>
             {
                 _redisAdapter.Connect();
                 RecordConfigInit();
-            });
+            }, "Redis Adapter Connect.");
 
             _segmentCache = new RedisSegmentCache(_redisAdapter, _config.RedisUserPrefix);
             _splitParser = new RedisSplitParser(_segmentCache);
@@ -174,7 +180,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private void Start()
         {
             _uniqueKeysTracker.Start();
-            _impressionCounterSender.Start();
+            _impressionsCounter.Start();
         }
 
         private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)

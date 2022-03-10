@@ -24,7 +24,7 @@ namespace Splitio.Services.Common
         private readonly IEventsLog _eventsLog;
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISplitLogger _log;
-        private readonly IImpressionsCountSender _impressionsCountSender;
+        private readonly IImpressionsCounter _impressionsCounter;
         private readonly IStatusManager _statusManager;
         private readonly ITelemetrySyncTask _telemetrySyncTask;
         private readonly ITasksManager _tasksManager;
@@ -41,7 +41,7 @@ namespace Splitio.Services.Common
             ISelfRefreshingSegmentFetcher segmentFetcher,
             IImpressionsLog impressionsLog,
             IEventsLog eventsLog,
-            IImpressionsCountSender impressionsCountSender,
+            IImpressionsCounter impressionsCounter,
             IWrapperAdapter wrapperAdapter,
             IStatusManager statusManager,
             ITelemetrySyncTask telemetrySyncTask,
@@ -58,7 +58,7 @@ namespace Splitio.Services.Common
             _segmentFetcher = segmentFetcher;
             _impressionsLog = impressionsLog;
             _eventsLog = eventsLog;
-            _impressionsCountSender = impressionsCountSender;            
+            _impressionsCounter = impressionsCounter;            
             _wrapperAdapter = wrapperAdapter;
             _statusManager = statusManager;
             _telemetrySyncTask = telemetrySyncTask;
@@ -80,7 +80,7 @@ namespace Splitio.Services.Common
             _telemetrySyncTask.Start();
             _impressionsLog.Start();
             _eventsLog.Start();
-            _impressionsCountSender.Start();
+            _impressionsCounter.Start();
             _uniqueKeysTracker.Start();
             _log.Debug("Periodic Data Recording started...");
         }
@@ -97,7 +97,7 @@ namespace Splitio.Services.Common
             _telemetrySyncTask.Stop();
             _impressionsLog.Stop();
             _eventsLog.Stop();
-            _impressionsCountSender.Stop();
+            _impressionsCounter.Stop();
             _uniqueKeysTracker.Stop();
             _log.Debug("Periodic Data Recording stopped...");
         }

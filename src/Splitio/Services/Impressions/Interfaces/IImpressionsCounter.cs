@@ -1,11 +1,9 @@
-﻿using Splitio.Services.Impressions.Classes;
-using System.Collections.Concurrent;
+﻿using Splitio.Services.Shared.Interfaces;
 
 namespace Splitio.Services.Impressions.Interfaces
 {
-    public interface IImpressionsCounter
+    public interface IImpressionsCounter : IPeriodicTask
     {
         void Inc(string splitName, long timeFrame);
-        ConcurrentDictionary<KeyCache, int> PopAll();
     }
 }
