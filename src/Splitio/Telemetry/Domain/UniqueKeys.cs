@@ -18,7 +18,7 @@ namespace Splitio.Telemetry.Domain
     {
         [JsonProperty("f")]
         public string Feature { get; }
-        [JsonProperty("k")]
+        [JsonProperty("ks")]
         public HashSet<string> Keys { get; }
 
         public Mtks(string feature, HashSet<string> keys)
