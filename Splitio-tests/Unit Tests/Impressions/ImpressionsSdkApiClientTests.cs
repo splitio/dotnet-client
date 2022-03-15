@@ -6,7 +6,6 @@ using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Storages;
 using Splitio_Tests.Resources;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Impressions
@@ -21,10 +20,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         {
             // Arrange.
             var time9am = SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 00, 00, DateTimeKind.Utc));
-            var time10am = SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 10, 00, 00, DateTimeKind.Utc));
-
-            var impressions = new ConcurrentDictionary<KeyCache, int>();
-            impressions.TryAdd(new KeyCache("featur1", time9am), 2);
+           
+            var impressions = new List<ImpressionsCountModel> { new ImpressionsCountModel(new KeyCache("featur1", time9am), 2) };
 
             var telemetryStorage = new InMemoryTelemetryStorage();
             var impressionsSdkApiClient = new ImpressionsSdkApiClient(string.Empty, new Dictionary<string, string>(), "http://www.fake-test-split.com", 5, 5, telemetryStorage, _wrapperAdapter, 5);

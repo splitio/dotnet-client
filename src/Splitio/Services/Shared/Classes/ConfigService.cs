@@ -39,6 +39,8 @@ namespace Splitio.Services.Shared.Classes
             baseConfig.ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Debug;
             baseConfig.UniqueKeysRefreshRate = 300;
             baseConfig.ImpressionsCounterRefreshRate = 300;
+            baseConfig.ImpressionsCountBulkSize = 10000;
+            baseConfig.UniqueKeysBulkSize = 10000;
 
             return baseConfig;
         }
@@ -57,6 +59,9 @@ namespace Splitio.Services.Shared.Classes
                 BfErrorRate = baseConfig.BfErrorRate,
                 BfExpectedElements = baseConfig.BfExpectedElements,
                 UniqueKeysCacheMaxSize = baseConfig.UniqueKeysCacheMaxSize,
+                ImpressionsCounterCacheMaxSize = baseConfig.ImpressionsCounterCacheMaxSize,
+                UniqueKeysBulkSize = 30000,
+                ImpressionsCountBulkSize = 30000,
                 UniqueKeysRefreshRate = 3600,
                 ImpressionsCounterRefreshRate = 1800, // Send bulk impressions count - Refresh rate: 30 min.
                 ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Optimized,
@@ -106,7 +111,8 @@ namespace Splitio.Services.Shared.Classes
                 LabelsEnabled = config.LabelsEnabled ?? true,
                 BfExpectedElements = 10000000,
                 BfErrorRate = 0.01,
-                UniqueKeysCacheMaxSize = 50000
+                UniqueKeysCacheMaxSize = 50000,
+                ImpressionsCounterCacheMaxSize = 50000
             };
         }
 

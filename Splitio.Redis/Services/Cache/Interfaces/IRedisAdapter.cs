@@ -48,7 +48,7 @@ namespace Splitio.Redis.Services.Cache.Interfaces
 
         bool HashSet(RedisKey key, RedisValue hashField, RedisValue value);
 
-        void HashIncrementAsyncBatch(string key, Dictionary<string, int> values);
+        long HashIncrementAsyncBatch(string key, Dictionary<string, int> values);
 
         HashEntry[] HashGetAll(RedisKey key);
     }

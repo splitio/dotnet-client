@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Telemetry.Domain;
 
 namespace Splitio.Integration_tests
 {
@@ -183,6 +184,7 @@ namespace Splitio.Integration_tests
             client.GetTreatment("mauro_test", "FACUNDO_TEST");
             client.GetTreatment("nico_test", "FACUNDO_TEST");
             client.GetTreatment("redo_test", "FACUNDO_TEST");
+            client.GetTreatment("redo_test", "FACUNDO_TEST");
             client.GetTreatment("redo_test", "MAURO_TEST");
 
             client.Destroy();
@@ -190,11 +192,12 @@ namespace Splitio.Integration_tests
             var result = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.uniquekeys");
 
             // Assert.
-            Assert.AreEqual(4, result.Count());
-            Assert.IsTrue(result.Contains("FACUNDO_TEST::mauro_test"));
-            Assert.IsTrue(result.Contains("FACUNDO_TEST::nico_test"));
-            Assert.IsTrue(result.Contains("FACUNDO_TEST::redo_test"));
-            Assert.IsTrue(result.Contains("MAURO_TEST::redo_test"));
+            Assert.AreEqual(2, result.Count());
+
+            var uniques = result.Select(x => JsonConvert.DeserializeObject<Mtks>(x)).ToList();
+
+            Assert.IsTrue(uniques.Any(u => u.Feature.Equals("FACUNDO_TEST") && u.Keys.Contains("mauro_test") && u.Keys.Contains("nico_test") && u.Keys.Contains("redo_test")));
+            Assert.IsTrue(uniques.Any(u => u.Feature.Equals("MAURO_TEST") && u.Keys.Contains("redo_test")));
 
             CleanKeys();
         }

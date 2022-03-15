@@ -24,6 +24,11 @@ namespace Splitio.Services.Shared.Classes
             Task.Factory.StartNew(action, cancellationToken.Token);
         }
 
+        public void Start(Action action, string description)
+        {
+            Start(action, new CancellationTokenSource(), description);
+        }
+
         public void StartPeriodic(Action action, int intervalInMilliseconds, CancellationTokenSource cancellationToken, string description)
         {
             _log.Debug($"Starting Periodic Task: {description}");

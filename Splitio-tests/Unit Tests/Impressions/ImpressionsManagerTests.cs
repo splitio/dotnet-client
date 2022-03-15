@@ -340,10 +340,9 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         {
             // Arrange.
             var impressionsObserver = new ImpressionsObserver(new ImpressionHasher());
-            var impressionsCounter = new ImpressionsCounter();
             var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
                 null,
-                impressionsCounter,
+                _impressionsCounter.Object,
                 true,
                 ImpressionsMode.Optimized,
                 _telemetryRuntimeProducer.Object,
@@ -381,10 +380,9 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         {
             // Arrange.
             var impressionsObserver = new ImpressionsObserver(new ImpressionHasher());
-            var impressionsCounter = new ImpressionsCounter();
             var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
                 null,
-                impressionsCounter,
+                _impressionsCounter.Object,
                 true,
                 ImpressionsMode.Debug,
                 _telemetryRuntimeProducer.Object,

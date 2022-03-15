@@ -2,15 +2,15 @@
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Telemetry.Domain;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace Splitio.Services.Impressions.Classes
 {
-    public class UniqueKeysTracker : IUniqueKeysTracker
+    public class UniqueKeysTracker : TrackerComponent, IUniqueKeysTracker
     {
         private static readonly ISplitLogger _logger = WrapperAdapter.GetLogger(typeof(UniqueKeysTracker));
         private static readonly int IntervalToClearLongTermCache = 3600000;        
@@ -18,55 +18,19 @@ namespace Splitio.Services.Impressions.Classes
         private readonly IFilterAdapter _filterAdapter;
         private readonly ConcurrentDictionary<string, HashSet<string>> _cache;
         private readonly IImpressionsSenderAdapter _senderAdapter;
-        private readonly ITasksManager _tasksManager;
-        private readonly int _interval;
-        private readonly int _cacheMaxSize;
 
-        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-        private readonly object _lock = new object();
-        private readonly object _taskLock = new object();
-
-        private bool _running = false;
-
-        public UniqueKeysTracker(TrackerConfig config,
+        public UniqueKeysTracker(ComponentConfig config,
             IFilterAdapter filterAdapter,
             ConcurrentDictionary<string, HashSet<string>> cache,
             IImpressionsSenderAdapter senderAdapter,
-            ITasksManager tasksManager)
+            ITasksManager tasksManager) : base(config, tasksManager)
         {
             _filterAdapter = filterAdapter;
             _cache = cache;
-            _cacheMaxSize = config.CacheMaxSize;
             _senderAdapter = senderAdapter;
-            _tasksManager = tasksManager;
-            _interval = config.PeriodicTaskIntervalSeconds;
         }
 
         #region Public Methods
-        public void Start()
-        {
-            lock (_taskLock)
-            {
-                if (_running) return;
-
-                _running = true;
-                _tasksManager.StartPeriodic(() => SendBulkUniques(), _interval * 1000, _cancellationTokenSource, "MTKs sender.");
-                _tasksManager.StartPeriodic(() => _filterAdapter.Clear(), IntervalToClearLongTermCache, _cancellationTokenSource, "Cache Long Term clear.");
-            }
-        }
-
-        public void Stop()
-        {
-            lock (_taskLock)
-            {
-                if (!_running) return;
-
-                _running = false;
-                _cancellationTokenSource.Cancel();
-                SendBulkUniques();
-            }
-        }
-
         public bool Track(string key, string featureName)
         {
             if (_filterAdapter.Contains(featureName, key)) return false;
@@ -81,15 +45,21 @@ namespace Splitio.Services.Impressions.Classes
 
             if (_cache.Count >= _cacheMaxSize)
             {
-                SendBulkUniques();
+                SendBulkData();
             }
 
             return true;
         }
         #endregion
 
-        #region Private Methods
-        private void SendBulkUniques()
+        #region Protected Methods
+        protected override void StartTask()
+        {
+            _tasksManager.StartPeriodic(() => SendBulkData(), _taskInterval * 1000, _cancellationTokenSource, "MTKs sender.");
+            _tasksManager.StartPeriodic(() => _filterAdapter.Clear(), IntervalToClearLongTermCache, _cancellationTokenSource, "Cache Long Term clear.");
+        }
+
+        protected override void SendBulkData()
         {
             lock (_lock)
             {
@@ -101,7 +71,22 @@ namespace Splitio.Services.Impressions.Classes
 
                 try
                 {
-                    _senderAdapter.RecordUniqueKeys(uniques);
+                    var values = uniques
+                        .Select(v => new Mtks(v.Key, v.Value))
+                        .ToList();
+
+                    if (values.Count <= _maxBulkSize)
+                    {
+                        _senderAdapter.RecordUniqueKeys(values);
+                        return;
+                    }
+
+                    while (values.Count > 0)
+                    {
+                        var bulkToPost = Util.Helper.TakeFromList(values, _maxBulkSize);
+
+                        _senderAdapter.RecordUniqueKeys(bulkToPost);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -110,11 +95,5 @@ namespace Splitio.Services.Impressions.Classes
             }
         }
         #endregion
-    }
-
-    public class TrackerConfig
-    {
-        public int PeriodicTaskIntervalSeconds { get; set; }
-        public int CacheMaxSize { get; set; }
     }
 }

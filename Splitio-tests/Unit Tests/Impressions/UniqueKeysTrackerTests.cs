@@ -4,6 +4,7 @@ using Splitio.Services.Cache.Filter;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
+using Splitio.Telemetry.Domain;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -34,11 +35,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Arrange.
             _cache.Clear();
 
-            var config = new TrackerConfig
-            {
-                CacheMaxSize = 5,
-                PeriodicTaskIntervalSeconds = 1
-            };
+            var config = new ComponentConfig(1, 5, 5);
             _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, _tasksManager);
 
             // Act.
@@ -49,12 +46,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             Thread.Sleep(1500);
 
-            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<ConcurrentDictionary<string, HashSet<string>>>()), Times.Once);
+            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<List<Mtks>>()), Times.Once);
 
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test", "feature-name-test"));
             _uniqueKeysTracker.Stop();
 
-            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<ConcurrentDictionary<string, HashSet<string>>>()), Times.Exactly(2));
+            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<List<Mtks>>()), Times.Exactly(2));
 
             _cache.Clear();
         }
@@ -65,11 +62,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Arrange.
             _cache.Clear();
 
-            var config = new TrackerConfig
-            {
-                CacheMaxSize = 5,
-                PeriodicTaskIntervalSeconds = 1
-            };
+            var config = new ComponentConfig(1, 5, 5);
             _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, _tasksManager);
 
             _filterAdapter
@@ -99,7 +92,29 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Assert.AreEqual(1, values3.Count);
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-5"));
 
-            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<ConcurrentDictionary<string, HashSet<string>>>()), Times.Once);
+            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<List<Mtks>>()), Times.Once);
+
+            _cache.Clear();
+        }
+
+        [TestMethod]
+        public void Track_WithFullSize_ShouldSendTwoBulk()
+        {
+            // Arrange.
+            _cache.Clear();
+
+            var config = new ComponentConfig(1, 6, 3);
+            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, _tasksManager);
+
+            // Act && Assert.
+            Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test"));
+            Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-2"));
+            Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-3"));
+            Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-4"));
+            Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-5"));
+            Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-6"));
+            
+            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<List<Mtks>>()), Times.Exactly(2));
 
             _cache.Clear();
         }

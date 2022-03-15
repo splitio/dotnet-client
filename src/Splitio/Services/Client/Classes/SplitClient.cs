@@ -59,7 +59,6 @@ namespace Splitio.Services.Client.Classes
         protected IImpressionsManager _impressionsManager;
         protected IImpressionsSenderAdapter _impressionsSenderAdapter;
         protected IImpressionsCounter _impressionsCounter;
-        protected IImpressionsCountSender _impressionCounterSender;
         protected IImpressionsObserver _impressionsObserver;
 
         public SplitClient(ISplitLogger log)
@@ -231,11 +230,7 @@ namespace Splitio.Services.Client.Classes
             var bloomFilter = new BloomFilter(config.BfExpectedElements, config.BfErrorRate);
             var filterAdapter = new FilterAdapter(bloomFilter);
             var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
-            var trackerConfig = new TrackerConfig
-            {
-                CacheMaxSize = config.UniqueKeysCacheMaxSize,
-                PeriodicTaskIntervalSeconds = config.UniqueKeysRefreshRate
-            };
+            var trackerConfig = new ComponentConfig(config.UniqueKeysRefreshRate, config.UniqueKeysCacheMaxSize, config.UniqueKeysBulkSize);
 
             _uniqueKeysTracker = new UniqueKeysTracker(trackerConfig, filterAdapter, trackerCache, _impressionsSenderAdapter, _tasksManager);
         }
@@ -245,12 +240,12 @@ namespace Splitio.Services.Client.Classes
             if (config.ImpressionsMode == ImpressionsMode.Debug)
             {
                 _impressionsCounter = new NoopImpressionsCounter();
-                _impressionCounterSender = new NoopImpressionsCountSender();
                 return;
             }
 
-            _impressionsCounter = new ImpressionsCounter();
-            _impressionCounterSender = new ImpressionsCountSender(_impressionsSenderAdapter, _impressionsCounter, _tasksManager, config.ImpressionsCounterRefreshRate);
+            var trackerConfig = new ComponentConfig(config.ImpressionsCounterRefreshRate, config.ImpressionsCounterCacheMaxSize, config.ImpressionsCountBulkSize);
+
+            _impressionsCounter = new ImpressionsCounter(trackerConfig, _impressionsSenderAdapter, _tasksManager);
         }
         #endregion
 

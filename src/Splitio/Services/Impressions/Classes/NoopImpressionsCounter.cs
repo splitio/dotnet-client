@@ -15,5 +15,15 @@ namespace Splitio.Services.Impressions.Classes
             // No op.
             return new ConcurrentDictionary<KeyCache, int>();
         }
+
+        public void Start()
+        {
+            // No op.
+        }
+
+        public void Stop()
+        {
+            // No op.
+        }
     }
 }

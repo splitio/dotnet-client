@@ -4,7 +4,6 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Common;
 using Splitio.Telemetry.Domain;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Impressions.Classes
@@ -23,7 +22,7 @@ namespace Splitio.Services.Impressions.Classes
             _impressionsSdkApiClient = impressionsSdkApiClient;
         }
 
-        public void RecordUniqueKeys(ConcurrentDictionary<string, HashSet<string>> uniques)
+        public void RecordUniqueKeys(List<Mtks> uniques)
         {
             try
             {
@@ -35,11 +34,11 @@ namespace Splitio.Services.Impressions.Classes
             }
         }
 
-        public void RecordImpressionsCount(ConcurrentDictionary<KeyCache, int> impressionsCount)
+        public void RecordImpressionsCount(List<ImpressionsCountModel> values)
         {
             try
             {
-                _impressionsSdkApiClient.SendBulkImpressionsCount(impressionsCount);
+                _impressionsSdkApiClient.SendBulkImpressionsCount(values);
             }
             catch (Exception ex)
             {
