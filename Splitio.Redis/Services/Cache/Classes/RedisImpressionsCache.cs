@@ -11,6 +11,8 @@ namespace Splitio.Redis.Services.Cache.Classes
 {
     public class RedisImpressionsCache : RedisCacheBase, IImpressionsCache
     {
+        private static readonly TimeSpan _expireTimeOneHour = new TimeSpan(0, 0, 3600);
+
         private string UniqueKeysKey => "{prefix}.SPLITIO.uniquekeys"
             .Replace("{prefix}.", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
 
@@ -19,7 +21,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         private string ImpressionsKey => "{prefix}.SPLITIO.impressions"
             .Replace("{prefix}.", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
-
+        
         public RedisImpressionsCache(IRedisAdapter redisAdapter, 
             string machineIP, 
             string sdkVersion, 
@@ -39,7 +41,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             if (lengthRedis == items.Count)
             {
-                _redisAdapter.KeyExpire(ImpressionsKey, new TimeSpan(0, 0, 3600));
+                _redisAdapter.KeyExpire(ImpressionsKey, _expireTimeOneHour);
             }
 
             return 0;
@@ -53,7 +55,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             if (lengthRedis == uniqueKeys.Count)
             {
-                _redisAdapter.KeyExpire(UniqueKeysKey, new TimeSpan(0, 0, 3600));
+                _redisAdapter.KeyExpire(UniqueKeysKey, _expireTimeOneHour);
             }
         }
 
@@ -63,7 +65,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             if (result == impressionsCount.Sum(i => i.Value))
             {
-                _redisAdapter.KeyExpire(UniqueKeysKey, new TimeSpan(0, 0, 3600));
+                _redisAdapter.KeyExpire(UniqueKeysKey, _expireTimeOneHour);
             }
         }
     }
