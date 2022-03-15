@@ -101,7 +101,7 @@ namespace Splitio.Redis.Services.Client.Classes
             {
                 _redisAdapter.Connect();
                 RecordConfigInit();
-            }, "Redis Adapter Connect.");
+            }, "Connecting Redis Adapter.");
 
             _segmentCache = new RedisSegmentCache(_redisAdapter, _config.RedisUserPrefix);
             _splitParser = new RedisSplitParser(_segmentCache);

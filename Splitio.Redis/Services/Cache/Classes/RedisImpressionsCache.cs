@@ -53,6 +53,10 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             var lengthRedis = _redisAdapter.ListRightPush(UniqueKeysKey, uniques.Select(i => (RedisValue)i).ToArray());
 
+            // This operation will simply do nothing if the key no longer exists (queue is empty)
+            // It's only done in the "successful" exit path so that the TTL is not overridden if mtks weren't
+            // popped correctly. This will result in mtks getting lost but will prevent the queue from taking
+            // a huge amount of memory.
             if (lengthRedis == uniqueKeys.Count)
             {
                 _redisAdapter.KeyExpire(UniqueKeysKey, _expireTimeOneHour);
