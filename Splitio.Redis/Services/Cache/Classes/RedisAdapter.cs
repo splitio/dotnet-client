@@ -303,7 +303,8 @@ namespace Splitio.Redis.Services.Cache.Classes
         public long HashIncrementAsyncBatch(string key, Dictionary<string, int> values)
         {
             var tasks = new List<Task<long>>();
-            long toReturn = 0;
+            long keysCount = 0;
+            long hashLength = 0;
 
             try
             {
@@ -322,11 +323,12 @@ namespace Splitio.Redis.Services.Cache.Classes
                 {
                     Task.WaitAll(tasks.ToArray());
 
-                    toReturn = tasks.Sum(t => t.Result);
+                    keysCount = tasks.Sum(t => t.Result);
+                    hashLength = _database.HashLengthAsync(key).Result;
                 }
             }
 
-            return toReturn;
+            return keysCount + hashLength;
         }
 
         public HashEntry[] HashGetAll(RedisKey key)

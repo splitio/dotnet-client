@@ -67,7 +67,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             var result = _redisAdapter.HashIncrementAsyncBatch(ImpressionsCountKey, impressionsCount);
 
-            if (result == impressionsCount.Sum(i => i.Value))
+            if (result == (impressionsCount.Count + impressionsCount.Sum(i => i.Value)))
             {
                 _redisAdapter.KeyExpire(UniqueKeysKey, _expireTimeOneHour);
             }
