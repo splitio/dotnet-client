@@ -5,12 +5,12 @@ namespace Splitio.Telemetry.Domain
 {
     public class UniqueKeys
     {
-        [JsonProperty("mtks")]
-        public List<Mtks> Mtks { get; }
+        [JsonProperty("keys")]
+        public List<Mtks> Keys { get; }
 
         public UniqueKeys(List<Mtks> values)
         {
-            Mtks = values;
+            Keys = values;
         }
     }
 
