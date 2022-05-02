@@ -15,7 +15,7 @@ namespace Splitio.Telemetry.Common
     {
         private const string ConfigURL = "/metrics/config";
         private const string UsageURL = "/metrics/usage";
-        private const string UniqueKeysURL = "/mtks/ss";
+        private const string UniqueKeysURL = "/keys/ss";
 
         private readonly ISplitioHttpClient _splitioHttpClient;
         private readonly ISplitLogger _log;
