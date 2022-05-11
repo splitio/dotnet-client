@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>    
-    <TargetFrameworks>netcoreapp2.2;netcoreapp2.1;netcoreapp2.0;netcoreapp1.1;netcoreapp1.0;net472;net471;net47;net462;net461;net46;net452;net451;net45</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net472</TargetFrameworks>
     <RootNamespace>Splitio_Tests</RootNamespace>
   </PropertyGroup>
 
@@ -12,46 +12,21 @@
     <PackageReference Include="MSTest.TestFramework" Version="1.1.11" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2'">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1'">
     <DefineConstants>NETCORE</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1'">
-    <DefineConstants>NETCORE</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0'">
-    <DefineConstants>NETCORE</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1'">
-    <DefineConstants>NETCORE</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0'">
-    <DefineConstants>NETCORE</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0' or '$(TargetFramework)' == 'netcoreapp1.1' or '$(TargetFramework)' == 'netcoreapp2.0' or '$(TargetFramework)' == 'netcoreapp2.1' or '$(TargetFramework)' == 'netcoreapp2.2'">
-    <ProjectReference Include="..\Splitio.Redis\Splitio.Redis.csproj" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+	<ProjectReference Include="..\Splitio.Redis\Splitio.Redis.csproj" />
     <ProjectReference Include="..\src\Splitio\Splitio.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net472' or '$(TargetFramework)' == 'net471' or '$(TargetFramework)' == 'net47' or '$(TargetFramework)' == 'net462' or '$(TargetFramework)' == 'net461'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
     <ProjectReference Include="..\Splitio.Redis\Splitio.Redis.csproj">
       <SetTargetFramework>TargetFramework=net461</SetTargetFramework>
     </ProjectReference>
     <ProjectReference Include="..\src\Splitio\Splitio.csproj">
       <SetTargetFramework>TargetFramework=net461</SetTargetFramework>
-    </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net46' or '$(TargetFramework)' == 'net452' or '$(TargetFramework)' == 'net451' or '$(TargetFramework)' == 'net45'">
-    <ProjectReference Include="..\Splitio.Redis\Splitio.Redis.csproj">
-      <SetTargetFramework>TargetFramework=net45</SetTargetFramework>
-    </ProjectReference>
-    <ProjectReference Include="..\src\Splitio\Splitio.csproj">
-      <SetTargetFramework>TargetFramework=net45</SetTargetFramework>
     </ProjectReference>
   </ItemGroup>
 

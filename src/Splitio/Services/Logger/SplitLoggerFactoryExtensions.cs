@@ -1,4 +1,4 @@
-﻿# if NETSTANDARD
+﻿#if NETSTANDARD2_0
 namespace Microsoft.Extensions.Logging
 {
     public static class SplitLoggerFactoryExtensions
