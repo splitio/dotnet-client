@@ -22,7 +22,7 @@ namespace Splitio.Services.Shared.Classes
             var data = new ReadConfigData();
             var ipAddressesEnabled = config.IPAddressesEnabled ?? true;
 
-#if NETSTANDARD2_0
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
             data.SdkVersion = ".NET_CORE-" + SplitSdkVersion();
 #else
             data.SdkVersion = ".NET-" + SplitSdkVersion();
@@ -73,7 +73,7 @@ namespace Splitio.Services.Shared.Classes
 
         private string SplitSdkVersion()
         {
-#if NETSTANDARD2_0
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
             return typeof(Split).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 #else
             return FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
@@ -82,7 +82,7 @@ namespace Splitio.Services.Shared.Classes
 
         public static ISplitLogger GetLogger(Type type)
         {
-#if NETSTANDARD2_0
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
             return new MicrosoftExtensionsLogging(type);
 #else
             return new CommonLogging(type);
@@ -91,7 +91,7 @@ namespace Splitio.Services.Shared.Classes
 
         public static ISplitLogger GetLogger(string type)
         {
-#if NETSTANDARD2_0
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
             return new MicrosoftExtensionsLogging(type);
 #else
             return new CommonLogging(type);
@@ -127,7 +127,7 @@ namespace Splitio.Services.Shared.Classes
             {
                 try
                 {
-#if NETSTANDARD2_0
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
                     var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
                     hostAddressesTask.Wait();
                     return config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
