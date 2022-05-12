@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net472</TargetFrameworks>
+    <TargetFrameworks>net6.0;netcoreapp3.1;net472</TargetFrameworks>
     <RootNamespace>Splitio.Integration_tests</RootNamespace>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -14,7 +14,7 @@
     <PackageReference Include="WireMock.Net" Version="1.0.29" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" $(TargetFramework.StartsWith('netcoreapp')) ">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' Or '$(TargetFramework)' == 'net6.0'">
     <DefineConstants>NETCORE</DefineConstants>
   </PropertyGroup>
 
