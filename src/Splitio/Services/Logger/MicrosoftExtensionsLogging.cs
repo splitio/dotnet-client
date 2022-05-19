@@ -1,4 +1,4 @@
-﻿# if NETSTANDARD
+﻿#if NETSTANDARD2_0 || NET6_0 || NET5_0
 using Microsoft.Extensions.Logging;
 using System;
 
