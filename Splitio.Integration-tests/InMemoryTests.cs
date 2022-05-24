@@ -331,6 +331,8 @@ namespace Splitio.Integration_tests
             }
         }
 
+        // TODO: None mode is not supported yet.
+        [Ignore]
         [TestMethod]
         public void GetTreatments_WithImpressionsInNoneMode()
         {
