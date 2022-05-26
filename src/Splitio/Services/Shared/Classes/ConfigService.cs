@@ -36,7 +36,12 @@ namespace Splitio.Services.Shared.Classes
         {
             var baseConfig = ReadBaseConfig(config);
 
-            baseConfig.ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Debug;
+            if (config.ImpressionsMode.HasValue && config.ImpressionsMode != ImpressionsMode.Debug)
+            {
+                _log.Warn("None and Optimized modes are not supported yet. Defaulting to Debug mode.");
+            }
+
+            baseConfig.ImpressionsMode = ImpressionsMode.Debug;
             baseConfig.UniqueKeysRefreshRate = 300;
             baseConfig.ImpressionsCounterRefreshRate = 300;
             baseConfig.ImpressionsCountBulkSize = 10000;
@@ -64,7 +69,7 @@ namespace Splitio.Services.Shared.Classes
                 ImpressionsCountBulkSize = 30000,
                 UniqueKeysRefreshRate = 3600,
                 ImpressionsCounterRefreshRate = 1800, // Send bulk impressions count - Refresh rate: 30 min.
-                ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Optimized,
+                // ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Optimized,
                 SplitsRefreshRate = config.FeaturesRefreshRate ?? 5,
                 SegmentRefreshRate = config.SegmentsRefreshRate ?? 60,
                 HttpConnectionTimeout = config.ConnectionTimeout ?? 15000,
@@ -92,6 +97,14 @@ namespace Splitio.Services.Shared.Classes
                 OnDemandFetchRetryDelayMs = 50
             };
 
+            if (config.ImpressionsMode.HasValue && config.ImpressionsMode == ImpressionsMode.None)
+            {
+                _log.Warn("None mode is not supported yet. Defaulting to Optimized mode.");
+
+                config.ImpressionsMode = ImpressionsMode.Optimized;
+            }
+
+            selfRefreshingConfig.ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Optimized;
             selfRefreshingConfig.TreatmentLogRefreshRate = GetImpressionRefreshRate(selfRefreshingConfig.ImpressionsMode, config.ImpressionsRefreshRate);
 
             return selfRefreshingConfig;

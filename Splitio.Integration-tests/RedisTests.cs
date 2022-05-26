@@ -163,6 +163,8 @@ namespace Splitio.Integration_tests
             CleanKeys();
         }
 
+        // TODO: None mode is not supported yet.
+        [Ignore]
         [TestMethod]
         public void GetTreatment_WithImpressionModeInNone_ShouldGetUniqueKeys()
         {
@@ -202,6 +204,8 @@ namespace Splitio.Integration_tests
             CleanKeys();
         }
 
+        // TODO: Optimized mode is not supported yet.
+        [Ignore]
         [TestMethod]
         public void GetTreatment_WithImpressionModeOptimized_ShouldGetImpressionCount()
         {
