@@ -1,5 +1,9 @@
 CHANGES
 
+7.0.0 (May 26, 2022)
+- BREAKING CHANGE: Deprecated support for .NET Framework 4.0 and .NET Core 1.x.
+- Updated redis command for config telemetry, using hset instead of rpush now.
+
 6.3.7 (Dec 16, 2021)
 - Updated the logic that posts events and impressions data to have a maximum bulk size.
 - Updated the readiness flow to be more consistent with the other sdks and improve the readiness time.
