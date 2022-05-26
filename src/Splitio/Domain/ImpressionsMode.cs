@@ -3,6 +3,7 @@
     public enum ImpressionsMode
     {
         Optimized,
-        Debug
+        Debug,
+        None
     }
 }

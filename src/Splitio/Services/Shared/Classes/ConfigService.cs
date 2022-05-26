@@ -19,29 +19,35 @@ namespace Splitio.Services.Shared.Classes
             _log = log;
         }
 
+        #region Public Methods
         public BaseConfig ReadConfig(ConfigurationOptions config, ConfingTypes configType)
         {
             switch (configType)
             {
                 case ConfingTypes.Redis:
-                    return ReadBaseConfig(config);
+                    return ReadRedisConfig(config);
                 case ConfingTypes.InMemory:
                 default:
                     return ReadInMemoryConfig(config);
             }
         }
-
-        public BaseConfig ReadBaseConfig(ConfigurationOptions config)
+        
+        public BaseConfig ReadRedisConfig(ConfigurationOptions config)
         {
-            var data = _wrapperAdapter.ReadConfig(config, _log);
+            var baseConfig = ReadBaseConfig(config);
 
-            return new BaseConfig
+            if (config.ImpressionsMode.HasValue && config.ImpressionsMode != ImpressionsMode.Debug)
             {
-                SdkVersion = data.SdkVersion,
-                SdkMachineName = data.SdkMachineName,
-                SdkMachineIP = data.SdkMachineIP,
-                LabelsEnabled = config.LabelsEnabled ?? true
-            };
+                _log.Warn("None and Optimized modes are not supported yet. Defaulting to Debug mode.");
+            }
+
+            baseConfig.ImpressionsMode = ImpressionsMode.Debug;
+            baseConfig.UniqueKeysRefreshRate = 300;
+            baseConfig.ImpressionsCounterRefreshRate = 300;
+            baseConfig.ImpressionsCountBulkSize = 10000;
+            baseConfig.UniqueKeysBulkSize = 10000;
+
+            return baseConfig;
         }
 
         public SelfRefreshingConfig ReadInMemoryConfig(ConfigurationOptions config)
@@ -54,7 +60,16 @@ namespace Splitio.Services.Shared.Classes
                 SdkVersion = baseConfig.SdkVersion,
                 SdkMachineName = baseConfig.SdkMachineName,
                 SdkMachineIP = baseConfig.SdkMachineIP,
-                LabelsEnabled = baseConfig.LabelsEnabled,                
+                LabelsEnabled = baseConfig.LabelsEnabled,
+                BfErrorRate = baseConfig.BfErrorRate,
+                BfExpectedElements = baseConfig.BfExpectedElements,
+                UniqueKeysCacheMaxSize = baseConfig.UniqueKeysCacheMaxSize,
+                ImpressionsCounterCacheMaxSize = baseConfig.ImpressionsCounterCacheMaxSize,
+                UniqueKeysBulkSize = 30000,
+                ImpressionsCountBulkSize = 30000,
+                UniqueKeysRefreshRate = 3600,
+                ImpressionsCounterRefreshRate = 1800, // Send bulk impressions count - Refresh rate: 30 min.
+                // ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Optimized,
                 SplitsRefreshRate = config.FeaturesRefreshRate ?? 5,
                 SegmentRefreshRate = config.SegmentsRefreshRate ?? 60,
                 HttpConnectionTimeout = config.ConnectionTimeout ?? 15000,
@@ -70,7 +85,6 @@ namespace Splitio.Services.Shared.Classes
                 StreamingEnabled = config.StreamingEnabled ?? true,
                 AuthRetryBackoffBase = GetMinimunAllowed(config.AuthRetryBackoffBase ?? 1, 1, "AuthRetryBackoffBase"),
                 StreamingReconnectBackoffBase = GetMinimunAllowed(config.StreamingReconnectBackoffBase ?? 1, 1, "StreamingReconnectBackoffBase"),
-                ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Optimized,
                 TelemetryRefreshRate = GetMinimunAllowed(config.TelemetryRefreshRate ?? 3600, 60, "TelemetryRefreshRate"),
                 ImpressionListener = config.ImpressionListener,
                 AuthServiceURL = string.IsNullOrEmpty(config.AuthServiceURL) ? Constants.Urls.AuthServiceURL : config.AuthServiceURL,
@@ -83,9 +97,36 @@ namespace Splitio.Services.Shared.Classes
                 OnDemandFetchRetryDelayMs = 50
             };
 
+            if (config.ImpressionsMode.HasValue && config.ImpressionsMode == ImpressionsMode.None)
+            {
+                _log.Warn("None mode is not supported yet. Defaulting to Optimized mode.");
+
+                config.ImpressionsMode = ImpressionsMode.Optimized;
+            }
+
+            selfRefreshingConfig.ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Optimized;
             selfRefreshingConfig.TreatmentLogRefreshRate = GetImpressionRefreshRate(selfRefreshingConfig.ImpressionsMode, config.ImpressionsRefreshRate);
 
             return selfRefreshingConfig;
+        }
+        #endregion
+
+        #region Private Methods
+        private BaseConfig ReadBaseConfig(ConfigurationOptions config)
+        {
+            var data = _wrapperAdapter.ReadConfig(config, _log);
+
+            return new BaseConfig
+            {
+                SdkVersion = data.SdkVersion,
+                SdkMachineName = data.SdkMachineName,
+                SdkMachineIP = data.SdkMachineIP,
+                LabelsEnabled = config.LabelsEnabled ?? true,
+                BfExpectedElements = 10000000,
+                BfErrorRate = 0.01,
+                UniqueKeysCacheMaxSize = 50000,
+                ImpressionsCounterCacheMaxSize = 50000
+            };
         }
 
         private int GetMinimunAllowed(int value, int minAllowed, string configName)
@@ -111,6 +152,7 @@ namespace Splitio.Services.Shared.Classes
                     return impressionsRefreshRate == null || impressionsRefreshRate <= 0 ? 300 : Math.Max(60, impressionsRefreshRate.Value);
             }
         }
+        #endregion
     }
 
     public enum ConfingTypes

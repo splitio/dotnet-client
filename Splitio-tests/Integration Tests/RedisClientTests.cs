@@ -189,6 +189,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatments_WhenClientIsNotReady_ReturnsControl()
         {
             // Arrange.
+            config.CacheAdapterConfig.Host = "fake-host";
             var client = new RedisClient(config, API_KEY, _logMock.Object);
 
             // Act.

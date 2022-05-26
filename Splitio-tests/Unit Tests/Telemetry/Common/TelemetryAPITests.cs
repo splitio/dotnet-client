@@ -105,5 +105,29 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             _splitioHttpClient.Verify(mock => mock.PostAsync("www.fake-url.com/metrics/usage", data), Times.Once);
             _log.Verify(mock => mock.Error(It.IsAny<string>()), Times.Never);
         }
+
+        [TestMethod]
+        public void RecordUniqueKeys()
+        {
+            // Arrange.
+            var values = new List<Mtks> { new Mtks("feature-01", new HashSet<string> { "key-01", "key-02", "key-03", "key-04" }) };
+
+            var uniqueKeys = new UniqueKeys(values);
+
+            var data = "{\"keys\":[{\"f\":\"feature-01\",\"ks\":[\"key-01\",\"key-02\",\"key-03\",\"key-04\"]}]}";
+            _splitioHttpClient
+                .Setup(mock => mock.PostAsync("www.fake-url.com/keys/ss", data))
+                .ReturnsAsync(new HTTPResult
+                {
+                    statusCode = System.Net.HttpStatusCode.OK
+                });
+
+            // Act.
+            _telemetryAPI.RecordUniqueKeys(uniqueKeys);
+
+            // Assert.
+            _splitioHttpClient.Verify(mock => mock.PostAsync("www.fake-url.com/keys/ss", data), Times.Once);
+            _log.Verify(mock => mock.Error(It.IsAny<string>()), Times.Never);
+        }
     }
 }

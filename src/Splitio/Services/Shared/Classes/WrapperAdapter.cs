@@ -22,7 +22,7 @@ namespace Splitio.Services.Shared.Classes
             var data = new ReadConfigData();
             var ipAddressesEnabled = config.IPAddressesEnabled ?? true;
 
-#if NETSTANDARD
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
             data.SdkVersion = ".NET_CORE-" + SplitSdkVersion();
 #else
             data.SdkVersion = ".NET-" + SplitSdkVersion();
@@ -35,7 +35,6 @@ namespace Splitio.Services.Shared.Classes
 
         public void TaskWaitAndDispose(params Task[] tasks)
         {
-#if !NETSTANDARD1_6
             try
             {
                 foreach (var t in tasks)
@@ -50,48 +49,31 @@ namespace Splitio.Services.Shared.Classes
             {
                 _log.Debug(ex.Message);
             }
-#endif
         }
 
         public Task TaskDelay(int millisecondsDelay, CancellationToken cancellationToken)
         {
-#if NETSTANDARD || NET45 || NET461
             return Task.Delay(millisecondsDelay, cancellationToken);
-#else
-            return TaskEx.Delay(millisecondsDelay, cancellationToken);
-#endif
         }
 
         public Task TaskDelay(int millisecondsDelay)
         {
-#if NETSTANDARD || NET45 || NET461
             return Task.Delay(millisecondsDelay);
-#else
-            return TaskEx.Delay(millisecondsDelay);
-#endif
         }
 
         public Task<Task> WhenAny(params Task[] tasks)
         {
-#if NETSTANDARD || NET45 || NET461
-             return Task.WhenAny(tasks);
-#else
-            return TaskEx.WhenAny(tasks);
-#endif
+            return Task.WhenAny(tasks);
         }
 
         public async Task<T> TaskFromResult<T>(T result)
         {
-#if NETSTANDARD || NET45 || NET461
             return await Task.FromResult(result);
-#else
-            return await TaskEx.FromResult(result);
-#endif
         }
 
         private string SplitSdkVersion()
         {
-#if NETSTANDARD
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
             return typeof(Split).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 #else
             return FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
@@ -100,7 +82,7 @@ namespace Splitio.Services.Shared.Classes
 
         public static ISplitLogger GetLogger(Type type)
         {
-#if NETSTANDARD
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
             return new MicrosoftExtensionsLogging(type);
 #else
             return new CommonLogging(type);
@@ -109,7 +91,7 @@ namespace Splitio.Services.Shared.Classes
 
         public static ISplitLogger GetLogger(string type)
         {
-#if NETSTANDARD
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
             return new MicrosoftExtensionsLogging(type);
 #else
             return new CommonLogging(type);
@@ -145,7 +127,7 @@ namespace Splitio.Services.Shared.Classes
             {
                 try
                 {
-#if NETSTANDARD
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
                     var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
                     hostAddressesTask.Wait();
                     return config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();

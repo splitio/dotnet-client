@@ -40,6 +40,7 @@ namespace Splitio.Integration_tests.Resources
         public string R { get; set; }
         public long? C { get; set; }
         public long? M { get; set; }
+        public long? PT  { get; set; }
     }
 
     public class ImpressionCount
