@@ -60,7 +60,11 @@ namespace Splitio.Services.Client.Classes
             ApiKey = "localhost";
 
             BuildEvaluator(log);
-            _impressionsManager = impressionsManager ?? new ImpressionsManager(impressionsLog, null, null, false, ImpressionsMode.Debug, telemetryRuntimeProducer: null, taskManager: _tasksManager);
+
+            _uniqueKeysTracker = new NoopUniqueKeysTracker();
+            _impressionsCounter = new NoopImpressionsCounter();
+            _impressionsObserver = new NoopImpressionsObserver();
+            _impressionsManager = impressionsManager ?? new ImpressionsManager(impressionsLog, null, _impressionsCounter, false, ImpressionsMode.Debug, null, _tasksManager, _uniqueKeysTracker, _impressionsObserver);
         }
 
         #region Public Methods

@@ -9,11 +9,11 @@ using Splitio.Redis.Services.Shared;
 using Splitio.Redis.Telemetry.Storages;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Classes;
+using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
-using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Client.Classes
 {
@@ -22,6 +22,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private readonly RedisConfig _config;
 
         private IRedisAdapter _redisAdapter;
+        private IImpressionsCache _impressionsCache;
 
         public RedisClient(ConfigurationOptions config,
             string apiKey,
@@ -33,12 +34,29 @@ namespace Splitio.Redis.Services.Client.Classes
             ReadConfig(config);
             BuildRedisCache();
             BuildTelemetryStorage();
-            BuildTreatmentLog(config);
+            BuildTreatmentLog(config.ImpressionListener);
+
+            BuildSenderAdapter();
+            BuildUniqueKeysTracker(_config);
+            BuildImpressionsCounter(_config);
+            BuildImpressionsObserver();
             BuildImpressionManager();
+
             BuildEventLog();
             BuildBlockUntilReadyService();
             BuildManager();
             BuildEvaluator();
+
+            Start();
+        }
+
+        public override void Destroy()
+        {
+            if (_statusManager.IsDestroyed()) return;
+
+            _uniqueKeysTracker.Stop();
+            _impressionsCounter.Stop();
+            base.Destroy();
         }
 
         #region Private Methods
@@ -48,6 +66,19 @@ namespace Splitio.Redis.Services.Client.Classes
             _config.SdkVersion = baseConfig.SdkVersion;
             _config.SdkMachineName = baseConfig.SdkMachineName;
             _config.SdkMachineIP = baseConfig.SdkMachineIP;
+            _config.BfExpectedElements = baseConfig.BfExpectedElements;
+            _config.BfErrorRate = baseConfig.BfErrorRate;
+
+            _config.UniqueKeysRefreshRate = baseConfig.UniqueKeysRefreshRate;
+            _config.UniqueKeysCacheMaxSize = baseConfig.UniqueKeysCacheMaxSize;
+            _config.UniqueKeysBulkSize = baseConfig.UniqueKeysBulkSize;
+
+            _config.ImpressionsMode = baseConfig.ImpressionsMode;
+
+            _config.ImpressionsCounterRefreshRate = baseConfig.ImpressionsCounterRefreshRate;
+            _config.ImpressionsCounterCacheMaxSize = baseConfig.ImpressionsCounterCacheMaxSize;
+            _config.ImpressionsCountBulkSize = baseConfig.ImpressionsCountBulkSize;
+
             LabelsEnabled = baseConfig.LabelsEnabled;
 
             _config.RedisHost = config.CacheAdapterConfig.Host;
@@ -66,11 +97,11 @@ namespace Splitio.Redis.Services.Client.Classes
         {
             _redisAdapter = new RedisAdapter(_config.RedisHost, _config.RedisPort, _config.RedisPassword, _config.RedisDatabase, _config.RedisConnectTimeout, _config.RedisConnectRetry, _config.RedisSyncTimeout, _config.TlsConfig);
 
-            Task.Factory.StartNew(() =>
+            _tasksManager.Start(()=>
             {
                 _redisAdapter.Connect();
                 RecordConfigInit();
-            });
+            }, "Connecting Redis Adapter.");
 
             _segmentCache = new RedisSegmentCache(_redisAdapter, _config.RedisUserPrefix);
             _splitParser = new RedisSplitParser(_segmentCache);
@@ -78,18 +109,35 @@ namespace Splitio.Redis.Services.Client.Classes
             _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
         }
 
-        private void BuildTreatmentLog(ConfigurationOptions config)
+        private void BuildTreatmentLog(IImpressionListener impressionListener)
         {
-            var impressionsCache = new RedisImpressionsCache(_redisAdapter, _config.SdkMachineIP, _config.SdkVersion, _config.SdkMachineName, _config.RedisUserPrefix);
-            _impressionsLog = new RedisImpressionLog(impressionsCache);
+            _impressionsCache = new RedisImpressionsCache(_redisAdapter, _config.SdkMachineIP, _config.SdkVersion, _config.SdkMachineName, _config.RedisUserPrefix);
+            _impressionsLog = new RedisImpressionLog(_impressionsCache);
+            _customerImpressionListener = impressionListener;
+        }
 
-            _customerImpressionListener = config.ImpressionListener;
+        private void BuildSenderAdapter()
+        {
+            _impressionsSenderAdapter = new RedisSenderAdapter(_impressionsCache);
+        }
+
+        private void BuildImpressionsObserver()
+        {
+            if (_config.ImpressionsMode != ImpressionsMode.Optimized)
+            {
+                _impressionsObserver = new NoopImpressionsObserver();
+                return;
+            }
+
+            var impressionHasher = new ImpressionHasher();
+            _impressionsObserver = new ImpressionsObserver(impressionHasher);
         }
 
         private void BuildImpressionManager()
         {
-            var impressionsCounter = new ImpressionsCounter();
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, false, ImpressionsMode.Debug, telemetryRuntimeProducer: null, taskManager: _tasksManager);
+            var shouldCalculatePreviousTime = _config.ImpressionsMode == ImpressionsMode.Optimized;
+
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, shouldCalculatePreviousTime, _config.ImpressionsMode, null, _tasksManager, _uniqueKeysTracker, _impressionsObserver);
         }
 
         private void BuildEventLog()
@@ -127,6 +175,12 @@ namespace Splitio.Redis.Services.Client.Classes
             };
 
             _telemetryInitProducer.RecordConfigInit(config);
+        }
+
+        private void Start()
+        {
+            _uniqueKeysTracker.Start();
+            _impressionsCounter.Start();
         }
 
         private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)

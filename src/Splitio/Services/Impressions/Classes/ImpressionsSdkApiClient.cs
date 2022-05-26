@@ -59,7 +59,7 @@ namespace Splitio.Services.Impressions.Classes
             }
         }
 
-        public async void SendBulkImpressionsCount(ConcurrentDictionary<KeyCache, int> impressionsCount)
+        public async void SendBulkImpressionsCount(List<ImpressionsCountModel> impressionsCount)
         {
             using (var clock = new Util.SplitStopwatch())
             {
@@ -84,17 +84,9 @@ namespace Splitio.Services.Impressions.Classes
             return JsonConvert.SerializeObject(impressionsPerFeature);
         }
 
-        public string ConvertToJson(ConcurrentDictionary<KeyCache, int> impressionsCount)
+        public string ConvertToJson(List<ImpressionsCountModel> impressionsCount)
         {
-            return JsonConvert.SerializeObject(new
-            {
-                pf = impressionsCount.Select(item => new
-                {
-                    f = item.Key.SplitName,
-                    m = item.Key.TimeFrame,
-                    rc = item.Value
-                })
-            });
+            return JsonConvert.SerializeObject(new { pf = impressionsCount });
         }
 
         private async Task BuildJsonAndPost(List<KeyImpression> impressions, Util.SplitStopwatch clock)

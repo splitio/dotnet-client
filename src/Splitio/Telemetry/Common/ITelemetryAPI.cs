@@ -6,5 +6,6 @@ namespace Splitio.Telemetry.Common
     {
         void RecordConfigInit(Config init);
         void RecordStats(Stats stats);
+        void RecordUniqueKeys(UniqueKeys uniqueKeys);
     }
 }

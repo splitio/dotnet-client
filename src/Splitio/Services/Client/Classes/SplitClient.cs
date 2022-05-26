@@ -1,10 +1,12 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
+using Splitio.Services.Cache.Filter;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
+using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
@@ -15,6 +17,7 @@ using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -37,7 +40,6 @@ namespace Splitio.Services.Client.Classes
         protected string ApiKey;
 
         protected ISplitManager _manager;
-        protected IImpressionsLog _impressionsLog;
         protected IEventsLog _eventsLog;
         protected ISplitCache _splitCache;
         protected ITrafficTypeValidator _trafficTypeValidator;
@@ -46,12 +48,18 @@ namespace Splitio.Services.Client.Classes
         protected IFactoryInstantiationsService _factoryInstantiationsService;
         protected ISplitParser _splitParser;
         protected IEvaluator _evaluator;
-        protected IImpressionListener _customerImpressionListener;
-        protected IImpressionsManager _impressionsManager;
         protected ITelemetryEvaluationProducer _telemetryEvaluationProducer;
         protected ITelemetryInitProducer _telemetryInitProducer;
         protected ITasksManager _tasksManager;
         protected IStatusManager _statusManager;
+
+        protected IImpressionsLog _impressionsLog;
+        protected IUniqueKeysTracker _uniqueKeysTracker;
+        protected IImpressionListener _customerImpressionListener;
+        protected IImpressionsManager _impressionsManager;
+        protected IImpressionsSenderAdapter _impressionsSenderAdapter;
+        protected IImpressionsCounter _impressionsCounter;
+        protected IImpressionsObserver _impressionsObserver;
 
         public SplitClient(ISplitLogger log)
         {
@@ -209,7 +217,36 @@ namespace Splitio.Services.Client.Classes
         {
             var splitter = new Splitter();
             _evaluator = new Evaluator.Evaluator(_splitCache, _splitParser, splitter, log);
-        }        
+        }
+
+        protected void BuildUniqueKeysTracker(BaseConfig config)
+        {
+            if (config.ImpressionsMode != ImpressionsMode.None)
+            {
+                _uniqueKeysTracker = new NoopUniqueKeysTracker();
+                return;
+            }
+
+            var bloomFilter = new BloomFilter(config.BfExpectedElements, config.BfErrorRate);
+            var filterAdapter = new FilterAdapter(bloomFilter);
+            var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
+            var trackerConfig = new ComponentConfig(config.UniqueKeysRefreshRate, config.UniqueKeysCacheMaxSize, config.UniqueKeysBulkSize);
+
+            _uniqueKeysTracker = new UniqueKeysTracker(trackerConfig, filterAdapter, trackerCache, _impressionsSenderAdapter, _tasksManager);
+        }
+
+        protected void BuildImpressionsCounter(BaseConfig config)
+        {
+            if (config.ImpressionsMode == ImpressionsMode.Debug)
+            {
+                _impressionsCounter = new NoopImpressionsCounter();
+                return;
+            }
+
+            var trackerConfig = new ComponentConfig(config.ImpressionsCounterRefreshRate, config.ImpressionsCounterCacheMaxSize, config.ImpressionsCountBulkSize);
+
+            _impressionsCounter = new ImpressionsCounter(trackerConfig, _impressionsSenderAdapter, _tasksManager);
+        }
         #endregion
 
         #region Private Methods

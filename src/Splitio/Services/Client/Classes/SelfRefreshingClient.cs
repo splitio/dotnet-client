@@ -44,10 +44,10 @@ namespace Splitio.Services.Client.Classes
         private IEventSdkApiClient _eventSdkApiClient;
         private ISelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
         private ISyncManager _syncManager;
-        private IImpressionsCounter _impressionsCounter;        
         private ITelemetrySyncTask _telemetrySyncTask;        
         private ITelemetryStorageConsumer _telemetryStorageConsumer;
         private ITelemetryRuntimeProducer _telemetryRuntimeProducer;
+        private ITelemetryAPI _telemetryAPI; 
 
         public SelfRefreshingClient(string apiKey, 
             ConfigurationOptions config, 
@@ -64,7 +64,13 @@ namespace Splitio.Services.Client.Classes
             BuildSdkApiClients();
             BuildSplitFetcher();            
             BuildTreatmentLog(config);
+
+            BuildSenderAdapter();
+            BuildUniqueKeysTracker(_config);
+            BuildImpressionsCounter(_config);
+            BuildImpressionsObserver();
             BuildImpressionManager();
+
             BuildEventLog(config);
             BuildEvaluator();
             BuildBlockUntilReadyService();
@@ -130,19 +136,33 @@ namespace Splitio.Services.Client.Classes
             _customerImpressionListener = config.ImpressionListener;
         }
 
+        private void BuildSenderAdapter()
+        {
+            _impressionsSenderAdapter = new InMemorySenderAdapter(_telemetryAPI, _impressionsSdkApiClient);
+        }
+
+        private void BuildImpressionsObserver()
+        {
+            if (_config.ImpressionsMode == ImpressionsMode.None)
+            {
+                _impressionsObserver = new NoopImpressionsObserver();
+                return;
+            }
+
+            var impressionHasher = new ImpressionHasher();
+            _impressionsObserver = new ImpressionsObserver(impressionHasher);
+        }
+
         private void BuildImpressionManager()
         {
-            var impressionsHasher = new ImpressionHasher();
-            var impressionsObserver = new ImpressionsObserver(impressionsHasher);
-            _impressionsCounter = new ImpressionsCounter();
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, true, _config.ImpressionsMode, _telemetryRuntimeProducer, _tasksManager, impressionsObserver);
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, true, _config.ImpressionsMode, _telemetryRuntimeProducer, _tasksManager, _uniqueKeysTracker, _impressionsObserver);
         }
 
         private void BuildEventLog(ConfigurationOptions config)
         {
             var eventsCache = new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(_config.EventLogSize));
             _eventsLog = new EventsLog(_eventSdkApiClient, _config.EventsFirstPushWindow, _config.EventLogRefreshRate, eventsCache, _telemetryRuntimeProducer, _tasksManager);
-        }        
+        }
 
         private int Random(int refreshRate)
         {
@@ -174,10 +194,10 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildTelemetrySyncTask()
         {
-            var httpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, GetHeaders());            
-            var telemetryAPI = new TelemetryAPI(httpClient, _config.TelemetryServiceURL, _telemetryRuntimeProducer);
+            var httpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, GetHeaders());
 
-            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorageConsumer, telemetryAPI, _splitCache, _segmentCache, _config, FactoryInstantiationsService.Instance(), _wrapperAdapter, _tasksManager);
+            _telemetryAPI = new TelemetryAPI(httpClient, _config.TelemetryServiceURL, _telemetryRuntimeProducer);
+            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorageConsumer, _telemetryAPI, _splitCache, _segmentCache, _config, FactoryInstantiationsService.Instance(), _wrapperAdapter, _tasksManager);
         }
 
         private void BuildSyncManager()
@@ -185,9 +205,8 @@ namespace Splitio.Services.Client.Classes
             try
             {
                 // Synchronizer
-                var impressionsCountSender = new ImpressionsCountSender(_impressionsSdkApiClient, _impressionsCounter, _tasksManager);
                 var backOff = new BackOff(backOffBase: 10, attempt: 0, maxAllowed: 60);
-                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, impressionsCountSender, _wrapperAdapter, _statusManager, _telemetrySyncTask, _tasksManager, _splitCache, backOff, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs, _segmentCache);
+                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _impressionsCounter, _wrapperAdapter, _statusManager, _telemetrySyncTask, _tasksManager, _splitCache, backOff, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs, _segmentCache, _uniqueKeysTracker);
 
                 // Workers
                 var splitsWorker = new SplitsWorker(_splitCache, synchronizer, _tasksManager);

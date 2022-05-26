@@ -24,13 +24,14 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<IImpressionsLog> _impressionsLog;
         private readonly Mock<IEventsLog> _eventsLog;
         private readonly Mock<ISplitLogger> _log;
-        private readonly Mock<IImpressionsCountSender> _impressionsCountSender;
+        private readonly Mock<IImpressionsCounter> _impressionsCounter;
         private readonly Mock<IWrapperAdapter> _wrapperAdapter;
         private readonly Mock<IStatusManager> _statusManager;
         private readonly Mock<ITelemetrySyncTask> _telemetrySyncTask;
         private readonly Mock<ISplitCache> _splitCache;
         private readonly Mock<ISegmentCache> _segmentCache;
         private readonly Mock<IBackOff> _backOff;
+        private readonly Mock<IUniqueKeysTracker> _uniqueKeysTracker;
         private readonly ISynchronizer _synchronizer;
 
         public SynchronizerTests()
@@ -40,15 +41,16 @@ namespace Splitio_Tests.Unit_Tests.Common
             _impressionsLog = new Mock<IImpressionsLog>();
             _eventsLog = new Mock<IEventsLog>();
             _log = new Mock<ISplitLogger>();
-            _impressionsCountSender = new Mock<IImpressionsCountSender>();
+            _impressionsCounter = new Mock<IImpressionsCounter>();
             _wrapperAdapter = new Mock<IWrapperAdapter>();
             _statusManager = new Mock<IStatusManager>();
             _telemetrySyncTask = new Mock<ITelemetrySyncTask>();
             _splitCache = new Mock<ISplitCache>();
             _backOff = new Mock<IBackOff>();
             _segmentCache = new Mock<ISegmentCache>();
+            _uniqueKeysTracker = new Mock<IUniqueKeysTracker>();
 
-            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCountSender.Object, _wrapperAdapter.Object, _statusManager.Object, _telemetrySyncTask.Object, new TasksManager(_wrapperAdapter.Object), _splitCache.Object, _backOff.Object, 10, 5, _segmentCache.Object, _log.Object);
+            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCounter.Object, _wrapperAdapter.Object, _statusManager.Object, _telemetrySyncTask.Object, new TasksManager(_wrapperAdapter.Object), _splitCache.Object, _backOff.Object, 10, 5, _segmentCache.Object, _uniqueKeysTracker.Object, _log.Object);
         }
 
         [TestMethod]
@@ -60,7 +62,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             // Assert.
             _impressionsLog.Verify(mock => mock.Start(), Times.Once);
             _eventsLog.Verify(mock => mock.Start(), Times.Once);
-            _impressionsCountSender.Verify(mock => mock.Start(), Times.Once);
+            _impressionsCounter.Verify(mock => mock.Start(), Times.Once);
             _telemetrySyncTask.Verify(mock => mock.Start(), Times.Once);
         }
 
@@ -85,7 +87,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             // Assert.
             _impressionsLog.Verify(mock => mock.Stop(), Times.Once);
             _eventsLog.Verify(mock => mock.Stop(), Times.Once);
-            _impressionsCountSender.Verify(mock => mock.Stop(), Times.Once);
+            _impressionsCounter.Verify(mock => mock.Stop(), Times.Once);
             _telemetrySyncTask.Verify(mock => mock.Stop(), Times.Once);
         }
 
