@@ -11,7 +11,6 @@
     public class Http
     {
         public static string Bearer => "Bearer";
-        public static int ProtocolTypeTls12 => 3072;
         public static string SplitSDKVersion => "SplitSDKVersion";
         public static string SplitSDKImpressionsMode => "SplitSDKImpressionsMode";
         public static string SplitSDKMachineName => "SplitSDKMachineName";
