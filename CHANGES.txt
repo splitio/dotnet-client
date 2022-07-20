@@ -1,5 +1,8 @@
 CHANGES
 
+7.0.1 (Jul 21, 2022)
+- Updated to avoid forcing TLS1.2 when TLS1.3 is available when compiling in .NET Framework.
+
 7.0.0 (May 26, 2022)
 - BREAKING CHANGE: Deprecated support for .NET Framework 4.0 and .NET Core 1.x.
 - Updated redis command for config telemetry, using hset instead of rpush now.

@@ -31,8 +31,8 @@ namespace Splitio.Services.Common
             long connectionTimeOut,
             Dictionary<string, string> headers = null)
         {
-#if NET45 || NET461
-            ServicePointManager.SecurityProtocol = (SecurityProtocolType)Constants.Http.ProtocolTypeTls12;
+#if NET45
+            ServicePointManager.SecurityProtocol = (SecurityProtocolType)12288 | (SecurityProtocolType)3072 | (SecurityProtocolType)768 | SecurityProtocolType.Tls;
 #endif
             _log = WrapperAdapter.GetLogger(typeof(SplitioHttpClient));
             _httpClient = new HttpClient()
