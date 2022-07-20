@@ -4,7 +4,6 @@ using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -28,7 +27,7 @@ namespace Splitio.CommonLibraries
             ITelemetryRuntimeProducer telemetryRuntimeProducer)
         {
 #if NET45
-            ServicePointManager.SecurityProtocol = (SecurityProtocolType)12288 | (SecurityProtocolType)3072 | (SecurityProtocolType)768 | SecurityProtocolType.Tls;
+            ServicePointManager.SecurityProtocol = (SecurityProtocolType)12288 | (SecurityProtocolType)3072;
 #endif
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             var handler = new HttpClientHandler()
