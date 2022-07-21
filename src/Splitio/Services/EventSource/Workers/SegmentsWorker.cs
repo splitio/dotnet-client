@@ -67,7 +67,7 @@ namespace Splitio.Services.EventSource.Workers
                 }
                 catch (Exception ex)
                 {
-                    _log.Error($"Start: {ex.Message}");
+                    _log.Debug($"Start: {ex.Message}");
                 }
             }
         }
@@ -92,7 +92,7 @@ namespace Splitio.Services.EventSource.Workers
                 }
                 catch (Exception ex)
                 {
-                    _log.Error($"Stop: {ex.Message}");
+                    _log.Debug($"Stop: {ex.Message}");
                 }
             }
         }
@@ -116,7 +116,7 @@ namespace Splitio.Services.EventSource.Workers
             }
             catch (Exception ex)
             {
-                _log.Error($"Execute: {ex.Message}");
+                _log.Debug($"Execute: {ex.Message}");
             }
             finally
             {
