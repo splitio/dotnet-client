@@ -28,6 +28,7 @@ namespace Splitio.Services.Shared.Classes
 
                 object keyOrKeys;
                 string config;
+                int size = 100;
 
                 foreach (var children in sequenceNodes.Children)
                 {
@@ -37,6 +38,7 @@ namespace Splitio.Services.Shared.Classes
                     var treatment = mapping.Value["treatment"]?.ToString();
                     try { keyOrKeys = mapping.Value["keys"]; } catch { keyOrKeys = null; }
                     try { config = ((YamlScalarNode)mapping.Value["config"]).Value; } catch { config = null; }
+                    try { int.TryParse(((YamlScalarNode)mapping.Value["size"]).Value, out size); } catch { size = 100; }
 
                     List<string> keys = null;
                     var splitToAdd = CreateParsedSplit(splitName, Control, new List<ConditionWithLogic>());
@@ -59,7 +61,7 @@ namespace Splitio.Services.Shared.Classes
                         }
                     }
 
-                    splitToAdd.conditions.Add(CreateCondition(treatment, keys));
+                    splitToAdd.conditions.Add(CreateCondition(treatment, keys, size));
 
                     if (!string.IsNullOrEmpty(config))
                     {

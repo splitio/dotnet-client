@@ -30,7 +30,7 @@ namespace Splitio.Services.Shared.Classes
             return split;
         }
 
-        protected ConditionWithLogic CreateCondition(string treatment, List<string> keys = null)
+        protected ConditionWithLogic CreateCondition(string treatment, List<string> keys = null, int size = 100)
         {
             if (keys != null)
             {
@@ -53,7 +53,7 @@ namespace Splitio.Services.Shared.Classes
                     {
                         new PartitionDefinition
                         {
-                            size = 100,
+                            size = size,
                             treatment = treatment
                         }
                     },
@@ -81,7 +81,7 @@ namespace Splitio.Services.Shared.Classes
                     {
                         new PartitionDefinition
                         {
-                            size = 100,
+                            size = size,
                             treatment = treatment
                         }
                     },
