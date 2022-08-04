@@ -159,6 +159,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 "testing_split_only_wl",
                 "testing_split_with_wl",
                 "testing_split_off_with_config",
+                "testing_split_with_size",
             };
 
             var configurationOptions = new ConfigurationOptions
@@ -197,6 +198,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 "testing_split_only_wl",
                 "testing_split_with_wl",
                 "testing_split_off_with_config",
+                "testing_split_with_size",
             };
 
             var configurationOptions = new ConfigurationOptions
