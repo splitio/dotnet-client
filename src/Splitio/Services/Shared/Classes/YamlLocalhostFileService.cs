@@ -80,6 +80,7 @@ namespace Splitio.Services.Shared.Classes
                                 splitToAdd.configurations.Add(conf.Key, conf.Value);
                         }
 
+                        //splitToAdd.conditions.AddRange(oldSplit.conditions); 
                         MergeConditions(splitToAdd, oldSplit);
 
                         splits.TryUpdate(splitName, splitToAdd, oldSplit);
@@ -96,19 +97,24 @@ namespace Splitio.Services.Shared.Classes
 
         private void MergeConditions(ParsedSplit splitToAdd, ParsedSplit oldSplit)
         {
-            var splitToAddConditionTypes = splitToAdd.conditions.Select(c => c.conditionType);
-            var oldSplitConditionTypes = oldSplit.conditions.Select(c => c.conditionType);
-
-            var commonConditionTypes = splitToAddConditionTypes.Intersect(oldSplitConditionTypes).ToArray();
-
-            foreach (var commonCondition in commonConditionTypes)
+            if (oldSplit.conditions.Exists(c => c.conditionType == ConditionType.ROLLOUT))
             {
-                splitToAdd.conditions
-                    .First(s => s.conditionType == commonCondition).partitions
-                    .Add(oldSplit.conditions.First(s => s.conditionType == commonCondition).partitions.First());
+                if (splitToAdd.conditions.Exists(c => c.conditionType == ConditionType.ROLLOUT))
+                {
+                    splitToAdd.conditions
+                        .First(s => s.conditionType == ConditionType.ROLLOUT).partitions
+                        .AddRange(oldSplit.conditions.FirstOrDefault(s => s.conditionType == ConditionType.ROLLOUT)?.partitions.ToList() ?? new List<PartitionDefinition>());
+                }
+                else
+                {
+                    splitToAdd.conditions
+                        .AddRange(oldSplit.conditions.Where(s => s.conditionType == ConditionType.ROLLOUT));
+                }
             }
 
-            splitToAdd.conditions.AddRange(oldSplit.conditions.Where(c => !commonConditionTypes.Contains(c.conditionType)));
+            splitToAdd.conditions.AddRange(oldSplit.conditions.Where(c => c.conditionType != ConditionType.ROLLOUT));
+
+            splitToAdd.conditions = splitToAdd.conditions.OrderBy(k => k.conditionType).ToList();
         }
     }
 }
