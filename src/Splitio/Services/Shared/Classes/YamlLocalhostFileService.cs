@@ -80,7 +80,6 @@ namespace Splitio.Services.Shared.Classes
                                 splitToAdd.configurations.Add(conf.Key, conf.Value);
                         }
 
-                        //splitToAdd.conditions.AddRange(oldSplit.conditions); 
                         MergeConditions(splitToAdd, oldSplit);
 
                         splits.TryUpdate(splitName, splitToAdd, oldSplit);
