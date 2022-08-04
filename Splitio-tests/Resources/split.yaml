@@ -20,3 +20,10 @@
 - testing_split_off_with_config:
     treatment: "off"
     config: "{\"color\": \"green\"}"
+# Playing with size
+- testing_split_with_size:
+    treatment: "on"
+    size: 55
+- testing_split_with_size:
+    treatment: "off"
+    size: 45

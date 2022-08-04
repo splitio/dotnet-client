@@ -181,6 +181,9 @@ namespace Splitio_Tests.Integration_Tests
             result = client.GetTreatmentWithConfig("key_for_wl_2", "testing_split_off_with_config");
             Assert.AreEqual("off", result.Treatment);
             Assert.AreEqual("{\"color\": \"green\"}", result.Config);
+
+            result = client.GetTreatmentWithConfig("key_for_ws", "testing_split_with_size");
+            Assert.IsTrue(string.Equals(result.Treatment, "on") || string.Equals(result.Treatment, "off"));
         }
 
         [DeploymentItem(@"Resources\split.yml")]
@@ -252,6 +255,9 @@ namespace Splitio_Tests.Integration_Tests
             result = client.GetTreatmentWithConfig("key_for_wl_2", "testing_split_off_with_config");
             Assert.AreEqual("off", result.Treatment);
             Assert.AreEqual("{\"color\": \"green\"}", result.Config);
+
+            result = client.GetTreatmentWithConfig("key_for_ws", "testing_split_with_size");
+            Assert.IsTrue(string.Equals(result.Treatment, "on") || string.Equals(result.Treatment, "off"));
         }
 
         [DeploymentItem(@"Resources\split.yaml")]
