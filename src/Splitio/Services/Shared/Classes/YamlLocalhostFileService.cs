@@ -80,7 +80,7 @@ namespace Splitio.Services.Shared.Classes
                                 splitToAdd.configurations.Add(conf.Key, conf.Value);
                         }
 
-                        splitToAdd.conditions.AddRange(oldSplit.conditions);
+                        MergeConditions(splitToAdd, oldSplit);
 
                         splits.TryUpdate(splitName, splitToAdd, oldSplit);
                     }
@@ -92,6 +92,23 @@ namespace Splitio.Services.Shared.Classes
             }
 
             return splits;
+        }
+
+        private void MergeConditions(ParsedSplit splitToAdd, ParsedSplit oldSplit)
+        {
+            var splitToAddConditionTypes = splitToAdd.conditions.Select(c => c.conditionType);
+            var oldSplitConditionTypes = oldSplit.conditions.Select(c => c.conditionType);
+
+            var commonConditionTypes = splitToAddConditionTypes.Intersect(oldSplitConditionTypes).ToArray();
+
+            foreach (var commonCondition in commonConditionTypes)
+            {
+                splitToAdd.conditions
+                    .First(s => s.conditionType == commonCondition).partitions
+                    .Add(oldSplit.conditions.First(s => s.conditionType == commonCondition).partitions.First());
+            }
+
+            splitToAdd.conditions.AddRange(oldSplit.conditions.Where(c => !commonConditionTypes.Contains(c.conditionType)));
         }
     }
 }
