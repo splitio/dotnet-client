@@ -1,5 +1,8 @@
 CHANGES
 
+7.0.2 (Coming soon)
+- Avoid count when the previous time calculated is 0 or null
+
 7.0.1 (Jul 21, 2022)
 - Updated to avoid forcing TLS1.2 when TLS1.3 is available when compiling in .NET Framework.
 
