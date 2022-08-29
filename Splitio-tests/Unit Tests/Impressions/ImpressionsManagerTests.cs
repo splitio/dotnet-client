@@ -164,7 +164,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
            
             // Assert.
             _impressionsObserver.Verify(mock => mock.TestAndSet(It.IsAny<KeyImpression>()), Times.Once);
-            _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Once);
+            _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Never);
 
             Thread.Sleep(1000);
             _impressionsLog.Verify(mock => mock.Log(It.IsAny<List<KeyImpression>>()), Times.Once);
@@ -192,7 +192,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             // Assert.
             _impressionsObserver.Verify(mock => mock.TestAndSet(It.IsAny<KeyImpression>()), Times.Once);
-            _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Once);
+            _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Never);
 
             Thread.Sleep(1000);
             _impressionsLog.Verify(mock => mock.Log(It.IsAny<List<KeyImpression>>()), Times.Once);
