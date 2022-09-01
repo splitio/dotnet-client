@@ -39,7 +39,7 @@ namespace Splitio_Tests.Integration_Tests
             var splitChangesResult = splitChangeFetcher.Fetch(-1, new FetchOptions());
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
             var gates = new InMemoryReadinessGatesCache();
-            var wrapperAdapter = new WrapperAdapter();
+            var wrapperAdapter = WrapperAdapter.Instance();
             var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, splitParser, gates, 30, new TasksManager(wrapperAdapter), splitCache);
             selfRefreshingSplitFetcher.Start();
             gates.WaitUntilReady(1000);
@@ -65,7 +65,7 @@ namespace Splitio_Tests.Integration_Tests
             var splitChangesResult = splitChangeFetcher.Fetch(-1, new FetchOptions());
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
             var gates = new InMemoryReadinessGatesCache();
-            var wrapperAdapter = new WrapperAdapter();
+            var wrapperAdapter = WrapperAdapter.Instance();
             var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, splitParser, gates, 30, new TasksManager(wrapperAdapter), splitCache);
             selfRefreshingSplitFetcher.Start();
             gates.WaitUntilReady(1000);
@@ -104,7 +104,7 @@ namespace Splitio_Tests.Integration_Tests
             var gates = new InMemoryReadinessGatesCache();
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var segmentTaskQueue = new SegmentTaskQueue();
-            var wrapperAdapter = new WrapperAdapter();
+            var wrapperAdapter = WrapperAdapter.Instance();
             var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, gates, 30, segmentCache, 4, segmentTaskQueue, new TasksManager(wrapperAdapter), wrapperAdapter);
 
             var splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, segmentCache);
@@ -144,7 +144,7 @@ namespace Splitio_Tests.Integration_Tests
             var gates = new InMemoryReadinessGatesCache();
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var segmentTaskQueue = new SegmentTaskQueue();
-            var wrapperAdapter = new WrapperAdapter();
+            var wrapperAdapter = WrapperAdapter.Instance();
             var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, gates, 30, segmentCache, 4, segmentTaskQueue, new TasksManager(wrapperAdapter), wrapperAdapter);
             var splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, segmentCache);
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());

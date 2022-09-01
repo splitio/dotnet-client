@@ -62,7 +62,7 @@ namespace Splitio_Tests.Integration_Tests
             var gates = new InMemoryReadinessGatesCache();
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var segmentTaskQueue = new SegmentTaskQueue();
-            var wrapperAdapter = new WrapperAdapter();
+            var wrapperAdapter = WrapperAdapter.Instance();
             var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, gates, 30, segmentCache, 4, segmentTaskQueue, new TasksManager(wrapperAdapter), wrapperAdapter);
 
             //Act

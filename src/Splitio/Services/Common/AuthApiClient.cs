@@ -23,13 +23,12 @@ namespace Splitio.Services.Common
         public AuthApiClient(string url,
             string apiKey,
             ISplitioHttpClient splitioHttpClient,
-            ITelemetryRuntimeProducer telemetryRuntimeProducer,
-            ISplitLogger log = null)
+            ITelemetryRuntimeProducer telemetryRuntimeProducer)
         {
             _url = url;
             _splitioHttpClient = splitioHttpClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
-            _log = log ?? WrapperAdapter.GetLogger(typeof(AuthApiClient));            
+            _log = WrapperAdapter.Instance().GetLogger(typeof(AuthApiClient));            
         }
 
         #region Public Methods

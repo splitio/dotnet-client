@@ -1,5 +1,4 @@
 ﻿using Splitio.Domain;
-using Splitio.Services.Logger;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -10,9 +9,9 @@ namespace Splitio.Services.Shared.Classes
 {
     public class YamlLocalhostFileService : AbstractLocalhostFileService
     {
-        public YamlLocalhostFileService(ISplitLogger log = null)
+        public YamlLocalhostFileService()
         {
-            _log = log ?? WrapperAdapter.GetLogger(typeof(YamlLocalhostFileService));
+            _log = WrapperAdapter.Instance().GetLogger(typeof(YamlLocalhostFileService));
         }
 
         public override ConcurrentDictionary<string, ParsedSplit> ParseSplitFile(string filePath)

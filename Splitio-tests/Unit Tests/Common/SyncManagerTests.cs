@@ -3,7 +3,6 @@ using Moq;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Common;
@@ -20,7 +19,6 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<ISynchronizer> _synchronizer;
         private readonly Mock<IPushManager> _pushManager;
         private readonly Mock<ISSEHandler> _sseHandler;
-        private readonly Mock<ISplitLogger> _log;
         private readonly Mock<INotificationManagerKeeper> _notificationManagerKeeper;
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private readonly Mock<IStatusManager> _statusManager;
@@ -29,13 +27,12 @@ namespace Splitio_Tests.Unit_Tests.Common
 
         public SyncManagerTests()
         {
-            _wrapperAdapter = new WrapperAdapter();
+            _wrapperAdapter = WrapperAdapter.Instance();
             _taskManager = new TasksManager(_wrapperAdapter);
 
             _synchronizer = new Mock<ISynchronizer>();
             _pushManager = new Mock<IPushManager>();
             _sseHandler = new Mock<ISSEHandler>();
-            _log = new Mock<ISplitLogger>();
             _notificationManagerKeeper = new Mock<INotificationManagerKeeper>();
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _telemetrySyncTask = new Mock<ITelemetrySyncTask>();
@@ -60,8 +57,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
-                _telemetrySyncTask.Object,
-                _log.Object);
+                _telemetrySyncTask.Object);
 
             // Act.
             _syncManager.Start();
@@ -96,8 +92,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
-                _telemetrySyncTask.Object,
-                _log.Object);
+                _telemetrySyncTask.Object);
 
             // Act.
             _syncManager.Start();
@@ -132,8 +127,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
-                _telemetrySyncTask.Object,
-                _log.Object);
+                _telemetrySyncTask.Object);
 
             // Act.
             _syncManager.Start();
@@ -160,8 +154,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
-                _telemetrySyncTask.Object,
-                _log.Object);
+                _telemetrySyncTask.Object);
 
             // Act.
             _syncManager.Shutdown();
@@ -186,8 +179,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
-                _telemetrySyncTask.Object,
-                _log.Object);
+                _telemetrySyncTask.Object);
 
             // Act & Assert.
             syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.CONNECTED));
@@ -218,8 +210,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
-                _telemetrySyncTask.Object,
-                _log.Object);
+                _telemetrySyncTask.Object);
 
             // Act & Assert.
             syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.DISCONNECT));
@@ -253,8 +244,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
-                _telemetrySyncTask.Object,
-                _log.Object);
+                _telemetrySyncTask.Object);
 
             // Act & Assert.
             syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.RETRYABLE_ERROR));
@@ -288,8 +278,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
-                _telemetrySyncTask.Object,
-                _log.Object);
+                _telemetrySyncTask.Object);
 
             // Act & Assert.
             syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.NONRETRYABLE_ERROR));
@@ -323,8 +312,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
-                _telemetrySyncTask.Object,
-                _log.Object);
+                _telemetrySyncTask.Object);
 
             // Act.
             syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.SUBSYSTEM_DOWN));
@@ -349,8 +337,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
-                _telemetrySyncTask.Object,
-                _log.Object);
+                _telemetrySyncTask.Object);
 
             // Act.
             syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.SUBSYSTEM_READY));
@@ -375,8 +362,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
-                _telemetrySyncTask.Object,
-                _log.Object);
+                _telemetrySyncTask.Object);
 
             // Act.
             syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.SUBSYSTEM_OFF));

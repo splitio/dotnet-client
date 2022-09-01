@@ -7,7 +7,6 @@ namespace Splitio.Services.Client.Classes
 {
     public class InMemoryReadinessGatesCache : IStatusManager
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(InMemoryReadinessGatesCache));
         private readonly CountdownEvent _sdkReady = new CountdownEvent(1);
         private readonly CountdownEvent _sdkDestroyed = new CountdownEvent(1);
 

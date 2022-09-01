@@ -8,7 +8,7 @@ namespace Splitio.Services.Client.Classes
     {
         private Dictionary<string, string> _tests;
 
-        public SplitClientForTest(ISplitLogger log) : base(log)
+        public SplitClientForTest() : base()
         {
             _tests = new Dictionary<string, string>();
         }

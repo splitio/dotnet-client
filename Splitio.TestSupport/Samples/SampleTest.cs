@@ -7,15 +7,11 @@ namespace Splitio.TestSupport.Samples
 {
     public class SampleTest
     {
-        private readonly Mock<ISplitLogger> _logMock;
-        
         private SplitClientForTest splitClient;
 
         public SampleTest()
         {
-            _logMock = new Mock<ISplitLogger>();
-
-            splitClient = new SplitClientForTest(_logMock.Object);
+            splitClient = new SplitClientForTest();
         }
 
         [Theory]

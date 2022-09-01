@@ -49,9 +49,7 @@ namespace Splitio.Services.Client.Classes
         private ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private ITelemetryAPI _telemetryAPI; 
 
-        public SelfRefreshingClient(string apiKey, 
-            ConfigurationOptions config, 
-            ISplitLogger log = null) : base(GetLogger(log))
+        public SelfRefreshingClient(string apiKey, ConfigurationOptions config) : base()
         {
             _config = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
             LabelsEnabled = _config.LabelsEnabled;
@@ -189,7 +187,7 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildBlockUntilReadyService()
         {
-            _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(_statusManager, _telemetryInitProducer, _log);
+            _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(_statusManager, _telemetryInitProducer);
         }
 
         private void BuildTelemetrySyncTask()
@@ -277,11 +275,6 @@ namespace Splitio.Services.Client.Classes
         private void Stop()
         {
             _syncManager.Shutdown();
-        }
-
-        private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)
-        {
-            return splitLogger ?? WrapperAdapter.GetLogger(typeof(SelfRefreshingClient));
         }
         #endregion
     }

@@ -22,13 +22,12 @@ namespace Splitio.Services.EventSource.Workers
 
         public SplitsWorker(ISplitCache splitCache,
             ISynchronizer synchronizer,
-            ITasksManager tasksManager,
-            ISplitLogger log = null)
+            ITasksManager tasksManager)
         {
             _splitCache = splitCache;
             _synchronizer = synchronizer;
             _tasksManager = tasksManager;
-            _log = log ?? WrapperAdapter.GetLogger(typeof(SplitsWorker));
+            _log = WrapperAdapter.Instance().GetLogger(typeof(SplitsWorker));
             _queue = new BlockingCollection<long>(new ConcurrentQueue<long>());
         }
 

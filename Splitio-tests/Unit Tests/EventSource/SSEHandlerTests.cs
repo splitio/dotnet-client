@@ -9,7 +9,6 @@ namespace Splitio_Tests.Unit_Tests.EventSource
     [TestClass]
     public class SSEHandlerTests
     {
-        private readonly Mock<ISplitLogger> _log;
         private readonly Mock<ISplitsWorker> _splitsWorker;
         private readonly Mock<ISegmentsWorker> _segmentsWorker;
         private readonly Mock<INotificationProcessor> _notificationPorcessor;
@@ -19,14 +18,13 @@ namespace Splitio_Tests.Unit_Tests.EventSource
 
         public SSEHandlerTests()
         {
-            _log = new Mock<ISplitLogger>();
             _splitsWorker = new Mock<ISplitsWorker>();
             _segmentsWorker = new Mock<ISegmentsWorker>();
             _notificationPorcessor = new Mock<INotificationProcessor>();
             _eventSourceClient = new Mock<IEventSourceClient>();
             _notificationManagerKeeper = new Mock<INotificationManagerKeeper>();
 
-            _sseHandler = new SSEHandler("www.fake.com", _splitsWorker.Object, _segmentsWorker.Object, _notificationPorcessor.Object, _notificationManagerKeeper.Object, _log.Object, _eventSourceClient.Object);
+            _sseHandler = new SSEHandler("www.fake.com", _splitsWorker.Object, _segmentsWorker.Object, _notificationPorcessor.Object, _notificationManagerKeeper.Object, _eventSourceClient.Object);
         }
 
         [TestMethod]

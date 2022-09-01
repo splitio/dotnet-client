@@ -24,13 +24,12 @@ namespace Splitio.Telemetry.Common
 
         public TelemetryAPI(ISplitioHttpClient splitioHttpClient,
             string telemetryURL,
-            ITelemetryRuntimeProducer telemetryRuntimeProducer,
-            ISplitLogger log = null)
+            ITelemetryRuntimeProducer telemetryRuntimeProducer)
         {
             _splitioHttpClient = splitioHttpClient;
             _telemetryURL = telemetryURL;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
-            _log = log ?? WrapperAdapter.GetLogger(typeof(TelemetryAPI));
+            _log = WrapperAdapter.Instance().GetLogger(typeof(TelemetryAPI));
         }
 
         #region Public Methods

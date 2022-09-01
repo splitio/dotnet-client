@@ -1,6 +1,7 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Logger;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,5 +15,7 @@ namespace Splitio.Services.Shared.Interfaces
         Task<Task> WhenAny(params Task[] tasks);
         Task<T> TaskFromResult<T>(T result);
         void TaskWaitAndDispose(params Task[] tasks);
+        ISplitLogger GetLogger(string type);
+        ISplitLogger GetLogger(Type type);
     }
 }

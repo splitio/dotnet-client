@@ -2,25 +2,22 @@
 using Moq;
 using Splitio.Services.EventSource;
 using Splitio.Services.EventSource.Workers;
-using Splitio.Services.Logger;
 
 namespace Splitio_Tests.Unit_Tests.EventSource
 {
     [TestClass]
     public class NotificationPorcessorTests
     {
-        private readonly Mock<ISplitLogger> _log;
         private readonly Mock<ISplitsWorker> _splitsWorker;
         private readonly Mock<ISegmentsWorker> _segmentsWorker;
         private readonly INotificationProcessor _notificationPorcessor;
 
         public NotificationPorcessorTests()
         {
-            _log = new Mock<ISplitLogger>();
             _splitsWorker = new Mock<ISplitsWorker>();
             _segmentsWorker = new Mock<ISegmentsWorker>();
 
-            _notificationPorcessor = new NotificationProcessor(_splitsWorker.Object, _segmentsWorker.Object, _log.Object);
+            _notificationPorcessor = new NotificationProcessor(_splitsWorker.Object, _segmentsWorker.Object);
         }
 
         [TestMethod]

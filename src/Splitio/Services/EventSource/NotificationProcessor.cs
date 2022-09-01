@@ -11,11 +11,9 @@ namespace Splitio.Services.EventSource
         private readonly ISplitsWorker _splitsWorker;
         private readonly ISegmentsWorker _segmentsWorker;
 
-        public NotificationProcessor(ISplitsWorker splitsWorker,
-            ISegmentsWorker segmentsWorker,
-            ISplitLogger log = null)
+        public NotificationProcessor(ISplitsWorker splitsWorker, ISegmentsWorker segmentsWorker)
         {
-            _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
+            _log = WrapperAdapter.Instance().GetLogger(typeof(EventSourceClient));
             _splitsWorker = splitsWorker;
             _segmentsWorker = segmentsWorker;
         }

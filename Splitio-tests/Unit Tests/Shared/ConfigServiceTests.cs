@@ -12,16 +12,14 @@ namespace Splitio_Tests.Unit_Tests.Shared
     public class ConfigServiceTests
     {
         private readonly Mock<IWrapperAdapter> _wrapperAdapter;
-        private readonly Mock<ISplitLogger> _log;
 
         private readonly IConfigService _configService;
 
         public ConfigServiceTests()
         {
             _wrapperAdapter = new Mock<IWrapperAdapter>();
-            _log = new Mock<ISplitLogger>();
 
-            _configService = new ConfigService(_wrapperAdapter.Object, _log.Object);
+            _configService = new ConfigService(_wrapperAdapter.Object);
         }
 
         [TestMethod]

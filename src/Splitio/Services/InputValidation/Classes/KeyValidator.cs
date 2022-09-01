@@ -13,7 +13,7 @@ namespace Splitio.Services.InputValidation.Classes
 
         public KeyValidator(ISplitLogger log = null)
         {
-            _log = log ?? WrapperAdapter.GetLogger(typeof(KeyValidator));
+            _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(KeyValidator));
         }
 
         public bool IsValid(Key key, string method)

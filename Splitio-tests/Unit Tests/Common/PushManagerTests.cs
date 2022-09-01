@@ -3,7 +3,6 @@ using Moq;
 using Splitio.Domain;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Storages;
 using System.Threading;
@@ -14,7 +13,6 @@ namespace Splitio_Tests.Unit_Tests.Common
     public class PushManagerTests
     {
         private readonly Mock<IAuthApiClient> _authApiClient;
-        private readonly Mock<ISplitLogger> _log;
         private readonly Mock<ISSEHandler> _sseHandler;
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private readonly IPushManager _pushManager;
@@ -22,12 +20,11 @@ namespace Splitio_Tests.Unit_Tests.Common
         public PushManagerTests()
         {
             _authApiClient = new Mock<IAuthApiClient>();
-            _log = new Mock<ISplitLogger>();
             _sseHandler = new Mock<ISSEHandler>();
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
-            var wrapper = new WrapperAdapter();
+            var wrapper = WrapperAdapter.Instance();
             var backoff = new BackOff(1, 1);
-            _pushManager = new PushManager(_sseHandler.Object, _authApiClient.Object, wrapper, _telemetryRuntimeProducer.Object, backoff, _log.Object);
+            _pushManager = new PushManager(_sseHandler.Object, _authApiClient.Object, wrapper, _telemetryRuntimeProducer.Object, backoff);
         }
 
         [TestMethod]

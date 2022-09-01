@@ -22,8 +22,9 @@ namespace Splitio.Services.Client.Classes
             ConfigurationOptions options = null)
         {
             _apiKey = apiKey;
-            _options = options;
+            _options = options ?? new ConfigurationOptions();
 
+            WrapperAdapter.Instance(_options.Logger);
             _apiKeyValidator = new ApiKeyValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
 
@@ -54,8 +55,6 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildSplitClient()
         {
-            _options = _options ?? new ConfigurationOptions();
-
             _apiKeyValidator.Validate(_apiKey);
 
             switch (_options.Mode)
@@ -87,7 +86,7 @@ namespace Splitio.Services.Client.Classes
                             var redisAssembly = Assembly.Load(new AssemblyName("Splitio.Redis"));
                             var redisType = redisAssembly.GetType("Splitio.Redis.Services.Client.Classes.RedisClient");
 
-                            _client = (ISplitClient)Activator.CreateInstance(redisType, new object[] { _options, _apiKey, null });
+                            _client = (ISplitClient)Activator.CreateInstance(redisType, new object[] { _options, _apiKey });
 
                         }
                         catch (Exception e)

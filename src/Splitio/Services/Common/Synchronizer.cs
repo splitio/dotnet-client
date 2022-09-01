@@ -70,7 +70,7 @@ namespace Splitio.Services.Common
             _onDemandFetchRetryDelayMs = onDemandFetchRetryDelayMs;
             _segmentCache = segmentCache;
             _uniqueKeysTracker = uniqueKeysTracker;
-            _log = log ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
+            _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(Synchronizer));
             _defaultFetchOptions = new FetchOptions();
         }
 

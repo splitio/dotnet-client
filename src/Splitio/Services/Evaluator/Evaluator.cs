@@ -15,19 +15,15 @@ namespace Splitio.Services.Evaluator
         protected const string Control = "control";
 
         private readonly ISplitter _splitter;
-        private readonly ISplitLogger _log;        
-        private readonly ISplitParser _splitParser;
+        private readonly ISplitLogger _log;
         private readonly ISplitCache _splitCache;
 
         public Evaluator(ISplitCache splitCache,
-            ISplitParser splitParser,
-            ISplitter splitter,
-            ISplitLogger log = null)
+            ISplitter splitter)
         {
             _splitCache = splitCache;
-            _splitParser = splitParser;
             _splitter = splitter;
-            _log = log ?? WrapperAdapter.GetLogger(typeof(Evaluator));
+            _log = WrapperAdapter.Instance().GetLogger(typeof(Evaluator));
         }
 
         #region Public Method

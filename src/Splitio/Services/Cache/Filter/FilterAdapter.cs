@@ -6,7 +6,7 @@ namespace Splitio.Services.Cache.Filter
 {
     public class FilterAdapter : IFilterAdapter
     {
-        private static readonly ISplitLogger _logger = WrapperAdapter.GetLogger(typeof(FilterAdapter));
+        private static readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger(typeof(FilterAdapter));
 
         private readonly IFilter _filter;
 

@@ -38,14 +38,13 @@ namespace Splitio.Services.Common
             IStatusManager statusManager,
             ITasksManager tasksManager,
             IWrapperAdapter wrapperAdapter,
-            ITelemetrySyncTask telemetrySyncTask,
-            ISplitLogger log = null)
+            ITelemetrySyncTask telemetrySyncTask)
         {
             _streamingEnabled = streamingEnabled;
             _synchronizer = synchronizer;
             _pushManager = pushManager;
             _sseHandler = sseHandler;
-            _log = log ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
+            _log = WrapperAdapter.Instance().GetLogger(typeof(Synchronizer));
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _statusManager = statusManager;
             _tasksManager = tasksManager;
