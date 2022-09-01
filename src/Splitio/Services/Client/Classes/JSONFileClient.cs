@@ -5,7 +5,6 @@ using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
-using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.Shared.Classes;
@@ -19,7 +18,6 @@ namespace Splitio.Services.Client.Classes
     {
         public JSONFileClient(string splitsFilePath,
             string segmentsFilePath,
-            ISplitLogger log = null,
             ISegmentCache segmentCacheInstance = null,
             ISplitCache splitCacheInstance = null,
             IImpressionsLog impressionsLog = null,
