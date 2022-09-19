@@ -9,7 +9,7 @@ namespace Splitio.Services.Shared.Classes
 {
     public class TasksManager : ITasksManager
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(IWrapperAdapter));
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(IWrapperAdapter));
 
         private readonly IWrapperAdapter _wrapperAdapter;
 

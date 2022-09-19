@@ -28,12 +28,11 @@ namespace Splitio.Services.Common
             IAuthApiClient authApiClient,
             IWrapperAdapter wrapperAdapter,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
-            IBackOff backOff,
-            ISplitLogger log = null)
+            IBackOff backOff)
         {
             _sseHandler = sseHandler;
             _authApiClient = authApiClient;
-            _log = log ?? WrapperAdapter.GetLogger(typeof(PushManager));
+            _log = WrapperAdapter.Instance().GetLogger(typeof(PushManager));
             _wrapperAdapter = wrapperAdapter;
             _backOff = backOff;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;

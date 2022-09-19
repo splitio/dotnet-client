@@ -10,7 +10,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class SegmentTaskWorker
     {
-        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SegmentTaskWorker));
+        private static readonly ISplitLogger Log = WrapperAdapter.Instance().GetLogger(typeof(SegmentTaskWorker));
 
         private readonly int _numberOfParallelTasks;
         private readonly ISegmentTaskQueue _segmentTaskQueue;

@@ -13,7 +13,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     [TestClass]
     public class ImpressionsSdkApiClientTests
     {
-        private readonly IWrapperAdapter _wrapperAdapter = new WrapperAdapter();
+        private readonly IWrapperAdapter _wrapperAdapter = WrapperAdapter.Instance();
 
         [TestMethod]
         public void CorrectFormatSendCounts()

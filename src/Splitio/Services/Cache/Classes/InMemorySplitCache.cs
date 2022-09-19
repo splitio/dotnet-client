@@ -10,7 +10,7 @@ namespace Splitio.Services.Cache.Classes
 {
     public class InMemorySplitCache : ISplitCache
     {
-        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(InMemorySplitCache));
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemorySplitCache));
 
         private ConcurrentDictionary<string, ParsedSplit> _splits;
         private ConcurrentDictionary<string, int> _trafficTypes;
@@ -80,7 +80,7 @@ namespace Splitio.Services.Cache.Classes
         {
             if (changeNumber < _changeNumber)
             {
-                Log.Error("ChangeNumber for splits cache is less than previous");
+                _log.Error("ChangeNumber for splits cache is less than previous");
             }
 
             _changeNumber = changeNumber;

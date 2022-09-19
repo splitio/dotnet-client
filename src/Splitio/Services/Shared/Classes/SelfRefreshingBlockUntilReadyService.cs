@@ -12,13 +12,11 @@ namespace Splitio.Services.Shared.Classes
         private readonly ISplitLogger _log;
         private readonly ITelemetryInitProducer _telemetryInitProducer;
 
-        public SelfRefreshingBlockUntilReadyService(IStatusManager statusManager,
-            ITelemetryInitProducer telemetryInitProducer,
-            ISplitLogger log = null)
+        public SelfRefreshingBlockUntilReadyService(IStatusManager statusManager, ITelemetryInitProducer telemetryInitProducer)
         {
             _statusManager = statusManager;
             _telemetryInitProducer = telemetryInitProducer;
-            _log = log ?? WrapperAdapter.GetLogger(typeof(SelfRefreshingBlockUntilReadyService));
+            _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingBlockUntilReadyService));
         }
 
         public void BlockUntilReady(int blockMilisecondsUntilReady)

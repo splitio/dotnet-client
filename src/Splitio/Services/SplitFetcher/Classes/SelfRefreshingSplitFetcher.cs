@@ -14,7 +14,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 {
     public class SelfRefreshingSplitFetcher : ISplitFetcher
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SelfRefreshingSplitFetcher));
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingSplitFetcher));
 
         private readonly ISplitChangeFetcher _splitChangeFetcher;
         private readonly ISplitParser _splitParser;
@@ -79,7 +79,6 @@ namespace Splitio.Services.SplitFetcher.Classes
         public async Task<FetchResult> FetchSplits(FetchOptions fetchOptions)
         {
             var segmentNames = new List<string>();
-            var names = new Dictionary<string, string>();
             var success = false;
 
             while (true)

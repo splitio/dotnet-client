@@ -10,7 +10,7 @@ namespace Splitio.Services.Impressions.Classes
 {
     public class InMemorySenderAdapter : IImpressionsSenderAdapter
     {
-        private static readonly ISplitLogger _logger = WrapperAdapter.GetLogger(typeof(InMemorySenderAdapter));
+        private static readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger(typeof(InMemorySenderAdapter));
 
         private readonly ITelemetryAPI _telemetryApi;
         private readonly IImpressionsSdkApiClient _impressionsSdkApiClient;

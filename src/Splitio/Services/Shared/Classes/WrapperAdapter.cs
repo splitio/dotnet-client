@@ -15,7 +15,33 @@ namespace Splitio.Services.Shared.Classes
 {
     public class WrapperAdapter : IWrapperAdapter
     {
-        private static readonly ISplitLogger _log = GetLogger(typeof(IWrapperAdapter));
+        private static readonly object _instanceLock = new object();
+
+        private static IWrapperAdapter _instance;
+        private static ISplitLogger _log;
+        private static ISplitLogger _customLogger;
+
+        public static IWrapperAdapter Instance(ISplitLogger customLogger = null)
+        {
+            if (_instance == null)
+            {
+                lock (_instanceLock)
+                {
+                    if (_instance == null)
+                    {
+                        _instance = new WrapperAdapter(customLogger);
+                    }
+                }
+            }
+
+            return _instance;
+        }
+
+        private WrapperAdapter(ISplitLogger customLogger)
+        {
+            _customLogger = customLogger;
+            _log = GetLogger(typeof(IWrapperAdapter));
+        }
 
         public ReadConfigData ReadConfig(ConfigurationOptions config, ISplitLogger log)
         {
@@ -80,8 +106,13 @@ namespace Splitio.Services.Shared.Classes
 #endif
         }
 
-        public static ISplitLogger GetLogger(Type type)
+        public ISplitLogger GetLogger(Type type)
         {
+            if (_customLogger != null)
+            {
+                return _customLogger;
+            }
+
 #if NETSTANDARD2_0 || NET6_0 || NET5_0
             return new MicrosoftExtensionsLogging(type);
 #else
@@ -89,8 +120,13 @@ namespace Splitio.Services.Shared.Classes
 #endif
         }
 
-        public static ISplitLogger GetLogger(string type)
+        public ISplitLogger GetLogger(string type)
         {
+            if (_customLogger != null)
+            {
+                return _customLogger;
+            }
+
 #if NETSTANDARD2_0 || NET6_0 || NET5_0
             return new MicrosoftExtensionsLogging(type);
 #else

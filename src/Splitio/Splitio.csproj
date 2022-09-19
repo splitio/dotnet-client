@@ -10,7 +10,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>7.0.1</Version>
+    <Version>7.0.2-rc2</Version>
     <RootNamespace>Splitio</RootNamespace>    
   </PropertyGroup>
 
@@ -35,11 +35,6 @@
     <PackageReference Include="Common.Logging" version="3.3.1" />
     <PackageReference Include="Common.Logging.Core" version="3.3.1" />
     <Reference Include="System.Net.Http" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Services\Events\Classes\AsynchronousEventListener.cs" />
-    <Compile Remove="Services\Impressions\Classes\AsynchronousImpressionListener.cs" />
   </ItemGroup>
 
 </Project>

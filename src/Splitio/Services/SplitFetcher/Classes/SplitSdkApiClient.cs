@@ -15,7 +15,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 {
     public class SplitSdkApiClient : SdkApiClient, ISplitSdkApiClient
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SplitSdkApiClient));
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitSdkApiClient));
 
         public SplitSdkApiClient(string apiKey,
             Dictionary<string, string> headers,

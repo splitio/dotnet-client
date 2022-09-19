@@ -11,7 +11,7 @@ namespace Splitio.Telemetry.Storages
 {
     public class InMemoryTelemetryStorage : ITelemetryStorageProducer, ITelemetryStorageConsumer
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(InMemoryTelemetryStorage));
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemoryTelemetryStorage));
 
         // Latencies
         private readonly ConcurrentDictionary<MethodEnum, long[]> _methodLatencies = new ConcurrentDictionary<MethodEnum, long[]>();

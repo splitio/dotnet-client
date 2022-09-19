@@ -20,7 +20,7 @@ namespace Splitio.Integration_tests.Impressions
         public ImpressionsSdkApiClientTests()
         {
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
-            _wrapperAdapter = new WrapperAdapter();
+            _wrapperAdapter = WrapperAdapter.Instance();
         }
 
         [TestMethod]

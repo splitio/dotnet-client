@@ -3,8 +3,8 @@ using Moq;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource.Workers;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.EventSource.Workers
@@ -12,9 +12,8 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
     [TestClass]
     public class SplitsWorkerTests
     {
-        private readonly WrapperAdapter wrapperAdapter = new WrapperAdapter();
+        private readonly IWrapperAdapter wrapperAdapter = WrapperAdapter.Instance();
 
-        private readonly Mock<ISplitLogger> _log;
         private readonly Mock<ISynchronizer> _synchronizer;
         private readonly Mock<ISplitCache> _splitCache;
 
@@ -22,11 +21,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
         public SplitsWorkerTests()
         {
-            _log = new Mock<ISplitLogger>();
             _synchronizer = new Mock<ISynchronizer>();
             _splitCache = new Mock<ISplitCache>();
 
-            _splitsWorker = new SplitsWorker(_splitCache.Object, _synchronizer.Object, new TasksManager(wrapperAdapter), _log.Object);
+            _splitsWorker = new SplitsWorker(_splitCache.Object, _synchronizer.Object, new TasksManager(wrapperAdapter));
         }
 
         [TestMethod]        

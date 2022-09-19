@@ -12,11 +12,10 @@ namespace Splitio.Services.Shared.Classes
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISplitLogger _log;
 
-        public ConfigService(IWrapperAdapter wrapperAdapter,
-            ISplitLogger log)
+        public ConfigService(IWrapperAdapter wrapperAdapter)
         {
             _wrapperAdapter = wrapperAdapter;
-            _log = log;
+            _log = _wrapperAdapter.GetLogger(typeof(ConfigService));
         }
 
         #region Public Methods

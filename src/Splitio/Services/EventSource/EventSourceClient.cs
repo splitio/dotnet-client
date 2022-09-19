@@ -44,13 +44,12 @@ namespace Splitio.Services.EventSource
             IWrapperAdapter wrapperAdapter,
             ISplitioHttpClient splitHttpClient,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
-            ITasksManager tasksManager,
-            ISplitLogger log = null)
+            ITasksManager tasksManager)
         {            
             _notificationParser = notificationParser;
             _wrapperAdapter = wrapperAdapter;
             _splitHttpClient = splitHttpClient;
-            _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
+            _log = WrapperAdapter.Instance().GetLogger(typeof(EventSourceClient));
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _tasksManager = tasksManager;
 

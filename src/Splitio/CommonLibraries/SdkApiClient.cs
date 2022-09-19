@@ -14,7 +14,7 @@ namespace Splitio.CommonLibraries
 {
     public class SdkApiClient : ISdkApiClient
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SdkApiClient));
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SdkApiClient));
 
         private readonly HttpClient _httpClient;
         protected readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;

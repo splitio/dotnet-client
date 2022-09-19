@@ -19,7 +19,7 @@ namespace Splitio.Services.SplitFetcher.Classes
         public JSONFileSplitChangeFetcher(string filePath)
         {
             _filePath = filePath;
-            _wrapperAdapter = new WrapperAdapter();
+            _wrapperAdapter = WrapperAdapter.Instance();
         }
 
         protected override async Task<SplitChangesResult> FetchFromBackend(long since, FetchOptions fetchOptions)

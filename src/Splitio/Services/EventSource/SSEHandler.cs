@@ -23,7 +23,6 @@ namespace Splitio.Services.EventSource
             ISegmentsWorker segmentsWorker,
             INotificationProcessor notificationPorcessor,
             INotificationManagerKeeper notificationManagerKeeper,
-            ISplitLogger log = null,
             IEventSourceClient eventSourceClient = null)
         {
             _streaminServiceUrl = streaminServiceUrl;
@@ -31,7 +30,7 @@ namespace Splitio.Services.EventSource
             _segmentsWorker = segmentsWorker;
             _notificationPorcessor = notificationPorcessor;
             _notificationManagerKeeper = notificationManagerKeeper;
-            _log = log ?? WrapperAdapter.GetLogger(typeof(SSEHandler));
+            _log = WrapperAdapter.Instance().GetLogger(typeof(SSEHandler));
             _eventSourceClient = eventSourceClient;
 
             _eventSourceClient.EventReceived += EventReceived;

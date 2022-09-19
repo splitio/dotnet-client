@@ -10,7 +10,7 @@ namespace Splitio.Services.InputValidation.Classes
 
         public ApiKeyValidator(ISplitLogger log = null)
         {
-            _log = log ?? WrapperAdapter.GetLogger(typeof(ApiKeyValidator));
+            _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(ApiKeyValidator));
         }
 
         public void Validate(string apiKey)

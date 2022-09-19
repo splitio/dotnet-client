@@ -16,7 +16,6 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
     public class TelemetryAPITests
     {
         private Mock<ISplitioHttpClient> _splitioHttpClient;
-        private Mock<ISplitLogger> _log;
         private Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
 
         private ITelemetryAPI _telemetryAPI;
@@ -25,10 +24,9 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
         public void Initialization()
         {
             _splitioHttpClient = new Mock<ISplitioHttpClient>();
-            _log = new Mock<ISplitLogger>();
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
 
-            _telemetryAPI = new TelemetryAPI(_splitioHttpClient.Object, "www.fake-url.com", _telemetryRuntimeProducer.Object, _log.Object);
+            _telemetryAPI = new TelemetryAPI(_splitioHttpClient.Object, "www.fake-url.com", _telemetryRuntimeProducer.Object);
         }
 
         [TestMethod]
@@ -67,7 +65,6 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 
             // Assert.
             _splitioHttpClient.Verify(mock => mock.PostAsync("www.fake-url.com/metrics/config", data), Times.Once);
-            _log.Verify(mock => mock.Error(It.IsAny<string>()), Times.Never);
         }
 
         [TestMethod]
@@ -103,7 +100,6 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 
             // Assert.
             _splitioHttpClient.Verify(mock => mock.PostAsync("www.fake-url.com/metrics/usage", data), Times.Once);
-            _log.Verify(mock => mock.Error(It.IsAny<string>()), Times.Never);
         }
 
         [TestMethod]
@@ -127,7 +123,6 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 
             // Assert.
             _splitioHttpClient.Verify(mock => mock.PostAsync("www.fake-url.com/keys/ss", data), Times.Once);
-            _log.Verify(mock => mock.Error(It.IsAny<string>()), Times.Never);
         }
     }
 }

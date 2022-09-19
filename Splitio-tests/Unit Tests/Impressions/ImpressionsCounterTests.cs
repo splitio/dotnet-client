@@ -3,6 +3,7 @@ using Moq;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using Splitio_Tests.Resources;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     [TestClass]
     public class ImpressionsCounterTests
     {
-        private readonly WrapperAdapter wrapperAdapter = new WrapperAdapter();
+        private readonly IWrapperAdapter wrapperAdapter = WrapperAdapter.Instance();
 
         private readonly Mock<IImpressionsSenderAdapter> _senderAdapter;
 

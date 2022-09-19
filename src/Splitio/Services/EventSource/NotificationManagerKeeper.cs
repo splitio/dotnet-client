@@ -19,11 +19,10 @@ namespace Splitio.Services.EventSource
 
         public event EventHandler<SSEActionsEventArgs> ActionEvent;
 
-        public NotificationManagerKeeper(ITelemetryRuntimeProducer telemetryRuntimeProducer,
-            ISplitLogger log = null)
+        public NotificationManagerKeeper(ITelemetryRuntimeProducer telemetryRuntimeProducer)
         {
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
-            _log = log ?? WrapperAdapter.GetLogger(typeof(NotificationManagerKeeper));
+            _log = WrapperAdapter.Instance().GetLogger(typeof(NotificationManagerKeeper));
 
             _publisherAvailable = true;
         }

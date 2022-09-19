@@ -12,7 +12,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 {
     public class RedisAdapter : IRedisAdapter
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(RedisAdapter));
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(RedisAdapter));
 
         private readonly string _host;
         private readonly string _port;

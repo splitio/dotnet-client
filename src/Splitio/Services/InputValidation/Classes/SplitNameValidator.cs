@@ -15,7 +15,7 @@ namespace Splitio.Services.InputValidation.Classes
 
         public SplitNameValidator(ISplitLogger log = null)
         {
-            _log = log ?? WrapperAdapter.GetLogger(typeof(SplitNameValidator));
+            _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(SplitNameValidator));
         }
 
         public List<string> SplitNamesAreValid(List<string> splitNames, string method)

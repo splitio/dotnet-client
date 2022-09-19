@@ -17,7 +17,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
     {
         private const string UrlParameterSince = "?since=";
 
-        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SegmentSdkApiClient));
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SegmentSdkApiClient));
 
         public SegmentSdkApiClient(string apiKey,
             Dictionary<string, string> headers,

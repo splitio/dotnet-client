@@ -16,7 +16,7 @@ namespace Splitio_Tests.Unit_Tests.Events
     [TestClass]
     public class EventsLogUnitTests
     {
-        private readonly WrapperAdapter wrapperAdapter = new WrapperAdapter();
+        private readonly IWrapperAdapter wrapperAdapter = WrapperAdapter.Instance();
 
         private BlockingQueue<WrappedEvent> _queue;
         private InMemorySimpleCache<WrappedEvent> _eventsCache;
