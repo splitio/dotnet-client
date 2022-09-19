@@ -18,12 +18,10 @@ namespace Splitio.Services.Client.Classes
         private readonly ISplitNameValidator _splitNameValidator;
         private readonly IBlockUntilReadyService _blockUntilReadyService;
 
-        public SplitManager(ISplitCache splitCache,
-            IBlockUntilReadyService blockUntilReadyService,
-            ISplitLogger log = null)
+        public SplitManager(ISplitCache splitCache, IBlockUntilReadyService blockUntilReadyService)
         {
             _splitCache = splitCache;
-            _log = log ?? WrapperAdapter.GetLogger(typeof(SplitManager));
+            _log = WrapperAdapter.Instance().GetLogger(typeof(SplitManager));
             _splitNameValidator = new SplitNameValidator(_log);
             _blockUntilReadyService = blockUntilReadyService;
         }

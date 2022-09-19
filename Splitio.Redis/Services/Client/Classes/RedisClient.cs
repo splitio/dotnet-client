@@ -24,9 +24,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private IRedisAdapter _redisAdapter;
         private IImpressionsCache _impressionsCache;
 
-        public RedisClient(ConfigurationOptions config,
-            string apiKey,
-            ISplitLogger log = null) : base(GetLogger(log))
+        public RedisClient(ConfigurationOptions config, string apiKey) : base()
         {
             _config = new RedisConfig();
             ApiKey = apiKey;
@@ -181,11 +179,6 @@ namespace Splitio.Redis.Services.Client.Classes
         {
             _uniqueKeysTracker.Start();
             _impressionsCounter.Start();
-        }
-
-        private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)
-        {
-            return splitLogger ?? WrapperAdapter.GetLogger(typeof(RedisClient));
         }
         #endregion
     }

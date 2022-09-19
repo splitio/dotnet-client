@@ -12,7 +12,7 @@ namespace Splitio.Services.Impressions.Classes
 {
     public class UniqueKeysTracker : TrackerComponent, IUniqueKeysTracker
     {
-        private static readonly ISplitLogger _logger = WrapperAdapter.GetLogger(typeof(UniqueKeysTracker));
+        private static readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger(typeof(UniqueKeysTracker));
         private static readonly int IntervalToClearLongTermCache = 3600000;        
 
         private readonly IFilterAdapter _filterAdapter;

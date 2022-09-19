@@ -14,8 +14,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 {
     [TestClass]
     public class SplitClientUnitTests
-    {        
-        private Mock<ISplitLogger> _logMock;
+    {
         private Mock<IEventsLog> _eventsLogMock;
         private Mock<ISplitCache> _splitCacheMock;
         private Mock<IImpressionsLog> _impressionsLogMock;
@@ -29,7 +28,6 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestInitialize]
         public void TestInitialize()
         {
-            _logMock = new Mock<ISplitLogger>();
             _splitCacheMock = new Mock<ISplitCache>();
             _combiningMatcher = new Mock<CombiningMatcher>();
             _eventsLogMock = new Mock<IEventsLog>();
@@ -38,7 +36,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             _evaluatorMock = new Mock<IEvaluator>();
             _impressionsManager = new Mock<IImpressionsManager>();
 
-            _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _splitCacheMock.Object, _eventsLogMock.Object, _impressionsLogMock.Object, _blockUntilReadyService.Object, _evaluatorMock.Object, _impressionsManager.Object);
+            _splitClientForTesting = new SplitClientForTesting(_splitCacheMock.Object, _eventsLogMock.Object, _impressionsLogMock.Object, _blockUntilReadyService.Object, _evaluatorMock.Object, _impressionsManager.Object);
 
             _splitClientForTesting.BlockUntilReady(1000);
         }
@@ -743,8 +741,6 @@ namespace Splitio_Tests.Unit_Tests.Client
                                                                              we.Event.eventTypeId.Equals("event_type") &&
                                                                              we.Event.trafficTypeName.Equals(trafficType) &&
                                                                              we.Event.value == 132)), Times.Once);
-
-            _logMock.Verify(mock => mock.Warn($"Track: Traffic Type {trafficType} does not have any corresponding Splits in this environment, make sure you’re tracking your events to a valid traffic type defined in the Split console."), Times.Once);
         }
 
         [TestMethod]
@@ -772,8 +768,6 @@ namespace Splitio_Tests.Unit_Tests.Client
                                                                              we.Event.eventTypeId.Equals("event_type") &&
                                                                              we.Event.trafficTypeName.Equals(trafficType) &&
                                                                              we.Event.value == 132)), Times.Once);
-
-            _logMock.Verify(mock => mock.Warn($"Track: Traffic Type {trafficType} does not have any corresponding Splits in this environment, make sure you’re tracking your events to a valid traffic type defined in the Split console."), Times.Never);
         }
         #endregion
 

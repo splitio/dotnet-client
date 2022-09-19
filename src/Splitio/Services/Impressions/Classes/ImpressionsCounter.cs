@@ -9,7 +9,7 @@ namespace Splitio.Services.Impressions.Classes
 {
     public class ImpressionsCounter : TrackerComponent, IImpressionsCounter
     {
-        private static readonly ISplitLogger Logger = WrapperAdapter.GetLogger(typeof(ImpressionsCounter));
+        private static readonly ISplitLogger Logger = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsCounter));
         private const int DefaultAmount = 1;
 
         private readonly IImpressionsSenderAdapter _senderAdapter;

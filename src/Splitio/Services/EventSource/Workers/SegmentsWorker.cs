@@ -18,13 +18,11 @@ namespace Splitio.Services.EventSource.Workers
         private CancellationTokenSource _cancellationTokenSource;
         private bool _running;
 
-        public SegmentsWorker(ISynchronizer synchronizer,
-            ITasksManager tasksManager,
-            ISplitLogger log = null)
+        public SegmentsWorker(ISynchronizer synchronizer, ITasksManager tasksManager)
         {
             _synchronizer = synchronizer;
             _tasksManager = tasksManager;
-            _log = log ?? WrapperAdapter.GetLogger(typeof(SegmentsWorker));
+            _log = WrapperAdapter.Instance().GetLogger(typeof(SegmentsWorker));
             _queue = new BlockingCollection<SegmentQueueDto>(new ConcurrentQueue<SegmentQueueDto>());
         }
 

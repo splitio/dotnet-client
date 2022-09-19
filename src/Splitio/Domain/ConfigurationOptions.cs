@@ -1,5 +1,6 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.Logger;
 using System;
 
 namespace Splitio.Services.Client.Classes
@@ -28,6 +29,7 @@ namespace Splitio.Services.Client.Classes
         public int? StreamingReconnectBackoffBase { get; set; }
         public ImpressionsMode? ImpressionsMode { get; set; }
         public bool RandomizeRefreshRates { get; set; }
+        public ISplitLogger Logger { get; set; }
 
         // Urls.
         public string Endpoint { get; set; }

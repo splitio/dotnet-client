@@ -5,7 +5,6 @@ using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
-using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.Shared.Classes;
@@ -19,14 +18,13 @@ namespace Splitio.Services.Client.Classes
     {
         public JSONFileClient(string splitsFilePath,
             string segmentsFilePath,
-            ISplitLogger log = null,
             ISegmentCache segmentCacheInstance = null,
             ISplitCache splitCacheInstance = null,
             IImpressionsLog impressionsLog = null,
             bool isLabelsEnabled = true,
             IEventsLog eventsLog = null,
             ITrafficTypeValidator trafficTypeValidator = null,
-            IImpressionsManager impressionsManager = null) : base(GetLogger(log))
+            IImpressionsManager impressionsManager = null) : base()
         {
             _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
 
@@ -55,11 +53,11 @@ namespace Splitio.Services.Client.Classes
             _trafficTypeValidator = trafficTypeValidator;
             
             _blockUntilReadyService = new NoopBlockUntilReadyService();
-            _manager = new SplitManager(_splitCache, _blockUntilReadyService, log);
+            _manager = new SplitManager(_splitCache, _blockUntilReadyService);
 
             ApiKey = "localhost";
 
-            BuildEvaluator(log);
+            BuildEvaluator();
 
             _uniqueKeysTracker = new NoopUniqueKeysTracker();
             _impressionsCounter = new NoopImpressionsCounter();
@@ -86,13 +84,6 @@ namespace Splitio.Services.Client.Classes
                 _segmentCache.Clear();
                 base.Destroy();
             }
-        }
-        #endregion
-
-        #region Private Methods
-        private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)
-        {
-            return splitLogger ?? WrapperAdapter.GetLogger(typeof(JSONFileClient));
         }
         #endregion
     }

@@ -9,7 +9,6 @@ namespace Splitio_Tests.Unit_Tests.EventSource
     [TestClass]
     public class NotificationManagerKeeperTests
     {
-        private readonly Mock<ISplitLogger> _log;
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private SSEActionsEventArgs _event;
 
@@ -17,10 +16,9 @@ namespace Splitio_Tests.Unit_Tests.EventSource
 
         public NotificationManagerKeeperTests()
         {
-            _log = new Mock<ISplitLogger>();
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
 
-            _notificationManagerKeeper = new NotificationManagerKeeper(_telemetryRuntimeProducer.Object, _log.Object);
+            _notificationManagerKeeper = new NotificationManagerKeeper(_telemetryRuntimeProducer.Object);
             _notificationManagerKeeper.ActionEvent += OnActionEvent;
         }
 

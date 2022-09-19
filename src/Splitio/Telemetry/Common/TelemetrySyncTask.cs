@@ -36,8 +36,7 @@ namespace Splitio.Telemetry.Common
             SelfRefreshingConfig configurationOptions,
             IFactoryInstantiationsService factoryInstantiationsService,
             IWrapperAdapter wrapperAdapter,
-            ITasksManager tasksManager,
-            ISplitLogger log = null)
+            ITasksManager tasksManager)
         {
             _telemetryStorageConsumer = telemetryStorage;
             _telemetryAPI = telemetryAPI;            
@@ -45,7 +44,7 @@ namespace Splitio.Telemetry.Common
             _segmentCache = segmentCache;
             _configurationOptions = configurationOptions;
             _factoryInstantiationsService = factoryInstantiationsService;
-            _log = log ?? WrapperAdapter.GetLogger(typeof(TelemetrySyncTask));
+            _log = WrapperAdapter.Instance().GetLogger(typeof(TelemetrySyncTask));
             _wrapperAdapter = wrapperAdapter;
             _tasksManager = tasksManager;
 

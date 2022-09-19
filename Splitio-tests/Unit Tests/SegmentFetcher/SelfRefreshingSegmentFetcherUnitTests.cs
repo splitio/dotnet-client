@@ -1,24 +1,25 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.SegmentFetcher.Classes;
-using Splitio.Services.Client.Classes;
-using System.Collections.Concurrent;
-using Splitio.Services.Cache.Classes;
-using Splitio.Domain;
 using Moq;
-using Splitio.Services.SplitFetcher.Interfaces;
-using System.Threading;
-using System.Threading.Tasks;
+using Splitio.Domain;
+using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
-using System.Collections.Generic;
+using Splitio.Services.Client.Classes;
+using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.SplitFetcher.Interfaces;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.SegmentFetcher
 {
     [TestClass]
     public class SelfRefreshingSegmentFetcherUnitTests
     {
-        private readonly WrapperAdapter wrapperAdapter = new WrapperAdapter();
+        private readonly IWrapperAdapter wrapperAdapter = WrapperAdapter.Instance();
 
         private static readonly string PayedSplitJson = @"{'name': 'payed','added': ['abcdz','bcadz','xzydz'],'removed': [],'since': -1,'till': 10001}";
 

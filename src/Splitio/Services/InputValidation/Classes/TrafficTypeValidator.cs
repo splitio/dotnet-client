@@ -14,7 +14,7 @@ namespace Splitio.Services.InputValidation.Classes
 
         public TrafficTypeValidator(ISplitCache splitCache, ISplitLogger log = null)
         {
-            _log = log ?? WrapperAdapter.GetLogger(typeof(TrafficTypeValidator));
+            _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(TrafficTypeValidator));
             _splitCache = splitCache;
         }
 

@@ -25,7 +25,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         {
             _filterAdapter = new Mock<IFilterAdapter>();
             _senderAdapter = new Mock<IImpressionsSenderAdapter>();
-            _tasksManager = new TasksManager(new WrapperAdapter());
+            _tasksManager = new TasksManager(WrapperAdapter.Instance());
             _cache = new ConcurrentDictionary<string, HashSet<string>>();
         }
 

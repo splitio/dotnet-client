@@ -24,7 +24,7 @@ namespace Splitio.Integration_tests.EventSource
                 var actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var notificationParser = new NotificationParser();
-                var wrapperAdapter = new WrapperAdapter();
+                var wrapperAdapter = WrapperAdapter.Instance();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
@@ -61,7 +61,7 @@ namespace Splitio.Integration_tests.EventSource
                 var actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var notificationParser = new NotificationParser();
-                var wrapperAdapter = new WrapperAdapter();
+                var wrapperAdapter = WrapperAdapter.Instance();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
@@ -100,7 +100,7 @@ namespace Splitio.Integration_tests.EventSource
                 var actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var notificationParser = new NotificationParser();
-                var wrapperAdapter = new WrapperAdapter();
+                var wrapperAdapter = WrapperAdapter.Instance();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
@@ -137,7 +137,7 @@ namespace Splitio.Integration_tests.EventSource
                 var actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var notificationParser = new NotificationParser();
-                var wrapperAdapter = new WrapperAdapter();
+                var wrapperAdapter = WrapperAdapter.Instance();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
@@ -174,7 +174,7 @@ namespace Splitio.Integration_tests.EventSource
                 var actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var notificationParser = new NotificationParser();
-                var wrapperAdapter = new WrapperAdapter();
+                var wrapperAdapter = WrapperAdapter.Instance();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
@@ -210,7 +210,7 @@ namespace Splitio.Integration_tests.EventSource
                 var actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var notificationParser = new NotificationParser();
-                var wrapperAdapter = new WrapperAdapter();
+                var wrapperAdapter = WrapperAdapter.Instance();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
@@ -256,7 +256,7 @@ namespace Splitio.Integration_tests.EventSource
                 var actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var notificationParser = new NotificationParser();
-                var wrapperAdapter = new WrapperAdapter();
+                var wrapperAdapter = WrapperAdapter.Instance();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
@@ -290,7 +290,7 @@ namespace Splitio.Integration_tests.EventSource
                 var actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var notificationParser = new NotificationParser();
-                var wrapperAdapter = new WrapperAdapter();
+                var wrapperAdapter = WrapperAdapter.Instance();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
@@ -322,7 +322,7 @@ namespace Splitio.Integration_tests.EventSource
                 var actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var notificationParser = new NotificationParser();
-                var wrapperAdapter = new WrapperAdapter();
+                var wrapperAdapter = WrapperAdapter.Instance();
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 

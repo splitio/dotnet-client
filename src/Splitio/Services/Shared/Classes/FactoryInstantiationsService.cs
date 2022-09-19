@@ -31,7 +31,7 @@ namespace Splitio.Services.Shared.Classes
 
         private FactoryInstantiationsService(ISplitLogger log = null)
         {
-            _log = log ?? WrapperAdapter.GetLogger(typeof(FactoryInstantiationsService));
+            _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(FactoryInstantiationsService));
             _factoryInstantiations = new ConcurrentDictionary<string, int>();
         }
 

@@ -1,5 +1,10 @@
 CHANGES
 
+7.1.0 (Sep 19, 2022)
+- Added support to receive a custom logger by configuration.
+- Updated ImpressionManager logic to avoid count when the previous time calculated is 0 or null.
+- Updated Newtonsoft.Json dependency to 13.0.1 fixing vulnerabilities.
+
 7.0.1 (Jul 21, 2022)
 - Updated to avoid forcing TLS1.2 when TLS1.3 is available when compiling in .NET Framework.
 

@@ -11,7 +11,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class SelfRefreshingSegment : ISelfRefreshingSegment
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SelfRefreshingSegment));
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingSegment));
 
         public string Name;
         private readonly ISegmentChangeFetcher _segmentChangeFetcher;

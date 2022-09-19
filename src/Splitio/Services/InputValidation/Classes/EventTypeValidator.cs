@@ -13,7 +13,7 @@ namespace Splitio.Services.InputValidation.Classes
 
         public EventTypeValidator(ISplitLogger log = null)
         {
-            _log = log ?? WrapperAdapter.GetLogger(typeof(EventTypeValidator));
+            _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(EventTypeValidator));
         }
 
         public bool IsValid(string eventType, string method)

@@ -11,7 +11,6 @@ namespace Splitio.Redis.Telemetry.Storages
     public class RedisTelemetryStorage : ITelemetryInitProducer, ITelemetryEvaluationProducer
     {
         private readonly IRedisAdapter _redisAdapter;
-        private readonly ISplitLogger _log;
         private readonly string _userPrefix;
         private readonly string _sdkVersion;
         private readonly string _machineIp;
@@ -30,15 +29,13 @@ namespace Splitio.Redis.Telemetry.Storages
             string userPrefix,
             string sdkVersion,
             string machineIp,
-            string machineName,
-            ISplitLogger log = null)
+            string machineName)
         {
             _redisAdapter = redisAdapter;
             _userPrefix = userPrefix;
             _sdkVersion = sdkVersion;
             _machineIp = machineIp;
             _machineName = machineName;
-            _log = log ?? WrapperAdapter.GetLogger(typeof(RedisTelemetryStorage));
         }
 
         public void RecordConfigInit(Config config)

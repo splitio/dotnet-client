@@ -61,16 +61,16 @@ namespace Splitio.Services.Client.Classes
         protected IImpressionsCounter _impressionsCounter;
         protected IImpressionsObserver _impressionsObserver;
 
-        public SplitClient(ISplitLogger log)
+        public SplitClient()
         {
-            _log = log;
+            _wrapperAdapter = WrapperAdapter.Instance();
+            _log = _wrapperAdapter.GetLogger(typeof(SplitClient));
             _keyValidator = new KeyValidator();
             _splitNameValidator = new SplitNameValidator();
             _eventTypeValidator = new EventTypeValidator();
             _eventPropertiesValidator = new EventPropertiesValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
-            _wrapperAdapter = new WrapperAdapter();
-            _configService = new ConfigService(_wrapperAdapter, _log);
+            _configService = new ConfigService(_wrapperAdapter);
             _tasksManager = new TasksManager(_wrapperAdapter);
             _statusManager = new InMemoryReadinessGatesCache();
         }
@@ -213,10 +213,10 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Protected Methods
-        protected void BuildEvaluator(ISplitLogger log = null)
+        protected void BuildEvaluator()
         {
             var splitter = new Splitter();
-            _evaluator = new Evaluator.Evaluator(_splitCache, _splitParser, splitter, log);
+            _evaluator = new Evaluator.Evaluator(_splitCache, splitter);
         }
 
         protected void BuildUniqueKeysTracker(BaseConfig config)

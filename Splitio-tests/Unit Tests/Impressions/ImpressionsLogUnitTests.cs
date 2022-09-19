@@ -4,6 +4,7 @@ using Splitio.Domain;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -12,7 +13,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     [TestClass]
     public class ImpressionsLogUnitTests
     {
-        private readonly WrapperAdapter wrapperAdapter = new WrapperAdapter();
+        private readonly IWrapperAdapter wrapperAdapter = WrapperAdapter.Instance();
 
         private Mock<IImpressionsSdkApiClient> _apiClientMock;
         private BlockingQueue<KeyImpression> _queue;

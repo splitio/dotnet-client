@@ -23,8 +23,7 @@ namespace Splitio.Services.Client.Classes
         private readonly FileSystemWatcher _watcher;
         private readonly string _fullPath;
 
-        public LocalhostClient(string filePath, 
-            ISplitLogger log = null) : base(GetLogger(log))
+        public LocalhostClient(string filePath) : base()
         {
             _fullPath = LookupFilePath(filePath);
 
@@ -126,11 +125,6 @@ namespace Splitio.Services.Client.Classes
         private ConcurrentDictionary<string, ParsedSplit> ParseSplitFile(string filePath)
         {
             return _localhostFileService.ParseSplitFile(filePath);
-        }
-
-        private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)
-        {
-            return splitLogger ?? WrapperAdapter.GetLogger(typeof(LocalhostClient));
         }
         #endregion
     }

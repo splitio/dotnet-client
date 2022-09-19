@@ -9,7 +9,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public abstract class SegmentChangeFetcher: ISegmentChangeFetcher
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SegmentChangeFetcher));
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SegmentChangeFetcher));
 
         protected abstract Task<SegmentChange> FetchFromBackend(string name, long since, FetchOptions fetchOptions);
 

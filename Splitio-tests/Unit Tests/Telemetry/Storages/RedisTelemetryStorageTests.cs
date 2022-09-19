@@ -15,7 +15,6 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
     public class RedisTelemetryStorageTests
     {
         private Mock<IRedisAdapter> _redisAdapter;
-        private Mock<ISplitLogger> _log;
         private string _userPrefix;
         private string _sdkVersion;
         private string _machineIp;
@@ -27,13 +26,12 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         public void Initialization()
         {
             _redisAdapter = new Mock<IRedisAdapter>();
-            _log = new Mock<ISplitLogger>();
             _userPrefix = "user-prefix-test";
             _sdkVersion = "sdk-version-test";
             _machineIp = "10.0.0.1";
             _machineName = "machine-name-test";
 
-            _telemetryStorage = new RedisTelemetryStorage(_redisAdapter.Object, _userPrefix, _sdkVersion, _machineIp, _machineName, _log.Object);
+            _telemetryStorage = new RedisTelemetryStorage(_redisAdapter.Object, _userPrefix, _sdkVersion, _machineIp, _machineName);
         }
 
         [TestMethod]

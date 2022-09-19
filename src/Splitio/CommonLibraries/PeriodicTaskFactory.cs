@@ -11,7 +11,7 @@ namespace Splitio.CommonLibraries
     /// </summary>
     public static class PeriodicTaskFactory
     {
-        private static ISplitLogger _log = WrapperAdapter.GetLogger(typeof(PeriodicTaskFactory));
+        private static ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(PeriodicTaskFactory));
 
         /// <summary>
         /// Starts the periodic task.

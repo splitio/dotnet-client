@@ -15,7 +15,7 @@ namespace Splitio.Services.Events.Classes
     public class EventsLog : IEventsLog
     {
         private static readonly long MAX_SIZE_BYTES = 5 * 1024 * 1024L;
-        protected static readonly ISplitLogger Logger = WrapperAdapter.GetLogger(typeof(EventsLog));
+        protected static readonly ISplitLogger Logger = WrapperAdapter.Instance().GetLogger(typeof(EventsLog));
 
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly IEventSdkApiClient _apiClient;
@@ -49,7 +49,7 @@ namespace Splitio.Services.Events.Classes
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _tasksManager = tasksManager;
 
-            _wrapperAdapter = new WrapperAdapter();
+            _wrapperAdapter = WrapperAdapter.Instance();
         }
 
         public void Start()

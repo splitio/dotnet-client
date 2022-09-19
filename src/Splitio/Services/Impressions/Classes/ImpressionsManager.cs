@@ -13,7 +13,7 @@ namespace Splitio.Services.Impressions.Classes
 {
     public class ImpressionsManager : IImpressionsManager
     {
-        private static readonly ISplitLogger _logger = WrapperAdapter.GetLogger(typeof(ImpressionsManager));
+        private static readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsManager));
 
         private readonly IImpressionsObserver _impressionsObserver;
         private readonly IImpressionsLog _impressionsLog;
@@ -71,7 +71,9 @@ namespace Splitio.Services.Impressions.Classes
                     default:
                         ShouldCalculatePreviousTime(impression);
 
-                        _impressionsCounter.Inc(feature, time);
+                        if (impression.previousTime.HasValue)
+                            _impressionsCounter.Inc(feature, time);
+
                         impression.Optimized = ShouldQueueImpression(impression);
                         break;
                 }
@@ -137,7 +139,7 @@ namespace Splitio.Services.Impressions.Classes
         // Public only for tests
         public bool ShouldQueueImpression(KeyImpression impression)
         {
-            return impression.previousTime == null || (ImpressionsHelper.TruncateTimeFrame(impression.previousTime.Value) != ImpressionsHelper.TruncateTimeFrame(impression.time));
+            return !impression.previousTime.HasValue || (ImpressionsHelper.TruncateTimeFrame(impression.previousTime.Value) != ImpressionsHelper.TruncateTimeFrame(impression.time));
         }
         #endregion
 

@@ -22,7 +22,7 @@ namespace Splitio.Integration_tests.Events
         public EventsLogTests()
         {
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
-            _wrapperAdapter = new WrapperAdapter();
+            _wrapperAdapter = WrapperAdapter.Instance();
             _tasksManger = new TasksManager(_wrapperAdapter);
         }
 

@@ -14,7 +14,7 @@ namespace Splitio.Services.InputValidation.Classes
 
         public EventPropertiesValidator(ISplitLogger log = null)
         {
-            _log = log ?? WrapperAdapter.GetLogger(typeof(EventPropertiesValidator));
+            _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(EventPropertiesValidator));
         }
 
         public EventValidatorResult IsValid(Dictionary<string, object> properties)

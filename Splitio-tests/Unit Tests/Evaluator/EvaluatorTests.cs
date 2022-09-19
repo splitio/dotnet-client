@@ -4,10 +4,8 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Evaluator;
-using Splitio.Services.Logger;
 using Splitio.Services.Parsing;
 using Splitio.Services.Parsing.Classes;
-using Splitio.Services.Parsing.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,8 +15,6 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
     public class EvaluatorTests
     {
         private readonly Mock<ISplitter> _splitter;
-        private readonly Mock<ISplitLogger> _log;
-        private readonly Mock<ISplitParser> _splitParser;
         private readonly Mock<ISplitCache> _splitCache;
 
         private IEvaluator _evaluator;
@@ -26,11 +22,9 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
         public EvaluatorTests()
         {
             _splitter = new Mock<ISplitter>();
-            _log = new Mock<ISplitLogger>();
-            _splitParser = new Mock<ISplitParser>();
             _splitCache = new Mock<ISplitCache>();
 
-            _evaluator = new Splitio.Services.Evaluator.Evaluator(_splitCache.Object, _splitParser.Object, _splitter.Object, _log.Object);
+            _evaluator = new Splitio.Services.Evaluator.Evaluator(_splitCache.Object, _splitter.Object);
         }
 
         #region EvaluateFeature
@@ -52,7 +46,6 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             // Assert.
             Assert.AreEqual("control", result.Treatment);
             Assert.AreEqual(Labels.SplitNotFound, result.Label);
-            _log.Verify(mock => mock.Warn($"GetTreatment: you passed {splitName} that does not exist in this environment, please double check what Splits exist in the web console."), Times.Once);
         }
 
         [TestMethod]

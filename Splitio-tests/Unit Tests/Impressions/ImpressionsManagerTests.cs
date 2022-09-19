@@ -5,6 +5,7 @@ using Splitio.Domain;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     [TestClass]
     public class ImpressionsManagerTests
     {
-        private readonly WrapperAdapter wrapperAdapter = new WrapperAdapter();
+        private readonly IWrapperAdapter wrapperAdapter = WrapperAdapter.Instance();
 
         private readonly Mock<IImpressionsObserver> _impressionsObserver;
         private readonly Mock<IImpressionsLog> _impressionsLog;
@@ -35,7 +36,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _uniqueKeysTracker = new Mock<IUniqueKeysTracker>();
 
-            _tasksManager = new TasksManager(new WrapperAdapter());
+            _tasksManager = new TasksManager(WrapperAdapter.Instance());
         }
 
         [TestMethod]
@@ -164,7 +165,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
            
             // Assert.
             _impressionsObserver.Verify(mock => mock.TestAndSet(It.IsAny<KeyImpression>()), Times.Once);
-            _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Once);
+            _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Never);
 
             Thread.Sleep(1000);
             _impressionsLog.Verify(mock => mock.Log(It.IsAny<List<KeyImpression>>()), Times.Once);
@@ -192,7 +193,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             // Assert.
             _impressionsObserver.Verify(mock => mock.TestAndSet(It.IsAny<KeyImpression>()), Times.Once);
-            _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Once);
+            _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Never);
 
             Thread.Sleep(1000);
             _impressionsLog.Verify(mock => mock.Log(It.IsAny<List<KeyImpression>>()), Times.Once);

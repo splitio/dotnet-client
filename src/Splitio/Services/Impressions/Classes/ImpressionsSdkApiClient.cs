@@ -20,7 +20,7 @@ namespace Splitio.Services.Impressions.Classes
         private const string ImpressionsCountUrlTemplate = "/api/testImpressions/count";
         private const int MaxAttempts = 3;
 
-        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(ImpressionsSdkApiClient));
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsSdkApiClient));
 
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly int _maxBulkSize;

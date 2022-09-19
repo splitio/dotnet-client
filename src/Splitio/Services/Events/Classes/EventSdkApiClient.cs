@@ -16,7 +16,7 @@ namespace Splitio.Services.Events.Classes
 {
     public class EventSdkApiClient : SdkApiClient, IEventSdkApiClient
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(EventSdkApiClient));
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(EventSdkApiClient));
 
         private const string EventsUrlTemplate = "/api/events/bulk";
         private const int MaxAttempts = 3;
