@@ -1,7 +1,7 @@
 CHANGES
 
 7.2.0 (Oct 3, 2022)
-- 
+- Added a new impressions mode for the SDK called NONE , to be used in factory when there is no desire to capture impressions on an SDK factory to feed Split's analytics engine. Running NONE mode, the SDK will only capture unique keys evaluated for a particular feature flag instead of full blown impressions.
 
 7.1.0 (Sep 19, 2022)
 - Added support to receive a custom logger by configuration.
@@ -49,9 +49,10 @@ CHANGES
 - Fixed the first schedule for the SSE refresh token.
 
 6.2.0 (Oct 13, 2020)
-- Added deduplication logic for impressions data.
-  - Now there are two modes for Impressions when the SDK is in standalone mode, OPTIMIZED (default) that only ships unique impressions and DEBUG for times where you need to send ALL impressions to debug an integration.
-  - Impression listener remains unchanged and will still get all impressions.
+- Added impressions dedupe logic to avoid sending duplicated impressions:  
+  - Added `OPTIMIZED` and `DEBUG` modes in order to enabling/disabling how impressions are going to be sent into Split servers,
+    - `OPTIMIZED`: will send unique impressions in a timeframe in order to reduce how many times impressions are posted to Split.
+    - `DEBUG`: will send every impression generated to Split.
 - Fixed async operation.
 
 6.1.5 (Sep 3, 2020)
