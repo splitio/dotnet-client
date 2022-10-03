@@ -1,5 +1,8 @@
 CHANGES
 
+7.2.0 (Oct 3, 2022)
+- 
+
 7.1.0 (Sep 19, 2022)
 - Added support to receive a custom logger by configuration.
 - Updated ImpressionManager logic to avoid count when the previous time calculated is 0 or null.
