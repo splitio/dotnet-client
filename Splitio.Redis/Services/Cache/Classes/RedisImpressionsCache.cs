@@ -49,9 +49,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public void RecordUniqueKeys(List<Mtks> uniqueKeys)
         {
-            var uniques = uniqueKeys.Select(i => JsonConvert.SerializeObject(i)); ;
-
-            var lengthRedis = _redisAdapter.ListRightPush(UniqueKeysKey, uniques.Select(i => (RedisValue)i).ToArray());
+            var lengthRedis = _redisAdapter.ListRightPush(UniqueKeysKey, JsonConvert.SerializeObject(uniqueKeys));
 
             // This operation will simply do nothing if the key no longer exists (queue is empty)
             // It's only done in the "successful" exit path so that the TTL is not overridden if mtks weren't
