@@ -58,9 +58,9 @@ namespace Splitio.Services.Client.Classes
             BuildSplitCache();
             BuildSegmentCache();
             BuildTelemetryStorage();
-            BuildTelemetrySyncTask();            
+            BuildTelemetrySyncTask();
             BuildSdkApiClients();
-            BuildSplitFetcher();            
+            BuildSplitFetcher();
             BuildTreatmentLog(config);
 
             BuildSenderAdapter();
@@ -72,7 +72,7 @@ namespace Splitio.Services.Client.Classes
             BuildEventLog(config);
             BuildEvaluator();
             BuildBlockUntilReadyService();
-            BuildManager();            
+            BuildManager();
             BuildSyncManager();
 
             _startSessionMs = CurrentTimeHelper.CurrentTimeMillis();
