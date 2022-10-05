@@ -64,7 +64,7 @@ namespace Splitio.Services.Shared.Classes
                 UniqueKeysRefreshRate = 3600,
                 ImpressionsCounterRefreshRate = 1800, // Send bulk impressions count - Refresh rate: 30 min.
                 ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Optimized,
-                SplitsRefreshRate = config.FeaturesRefreshRate ?? 5,
+                SplitsRefreshRate = config.FeaturesRefreshRate ?? 60,
                 SegmentRefreshRate = config.SegmentsRefreshRate ?? 60,
                 HttpConnectionTimeout = config.ConnectionTimeout ?? 15000,
                 HttpReadTimeout = config.ReadTimeout ?? 15000,

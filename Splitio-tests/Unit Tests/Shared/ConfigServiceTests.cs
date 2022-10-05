@@ -39,7 +39,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual(true, result.LabelsEnabled);
             Assert.AreEqual("https://sdk.split.io", result.BaseUrl);
             Assert.AreEqual("https://events.split.io", result.EventsBaseUrl);
-            Assert.AreEqual(5, result.SplitsRefreshRate);
+            Assert.AreEqual(60, result.SplitsRefreshRate);
             Assert.AreEqual(60, result.SegmentRefreshRate);
             Assert.AreEqual(15000, result.HttpConnectionTimeout);
             Assert.AreEqual(15000, result.HttpReadTimeout);
