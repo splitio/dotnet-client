@@ -14,6 +14,8 @@ namespace Splitio.Redis.Services.Cache.Classes
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(RedisAdapter));
 
+        private readonly object _lock = new object();
+
         private readonly string _host;
         private readonly string _port;
         private readonly string _password = "";
@@ -80,185 +82,224 @@ namespace Splitio.Redis.Services.Cache.Classes
         
         public bool Set(string key, string value)
         {
-            try
+            lock (_lock)
             {
-                return _database.StringSet(key, value);
+                try
+                {
+                    return _database.StringSet(key, value);
+                }
+                catch (Exception e)
+                {
+                    LogError("Set", key, e);
+                    return false;
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("Set", key, e);
-                return false;
-            }
-            finally { FinishProfiling(); }
         }
 
         public string Get(string key)
         {
-            try
+            lock (_lock)
             {
-                return _database.StringGet(key);
+                try
+                {
+                    return _database.StringGet(key);
+                }
+                catch (Exception e)
+                {
+                    LogError("Get", key, e);
+                    return string.Empty;
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("Get", key, e);
-                return string.Empty;
-            }
-            finally { FinishProfiling(); }
         }
 
         public RedisValue[] MGet(RedisKey[] keys)
         {
-            try
+            lock (_lock)
             {
-                return _database.StringGet(keys);
+                try
+                {
+                    return _database.StringGet(keys);
+                }
+                catch (Exception e)
+                {
+                    LogError("MGet", string.Empty, e);
+                    return new RedisValue[0];
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("MGet", string.Empty, e);
-                return new RedisValue[0];
-            }
-            finally { FinishProfiling(); }
         }
 
         public RedisKey[] Keys(string pattern)
         {
-            try
+            lock (_lock)
             {
-                var keys = _server.Keys(_databaseNumber, pattern);
-                return keys.ToArray();
+                try
+                {
+                    var keys = _server.Keys(_databaseNumber, pattern);
+                    return keys.ToArray();
+                }
+                catch (Exception e)
+                {
+                    LogError("Keys", pattern, e);
+                    return new RedisKey[0];
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("Keys", pattern, e);
-                return new RedisKey[0];
-            }
-            finally { FinishProfiling(); }
         }
 
         public bool Del(string key)
         {
-            try
+            lock (_lock)
             {
-                return _database.KeyDelete(key);
+                try
+                {
+                    return _database.KeyDelete(key);
+                }
+                catch (Exception e)
+                {
+                    LogError("Del", key, e);
+                    return false;
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("Del", key, e);
-                return false;
-            }
-            finally { FinishProfiling(); }
         }
 
         public long Del(RedisKey[] keys)
         {
-            try
+            lock (_lock)
             {
-                return _database.KeyDelete(keys);
+                try
+                {
+                    return _database.KeyDelete(keys);
+                }
+                catch (Exception e)
+                {
+                    LogError("Del Keys", string.Empty, e);
+                    return 0;
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("Del Keys", string.Empty, e);
-                return 0;
-            }
-            finally { FinishProfiling(); }
         }
 
         public bool SAdd(string key, RedisValue value)
         {
-            try
+            lock (_lock)
             {
-                return _database.SetAdd(key, value);
+                try
+                {
+                    return _database.SetAdd(key, value);
+                }
+                catch (Exception e)
+                {
+                    LogError("SAdd", key, e);
+                    return false;
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("SAdd", key, e);
-                return false;
-            }
-            finally { FinishProfiling(); }
         }
 
         public long SAdd(string key, RedisValue[] values)
         {
-            try
+            lock (_lock)
             {
-                return _database.SetAdd(key, values);
+                try
+                {
+                    return _database.SetAdd(key, values);
+                }
+                catch (Exception e)
+                {
+                    LogError("SAdd", key, e);
+                    return 0;
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("SAdd", key, e);
-                return 0;
-            }
-            finally { FinishProfiling(); }
         }
 
         public long SRem(string key, RedisValue[] values)
         {
-            try
+            lock (_lock)
             {
-                return _database.SetRemove(key, values);
+                try
+                {
+                    return _database.SetRemove(key, values);
+                }
+                catch (Exception e)
+                {
+                    LogError("SRem", key, e);
+                    return 0;
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("SRem", key, e);
-                return 0;
-            }
-            finally { FinishProfiling(); }
         }
 
         public bool SIsMember(string key, string value)
         {
-            try
+            lock (_lock)
             {
-                return _database.SetContains(key, value);
+                try
+                {
+                    return _database.SetContains(key, value);
+                }
+                catch (Exception e)
+                {
+                    LogError("SIsMember", key, e);
+                    return false;
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("SIsMember", key, e);
-                return false;
-            }
-            finally { FinishProfiling(); }
         }
 
         public RedisValue[] SMembers(string key)
         {
-            try
+            lock (_lock)
             {
-                return _database.SetMembers(key);
+                try
+                {
+                    return _database.SetMembers(key);
+                }
+                catch (Exception e)
+                {
+                    LogError("SMembers", key, e);
+                    return new RedisValue[0];
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("SMembers", key, e);
-                return new RedisValue[0];
-            }
-            finally { FinishProfiling(); }
         }
 
         public long IcrBy(string key, long value)
         {
-            try
+            lock (_lock)
             {
-                return _database.StringIncrement(key, value);
+                try
+                {
+                    return _database.StringIncrement(key, value);
+                }
+                catch (Exception e)
+                {
+                    LogError("IcrBy", key, e);
+                    return 0;
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("IcrBy", key, e);
-                return 0;
-            }
-            finally { FinishProfiling(); }
         }
 
         public long ListRightPush(string key, RedisValue value)
         {
-            try
+            lock (_lock)
             {
-                return _database.ListRightPush(key, value);
+                try
+                {
+                    return _database.ListRightPush(key, value);
+                }
+                catch (Exception e)
+                {
+                    LogError("ListRightPush", key, e);
+                    return 0;
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("ListRightPush", key, e);
-                return 0;
-            }
-            finally { FinishProfiling(); }
         }
 
         public void Flush()
@@ -275,119 +316,140 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public bool KeyExpire(string key, TimeSpan expiry)
         {
-            try
+            lock (_lock)
             {
-                return _database.KeyExpire(key, expiry);
+                try
+                {
+                    return _database.KeyExpire(key, expiry);
+                }
+                catch (Exception e)
+                {
+                    LogError("KeyExpire", key, e);
+                    return false;
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("KeyExpire", key, e);
-                return false;
-            }
-            finally { FinishProfiling(); }
         }
 
         public long ListRightPush(string key, RedisValue[] values)
         {
-            try
+            lock (_lock)
             {
-                return _database.ListRightPush(key, values);
+                try
+                {
+                    return _database.ListRightPush(key, values);
+                }
+                catch (Exception e)
+                {
+                    LogError("ListRightPush", key, e);
+                    return 0;
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("ListRightPush", key, e);
-                return 0;
-            }
-            finally { FinishProfiling(); }
         }
 
         public RedisValue[] ListRange(RedisKey key, long start = 0, long stop = -1)
         {
-            try
+            lock (_lock)
             {
-                return _database.ListRange(key, start, stop);
+                try
+                {
+                    return _database.ListRange(key, start, stop);
+                }
+                catch (Exception e)
+                {
+                    LogError("ListRange", key, e);
+                    return new RedisValue[0];
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("ListRange", key, e);
-                return new RedisValue[0];
-            }
-            finally { FinishProfiling(); }
         }
 
         public double HashIncrement(string key, string hashField, double value)
         {
-            try
+            lock (_lock)
             {
-                return _database.HashIncrement(key, hashField, value);
+                try
+                {
+                    return _database.HashIncrement(key, hashField, value);
+                }
+                catch (Exception e)
+                {
+                    LogError("HashIncrement", key, e);
+                    return 0;
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("HashIncrement", key, e);
-                return 0;
-            }
-            finally { FinishProfiling(); }
         }
 
         public long HashIncrementAsyncBatch(string key, Dictionary<string, int> values)
         {
-            var tasks = new List<Task<long>>();
-            long keysCount = 0;
-            long hashLength = 0;
-
-            try
+            lock (_lock)
             {
-                foreach (var item in values)
+                var tasks = new List<Task<long>>();
+                long keysCount = 0;
+                long hashLength = 0;
+
+                try
                 {
-                    tasks.Add(_database.HashIncrementAsync(key, item.Key, item.Value));
+                    foreach (var item in values)
+                    {
+                        tasks.Add(_database.HashIncrementAsync(key, item.Key, item.Value));
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                LogError("HashIncrementAsync", key, e);
-            }
-            finally
-            {
-                if (tasks.Any())
+                catch (Exception e)
                 {
-                    Task.WaitAll(tasks.ToArray());
+                    LogError("HashIncrementAsync", key, e);
+                }
+                finally
+                {
+                    if (tasks.Any())
+                    {
+                        Task.WaitAll(tasks.ToArray());
 
-                    keysCount = tasks.Sum(t => t.Result);
-                    hashLength = _database.HashLengthAsync(key).Result;
+                        keysCount = tasks.Sum(t => t.Result);
+                        hashLength = _database.HashLengthAsync(key).Result;
+                    }
+
+                    FinishProfiling();
                 }
 
-                FinishProfiling();
+                return keysCount + hashLength;
             }
-
-            return keysCount + hashLength;
         }
 
         public HashEntry[] HashGetAll(RedisKey key)
         {
-            try
+            lock (_lock)
             {
-                return _database.HashGetAll(key);
+                try
+                {
+                    return _database.HashGetAll(key);
+                }
+                catch (Exception e)
+                {
+                    LogError("HashGetAll", key, e);
+                    return new HashEntry[0];
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("HashGetAll", key, e);
-                return new HashEntry[0];
-            }
-            finally { FinishProfiling(); }
         }
 
         public bool HashSet(RedisKey key, RedisValue hashField, RedisValue value)
         {
-            try
+            lock (_lock)
             {
-                return _database.HashSet(key, hashField, value);
+                try
+                {
+                    return _database.HashSet(key, hashField, value);
+                }
+                catch (Exception e)
+                {
+                    LogError("HashSet", key, e);
+                    return false;
+                }
+                finally { FinishProfiling(); }
             }
-            catch (Exception e)
-            {
-                LogError("HashSet", key, e);
-                return false;
-            }
-            finally { FinishProfiling(); }
         }
         #endregion
 
@@ -402,8 +464,9 @@ namespace Splitio.Redis.Services.Cache.Classes
         private void Profiling()
         {
 #if NETSTANDARD2_0 || NET6_0 || NET5_0
-
+            _log.Warn("Redis Profiling");
             var commands = _profiler.GetSession().FinishProfiling();
+
             foreach (var item in commands)
             {
                 _log.Warn(item.ToString());
@@ -416,7 +479,6 @@ namespace Splitio.Redis.Services.Cache.Classes
             Profiling(); 
             _log.Error($"Exception calling Redis Adapter {command}.\nKey: {key}.\nMessage: {ex.Message}.\nStackTrace: {ex.StackTrace}.\n InnerExection: {ex.InnerException}.", ex);
         }
-
 
         // public only for testing.
         public ConfigurationOptions GetConfig()
