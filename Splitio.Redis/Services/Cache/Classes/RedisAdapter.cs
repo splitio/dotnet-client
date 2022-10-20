@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using YamlDotNet.Core.Tokens;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
@@ -90,6 +89,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("Set", key, e);
                 return false;
             }
+            finally { FinishProfiling(); }
         }
 
         public string Get(string key)
@@ -103,6 +103,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("Get", key, e);
                 return string.Empty;
             }
+            finally { FinishProfiling(); }
         }
 
         public RedisValue[] MGet(RedisKey[] keys)
@@ -116,6 +117,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("MGet", string.Empty, e);
                 return new RedisValue[0];
             }
+            finally { FinishProfiling(); }
         }
 
         public RedisKey[] Keys(string pattern)
@@ -130,6 +132,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("Keys", pattern, e);
                 return new RedisKey[0];
             }
+            finally { FinishProfiling(); }
         }
 
         public bool Del(string key)
@@ -143,6 +146,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("Del", key, e);
                 return false;
             }
+            finally { FinishProfiling(); }
         }
 
         public long Del(RedisKey[] keys)
@@ -156,6 +160,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("Del Keys", string.Empty, e);
                 return 0;
             }
+            finally { FinishProfiling(); }
         }
 
         public bool SAdd(string key, RedisValue value)
@@ -169,6 +174,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("SAdd", key, e);
                 return false;
             }
+            finally { FinishProfiling(); }
         }
 
         public long SAdd(string key, RedisValue[] values)
@@ -182,6 +188,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("SAdd", key, e);
                 return 0;
             }
+            finally { FinishProfiling(); }
         }
 
         public long SRem(string key, RedisValue[] values)
@@ -195,6 +202,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("SRem", key, e);
                 return 0;
             }
+            finally { FinishProfiling(); }
         }
 
         public bool SIsMember(string key, string value)
@@ -208,6 +216,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("SIsMember", key, e);
                 return false;
             }
+            finally { FinishProfiling(); }
         }
 
         public RedisValue[] SMembers(string key)
@@ -221,6 +230,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("SMembers", key, e);
                 return new RedisValue[0];
             }
+            finally { FinishProfiling(); }
         }
 
         public long IcrBy(string key, long value)
@@ -234,6 +244,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("IcrBy", key, e);
                 return 0;
             }
+            finally { FinishProfiling(); }
         }
 
         public long ListRightPush(string key, RedisValue value)
@@ -247,6 +258,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("ListRightPush", key, e);
                 return 0;
             }
+            finally { FinishProfiling(); }
         }
 
         public void Flush()
@@ -272,6 +284,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("KeyExpire", key, e);
                 return false;
             }
+            finally { FinishProfiling(); }
         }
 
         public long ListRightPush(string key, RedisValue[] values)
@@ -285,6 +298,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("ListRightPush", key, e);
                 return 0;
             }
+            finally { FinishProfiling(); }
         }
 
         public RedisValue[] ListRange(RedisKey key, long start = 0, long stop = -1)
@@ -298,6 +312,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("ListRange", key, e);
                 return new RedisValue[0];
             }
+            finally { FinishProfiling(); }
         }
 
         public double HashIncrement(string key, string hashField, double value)
@@ -311,6 +326,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("HashIncrement", key, e);
                 return 0;
             }
+            finally { FinishProfiling(); }
         }
 
         public long HashIncrementAsyncBatch(string key, Dictionary<string, int> values)
@@ -339,6 +355,8 @@ namespace Splitio.Redis.Services.Cache.Classes
                     keysCount = tasks.Sum(t => t.Result);
                     hashLength = _database.HashLengthAsync(key).Result;
                 }
+
+                FinishProfiling();
             }
 
             return keysCount + hashLength;
@@ -355,6 +373,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("HashGetAll", key, e);
                 return new HashEntry[0];
             }
+            finally { FinishProfiling(); }
         }
 
         public bool HashSet(RedisKey key, RedisValue hashField, RedisValue value)
@@ -368,16 +387,23 @@ namespace Splitio.Redis.Services.Cache.Classes
                 LogError("HashSet", key, e);
                 return false;
             }
+            finally { FinishProfiling(); }
         }
         #endregion
 
         #region Private Methods
+        private void FinishProfiling()
+        {
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
+            _profiler.GetSession().FinishProfiling();
+#endif
+        }
+
         private void Profiling()
         {
 #if NETSTANDARD2_0 || NET6_0 || NET5_0
 
             var commands = _profiler.GetSession().FinishProfiling();
-
             foreach (var item in commands)
             {
                 _log.Warn(item.ToString());
@@ -387,7 +413,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         private void LogError(string command, string key, Exception ex)
         {
-            Profiling();
+            Profiling(); 
             _log.Error($"Exception calling Redis Adapter {command}.\nKey: {key}.\nMessage: {ex.Message}.\nStackTrace: {ex.StackTrace}.\n InnerExection: {ex.InnerException}.", ex);
         }
 
