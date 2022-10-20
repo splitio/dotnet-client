@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using YamlDotNet.Core.Tokens;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
@@ -27,6 +28,10 @@ namespace Splitio.Redis.Services.Cache.Classes
         private IDatabase _database;
         private IServer _server;
 
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
+        private readonly AsyncLocalProfiler _profiler;
+#endif
+
         public RedisAdapter(string host,
             string port,
             string password = "",
@@ -44,6 +49,10 @@ namespace Splitio.Redis.Services.Cache.Classes
             _connectRetry = connectRetry;
             _syncTimeout = syncTimeout;
             _tlsConfig = tlsConfig;
+
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
+            _profiler = new AsyncLocalProfiler();
+#endif
         }
 
         #region Public Methods
@@ -54,6 +63,10 @@ namespace Splitio.Redis.Services.Cache.Classes
                 _redis = ConnectionMultiplexer.Connect(GetConfig());
                 _database = _redis.GetDatabase(_databaseNumber);
                 _server = _redis.GetServer($"{_host}:{_port}");
+
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
+                _redis.RegisterProfiler(_profiler.GetSession);
+#endif
             }
             catch (Exception e)
             {
@@ -74,7 +87,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter Set", e);
+                LogError("Set", key, e);
                 return false;
             }
         }
@@ -87,7 +100,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter Get", e);
+                LogError("Get", key, e);
                 return string.Empty;
             }
         }
@@ -100,7 +113,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter Get", e);
+                LogError("MGet", string.Empty, e);
                 return new RedisValue[0];
             }
         }
@@ -114,7 +127,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter Keys", e);
+                LogError("Keys", pattern, e);
                 return new RedisKey[0];
             }
         }
@@ -127,7 +140,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter Del", e);
+                LogError("Del", key, e);
                 return false;
             }
         }
@@ -140,7 +153,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter Del", e);
+                LogError("Del Keys", string.Empty, e);
                 return 0;
             }
         }
@@ -153,7 +166,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter SAdd", e);
+                LogError("SAdd", key, e);
                 return false;
             }
         }
@@ -166,7 +179,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter SAdd", e);
+                LogError("SAdd", key, e);
                 return 0;
             }
         }
@@ -179,7 +192,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter SRem", e);
+                LogError("SRem", key, e);
                 return 0;
             }
         }
@@ -192,7 +205,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter SIsMember", e);
+                LogError("SIsMember", key, e);
                 return false;
             }
         }
@@ -205,7 +218,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter SMembers", e);
+                LogError("SMembers", key, e);
                 return new RedisValue[0];
             }
         }
@@ -218,7 +231,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter IcrBy", e);
+                LogError("IcrBy", key, e);
                 return 0;
             }
         }
@@ -231,7 +244,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter ListRightPush", e);
+                LogError("ListRightPush", key, e);
                 return 0;
             }
         }
@@ -256,7 +269,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter KeyExpire", e);
+                LogError("KeyExpire", key, e);
                 return false;
             }
         }
@@ -269,7 +282,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter ListRightPush", e);
+                LogError("ListRightPush", key, e);
                 return 0;
             }
         }
@@ -282,7 +295,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter ListRange", e);
+                LogError("ListRange", key, e);
                 return new RedisValue[0];
             }
         }
@@ -295,7 +308,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter HashIncrement, ", e);
+                LogError("HashIncrement", key, e);
                 return 0;
             }
         }
@@ -315,7 +328,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter HashIncrementAsync", e);
+                LogError("HashIncrementAsync", key, e);
             }
             finally
             {
@@ -339,7 +352,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter HashGet", e);
+                LogError("HashGetAll", key, e);
                 return new HashEntry[0];
             }
         }
@@ -352,13 +365,33 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                _log.Error("Exception calling Redis Adapter HashIncrement, ", e);
+                LogError("HashSet", key, e);
                 return false;
             }
         }
         #endregion
 
         #region Private Methods
+        private void Profiling()
+        {
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
+
+            var commands = _profiler.GetSession().FinishProfiling();
+
+            foreach (var item in commands)
+            {
+                _log.Warn(item.ToString());
+            }
+#endif
+        }
+
+        private void LogError(string command, string key, Exception ex)
+        {
+            Profiling();
+            _log.Error($"Exception calling Redis Adapter {command}.\nKey: {key}.\nMessage: {ex.Message}.\nStackTrace: {ex.StackTrace}.\n InnerExection: {ex.InnerException}.", ex);
+        }
+
+
         // public only for testing.
         public ConfigurationOptions GetConfig()
         {
