@@ -457,6 +457,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         private void FinishProfiling()
         {
 #if NETSTANDARD2_0 || NET6_0 || NET5_0
+            _log.Info("FinishProfiling");
             _profiler.GetSession().FinishProfiling();
 #endif
         }
@@ -464,7 +465,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         private void Profiling()
         {
 #if NETSTANDARD2_0 || NET6_0 || NET5_0
-            _log.Warn("Redis Profiling");
+            _log.Info("Redis Profiling");
             var commands = _profiler.GetSession().FinishProfiling();
 
             foreach (var item in commands)
