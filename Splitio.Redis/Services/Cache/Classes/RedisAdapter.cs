@@ -138,6 +138,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 try
                 {
                     var keys = _server.Keys(_databaseNumber, pattern);
+
                     return keys.ToArray();
                 }
                 catch (Exception e)
@@ -463,7 +464,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             foreach (var item in commands)
             {
-                _log.Info($"Key: {key}\nMethod:{command}\nInfo: {item}");
+                _log.Info($"Total commands: {commands.Count()}\nKey: {key}\nMethod:{command}\nInfo: {item}");
             }
 #endif
         }
@@ -475,7 +476,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             foreach (var item in commands)
             {
-                _log.Warn($"Key: {key}\nMethod:{command}\nInfo: {item}");
+                _log.Warn($"Total commands: {commands.Count()}\nKey: {key}\nMethod:{command}\nInfo: {item}");
             }
 #endif
         }
