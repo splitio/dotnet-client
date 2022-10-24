@@ -93,7 +93,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("Set", key, e);
                     return false;
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("Set", key); }
             }
         }
 
@@ -110,7 +110,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("Get", key, e);
                     return string.Empty;
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("Get", key); }
             }
         }
 
@@ -127,7 +127,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("MGet", string.Empty, e);
                     return new RedisValue[0];
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("MGet", string.Empty); }
             }
         }
 
@@ -145,7 +145,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("Keys", pattern, e);
                     return new RedisKey[0];
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("Keys", pattern); }
             }
         }
 
@@ -162,7 +162,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("Del", key, e);
                     return false;
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("Del", key); }
             }
         }
 
@@ -179,7 +179,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("Del Keys", string.Empty, e);
                     return 0;
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("Del Keys", string.Empty); }
             }
         }
 
@@ -196,7 +196,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("SAdd", key, e);
                     return false;
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("SAdd", key); }
             }
         }
 
@@ -213,7 +213,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("SAdd", key, e);
                     return 0;
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("SAdd", key); }
             }
         }
 
@@ -230,7 +230,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("SRem", key, e);
                     return 0;
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("SRem", key); }
             }
         }
 
@@ -247,7 +247,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("SIsMember", key, e);
                     return false;
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("SIsMember", key); }
             }
         }
 
@@ -264,7 +264,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("SMembers", key, e);
                     return new RedisValue[0];
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("SMembers", key); }
             }
         }
 
@@ -281,7 +281,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("IcrBy", key, e);
                     return 0;
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("IcrBy", key); }
             }
         }
 
@@ -298,7 +298,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("ListRightPush", key, e);
                     return 0;
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("ListRightPush", key); }
             }
         }
 
@@ -327,7 +327,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("KeyExpire", key, e);
                     return false;
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("KeyExpire", key); }
             }
         }
 
@@ -344,7 +344,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("ListRightPush", key, e);
                     return 0;
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("ListRightPush", key); }
             }
         }
 
@@ -361,7 +361,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("ListRange", key, e);
                     return new RedisValue[0];
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("ListRange", key); }
             }
         }
 
@@ -378,7 +378,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("HashIncrement", key, e);
                     return 0;
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("HashIncrement", key); }
             }
         }
 
@@ -411,7 +411,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                         hashLength = _database.HashLengthAsync(key).Result;
                     }
 
-                    FinishProfiling();
+                    FinishProfiling("HashIncrementAsync", key);
                 }
 
                 return keysCount + hashLength;
@@ -431,7 +431,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("HashGetAll", key, e);
                     return new HashEntry[0];
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("HashGetAll", key); }
             }
         }
 
@@ -448,21 +448,28 @@ namespace Splitio.Redis.Services.Cache.Classes
                     LogError("HashSet", key, e);
                     return false;
                 }
-                finally { FinishProfiling(); }
+                finally { FinishProfiling("HashSet", key); }
             }
         }
         #endregion
 
         #region Private Methods
-        private void FinishProfiling()
+        private void FinishProfiling(string command, string key)
         {
 #if NETSTANDARD2_0 || NET6_0 || NET5_0
             _log.Info("FinishProfiling");
-            _profiler.GetSession().FinishProfiling();
+            var commands = _profiler.GetSession().FinishProfiling();
+
+            if (commands.Count() <= 1) return;
+
+            foreach (var item in commands)
+            {
+                _log.Info($"Key: {key}\nMethod:{command}\nInfo: {item}");
+            }
 #endif
         }
 
-        private void Profiling()
+        private void Profiling(string command, string key)
         {
 #if NETSTANDARD2_0 || NET6_0 || NET5_0
             _log.Info("Redis Profiling");
@@ -470,14 +477,14 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             foreach (var item in commands)
             {
-                _log.Warn(item.ToString());
+                _log.Warn($"Key: {key}\nMethod:{command}\nInfo: {item}");
             }
 #endif
         }
 
         private void LogError(string command, string key, Exception ex)
         {
-            Profiling(); 
+            Profiling(command, key);
             _log.Error($"Exception calling Redis Adapter {command}.\nKey: {key}.\nMessage: {ex.Message}.\nStackTrace: {ex.StackTrace}.\n InnerExection: {ex.InnerException}.", ex);
         }
 
