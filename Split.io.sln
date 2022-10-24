@@ -4,17 +4,15 @@ VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{79B9E308-3F0F-441F-92B6-18C73B5CA3ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Splitio.TestSupport", "Splitio.TestSupport\Splitio.TestSupport.csproj", "{FCB20D65-39D6-4D1A-816B-43F9B8931FDC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio.TestSupport", "Splitio.TestSupport\Splitio.TestSupport.csproj", "{FCB20D65-39D6-4D1A-816B-43F9B8931FDC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio-tests", "Splitio-tests\Splitio-tests.csproj", "{32840F07-126C-4E99-8F82-D9BCA646C355}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio.Integration-tests", "Splitio.Integration-tests\Splitio.Integration-tests.csproj", "{ED6ACB62-18B2-4A4E-9AFB-BD30AE5A9C6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Splitio.Redis", "Splitio.Redis\Splitio.Redis.csproj", "{BD7CCDE8-225B-4AAE-A47D-F202714D9608}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio.Redis", "Splitio.Redis\Splitio.Redis.csproj", "{BD7CCDE8-225B-4AAE-A47D-F202714D9608}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Splitio", "src\Splitio\Splitio.csproj", "{EA4C2A75-88E9-4A66-AC15-EBB5CB3718E8}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testing-profiling", "testing-profiling\testing-profiling.csproj", "{A5CBA742-AE6B-443F-9841-4F2094007E0C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio", "src\Splitio\Splitio.csproj", "{EA4C2A75-88E9-4A66-AC15-EBB5CB3718E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,10 +40,6 @@ Global
 		{EA4C2A75-88E9-4A66-AC15-EBB5CB3718E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA4C2A75-88E9-4A66-AC15-EBB5CB3718E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA4C2A75-88E9-4A66-AC15-EBB5CB3718E8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A5CBA742-AE6B-443F-9841-4F2094007E0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A5CBA742-AE6B-443F-9841-4F2094007E0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A5CBA742-AE6B-443F-9841-4F2094007E0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A5CBA742-AE6B-443F-9841-4F2094007E0C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
