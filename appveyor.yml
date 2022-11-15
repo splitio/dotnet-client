@@ -25,12 +25,12 @@ build_script:
  - SonarScanner.MSBuild.exe end /d:sonar.login=%SONAR_LOGIN%
 
 after_build:
-# - Redis-64\tools\redis-server.exe --service-start
-# - dotnet test .\Splitio-tests\Splitio-tests.csproj --configuration Release
-# - Redis-64\tools\redis-server.exe --service-stop
-# - Redis-64\tools\redis-server.exe --service-start
-# - dotnet test .\Splitio.Integration-tests\Splitio.Integration-tests.csproj --configuration Release
-# - dotnet test .\Splitio.TestSupport\Splitio.TestSupport.csproj --configuration Release
+ - Redis-64\tools\redis-server.exe --service-start
+ - dotnet test .\Splitio-tests\Splitio-tests.csproj --configuration Release
+ - Redis-64\tools\redis-server.exe --service-stop
+ - Redis-64\tools\redis-server.exe --service-start
+ - dotnet test .\Splitio.Integration-tests\Splitio.Integration-tests.csproj --configuration Release
+ - dotnet test .\Splitio.TestSupport\Splitio.TestSupport.csproj --configuration Release
  - dotnet pack .\src\Splitio --configuration Release
  - dotnet pack .\Splitio.Redis --configuration Release
  - dotnet pack .\Splitio.TestSupport --configuration Release
