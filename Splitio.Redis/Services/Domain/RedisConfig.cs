@@ -15,5 +15,26 @@ namespace Splitio.Redis.Services.Domain
         public int RedisConnectRetry { get; set; }
         public int RedisSyncTimeout { get; set; }
         public TlsConfig TlsConfig { get; set; }
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
+        public bool ProfilingEnabled { get; set; }
+#endif
+
+        public string HostAndPort => $"{RedisHost}:{RedisPort}";
+
+        public void FromCacheAdapterConfig(CacheAdapterConfigurationOptions options)
+        {
+            RedisHost = options.Host;
+            RedisPort = options.Port;
+            RedisPassword = options.Password;
+            RedisDatabase = options.Database ?? 0;
+            RedisConnectTimeout = options.ConnectTimeout ?? 0;
+            RedisSyncTimeout = options.SyncTimeout ?? 0;
+            RedisConnectRetry = options.ConnectRetry ?? 0;
+            RedisUserPrefix = options.UserPrefix;
+            TlsConfig = options.TlsConfig;
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
+            ProfilingEnabled = options.ProfilingEnabled;
+#endif
+        }
     }
 }

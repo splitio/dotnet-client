@@ -1,16 +1,17 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Splitio.Domain;
+using Splitio.Integration_tests.Resources;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Domain;
 using Splitio.Services.Client.Classes;
-using Splitio.Integration_tests.Resources;
+using Splitio.Services.Impressions.Interfaces;
+using Splitio.Telemetry.Domain;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Splitio.Services.Impressions.Interfaces;
-using Splitio.Telemetry.Domain;
 
 namespace Splitio.Integration_tests
 {
@@ -28,8 +29,13 @@ namespace Splitio.Integration_tests
 
         public RedisTests()
         {
-            _redisAdapter = new RedisAdapter(Host, Port, Password, Database);
-            _redisAdapter.Connect();
+            _redisAdapter = new RedisAdapter(new RedisConfig
+            {
+                RedisHost = Host,
+                RedisPort = Port,
+                RedisPassword = Password,
+                RedisDatabase = Database
+            });
 
             rootFilePath = string.Empty;
 

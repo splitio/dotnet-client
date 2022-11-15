@@ -11,7 +11,6 @@ using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
 
@@ -31,7 +30,6 @@ namespace Splitio.Redis.Services.Client.Classes
 
             ReadConfig(config);
             BuildRedisCache();
-            BuildTelemetryStorage();
             BuildTreatmentLog(config.ImpressionListener);
 
             BuildSenderAdapter();
@@ -79,27 +77,15 @@ namespace Splitio.Redis.Services.Client.Classes
 
             LabelsEnabled = baseConfig.LabelsEnabled;
 
-            _config.RedisHost = config.CacheAdapterConfig.Host;
-            _config.RedisPort = config.CacheAdapterConfig.Port;
-            _config.RedisPassword = config.CacheAdapterConfig.Password;
-            _config.RedisDatabase = config.CacheAdapterConfig.Database ?? 0;
-            _config.RedisConnectTimeout = config.CacheAdapterConfig.ConnectTimeout ?? 0;
-            _config.RedisSyncTimeout = config.CacheAdapterConfig.SyncTimeout ?? 0;
-            _config.RedisConnectRetry = config.CacheAdapterConfig.ConnectRetry ?? 0;
-            _config.RedisUserPrefix = config.CacheAdapterConfig.UserPrefix;
             _config.Mode = config.Mode;
-            _config.TlsConfig = config.CacheAdapterConfig.TlsConfig;
-        }
+            _config.FromCacheAdapterConfig(config.CacheAdapterConfig);
+    }
 
-        private void BuildRedisCache()
+    private void BuildRedisCache()
         {
-            _redisAdapter = new RedisAdapter(_config.RedisHost, _config.RedisPort, _config.RedisPassword, _config.RedisDatabase, _config.RedisConnectTimeout, _config.RedisConnectRetry, _config.RedisSyncTimeout, _config.TlsConfig);
-
-            _tasksManager.Start(()=>
-            {
-                _redisAdapter.Connect();
-                RecordConfigInit();
-            }, "Connecting Redis Adapter.");
+            _redisAdapter = new RedisAdapter(_config);
+            BuildTelemetryStorage();
+            RecordConfigInit();
 
             _segmentCache = new RedisSegmentCache(_redisAdapter, _config.RedisUserPrefix);
             _splitParser = new RedisSplitParser(_segmentCache);
