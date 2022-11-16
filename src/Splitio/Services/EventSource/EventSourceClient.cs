@@ -181,8 +181,9 @@ namespace Splitio.Services.EventSource
                                     _log.Debug($"Reading stream ....");
                                     len = await stream.ReadAsync(_buffer, 0, BufferSize, timeoutToken.Token).ConfigureAwait(false);
                                 }
-                                catch
+                                catch(Exception ex)
                                 {
+                                    _log.Debug($"Read Stream exception: {ex.GetType} || {ex}");
                                     throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Streaming read time out after {ReadTimeoutMs/1000} seconds.");
                                 }
 
