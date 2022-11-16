@@ -183,7 +183,7 @@ namespace Splitio.Services.EventSource
                                 }
                                 catch(Exception ex)
                                 {
-                                    _log.Debug($"Read Stream exception: {ex.GetType} || {ex}");
+                                    _log.Debug($"Read Stream exception: {ex.GetType()} || {ex}");
                                     throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Streaming read time out after {ReadTimeoutMs/1000} seconds.");
                                 }
 
