@@ -14,7 +14,6 @@ namespace Splitio.Services.Shared.Interfaces
         Task TaskDelay(int millisecondsDelay, CancellationToken cancellationToken);
         Task<Task> WhenAny(params Task[] tasks);
         Task<T> TaskFromResult<T>(T result);
-        void TaskWaitAndDispose(params Task[] tasks);
         ISplitLogger GetLogger(string type);
         ISplitLogger GetLogger(Type type);
     }

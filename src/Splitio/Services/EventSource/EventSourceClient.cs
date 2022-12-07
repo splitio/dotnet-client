@@ -163,8 +163,6 @@ namespace Splitio.Services.EventSource
 
         private async Task ReadStreamAsync(Stream stream, CancellationToken cancellationToken)
         {
-            _log.Debug($"Reading stream ....");
-
             try
             {
                 while (!cancellationToken.IsCancellationRequested && (IsConnected() || _firstEvent))
@@ -173,74 +171,68 @@ namespace Splitio.Services.EventSource
                     {
                         Array.Clear(_buffer, 0, BufferSize);
 
-                        var timeoutToken = new CancellationTokenSource();
-                        var timeoutTask = _wrapperAdapter.TaskDelay(ReadTimeoutMs, timeoutToken.Token);
-                        var streamReadTask = stream.ReadAsync(_buffer, 0, BufferSize, cancellationToken);
-                        // Creates a task that will complete when any of the supplied tasks have completed.
-                        // Returns: A task that represents the completion of one of the supplied tasks. The return task's Result is the task that completed.
-                        var finishedTask = await _wrapperAdapter.WhenAny(streamReadTask, timeoutTask);
-
-                        try
+                        using (var timeoutToken = new CancellationTokenSource(ReadTimeoutMs))
                         {
-                            if (finishedTask == timeoutTask)
+                            using (timeoutToken.Token.Register(() => stream.Close()))
                             {
-                                throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Streaming read time out after {ReadTimeoutMs} seconds.");
-                            }
-
-                            int len = streamReadTask.Result;
-
-                            if (len == 0)
-                            {
-                                var exception = new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, "Streaming end of the file.");
-
-                                // Added for tests. 
-                                if (_url.StartsWith("http://localhost"))
-                                    exception = new ReadStreamException(SSEClientActions.DISCONNECT, "Streaming end of the file - for tests.");
-
-                                throw exception;
-                            }
-
-                            var notificationString = _encoder.GetString(_buffer, 0, len);
-                            _log.Debug($"Read stream encoder buffer: {notificationString}");
-
-                            if (_firstEvent)
-                            {
-                                ProcessFirtsEvent(notificationString);
-                            }
-
-                            if (notificationString != KeepAliveResponse && IsConnected())
-                            {
-                                var lines = notificationString.Split(_notificationSplitArray, StringSplitOptions.None);
-
-                                foreach (var line in lines)
+                                var len = 0;
+                                try
                                 {
-                                    if (!string.IsNullOrEmpty(line))
+                                    _log.Debug($"Reading stream ....");
+                                    len = await stream.ReadAsync(_buffer, 0, BufferSize, timeoutToken.Token).ConfigureAwait(false);
+                                }
+                                catch(Exception ex)
+                                {
+                                    _log.Debug($"Read Stream exception: {ex.GetType()}.|| {ex}");
+                                    throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Streaming read time out after {ReadTimeoutMs/1000} seconds.");
+                                }
+
+                                if (len == 0)
+                                {
+                                    var exception = new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, "Streaming end of the file.");
+
+                                    // Added for tests. 
+                                    if (_url.StartsWith("http://localhost"))
+                                        exception = new ReadStreamException(SSEClientActions.DISCONNECT, "Streaming end of the file - for tests.");
+
+                                    throw exception;
+                                }
+
+                                var notificationString = _encoder.GetString(_buffer, 0, len);
+                                _log.Debug($"Read stream encoder buffer: {notificationString}");
+
+                                if (_firstEvent)
+                                {
+                                    ProcessFirtsEvent(notificationString);
+                                }
+
+                                if (notificationString != KeepAliveResponse && IsConnected())
+                                {
+                                    var lines = notificationString.Split(_notificationSplitArray, StringSplitOptions.None);
+
+                                    foreach (var line in lines)
                                     {
-                                        var eventData = _notificationParser.Parse(line);
-
-                                        if (eventData != null)
+                                        if (!string.IsNullOrEmpty(line))
                                         {
-                                            if (eventData.Type == NotificationType.ERROR)
-                                            {
-                                                var notificationError = (NotificationError)eventData;
+                                            var eventData = _notificationParser.Parse(line);
 
-                                                ProcessErrorNotification(notificationError);
-                                            }
-                                            else
+                                            if (eventData != null)
                                             {
-                                                DispatchEvent(eventData);
+                                                if (eventData.Type == NotificationType.ERROR)
+                                                {
+                                                    var notificationError = (NotificationError)eventData;
+
+                                                    ProcessErrorNotification(notificationError);
+                                                }
+                                                else
+                                                {
+                                                    DispatchEvent(eventData);
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
-                        }
-                        finally
-                        {
-                            _log.Debug("Disposing Stream Read Task...");
-                            timeoutToken.Cancel();
-                            timeoutToken.Dispose();
-                            _wrapperAdapter.TaskWaitAndDispose(timeoutTask, streamReadTask, finishedTask);
                         }
                     }
                 }
