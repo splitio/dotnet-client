@@ -14,5 +14,8 @@ namespace Splitio.Services.Client.Classes
         public int? SyncTimeout { get; set; }
         public string UserPrefix { get; set; }
         public TlsConfig TlsConfig { get; set; }
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
+        public bool ProfilingEnabled { get; set; }
+#endif
     }
 }

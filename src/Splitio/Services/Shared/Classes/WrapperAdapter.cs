@@ -59,24 +59,6 @@ namespace Splitio.Services.Shared.Classes
             return data;
         }
 
-        public void TaskWaitAndDispose(params Task[] tasks)
-        {
-            try
-            {
-                foreach (var t in tasks)
-                {
-                    if (t == null || t.Status == TaskStatus.Canceled) continue;
-
-                    t.Wait();
-                    t.Dispose();
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Debug(ex.Message);
-            }
-        }
-
         public Task TaskDelay(int millisecondsDelay, CancellationToken cancellationToken)
         {
             return Task.Delay(millisecondsDelay, cancellationToken);
