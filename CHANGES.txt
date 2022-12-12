@@ -1,5 +1,10 @@
 CHANGES
 
+7.2.2 (Dec 12, 2022)
+- Fixed unhealthy streaming connection when network conditions change.
+- Added redis profiling.
+- Updated StackExchange.Redis dependecy to 2.6.70.
+
 7.2.1 (Oct 5, 2022)
 - Added a new impressions mode for the SDK called NONE , to be used in factory when there is no desire to capture impressions on an SDK factory to feed Split's analytics engine. Running NONE mode, the SDK will only capture unique keys evaluated for a particular feature flag instead of full blown impressions.
 
