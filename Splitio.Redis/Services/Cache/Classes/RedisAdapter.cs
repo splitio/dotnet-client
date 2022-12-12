@@ -1,5 +1,5 @@
-﻿using Splitio.Domain;
-using Splitio.Redis.Services.Cache.Interfaces;
+﻿using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using StackExchange.Redis;
@@ -14,225 +14,275 @@ namespace Splitio.Redis.Services.Cache.Classes
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(RedisAdapter));
 
-        private readonly string _host;
-        private readonly string _port;
-        private readonly string _password = "";
-        private readonly int _databaseNumber = 0;
-        private readonly int _connectTimeout = 0;
-        private readonly int _connectRetry = 0;
-        private readonly int _syncTimeout = 0;
-        private readonly TlsConfig _tlsConfig;
+        private readonly object _lock = new object();
 
-        private IConnectionMultiplexer _redis;
-        private IDatabase _database;
-        private IServer _server;
+        private readonly RedisConfig _config;
+        private readonly IConnectionMultiplexer _redis;
+        private readonly IServer _server;
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
+        private readonly AsyncLocalProfiler _profiler;
+#endif
 
-        public RedisAdapter(string host,
-            string port,
-            string password = "",
-            int databaseNumber = 0,
-            int connectTimeout = 0,
-            int connectRetry = 0,
-            int syncTimeout = 0,
-            TlsConfig tlsConfig = null)
+        public RedisAdapter(RedisConfig config)
         {
-            _host = host;
-            _port = port;
-            _password = password;
-            _databaseNumber = databaseNumber;
-            _connectTimeout = connectTimeout;
-            _connectRetry = connectRetry;
-            _syncTimeout = syncTimeout;
-            _tlsConfig = tlsConfig;
-        }
+            _config = config;
 
-        #region Public Methods
-        public void Connect()
-        {
             try
             {
                 _redis = ConnectionMultiplexer.Connect(GetConfig());
-                _database = _redis.GetDatabase(_databaseNumber);
-                _server = _redis.GetServer($"{_host}:{_port}");
+                _server = _redis.GetServer(_config.HostAndPort);
+
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
+                if (_config.ProfilingEnabled)
+                {
+                    _profiler = new AsyncLocalProfiler();
+                    _redis.RegisterProfiler(_profiler.GetSession);
+                }
+#endif
             }
             catch (Exception e)
             {
-                _log.Error(string.Format("Exception caught building Redis Adapter '{0}:{1}': ", _host, _port), e);
+                _log.Error($"Exception caught building Redis Adapter '{_config.HostAndPort}': {e}");
             }
         }
 
+        #region Public Methods
         public bool IsConnected()
         {
             return _server?.IsConnected ?? false;
         }
-        
+
         public bool Set(string key, string value)
         {
-            try
+            lock (_lock)
             {
-                return _database.StringSet(key, value);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter Set", e);
-                return false;
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.StringSet(key, value);
+                }
+                catch (Exception e)
+                {
+                    LogError("Set", key, e);
+                    return false;
+                }
+                finally { FinishProfiling("Set", key); }
             }
         }
 
         public string Get(string key)
         {
-            try
+            lock (_lock)
             {
-                return _database.StringGet(key);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter Get", e);
-                return string.Empty;
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.StringGet(key);
+                }
+                catch (Exception e)
+                {
+                    LogError("Get", key, e);
+                    return string.Empty;
+                }
+                finally { FinishProfiling("Get", key); }
             }
         }
 
         public RedisValue[] MGet(RedisKey[] keys)
         {
-            try
+            lock (_lock)
             {
-                return _database.StringGet(keys);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter Get", e);
-                return new RedisValue[0];
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.StringGet(keys);
+                }
+                catch (Exception e)
+                {
+                    LogError("MGet", string.Empty, e);
+                    return new RedisValue[0];
+                }
+                finally { FinishProfiling("MGet", string.Empty); }
             }
         }
 
         public RedisKey[] Keys(string pattern)
         {
-            try
+            lock (_lock)
             {
-                var keys = _server.Keys(_databaseNumber, pattern);
-                return keys.ToArray();
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter Keys", e);
-                return new RedisKey[0];
+                try
+                {
+                    var keys = _server.Keys(_config.RedisDatabase, pattern);
+                    return keys.ToArray();
+                }
+                catch (Exception e)
+                {
+                    LogError("Keys", pattern, e);
+                    return new RedisKey[0];
+                }
+                finally { FinishProfiling("Keys", pattern); }
             }
         }
 
         public bool Del(string key)
         {
-            try
+            lock (_lock)
             {
-                return _database.KeyDelete(key);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter Del", e);
-                return false;
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.KeyDelete(key);
+                }
+                catch (Exception e)
+                {
+                    LogError("Del", key, e);
+                    return false;
+                }
+                finally { FinishProfiling("Del", key); }
             }
         }
 
         public long Del(RedisKey[] keys)
         {
-            try
+            lock (_lock)
             {
-                return _database.KeyDelete(keys);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter Del", e);
-                return 0;
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.KeyDelete(keys);
+                }
+                catch (Exception e)
+                {
+                    LogError("Del Keys", string.Empty, e);
+                    return 0;
+                }
+                finally { FinishProfiling("Del Keys", string.Empty); }
             }
         }
 
         public bool SAdd(string key, RedisValue value)
         {
-            try
+            lock (_lock)
             {
-                return _database.SetAdd(key, value);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter SAdd", e);
-                return false;
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.SetAdd(key, value);
+                }
+                catch (Exception e)
+                {
+                    LogError("SAdd", key, e);
+                    return false;
+                }
+                finally { FinishProfiling("SAdd", key); }
             }
         }
 
         public long SAdd(string key, RedisValue[] values)
         {
-            try
+            lock (_lock)
             {
-                return _database.SetAdd(key, values);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter SAdd", e);
-                return 0;
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.SetAdd(key, values);
+                }
+                catch (Exception e)
+                {
+                    LogError("SAdd", key, e);
+                    return 0;
+                }
+                finally { FinishProfiling("SAdd", key); }
             }
         }
 
         public long SRem(string key, RedisValue[] values)
         {
-            try
+            lock (_lock)
             {
-                return _database.SetRemove(key, values);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter SRem", e);
-                return 0;
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.SetRemove(key, values);
+                }
+                catch (Exception e)
+                {
+                    LogError("SRem", key, e);
+                    return 0;
+                }
+                finally { FinishProfiling("SRem", key); }
             }
         }
 
         public bool SIsMember(string key, string value)
         {
-            try
+            lock (_lock)
             {
-                return _database.SetContains(key, value);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter SIsMember", e);
-                return false;
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.SetContains(key, value);
+                }
+                catch (Exception e)
+                {
+                    LogError("SIsMember", key, e);
+                    return false;
+                }
+                finally { FinishProfiling("SIsMember", key); }
             }
         }
 
         public RedisValue[] SMembers(string key)
         {
-            try
+            lock (_lock)
             {
-                return _database.SetMembers(key);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter SMembers", e);
-                return new RedisValue[0];
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.SetMembers(key);
+                }
+                catch (Exception e)
+                {
+                    LogError("SMembers", key, e);
+                    return new RedisValue[0];
+                }
+                finally { FinishProfiling("SMembers", key); }
             }
         }
 
         public long IcrBy(string key, long value)
         {
-            try
+            lock (_lock)
             {
-                return _database.StringIncrement(key, value);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter IcrBy", e);
-                return 0;
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.StringIncrement(key, value);
+                }
+                catch (Exception e)
+                {
+                    LogError("IcrBy", key, e);
+                    return 0;
+                }
+                finally { FinishProfiling("IcrBy", key); }
             }
         }
 
         public long ListRightPush(string key, RedisValue value)
         {
-            try
+            lock (_lock)
             {
-                return _database.ListRightPush(key, value);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter ListRightPush", e);
-                return 0;
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.ListRightPush(key, value);
+                }
+                catch (Exception e)
+                {
+                    LogError("ListRightPush", key, e);
+                    return 0;
+                }
+                finally { FinishProfiling("ListRightPush", key); }
             }
         }
 
@@ -250,155 +300,219 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public bool KeyExpire(string key, TimeSpan expiry)
         {
-            try
+            lock (_lock)
             {
-                return _database.KeyExpire(key, expiry);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter KeyExpire", e);
-                return false;
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.KeyExpire(key, expiry);
+                }
+                catch (Exception e)
+                {
+                    LogError("KeyExpire", key, e);
+                    return false;
+                }
+                finally { FinishProfiling("KeyExpire", key); }
             }
         }
 
         public long ListRightPush(string key, RedisValue[] values)
         {
-            try
+            lock (_lock)
             {
-                return _database.ListRightPush(key, values);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter ListRightPush", e);
-                return 0;
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.ListRightPush(key, values);
+                }
+                catch (Exception e)
+                {
+                    LogError("ListRightPush", key, e);
+                    return 0;
+                }
+                finally { FinishProfiling("ListRightPush", key); }
             }
         }
 
         public RedisValue[] ListRange(RedisKey key, long start = 0, long stop = -1)
         {
-            try
+            lock (_lock)
             {
-                return _database.ListRange(key, start, stop);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter ListRange", e);
-                return new RedisValue[0];
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.ListRange(key, start, stop);
+                }
+                catch (Exception e)
+                {
+                    LogError("ListRange", key, e);
+                    return new RedisValue[0];
+                }
+                finally { FinishProfiling("ListRange", key); }
             }
         }
 
         public double HashIncrement(string key, string hashField, double value)
         {
-            try
+            lock (_lock)
             {
-                return _database.HashIncrement(key, hashField, value);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter HashIncrement, ", e);
-                return 0;
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.HashIncrement(key, hashField, value);
+                }
+                catch (Exception e)
+                {
+                    LogError("HashIncrement", key, e);
+                    return 0;
+                }
+                finally { FinishProfiling("HashIncrement", key); }
             }
         }
 
         public long HashIncrementAsyncBatch(string key, Dictionary<string, int> values)
         {
-            var tasks = new List<Task<long>>();
-            long keysCount = 0;
-            long hashLength = 0;
-
-            try
+            lock (_lock)
             {
-                foreach (var item in values)
+                var tasks = new List<Task<long>>();
+                long keysCount = 0;
+                long hashLength = 0;
+                var db = _redis.GetDatabase(_config.RedisDatabase);
+
+                try
                 {
-                    tasks.Add(_database.HashIncrementAsync(key, item.Key, item.Value));
+                    foreach (var item in values)
+                    {
+                        tasks.Add(db.HashIncrementAsync(key, item.Key, item.Value));
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter HashIncrementAsync", e);
-            }
-            finally
-            {
-                if (tasks.Any())
+                catch (Exception e)
                 {
-                    Task.WaitAll(tasks.ToArray());
-
-                    keysCount = tasks.Sum(t => t.Result);
-                    hashLength = _database.HashLengthAsync(key).Result;
+                    LogError("HashIncrementAsync", key, e);
                 }
-            }
+                finally
+                {
+                    if (tasks.Any())
+                    {
+                        Task.WaitAll(tasks.ToArray());
 
-            return keysCount + hashLength;
+                        keysCount = tasks.Sum(t => t.Result);
+                        hashLength = db.HashLengthAsync(key).Result;
+                    }
+
+                    FinishProfiling("HashIncrementAsync", key);
+                }
+
+                return keysCount + hashLength;
+            }
         }
 
         public HashEntry[] HashGetAll(RedisKey key)
         {
-            try
+            lock (_lock)
             {
-                return _database.HashGetAll(key);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter HashGet", e);
-                return new HashEntry[0];
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.HashGetAll(key);
+                }
+                catch (Exception e)
+                {
+                    LogError("HashGetAll", key, e);
+                    return new HashEntry[0];
+                }
+                finally { FinishProfiling("HashGetAll", key); }
             }
         }
 
         public bool HashSet(RedisKey key, RedisValue hashField, RedisValue value)
         {
-            try
+            lock (_lock)
             {
-                return _database.HashSet(key, hashField, value);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception calling Redis Adapter HashIncrement, ", e);
-                return false;
+                try
+                {
+                    var db = _redis.GetDatabase(_config.RedisDatabase);
+                    return db.HashSet(key, hashField, value);
+                }
+                catch (Exception e)
+                {
+                    LogError("HashSet", key, e);
+                    return false;
+                }
+                finally { FinishProfiling("HashSet", key); }
             }
         }
         #endregion
 
         #region Private Methods
+        private void FinishProfiling(string command, string key)
+        {
+            Profiling(command, key, true);
+        }
+
+        private void Profiling(string command, string key, bool forced = false)
+        {
+#if NETSTANDARD2_0 || NET6_0 || NET5_0
+            if (!_config.ProfilingEnabled) return;
+
+            var commands = _profiler.GetSession().FinishProfiling();
+
+            if (forced && commands.Count() <= 1) return;
+
+            var count = 1;
+            foreach (var item in commands)
+            {
+                _log.Debug($"Count: {count++}\nKey: {key}\nMethod:{command}\nInfo: {item}");
+            }
+#endif
+        }
+
+        private void LogError(string command, string key, Exception ex)
+        {
+            Profiling(command, key);
+            _log.Error($"Exception calling Redis Adapter {command}.\nKey: {key}.\nMessage: {ex.Message}.\nStackTrace: {ex.StackTrace}.\n InnerExection: {ex.InnerException}.", ex);
+        }
+
         // public only for testing.
         public ConfigurationOptions GetConfig()
         {
             var config = new ConfigurationOptions
             {
-                EndPoints = { $"{_host}:{_port}" },
-                Password = _password,
+                EndPoints = { _config.HostAndPort },
+                Password = _config.RedisPassword,
                 AllowAdmin = true,
-                KeepAlive = 1,
+                KeepAlive = 1
             };
 
-            if (_tlsConfig != null && _tlsConfig.Ssl)
+            if (_config.TlsConfig != null && _config.TlsConfig.Ssl)
             {
-                config.Ssl = _tlsConfig.Ssl;
-                config.SslHost = _host;
+                config.Ssl = _config.TlsConfig.Ssl;
+                config.SslHost = _config.RedisHost;
 
-                if (_tlsConfig.CertificateValidationFunc != null)
+                if (_config.TlsConfig.CertificateValidationFunc != null)
                 {
-                    config.CertificateValidation += _tlsConfig.CertificateValidationFunc.Invoke;
+                    config.CertificateValidation += _config.TlsConfig.CertificateValidationFunc.Invoke;
                 }
 
-                if (_tlsConfig.CertificateSelectionFunc != null)
+                if (_config.TlsConfig.CertificateSelectionFunc != null)
                 {
-                    config.CertificateSelection += _tlsConfig.CertificateSelectionFunc.Invoke;
+                    config.CertificateSelection += _config.TlsConfig.CertificateSelectionFunc.Invoke;
                 }
             }      
 
-            if (_connectTimeout > 0)
+            if (_config.RedisConnectTimeout > 0)
             {
-                config.ConnectTimeout = _connectTimeout;
+                config.ConnectTimeout = _config.RedisConnectTimeout;
             }
 
-            if (_connectRetry > 0)
+            if (_config.RedisConnectRetry > 0)
             {
-                config.ConnectRetry = _connectRetry;
+                config.ConnectRetry = _config.RedisConnectRetry;
             }
 
-            if (_syncTimeout > 0)
+            if (_config.RedisSyncTimeout > 0)
             {
-                config.SyncTimeout = _syncTimeout;
+                config.SyncTimeout = _config.RedisSyncTimeout;
             }
 
             return config;

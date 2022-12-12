@@ -1,10 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Client.Classes;
+using Splitio.Redis.Services.Domain;
 using Splitio.Services.Client.Classes;
-using Splitio.Services.Logger;
 using Splitio_Tests.Resources;
 using System.Collections.Generic;
 
@@ -39,8 +38,13 @@ namespace Splitio_Tests.Integration_Tests
                 SdkMachineIP = "192.168.0.1"
             };
 
-            _redisAdapter = new RedisAdapter(HOST, PORT, PASSWORD, DB);
-            _redisAdapter.Connect();
+            _redisAdapter = new RedisAdapter(new RedisConfig
+            {
+                RedisHost = HOST,
+                RedisPort = PORT,
+                RedisPassword = PASSWORD,
+                RedisDatabase = DB
+            });
             LoadSplits();
         }
 

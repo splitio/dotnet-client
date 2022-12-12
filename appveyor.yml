@@ -4,7 +4,7 @@ image:
 nuget:
   account_feed: true
 
-version: 7.2.1
+version: 7.2.2
 dotnet_csproj:
   patch: true
   file: '**\*.csproj'
@@ -40,9 +40,3 @@ test: off
 artifacts:
  - path: '**\Splitio*.nupkg'
    name: splitio-nuget
-
-deploy:
- - provider: Environment
-   name: NugetNetCorePublish
-   on:
-    branch: master
