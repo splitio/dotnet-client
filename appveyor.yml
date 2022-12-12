@@ -40,9 +40,3 @@ test: off
 artifacts:
  - path: '**\Splitio*.nupkg'
    name: splitio-nuget
-
-deploy:
- - provider: Environment
-   name: NugetNetCorePublish
-   on:
-    branch: master
