@@ -99,11 +99,11 @@ namespace Splitio.Services.Common
 
                 _wrapperAdapter
                     .TaskDelay(sleepTime)
-                    .ContinueWith(async (t) =>
+                    .ContinueWith((t) =>
                     {
                         _log.Debug("Starting ScheduleNextTokenRefresh ...");
                         StopSse();
-                        await StartSse();
+                        StartSse();
                     }, _cancellationTokenSourceRefreshToken.Token);
             }
             catch (Exception ex)
