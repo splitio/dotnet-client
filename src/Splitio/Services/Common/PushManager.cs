@@ -22,7 +22,6 @@ namespace Splitio.Services.Common
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
 
         private CancellationTokenSource _cancellationTokenSourceRefreshToken;
-        private Task _refreshTokenTask;
 
         public PushManager(ISSEHandler sseHandler,
             IAuthApiClient authApiClient,
@@ -98,13 +97,13 @@ namespace Splitio.Services.Common
                 var sleepTime = Convert.ToInt32(time) * 1000;
                 _log.Debug($"ScheduleNextTokenRefresh sleep time : {sleepTime} miliseconds.");
 
-                _refreshTokenTask = _wrapperAdapter
+                _wrapperAdapter
                     .TaskDelay(sleepTime)
-                    .ContinueWith((t) =>
+                    .ContinueWith(async (t) =>
                     {
                         _log.Debug("Starting ScheduleNextTokenRefresh ...");
                         StopSse();
-                        StartSse();
+                        await StartSse();
                     }, _cancellationTokenSourceRefreshToken.Token);
             }
             catch (Exception ex)

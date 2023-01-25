@@ -76,19 +76,18 @@ namespace Splitio.Services.Common
         private AuthenticationResponse GetSuccessResponse(string content)
         {
             var authResponse = JsonConvert.DeserializeObject<AuthenticationResponse>(content);
+            authResponse.Retry = authResponse.PushEnabled;
 
-            if (authResponse.PushEnabled == true)
-            {
-                var tokenDecoded = DecodeJwt(authResponse.Token);
-                var token = JsonConvert.DeserializeObject<Jwt>(tokenDecoded);
+            if (authResponse.PushEnabled == false) 
+                return authResponse;
 
-                authResponse.Channels = GetChannels(token);
-                authResponse.Expiration = GetExpirationSeconds(token);
+            var tokenDecoded = DecodeJwt(authResponse.Token);
+            var token = JsonConvert.DeserializeObject<Jwt>(tokenDecoded);
 
-                _telemetryRuntimeProducer.RecordTokenRefreshes();
-            }
+            authResponse.Channels = GetChannels(token);
+            authResponse.Expiration = GetExpirationSeconds(token);
 
-            authResponse.Retry = false;
+            _telemetryRuntimeProducer.RecordTokenRefreshes();
 
             return authResponse;
         }

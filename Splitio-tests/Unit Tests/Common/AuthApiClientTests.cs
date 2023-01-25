@@ -43,7 +43,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             Assert.IsTrue(result.PushEnabled.Value);
             Assert.AreEqual("xxxx_xxxx_segments,xxxx_xxxx_splits,control", result.Channels);
             Assert.IsFalse(string.IsNullOrEmpty(result.Token));
-            Assert.IsFalse(result.Retry.Value);
+            Assert.IsTrue(result.Retry.Value);
         }
 
         [TestMethod]
