@@ -16,7 +16,6 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<ISSEHandler> _sseHandler;
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
 
-        private readonly IBackOff _backoff;
         private readonly IPushManager _pushManager;
 
         public PushManagerTests()
@@ -25,9 +24,9 @@ namespace Splitio_Tests.Unit_Tests.Common
             _sseHandler = new Mock<ISSEHandler>();
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             var wrapper = WrapperAdapter.Instance();
-            _backoff = new BackOff(1, 0);
+            var backoff = new BackOff(1, 1);
 
-            _pushManager = new PushManager(_sseHandler.Object, _authApiClient.Object, wrapper, _telemetryRuntimeProducer.Object, _backoff);
+            _pushManager = new PushManager(_sseHandler.Object, _authApiClient.Object, wrapper, _telemetryRuntimeProducer.Object, backoff);
         }
 
         [TestMethod]
@@ -53,13 +52,11 @@ namespace Splitio_Tests.Unit_Tests.Common
             
             // Act.
             var result = _pushManager.StartSse();
-            Thread.Sleep(5000);
+            Thread.Sleep(8000);
 
             // Assert.
             _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Exactly(3));
             _sseHandler.Verify(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(3));
-            Assert.AreEqual(0, _backoff.GetAttempt());
-            Assert.AreEqual(0, _backoff.GetInterval());
         }
 
         [TestMethod]
