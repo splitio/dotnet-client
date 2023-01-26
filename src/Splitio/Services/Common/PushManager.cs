@@ -58,7 +58,10 @@ namespace Splitio.Services.Common
 
                 if (response.Retry.Value)
                 {
-                    ScheduleNextTokenRefresh(_backOff.GetInterval());
+                    var interval = _backOff.GetInterval();
+
+                    _log.Info($"Streaming service temporarily unavailable, working in polling mode and retrying in {interval} seconds.");
+                    ScheduleNextTokenRefresh(interval);
                 }
                 else
                 {
