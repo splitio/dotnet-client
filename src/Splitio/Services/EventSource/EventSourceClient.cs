@@ -139,8 +139,11 @@ namespace Splitio.Services.EventSource
             }
             finally
             {
+                if (!_initializationSignal.IsSet)
+                    _initializationSignal.Signal();
+
                 _disconnectSignal.Signal();
-                _initializationSignal.Signal();
+                
                 Disconnect(action);                
 
                 _log.Debug("Finished Event Source client ConnectAsync.");
@@ -198,23 +201,21 @@ namespace Splitio.Services.EventSource
 
                                     foreach (var line in lines)
                                     {
-                                        if (!string.IsNullOrEmpty(line))
+                                        if (string.IsNullOrEmpty(line)) continue;
+
+                                        var eventData = _notificationParser.Parse(line);
+
+                                        if (eventData == null) continue;
+
+                                        switch (eventData.Type)
                                         {
-                                            var eventData = _notificationParser.Parse(line);
-
-                                            if (eventData != null)
-                                            {
-                                                if (eventData.Type == NotificationType.ERROR)
-                                                {
-                                                    var notificationError = (NotificationError)eventData;
-
-                                                    ProcessErrorNotification(notificationError);
-                                                }
-                                                else
-                                                {
-                                                    DispatchEvent(eventData);
-                                                }
-                                            }
+                                            case NotificationType.ERROR:
+                                                var notificationError = (NotificationError)eventData;
+                                                ProcessErrorNotification(notificationError);
+                                                break;
+                                            default:
+                                                DispatchEvent(eventData);
+                                                break;
                                         }
                                     }
                                 }
