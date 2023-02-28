@@ -28,7 +28,7 @@ namespace Splitio.Integration_tests.EventSource
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
+                var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
                 eventSourceClient.EventReceived += delegate(object sender, EventReceivedEventArgs e)
                 {
                     eventsReceived.TryAdd(e);
@@ -65,7 +65,7 @@ namespace Splitio.Integration_tests.EventSource
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
+                var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
                 eventSourceClient.EventReceived += delegate (object sender, EventReceivedEventArgs e)
                 {
                     eventsReceived.TryAdd(e);
@@ -104,7 +104,7 @@ namespace Splitio.Integration_tests.EventSource
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
+                var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
                 eventSourceClient.EventReceived += delegate (object sender, EventReceivedEventArgs e)
                 {
                     eventsReceived.TryAdd(e);
@@ -141,7 +141,7 @@ namespace Splitio.Integration_tests.EventSource
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
+                var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
                 eventSourceClient.EventReceived += delegate (object sender, EventReceivedEventArgs e)
                 {
                     eventsReceived.TryAdd(e);
@@ -178,7 +178,7 @@ namespace Splitio.Integration_tests.EventSource
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
+                var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
                 eventSourceClient.EventReceived += delegate (object sender, EventReceivedEventArgs e)
                 {
                     eventsReceived.TryAdd(e);
@@ -214,7 +214,7 @@ namespace Splitio.Integration_tests.EventSource
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
+                var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
                 eventSourceClient.EventReceived += delegate (object sender, EventReceivedEventArgs e)
                 {
                     eventsReceived.TryAdd(e);
@@ -260,7 +260,7 @@ namespace Splitio.Integration_tests.EventSource
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
+                var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
                 eventSourceClient.EventReceived += delegate (object sender, EventReceivedEventArgs e)
                 {
                     eventsReceived.TryAdd(e);
@@ -294,7 +294,7 @@ namespace Splitio.Integration_tests.EventSource
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
+                var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
                 eventSourceClient.EventReceived += delegate (object sender, EventReceivedEventArgs e)
                 {
                     eventsReceived.TryAdd(e);
@@ -326,7 +326,7 @@ namespace Splitio.Integration_tests.EventSource
                 var sseHttpClient = new SplitioHttpClient("api-key", 5000);
                 var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
-                var eventSourceClient = new EventSourceClient(notificationParser, wrapperAdapter, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
+                var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter));
                 eventSourceClient.EventReceived += delegate (object sender, EventReceivedEventArgs e)
                 {
                     eventsReceived.TryAdd(e);

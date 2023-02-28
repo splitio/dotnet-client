@@ -222,9 +222,8 @@ namespace Splitio.Services.Client.Classes
                 // EventSourceClient
                 var headers = GetHeaders();
                 headers.Add(Constants.Http.SplitSDKClientKey, ApiKey.Substring(ApiKey.Length - 4));
-                headers.Add(Constants.Http.Accept, Constants.Http.EventStream);
                 var sseHttpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, headers);
-                var eventSourceClient = new EventSourceClient(notificationParser, _wrapperAdapter, sseHttpClient, _telemetryRuntimeProducer, _tasksManager);
+                var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, _telemetryRuntimeProducer, _tasksManager);
 
                 // SSEHandler
                 var sseHandler = new SSEHandler(_config.StreamingServiceURL, splitsWorker, segmentsWorker, notificationProcessor, notificationManagerKeeper, eventSourceClient: eventSourceClient);

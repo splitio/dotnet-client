@@ -10,7 +10,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>7.2.2</Version>
+    <Version>7.2.3</Version>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>SplitioRedis.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
