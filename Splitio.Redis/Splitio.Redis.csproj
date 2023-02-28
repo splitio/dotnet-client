@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0;netstandard2.0;net461;net45</TargetFrameworks>
+    <TargetFrameworks>net7.0;net6.0;net5.0;netstandard2.0;net461;net45</TargetFrameworks>
     <AssemblyName>Splitio.Redis</AssemblyName>
     <PackageId>Splitio.Redis</PackageId>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
@@ -12,7 +12,7 @@
     <AssemblyOriginatorKeyFile>SplitioRedis.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net7.0' Or '$(TargetFramework)' == 'net6.0'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net7.0' Or '$(TargetFramework)' == 'net6.0' Or '$(TargetFramework)' == 'net5.0'">
     <DefineConstants>NET_LATEST</DefineConstants>
   </PropertyGroup>
 
@@ -20,7 +20,7 @@
     <PackageReference Include="Newtonsoft.Json" version="13.0.1" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net7.0' Or '$(TargetFramework)' == 'net6.0' Or '$(TargetFramework)' == 'net461'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'net45'">
     <PackageReference Include="StackExchange.Redis" Version="2.6.70" />
   </ItemGroup>
 
