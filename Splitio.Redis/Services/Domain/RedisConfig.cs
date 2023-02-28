@@ -15,7 +15,7 @@ namespace Splitio.Redis.Services.Domain
         public int RedisConnectRetry { get; set; }
         public int RedisSyncTimeout { get; set; }
         public TlsConfig TlsConfig { get; set; }
-#if NETSTANDARD2_0 || NET6_0 || NET5_0
+#if NET_LATEST
         public bool ProfilingEnabled { get; set; }
 #endif
 
@@ -32,7 +32,7 @@ namespace Splitio.Redis.Services.Domain
             RedisConnectRetry = options.ConnectRetry ?? 0;
             RedisUserPrefix = options.UserPrefix;
             TlsConfig = options.TlsConfig;
-#if NETSTANDARD2_0 || NET6_0 || NET5_0
+#if NET_LATEST
             ProfilingEnabled = options.ProfilingEnabled;
 #endif
         }

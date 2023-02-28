@@ -19,7 +19,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         private readonly RedisConfig _config;
         private readonly IConnectionMultiplexer _redis;
         private readonly IServer _server;
-#if NETSTANDARD2_0 || NET6_0 || NET5_0
+#if NET_LATEST
         private readonly AsyncLocalProfiler _profiler;
 #endif
 
@@ -32,7 +32,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 _redis = ConnectionMultiplexer.Connect(GetConfig());
                 _server = _redis.GetServer(_config.HostAndPort);
 
-#if NETSTANDARD2_0 || NET6_0 || NET5_0
+#if NET_LATEST
                 if (_config.ProfilingEnabled)
                 {
                     _profiler = new AsyncLocalProfiler();
@@ -452,7 +452,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         private void Profiling(string command, string key, bool forced = false)
         {
-#if NETSTANDARD2_0 || NET6_0 || NET5_0
+#if NET_LATEST
             if (!_config.ProfilingEnabled) return;
 
             var commands = _profiler.GetSession().FinishProfiling();
