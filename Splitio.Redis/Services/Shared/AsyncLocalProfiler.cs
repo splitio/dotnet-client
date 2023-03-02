@@ -2,7 +2,7 @@
 using StackExchange.Redis.Profiling;
 using System.Threading;
 
-namespace Splitio.Redis.Services.Cache.Classes
+namespace Splitio.Redis.Services.Shared
 {
     public class AsyncLocalProfiler
     {
