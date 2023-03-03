@@ -56,32 +56,19 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public IConnectionMultiplexer GetConnection()
         {
-            if (_connections == null || _connections.Length == 0) return null;
+            if (_connections == null || _connections.Length == 0 || _connections[0] == null) return null;
 
             IConnectionMultiplexer conn;
 
 #if NET6_0 || NET7_0
             conn = _connections.MinBy(c => c.GetCounters().TotalOutstanding);
 #else
-            conn = _connections[GetRandomIdx()];
+            conn = _connections[_random.Next(_connections.Length)];
 #endif
 
             _log.Debug($"Using connection {conn.GetHashCode()}.");
 
             return conn;
-        }
-        
-        private int GetRandomIdx()
-        {
-            var idx = _random.Next(_connections.Length);
-
-            if (idx != _lastIdx)
-            {
-                _lastIdx = idx;
-                return idx;
-            }
-
-            return GetRandomIdx();
         }
 
         private ConfigurationOptions GetConfig(RedisConfig redisCfg)
