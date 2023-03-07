@@ -26,7 +26,7 @@ namespace Splitio.Services.Common
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ITelemetrySyncTask _telemetrySyncTask;
         private readonly CancellationTokenSource _ctsStreaming;
-        private readonly BlockingCollection<SSEClientActions> _sseClientStatus;
+        private readonly BlockingCollection<SSEClientActions> _sseClientStatusQueue;
         private readonly CancellationTokenSource _ctsShutdown;
         private readonly object _lock = new object();
 
@@ -53,7 +53,7 @@ namespace Splitio.Services.Common
             _tasksManager = tasksManager;
             _wrapperAdapter = wrapperAdapter;
             _telemetrySyncTask = telemetrySyncTask;
-            _sseClientStatus = sseClientStatus;
+            _sseClientStatusQueue = sseClientStatus;
             _ctsStreaming = new CancellationTokenSource();
             _ctsShutdown = new CancellationTokenSource();
         }
@@ -101,10 +101,10 @@ namespace Splitio.Services.Common
             _synchronizer.ClearFetchersCache();
             _synchronizer.StopPeriodicDataRecording();
             _pushManager.StopSse();
-            _ctsStreaming.Cancel();
-            _ctsStreaming.Dispose();
             _ctsShutdown.Cancel();
             _ctsShutdown.Dispose();
+            if (!_ctsStreaming.IsCancellationRequested) _ctsStreaming.Cancel();
+            _ctsStreaming.Dispose();
         }
 
         public void OnSSEClientStatus()
@@ -113,7 +113,7 @@ namespace Splitio.Services.Common
             {
                 while (!_ctsStreaming.IsCancellationRequested)
                 {
-                    if (_sseClientStatus.TryTake(out SSEClientActions action, -1, _ctsStreaming.Token))
+                    if (_sseClientStatusQueue.TryTake(out SSEClientActions action, -1, _ctsStreaming.Token))
                     {
                         _log.Debug($"OnSSEClientStatus Action: {action}");
 
@@ -145,8 +145,9 @@ namespace Splitio.Services.Common
             catch (Exception ex)
             {
                 _log.Debug(ex.Message);
-                _sseClientStatus.Dispose();
             }
+            finally
+            { _sseClientStatusQueue.Dispose(); }
         }
         #endregion
 
@@ -211,7 +212,6 @@ namespace Splitio.Services.Common
         {
             _pushManager.StopSse();
             _ctsStreaming.Cancel();
-            _ctsStreaming.Dispose();
         }
         #endregion
     }

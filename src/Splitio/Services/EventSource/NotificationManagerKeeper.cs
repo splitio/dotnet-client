@@ -11,7 +11,7 @@ namespace Splitio.Services.EventSource
     {
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly ISplitLogger _log;
-        private readonly BlockingCollection<SSEClientActions> _sseClientStatus;
+        private readonly BlockingCollection<SSEClientActions> _sseClientStatusQueue;
         private readonly object _eventOccupancyLock = new object();
 
         private bool _publisherAvailable;
@@ -21,7 +21,7 @@ namespace Splitio.Services.EventSource
         public NotificationManagerKeeper(ITelemetryRuntimeProducer telemetryRuntimeProducer, BlockingCollection<SSEClientActions> sseClientStatus)
         {
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
-            _sseClientStatus = sseClientStatus;
+            _sseClientStatusQueue = sseClientStatus;
             _log = WrapperAdapter.Instance().GetLogger(typeof(NotificationManagerKeeper));
 
             _publisherAvailable = true;
@@ -54,19 +54,19 @@ namespace Splitio.Services.EventSource
             {
                 case ControlType.STREAMING_PAUSED:
                     _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.StreamingStatus, (int)StreamingStatusEnum.Paused));
-                    _sseClientStatus.Add(SSEClientActions.SUBSYSTEM_DOWN);
+                    _sseClientStatusQueue.Add(SSEClientActions.SUBSYSTEM_DOWN);
                     break;
                 case ControlType.STREAMING_RESUMED:
                     lock (_eventOccupancyLock)
                     {
                         _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.StreamingStatus, (int)StreamingStatusEnum.Enabled));
                         
-                        if (_publisherAvailable) _sseClientStatus.Add(SSEClientActions.SUBSYSTEM_READY);
+                        if (_publisherAvailable) _sseClientStatusQueue.Add(SSEClientActions.SUBSYSTEM_READY);
                     }
                     break;
                 case ControlType.STREAMING_DISABLED:
                     _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.StreamingStatus, (int)StreamingStatusEnum.Disabled));
-                    _sseClientStatus.Add(SSEClientActions.SUBSYSTEM_OFF);
+                    _sseClientStatusQueue.Add(SSEClientActions.SUBSYSTEM_OFF);
                     break;
                 default:
                     _log.Error($"Incorrect control type. {controlEvent.ControlType}");
@@ -85,12 +85,12 @@ namespace Splitio.Services.EventSource
                 if (!ArePublishersAvailable() && _publisherAvailable)
                 {
                     _publisherAvailable = false;
-                    _sseClientStatus.Add(SSEClientActions.SUBSYSTEM_DOWN);
+                    _sseClientStatusQueue.Add(SSEClientActions.SUBSYSTEM_DOWN);
                 }
                 else if (ArePublishersAvailable() && !_publisherAvailable)
                 {
                     _publisherAvailable = true;
-                    _sseClientStatus.Add(SSEClientActions.SUBSYSTEM_READY);
+                    _sseClientStatusQueue.Add(SSEClientActions.SUBSYSTEM_READY);
                 }
             }
         }

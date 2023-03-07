@@ -32,7 +32,7 @@ namespace Splitio.Services.EventSource
         private readonly ISplitioHttpClient _splitHttpClient;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly ITasksManager _tasksManager;
-        private readonly BlockingCollection<SSEClientActions> _sseClientStatus;
+        private readonly BlockingCollection<SSEClientActions> _sseClientStatusQueue;
 
         private string _url;
         private bool _connected;
@@ -50,7 +50,7 @@ namespace Splitio.Services.EventSource
             _splitHttpClient = splitHttpClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _tasksManager = tasksManager;
-            _sseClientStatus = sseClientStatus;
+            _sseClientStatusQueue = sseClientStatus;
             _firstEvent = true;
             _log = WrapperAdapter.Instance().GetLogger(typeof(EventSourceClient));
         }
@@ -96,7 +96,7 @@ namespace Splitio.Services.EventSource
 
             _disconnectSignal.Wait(ReadTimeoutMs);
 
-            AddActionToQueue(action);
+            _sseClientStatusQueue.Add(action);
             _log.Debug($"Disconnected from {_url}");
         }
         #endregion
@@ -262,11 +262,6 @@ namespace Splitio.Services.EventSource
             EventReceived?.Invoke(this, new EventReceivedEventArgs(incomingNotification));
         }
 
-        private void AddActionToQueue(SSEClientActions action)
-        {
-            _sseClientStatus.Add(action);
-        }
-
         private void ProcessFirtsEvent(string notification)
         {
             _firstEvent = false;
@@ -278,7 +273,7 @@ namespace Splitio.Services.EventSource
             _connected = true;
             _initializationSignal.Signal();
             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SSEConnectionEstablished));
-            AddActionToQueue(SSEClientActions.CONNECTED);            
+            _sseClientStatusQueue.Add(SSEClientActions.CONNECTED);            
         }
         #endregion
     }
