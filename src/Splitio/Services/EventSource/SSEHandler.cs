@@ -16,8 +16,6 @@ namespace Splitio.Services.EventSource
 
         private IEventSourceClient _eventSourceClient;
 
-        public event EventHandler<SSEActionsEventArgs> ActionEvent;
-
         public SSEHandler(string streaminServiceUrl,
             ISplitsWorker splitsWorker,
             ISegmentsWorker segmentsWorker,
@@ -34,7 +32,6 @@ namespace Splitio.Services.EventSource
             _eventSourceClient = eventSourceClient;
 
             _eventSourceClient.EventReceived += EventReceived;
-            _eventSourceClient.ActionEvent += OnAction;
         }
 
         #region Public Methods
@@ -97,11 +94,6 @@ namespace Splitio.Services.EventSource
             {
                 _notificationPorcessor.Proccess(e.Event);
             }
-        }
-
-        private void OnAction(object sender, SSEActionsEventArgs e)
-        {
-            ActionEvent?.Invoke(this, e);
         }
         #endregion
     }

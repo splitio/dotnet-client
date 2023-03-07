@@ -7,6 +7,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Common;
 using Splitio.Telemetry.Storages;
+using System.Collections.Concurrent;
 using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.Common
@@ -19,11 +20,10 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<ISynchronizer> _synchronizer;
         private readonly Mock<IPushManager> _pushManager;
         private readonly Mock<ISSEHandler> _sseHandler;
-        private readonly Mock<INotificationManagerKeeper> _notificationManagerKeeper;
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private readonly Mock<IStatusManager> _statusManager;
         private readonly Mock<ITelemetrySyncTask> _telemetrySyncTask;
-        private ISyncManager _syncManager;
+        private readonly BlockingCollection<SSEClientActions> _sseClientStatus;
 
         public SyncManagerTests()
         {
@@ -33,10 +33,10 @@ namespace Splitio_Tests.Unit_Tests.Common
             _synchronizer = new Mock<ISynchronizer>();
             _pushManager = new Mock<IPushManager>();
             _sseHandler = new Mock<ISSEHandler>();
-            _notificationManagerKeeper = new Mock<INotificationManagerKeeper>();
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _telemetrySyncTask = new Mock<ITelemetrySyncTask>();
             _statusManager = new Mock<IStatusManager>();
+            _sseClientStatus = new BlockingCollection<SSEClientActions>(new ConcurrentQueue<SSEClientActions>());
         }
 
         [TestMethod]
@@ -48,19 +48,10 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
                 .Returns(true);
 
-            _syncManager = new SyncManager(streamingEnabled,
-                _synchronizer.Object,
-                _pushManager.Object,
-                _sseHandler.Object,
-                _notificationManagerKeeper.Object,
-                _telemetryRuntimeProducer.Object,
-                _statusManager.Object,
-                _taskManager,
-                _wrapperAdapter,
-                _telemetrySyncTask.Object);
+            var syncManager = GetSyncManager(streamingEnabled);
 
             // Act.
-            _syncManager.Start();
+            syncManager.Start();
 
             // Assert.
             Thread.Sleep(1000);
@@ -83,19 +74,10 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .ReturnsAsync(true);
 
             var streamingEnabled = true;
-            _syncManager = new SyncManager(streamingEnabled,
-                _synchronizer.Object,
-                _pushManager.Object,
-                _sseHandler.Object,
-                _notificationManagerKeeper.Object,
-                _telemetryRuntimeProducer.Object,
-                _statusManager.Object,
-                _taskManager,
-                _wrapperAdapter,
-                _telemetrySyncTask.Object);
+            var syncManager = GetSyncManager(streamingEnabled);
 
             // Act.
-            _syncManager.Start();
+            syncManager.Start();
 
             // Assert.            
             Thread.Sleep(1000);
@@ -115,26 +97,17 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             _pushManager
                 .Setup(mock => mock.StartSse())
-                .ReturnsAsync(false);            
+                .ReturnsAsync(false);
 
             var streamingEnabled = true;
-            _syncManager = new SyncManager(streamingEnabled,
-                _synchronizer.Object,
-                _pushManager.Object,
-                _sseHandler.Object,
-                _notificationManagerKeeper.Object,
-                _telemetryRuntimeProducer.Object,
-                _statusManager.Object,
-                _taskManager,
-                _wrapperAdapter,
-                _telemetrySyncTask.Object);
+            var syncManager = GetSyncManager(streamingEnabled);
 
             // Act.
-            _syncManager.Start();
+            syncManager.Start();
 
             // Assert.            
             Thread.Sleep(1000);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);            
+            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
             _pushManager.Verify(mock => mock.StartSse(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicDataRecording(), Times.Once);
@@ -145,19 +118,10 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            _syncManager = new SyncManager(streamingEnabled,
-                _synchronizer.Object,
-                _pushManager.Object,
-                _sseHandler.Object,
-                _notificationManagerKeeper.Object,
-                _telemetryRuntimeProducer.Object,
-                _statusManager.Object,
-                _taskManager,
-                _wrapperAdapter,
-                _telemetrySyncTask.Object);
+            var syncManager = GetSyncManager(streamingEnabled);
 
             // Act.
-            _syncManager.Shutdown();
+            syncManager.Shutdown();
 
             // Assert.
             _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
@@ -169,30 +133,34 @@ namespace Splitio_Tests.Unit_Tests.Common
         public void OnProcessFeedbackSSE_Connected()
         {
             // Arrange.
+            _synchronizer
+                .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
+                .Returns(true);
+
+            _pushManager
+                .Setup(mock => mock.StartSse())
+                .ReturnsAsync(true);
+
             var streamingEnabled = true;
-            var syncManager = new SyncManager(streamingEnabled,
-                _synchronizer.Object,
-                _pushManager.Object,
-                _sseHandler.Object,
-                _notificationManagerKeeper.Object,
-                _telemetryRuntimeProducer.Object,
-                _statusManager.Object,
-                _taskManager,
-                _wrapperAdapter,
-                _telemetrySyncTask.Object);
+            var syncManager = GetSyncManager(streamingEnabled);
+            syncManager.Start();
+            Thread.Sleep(1000);
 
             // Act & Assert.
-            syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.CONNECTED));
+            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
+
+            _sseClientStatus.Add(SSEClientActions.CONNECTED);
+            Thread.Sleep(50);
 
             _sseHandler.Verify(mock => mock.StartWorkers(), Times.Once);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), It.IsAny<bool>()), Times.Once);
             _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
 
             // Act & Assert.
-            syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.CONNECTED));
+            _sseClientStatus.Add(SSEClientActions.CONNECTED);
+            Thread.Sleep(50);
 
             _sseHandler.Verify(mock => mock.StartWorkers(), Times.Once);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), It.IsAny<bool>()), Times.Once);
+            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
             _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
         }
 
@@ -200,34 +168,45 @@ namespace Splitio_Tests.Unit_Tests.Common
         public void OnProcessFeedbackSSE_Disconnect()
         {
             // Arrange.
+            _synchronizer
+                .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
+                .Returns(true);
+
+            _pushManager
+                .Setup(mock => mock.StartSse())
+                .ReturnsAsync(true);
+
             var streamingEnabled = true;
-            var syncManager = new SyncManager(streamingEnabled,
-                _synchronizer.Object,
-                _pushManager.Object,
-                _sseHandler.Object,
-                _notificationManagerKeeper.Object,
-                _telemetryRuntimeProducer.Object,
-                _statusManager.Object,
-                _taskManager,
-                _wrapperAdapter,
-                _telemetrySyncTask.Object);
+            var syncManager = GetSyncManager(streamingEnabled);
+            syncManager.Start();
+            Thread.Sleep(1000);
 
             // Act & Assert.
-            syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.DISCONNECT));
+            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
+            _pushManager.Verify(mock => mock.StartSse(), Times.Once);
+
+            _sseClientStatus.Add(SSEClientActions.DISCONNECT);
+            Thread.Sleep(50);
 
             _sseHandler.Verify(mock => mock.StopWorkers(), Times.Never);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), It.IsAny<bool>()), Times.Never);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Never);
-            _pushManager.Verify(mock => mock.StartSse(), Times.Never);
+            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Never);
 
             // Act & Assert.
-            syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.CONNECTED));
-            syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.DISCONNECT));
+            _sseClientStatus.Add(SSEClientActions.CONNECTED);
+            Thread.Sleep(50);
+
+            _sseHandler.Verify(mock => mock.StartWorkers(), Times.Once);
+            _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
+            _pushManager.Verify(mock => mock.StartSse(), Times.Once);
+
+            _sseClientStatus.Add(SSEClientActions.DISCONNECT);
+            Thread.Sleep(50);
 
             _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), It.IsAny<bool>()), Times.Exactly(2));
+            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Exactly(2));
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
-            _pushManager.Verify(mock => mock.StartSse(), Times.Never);
+            _pushManager.Verify(mock => mock.StartSse(), Times.Once);
         }
 
         [TestMethod]
@@ -235,33 +214,45 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            var syncManager = new SyncManager(streamingEnabled,
-                _synchronizer.Object,
-                _pushManager.Object,
-                _sseHandler.Object,
-                _notificationManagerKeeper.Object,
-                _telemetryRuntimeProducer.Object,
-                _statusManager.Object,
-                _taskManager,
-                _wrapperAdapter,
-                _telemetrySyncTask.Object);
+            
+            _synchronizer
+                .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
+                .Returns(true);
+
+            _pushManager
+                .Setup(mock => mock.StartSse())
+                .ReturnsAsync(false);
+
+            var syncManager = GetSyncManager(streamingEnabled);
+            syncManager.Start();
+            Thread.Sleep(1000);
 
             // Act & Assert.
-            syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.RETRYABLE_ERROR));
+            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
+
+            _sseClientStatus.Add(SSEClientActions.RETRYABLE_ERROR);
+            Thread.Sleep(50);
 
             _sseHandler.Verify(mock => mock.StopWorkers(), Times.Never);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), It.IsAny<bool>()), Times.Never);
-            _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Never);
-            _pushManager.Verify(mock => mock.StartSse(), Times.Never);
-
-            // Act & Assert.
-            syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.CONNECTED));
-            syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.RETRYABLE_ERROR));
-
-            _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), It.IsAny<bool>()), Times.Exactly(2));
+            
+            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Never);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
             _pushManager.Verify(mock => mock.StartSse(), Times.Once);
+
+            // Act & Assert.
+            _sseClientStatus.Add(SSEClientActions.CONNECTED);
+            Thread.Sleep(50);
+            _sseHandler.Verify(mock => mock.StartWorkers(), Times.Once);
+            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Once);
+            _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
+
+            _sseClientStatus.Add(SSEClientActions.RETRYABLE_ERROR);
+            Thread.Sleep(50);
+
+            _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
+            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Exactly(2));
+            _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Exactly(2));
+            _pushManager.Verify(mock => mock.StartSse(), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -269,33 +260,43 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            var syncManager = new SyncManager(streamingEnabled,
-                _synchronizer.Object,
-                _pushManager.Object,
-                _sseHandler.Object,
-                _notificationManagerKeeper.Object,
-                _telemetryRuntimeProducer.Object,
-                _statusManager.Object,
-                _taskManager,
-                _wrapperAdapter,
-                _telemetrySyncTask.Object);
+            
+            _synchronizer
+                .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
+                .Returns(true);
+
+            _pushManager
+                .Setup(mock => mock.StartSse())
+                .ReturnsAsync(false);
+
+            var syncManager = GetSyncManager(streamingEnabled);
+            syncManager.Start();
+            Thread.Sleep(1000);
 
             // Act & Assert.
-            syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.NONRETRYABLE_ERROR));
+            _sseClientStatus.Add(SSEClientActions.NONRETRYABLE_ERROR);
+            Thread.Sleep(50);
 
             _sseHandler.Verify(mock => mock.StopWorkers(), Times.Never);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), It.IsAny<bool>()), Times.Never);
-            _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Never);
-            _pushManager.Verify(mock => mock.StartSse(), Times.Never);
+            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
+            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Never);
+            _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
+            _pushManager.Verify(mock => mock.StartSse(), Times.Once);
 
             // Act & Assert.
-            syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.CONNECTED));
-            syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.NONRETRYABLE_ERROR));
+            _sseClientStatus.Add(SSEClientActions.CONNECTED);
+            Thread.Sleep(50);
+            _sseHandler.Verify(mock => mock.StartWorkers(), Times.Once);
+            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Once);
+            _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
+
+            _sseClientStatus.Add(SSEClientActions.NONRETRYABLE_ERROR);
+            Thread.Sleep(50);
 
             _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), It.IsAny<bool>()), Times.Exactly(2));
-            _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
-            _pushManager.Verify(mock => mock.StartSse(), Times.Never);
+            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Exactly(2));
+            _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Exactly(2));
+            _pushManager.Verify(mock => mock.StartSse(), Times.Once);
         }
 
         [TestMethod]
@@ -303,19 +304,22 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            var syncManager = new SyncManager(streamingEnabled,
-                _synchronizer.Object,
-                _pushManager.Object,
-                _sseHandler.Object,
-                _notificationManagerKeeper.Object,
-                _telemetryRuntimeProducer.Object,
-                _statusManager.Object,
-                _taskManager,
-                _wrapperAdapter,
-                _telemetrySyncTask.Object);
+
+            _synchronizer
+                .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
+                .Returns(true);
+
+            _pushManager
+                .Setup(mock => mock.StartSse())
+                .ReturnsAsync(true);
+
+            var syncManager = GetSyncManager(streamingEnabled);
+            syncManager.Start();
+            Thread.Sleep(1000);
 
             // Act.
-            syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.SUBSYSTEM_DOWN));
+            _sseClientStatus.Add(SSEClientActions.SUBSYSTEM_DOWN);
+            Thread.Sleep(50);
 
             // Assert.
             _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
@@ -328,23 +332,27 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            var syncManager = new SyncManager(streamingEnabled,
-                _synchronizer.Object,
-                _pushManager.Object,
-                _sseHandler.Object,
-                _notificationManagerKeeper.Object,
-                _telemetryRuntimeProducer.Object,
-                _statusManager.Object,
-                _taskManager,
-                _wrapperAdapter,
-                _telemetrySyncTask.Object);
+
+            _synchronizer
+                .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
+                .Returns(true);
+
+            _pushManager
+                .Setup(mock => mock.StartSse())
+                .ReturnsAsync(true);
+
+            var syncManager = GetSyncManager(streamingEnabled);
+            syncManager.Start();
+            Thread.Sleep(1000);
 
             // Act.
-            syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.SUBSYSTEM_READY));
+            _sseClientStatus.Add(SSEClientActions.SUBSYSTEM_READY);
+            Thread.Sleep(50);
 
             // Assert.
             _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), It.IsAny<bool>()), Times.Once);
+            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
+            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Once);
             _sseHandler.Verify(mock => mock.StartWorkers(), Times.Once);
         }
 
@@ -353,22 +361,39 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            var syncManager = new SyncManager(streamingEnabled,
+
+            _synchronizer
+                .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
+                .Returns(true);
+
+            _pushManager
+                .Setup(mock => mock.StartSse())
+                .ReturnsAsync(true);
+
+            var syncManager = GetSyncManager(streamingEnabled);
+            syncManager.Start();
+            Thread.Sleep(1000);
+
+            // Act.
+            _sseClientStatus.Add(SSEClientActions.SUBSYSTEM_OFF);
+            Thread.Sleep(50);
+
+            // Assert.
+            _pushManager.Verify(mock => mock.StopSse(), Times.Once);
+        }
+
+        private ISyncManager GetSyncManager(bool streamingEnabled)
+        {
+            return new SyncManager(streamingEnabled,
                 _synchronizer.Object,
                 _pushManager.Object,
                 _sseHandler.Object,
-                _notificationManagerKeeper.Object,
                 _telemetryRuntimeProducer.Object,
                 _statusManager.Object,
                 _taskManager,
                 _wrapperAdapter,
-                _telemetrySyncTask.Object);
-
-            // Act.
-            syncManager.OnProcessFeedbackSSE(this, new SSEActionsEventArgs(SSEClientActions.SUBSYSTEM_OFF));
-
-            // Assert.
-            _pushManager.Verify(mock => mock.StopSse(), Times.Once);
+                _telemetrySyncTask.Object,
+                _sseClientStatus);
         }
     }
 }

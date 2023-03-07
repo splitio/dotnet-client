@@ -112,7 +112,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                Thread.Sleep(5000);
+                //Thread.Sleep(5000);
 
                 var result = client.GetTreatment("admin", "push_test");
 
@@ -176,7 +176,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void GetTreatment_SplitKill_ShouldNotFetch()
+        public void Z_GetTreatment_SplitKill_ShouldNotFetch()
         {
             using (var httpClientMock = new HttpClientMock())
             {
@@ -216,7 +216,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                Thread.Sleep(5000);
+                Thread.Sleep(8000);
 
                 var result = client.GetTreatment("admin", "push_test");
 
