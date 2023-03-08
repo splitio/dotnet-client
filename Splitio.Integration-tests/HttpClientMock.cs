@@ -19,7 +19,7 @@ namespace Splitio.Integration_tests
         {
             rootFilePath = string.Empty;
 
-#if NETCORE
+#if NET_LATEST
             rootFilePath = @"Resources\";
 #endif
 

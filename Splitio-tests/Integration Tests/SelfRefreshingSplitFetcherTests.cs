@@ -22,7 +22,7 @@ namespace Splitio_Tests.Integration_Tests
             // This line is to clean the warnings.
             rootFilePath = string.Empty;
 
-#if NETCORE
+#if NET_LATEST
             rootFilePath = @"Resources\";
 #endif
         }

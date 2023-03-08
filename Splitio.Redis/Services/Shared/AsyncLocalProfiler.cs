@@ -1,8 +1,8 @@
-﻿#if NETSTANDARD2_0 || NET6_0 || NET5_0
+﻿#if NET_LATEST
 using StackExchange.Redis.Profiling;
 using System.Threading;
 
-namespace Splitio.Redis.Services.Cache.Classes
+namespace Splitio.Redis.Services.Shared
 {
     public class AsyncLocalProfiler
     {
