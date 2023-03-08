@@ -38,13 +38,16 @@ namespace Splitio_Tests.Integration_Tests
                 SdkMachineIP = "192.168.0.1"
             };
 
-            _redisAdapter = new RedisAdapter(new RedisConfig
+            var rconfig = new RedisConfig
             {
                 RedisHost = HOST,
                 RedisPort = PORT,
                 RedisPassword = PASSWORD,
-                RedisDatabase = DB
-            });
+                RedisDatabase = DB,
+                PoolSize = 1
+            };
+            var pool = new ConnectionPoolManager(rconfig);
+            _redisAdapter = new RedisAdapter(rconfig, pool);
             LoadSplits();
         }
 

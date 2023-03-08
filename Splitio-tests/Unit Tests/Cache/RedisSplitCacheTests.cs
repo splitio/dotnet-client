@@ -6,7 +6,6 @@ using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
 using StackExchange.Redis;
-using System;
 using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Cache

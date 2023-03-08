@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
@@ -17,7 +16,7 @@ namespace Splitio_Tests.Integration_Tests
         [TestInitialize]
         public void Initialization()
         {
-            adapter = new RedisAdapter(new RedisConfig
+            var config = new RedisConfig
             {
                 RedisHost = "localhost",
                 RedisPort = "6379",
@@ -25,8 +24,12 @@ namespace Splitio_Tests.Integration_Tests
                 RedisDatabase = 0,
                 RedisConnectTimeout = 1000,
                 RedisConnectRetry = 5,
-                RedisSyncTimeout = 1000
-            });
+                RedisSyncTimeout = 1000,
+                PoolSize = 1,
+            };
+
+            var pool = new ConnectionPoolManager(config);
+            adapter = new RedisAdapter(config, pool);
             adapter.Flush();
         }
 
@@ -48,7 +51,10 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteSetShouldReturnFalseOnException()
         {
             //Arrange
-            var adapter = new RedisAdapter(new RedisConfig());
+            var config = new RedisConfig();
+            var pool = new ConnectionPoolManager(config);
+
+            var adapter = new RedisAdapter(config, pool);
 
             //Act
             var isSet = adapter.Set("test_key", "test_value");
@@ -61,7 +67,10 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetShouldReturnEmptyOnException()
         {
             //Arrange
-            var adapter = new RedisAdapter(new RedisConfig());
+            var config = new RedisConfig();
+            var pool = new ConnectionPoolManager(config);
+
+            var adapter = new RedisAdapter(config, pool);
 
             //Act
             var result = adapter.Get("test_key");
@@ -94,7 +103,10 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetShouldReturnEmptyArrayOnException()
         {
             //Arrange
-            var adapter = new RedisAdapter(new RedisConfig());
+            var config = new RedisConfig();
+            var pool = new ConnectionPoolManager(config);
+
+            var adapter = new RedisAdapter(config, pool);
 
             //Act
             var result = adapter.MGet(new RedisKey[] { "test_key", "test_key2", "test_key3" });
@@ -127,7 +139,10 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteKeysShouldReturnEmptyArrayOnException()
         {
             //Arrange
-            var adapter = new RedisAdapter(new RedisConfig());
+            var config = new RedisConfig();
+            var pool = new ConnectionPoolManager(config);
+
+            var adapter = new RedisAdapter(config, pool);
 
             //Act
             var result = adapter.Keys("test.*");
@@ -157,7 +172,10 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteDelShouldReturnFalseOnException()
         {
             //Arrange
-            var adapter = new RedisAdapter(new RedisConfig());
+            var config = new RedisConfig();
+            var pool = new ConnectionPoolManager(config);
+
+            var adapter = new RedisAdapter(config, pool);
 
             //Act
             var isDel = adapter.Del("testdel.test_key");
@@ -200,7 +218,10 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteSAddShouldReturnFalseOnException()
         {
             //Arrange
-            var adapter = new RedisAdapter(new RedisConfig());
+            var config = new RedisConfig();
+            var pool = new ConnectionPoolManager(config);
+
+            var adapter = new RedisAdapter(config, pool);
 
             //Act
             var setCount = adapter.SAdd("test_key_set", "test_value_1");
@@ -213,7 +234,10 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteSMembersShouldReturnFalseOnException()
         {
             //Arrange
-            var adapter = new RedisAdapter(new RedisConfig());
+            var config = new RedisConfig();
+            var pool = new ConnectionPoolManager(config);
+
+            var adapter = new RedisAdapter(config, pool);
 
             //Act
             var result = adapter.SMembers("test_key_set");
@@ -242,7 +266,10 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteSAddShouldReturnZeroOnException()
         {
             //Arrange
-            var adapter = new RedisAdapter(new RedisConfig());
+            var config = new RedisConfig();
+            var pool = new ConnectionPoolManager(config);
+
+            var adapter = new RedisAdapter(config, pool);
 
             //Act
             var setCount = adapter.SAdd("test_key_set_multiple", new RedisValue[] { "test_value", "test_value2" });
@@ -273,7 +300,10 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteSRemShouldReturnZeroOnException()
         {
             //Arrange
-            var adapter = new RedisAdapter(new RedisConfig());
+            var config = new RedisConfig();
+            var pool = new ConnectionPoolManager(config);
+
+            var adapter = new RedisAdapter(config, pool);
 
             //Act
             var remCount = adapter.SRem("test_key_set", new RedisValue[] { "test_value2" });
@@ -299,66 +329,16 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteIncrShouldReturnZeroOnException()
         {
             //Arrange
-            var adapter = new RedisAdapter(new RedisConfig());
+            var config = new RedisConfig();
+            var pool = new ConnectionPoolManager(config);
+
+            var adapter = new RedisAdapter(config, pool);
 
             //Act
             var result = adapter.IcrBy("test_count", 2);
 
             //Assert
             Assert.AreEqual(0, result);
-        }
-
-        [TestMethod]
-        public void GetConfigWithoutTls()
-        {
-            //Arrange
-            var adapter = new RedisAdapter(new RedisConfig
-            {
-                RedisHost = "localhost",
-                RedisPort = "6379",
-                RedisPassword = "",
-                RedisDatabase = 0,
-                RedisConnectTimeout = 1000,
-                RedisConnectRetry = 5,
-                RedisSyncTimeout = 1000
-            });
-
-            //Act
-            var result = adapter.GetConfig();
-
-            //Assert
-            Assert.AreEqual(1, result.EndPoints.Count);
-            Assert.AreEqual(string.Empty, result.Password);
-            Assert.AreEqual(1000, result.ConnectTimeout);
-            Assert.AreEqual(1000, result.SyncTimeout);
-            Assert.IsFalse(result.Ssl);
-        }
-
-        [TestMethod]
-        public void GetConfigWithTls()
-        {
-            //Arrange
-            var adapter = new RedisAdapter(new RedisConfig
-            {
-                RedisHost = "localhost",
-                RedisPort = "6379",
-                RedisPassword = "",
-                RedisDatabase = 0,
-                RedisConnectTimeout = 1000,
-                RedisConnectRetry = 5,
-                RedisSyncTimeout = 1000,
-                TlsConfig = new TlsConfig(ssl: true)
-            });
-            //Act
-            var result = adapter.GetConfig();
-
-            //Assert
-            Assert.AreEqual(1, result.EndPoints.Count);
-            Assert.AreEqual(string.Empty, result.Password);
-            Assert.AreEqual(1000, result.ConnectTimeout);
-            Assert.AreEqual(1000, result.SyncTimeout);
-            Assert.IsTrue(result.Ssl);
-            Assert.AreEqual("localhost", result.SslHost);
         }
 
         [TestMethod]

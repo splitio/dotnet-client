@@ -29,13 +29,16 @@ namespace Splitio.Integration_tests
 
         public RedisTests()
         {
-            _redisAdapter = new RedisAdapter(new RedisConfig
+            var config = new RedisConfig
             {
                 RedisHost = Host,
                 RedisPort = Port,
                 RedisPassword = Password,
-                RedisDatabase = Database
-            });
+                RedisDatabase = Database,
+                PoolSize = 1
+            };
+            var pool = new ConnectionPoolManager(config);
+            _redisAdapter = new RedisAdapter(config, pool);
 
             rootFilePath = string.Empty;
 
@@ -60,12 +63,12 @@ namespace Splitio.Integration_tests
             client.BlockUntilReady(10000);
 
             // Act.
-            var treatmentResult1 = client.GetTreatment("mauro_test", "FACUNDO_TEST");
-            var treatmentResult2 = client.GetTreatment("nico_test", "FACUNDO_TEST");
-            var treatmentResult3 = client.GetTreatment("redo_test", "FACUNDO_TEST");
-            var trackResult1 = client.Track("mauro", "user", "event_type");
-            var trackResult2 = client.Track("nicolas", "user_2", "event_type_2");
-            var trackResult3 = client.Track("redo", "user_3", "event_type_3");
+            client.GetTreatment("mauro_test", "FACUNDO_TEST");
+            client.GetTreatment("nico_test", "FACUNDO_TEST");
+            client.GetTreatment("redo_test", "FACUNDO_TEST");
+            client.Track("mauro", "user", "event_type");
+            client.Track("nicolas", "user_2", "event_type_2");
+            client.Track("redo", "user_3", "event_type_3");
 
             // Assert.
             Thread.Sleep(1500);
@@ -123,12 +126,12 @@ namespace Splitio.Integration_tests
             client.BlockUntilReady(10000);
 
             // Act.
-            var treatmentResult1 = client.GetTreatment("mauro_test", "FACUNDO_TEST");
-            var treatmentResult2 = client.GetTreatment("nico_test", "FACUNDO_TEST");
-            var treatmentResult3 = client.GetTreatment("redo_test", "FACUNDO_TEST");
-            var trackResult1 = client.Track("mauro", "user", "event_type");
-            var trackResult2 = client.Track("nicolas", "user_2", "event_type_2");
-            var trackResult3 = client.Track("redo", "user_3", "event_type_3");
+            client.GetTreatment("mauro_test", "FACUNDO_TEST");
+            client.GetTreatment("nico_test", "FACUNDO_TEST");
+            client.GetTreatment("redo_test", "FACUNDO_TEST");
+            client.Track("mauro", "user", "event_type");
+            client.Track("nicolas", "user_2", "event_type_2");
+            client.Track("redo", "user_3", "event_type_3");
 
             // Assert.
             Thread.Sleep(1500);
