@@ -12,6 +12,7 @@ namespace Splitio.Redis.Services.Cache.Classes
     public class RedisImpressionsCache : RedisCacheBase, IImpressionsCache
     {
         private static readonly TimeSpan _expireTimeOneHour = new TimeSpan(0, 0, 3600);
+        private readonly object _lock = new object();
 
         private string UniqueKeysKey => "{prefix}.SPLITIO.uniquekeys"
             .Replace("{prefix}.", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
@@ -49,15 +50,22 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public void RecordUniqueKeys(List<Mtks> uniqueKeys)
         {
-            var lengthRedis = _redisAdapter.ListRightPush(UniqueKeysKey, JsonConvert.SerializeObject(uniqueKeys));
-
-            // This operation will simply do nothing if the key no longer exists (queue is empty)
-            // It's only done in the "successful" exit path so that the TTL is not overridden if mtks weren't
-            // popped correctly. This will result in mtks getting lost but will prevent the queue from taking
-            // a huge amount of memory.
-            if (lengthRedis == uniqueKeys.Count)
+            lock (_lock)
             {
-                _redisAdapter.KeyExpire(UniqueKeysKey, _expireTimeOneHour);
+                var lengthRedis = 0L;
+                foreach (var item in uniqueKeys)
+                {
+                    lengthRedis = _redisAdapter.ListRightPush(UniqueKeysKey, JsonConvert.SerializeObject(item));
+                }
+
+                // This operation will simply do nothing if the key no longer exists (queue is empty)
+                // It's only done in the "successful" exit path so that the TTL is not overridden if mtks weren't
+                // popped correctly. This will result in mtks getting lost but will prevent the queue from taking
+                // a huge amount of memory.
+                if (lengthRedis == uniqueKeys.Count)
+                {
+                    _redisAdapter.KeyExpire(UniqueKeysKey, _expireTimeOneHour);
+                }
             }
         }
 
