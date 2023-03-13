@@ -2,7 +2,9 @@
 using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Client.Interfaces;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests
 {
@@ -58,13 +60,11 @@ namespace Splitio.Integration_tests
                 var apikey = "apikey1";
 
                 var splitFactory = new SplitFactory(apikey, config);
-                var client = splitFactory.Client();               
+                var client = splitFactory.Client();
 
-                client.BlockUntilReady(10000);
-                Thread.Sleep(8000);
+                client.BlockUntilReady(5000);
 
-                var result = client.GetTreatment("admin", "push_test");
-
+                var result = EvaluateWithDelay("admin", "push_test", "after_fetch", client);
                 Assert.AreEqual("after_fetch", result);
 
                 client.Destroy();
@@ -111,17 +111,16 @@ namespace Splitio.Integration_tests
                 var splitFactory = new SplitFactory(apikey, config);
                 var client = splitFactory.Client();
 
-                client.BlockUntilReady(10000);
-                //Thread.Sleep(5000);
+                client.BlockUntilReady(5000);
 
-                var result = client.GetTreatment("admin", "push_test");
+                var result = EvaluateWithDelay("admin", "push_test", "on", client);
 
                 Assert.AreEqual("on", result);
 
                 client.Destroy();
             }
         }
-
+        
         [Ignore]
         [TestMethod]
         public void GetTreatment_SplitKill_ShouldFetch()
@@ -164,7 +163,7 @@ namespace Splitio.Integration_tests
                 var splitFactory = new SplitFactory(apikey, config);
                 var client = splitFactory.Client();
 
-                client.BlockUntilReady(10000);
+                client.BlockUntilReady(5000);
                 Thread.Sleep(5000);
 
                 var result = client.GetTreatment("admin", "push_test");
@@ -176,7 +175,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void Z_GetTreatment_SplitKill_ShouldNotFetch()
+        public void GetTreatment_SplitKill_ShouldNotFetch()
         {
             using (var httpClientMock = new HttpClientMock())
             {
@@ -215,11 +214,9 @@ namespace Splitio.Integration_tests
                 var splitFactory = new SplitFactory(apikey, config);
                 var client = splitFactory.Client();
 
-                client.BlockUntilReady(10000);
-                Thread.Sleep(8000);
+                client.BlockUntilReady(5000);
 
-                var result = client.GetTreatment("admin", "push_test");
-
+                var result = EvaluateWithDelay("admin", "push_test", "off_kill", client);
                 Assert.AreEqual("off_kill", result);
 
                 client.Destroy();
@@ -267,7 +264,7 @@ namespace Splitio.Integration_tests
                 var splitFactory = new SplitFactory(apikey, config);
                 var client = splitFactory.Client();
 
-                client.BlockUntilReady(10000);
+                client.BlockUntilReady(5000);
                 Thread.Sleep(5000);
 
                 var result = client.GetTreatment("test_in_segment", "feature_segment");
@@ -319,11 +316,9 @@ namespace Splitio.Integration_tests
                 var splitFactory = new SplitFactory(apikey, config);
                 var client = splitFactory.Client();
 
-                client.BlockUntilReady(10000);
-                Thread.Sleep(8000);
-
-                var result = client.GetTreatment("admin", "push_test");
-
+                client.BlockUntilReady(5000);
+                
+                var result = EvaluateWithDelay("admin", "push_test", "after_fetch", client);
                 Assert.AreEqual("after_fetch", result);
 
                 client.Destroy();
@@ -371,7 +366,7 @@ namespace Splitio.Integration_tests
                 var splitFactory = new SplitFactory(apikey, config);
                 var client = splitFactory.Client();
 
-                client.BlockUntilReady(10000);
+                client.BlockUntilReady(5000);
 
                 var result = client.GetTreatment("admin", "push_test");
 
@@ -422,7 +417,7 @@ namespace Splitio.Integration_tests
                 var splitFactory = new SplitFactory(apikey, config);
                 var client = splitFactory.Client();
 
-                client.BlockUntilReady(10000);
+                client.BlockUntilReady(5000);
 
                 var result = client.GetTreatment("admin", "push_test");
 
@@ -473,7 +468,7 @@ namespace Splitio.Integration_tests
                 var splitFactory = new SplitFactory(apikey, config);
                 var client = splitFactory.Client();
 
-                client.BlockUntilReady(10000);
+                client.BlockUntilReady(5000);
                 
                 var result = client.GetTreatment("admin", "push_test");
 
@@ -524,7 +519,7 @@ namespace Splitio.Integration_tests
                 var splitFactory = new SplitFactory(apikey, config);
                 var client = splitFactory.Client();
 
-                client.BlockUntilReady(10000);
+                client.BlockUntilReady(5000);
                 
                 var result = client.GetTreatment("admin", "push_test");
 
@@ -532,6 +527,20 @@ namespace Splitio.Integration_tests
 
                 client.Destroy();
             }
+        }
+
+        private string EvaluateWithDelay(string key, string splitName, string expected, ISplitClient client, int attemps = 10)
+        {
+            var result = string.Empty;
+            for (int i = 0; i < attemps; i++)
+            {
+                result = client.GetTreatment(key, splitName);
+                if (result == expected) break;
+
+                Task.Delay(1000).Wait();
+            }
+
+            return result;
         }
     }
 }
