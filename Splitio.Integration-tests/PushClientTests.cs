@@ -16,7 +16,6 @@ namespace Splitio.Integration_tests
     [DeploymentItem(@"Resources\split_segment4_updated.json")]
     [DeploymentItem(@"Resources\split_segment4_updated_empty.json")]
     [TestClass]
-    [Ignore]
     public class PushClientTests
     {
         private string EventSourcePath => "/eventsource";
@@ -175,6 +174,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
+        [Ignore]
         public void GetTreatment_SplitKill_ShouldNotFetch()
         {
             using (var httpClientMock = new HttpClientMock())
