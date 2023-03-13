@@ -13,7 +13,7 @@ dotnet_csproj:
 configuration: Release
 
 before_build:
- - choco install "sonarscanner-msbuild-net50" -y
+ - choco install "sonarscanner-msbuild-net70" -y
  - nuget install redis-64 -excludeversion -source http://www.nuget.org/api/v2/
  - Redis-64\tools\redis-server.exe --service-install
  - dotnet restore -s https://www.nuget.org/api/v2/
