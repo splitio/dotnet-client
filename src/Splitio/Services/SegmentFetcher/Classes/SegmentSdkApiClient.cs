@@ -53,7 +53,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                     _log.Error(response.statusCode == HttpStatusCode.Forbidden
                         ? "factory instantiation: you passed a browser type api_key, please grab an api key from the Split console that is of type sdk"
-                        : $"Http status executing FetchSegmentChanges: {response.statusCode.ToString()} - {response.content}");
+                        : $"Http status executing FetchSegmentChanges: {response.statusCode} - {response.content}");
 
                     _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.SegmentSync, (int)response.statusCode);
 

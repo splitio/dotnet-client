@@ -5,6 +5,7 @@ using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net.Http;
 using System.Text;
@@ -31,6 +32,7 @@ namespace Splitio.Services.EventSource
         private readonly ISplitioHttpClient _splitHttpClient;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly ITasksManager _tasksManager;
+        private readonly BlockingCollection<SSEClientActions> _sseClientStatusQueue;
 
         private string _url;
         private bool _connected;
@@ -41,19 +43,19 @@ namespace Splitio.Services.EventSource
         public EventSourceClient(INotificationParser notificationParser,
             ISplitioHttpClient splitHttpClient,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
-            ITasksManager tasksManager)
+            ITasksManager tasksManager,
+            BlockingCollection<SSEClientActions> sseClientStatus)
         {            
             _notificationParser = notificationParser;
             _splitHttpClient = splitHttpClient;
-            _log = WrapperAdapter.Instance().GetLogger(typeof(EventSourceClient));
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _tasksManager = tasksManager;
-
+            _sseClientStatusQueue = sseClientStatus;
             _firstEvent = true;
+            _log = WrapperAdapter.Instance().GetLogger(typeof(EventSourceClient));
         }
         
         public event EventHandler<EventReceivedEventArgs> EventReceived;
-        public event EventHandler<SSEActionsEventArgs> ActionEvent;
 
         #region Public Methods
         public bool ConnectAsync(string url)
@@ -94,7 +96,7 @@ namespace Splitio.Services.EventSource
 
             _disconnectSignal.Wait(ReadTimeoutMs);
 
-            DispatchActionEvent(action);
+            _sseClientStatusQueue.Add(action);
             _log.Debug($"Disconnected from {_url}");
         }
         #endregion
@@ -154,70 +156,61 @@ namespace Splitio.Services.EventSource
         {
             try
             {
-                while (!cancellationToken.IsCancellationRequested && (IsConnected() || _firstEvent))
+                while (!cancellationToken.IsCancellationRequested && stream.CanRead && (IsConnected() || _firstEvent))
                 {
-                    if (stream.CanRead && (IsConnected() || _firstEvent))
+                    Array.Clear(_buffer, 0, BufferSize);
+
+                    using (var timeoutToken = new CancellationTokenSource(ReadTimeoutMs))
                     {
-                        Array.Clear(_buffer, 0, BufferSize);
-
-                        using (var timeoutToken = new CancellationTokenSource(ReadTimeoutMs))
+                        using (timeoutToken.Token.Register(() => stream.Close()))
                         {
-                            using (timeoutToken.Token.Register(() => stream.Close()))
+                            var len = 0;
+                            try
                             {
-                                var len = 0;
-                                try
+                                _log.Debug($"Reading stream ....");
+                                len = await stream.ReadAsync(_buffer, 0, BufferSize, timeoutToken.Token).ConfigureAwait(false);
+                            }
+                            catch(Exception ex)
+                            {
+                                _log.Debug($"Read Stream exception: {ex.GetType()}.|| {ex}");
+                                throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Streaming read time out after {ReadTimeoutMs/1000} seconds.");
+                            }
+
+                            if (len == 0)
+                            {
+                                // Added for tests. 
+                                if (_url.StartsWith("http://localhost"))
+                                    throw new ReadStreamException(SSEClientActions.CONNECTED, "Streaming end of the file - for tests.");
+
+                                throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, "Streaming end of the file."); ;
+                            }
+
+                            var notificationString = _encoder.GetString(_buffer, 0, len);
+                            _log.Debug($"Read stream encoder buffer: {notificationString}");
+
+                            if (_firstEvent) ProcessFirtsEvent(notificationString);
+
+                            if (notificationString == KeepAliveResponse || !IsConnected()) continue;
+                            
+                            var lines = notificationString.Split(_notificationSplitArray, StringSplitOptions.None);
+
+                            foreach (var line in lines)
+                            {
+                                if (string.IsNullOrEmpty(line)) continue;
+
+                                var eventData = _notificationParser.Parse(line);
+
+                                if (eventData == null) continue;
+
+                                switch (eventData.Type)
                                 {
-                                    _log.Debug($"Reading stream ....");
-                                    len = await stream.ReadAsync(_buffer, 0, BufferSize, timeoutToken.Token).ConfigureAwait(false);
-                                }
-                                catch(Exception ex)
-                                {
-                                    _log.Debug($"Read Stream exception: {ex.GetType()}.|| {ex}");
-                                    throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Streaming read time out after {ReadTimeoutMs/1000} seconds.");
-                                }
-
-                                if (len == 0)
-                                {
-                                    var exception = new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, "Streaming end of the file.");
-
-                                    // Added for tests. 
-                                    if (_url.StartsWith("http://localhost"))
-                                        exception = new ReadStreamException(SSEClientActions.DISCONNECT, "Streaming end of the file - for tests.");
-
-                                    throw exception;
-                                }
-
-                                var notificationString = _encoder.GetString(_buffer, 0, len);
-                                _log.Debug($"Read stream encoder buffer: {notificationString}");
-
-                                if (_firstEvent)
-                                {
-                                    ProcessFirtsEvent(notificationString);
-                                }
-
-                                if (notificationString != KeepAliveResponse && IsConnected())
-                                {
-                                    var lines = notificationString.Split(_notificationSplitArray, StringSplitOptions.None);
-
-                                    foreach (var line in lines)
-                                    {
-                                        if (string.IsNullOrEmpty(line)) continue;
-
-                                        var eventData = _notificationParser.Parse(line);
-
-                                        if (eventData == null) continue;
-
-                                        switch (eventData.Type)
-                                        {
-                                            case NotificationType.ERROR:
-                                                var notificationError = (NotificationError)eventData;
-                                                ProcessErrorNotification(notificationError);
-                                                break;
-                                            default:
-                                                DispatchEvent(eventData);
-                                                break;
-                                        }
-                                    }
+                                    case NotificationType.ERROR:
+                                        var notificationError = (NotificationError)eventData;
+                                        ProcessErrorNotification(notificationError);
+                                        break;
+                                    default:
+                                        DispatchEvent(eventData);
+                                        break;
                                 }
                             }
                         }
@@ -269,11 +262,6 @@ namespace Splitio.Services.EventSource
             EventReceived?.Invoke(this, new EventReceivedEventArgs(incomingNotification));
         }
 
-        private void DispatchActionEvent(SSEClientActions action)
-        {
-            ActionEvent?.Invoke(this, new SSEActionsEventArgs(action));
-        }
-
         private void ProcessFirtsEvent(string notification)
         {
             _firstEvent = false;
@@ -285,7 +273,7 @@ namespace Splitio.Services.EventSource
             _connected = true;
             _initializationSignal.Signal();
             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SSEConnectionEstablished));
-            DispatchActionEvent(SSEClientActions.CONNECTED);            
+            _sseClientStatusQueue.Add(SSEClientActions.CONNECTED);            
         }
         #endregion
     }

@@ -27,9 +27,15 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void RecordUniqueKeysAndExpire()
         {
             var key = "test-pre:.SPLITIO.uniquekeys";
-            var expected = "[{\"f\":\"Feature1\",\"ks\":[\"key-1\",\"key-2\"]},{\"f\":\"Feature2\",\"ks\":[\"key-1\",\"key-2\"]}]";
+            var expected1 = "{\"f\":\"Feature1\",\"ks\":[\"key-1\",\"key-2\"]}";
+            var expected2 = "{\"f\":\"Feature2\",\"ks\":[\"key-1\",\"key-2\"]}";
+            
             _redisAdapter
-                .Setup(mock => mock.ListRightPush(key, expected))
+                .Setup(mock => mock.ListRightPush(key, expected1))
+                .Returns(1);
+
+            _redisAdapter
+                .Setup(mock => mock.ListRightPush(key, expected2))
                 .Returns(2);
 
             _cache.RecordUniqueKeys(new List<Mtks>
@@ -38,7 +44,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 new Mtks("Feature2", new HashSet<string>{ "key-1", "key-2" })
             });
             
-            _redisAdapter.Verify(mock => mock.ListRightPush(key, expected), Times.Once);
+            _redisAdapter.Verify(mock => mock.ListRightPush(key, expected1), Times.Once);
+            _redisAdapter.Verify(mock => mock.ListRightPush(key, expected2), Times.Once);
             _redisAdapter.Verify(mock => mock.KeyExpire(key, new TimeSpan(0, 0, 3600)), Times.Once);
         }
 
@@ -46,10 +53,16 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void RecordUniqueKeysWithoutExpire()
         {
             var key = "test-pre:.SPLITIO.uniquekeys";
-            var expected = "[{\"f\":\"Feature1\",\"ks\":[\"key-1\",\"key-2\"]},{\"f\":\"Feature2\",\"ks\":[\"key-1\",\"key-2\"]}]";
+            var expected1 = "{\"f\":\"Feature1\",\"ks\":[\"key-1\",\"key-2\"]}";
+            var expected2 = "{\"f\":\"Feature2\",\"ks\":[\"key-1\",\"key-2\"]}";
+
             _redisAdapter
-                .Setup(mock => mock.ListRightPush(key, expected))
-                .Returns(1);
+                .Setup(mock => mock.ListRightPush(key, expected1))
+                .Returns(2);
+
+            _redisAdapter
+                .Setup(mock => mock.ListRightPush(key, expected2))
+                .Returns(3);
 
             _cache.RecordUniqueKeys(new List<Mtks>
             {
@@ -57,7 +70,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 new Mtks("Feature2", new HashSet<string>{ "key-1", "key-2" })
             });
 
-            _redisAdapter.Verify(mock => mock.ListRightPush(key, expected), Times.Once);
+            _redisAdapter.Verify(mock => mock.ListRightPush(key, expected1), Times.Once);
+            _redisAdapter.Verify(mock => mock.ListRightPush(key, expected2), Times.Once);
             _redisAdapter.Verify(mock => mock.KeyExpire(key, new TimeSpan(0, 0, 3600)), Times.Never);
         }
     }

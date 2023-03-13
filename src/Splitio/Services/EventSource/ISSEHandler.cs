@@ -8,7 +8,5 @@ namespace Splitio.Services.EventSource
         void Stop();
         void StartWorkers();
         void StopWorkers();
-
-        event EventHandler<SSEActionsEventArgs> ActionEvent;
     }
 }

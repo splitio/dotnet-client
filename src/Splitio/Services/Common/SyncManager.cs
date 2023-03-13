@@ -8,6 +8,7 @@ using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
+using System.Collections.Concurrent;
 using System.Threading;
 
 namespace Splitio.Services.Common
@@ -24,7 +25,9 @@ namespace Splitio.Services.Common
         private readonly ITasksManager _tasksManager;
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ITelemetrySyncTask _telemetrySyncTask;
-        private readonly CancellationTokenSource _shutdownCancellationTokenSource;
+        private readonly CancellationTokenSource _ctsStreaming;
+        private readonly BlockingCollection<SSEClientActions> _sseClientStatusQueue;
+        private readonly CancellationTokenSource _ctsShutdown;
         private readonly object _lock = new object();
 
         private bool _streamingConnected;
@@ -33,12 +36,12 @@ namespace Splitio.Services.Common
             ISynchronizer synchronizer,
             IPushManager pushManager,
             ISSEHandler sseHandler,
-            INotificationManagerKeeper notificationManagerKeeper,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
             IStatusManager statusManager,
             ITasksManager tasksManager,
             IWrapperAdapter wrapperAdapter,
-            ITelemetrySyncTask telemetrySyncTask)
+            ITelemetrySyncTask telemetrySyncTask,
+            BlockingCollection<SSEClientActions> sseClientStatus)
         {
             _streamingEnabled = streamingEnabled;
             _synchronizer = synchronizer;
@@ -50,11 +53,9 @@ namespace Splitio.Services.Common
             _tasksManager = tasksManager;
             _wrapperAdapter = wrapperAdapter;
             _telemetrySyncTask = telemetrySyncTask;
-
-            _sseHandler.ActionEvent += OnProcessFeedbackSSE;
-            notificationManagerKeeper.ActionEvent += OnProcessFeedbackSSE;
-
-            _shutdownCancellationTokenSource = new CancellationTokenSource();
+            _sseClientStatusQueue = sseClientStatus;
+            _ctsStreaming = new CancellationTokenSource();
+            _ctsShutdown = new CancellationTokenSource();
         }
 
         #region Public Methods
@@ -64,7 +65,7 @@ namespace Splitio.Services.Common
             {
                 try
                 {
-                    while (!_synchronizer.SyncAll(_shutdownCancellationTokenSource, asynchronous: false))
+                    while (!_synchronizer.SyncAll(_ctsShutdown, asynchronous: false))
                     {
                         _wrapperAdapter.TaskDelay(500).Wait();
                     }
@@ -76,6 +77,7 @@ namespace Splitio.Services.Common
                     if (_streamingEnabled)
                     {
                         _log.Debug("Starting streaming mode...");
+                        _tasksManager.Start(OnSSEClientStatus, "SSE Client Status");
                         var connected = _pushManager.StartSse().Result;
 
                         if (connected) return;
@@ -90,7 +92,7 @@ namespace Splitio.Services.Common
                     _log.Debug("Exception initialization SDK.", ex);
                 }
                 
-            }, _shutdownCancellationTokenSource, "SDK Initialization");
+            }, _ctsShutdown, "SDK Initialization");
         }
 
         public void Shutdown()
@@ -99,37 +101,53 @@ namespace Splitio.Services.Common
             _synchronizer.ClearFetchersCache();
             _synchronizer.StopPeriodicDataRecording();
             _pushManager.StopSse();
-            _shutdownCancellationTokenSource.Cancel();
-            _shutdownCancellationTokenSource.Dispose();
+            _ctsShutdown.Cancel();
+            _ctsShutdown.Dispose();
+            if (!_ctsStreaming.IsCancellationRequested) _ctsStreaming.Cancel();
+            _ctsStreaming.Dispose();
         }
 
-        // public for tests
-        public void OnProcessFeedbackSSE(object sender, SSEActionsEventArgs e)
+        public void OnSSEClientStatus()
         {
-            _log.Debug($"OnProcessFeedbackSSE Action: {e.Action}");
-
-            switch (e.Action)
+            try
             {
-                case SSEClientActions.CONNECTED:
-                    ProcessConnected();
-                    break;                
-                case SSEClientActions.RETRYABLE_ERROR:
-                    ProcessDisconnect(retry: true);
-                    break;
-                case SSEClientActions.DISCONNECT:
-                case SSEClientActions.NONRETRYABLE_ERROR:
-                    ProcessDisconnect(retry: false);
-                    break;
-                case SSEClientActions.SUBSYSTEM_DOWN:
-                    ProcessSubsystemDown();
-                    break;
-                case SSEClientActions.SUBSYSTEM_READY:
-                    ProcessSubsystemReady();
-                    break;
-                case SSEClientActions.SUBSYSTEM_OFF:
-                    ProcessSubsystemOff();
-                    break;
+                while (!_ctsStreaming.IsCancellationRequested)
+                {
+                    if (_sseClientStatusQueue.TryTake(out SSEClientActions action, -1, _ctsStreaming.Token))
+                    {
+                        _log.Debug($"OnSSEClientStatus Action: {action}");
+
+                        switch (action)
+                        {
+                            case SSEClientActions.CONNECTED:
+                                ProcessConnected();
+                                break;
+                            case SSEClientActions.RETRYABLE_ERROR:
+                                ProcessDisconnect(retry: true);
+                                break;
+                            case SSEClientActions.DISCONNECT:
+                            case SSEClientActions.NONRETRYABLE_ERROR:
+                                ProcessDisconnect(retry: false);
+                                break;
+                            case SSEClientActions.SUBSYSTEM_DOWN:
+                                ProcessSubsystemDown();
+                                break;
+                            case SSEClientActions.SUBSYSTEM_READY:
+                                ProcessSubsystemReady();
+                                break;
+                            case SSEClientActions.SUBSYSTEM_OFF:
+                                ProcessSubsystemOff();
+                                break;
+                        }
+                    }
+                }
             }
+            catch (Exception ex)
+            {
+                _log.Debug(ex.Message);
+            }
+            finally
+            { _sseClientStatusQueue.Dispose(); }
         }
         #endregion
 
@@ -146,7 +164,7 @@ namespace Splitio.Services.Common
 
                 _streamingConnected = true;
                 _sseHandler.StartWorkers();
-                _synchronizer.SyncAll(_shutdownCancellationTokenSource);
+                _synchronizer.SyncAll(_ctsShutdown);
                 _synchronizer.StopPeriodicFetching();
                 _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Streaming));
             }
@@ -164,7 +182,7 @@ namespace Splitio.Services.Common
 
                 _streamingConnected = false;
                 _sseHandler.StopWorkers();
-                _synchronizer.SyncAll(_shutdownCancellationTokenSource);
+                _synchronizer.SyncAll(_ctsShutdown);
                 _synchronizer.StartPeriodicFetching();
                 _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
 
@@ -185,7 +203,7 @@ namespace Splitio.Services.Common
         private void ProcessSubsystemReady()
         {
             _synchronizer.StopPeriodicFetching();
-            _synchronizer.SyncAll(_shutdownCancellationTokenSource);
+            _synchronizer.SyncAll(_ctsShutdown);
             _sseHandler.StartWorkers();
             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Streaming));
         }
@@ -193,6 +211,7 @@ namespace Splitio.Services.Common
         private void ProcessSubsystemOff()
         {
             _pushManager.StopSse();
+            _ctsStreaming.Cancel();
         }
         #endregion
     }
