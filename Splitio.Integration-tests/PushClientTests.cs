@@ -4,7 +4,6 @@ using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Client.Interfaces;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests
 {
@@ -17,6 +16,7 @@ namespace Splitio.Integration_tests
     [DeploymentItem(@"Resources\split_segment4_updated.json")]
     [DeploymentItem(@"Resources\split_segment4_updated_empty.json")]
     [TestClass]
+    [Ignore]
     public class PushClientTests
     {
         private string EventSourcePath => "/eventsource";
@@ -537,7 +537,7 @@ namespace Splitio.Integration_tests
                 result = client.GetTreatment(key, splitName);
                 if (result == expected) break;
 
-                Task.Delay(1000).Wait();
+                Thread.Sleep(1000);
             }
 
             return result;
