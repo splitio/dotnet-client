@@ -1,3 +1,6 @@
+platform:
+  - x64
+
 image:
   - Visual Studio 2022
 
@@ -22,7 +25,7 @@ before_build:
 build_script:
  - sonar-scanner.bat
  - dotnet build --configuration Release
- # - SonarScanner.MSBuild.exe end /d:sonar.login=%SONAR_LOGIN%
+ - SonarScanner.MSBuild.exe end /d:sonar.login=%SONAR_LOGIN%
 
 after_build:
  - Redis-64\tools\redis-server.exe --service-start

@@ -1,4 +1,6 @@
 @echo off
+
+SET "JAVA_HOME=C:/Program Files/Java/jdk17"
 setlocal EnableDelayedExpansion
 GOTO :main
 
