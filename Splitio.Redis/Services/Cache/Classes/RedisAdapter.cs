@@ -363,6 +363,20 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             finally { FinishProfiling("HashSet", key); }
         }
+
+        // Only for tests.
+        public TimeSpan? KeyTimeToLive(RedisKey key)
+        {
+            try
+            {
+                var db = GetDatabase();
+                return db.KeyTimeToLive(key);
+            }
+            catch
+            {
+                return null;
+            }
+        }
         #endregion
 
         #region Private Methods
