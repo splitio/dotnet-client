@@ -1,5 +1,11 @@
 CHANGES
 
+7.3.0 (Mar 13, 2023)
+- Added retries with backoff when the sdk tries to connect to the Streaming service and it is not available.
+- Added support for .NET 7.
+- Added redis pool connections.
+- Updated the way that the sdk write mtks in redis.
+
 7.2.2 (Dec 12, 2022)
 - Fixed unhealthy streaming connection when network conditions change.
 - Added redis profiling.

@@ -19,7 +19,6 @@
         public static string Accept => "Accept";
         public static string AcceptEncoding => "Accept-Encoding";
         public static string KeepAlive => "Keep-Alive";
-        public static string EventStream = "text/event-stream";
         public static string Gzip => "gzip";
         public static string CacheControlKey => "Cache-Control";
         public static string CacheControlValue => "no-cache";
@@ -37,7 +36,7 @@
         public static string BaseUrl => "https://sdk.split.io";
         public static string EventsBaseUrl => "https://events.split.io";
         public static string AuthServiceURL => "https://auth.split.io/api/auth";
-        public static string StreamingServiceURL => "https://streaming.split.io/event-stream";
+        public static string StreamingServiceURL => "https://streaming.split.io/sse";
         public static string TelemetryServiceURL => "https://telemetry.split.io/api/v1";
     }
 

@@ -22,6 +22,7 @@ namespace Splitio.Redis.Services.Client.Classes
 
         private IRedisAdapter _redisAdapter;
         private IImpressionsCache _impressionsCache;
+        private IConnectionPoolManager _connectionPoolManager;
 
         public RedisClient(ConfigurationOptions config, string apiKey) : base()
         {
@@ -52,6 +53,7 @@ namespace Splitio.Redis.Services.Client.Classes
 
             _uniqueKeysTracker.Stop();
             _impressionsCounter.Stop();
+            _connectionPoolManager.Dispose();
             base.Destroy();
         }
 
@@ -81,9 +83,10 @@ namespace Splitio.Redis.Services.Client.Classes
             _config.FromCacheAdapterConfig(config.CacheAdapterConfig);
     }
 
-    private void BuildRedisCache()
+        private void BuildRedisCache()
         {
-            _redisAdapter = new RedisAdapter(_config);
+            _connectionPoolManager = new ConnectionPoolManager(_config);
+            _redisAdapter = new RedisAdapter(_config, _connectionPoolManager);
             BuildTelemetryStorage();
             RecordConfigInit();
 

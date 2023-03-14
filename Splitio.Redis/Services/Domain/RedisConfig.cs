@@ -1,4 +1,5 @@
 ﻿using Splitio.Domain;
+using Splitio.Redis.Services.Shared;
 using Splitio.Services.Client.Classes;
 
 namespace Splitio.Redis.Services.Domain
@@ -15,8 +16,9 @@ namespace Splitio.Redis.Services.Domain
         public int RedisConnectRetry { get; set; }
         public int RedisSyncTimeout { get; set; }
         public TlsConfig TlsConfig { get; set; }
-#if NETSTANDARD2_0 || NET6_0 || NET5_0
-        public bool ProfilingEnabled { get; set; }
+        public int PoolSize { get; set; }
+#if NET_LATEST
+        public AsyncLocalProfiler LocalProfiler { get; set; }
 #endif
 
         public string HostAndPort => $"{RedisHost}:{RedisPort}";
@@ -32,8 +34,10 @@ namespace Splitio.Redis.Services.Domain
             RedisConnectRetry = options.ConnectRetry ?? 0;
             RedisUserPrefix = options.UserPrefix;
             TlsConfig = options.TlsConfig;
-#if NETSTANDARD2_0 || NET6_0 || NET5_0
-            ProfilingEnabled = options.ProfilingEnabled;
+            PoolSize = options.PoolSize ?? 1;
+#if NET_LATEST
+            if (options.ProfilingEnabled)
+                LocalProfiler = new AsyncLocalProfiler();
 #endif
         }
     }

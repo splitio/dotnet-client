@@ -9,6 +9,5 @@ namespace Splitio.Services.EventSource
         bool IsConnected();
         
         event EventHandler<EventReceivedEventArgs> EventReceived;
-        event EventHandler<SSEActionsEventArgs> ActionEvent;
     }
 }

@@ -49,5 +49,8 @@ namespace Splitio.Redis.Services.Cache.Interfaces
         long HashIncrementAsyncBatch(string key, Dictionary<string, int> values);
 
         HashEntry[] HashGetAll(RedisKey key);
+
+        // Only for tests.
+        TimeSpan? KeyTimeToLive(RedisKey key);
     }
 }

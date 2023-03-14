@@ -22,7 +22,6 @@ namespace Splitio.Services.Common
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
 
         private CancellationTokenSource _cancellationTokenSourceRefreshToken;
-        private Task _refreshTokenTask;
 
         public PushManager(ISSEHandler sseHandler,
             IAuthApiClient authApiClient,
@@ -59,7 +58,10 @@ namespace Splitio.Services.Common
 
                 if (response.Retry.Value)
                 {
-                    ScheduleNextTokenRefresh(_backOff.GetInterval());
+                    var interval = _backOff.GetInterval();
+
+                    _log.Info($"Streaming service temporarily unavailable, working in polling mode and retrying in {interval} seconds.");
+                    ScheduleNextTokenRefresh(interval);
                 }
                 else
                 {
@@ -98,7 +100,7 @@ namespace Splitio.Services.Common
                 var sleepTime = Convert.ToInt32(time) * 1000;
                 _log.Debug($"ScheduleNextTokenRefresh sleep time : {sleepTime} miliseconds.");
 
-                _refreshTokenTask = _wrapperAdapter
+                _wrapperAdapter
                     .TaskDelay(sleepTime)
                     .ContinueWith((t) =>
                     {

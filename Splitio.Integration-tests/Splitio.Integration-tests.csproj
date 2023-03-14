@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net472</TargetFrameworks>
+    <TargetFrameworks>net7.0;net472</TargetFrameworks>
     <RootNamespace>Splitio.Integration_tests</RootNamespace>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -14,8 +14,8 @@
     <PackageReference Include="WireMock.Net" Version="1.0.29" />
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <DefineConstants>NETCORE</DefineConstants>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net7.0'">
+    <DefineConstants>NET_LATEST</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
