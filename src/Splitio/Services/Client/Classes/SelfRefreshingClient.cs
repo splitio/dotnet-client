@@ -173,16 +173,16 @@ namespace Splitio.Services.Client.Classes
             headers.Add(Constants.Http.AcceptEncoding, Constants.Http.Gzip);
             headers.Add(Constants.Http.KeepAlive, "true");
 
-            var sdkHttpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, _config.HttpReadTimeout, headers);
+            var sdkHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
             _splitSdkApiClient = new SplitSdkApiClient(sdkHttpClient, _telemetryRuntimeProducer, _config.BaseUrl);
 
-            var segmentsHttpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, _config.HttpReadTimeout, headers);
+            var segmentsHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
             _segmentSdkApiClient = new SegmentSdkApiClient(segmentsHttpClient, _telemetryRuntimeProducer, _config.BaseUrl);
 
-            var impressionsHttpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, _config.HttpReadTimeout, headers);
+            var impressionsHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
             _impressionsSdkApiClient = new ImpressionsSdkApiClient(impressionsHttpClient, _telemetryRuntimeProducer, _config.EventsBaseUrl, _wrapperAdapter, _config.ImpressionsBulkSize);
 
-            var eventsHttpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, _config.HttpReadTimeout, headers);
+            var eventsHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
             _eventSdkApiClient = new EventSdkApiClient(eventsHttpClient, _telemetryRuntimeProducer, _tasksManager, _wrapperAdapter, _config.EventsBaseUrl, _config.EventsBulkSize);
         }
 
@@ -198,7 +198,7 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildTelemetrySyncTask()
         {
-            var httpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, _config.HttpReadTimeout, GetHeaders());
+            var httpClient = new SplitioHttpClient(ApiKey, _config, GetHeaders());
 
             _telemetryAPI = new TelemetryAPI(httpClient, _config.TelemetryServiceURL, _telemetryRuntimeProducer);
             _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorageConsumer, _telemetryAPI, _splitCache, _segmentCache, _config, FactoryInstantiationsService.Instance(), _wrapperAdapter, _tasksManager);
@@ -231,14 +231,14 @@ namespace Splitio.Services.Client.Classes
                 // EventSourceClient
                 var headers = GetHeaders();
                 headers.Add(Constants.Http.SplitSDKClientKey, ApiKey.Substring(ApiKey.Length - 4));
-                var sseHttpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, _config.HttpReadTimeout, headers);
+                var sseHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
                 var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, _telemetryRuntimeProducer, _tasksManager, sseClientStatus);
 
                 // SSEHandler
                 var sseHandler = new SSEHandler(_config.StreamingServiceURL, splitsWorker, segmentsWorker, notificationProcessor, notificationManagerKeeper, eventSourceClient: eventSourceClient);
 
                 // AuthApiClient
-                var httpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, _config.HttpReadTimeout, GetHeaders());
+                var httpClient = new SplitioHttpClient(ApiKey, _config, GetHeaders());
                 var authApiClient = new AuthApiClient(_config.AuthServiceURL, ApiKey, httpClient, _telemetryRuntimeProducer);
 
                 // PushManager

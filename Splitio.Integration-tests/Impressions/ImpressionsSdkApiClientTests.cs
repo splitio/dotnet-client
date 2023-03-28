@@ -23,7 +23,12 @@ namespace Splitio.Integration_tests.Impressions
         {
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _wrapperAdapter = WrapperAdapter.Instance();
-            _splitioHttpClient = new SplitioHttpClient("api-key-test", 10000, 10000, new Dictionary<string, string>());
+            var config = new SelfRefreshingConfig
+            {
+                HttpConnectionTimeout = 10000,
+                HttpReadTimeout = 10000
+            };
+            _splitioHttpClient = new SplitioHttpClient("api-key-test", config, new Dictionary<string, string>());
         }
 
         [TestMethod]

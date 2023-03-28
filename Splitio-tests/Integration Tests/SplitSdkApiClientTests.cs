@@ -24,7 +24,12 @@ namespace Splitio_Tests.Integration_Tests
             };
 
             var telemetryStorage = new InMemoryTelemetryStorage();
-            var httpClient = new SplitioHttpClient(string.Empty, 10000, 10000, headers);
+            var config = new SelfRefreshingConfig
+            {
+                HttpConnectionTimeout = 10000,
+                HttpReadTimeout = 10000
+            };
+            var httpClient = new SplitioHttpClient(string.Empty, config, headers);
             var SplitSdkApiClient = new SplitSdkApiClient(httpClient, telemetryStorage, baseUrl);
 
             //Act

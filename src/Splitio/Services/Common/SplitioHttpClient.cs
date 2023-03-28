@@ -1,4 +1,5 @@
 ﻿using Splitio.CommonLibraries;
+using Splitio.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
@@ -21,8 +22,7 @@ namespace Splitio.Services.Common
         private bool _disposed;
 
         public SplitioHttpClient(string apiKey,
-            long connectionTimeOut,
-            long readTimeout,
+            SelfRefreshingConfig config,
             Dictionary<string, string> headers)
         {
 #if NET45
@@ -30,12 +30,12 @@ namespace Splitio.Services.Common
 #endif
             var handler = new HttpClientHandler()
             {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
             };
 
             _httpClient = new HttpClient(handler)
             {
-                Timeout = TimeSpan.FromMilliseconds(connectionTimeOut + readTimeout)
+                Timeout = TimeSpan.FromMilliseconds(config.HttpConnectionTimeout + config.HttpReadTimeout)
             };
 
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Constants.Http.Bearer, apiKey);
