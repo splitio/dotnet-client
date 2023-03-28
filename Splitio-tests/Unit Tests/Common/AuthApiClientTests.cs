@@ -29,7 +29,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             var authResponse = "{\"pushEnabled\":true,\"token\":\"khdkjdahs987498217.eyJ4LWFibHktY2FwYWJpbGl0eSI6IntcInh4eHhfeHh4eF9zZWdtZW50c1wiOltcInN1YnNjcmliZVwiXSxcInh4eHhfeHh4eF9zcGxpdHNcIjpbXCJzdWJzY3JpYmVcIl0sXCJjb250cm9sXCI6W1wic3Vic2NyaWJlXCJdfSJ9\"}";
 
             _splitioHttpClientMock
-                .Setup(mock => mock.GetAsync(It.IsAny<string>()))
+                .Setup(mock => mock.GetAsync(It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(new HTTPResult
                 {
                     statusCode = System.Net.HttpStatusCode.OK,
@@ -53,7 +53,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             var authResponse = "{\"pushEnabled\":false}";
 
             _splitioHttpClientMock
-                .Setup(mock => mock.GetAsync(It.IsAny<string>()))
+                .Setup(mock => mock.GetAsync(It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(new HTTPResult
                 {
                     statusCode = System.Net.HttpStatusCode.OK,
@@ -75,7 +75,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             //Arrange
             _splitioHttpClientMock
-                .Setup(mock => mock.GetAsync(It.IsAny<string>()))
+                .Setup(mock => mock.GetAsync(It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(new HTTPResult
                 {
                     statusCode = System.Net.HttpStatusCode.InternalServerError,
@@ -96,7 +96,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             //Arrange
             _splitioHttpClientMock
-                .Setup(mock => mock.GetAsync(It.IsAny<string>()))
+                .Setup(mock => mock.GetAsync(It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(new HTTPResult
                 {
                     statusCode = System.Net.HttpStatusCode.BadRequest,
@@ -117,7 +117,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             //Arrange
             _splitioHttpClientMock
-                .Setup(mock => mock.GetAsync(It.IsAny<string>()))
+                .Setup(mock => mock.GetAsync(It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(new HTTPResult
                 {
                     statusCode = System.Net.HttpStatusCode.Unauthorized,

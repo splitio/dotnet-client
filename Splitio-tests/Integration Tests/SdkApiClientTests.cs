@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.CommonLibraries;
+using Splitio.Services.Common;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Net;
@@ -15,7 +16,6 @@ namespace Splitio_Tests.Integration_Tests
         public async Task ExecuteGetSuccessful()
         {
             //Arrange
-            var baseUrl = "http://demo7064886.mockable.io";
             var headers = new Dictionary<string, string>
             {
                 { "SplitSDKMachineIP", "1.0.0.0" },
@@ -23,11 +23,10 @@ namespace Splitio_Tests.Integration_Tests
                 { "SplitSDKVersion", "1" }
             };
 
-            var telemetryStorage = new InMemoryTelemetryStorage();
-            var SdkApiClient = new SdkApiClient("ABCD", headers, baseUrl, 10000, 10000, telemetryStorage);
+            var httpClient = new SplitioHttpClient("ABCD", 10000, 10000, headers);
 
             //Act
-            var result = await SdkApiClient.ExecuteGet("/messages?item=msg1");
+            var result = await httpClient.GetAsync("http://demo7064886.mockable.io/messages?item=msg1");
 
             //Assert
             Assert.AreEqual(result.statusCode, HttpStatusCode.OK);
@@ -39,7 +38,6 @@ namespace Splitio_Tests.Integration_Tests
         public async Task ExecuteGetShouldReturnErrorNotAuthorized()
         {
             //Arrange
-            var baseUrl = "http://demo7064886.mockable.io";
             var headers = new Dictionary<string, string>
             {
                 { "SplitSDKMachineIP", "1.0.0.0" },
@@ -47,11 +45,10 @@ namespace Splitio_Tests.Integration_Tests
                 { "SplitSDKVersion", "1" }
             };
 
-            var telemetryStorage = new InMemoryTelemetryStorage();
-            var SdkApiClient = new SdkApiClient(string.Empty, headers, baseUrl, 10000, 10000, telemetryStorage);
+            var httpClient = new SplitioHttpClient(string.Empty, 10000, 10000, headers);
 
             //Act
-            var result = await SdkApiClient.ExecuteGet("/messages?item=msg2");
+            var result = await httpClient.GetAsync("http://demo7064886.mockable.io/messages?item=msg2");
 
             //Assert
             Assert.AreEqual(result.statusCode, HttpStatusCode.Unauthorized);
@@ -62,7 +59,6 @@ namespace Splitio_Tests.Integration_Tests
         public async Task ExecuteGetShouldReturnNotFoundOnInvalidRequest()
         {
             //Arrange
-            var baseUrl = "http://demo706abcd.mockable.io";
             var headers = new Dictionary<string, string>
             {
                 { "SplitSDKMachineIP", "1.0.0.0" },
@@ -70,11 +66,10 @@ namespace Splitio_Tests.Integration_Tests
                 { "SplitSDKVersion", "1" }
             };
 
-            var telemetryStorage = new InMemoryTelemetryStorage();
-            var SdkApiClient = new SdkApiClient("ABCD", headers, baseUrl, 10000, 10000, telemetryStorage);
+            var httpClient = new SplitioHttpClient("ABCD", 10000, 10000, headers);
 
             //Act
-            var result = await SdkApiClient.ExecuteGet("/messages?item=msg2");
+            var result = await httpClient.GetAsync("http://demo706abcd.mockable.io/messages?item=msg2");
 
             //Assert
             Assert.AreEqual(result.statusCode, HttpStatusCode.NotFound);
@@ -84,7 +79,6 @@ namespace Splitio_Tests.Integration_Tests
         public async Task ExecuteGetShouldReturnEmptyResponseOnInvalidURL()
         {
             //Arrange
-            var baseUrl = "http://demo70e.iio";
             var headers = new Dictionary<string, string>
             {
                 { "SplitSDKMachineIP", "1.0.0.0" },
@@ -92,11 +86,10 @@ namespace Splitio_Tests.Integration_Tests
                 { "SplitSDKVersion", "1" }
             };
 
-            var telemetryStorage = new InMemoryTelemetryStorage();
-            var SdkApiClient = new SdkApiClient("ABCD", headers, baseUrl, 10000, 10000, telemetryStorage);
+            var httpClient = new SplitioHttpClient("ABCD", 10000, 10000, headers);
 
             //Act
-            var result = await SdkApiClient.ExecuteGet("http://demo70e.iio/messages?item=msg2");
+            var result = await httpClient.GetAsync("http://demo70e.iio/messages?item=msg2");
 
             //Assert
             Assert.IsNotNull(result);

@@ -17,6 +17,8 @@ namespace Splitio.Redis.Services.Cache.Classes
         private readonly IConnectionMultiplexer[] _connections;
         private readonly Random _random;
 
+        private bool _disposed;
+
         public ConnectionPoolManager(RedisConfig config)
         {
             lock (_lock)
@@ -52,9 +54,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             lock (_lock)
             {
-                foreach (var conn in _connections)
-                    conn.Dispose();
-
+                Dispose(true);
                 GC.SuppressFinalize(this);
             }
         }
@@ -77,6 +77,19 @@ namespace Splitio.Redis.Services.Cache.Classes
 
                 return conn;
             }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            foreach (var conn in _connections)
+                conn.Dispose();
+
+            _disposed = true;
         }
 
         private ConfigurationOptions GetConfig(RedisConfig redisCfg)

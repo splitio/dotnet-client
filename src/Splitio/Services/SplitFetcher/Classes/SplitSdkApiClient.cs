@@ -1,29 +1,33 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
+using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {
-    public class SplitSdkApiClient : SdkApiClient, ISplitSdkApiClient
+    public class SplitSdkApiClient : ISplitSdkApiClient
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitSdkApiClient));
 
-        public SplitSdkApiClient(string apiKey,
-            Dictionary<string, string> headers,
-            string baseUrl,
-            long connectionTimeOut,
-            long readTimeout,
-            ITelemetryRuntimeProducer telemetryRuntimeProducer) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout, telemetryRuntimeProducer)
-        { }
+        private readonly ISplitioHttpClient _httpClient;
+        private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
+        private readonly string _baseUrl;
+
+        public SplitSdkApiClient(ISplitioHttpClient httpClient,
+            ITelemetryRuntimeProducer telemetryRuntimeProducer,
+            string baseUrl)
+        {
+            _httpClient = httpClient;
+            _telemetryRuntimeProducer = telemetryRuntimeProducer;
+            _baseUrl = baseUrl;
+        }
 
         public async Task<string> FetchSplitChanges(long since, FetchOptions fetchOptions)
         {
@@ -33,20 +37,15 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                 try
                 {
-                    var requestUri = GetRequestUri(since, fetchOptions.Till);
-                    var response = await ExecuteGet(requestUri, fetchOptions.CacheControlHeaders);
+                    var requestUri = GetRequestUri(since, fetchOptions.Till);                    
+                    var response = await _httpClient.GetAsync(requestUri, fetchOptions.CacheControlHeaders);
 
-                    if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
+                    Util.Helper.RecordTelemetrySync(nameof(FetchSplitChanges), response.statusCode, response.content, ResourceEnum.SplitSync, clock, _telemetryRuntimeProducer, _log);
+
+                    if (response.statusCode >= HttpStatusCode.OK && response.statusCode < HttpStatusCode.Ambiguous)
                     {
-                        _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.SplitSync, Util.Metrics.Bucket(clock.ElapsedMilliseconds));
-                        _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.SplitSync, CurrentTimeHelper.CurrentTimeMillis());
-
                         return response.content;
                     }
-
-                    _log.Error($"Http status executing FetchSplitChanges: {response.statusCode.ToString()} - {response.content}");
-
-                    _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.SplitSync, (int)response.statusCode);
 
                     return string.Empty;
                 }
@@ -61,7 +60,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
         private string GetRequestUri(long since, long? till = null)
         {
-            var uri = $"/api/splitChanges?since={Uri.EscapeDataString(since.ToString())}";
+            var uri = $"{_baseUrl}/api/splitChanges?since={Uri.EscapeDataString(since.ToString())}";
 
             if (till.HasValue)
                 return $"{uri}&till={Uri.EscapeDataString(till.Value.ToString())}";

@@ -1,13 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
-using Splitio.Services.Client.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
-using Splitio.Services.Shared.Classes;
-using Splitio.Telemetry.Storages;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -41,37 +36,5 @@ namespace Splitio_Tests.Integration_Tests
             //Assert
             Assert.IsTrue(segmentCache.IsInSegment("payed", "abcdz"));
         }
-
-
-        [TestMethod]
-        [Ignore] 
-        public void ExecuteGetSuccessfulWithResults()
-        {
-            //Arrange
-            var baseUrl = "https://sdk-aws-staging.split.io/api/";
-            var headers = new Dictionary<string, string>
-            {
-                { "SplitSDKMachineIP", "1.0.0.0" },
-                { "SplitSDKMachineName", "localhost" },
-                { "SplitSDKVersion", "1" }
-            };
-
-            var telemetryStorage = new InMemoryTelemetryStorage();
-            var sdkApiClient = new SegmentSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000, telemetryStorage);
-            var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkApiClient);
-            var gates = new InMemoryReadinessGatesCache();
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            var segmentTaskQueue = new SegmentTaskQueue();
-            var wrapperAdapter = WrapperAdapter.Instance();
-            var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, gates, 30, segmentCache, 4, segmentTaskQueue, new TasksManager(wrapperAdapter), wrapperAdapter);
-
-            //Act
-            var name = "payed";
-            selfRefreshingSegmentFetcher.InitializeSegment(name);
-
-            //Assert
-            Assert.IsTrue(segmentCache.IsInSegment(name, "abcdz"));
-        }
-
     }
 }

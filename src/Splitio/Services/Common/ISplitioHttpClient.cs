@@ -8,7 +8,7 @@ namespace Splitio.Services.Common
 {
     public interface ISplitioHttpClient : IDisposable
     {
-        Task<HTTPResult> GetAsync(string url);
+        Task<HTTPResult> GetAsync(string url, bool cacheControlHeadersEnabled = false);
         Task<HttpResponseMessage> GetAsync(string url, HttpCompletionOption completionOption, CancellationToken cancellationToken);
         Task<HTTPResult> PostAsync(string url, string data);
     }
