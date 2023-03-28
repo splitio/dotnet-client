@@ -33,6 +33,11 @@ namespace Splitio.Services.Common
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
             };
 
+            if (!string.IsNullOrEmpty(config.ProxyHost))
+            {
+                handler.Proxy = new WebProxy(config.ProxyHost, config.ProxyPort);
+            }
+
             _httpClient = new HttpClient(handler)
             {
                 Timeout = TimeSpan.FromMilliseconds(config.HttpConnectionTimeout + config.HttpReadTimeout)
