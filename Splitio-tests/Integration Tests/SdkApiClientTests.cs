@@ -32,7 +32,7 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             Assert.IsNotNull(result);
-            Assert.IsNull(result.content);
+            Assert.IsNull(result.Content);
             
         }
     }

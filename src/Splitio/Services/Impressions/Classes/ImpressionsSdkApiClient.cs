@@ -69,7 +69,7 @@ namespace Splitio.Services.Impressions.Classes
 
                 var response = await _httpClient.PostAsync(ImpressionsCountUrl, json);
 
-                Util.Helper.RecordTelemetrySync(nameof(SendBulkImpressionsCount), response.statusCode, response.content, ResourceEnum.ImpressionCountSync, clock, _telemetryRuntimeProducer, _log);
+                Util.Helper.RecordTelemetrySync(nameof(SendBulkImpressionsCount), response, ResourceEnum.ImpressionCountSync, clock, _telemetryRuntimeProducer, _log);
             }
         }
 
@@ -99,9 +99,9 @@ namespace Splitio.Services.Impressions.Classes
 
                 var response = await _httpClient.PostAsync(TestImpressionsUrl, impressionsJson);
 
-                Util.Helper.RecordTelemetrySync(nameof(SendBulkImpressions), response.statusCode, response.content, ResourceEnum.ImpressionSync, clock, _telemetryRuntimeProducer, _log);
+                Util.Helper.RecordTelemetrySync(nameof(SendBulkImpressions), response, ResourceEnum.ImpressionSync, clock, _telemetryRuntimeProducer, _log);
 
-                if (response.statusCode >= System.Net.HttpStatusCode.OK && response.statusCode < System.Net.HttpStatusCode.Ambiguous)
+                if (response.IsSuccessStatusCode)
                 {
                     _log.Debug($"Post bulk impressions success in {i} attempts.");
                     return;

@@ -4,7 +4,8 @@ namespace Splitio.CommonLibraries
 {
     public class HTTPResult
     {
-        public HttpStatusCode statusCode { get; set; }
-        public string content { get; set; }
+        public HttpStatusCode StatusCode { get; set; }
+        public string Content { get; set; }
+        public bool IsSuccessStatusCode { get; set; }
     }
 }

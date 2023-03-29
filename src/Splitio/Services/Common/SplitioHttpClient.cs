@@ -63,8 +63,9 @@ namespace Splitio.Services.Common
             {
                 using (var response = await _httpClient.SendAsync(request))
                 {
-                    result.statusCode = response.StatusCode;
-                    result.content = await response.Content.ReadAsStringAsync();
+                    result.StatusCode = response.StatusCode;
+                    result.Content = await response.Content.ReadAsStringAsync();
+                    result.IsSuccessStatusCode = response.IsSuccessStatusCode;
                 }
             }
             catch (Exception e)
@@ -88,8 +89,9 @@ namespace Splitio.Services.Common
             {
                 using (var response = await _httpClient.PostAsync(new Uri(url), new StringContent(data, Encoding.UTF8, "application/json")))
                 {
-                    result.statusCode = response.StatusCode;
-                    result.content = await response.Content.ReadAsStringAsync();
+                    result.StatusCode = response.StatusCode;
+                    result.Content = await response.Content.ReadAsStringAsync();
+                    result.IsSuccessStatusCode = response.IsSuccessStatusCode;
                 }
             }
             catch (Exception e)

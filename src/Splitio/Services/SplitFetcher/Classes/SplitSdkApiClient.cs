@@ -40,11 +40,11 @@ namespace Splitio.Services.SplitFetcher.Classes
                     var requestUri = GetRequestUri(since, fetchOptions.Till);                    
                     var response = await _httpClient.GetAsync(requestUri, fetchOptions.CacheControlHeaders);
 
-                    Util.Helper.RecordTelemetrySync(nameof(FetchSplitChanges), response.statusCode, response.content, ResourceEnum.SplitSync, clock, _telemetryRuntimeProducer, _log);
+                    Util.Helper.RecordTelemetrySync(nameof(FetchSplitChanges), response, ResourceEnum.SplitSync, clock, _telemetryRuntimeProducer, _log);
 
-                    if (response.statusCode >= HttpStatusCode.OK && response.statusCode < HttpStatusCode.Ambiguous)
+                    if (response.IsSuccessStatusCode)
                     {
-                        return response.content;
+                        return response.Content;
                     }
 
                     return string.Empty;

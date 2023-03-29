@@ -239,7 +239,7 @@ namespace Splitio.Services.Client.Classes
 
                 // AuthApiClient
                 var httpClient = new SplitioHttpClient(ApiKey, _config, GetHeaders());
-                var authApiClient = new AuthApiClient(_config.AuthServiceURL, ApiKey, httpClient, _telemetryRuntimeProducer);
+                var authApiClient = new AuthApiClient(_config.AuthServiceURL, httpClient, _telemetryRuntimeProducer);
 
                 // PushManager
                 var backoff = new BackOff(_config.AuthRetryBackoffBase, attempt: 1);

@@ -54,7 +54,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
                 .Setup(mock => mock.PostAsync("www.fake-url.com/metrics/config", data))
                 .ReturnsAsync(new HTTPResult
                 {
-                    statusCode = System.Net.HttpStatusCode.OK
+                    StatusCode = System.Net.HttpStatusCode.OK
                 });
 
             _telemetryRuntimeProducer
@@ -92,7 +92,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
                 .Setup(mock => mock.PostAsync("www.fake-url.com/metrics/usage", data))
                 .ReturnsAsync(new HTTPResult
                 {
-                    statusCode = System.Net.HttpStatusCode.OK
+                    StatusCode = System.Net.HttpStatusCode.OK
                 });
 
             // Act.
@@ -115,7 +115,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
                 .Setup(mock => mock.PostAsync("www.fake-url.com/keys/ss", data))
                 .ReturnsAsync(new HTTPResult
                 {
-                    statusCode = System.Net.HttpStatusCode.OK
+                    StatusCode = System.Net.HttpStatusCode.OK
                 });
 
             // Act.

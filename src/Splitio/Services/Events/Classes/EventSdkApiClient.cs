@@ -90,9 +90,9 @@ namespace Splitio.Services.Events.Classes
 
                 var response = await _httpClient.PostAsync(EventsUrl, eventsJson);
 
-                Util.Helper.RecordTelemetrySync(nameof(SendBulkEventsTask), response.statusCode, response.content, ResourceEnum.EventSync, clock, _telemetryRuntimeProducer, _log);
+                Util.Helper.RecordTelemetrySync(nameof(SendBulkEventsTask), response, ResourceEnum.EventSync, clock, _telemetryRuntimeProducer, _log);
 
-                if (response.statusCode >= HttpStatusCode.OK && response.statusCode < HttpStatusCode.Ambiguous)
+                if (response.IsSuccessStatusCode)
                 {
                     _log.Debug($"Post bulk events success in {i} attempts.");
                     return;

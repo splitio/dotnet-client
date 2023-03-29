@@ -1,12 +1,10 @@
 ﻿using Newtonsoft.Json;
-using Splitio.CommonLibraries;
 using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace Splitio.Telemetry.Common
@@ -52,22 +50,18 @@ namespace Splitio.Telemetry.Common
         #region Private Methods
         private async Task ExecutePost(string url, object data, string method)
         {
-            var jsonData = JsonConvert.SerializeObject(data, new JsonSerializerSettings
+            using (var clock = new Util.SplitStopwatch())
             {
-                NullValueHandling = NullValueHandling.Ignore
-            });
+                clock.Start();
 
-            var response = await _splitioHttpClient.PostAsync($"{_telemetryURL}{url}", jsonData);
+                var jsonData = JsonConvert.SerializeObject(data, new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                });
 
-            if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
-            {
-                _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.TelemetrySync, CurrentTimeHelper.CurrentTimeMillis());
-                _log.Debug($"Telemetry post success. {method}");
-            }
-            else
-            {
-                _log.Error($"Http status executing {method}: {response.statusCode} - {response.content}");
-                _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.TelemetrySync, (int)response.statusCode);
+                var response = await _splitioHttpClient.PostAsync($"{_telemetryURL}{url}", jsonData);
+
+                Util.Helper.RecordTelemetrySync(method, response, ResourceEnum.TelemetrySync, clock, _telemetryRuntimeProducer, _log);
             }
         }
         #endregion

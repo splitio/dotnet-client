@@ -40,15 +40,15 @@ namespace Splitio.Services.SegmentFetcher.Classes
                     var requestUri = GetRequestUri(name, since, fetchOptions.Till);
                     var response = await _httpClient.GetAsync(requestUri, fetchOptions.CacheControlHeaders);
 
-                    Util.Helper.RecordTelemetrySync(nameof(FetchSegmentChanges), response.statusCode, response.content, ResourceEnum.SegmentSync, clock, _telemetryRuntimeProducer, _log);
+                    Util.Helper.RecordTelemetrySync(nameof(FetchSegmentChanges), response, ResourceEnum.SegmentSync, clock, _telemetryRuntimeProducer, _log);
 
-                    if (response.statusCode >= HttpStatusCode.OK && response.statusCode < HttpStatusCode.Ambiguous)
+                    if (response.IsSuccessStatusCode)
                     {
                         _log.Debug($"FetchSegmentChanges with name '{name}' took {clock.ElapsedMilliseconds} milliseconds using uri '{requestUri}'");
 
-                        return response.content;
+                        return response.Content;
                     }
-                    else if (response.statusCode == HttpStatusCode.Forbidden)
+                    else if (response.StatusCode == HttpStatusCode.Forbidden)
                     {
                         _log.Error("factory instantiation: you passed a browser type api_key, please grab an api key from the Split console that is of type sdk");
                     }
