@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Splitio.CommonLibraries;
+using Splitio.Services.Logger;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
+using System.Collections.Generic;
 
 namespace Splitio.Util
 {
@@ -19,6 +23,21 @@ namespace Splitio.Util
             items.RemoveRange(0, count);
 
             return bulk;
+        }
+
+        public static void RecordTelemetrySync(string method, HTTPResult response, ResourceEnum resource, SplitStopwatch clock, ITelemetryRuntimeProducer telemetryRuntimeProducer, ISplitLogger log)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                telemetryRuntimeProducer.RecordSyncLatency(resource, Metrics.Bucket(clock.ElapsedMilliseconds));
+                telemetryRuntimeProducer.RecordSuccessfulSync(resource, CurrentTimeHelper.CurrentTimeMillis());
+            }
+            else
+            {
+                telemetryRuntimeProducer.RecordSyncError(resource, (int)response.StatusCode);
+            }
+
+            log.Error($"Http status executing {method}: {response.StatusCode}");
         }
     }
 }

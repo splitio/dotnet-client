@@ -1,9 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Splitio.Domain;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Storages;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Splitio.Integration_tests.EventSource
@@ -232,7 +234,12 @@ namespace Splitio.Integration_tests.EventSource
 
             var notificationParser = new NotificationParser();
             var wrapperAdapter = WrapperAdapter.Instance();
-            var sseHttpClient = new SplitioHttpClient("api-key", 5000);
+            var config = new SelfRefreshingConfig
+            {
+                HttpConnectionTimeout = 5000,
+                HttpReadTimeout = 5000
+            };
+            var sseHttpClient = new SplitioHttpClient("api-key", config, new Dictionary<string, string>());
             var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
 
             var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, telemetryRuntimeProducer, new TasksManager(wrapperAdapter), sseClientStatus);

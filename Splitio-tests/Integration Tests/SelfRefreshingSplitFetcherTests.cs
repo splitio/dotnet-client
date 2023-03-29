@@ -2,6 +2,7 @@
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Common;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.Shared.Classes;
@@ -83,48 +84,6 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        [Ignore]
-        public void ExecuteGetSuccessfulWithResults()
-        {
-            //Arrange
-            var baseUrl = "https://sdk-aws-staging.split.io/api/";
-            //var baseUrl = "http://localhost:3000/api/";
-            var headers = new Dictionary<string, string>
-            {
-                { "SplitSDKMachineIP", "1.0.0.0" },
-                { "SplitSDKMachineName", "localhost" },
-                { "SplitSDKVersion", "1" }
-            };
-
-            var telemetryStorage = new InMemoryTelemetryStorage();
-            var sdkApiClient = new SplitSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000, telemetryStorage);
-            var apiSplitChangeFetcher = new ApiSplitChangeFetcher(sdkApiClient);
-            var sdkSegmentApiClient = new SegmentSdkApiClient("///PUT API KEY HERE///", headers, baseUrl, 10000, 10000, telemetryStorage);
-            var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkSegmentApiClient);
-            var gates = new InMemoryReadinessGatesCache();
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            var segmentTaskQueue = new SegmentTaskQueue();
-            var wrapperAdapter = WrapperAdapter.Instance();
-            var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, gates, 30, segmentCache, 4, segmentTaskQueue, new TasksManager(wrapperAdapter), wrapperAdapter);
-
-            var splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, segmentCache);
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(apiSplitChangeFetcher, splitParser, gates, 30, new TasksManager(wrapperAdapter), splitCache);
-            selfRefreshingSplitFetcher.Start();
-
-            //Act           
-            gates.WaitUntilReady(1000);
-            selfRefreshingSplitFetcher.Stop();
-            ParsedSplit result = (ParsedSplit)splitCache.GetSplit("Pato_Test_1");
-            ParsedSplit result2 = (ParsedSplit)splitCache.GetSplit("Manu_Test_1");
-            //Assert
-            Assert.IsNotNull(result);
-            Assert.IsTrue(result.name == "Pato_Test_1");
-            Assert.IsTrue(result.conditions.Count > 0);
-
-        }
-
-        [TestMethod]
         public void ExecuteGetWithoutResults()
         {
             //Arrange
@@ -137,9 +96,15 @@ namespace Splitio_Tests.Integration_Tests
             };
 
             var telemetryStorage = new InMemoryTelemetryStorage();
-            var sdkApiClient = new SplitSdkApiClient("0", headers, baseUrl, 10000, 10000, telemetryStorage);
+            var config = new SelfRefreshingConfig
+            {
+                HttpConnectionTimeout = 10000,
+                HttpReadTimeout = 10000
+            };
+            var httpClient = new SplitioHttpClient("0", config, headers);
+            var sdkApiClient = new SplitSdkApiClient(httpClient, telemetryStorage, baseUrl);
             var apiSplitChangeFetcher = new ApiSplitChangeFetcher(sdkApiClient);
-            var sdkSegmentApiClient = new SegmentSdkApiClient("0", headers, baseUrl, 10000, 10000, telemetryStorage);
+            var sdkSegmentApiClient = new SegmentSdkApiClient(httpClient, telemetryStorage, baseUrl);
             var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkSegmentApiClient);
             var gates = new InMemoryReadinessGatesCache();
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());

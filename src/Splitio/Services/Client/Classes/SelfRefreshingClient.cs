@@ -173,10 +173,17 @@ namespace Splitio.Services.Client.Classes
             headers.Add(Constants.Http.AcceptEncoding, Constants.Http.Gzip);
             headers.Add(Constants.Http.KeepAlive, "true");
 
-            _splitSdkApiClient = new SplitSdkApiClient(ApiKey, headers, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout, _telemetryRuntimeProducer);
-            _segmentSdkApiClient = new SegmentSdkApiClient(ApiKey, headers, _config.BaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout, _telemetryRuntimeProducer);
-            _impressionsSdkApiClient = new ImpressionsSdkApiClient(ApiKey, headers, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout, _telemetryRuntimeProducer, _wrapperAdapter, _config.ImpressionsBulkSize);
-            _eventSdkApiClient = new EventSdkApiClient(ApiKey, headers, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout, _telemetryRuntimeProducer, _tasksManager, _wrapperAdapter, _config.EventsBulkSize);
+            var sdkHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
+            _splitSdkApiClient = new SplitSdkApiClient(sdkHttpClient, _telemetryRuntimeProducer, _config.BaseUrl);
+
+            var segmentsHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
+            _segmentSdkApiClient = new SegmentSdkApiClient(segmentsHttpClient, _telemetryRuntimeProducer, _config.BaseUrl);
+
+            var impressionsHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
+            _impressionsSdkApiClient = new ImpressionsSdkApiClient(impressionsHttpClient, _telemetryRuntimeProducer, _config.EventsBaseUrl, _wrapperAdapter, _config.ImpressionsBulkSize);
+
+            var eventsHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
+            _eventSdkApiClient = new EventSdkApiClient(eventsHttpClient, _telemetryRuntimeProducer, _tasksManager, _wrapperAdapter, _config.EventsBaseUrl, _config.EventsBulkSize);
         }
 
         private void BuildManager()
@@ -191,7 +198,7 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildTelemetrySyncTask()
         {
-            var httpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, GetHeaders());
+            var httpClient = new SplitioHttpClient(ApiKey, _config, GetHeaders());
 
             _telemetryAPI = new TelemetryAPI(httpClient, _config.TelemetryServiceURL, _telemetryRuntimeProducer);
             _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorageConsumer, _telemetryAPI, _splitCache, _segmentCache, _config, FactoryInstantiationsService.Instance(), _wrapperAdapter, _tasksManager);
@@ -224,15 +231,15 @@ namespace Splitio.Services.Client.Classes
                 // EventSourceClient
                 var headers = GetHeaders();
                 headers.Add(Constants.Http.SplitSDKClientKey, ApiKey.Substring(ApiKey.Length - 4));
-                var sseHttpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, headers);
+                var sseHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
                 var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, _telemetryRuntimeProducer, _tasksManager, sseClientStatus);
 
                 // SSEHandler
                 var sseHandler = new SSEHandler(_config.StreamingServiceURL, splitsWorker, segmentsWorker, notificationProcessor, notificationManagerKeeper, eventSourceClient: eventSourceClient);
 
                 // AuthApiClient
-                var httpClient = new SplitioHttpClient(ApiKey, _config.HttpConnectionTimeout, GetHeaders());
-                var authApiClient = new AuthApiClient(_config.AuthServiceURL, ApiKey, httpClient, _telemetryRuntimeProducer);
+                var httpClient = new SplitioHttpClient(ApiKey, _config, GetHeaders());
+                var authApiClient = new AuthApiClient(_config.AuthServiceURL, httpClient, _telemetryRuntimeProducer);
 
                 // PushManager
                 var backoff = new BackOff(_config.AuthRetryBackoffBase, attempt: 1);

@@ -21,7 +21,6 @@ namespace Splitio.Services.Common
         private readonly string _url;
 
         public AuthApiClient(string url,
-            string apiKey,
             ISplitioHttpClient splitioHttpClient,
             ITelemetryRuntimeProducer telemetryRuntimeProducer)
         {
@@ -42,24 +41,21 @@ namespace Splitio.Services.Common
                 {
                     var response = await _splitioHttpClient.GetAsync(_url);
 
-                    if (response.statusCode == HttpStatusCode.OK)
+                    Util.Helper.RecordTelemetrySync(nameof(AuthenticateAsync), response, ResourceEnum.TokenSync, clock, _telemetryRuntimeProducer, _log);
+
+                    if (response.IsSuccessStatusCode)
                     {
                         _log.Debug($"Success connection to: {_url}");
-
-                        _telemetryRuntimeProducer.RecordSyncLatency(ResourceEnum.TokenSync, Util.Metrics.Bucket(clock.ElapsedMilliseconds));
-                        _telemetryRuntimeProducer.RecordSuccessfulSync(ResourceEnum.TokenSync, CurrentTimeHelper.CurrentTimeMillis());
-
-                        return GetSuccessResponse(response.content);
+                        return GetSuccessResponse(response.Content);
                     }
-                    else if (response.statusCode >= HttpStatusCode.BadRequest && response.statusCode < HttpStatusCode.InternalServerError)
+                    else if (response.StatusCode >= HttpStatusCode.BadRequest && response.StatusCode < HttpStatusCode.InternalServerError)
                     {
-                        _log.Debug($"Problem to connect to : {_url}. Response status: {response.statusCode}");
+                        _log.Debug($"Problem to connect to : {_url}. Response status: {response.StatusCode}");
 
                         _telemetryRuntimeProducer.RecordAuthRejections();
                         return new AuthenticationResponse { PushEnabled = false, Retry = false };
                     }
 
-                    _telemetryRuntimeProducer.RecordSyncError(ResourceEnum.TokenSync, (int)response.statusCode);
                     return new AuthenticationResponse { PushEnabled = false, Retry = true };
                 }
                 catch (Exception ex)
@@ -81,18 +77,18 @@ namespace Splitio.Services.Common
             if (authResponse.PushEnabled == false) 
                 return authResponse;
 
-            var tokenDecoded = DecodeJwt(authResponse.Token);
+            var tokenDecoded = AuthApiClient.DecodeJwt(authResponse.Token);
             var token = JsonConvert.DeserializeObject<Jwt>(tokenDecoded);
 
-            authResponse.Channels = GetChannels(token);
-            authResponse.Expiration = GetExpirationSeconds(token);
+            authResponse.Channels = AuthApiClient.GetChannels(token);
+            authResponse.Expiration = AuthApiClient.GetExpirationSeconds(token);
 
             _telemetryRuntimeProducer.RecordTokenRefreshes();
 
             return authResponse;
         }
 
-        private string GetChannels(Jwt token)
+        private static string GetChannels(Jwt token)
         {
             var capability = (JObject)JsonConvert.DeserializeObject(token.Capability);
             var channelsList = capability
@@ -100,12 +96,12 @@ namespace Splitio.Services.Common
                 .Select(c => c.First.Path)
                 .ToList();
 
-            var channels = AddPrefixControlChannels(string.Join(",", channelsList));
+            var channels = AuthApiClient.AddPrefixControlChannels(string.Join(",", channelsList));
 
             return channels;
         }
 
-        private string AddPrefixControlChannels(string channels)
+        private static string AddPrefixControlChannels(string channels)
         {
             channels = channels
                 .Replace(Constants.Push.ControlPri, $"{Constants.Push.OccupancyPrefix}{Constants.Push.ControlPri}")
@@ -114,12 +110,12 @@ namespace Splitio.Services.Common
             return channels;
         }
 
-        private double GetExpirationSeconds(Jwt token)
+        private static double GetExpirationSeconds(Jwt token)
         {
             return token.Expiration - token.IssuedAt - Constants.Push.SecondsBeforeExpiration;
         }
 
-        private string DecodeJwt(string token)
+        private static string DecodeJwt(string token)
         {
             var split_string = token.Split('.');
             var base64EncodedBody = split_string[1];

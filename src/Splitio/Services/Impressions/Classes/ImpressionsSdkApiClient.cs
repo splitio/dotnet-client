@@ -1,39 +1,39 @@
 ﻿using Newtonsoft.Json;
-using Splitio.CommonLibraries;
 using Splitio.Domain;
+using Splitio.Services.Common;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {
-    public class ImpressionsSdkApiClient : SdkApiClient, IImpressionsSdkApiClient
+    public class ImpressionsSdkApiClient : IImpressionsSdkApiClient
     {
-        private const string TestImpressionsUrlTemplate = "/api/testImpressions/bulk";
-        private const string ImpressionsCountUrlTemplate = "/api/testImpressions/count";
         private const int MaxAttempts = 3;
 
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsSdkApiClient));
 
+        private readonly ISplitioHttpClient _httpClient;
+        private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly IWrapperAdapter _wrapperAdapter;
+        private readonly string _baseUrl;
         private readonly int _maxBulkSize;
 
-        public ImpressionsSdkApiClient(string apiKey,
-            Dictionary<string, string> headers,
-            string baseUrl,
-            long connectionTimeOut,
-            long readTimeout,
+        public ImpressionsSdkApiClient(ISplitioHttpClient httpClient,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
+            string baseUrl,
             IWrapperAdapter wrapperAdapter,
-            int maxBulkSize) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout, telemetryRuntimeProducer)
+            int maxBulkSize)
         {
+            _httpClient = httpClient;
+            _telemetryRuntimeProducer = telemetryRuntimeProducer;
+            _baseUrl = baseUrl;
             _wrapperAdapter = wrapperAdapter;
             _maxBulkSize = maxBulkSize;
         }
@@ -67,14 +67,14 @@ namespace Splitio.Services.Impressions.Classes
 
                 var json = ConvertToJson(impressionsCount);
 
-                var response = await ExecutePost(ImpressionsCountUrlTemplate, json);
+                var response = await _httpClient.PostAsync(ImpressionsCountUrl, json);
 
-                RecordTelemetry(nameof(SendBulkImpressionsCount), (int)response.statusCode, response.content, ResourceEnum.ImpressionCountSync, clock);
+                Util.Helper.RecordTelemetrySync(nameof(SendBulkImpressionsCount), response, ResourceEnum.ImpressionCountSync, clock, _telemetryRuntimeProducer, _log);
             }
         }
 
         // Public for tests
-        public string ConvertToJson(List<KeyImpression> impressions)
+        public static string ConvertToJson(List<KeyImpression> impressions)
         {
             var impressionsPerFeature =
                 impressions
@@ -84,7 +84,7 @@ namespace Splitio.Services.Impressions.Classes
             return JsonConvert.SerializeObject(impressionsPerFeature);
         }
 
-        public string ConvertToJson(List<ImpressionsCountModel> impressionsCount)
+        public static string ConvertToJson(List<ImpressionsCountModel> impressionsCount)
         {
             return JsonConvert.SerializeObject(new { pf = impressionsCount });
         }
@@ -95,13 +95,13 @@ namespace Splitio.Services.Impressions.Classes
 
             for (int i = 0; i < MaxAttempts; i++)
             {
-                if (i > 0) _wrapperAdapter.TaskDelay(500).Wait();                
+                if (i > 0) _wrapperAdapter.TaskDelay(500).Wait();
 
-                var response = await ExecutePost(TestImpressionsUrlTemplate, impressionsJson);
+                var response = await _httpClient.PostAsync(TestImpressionsUrl, impressionsJson);
 
-                RecordTelemetry(nameof(SendBulkImpressions), (int)response.statusCode, response.content, ResourceEnum.ImpressionSync, clock);
+                Util.Helper.RecordTelemetrySync(nameof(SendBulkImpressions), response, ResourceEnum.ImpressionSync, clock, _telemetryRuntimeProducer, _log);
 
-                if (response.statusCode >= System.Net.HttpStatusCode.OK && response.statusCode < System.Net.HttpStatusCode.Ambiguous)
+                if (response.IsSuccessStatusCode)
                 {
                     _log.Debug($"Post bulk impressions success in {i} attempts.");
                     return;
@@ -110,5 +110,8 @@ namespace Splitio.Services.Impressions.Classes
 
             _log.Debug($"Post bulk impressions fail after {MaxAttempts} attempts.");
         }
+
+        private string TestImpressionsUrl => $"{_baseUrl}/api/testImpressions/bulk";
+        private string ImpressionsCountUrl => $"{_baseUrl}/api/testImpressions/count";
     }
 }

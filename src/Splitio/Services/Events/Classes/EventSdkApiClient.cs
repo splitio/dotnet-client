@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
-using Splitio.CommonLibraries;
 using Splitio.Domain;
+using Splitio.Services.Common;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
@@ -9,35 +9,38 @@ using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Events.Classes
 {
-    public class EventSdkApiClient : SdkApiClient, IEventSdkApiClient
+    public class EventSdkApiClient : IEventSdkApiClient
     {
+        private const int MaxAttempts = 3; 
+        
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(EventSdkApiClient));
-
-        private const string EventsUrlTemplate = "/api/events/bulk";
-        private const int MaxAttempts = 3;
-
+        
+        private readonly ISplitioHttpClient _httpClient;
+        private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly ITasksManager _tasksManager;
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly int _maxBulkSize;
+        private readonly string _baseUrl;
 
-        public EventSdkApiClient(string apiKey,
-            Dictionary<string, string> headers,
-            string baseUrl,
-            long connectionTimeOut,
-            long readTimeout,
+        public EventSdkApiClient(ISplitioHttpClient httpClient,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
             ITasksManager tasksManager,
             IWrapperAdapter wrapperAdapter,
-            int maxBulkSize) : base(apiKey, headers, baseUrl, connectionTimeOut, readTimeout, telemetryRuntimeProducer)
+            string baseUrl,
+            int maxBulkSize)
         {
+            _httpClient = httpClient;
+            _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _tasksManager = tasksManager;
             _wrapperAdapter = wrapperAdapter;
             _maxBulkSize = maxBulkSize;
+            _baseUrl = baseUrl;
         }
 
         public void SendBulkEventsTask(List<Event> events)
@@ -85,11 +88,11 @@ namespace Splitio.Services.Events.Classes
             {
                 if (i > 0) _wrapperAdapter.TaskDelay(500).Wait();
 
-                var response = await ExecutePost(EventsUrlTemplate, eventsJson);
+                var response = await _httpClient.PostAsync(EventsUrl, eventsJson);
 
-                RecordTelemetry(nameof(SendBulkEventsTask), (int)response.statusCode, response.content, ResourceEnum.EventSync, clock);
+                Util.Helper.RecordTelemetrySync(nameof(SendBulkEventsTask), response, ResourceEnum.EventSync, clock, _telemetryRuntimeProducer, _log);
 
-                if (response.statusCode >= System.Net.HttpStatusCode.OK && response.statusCode < System.Net.HttpStatusCode.Ambiguous)
+                if (response.IsSuccessStatusCode)
                 {
                     _log.Debug($"Post bulk events success in {i} attempts.");
                     return;
@@ -98,6 +101,8 @@ namespace Splitio.Services.Events.Classes
 
             _log.Debug($"Post bulk events fail after {MaxAttempts} attempts.");
         }
+
+        private string EventsUrl => $"{_baseUrl}/api/events/bulk";
         #endregion
     }
 }
