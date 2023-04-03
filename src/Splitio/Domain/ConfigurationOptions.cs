@@ -46,5 +46,9 @@ namespace Splitio.Services.Client.Classes
         [Obsolete]
         public int? MetricsRefreshRate { get; set; }
         public int? TelemetryRefreshRate { get; set; }
+
+        // Proxy
+        public string ProxyHost { get; set; }
+        public int ProxyPort { get; set; }
     }
 }
