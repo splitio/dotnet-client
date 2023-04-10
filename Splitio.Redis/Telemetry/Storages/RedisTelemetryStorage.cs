@@ -1,7 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Splitio.Redis.Services.Cache.Interfaces;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
@@ -46,17 +44,17 @@ namespace Splitio.Redis.Telemetry.Storages
                 m = new { i = _machineIp, n = _machineName, s = _sdkVersion }
             });
 
-            _redisAdapter.HashSet(TelemetryInitKey, $"{_sdkVersion}/{_machineName}/{_machineIp}", jsonData);
+            _redisAdapter.HashSetAsync(TelemetryInitKey, $"{_sdkVersion}/{_machineName}/{_machineIp}", jsonData);
         }
 
         public void RecordLatency(MethodEnum method, int bucket)
         {
-            _redisAdapter.HashIncrement(TelemetryLatencyKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}/{bucket}", 1);
+            _redisAdapter.HashIncrementAsync(TelemetryLatencyKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}/{bucket}", 1);
         }
 
         public void RecordException(MethodEnum method)
         {
-            _redisAdapter.HashIncrement(TelemetryExceptionKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}", 1);
+            _redisAdapter.HashIncrementAsync(TelemetryExceptionKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}", 1);
         }
 
         public void RecordNonReadyUsages()

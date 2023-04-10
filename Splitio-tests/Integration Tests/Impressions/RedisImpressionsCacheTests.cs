@@ -5,6 +5,7 @@ using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Telemetry.Domain;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Integration_Tests.Impressions
 {
@@ -37,7 +38,7 @@ namespace Splitio_Tests.Integration_Tests.Impressions
         }
 
         [TestMethod]
-        public void RecordUniqueKeysAndExpire()
+        public async Task RecordUniqueKeysAndExpire()
         {
             _impressionsCache.RecordUniqueKeys(new List<Mtks>
             {
@@ -52,7 +53,7 @@ namespace Splitio_Tests.Integration_Tests.Impressions
             });
 
             var key = $"{RedisPrefix}.SPLITIO.uniquekeys";
-            var keys = _redisAdapter.ListRange(key);
+            var keys = await _redisAdapter.ListRangeAsync(key);
             var keyTimeToLive = _redisAdapter.KeyTimeToLive(key);
             
             Assert.AreEqual(4, keys.Length);

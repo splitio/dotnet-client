@@ -18,7 +18,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public RedisSplitCache(IRedisAdapter redisAdapter,
             ISplitParser splitParser,
-            string userPrefix = null) 
+            string userPrefix = null)
             : base(redisAdapter, userPrefix)
         {
             _splitParser = splitParser;
@@ -27,16 +27,16 @@ namespace Splitio.Redis.Services.Cache.Classes
         public long GetChangeNumber()
         {
             var key = $"{RedisKeyPrefix}{splitsKeyPrefix}till";
-            var changeNumberString = _redisAdapter.Get(key);
+            var changeNumberString = _redisAdapter.GetAsync(key).Result;
             var result = long.TryParse(changeNumberString, out long changeNumberParsed);
-            
+
             return result ? changeNumberParsed : -1;
         }
 
         public ParsedSplit GetSplit(string splitName)
         {
             var key = $"{RedisKeyPrefix}{splitKeyPrefix}{splitName}";
-            var splitJson = _redisAdapter.Get(key);
+            var splitJson = _redisAdapter.GetAsync(key).Result;
 
             if (string.IsNullOrEmpty(splitJson))
                 return null;
@@ -50,7 +50,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             var pattern = $"{RedisKeyPrefix}{splitKeyPrefix}*";
             var splitKeys = _redisAdapter.Keys(pattern);
-            var splitValues = _redisAdapter.MGet(splitKeys);
+            var splitValues = _redisAdapter.MGetAsync(splitKeys).Result;
 
             if (splitValues != null && splitValues.Any())
             {
@@ -62,7 +62,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     .Where(s => s != null)
                     .ToList();
             }
-            
+
             return new List<ParsedSplit>();
         }
 
@@ -84,7 +84,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             if (string.IsNullOrEmpty(trafficType)) return false;
 
-            var value = _redisAdapter.Get(GetTrafficTypeKey(trafficType));
+            var value = _redisAdapter.GetAsync(GetTrafficTypeKey(trafficType)).Result;
 
             var quantity = value ?? "0";
 
@@ -138,8 +138,8 @@ namespace Splitio.Redis.Services.Cache.Classes
             {
                 redisKey.Add($"{RedisKeyPrefix}{splitKeyPrefix}{name}");
             }
-                        
-            var splitValues = _redisAdapter.MGet(redisKey.ToArray());
+
+            var splitValues = _redisAdapter.MGetAsync(redisKey.ToArray()).Result;
 
             if (splitValues == null || !splitValues.Any()) return new List<ParsedSplit>();
 
@@ -170,4 +170,3 @@ namespace Splitio.Redis.Services.Cache.Classes
         }
     }
 }
- 

@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests
 {
@@ -48,7 +49,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void CheckingMachineIpAndMachineName_WithIPAddressesEnabled_ReturnsIpAndName()
+        public async Task CheckingMachineIpAndMachineName_WithIPAddressesEnabled_ReturnsIpAndName()
         {
             // Arrange.
             LoadSplits();
@@ -74,7 +75,7 @@ namespace Splitio.Integration_tests
             Thread.Sleep(1500);
 
             // Impressions
-            var redisImpressions = _redisAdapter.ListRange("SPLITIO.impressions");
+            var redisImpressions = await _redisAdapter.ListRangeAsync("SPLITIO.impressions");
 
             foreach (var item in redisImpressions)
             {
@@ -86,7 +87,7 @@ namespace Splitio.Integration_tests
 
             // Events 
             var sdkVersion = string.Empty;
-            var redisEvents = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.events");
+            var redisEvents = await _redisAdapter.ListRangeAsync($"{UserPrefix}.SPLITIO.events");
 
             foreach (var item in redisEvents)
             {
@@ -110,7 +111,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void CheckingMachineIpAndMachineName_WithIPAddressesDisabled_ReturnsNA()
+        public async Task CheckingMachineIpAndMachineName_WithIPAddressesDisabled_ReturnsNA()
         {
             // Arrange.
             
@@ -137,7 +138,7 @@ namespace Splitio.Integration_tests
             Thread.Sleep(1500);
 
             // Impressions
-            var redisImpressions = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.impressions");
+            var redisImpressions = await _redisAdapter.ListRangeAsync($"{UserPrefix}.SPLITIO.impressions");
 
             foreach (var item in redisImpressions)
             {
@@ -149,7 +150,7 @@ namespace Splitio.Integration_tests
 
             // Events 
             var sdkVersion = string.Empty;
-            var redisEvents = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.events");
+            var redisEvents = await _redisAdapter.ListRangeAsync($"{UserPrefix}.SPLITIO.events");
 
             foreach (var item in redisEvents)
             {
@@ -175,7 +176,7 @@ namespace Splitio.Integration_tests
         // TODO: None mode is not supported yet.
         [Ignore]
         [TestMethod]
-        public void GetTreatment_WithImpressionModeInNone_ShouldGetUniqueKeys()
+        public async Task GetTreatment_WithImpressionModeInNone_ShouldGetUniqueKeys()
         {
             // Arrange.
             
@@ -200,7 +201,7 @@ namespace Splitio.Integration_tests
 
             client.Destroy();
             Thread.Sleep(500);
-            var result = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.uniquekeys");
+            var result = await _redisAdapter.ListRangeAsync($"{UserPrefix}.SPLITIO.uniquekeys");
 
             // Assert.
             Assert.AreEqual(2, result.Count());
@@ -216,7 +217,7 @@ namespace Splitio.Integration_tests
         // TODO: Optimized mode is not supported yet.
         [Ignore]
         [TestMethod]
-        public void GetTreatment_WithImpressionModeOptimized_ShouldGetImpressionCount()
+        public async Task GetTreatment_WithImpressionModeOptimized_ShouldGetImpressionCount()
         {
             // Arrange.
             
@@ -244,8 +245,8 @@ namespace Splitio.Integration_tests
 
             client.Destroy();
             Thread.Sleep(500);
-            var result = _redisAdapter.HashGetAll($"{UserPrefix}.SPLITIO.impressions.count");
-            var redisImpressions = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.impressions");
+            var result = await _redisAdapter.HashGetAllAsync($"{UserPrefix}.SPLITIO.impressions.count");
+            var redisImpressions = await _redisAdapter.ListRangeAsync($"{UserPrefix}.SPLITIO.impressions");
 
             // Assert.
             Assert.AreEqual(4, result.FirstOrDefault(x => ((string)x.Name).Contains("FACUNDO_TEST")).Value);
@@ -293,11 +294,11 @@ namespace Splitio.Integration_tests
             return null;
         }
 
-        protected override void AssertSentImpressions(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
+        protected override async void AssertSentImpressions(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
         {
             Thread.Sleep(1500);
 
-            var redisImpressions = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.impressions");
+            var redisImpressions = await _redisAdapter.ListRangeAsync($"{UserPrefix}.SPLITIO.impressions");
 
             Assert.AreEqual(sentImpressionsCount, redisImpressions.Length);
 
@@ -309,11 +310,11 @@ namespace Splitio.Integration_tests
             }
         }
 
-        protected override void AssertSentEvents(List<EventBackend> eventsExcpected, HttpClientMock httpClientMock = null, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true)
+        protected override async void AssertSentEvents(List<EventBackend> eventsExcpected, HttpClientMock httpClientMock = null, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true)
         {
             Thread.Sleep(sleepTime);
 
-            var redisEvents = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.events");
+            var redisEvents = await _redisAdapter.ListRangeAsync($"{UserPrefix}.SPLITIO.events");
 
             Assert.AreEqual(eventsExcpected.Count, redisEvents.Length);
 
@@ -330,11 +331,7 @@ namespace Splitio.Integration_tests
         private void CleanKeys(string pattern = UserPrefix)
         {
             var keys = _redisAdapter.Keys($"{pattern}*");
-
-            foreach (var k in keys)
-            {
-                _redisAdapter.Del(k);
-            }
+            _redisAdapter.Del(keys);
         }
 
         private void AssertImpression(KeyImpressionRedis impressionActual, List<KeyImpression> sentImpressions)
@@ -367,7 +364,7 @@ namespace Splitio.Integration_tests
                 .Any());
         }
 
-        private void LoadSplits()
+        private async void LoadSplits()
         {
             CleanKeys(UserPrefix);
 
@@ -377,7 +374,7 @@ namespace Splitio.Integration_tests
 
             foreach (var split in splitResult.splits)
             {
-                _redisAdapter.Set($"{UserPrefix}.SPLITIO.split.{split.name}", JsonConvert.SerializeObject(split));
+                await _redisAdapter.SetAsync($"{UserPrefix}.SPLITIO.split.{split.name}", JsonConvert.SerializeObject(split));
             }
         }
         #endregion

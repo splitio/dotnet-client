@@ -21,7 +21,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Arrange
             var segmentName = "test";
             var redisAdapterMock = new Mock<IRedisAdapter>();
-            redisAdapterMock.Setup(x => x.SAdd(It.IsAny<string>(), It.IsAny<RedisValue[]>())).Returns(1);
+            redisAdapterMock.Setup(x => x.SAddAsync(It.IsAny<string>(), It.IsAny<RedisValue[]>())).ReturnsAsync(1);
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
             
             //Act
@@ -37,14 +37,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Arrange
             var segmentName = "test";
             var redisAdapterMock = new Mock<IRedisAdapter>();
-            redisAdapterMock.Setup(x => x.SAdd(It.IsAny<string>(), It.IsAny<RedisValue[]>())).Returns(1);
+            redisAdapterMock.Setup(x => x.SAddAsync(It.IsAny<string>(), It.IsAny<RedisValue[]>())).ReturnsAsync(1);
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
             //Act
             segmentCache.AddToSegment(segmentName, new List<string>() { "test" });
 
             //Assert
-            redisAdapterMock.Verify(mock => mock.SAdd(segmentKeyPrefix + segmentName, It.IsAny<RedisValue[]>()));
+            redisAdapterMock.Verify(mock => mock.SAddAsync(segmentKeyPrefix + segmentName, It.IsAny<RedisValue[]>()));
         }
 
         [TestMethod]
@@ -53,7 +53,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Arrange
             var segmentName = "segment_test";
             var redisAdapterMock = new Mock<IRedisAdapter>();
-            redisAdapterMock.Setup(x => x.SMembers(segmentsKeyPrefix + "registered")).Returns(new RedisValue[]{segmentName});
+            redisAdapterMock.Setup(x => x.SMembersAsync(segmentsKeyPrefix + "registered")).ReturnsAsync(new RedisValue[]{segmentName});
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
             //Act
@@ -70,7 +70,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Arrange
             var segmentName = "segment_test";
             var redisAdapterMock = new Mock<IRedisAdapter>();
-            redisAdapterMock.Setup(x => x.SIsMember(segmentKeyPrefix + segmentName, "abcd")).Returns(false);
+            redisAdapterMock.Setup(x => x.SIsMemberAsync(segmentKeyPrefix + segmentName, "abcd")).ReturnsAsync(false);
 
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
@@ -86,7 +86,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         {
             //Arrange
             var redisAdapterMock = new Mock<IRedisAdapter>();
-            redisAdapterMock.Setup(x => x.SIsMember(segmentKeyPrefix + "test", "abcd")).Returns(false);
+            redisAdapterMock.Setup(x => x.SIsMemberAsync(segmentKeyPrefix + "test", "abcd")).ReturnsAsync(false);
 
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
@@ -104,8 +104,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var segmentName = "segment_test";
             var keys = new List<string> { "abcd" };
             var redisAdapterMock = new Mock<IRedisAdapter>();
-            redisAdapterMock.Setup(x => x.SRem(segmentKeyPrefix + segmentName, It.IsAny<RedisValue[]>())).Returns(1);
-            redisAdapterMock.Setup(x => x.SIsMember(segmentKeyPrefix + segmentName, "abcd")).Returns(false);
+            redisAdapterMock.Setup(x => x.SRemAsync(segmentKeyPrefix + segmentName, It.IsAny<RedisValue[]>())).ReturnsAsync(1);
+            redisAdapterMock.Setup(x => x.SIsMemberAsync(segmentKeyPrefix + segmentName, "abcd")).ReturnsAsync(false);
 
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
@@ -125,8 +125,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var changeNumber = 1234;
             var segmentName = "segment_test";
             var redisAdapterMock = new Mock<IRedisAdapter>();
-            redisAdapterMock.Setup(x => x.Set(segmentNameKeyPrefix.Replace("{segmentname}", segmentName) + "till", changeNumber.ToString())).Returns(true);
-            redisAdapterMock.Setup(x => x.Get(segmentNameKeyPrefix.Replace("{segmentname}", segmentName) + "till")).Returns(changeNumber.ToString());
+            redisAdapterMock.Setup(x => x.SetAsync(segmentNameKeyPrefix.Replace("{segmentname}", segmentName) + "till", changeNumber.ToString())).ReturnsAsync(true);
+            redisAdapterMock.Setup(x => x.GetAsync(segmentNameKeyPrefix.Replace("{segmentname}", segmentName) + "till")).ReturnsAsync(changeNumber.ToString());
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
             //Act
@@ -144,7 +144,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var changeNumber = -1;
             var segmentName = "segment_test";
             var redisAdapterMock = new Mock<IRedisAdapter>();
-            redisAdapterMock.Setup(x => x.Get(segmentNameKeyPrefix.Replace("{segmentname}", segmentName) + "till")).Returns("");
+            redisAdapterMock.Setup(x => x.GetAsync(segmentNameKeyPrefix.Replace("{segmentname}", segmentName) + "till")).ReturnsAsync("");
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
             //Act
@@ -180,8 +180,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             segmentCache.AddToSegment(segmentName, keys);
 
             redisAdapterMock
-                .Setup(mock => mock.SMembers($"SPLITIO.segment.{segmentName}"))
-                .Returns(new List<RedisValue>
+                .Setup(mock => mock.SMembersAsync($"SPLITIO.segment.{segmentName}"))
+                .ReturnsAsync(new List<RedisValue>
                 {
                     "abcd",
                     "1234"
@@ -211,8 +211,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var segmentName = "test";
 
             redisAdapterMock
-                .Setup(mock => mock.SMembers("SPLITIO.segments.registered"))
-                .Returns(new List<RedisValue>
+                .Setup(mock => mock.SMembersAsync("SPLITIO.segments.registered"))
+                .ReturnsAsync(new List<RedisValue>
                 {
                     segmentName,
                     $"{segmentName}-1",

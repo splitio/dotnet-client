@@ -232,12 +232,12 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(client.IsDestroyed());
         }
 
-        private void LoadSplits()
+        private async void LoadSplits()
         {
             _redisAdapter.Flush();
 
-            _redisAdapter.Set("SPLITIO.split.always_on", SplitsHelper.AlwaysOn);
-            _redisAdapter.Set("SPLITIO.split.always_off", SplitsHelper.AlwaysOff);
+            await _redisAdapter.SetAsync("SPLITIO.split.always_on", SplitsHelper.AlwaysOn);
+            await _redisAdapter.SetAsync("SPLITIO.split.always_off", SplitsHelper.AlwaysOff);
         }
     }
 }

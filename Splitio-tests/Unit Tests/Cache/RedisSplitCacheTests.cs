@@ -6,6 +6,7 @@ using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
 using StackExchange.Redis;
+using System;
 using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Cache
@@ -37,8 +38,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             string value = null;
 
             _redisAdapterMock
-                .Setup(x => x.Get(splitKeyPrefix + "test_split"))
-                .Returns(value);
+                .Setup(x => x.GetAsync(splitKeyPrefix + "test_split"))
+                .ReturnsAsync(value);
 
             //Act
             var result = _redisSplitCache.GetSplit(splitName);
@@ -64,8 +65,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var changeNumber = -1;
 
             _redisAdapterMock
-                .Setup(x => x.Get(splitsKeyPrefix + "till"))
-                .Returns(string.Empty);
+                .Setup(x => x.GetAsync(splitsKeyPrefix + "till"))
+                .ReturnsAsync(string.Empty);
 
             //Act
             var result = _redisSplitCache.GetChangeNumber();
@@ -90,8 +91,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 .Returns(new RedisKey[] { "test_split", "test_split2" });
 
             _redisAdapterMock
-                .Setup(x => x.MGet(It.IsAny<RedisKey[]>()))
-                .Returns(new RedisValue[] { splitJson, splitJson2 });
+                .Setup(x => x.MGetAsync(It.IsAny<RedisKey[]>()))
+                .ReturnsAsync(new RedisValue[] { splitJson, splitJson2 });
 
             _splitParserMock
                 .Setup(mock => mock.Parse(It.IsAny<Split>()))
@@ -110,11 +111,11 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Arrange
             _redisAdapterMock
                 .Setup(x => x.Keys(splitKeyPrefix + "*"))
-                .Returns(new RedisKey[] { });
+                .Returns(Array.Empty<RedisKey>());
 
             _redisAdapterMock
-                .Setup(x => x.MGet(It.IsAny<RedisKey[]>()))
-                .Returns(new RedisValue[] { });
+                .Setup(x => x.MGetAsync(It.IsAny<RedisKey[]>()))
+                .ReturnsAsync(Array.Empty<RedisValue>());
 
             //Act
             var result = _redisSplitCache.GetAllSplits();
@@ -132,11 +133,11 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             _redisAdapterMock
                 .Setup(x => x.Keys(splitKeyPrefix + "*"))
-                .Returns(new RedisKey[] { });
+                .Returns(Array.Empty<RedisKey>());
 
             _redisAdapterMock
-                .Setup(x => x.MGet(It.IsAny<RedisKey[]>()))
-                .Returns(expectedResult);
+                .Setup(x => x.MGetAsync(It.IsAny<RedisKey[]>()))
+                .ReturnsAsync(expectedResult);
 
             //Act
             var result = _redisSplitCache.GetAllSplits();
@@ -168,7 +169,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Arrange
             _redisAdapterMock
                 .Setup(x => x.Keys(splitKeyPrefix + "*"))
-                .Returns(new RedisKey[] { });
+                .Returns(Array.Empty<RedisKey>());
 
             //Act
             var result = _redisSplitCache.GetKeys();
@@ -188,8 +189,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var ttKey = $"{trafficTypeKeyPrefix}{trafficType}";
 
             _redisAdapterMock
-                .Setup(mock => mock.Get(ttKey))
-                .Returns("1");
+                .Setup(mock => mock.GetAsync(ttKey))
+                .ReturnsAsync("1");
 
             //Act
             var result = _redisSplitCache.TrafficTypeExists(trafficType);
@@ -207,8 +208,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var ttKey = $"{trafficTypeKeyPrefix}{trafficType}";
 
             _redisAdapterMock
-                .Setup(mock => mock.Get(ttKey))
-                .Returns("0");
+                .Setup(mock => mock.GetAsync(ttKey))
+                .ReturnsAsync("0");
 
             //Act
             var result = _redisSplitCache.TrafficTypeExists(trafficType);
@@ -226,8 +227,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var ttKey = $"{trafficTypeKeyPrefix}{trafficType}";
 
             _redisAdapterMock
-                .Setup(mock => mock.Get(ttKey))
-                .Returns((string)null);
+                .Setup(mock => mock.GetAsync(ttKey))
+                .ReturnsAsync((string)null);
 
             //Act
             var result = _redisSplitCache.TrafficTypeExists(trafficType);
@@ -245,8 +246,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var ttKey = $"{trafficTypeKeyPrefix}{trafficType}";
 
             _redisAdapterMock
-                .Setup(mock => mock.Get(ttKey))
-                .Returns(string.Empty);
+                .Setup(mock => mock.GetAsync(ttKey))
+                .ReturnsAsync(string.Empty);
 
             //Act
             var result = _redisSplitCache.TrafficTypeExists(trafficType);
@@ -264,8 +265,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var ttKey = $"{trafficTypeKeyPrefix}{trafficType}";
 
             _redisAdapterMock
-                .Setup(mock => mock.Get(ttKey))
-                .Returns(string.Empty);
+                .Setup(mock => mock.GetAsync(ttKey))
+                .ReturnsAsync(string.Empty);
 
             //Act
             var result = _redisSplitCache.TrafficTypeExists(null);
@@ -282,15 +283,15 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var splitNames = new List<string> { "Split_1", "Split_2", "Split_3" };
 
             _redisAdapterMock
-                .Setup(mock => mock.MGet(It.IsAny<RedisKey[]>()))
-                .Returns(new RedisValue[3]);
+                .Setup(mock => mock.MGetAsync(It.IsAny<RedisKey[]>()))
+                .ReturnsAsync(new RedisValue[3]);
 
             // Act.
             var result = _redisSplitCache.FetchMany(splitNames);
 
             // Assert.
-            _redisAdapterMock.Verify(mock => mock.MGet(It.IsAny<RedisKey[]>()), Times.Once);
-            _redisAdapterMock.Verify(mock => mock.Get(It.IsAny<string>()), Times.Never);
+            _redisAdapterMock.Verify(mock => mock.MGetAsync(It.IsAny<RedisKey[]>()), Times.Once);
+            _redisAdapterMock.Verify(mock => mock.GetAsync(It.IsAny<string>()), Times.Never);
         }
 
         private Split BuildSplit(string splitName)

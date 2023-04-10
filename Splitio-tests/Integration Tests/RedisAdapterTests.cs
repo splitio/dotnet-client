@@ -34,13 +34,13 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public void ExecuteSetAndGetSuccessful()
+        public async void ExecuteSetAndGetSuccessful()
         {
             //Arrange
-            var isSet = adapter.Set("test_key", "test_value");
+            var isSet = await adapter.SetAsync("test_key", "test_value");
 
             //Act
-            var result = adapter.Get("test_key");
+            var result = await adapter.GetAsync("test_key");
 
             //Assert
             Assert.IsTrue(isSet);
@@ -48,7 +48,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public void ExecuteSetShouldReturnFalseOnException()
+        public async void ExecuteSetShouldReturnFalseOnException()
         {
             //Arrange
             var config = new RedisConfig();
@@ -57,14 +57,14 @@ namespace Splitio_Tests.Integration_Tests
             var adapter = new RedisAdapter(config, pool);
 
             //Act
-            var isSet = adapter.Set("test_key", "test_value");
+            var isSet = await adapter.SetAsync("test_key", "test_value");
 
             //Assert
             Assert.IsFalse(isSet);
         }
 
         [TestMethod]
-        public void ExecuteGetShouldReturnEmptyOnException()
+        public async void ExecuteGetShouldReturnEmptyOnException()
         {
             //Arrange
             var config = new RedisConfig();
@@ -73,34 +73,34 @@ namespace Splitio_Tests.Integration_Tests
             var adapter = new RedisAdapter(config, pool);
 
             //Act
-            var result = adapter.Get("test_key");
+            var result = await adapter.GetAsync("test_key");
 
             //Assert
-            Assert.AreEqual(String.Empty, result);
+            Assert.AreEqual(string.Empty, result);
         }
 
         [TestMethod]
-        public void ExecuteMultipleSetAndMultipleGetSuccessful()
+        public async void ExecuteMultipleSetAndMultipleGetSuccessful()
         {
             //Arrange
-            var isSet1 = adapter.Set("test_key", "test_value");
-            var isSet2 = adapter.Set("test_key2", "test_value2");
-            var isSet3 = adapter.Set("test_key3", "test_value3");
+            var isSet1 = await adapter.SetAsync("test_key", "test_value");
+            var isSet2 = await adapter.SetAsync("test_key2", "test_value2");
+            var isSet3 = await adapter.SetAsync("test_key3", "test_value3");
 
             //Act
-            var result = adapter.MGet(new RedisKey[]{"test_key", "test_key2", "test_key3"});
+            var result = await adapter.MGetAsync(new RedisKey[]{"test_key", "test_key2", "test_key3"});
 
             //Assert
             Assert.IsNotNull(result);
             Assert.IsTrue(isSet1 & isSet2 & isSet3);
-            Assert.AreEqual(3, result.Count());
+            Assert.AreEqual(3, result.Length);
             Assert.IsTrue(result.Contains("test_value"));
             Assert.IsTrue(result.Contains("test_value2"));
             Assert.IsTrue(result.Contains("test_value3"));
         }
 
         [TestMethod]
-        public void ExecuteGetShouldReturnEmptyArrayOnException()
+        public async void ExecuteGetShouldReturnEmptyArrayOnException()
         {
             //Arrange
             var config = new RedisConfig();
@@ -109,19 +109,19 @@ namespace Splitio_Tests.Integration_Tests
             var adapter = new RedisAdapter(config, pool);
 
             //Act
-            var result = adapter.MGet(new RedisKey[] { "test_key", "test_key2", "test_key3" });
+            var result = await adapter.MGetAsync(new RedisKey[] { "test_key", "test_key2", "test_key3" });
 
             //Assert
-            Assert.AreEqual(0, result.Count());
+            Assert.AreEqual(0, result.Length);
         }
 
         [TestMethod]
-        public void ExecuteMultipleSetAndGetAllKeysWithFilterSuccessful()
+        public async void ExecuteMultipleSetAndGetAllKeysWithFilterSuccessful()
         {
             //Arrange
-            var isSet1 = adapter.Set("test.test_key", "test_value");
-            var isSet2 = adapter.Set("test.test_key2", "test_value2");
-            var isSet3 = adapter.Set("test.test_key3", "test_value3");
+            var isSet1 = await adapter.SetAsync("test.test_key", "test_value");
+            var isSet2 = await adapter.SetAsync("test.test_key2", "test_value2");
+            var isSet3 = await adapter.SetAsync("test.test_key3", "test_value3");
 
             //Act
             var result = adapter.Keys("test.*");
@@ -129,7 +129,7 @@ namespace Splitio_Tests.Integration_Tests
             //Assert
             Assert.IsNotNull(result);
             Assert.IsTrue(isSet1 & isSet2 & isSet3);
-            Assert.AreEqual(3, result.Count());
+            Assert.AreEqual(3, result.Length);
             Assert.IsTrue(result.Contains("test.test_key"));
             Assert.IsTrue(result.Contains("test.test_key2"));
             Assert.IsTrue(result.Contains("test.test_key3"));
@@ -148,23 +148,23 @@ namespace Splitio_Tests.Integration_Tests
             var result = adapter.Keys("test.*");
 
             //Assert
-            Assert.AreEqual(0, result.Count());
+            Assert.AreEqual(0, result.Length);
         }
 
 
         [TestMethod]
-        public void ExecuteSetAndDelSuccessful()
+        public async void ExecuteSetAndDelSuccessful()
         {
             //Arrange
-            var isSet1 = adapter.Set("testdel.test_key", "test_value");
+            var isSet1 = await adapter.SetAsync("testdel.test_key", "test_value");
 
             //Act
-            var isDel = adapter.Del("testdel.test_key");
-            var result = adapter.Get("testdel.test_key");
+            var countDel = adapter.Del(new RedisKey[] { "testdel.test_key" });
+            var result = await adapter.GetAsync("testdel.test_key");
 
             //Assert
             Assert.IsTrue(isSet1);
-            Assert.IsTrue(isDel);
+            Assert.AreEqual(1, countDel);
             Assert.IsNull(result);
         }
 
@@ -178,17 +178,17 @@ namespace Splitio_Tests.Integration_Tests
             var adapter = new RedisAdapter(config, pool);
 
             //Act
-            var isDel = adapter.Del("testdel.test_key");
+            var countDel = adapter.Del(new RedisKey[] { "testdel.test_key" });
 
             //Assert
-            Assert.IsFalse(isDel);
+            Assert.AreEqual(0, countDel);
         }
 
         [TestMethod]
-        public void ExecuteSetAndFlushSuccessful()
+        public async void ExecuteSetAndFlushSuccessful()
         {
             //Arrange
-            var isSet1 = adapter.Set("testflush.test_key", "test_value");
+            var isSet1 = await adapter.SetAsync("testflush.test_key", "test_value");
 
             //Act
             adapter.Flush();
@@ -196,26 +196,26 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             Assert.IsTrue(isSet1);
-            Assert.AreEqual(0, result.Count());
+            Assert.AreEqual(0, result.Length);
         }
 
         [TestMethod]
-        public void ExecuteSAddAndSMemberSuccessful()
+        public async void ExecuteSAddAndSMemberSuccessful()
         {
             //Arrange
-            var setCount = adapter.SAdd("test_key_set", "test_value_1");
+            var setCount = await adapter.SetAsync("test_key_set", "test_value_1");
 
             //Act
-            var result = adapter.SMembers("test_key_set");
+            var result = await adapter.GetAsync("test_key_set");
 
             //Assert
             Assert.AreEqual(true, setCount);
-            Assert.AreEqual(1, result.Count());
+            Assert.AreEqual(1, result.Length);
             Assert.IsTrue(result.Contains("test_value_1"));
         }
 
         [TestMethod]
-        public void ExecuteSAddShouldReturnFalseOnException()
+        public async void ExecuteSAddShouldReturnFalseOnException()
         {
             //Arrange
             var config = new RedisConfig();
@@ -224,71 +224,71 @@ namespace Splitio_Tests.Integration_Tests
             var adapter = new RedisAdapter(config, pool);
 
             //Act
-            var setCount = adapter.SAdd("test_key_set", "test_value_1");
-
-            //Assert
-            Assert.IsFalse(setCount);
-        }
-
-        [TestMethod]
-        public void ExecuteSMembersShouldReturnFalseOnException()
-        {
-            //Arrange
-            var config = new RedisConfig();
-            var pool = new ConnectionPoolManager(config);
-
-            var adapter = new RedisAdapter(config, pool);
-
-            //Act
-            var result = adapter.SMembers("test_key_set");
-
-            //Assert
-            Assert.AreEqual(0, result.Count());
-        }
-
-        [TestMethod]
-        public void ExecuteSAddAndSMembersSuccessful()
-        {
-            //Arrange
-            var setCount = adapter.SAdd("test_key_set_multiple", new RedisValue[]{ "test_value", "test_value2"});
-
-            //Act
-            var result = adapter.SMembers("test_key_set_multiple");
-
-            //Assert
-            Assert.AreEqual(2, setCount);
-            Assert.AreEqual(2, result.Count());
-            Assert.IsTrue(result.Contains("test_value"));
-            Assert.IsTrue(result.Contains("test_value2"));
-        }
-
-        [TestMethod]
-        public void ExecuteSAddShouldReturnZeroOnException()
-        {
-            //Arrange
-            var config = new RedisConfig();
-            var pool = new ConnectionPoolManager(config);
-
-            var adapter = new RedisAdapter(config, pool);
-
-            //Act
-            var setCount = adapter.SAdd("test_key_set_multiple", new RedisValue[] { "test_value", "test_value2" });
+            var setCount = await adapter.SAddAsync("test_key_set", new RedisValue[] { "test_value_1" });
 
             //Assert
             Assert.AreEqual(0, setCount);
         }
 
         [TestMethod]
-        public void ExecuteSAddAndSRemSuccessful()
+        public async void ExecuteSMembersShouldReturnFalseOnException()
         {
             //Arrange
-            var setCount = adapter.SAdd("test_key_set", new RedisValue[] { "test_value", "test_value2" });
+            var config = new RedisConfig();
+            var pool = new ConnectionPoolManager(config);
+
+            var adapter = new RedisAdapter(config, pool);
 
             //Act
-            var remCount = adapter.SRem("test_key_set", new RedisValue[] { "test_value2" });
-            var result = adapter.SIsMember("test_key_set", "test_value");
-            var result2 = adapter.SIsMember("test_key_set", "test_value2");
-            var result3 = adapter.SIsMember("test_key_set", "test_value3");
+            var result = await adapter.SMembersAsync("test_key_set");
+
+            //Assert
+            Assert.AreEqual(0, result.Length);
+        }
+
+        [TestMethod]
+        public async void ExecuteSAddAndSMembersSuccessful()
+        {
+            //Arrange
+            var setCount = await adapter.SAddAsync("test_key_set_multiple", new RedisValue[]{ "test_value", "test_value2"});
+
+            //Act
+            var result = await adapter.SMembersAsync("test_key_set_multiple");
+
+            //Assert
+            Assert.AreEqual(2, setCount);
+            Assert.AreEqual(2, result.Length);
+            Assert.IsTrue(result.Contains("test_value"));
+            Assert.IsTrue(result.Contains("test_value2"));
+        }
+
+        [TestMethod]
+        public async void ExecuteSAddShouldReturnZeroOnException()
+        {
+            //Arrange
+            var config = new RedisConfig();
+            var pool = new ConnectionPoolManager(config);
+
+            var adapter = new RedisAdapter(config, pool);
+
+            //Act
+            var setCount = await adapter.SAddAsync("test_key_set_multiple", new RedisValue[] { "test_value", "test_value2" });
+
+            //Assert
+            Assert.AreEqual(0, setCount);
+        }
+
+        [TestMethod]
+        public async void ExecuteSAddAndSRemSuccessful()
+        {
+            //Arrange
+            var setCount = await adapter.SAddAsync("test_key_set", new RedisValue[] { "test_value", "test_value2" });
+
+            //Act
+            var remCount = await adapter.SRemAsync("test_key_set", new RedisValue[] { "test_value2" });
+            var result = await adapter.SIsMemberAsync("test_key_set", "test_value");
+            var result2 = await adapter.SIsMemberAsync("test_key_set", "test_value2");
+            var result3 = await adapter.SIsMemberAsync("test_key_set", "test_value3");
             
             //Assert
             Assert.IsTrue(result);
@@ -297,7 +297,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public void ExecuteSRemShouldReturnZeroOnException()
+        public async void ExecuteSRemShouldReturnZeroOnException()
         {
             //Arrange
             var config = new RedisConfig();
@@ -306,27 +306,27 @@ namespace Splitio_Tests.Integration_Tests
             var adapter = new RedisAdapter(config, pool);
 
             //Act
-            var remCount = adapter.SRem("test_key_set", new RedisValue[] { "test_value2" });
+            var remCount = await adapter.SRemAsync("test_key_set", new RedisValue[] { "test_value2" });
 
             //Assert
             Assert.AreEqual(0, remCount);
         }
 
         [TestMethod]
-        public void ExecuteIncrBySuccessful()
+        public async void ExecuteIncrBySuccessful()
         {
             //Arrange
-            adapter.IcrBy("test_count", 1);
+            await adapter.IcrByAsync("test_count", 1);
 
             //Act
-            var result = adapter.IcrBy("test_count", 2);
+            var result = await adapter.IcrByAsync("test_count", 2);
 
             //Assert
             Assert.AreEqual(3, result);
         }
 
         [TestMethod]
-        public void ExecuteIncrShouldReturnZeroOnException()
+        public async void ExecuteIncrShouldReturnZeroOnException()
         {
             //Arrange
             var config = new RedisConfig();
@@ -335,26 +335,26 @@ namespace Splitio_Tests.Integration_Tests
             var adapter = new RedisAdapter(config, pool);
 
             //Act
-            var result = adapter.IcrBy("test_count", 2);
+            var result = await adapter.IcrByAsync("test_count", 2);
 
             //Assert
             Assert.AreEqual(0, result);
         }
 
         [TestMethod]
-        public void ExecuteHashIncrementShouldReturnValue()
+        public async void ExecuteHashIncrementShouldReturnValue()
         {
             //Act & Assert
-            var result = adapter.HashIncrement("test_count", "hashField", 2);
+            var result = await adapter.HashIncrementAsync("test_count", "hashField", 2);
             Assert.AreEqual(2, result);
 
-            result = adapter.HashIncrement("test_count", "hashField", 2);
+            result = await adapter.HashIncrementAsync("test_count", "hashField", 2);
             Assert.AreEqual(4, result);
 
-            result = adapter.HashIncrement("test_count", "hashField", 3);
+            result = await adapter.HashIncrementAsync("test_count", "hashField", 3);
             Assert.AreEqual(7, result);
 
-            result = adapter.HashIncrement("test", "hashField", 1);
+            result = await adapter.HashIncrementAsync("test", "hashField", 1);
             Assert.AreEqual(1, result);
         }
     }

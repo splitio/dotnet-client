@@ -34,8 +34,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var splitCache = new RedisSplitCache(redisAdapterMock.Object, splitParser.Object);
 
             redisAdapterMock
-                .Setup(x => x.Get("SPLITIO.split.test_split"))
-                .Returns(JsonConvert.SerializeObject(split));
+                .Setup(x => x.GetAsync("SPLITIO.split.test_split"))
+                .ReturnsAsync(JsonConvert.SerializeObject(split));
 
             splitParser
                 .Setup(mock => mock.Parse(It.IsAny<Split>()))
@@ -84,8 +84,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var splitCache = new RedisSplitCache(redisAdapterMock.Object, splitParser.Object, "mycompany");
 
             redisAdapterMock
-                .Setup(x => x.Get("mycompany.SPLITIO.split.test_split"))
-                .Returns(JsonConvert.SerializeObject(split));
+                .Setup(x => x.GetAsync("mycompany.SPLITIO.split.test_split"))
+                .ReturnsAsync(JsonConvert.SerializeObject(split));
 
             splitParser
                 .Setup(mock => mock.Parse(It.IsAny<Split>()))
