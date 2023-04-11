@@ -15,7 +15,7 @@ namespace Splitio.Services.Parsing
 
         public override bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            return key != null;
+            return true;
         }
 
         public override bool Match(long key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)

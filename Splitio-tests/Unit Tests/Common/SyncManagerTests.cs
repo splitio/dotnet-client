@@ -58,7 +58,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicDataRecording(), Times.Once);
-            _pushManager.Verify(mock => mock.StartSse(), Times.Never);
+            _pushManager.Verify(mock => mock.StartSseAsync(), Times.Never);
         }
 
         [TestMethod]
@@ -70,7 +70,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(true);
 
             _pushManager
-                .Setup(mock => mock.StartSse())
+                .Setup(mock => mock.StartSseAsync())
                 .ReturnsAsync(true);
 
             var streamingEnabled = true;
@@ -82,7 +82,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             // Assert.            
             Thread.Sleep(1000);
             _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
-            _pushManager.Verify(mock => mock.StartSse(), Times.Once);
+            _pushManager.Verify(mock => mock.StartSseAsync(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Never);
             _synchronizer.Verify(mock => mock.StartPeriodicDataRecording(), Times.Once);
         }
@@ -96,7 +96,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(true);
 
             _pushManager
-                .Setup(mock => mock.StartSse())
+                .Setup(mock => mock.StartSseAsync())
                 .ReturnsAsync(false);
 
             var streamingEnabled = true;
@@ -108,7 +108,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             // Assert.            
             Thread.Sleep(1000);
             _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
-            _pushManager.Verify(mock => mock.StartSse(), Times.Once);
+            _pushManager.Verify(mock => mock.StartSseAsync(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicDataRecording(), Times.Once);
         }
@@ -138,7 +138,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(true);
 
             _pushManager
-                .Setup(mock => mock.StartSse())
+                .Setup(mock => mock.StartSseAsync())
                 .ReturnsAsync(true);
 
             var streamingEnabled = true;
@@ -173,7 +173,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(true);
 
             _pushManager
-                .Setup(mock => mock.StartSse())
+                .Setup(mock => mock.StartSseAsync())
                 .ReturnsAsync(true);
 
             var streamingEnabled = true;
@@ -183,7 +183,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Act & Assert.
             _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
-            _pushManager.Verify(mock => mock.StartSse(), Times.Once);
+            _pushManager.Verify(mock => mock.StartSseAsync(), Times.Once);
 
             _sseClientStatus.Add(SSEClientActions.DISCONNECT);
             Thread.Sleep(50);
@@ -198,7 +198,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             _sseHandler.Verify(mock => mock.StartWorkers(), Times.Once);
             _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
-            _pushManager.Verify(mock => mock.StartSse(), Times.Once);
+            _pushManager.Verify(mock => mock.StartSseAsync(), Times.Once);
 
             _sseClientStatus.Add(SSEClientActions.DISCONNECT);
             Thread.Sleep(50);
@@ -206,7 +206,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
             _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Exactly(2));
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
-            _pushManager.Verify(mock => mock.StartSse(), Times.Once);
+            _pushManager.Verify(mock => mock.StartSseAsync(), Times.Once);
         }
 
         [TestMethod]
@@ -220,7 +220,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(true);
 
             _pushManager
-                .Setup(mock => mock.StartSse())
+                .Setup(mock => mock.StartSseAsync())
                 .ReturnsAsync(false);
 
             var syncManager = GetSyncManager(streamingEnabled);
@@ -237,7 +237,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             
             _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Never);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
-            _pushManager.Verify(mock => mock.StartSse(), Times.Once);
+            _pushManager.Verify(mock => mock.StartSseAsync(), Times.Once);
 
             // Act & Assert.
             _sseClientStatus.Add(SSEClientActions.CONNECTED);
@@ -252,7 +252,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
             _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Exactly(2));
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Exactly(2));
-            _pushManager.Verify(mock => mock.StartSse(), Times.Exactly(2));
+            _pushManager.Verify(mock => mock.StartSseAsync(), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -266,7 +266,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(true);
 
             _pushManager
-                .Setup(mock => mock.StartSse())
+                .Setup(mock => mock.StartSseAsync())
                 .ReturnsAsync(false);
 
             var syncManager = GetSyncManager(streamingEnabled);
@@ -281,7 +281,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
             _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Never);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
-            _pushManager.Verify(mock => mock.StartSse(), Times.Once);
+            _pushManager.Verify(mock => mock.StartSseAsync(), Times.Once);
 
             // Act & Assert.
             _sseClientStatus.Add(SSEClientActions.CONNECTED);
@@ -296,7 +296,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
             _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Exactly(2));
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Exactly(2));
-            _pushManager.Verify(mock => mock.StartSse(), Times.Once);
+            _pushManager.Verify(mock => mock.StartSseAsync(), Times.Once);
         }
 
         [TestMethod]
@@ -310,7 +310,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(true);
 
             _pushManager
-                .Setup(mock => mock.StartSse())
+                .Setup(mock => mock.StartSseAsync())
                 .ReturnsAsync(true);
 
             var syncManager = GetSyncManager(streamingEnabled);
@@ -338,7 +338,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(true);
 
             _pushManager
-                .Setup(mock => mock.StartSse())
+                .Setup(mock => mock.StartSseAsync())
                 .ReturnsAsync(true);
 
             var syncManager = GetSyncManager(streamingEnabled);
@@ -367,7 +367,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(true);
 
             _pushManager
-                .Setup(mock => mock.StartSse())
+                .Setup(mock => mock.StartSseAsync())
                 .ReturnsAsync(true);
 
             var syncManager = GetSyncManager(streamingEnabled);

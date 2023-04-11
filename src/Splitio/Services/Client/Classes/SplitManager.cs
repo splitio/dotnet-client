@@ -33,7 +33,7 @@ namespace Splitio.Services.Client.Classes
                 return null;
             }
 
-            var currentSplits = _splitCache.GetAllSplits();
+            var currentSplits = _splitCache.GetAllSplitsAsync().Result;
 
             var lightSplits = currentSplits
                 .Select(x =>
@@ -66,7 +66,7 @@ namespace Splitio.Services.Client.Classes
 
             featureName = result.Value;
 
-            var split = _splitCache.GetSplit(featureName);
+            var split = _splitCache.GetSplitAsync(featureName).Result;
 
             if (split == null)
             {
@@ -99,7 +99,7 @@ namespace Splitio.Services.Client.Classes
                 return null;
             }
 
-            return _splitCache.GetSplitNames();
+            return _splitCache.GetSplitNamesAsync().Result;
         }
 
         private bool IsSdkReady(string methodName)

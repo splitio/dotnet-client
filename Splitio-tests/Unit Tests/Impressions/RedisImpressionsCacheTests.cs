@@ -6,6 +6,7 @@ using Splitio.Telemetry.Domain;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Impressions
 {
@@ -25,7 +26,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public void RecordUniqueKeysAndExpire()
+        public async Task RecordUniqueKeysAndExpire()
         {
             var key = "test-pre:.SPLITIO.uniquekeys";
             var expected1 = "{\"f\":\"Feature1\",\"ks\":[\"key-1\",\"key-2\"]}";
@@ -42,7 +43,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 .Setup(mock => mock.ListRightPushAsync(key, rValue2))
                 .ReturnsAsync(2);
 
-            _cache.RecordUniqueKeys(new List<Mtks>
+            await _cache.RecordUniqueKeysAsync(new List<Mtks>
             {
                 new Mtks("Feature1", new HashSet<string>{ "key-1", "key-2" }),
                 new Mtks("Feature2", new HashSet<string>{ "key-1", "key-2" })
@@ -54,7 +55,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public void RecordUniqueKeysWithoutExpire()
+        public async Task RecordUniqueKeysWithoutExpire()
         {
             var key = "test-pre:.SPLITIO.uniquekeys";
             var expected1 = "{\"f\":\"Feature1\",\"ks\":[\"key-1\",\"key-2\"]}";
@@ -70,7 +71,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 .Setup(mock => mock.ListRightPushAsync(key, rValue2))
                 .ReturnsAsync(3);
 
-            _cache.RecordUniqueKeys(new List<Mtks>
+            await _cache.RecordUniqueKeysAsync(new List<Mtks>
             {
                 new Mtks("Feature1", new HashSet<string>{ "key-1", "key-2" }),
                 new Mtks("Feature2", new HashSet<string>{ "key-1", "key-2" })

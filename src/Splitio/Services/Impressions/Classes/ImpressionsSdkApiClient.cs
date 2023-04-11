@@ -38,7 +38,7 @@ namespace Splitio.Services.Impressions.Classes
             _maxBulkSize = maxBulkSize;
         }
 
-        public async void SendBulkImpressions(List<KeyImpression> impressions)
+        public async Task SendBulkImpressionsAsync(List<KeyImpression> impressions)
         {
             using (var clock = new Util.SplitStopwatch())
             {
@@ -59,7 +59,7 @@ namespace Splitio.Services.Impressions.Classes
             }
         }
 
-        public async void SendBulkImpressionsCount(List<ImpressionsCountModel> impressionsCount)
+        public async Task SendBulkImpressionsCountAsync(List<ImpressionsCountModel> impressionsCount)
         {
             using (var clock = new Util.SplitStopwatch())
             {
@@ -69,7 +69,7 @@ namespace Splitio.Services.Impressions.Classes
 
                 var response = await _httpClient.PostAsync(ImpressionsCountUrl, json);
 
-                Util.Helper.RecordTelemetrySync(nameof(SendBulkImpressionsCount), response, ResourceEnum.ImpressionCountSync, clock, _telemetryRuntimeProducer, _log);
+                Util.Helper.RecordTelemetrySync(nameof(SendBulkImpressionsCountAsync), response, ResourceEnum.ImpressionCountSync, clock, _telemetryRuntimeProducer, _log);
             }
         }
 
@@ -99,7 +99,7 @@ namespace Splitio.Services.Impressions.Classes
 
                 var response = await _httpClient.PostAsync(TestImpressionsUrl, impressionsJson);
 
-                Util.Helper.RecordTelemetrySync(nameof(SendBulkImpressions), response, ResourceEnum.ImpressionSync, clock, _telemetryRuntimeProducer, _log);
+                Util.Helper.RecordTelemetrySync(nameof(SendBulkImpressionsAsync), response, ResourceEnum.ImpressionSync, clock, _telemetryRuntimeProducer, _log);
 
                 if (response.IsSuccessStatusCode)
                 {

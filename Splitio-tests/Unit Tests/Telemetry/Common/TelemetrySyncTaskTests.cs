@@ -64,8 +64,8 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             Thread.Sleep(2000);
 
             // Assert.
-            _telemetryAPI.Verify(mock => mock.RecordConfigInit(It.IsAny<Config>()), Times.Once);
-            _telemetryAPI.Verify(mock => mock.RecordStats(It.IsAny<Stats>()), Times.AtLeastOnce);
+            _telemetryAPI.Verify(mock => mock.RecordConfigInitAsync(It.IsAny<Config>()), Times.Once);
+            _telemetryAPI.Verify(mock => mock.RecordStatsAsync(It.IsAny<Stats>()), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.PopAuthRejections(), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.GetEventsStats(EventsEnum.EventsDropped), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.GetEventsStats(EventsEnum.EventsQueued), Times.AtLeastOnce);
@@ -81,7 +81,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             _telemetryStorage.Verify(mock => mock.PopStreamingEvents(), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.PopTags(), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.PopTokenRefreshes(), Times.AtLeastOnce);
-            _splitCache.Verify(mock => mock.SplitsCount(), Times.AtLeastOnce);
+            _splitCache.Verify(mock => mock.SplitsCountAsync(), Times.AtLeastOnce);
             _segmentCache.Verify(mock => mock.SegmentsCount(), Times.AtLeastOnce);
             _segmentCache.Verify(mock => mock.SegmentKeysCount(), Times.AtLeastOnce);
         }
@@ -100,7 +100,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             Thread.Sleep(2000);
 
             // Assert.
-            _telemetryAPI.Verify(mock => mock.RecordStats(It.IsAny<Stats>()), Times.AtLeastOnce);
+            _telemetryAPI.Verify(mock => mock.RecordStatsAsync(It.IsAny<Stats>()), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.PopAuthRejections(), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.GetEventsStats(EventsEnum.EventsDropped), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.GetEventsStats(EventsEnum.EventsQueued), Times.AtLeastOnce);
@@ -116,7 +116,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             _telemetryStorage.Verify(mock => mock.PopStreamingEvents(), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.PopTags(), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.PopTokenRefreshes(), Times.AtLeastOnce);
-            _splitCache.Verify(mock => mock.SplitsCount(), Times.AtLeastOnce);
+            _splitCache.Verify(mock => mock.SplitsCountAsync(), Times.AtLeastOnce);
             _segmentCache.Verify(mock => mock.SegmentsCount(), Times.AtLeastOnce);
             _segmentCache.Verify(mock => mock.SegmentKeysCount(), Times.AtLeastOnce);
         }
@@ -165,7 +165,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             _telemetryStorage.Setup(mock => mock.PopStreamingEvents()).Returns(new List<StreamingEvent>());
             _telemetryStorage.Setup(mock => mock.PopTags()).Returns(new List<string>());
             _telemetryStorage.Setup(mock => mock.PopTokenRefreshes()).Returns(9);
-            _splitCache.Setup(mock => mock.SplitsCount()).Returns(50);
+            _splitCache.Setup(mock => mock.SplitsCountAsync()).ReturnsAsync(50);
             _segmentCache.Setup(mock => mock.SegmentsCount()).Returns(10);
             _segmentCache.Setup(mock => mock.SegmentKeysCount()).Returns(33);
         }

@@ -8,6 +8,7 @@ using Splitio.Services.Parsing.Interfaces;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
@@ -31,7 +32,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
-        public void GetInexistentSplitOrRedisExceptionShouldReturnNull()
+        public async Task GetInexistentSplitOrRedisExceptionShouldReturnNull()
         {
             //Arrange
             var splitName = "test_split";
@@ -42,7 +43,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 .ReturnsAsync(value);
 
             //Act
-            var result = _redisSplitCache.GetSplit(splitName);
+            var result = await _redisSplitCache.GetSplitAsync(splitName);
 
             //Assert
             Assert.IsNull(result);
@@ -59,7 +60,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
-        public void GetChangeNumberWhenNotSetOrRedisThrowsException()
+        public async Task GetChangeNumberWhenNotSetOrRedisThrowsException()
         {
             //Arrange
             var changeNumber = -1;
@@ -69,14 +70,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 .ReturnsAsync(string.Empty);
 
             //Act
-            var result = _redisSplitCache.GetChangeNumber();
+            var result = await _redisSplitCache.GetChangeNumberAsync();
 
             //Assert
             Assert.AreEqual(changeNumber, result);
         }
 
         [TestMethod]
-        public void GetAllSplitsSuccessfully()
+        public async Task GetAllSplitsSuccessfully()
         {
             //Arrange
             var splitName = "test_split";
@@ -99,14 +100,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 .Returns(new ParsedSplit());                
 
             //Act
-            var result = _redisSplitCache.GetAllSplits();
+            var result = await _redisSplitCache.GetAllSplitsAsync();
 
             //Assert
             Assert.AreEqual(2, result.Count);
         }
 
         [TestMethod]
-        public void GetAllSplitsShouldReturnEmptyListIfGetReturnsEmpty()
+        public async Task GetAllSplitsShouldReturnEmptyListIfGetReturnsEmpty()
         {
             //Arrange
             _redisAdapterMock
@@ -118,7 +119,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 .ReturnsAsync(Array.Empty<RedisValue>());
 
             //Act
-            var result = _redisSplitCache.GetAllSplits();
+            var result = await _redisSplitCache.GetAllSplitsAsync();
 
             //Assert
             Assert.IsNotNull(result);
@@ -126,7 +127,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
-        public void GetAllSplitsShouldReturnEmptyListIfGetReturnsNull()
+        public async Task GetAllSplitsShouldReturnEmptyListIfGetReturnsNull()
         {
             //Arrange
             RedisValue[] expectedResult = null;
@@ -140,7 +141,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 .ReturnsAsync(expectedResult);
 
             //Act
-            var result = _redisSplitCache.GetAllSplits();
+            var result = await _redisSplitCache.GetAllSplitsAsync();
 
             //Assert
             Assert.IsNotNull(result);
@@ -181,7 +182,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
         #region TrafficTypeExists
         [TestMethod]
-        public void TrafficTypeExists_WhenHasQuantity_ReturnsTrue()
+        public async Task TrafficTypeExists_WhenHasQuantity_ReturnsTrue()
         {
             //Arrange
             var trafficType = "test";
@@ -193,14 +194,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 .ReturnsAsync("1");
 
             //Act
-            var result = _redisSplitCache.TrafficTypeExists(trafficType);
+            var result = await _redisSplitCache.TrafficTypeExistsAsync(trafficType);
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void TrafficTypeExists_WhenQuantityIs0_ReturnsFalse()
+        public async Task TrafficTypeExists_WhenQuantityIs0_ReturnsFalse()
         {
             //Arrange
             var trafficType = "test";
@@ -212,14 +213,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 .ReturnsAsync("0");
 
             //Act
-            var result = _redisSplitCache.TrafficTypeExists(trafficType);
+            var result = await _redisSplitCache.TrafficTypeExistsAsync(trafficType);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void TrafficTypeExists_WhenKeyDoesNotExist_ReturnsFalse()
+        public async Task TrafficTypeExists_WhenKeyDoesNotExist_ReturnsFalse()
         {
             //Arrange
             var trafficType = "test";
@@ -231,14 +232,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 .ReturnsAsync((string)null);
 
             //Act
-            var result = _redisSplitCache.TrafficTypeExists(trafficType);
+            var result = await _redisSplitCache.TrafficTypeExistsAsync(trafficType);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void TrafficTypeExists_WhenValueIsEmpty_ReturnsFalse()
+        public async Task TrafficTypeExists_WhenValueIsEmpty_ReturnsFalse()
         {
             //Arrange
             var trafficType = "test";
@@ -250,14 +251,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 .ReturnsAsync(string.Empty);
 
             //Act
-            var result = _redisSplitCache.TrafficTypeExists(trafficType);
+            var result = await _redisSplitCache.TrafficTypeExistsAsync(trafficType);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void TrafficTypeExists_WhenKeyIsNull_ReturnsFalse()
+        public async Task TrafficTypeExists_WhenKeyIsNull_ReturnsFalse()
         {
             //Arrange
             var trafficType = "test";
@@ -269,7 +270,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 .ReturnsAsync(string.Empty);
 
             //Act
-            var result = _redisSplitCache.TrafficTypeExists(null);
+            var result = await _redisSplitCache.TrafficTypeExistsAsync(null);
 
             //Assert
             Assert.IsFalse(result);
@@ -277,7 +278,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         #endregion
 
         [TestMethod]
-        public void FetchMany_VerifyMGetCall_Once()
+        public async Task FetchMany_VerifyMGetCall_Once()
         {
             // Arrange.
             var splitNames = new List<string> { "Split_1", "Split_2", "Split_3" };
@@ -287,7 +288,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 .ReturnsAsync(new RedisValue[3]);
 
             // Act.
-            var result = _redisSplitCache.FetchMany(splitNames);
+            var result = await _redisSplitCache.FetchManyAsync(splitNames);
 
             // Assert.
             _redisAdapterMock.Verify(mock => mock.MGetAsync(It.IsAny<RedisKey[]>()), Times.Once);

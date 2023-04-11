@@ -6,6 +6,7 @@ using Splitio.Services.EventSource;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Storages;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Common
 {
@@ -30,7 +31,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         }
 
         [TestMethod]
-        public void StartSse_WithSSEError_ShouldRetry()
+        public async Task StartSse_WithSSEError_ShouldRetry()
         {
             _authApiClient
                 .Setup(mock => mock.AuthenticateAsync())
@@ -51,7 +52,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 
             
             // Act.
-            var result = _pushManager.StartSse();
+            var result = await _pushManager.StartSseAsync();
             Thread.Sleep(8000);
 
             // Assert.
@@ -60,7 +61,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         }
 
         [TestMethod]
-        public void StartSse_WithPushEnabled_ShouldConnect()
+        public async Task StartSse_WithPushEnabled_ShouldConnect()
         {
             // Arrange.
             var response = new AuthenticationResponse
@@ -91,10 +92,10 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(true);
 
             // Act.
-            var result = _pushManager.StartSse();
+            var result = await _pushManager.StartSseAsync();
 
             // Assert.
-            Assert.IsTrue(result.Result);
+            Assert.IsTrue(result);
             _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Once);
             _sseHandler.Verify(mock => mock.Start(response.Token, response.Channels), Times.Once);
 
@@ -104,7 +105,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         }
 
         [TestMethod]
-        public void StartSse_WithPushDisable_ShouldNotConnect()
+        public async Task StartSse_WithPushDisable_ShouldNotConnect()
         {
             // Arrange.
             var response = new AuthenticationResponse
@@ -118,10 +119,10 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .ReturnsAsync(response);
 
             // Act.
-            var result = _pushManager.StartSse();
+            var result = await _pushManager.StartSseAsync();
 
             // Assert.
-            Assert.IsFalse(result.Result);
+            Assert.IsFalse(result);
             _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Once);
             _sseHandler.Verify(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
             _sseHandler.Verify(mock => mock.Stop(), Times.Once);
@@ -133,7 +134,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         }
 
         [TestMethod]
-        public void StartSse_WithPushDisableAndRetryTrue_ShouldNotConnect()
+        public async Task StartSse_WithPushDisableAndRetryTrue_ShouldNotConnect()
         {
             // Arrange.
             var response = new AuthenticationResponse
@@ -157,10 +158,10 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .ReturnsAsync(response2);
 
             // Act.
-            var result = _pushManager.StartSse();
+            var result = await _pushManager.StartSseAsync();
 
             // Assert.
-            Assert.IsFalse(result.Result);
+            Assert.IsFalse(result);
             _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Once);
             _sseHandler.Verify(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
             _sseHandler.Verify(mock => mock.Stop(), Times.Once);

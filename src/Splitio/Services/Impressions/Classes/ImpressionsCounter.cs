@@ -41,6 +41,7 @@ namespace Splitio.Services.Impressions.Classes
             _tasksManager.StartPeriodic(() => SendBulkData(), _taskInterval * 1000, _cancellationTokenSource, "Main Impressions Count Sender.");
         }
 
+        // TODO: VARIFICAR ASYNC MEHTODS
         protected override void SendBulkData()
         {
             lock (_lock)
@@ -58,7 +59,7 @@ namespace Splitio.Services.Impressions.Classes
 
                     if (values.Count <= _maxBulkSize)
                     {
-                        _senderAdapter.RecordImpressionsCount(values);
+                        _senderAdapter.RecordImpressionsCountAsync(values);
                         return;
                     }
 
@@ -66,7 +67,7 @@ namespace Splitio.Services.Impressions.Classes
                     {
                         var bulkToPost = Util.Helper.TakeFromList(values, _maxBulkSize);
 
-                        _senderAdapter.RecordImpressionsCount(bulkToPost);
+                        _senderAdapter.RecordImpressionsCountAsync(bulkToPost);
                     }
                 }
                 catch (Exception e)

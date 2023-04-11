@@ -7,7 +7,6 @@ using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -23,7 +22,6 @@ namespace Splitio.Services.Impressions.Classes
         private readonly ITasksManager _taskManager;
         private readonly ImpressionsMode _impressionsMode;
         private readonly IUniqueKeysTracker _uniqueKeysTracker;
-        private readonly bool _optimized;
         private readonly bool _addPreviousTime;
 
         public ImpressionsManager(IImpressionsLog impressionsLog,
@@ -40,7 +38,6 @@ namespace Splitio.Services.Impressions.Classes
             _customerImpressionListener = customerImpressionListener;
             _impressionsCounter = impressionsCounter;
             _addPreviousTime = addPreviousTime;
-            _optimized = impressionsMode == ImpressionsMode.Optimized && addPreviousTime;
             _impressionsObserver = impressionsObserver;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _taskManager = taskManager;
@@ -125,13 +122,13 @@ namespace Splitio.Services.Impressions.Classes
 
                 if (_customerImpressionListener != null)
                 {
-                    Task.Factory.StartNew(() =>
+                    _taskManager.Start(() =>
                     {
                         foreach (var imp in impressions)
                         {
                             _customerImpressionListener.Log(imp);
                         }
-                    });
+                    }, "Impression Listenet Log.");
                 }
             }
         }
@@ -173,7 +170,9 @@ namespace Splitio.Services.Impressions.Classes
 
         private void ShouldCalculatePreviousTime(KeyImpression impression)
         {
-            if (_addPreviousTime) impression.previousTime = _impressionsObserver.TestAndSet(impression);
+            if (!_addPreviousTime) return;
+
+            impression.previousTime = _impressionsObserver.TestAndSet(impression);
         }
         #endregion
     }

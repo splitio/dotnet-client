@@ -3,6 +3,7 @@ using Splitio.Services.Cache.Interfaces;
 using StackExchange.Redis;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
@@ -16,56 +17,72 @@ namespace Splitio.Redis.Services.Cache.Classes
             string userPrefix = null) : base(redisAdapter, userPrefix)
         { }
 
-        public void AddToSegment(string segmentName, List<string> segmentKeys)
+        public async Task AddToSegmentAsync(string segmentName, List<string> segmentKeys)
         {
             var key = $"{RedisKeyPrefix}{segmentKeyPrefix}{segmentName}";
             var valuesToAdd = segmentKeys.Select(x => (RedisValue)x).ToArray();
 
-            _redisAdapter.SAddAsync(key, valuesToAdd);
+            await _redisAdapter.SAddAsync(key, valuesToAdd);
         }
 
-        public void RemoveFromSegment(string segmentName, List<string> segmentKeys)
+        public async Task RemoveFromSegmentAsync(string segmentName, List<string> segmentKeys)
         {
             var key = $"{RedisKeyPrefix}{segmentKeyPrefix}{segmentName}";
             var valuesToRemove = segmentKeys.Select(x => (RedisValue)x).ToArray();
 
-            _redisAdapter.SRemAsync(key, valuesToRemove);
+            await _redisAdapter.SRemAsync(key, valuesToRemove);
         }
 
-        public bool IsInSegment(string segmentName, string key)
+        public async Task<bool> IsInSegmentAsync(string segmentName, string key)
         {
             var redisKey = $"{RedisKeyPrefix}{segmentKeyPrefix}{segmentName}";
 
-            return _redisAdapter.SIsMemberAsync(redisKey, key).Result;
+            return await _redisAdapter.SIsMemberAsync(redisKey, key);
         }
 
-        public void SetChangeNumber(string segmentName, long changeNumber)
+        public async Task SetChangeNumberAsync(string segmentName, long changeNumber)
         {
             var key = RedisKeyPrefix + segmentNameKeyPrefix.Replace("{segmentname}", segmentName) + "till";
 
-            _redisAdapter.SetAsync(key, changeNumber.ToString());
+            await _redisAdapter.SetAsync(key, changeNumber.ToString());
         }
 
-        public long GetChangeNumber(string segmentName)
+        public async Task<long> GetChangeNumberAsync(string segmentName)
         {
             var key = RedisKeyPrefix + segmentNameKeyPrefix.Replace("{segmentname}", segmentName) + "till";
-            var changeNumberString = _redisAdapter.GetAsync(key).Result;
+            var changeNumberString = await _redisAdapter.GetAsync(key);
             var result = long.TryParse(changeNumberString, out long changeNumberParsed);
 
             return result ? changeNumberParsed : -1;
         }
 
-        public long RegisterSegment(string segmentName)
-        {
-            return RegisterSegments(new List<string>() { segmentName });
-        }
-
-        public long RegisterSegments(List<string> segmentNames)
+        public async Task<List<string>> GetSegmentNamesAsync()
         {
             var key = $"{RedisKeyPrefix}{segmentsKeyPrefix}registered";
-            var segments = segmentNames.Select(x => (RedisValue)x).ToArray();
+            var result = await _redisAdapter.SMembersAsync(key);
 
-            return _redisAdapter.SAddAsync(key, segments).Result;
+            return result.Select(x => (string)x).ToList();
+        }
+
+        public async Task<List<string>> GetSegmentKeysAsync(string segmentName)
+        {
+            var key = $"{RedisKeyPrefix}{segmentKeyPrefix}{segmentName}";
+            var keys = await _redisAdapter.SMembersAsync(key);
+
+            if (keys == null)
+                return new List<string>();
+
+            return keys.Select(k => (string)k).ToList();
+        }
+
+        public Task<int> SegmentsCount()
+        {
+            return Task.FromResult(0); // No-op
+        }
+
+        public int SegmentKeysCount()
+        {
+            return 0; // No-op
         }
 
         public void Flush()
@@ -76,35 +93,6 @@ namespace Splitio.Redis.Services.Cache.Classes
         public void Clear()
         {
             return;
-        }
-
-        public List<string> GetSegmentNames()
-        {
-            var key = $"{RedisKeyPrefix}{segmentsKeyPrefix}registered";
-            var result = _redisAdapter.SMembersAsync(key).Result;
-
-            return result.Select(x => (string)x).ToList();
-        }
-
-        public List<string> GetSegmentKeys(string segmentName)
-        {
-            var key = $"{RedisKeyPrefix}{segmentKeyPrefix}{segmentName}";
-            var keys = _redisAdapter.SMembersAsync(key).Result;
-
-            if (keys == null)
-                return new List<string>();
-
-            return keys.Select(k => (string)k).ToList();
-        }
-
-        public int SegmentsCount()
-        {
-            return 0; // No-op
-        }
-
-        public int SegmentKeysCount()
-        {
-            return 0; // No-op
         }
     }
 }

@@ -107,14 +107,14 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Act.
             _splitFetcher
-                .Setup(mock => mock.FetchSplits(It.IsAny<FetchOptions>()))
+                .Setup(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(new FetchResult { Success = true });
 
             _synchronizer.SyncAll(new CancellationTokenSource());
 
             // Assert.
             Thread.Sleep(2000);
-            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Once);            
+            _splitFetcher.Verify(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()), Times.Once);            
             _segmentFetcher.Verify(mock => mock.FetchAll(), Times.Once);
         }
 
@@ -220,19 +220,19 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             _splitFetcher
-                .Setup(mock => mock.FetchSplits(It.IsAny<FetchOptions>()))
+                .Setup(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(new FetchResult());
 
             _splitCache
-                .SetupSequence(mock => mock.GetChangeNumber())
-                .Returns(-1)
-                .Returns(2);
+                .SetupSequence(mock => mock.GetChangeNumberAsync())
+                .ReturnsAsync(-1)
+                .ReturnsAsync(2);
 
             // Act.
             _synchronizer.SynchronizeSplits(1);
 
             // Assert.
-            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Once);
+            _splitFetcher.Verify(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()), Times.Once);
             _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExists(It.IsAny<IList<string>>()), Times.Once);
         }
 
@@ -241,14 +241,14 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             _splitCache
-                .Setup(mock => mock.GetChangeNumber())
-                .Returns(2);
+                .Setup(mock => mock.GetChangeNumberAsync())
+                .ReturnsAsync(2);
 
             // Act.
             _synchronizer.SynchronizeSplits(100);
 
             // Assert.
-            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Exactly(20));
+            _splitFetcher.Verify(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()), Times.Exactly(20));
             _log.Verify(mock => mock.Debug($"No changes fetched after 10 attempts with CDN bypassed."), Times.Once);
             _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
         }
@@ -258,23 +258,23 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             _splitFetcher
-                .Setup(mock => mock.FetchSplits(It.IsAny<FetchOptions>()))
+                .Setup(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(new FetchResult());
 
             _splitCache
-                .SetupSequence(mock => mock.GetChangeNumber())
-                .Returns(-1)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(110);
+                .SetupSequence(mock => mock.GetChangeNumberAsync())
+                .ReturnsAsync(-1)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(110);
 
             // Act.
             _synchronizer.SynchronizeSplits(100);
 
             // Assert.
-            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Exactly(5));
+            _splitFetcher.Verify(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()), Times.Exactly(5));
             _log.Verify(mock => mock.Debug($"Refresh completed in 5 attempts."), Times.Once);
             _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
         }
@@ -284,35 +284,35 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             _splitFetcher
-                .Setup(mock => mock.FetchSplits(It.IsAny<FetchOptions>()))
+                .Setup(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(new FetchResult());
 
             _splitCache
-                .SetupSequence(mock => mock.GetChangeNumber())
-                .Returns(-1)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(110);
+                .SetupSequence(mock => mock.GetChangeNumberAsync())
+                .ReturnsAsync(-1)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(110);
 
             // Act.
             _synchronizer.SynchronizeSplits(100);
 
             // Assert.
-            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Exactly(17));
+            _splitFetcher.Verify(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()), Times.Exactly(17));
             _log.Verify(mock => mock.Debug($"Refresh completed bypassing the CDN in 7 attempts."), Times.Once);
             _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
         }

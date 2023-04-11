@@ -2,11 +2,11 @@
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Logger;
-using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Evaluator
 {
@@ -27,7 +27,7 @@ namespace Splitio.Services.Evaluator
         }
 
         #region Public Method
-        public TreatmentResult EvaluateFeature(Key key, string featureName, Dictionary<string, object> attributes = null)
+        public async Task<TreatmentResult> EvaluateFeatureAsync(Key key, string featureName, Dictionary<string, object> attributes = null)
         {
             using (var clock = new Util.SplitStopwatch())
             {
@@ -35,7 +35,7 @@ namespace Splitio.Services.Evaluator
 
                 try
                 {
-                    var parsedSplit = _splitCache.GetSplit(featureName);
+                    var parsedSplit = await _splitCache.GetSplitAsync(featureName);
 
                     return EvaluateTreatment(key, parsedSplit, featureName, clock, attributes);
                 }
@@ -48,7 +48,7 @@ namespace Splitio.Services.Evaluator
             }
         }
 
-        public MultipleEvaluatorResult EvaluateFeatures(Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
+        public async Task<MultipleEvaluatorResult> EvaluateFeaturesAsync(Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
         {
             var exception = false;
             var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();            
@@ -58,7 +58,7 @@ namespace Splitio.Services.Evaluator
 
                 try
                 {
-                    var splits = _splitCache.FetchMany(featureNames);
+                    var splits = await _splitCache.FetchManyAsync(featureNames);
 
                     foreach (var feature in featureNames)
                     {

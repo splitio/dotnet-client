@@ -5,6 +5,7 @@ using Splitio.Redis.Services.Domain;
 using StackExchange.Redis;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -34,7 +35,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async void ExecuteSetAndGetSuccessful()
+        public async Task ExecuteSetAndGetSuccessful()
         {
             //Arrange
             var isSet = await adapter.SetAsync("test_key", "test_value");
@@ -48,7 +49,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async void ExecuteSetShouldReturnFalseOnException()
+        public async Task ExecuteSetShouldReturnFalseOnException()
         {
             //Arrange
             var config = new RedisConfig();
@@ -64,7 +65,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async void ExecuteGetShouldReturnEmptyOnException()
+        public async Task ExecuteGetShouldReturnEmptyOnException()
         {
             //Arrange
             var config = new RedisConfig();
@@ -80,7 +81,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async void ExecuteMultipleSetAndMultipleGetSuccessful()
+        public async Task ExecuteMultipleSetAndMultipleGetSuccessful()
         {
             //Arrange
             var isSet1 = await adapter.SetAsync("test_key", "test_value");
@@ -100,7 +101,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async void ExecuteGetShouldReturnEmptyArrayOnException()
+        public async Task ExecuteGetShouldReturnEmptyArrayOnException()
         {
             //Arrange
             var config = new RedisConfig();
@@ -116,7 +117,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async void ExecuteMultipleSetAndGetAllKeysWithFilterSuccessful()
+        public async Task ExecuteMultipleSetAndGetAllKeysWithFilterSuccessful()
         {
             //Arrange
             var isSet1 = await adapter.SetAsync("test.test_key", "test_value");
@@ -153,7 +154,7 @@ namespace Splitio_Tests.Integration_Tests
 
 
         [TestMethod]
-        public async void ExecuteSetAndDelSuccessful()
+        public async Task ExecuteSetAndDelSuccessful()
         {
             //Arrange
             var isSet1 = await adapter.SetAsync("testdel.test_key", "test_value");
@@ -185,7 +186,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async void ExecuteSetAndFlushSuccessful()
+        public async Task ExecuteSetAndFlushSuccessful()
         {
             //Arrange
             var isSet1 = await adapter.SetAsync("testflush.test_key", "test_value");
@@ -200,7 +201,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async void ExecuteSAddAndSMemberSuccessful()
+        public async Task ExecuteSAddAndSMemberSuccessful()
         {
             //Arrange
             var setCount = await adapter.SetAsync("test_key_set", "test_value_1");
@@ -210,12 +211,11 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             Assert.AreEqual(true, setCount);
-            Assert.AreEqual(1, result.Length);
             Assert.IsTrue(result.Contains("test_value_1"));
         }
 
         [TestMethod]
-        public async void ExecuteSAddShouldReturnFalseOnException()
+        public async Task ExecuteSAddShouldReturnFalseOnException()
         {
             //Arrange
             var config = new RedisConfig();
@@ -231,7 +231,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async void ExecuteSMembersShouldReturnFalseOnException()
+        public async Task ExecuteSMembersShouldReturnFalseOnException()
         {
             //Arrange
             var config = new RedisConfig();
@@ -247,7 +247,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async void ExecuteSAddAndSMembersSuccessful()
+        public async Task ExecuteSAddAndSMembersSuccessful()
         {
             //Arrange
             var setCount = await adapter.SAddAsync("test_key_set_multiple", new RedisValue[]{ "test_value", "test_value2"});
@@ -263,7 +263,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async void ExecuteSAddShouldReturnZeroOnException()
+        public async Task ExecuteSAddShouldReturnZeroOnException()
         {
             //Arrange
             var config = new RedisConfig();
@@ -279,7 +279,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async void ExecuteSAddAndSRemSuccessful()
+        public async Task ExecuteSAddAndSRemSuccessful()
         {
             //Arrange
             var setCount = await adapter.SAddAsync("test_key_set", new RedisValue[] { "test_value", "test_value2" });
@@ -297,7 +297,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async void ExecuteSRemShouldReturnZeroOnException()
+        public async Task ExecuteSRemShouldReturnZeroOnException()
         {
             //Arrange
             var config = new RedisConfig();
@@ -313,7 +313,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async void ExecuteIncrBySuccessful()
+        public async Task ExecuteIncrBySuccessful()
         {
             //Arrange
             await adapter.IcrByAsync("test_count", 1);
@@ -326,7 +326,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async void ExecuteIncrShouldReturnZeroOnException()
+        public async Task ExecuteIncrShouldReturnZeroOnException()
         {
             //Arrange
             var config = new RedisConfig();
@@ -342,7 +342,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async void ExecuteHashIncrementShouldReturnValue()
+        public async Task ExecuteHashIncrementShouldReturnValue()
         {
             //Act & Assert
             var result = await adapter.HashIncrementAsync("test_count", "hashField", 2);

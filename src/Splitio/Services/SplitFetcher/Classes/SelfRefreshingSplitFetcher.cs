@@ -54,7 +54,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                 _taskManager.StartPeriodic(async () =>
                 {
-                    await FetchSplits(new FetchOptions());
+                    await FetchSplitsAsync(new FetchOptions());
                 }, _interval * 1000, _cancelTokenSource, "Splits Fetcher.");
             }
         }
@@ -76,18 +76,18 @@ namespace Splitio.Services.SplitFetcher.Classes
             _splitCache.Clear();
         }
 
-        public async Task<FetchResult> FetchSplits(FetchOptions fetchOptions)
+        public async Task<FetchResult> FetchSplitsAsync(FetchOptions fetchOptions)
         {
             var segmentNames = new List<string>();
             var success = false;
 
             while (true)
             {
-                var changeNumber = _splitCache.GetChangeNumber();
+                var changeNumber = await _splitCache.GetChangeNumberAsync();
 
                 try
                 {
-                    var result = await _splitChangeFetcher.Fetch(changeNumber, fetchOptions);
+                    var result = await _splitChangeFetcher.FetchAsync(changeNumber, fetchOptions);
 
                     if (result == null)
                     {
@@ -116,7 +116,8 @@ namespace Splitio.Services.SplitFetcher.Classes
                 {
                     if (_log.IsDebugEnabled)
                     {
-                        _log.Debug($"split fetch before: {changeNumber}, after: {_splitCache.GetChangeNumber()}");
+                        var cn = await _splitCache.GetChangeNumberAsync();
+                        _log.Debug($"split fetch before: {changeNumber}, after: {cn}");
                     }
                 }
             }

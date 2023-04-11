@@ -38,7 +38,7 @@ namespace Splitio.Services.Common
         }
 
         #region Public Methods
-        public async Task<bool> StartSse()
+        public async Task<bool> StartSseAsync()
         {
             try
             {
@@ -102,11 +102,11 @@ namespace Splitio.Services.Common
 
                 _wrapperAdapter
                     .TaskDelay(sleepTime)
-                    .ContinueWith((t) =>
+                    .ContinueWith(async (t) =>
                     {
                         _log.Debug("Starting ScheduleNextTokenRefresh ...");
                         StopSse();
-                        StartSse();
+                        await StartSseAsync();
                     }, _cancellationTokenSourceRefreshToken.Token);
             }
             catch (Exception ex)

@@ -12,12 +12,10 @@ namespace Splitio.Services.Shared.Classes
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(IWrapperAdapter));
 
         private readonly IWrapperAdapter _wrapperAdapter;
-
         public TasksManager(IWrapperAdapter wrapperAdapter)
         {
             _wrapperAdapter = wrapperAdapter;
         }
-
         public void Start(Action action, CancellationTokenSource cancellationToken, string description)
         {
             _log.Debug($"Starting Task: {description}");
@@ -27,6 +25,12 @@ namespace Splitio.Services.Shared.Classes
         public void Start(Action action, string description)
         {
             Start(action, new CancellationTokenSource(), description);
+        }
+
+        public void Start(Func<Task> function, CancellationTokenSource cancellationToken, string description)
+        {
+            _log.Debug($"Starting Task: {description}");
+            Task.Factory.StartNew(function, cancellationToken.Token);
         }
 
         public void StartPeriodic(Action action, int intervalInMilliseconds, CancellationTokenSource cancellationToken, string description)

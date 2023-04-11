@@ -10,6 +10,7 @@ using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Telemetry.Storages;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -31,13 +32,13 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         [DeploymentItem(@"Resources\splits_staging.json")]
         [DeploymentItem(@"Resources\segment_payed.json")]
-        public void ExecuteGetSuccessfulWithResultsFromJSONFile()
+        public async Task ExecuteGetSuccessfulWithResultsFromJSONFile()
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var splitParser = new InMemorySplitParser(new JSONFileSegmentFetcher($"{rootFilePath}segment_payed.json", segmentCache), segmentCache);
             var splitChangeFetcher = new JSONFileSplitChangeFetcher($"{rootFilePath}splits_staging.json");
-            var splitChangesResult = splitChangeFetcher.Fetch(-1, new FetchOptions());
+            var splitChangesResult = await splitChangeFetcher.FetchAsync(-1, new FetchOptions());
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
             var gates = new InMemoryReadinessGatesCache();
             var wrapperAdapter = WrapperAdapter.Instance();
@@ -46,7 +47,7 @@ namespace Splitio_Tests.Integration_Tests
             gates.WaitUntilReady(1000);
 
             //Act           
-            ParsedSplit result = (ParsedSplit)splitCache.GetSplit("Pato_Test_1");
+            var result = await splitCache.GetSplitAsync("Pato_Test_1");
 
             //Assert
             Assert.IsNotNull(result);
@@ -57,13 +58,13 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         [DeploymentItem(@"Resources\splits_staging_4.json")]
         [DeploymentItem(@"Resources\segment_payed.json")]
-        public void ExecuteGetSuccessfulWithResultsFromJSONFileIncludingTrafficAllocation()
+        public async Task ExecuteGetSuccessfulWithResultsFromJSONFileIncludingTrafficAllocation()
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var splitParser = new InMemorySplitParser(new JSONFileSegmentFetcher($"{rootFilePath}segment_payed.json", segmentCache), segmentCache);
             var splitChangeFetcher = new JSONFileSplitChangeFetcher($"{rootFilePath}splits_staging_4.json");
-            var splitChangesResult = splitChangeFetcher.Fetch(-1, new FetchOptions());
+            var splitChangesResult = await splitChangeFetcher.FetchAsync(-1, new FetchOptions());
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
             var gates = new InMemoryReadinessGatesCache();
             var wrapperAdapter = WrapperAdapter.Instance();
@@ -72,7 +73,7 @@ namespace Splitio_Tests.Integration_Tests
             gates.WaitUntilReady(1000);
 
             //Act           
-            ParsedSplit result = (ParsedSplit)splitCache.GetSplit("Traffic_Allocation_UI");
+            var result = await splitCache.GetSplitAsync("Traffic_Allocation_UI");
 
             //Assert
             Assert.IsNotNull(result);
@@ -84,7 +85,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public void ExecuteGetWithoutResults()
+        public async Task ExecuteGetWithoutResults()
         {
             //Arrange
             var baseUrl = "https://sdk-aws-staging.split.io/api/";
@@ -119,7 +120,7 @@ namespace Splitio_Tests.Integration_Tests
             //Act
             gates.WaitUntilReady(10);
 
-            var result = splitCache.GetSplit("condition_and");
+            var result = await splitCache.GetSplitAsync("condition_and");
 
             //Assert
             Assert.IsNull(result);

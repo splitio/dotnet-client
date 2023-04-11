@@ -4,6 +4,7 @@ using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.InputValidation.Classes
 {
@@ -18,7 +19,7 @@ namespace Splitio.Services.InputValidation.Classes
             _splitCache = splitCache;
         }
 
-        public ValidatorResult IsValid(string trafficType, string method)
+        public async Task<ValidatorResult> IsValidAsync(string trafficType, string method)
         {
             if (trafficType == null)
             {
@@ -39,7 +40,9 @@ namespace Splitio.Services.InputValidation.Classes
                 trafficType = trafficType.ToLower();
             }
 
-            if (!_splitCache.TrafficTypeExists(trafficType))
+            var exists = await _splitCache.TrafficTypeExistsAsync(trafficType);
+
+            if (!exists)
             {
                 _log.Warn($"Track: Traffic Type {trafficType} does not have any corresponding Splits in this environment, make sure you’re tracking your events to a valid traffic type defined in the Split console.");
             }

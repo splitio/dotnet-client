@@ -6,6 +6,7 @@ using Splitio.Redis.Services.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio_Tests.Resources;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -22,7 +23,7 @@ namespace Splitio_Tests.Integration_Tests
         private IRedisAdapter _redisAdapter;
 
         [TestInitialize]
-        public void Initialization()
+        public async Task Initialization()
         {
             var cacheAdapterConfig = new CacheAdapterConfigurationOptions
             {
@@ -48,7 +49,8 @@ namespace Splitio_Tests.Integration_Tests
             };
             var pool = new ConnectionPoolManager(rconfig);
             _redisAdapter = new RedisAdapter(rconfig, pool);
-            LoadSplits();
+            
+            await LoadSplits();
         }
 
         [TestMethod]
@@ -232,7 +234,7 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(client.IsDestroyed());
         }
 
-        private async void LoadSplits()
+        private async Task LoadSplits()
         {
             _redisAdapter.Flush();
 

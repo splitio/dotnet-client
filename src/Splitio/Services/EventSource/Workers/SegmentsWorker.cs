@@ -4,6 +4,7 @@ using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource.Workers
 {
@@ -61,7 +62,7 @@ namespace Splitio.Services.EventSource.Workers
                     _log.Debug($"Segments worker starting ...");
                     _cancellationTokenSource = new CancellationTokenSource();
                     _running = true;
-                    _tasksManager.Start(() => Execute(), _cancellationTokenSource, "Segments Workers.");
+                    _tasksManager.Start(ExecuteAsync, _cancellationTokenSource, "Segments Workers.");
                 }
                 catch (Exception ex)
                 {
@@ -97,7 +98,7 @@ namespace Splitio.Services.EventSource.Workers
         #endregion
 
         #region Private Methods
-        public async void Execute()
+        public async Task ExecuteAsync()
         {
             try
             {

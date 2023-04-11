@@ -6,6 +6,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Impressions.Classes
 {
@@ -20,11 +21,11 @@ namespace Splitio.Redis.Services.Impressions.Classes
             _impressionsCache = impressionsCache;
         }
 
-        public void RecordUniqueKeys(List<Mtks> uniques)
+        public async Task RecordUniqueKeysAsync(List<Mtks> uniques)
         {
             try
             {
-                _impressionsCache.RecordUniqueKeys(uniques);
+                await _impressionsCache.RecordUniqueKeysAsync(uniques);
             }
             catch (Exception ex)
             {
@@ -32,7 +33,7 @@ namespace Splitio.Redis.Services.Impressions.Classes
             }
         }
 
-        public void RecordImpressionsCount(List<ImpressionsCountModel> impressionsCount)
+        public async Task RecordImpressionsCountAsync(List<ImpressionsCountModel> impressionsCount)
         {
             try
             {
@@ -43,7 +44,7 @@ namespace Splitio.Redis.Services.Impressions.Classes
                     values.Add($"{item.SplitName}::{item.TimeFrame}", item.Count);
                 }
 
-                _impressionsCache.RecordImpressionsCount(values);
+                await _impressionsCache.RecordImpressionsCountAsync(values);
             }
             catch (Exception ex)
             {

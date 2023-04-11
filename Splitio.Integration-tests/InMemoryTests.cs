@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests
 {
@@ -15,10 +16,10 @@ namespace Splitio.Integration_tests
     public class InMemoryTests : BaseIntegrationTests
     {
         [TestMethod]
-        public void GetTreatment_WithoutBUR_ReturnsControl()
+        public async Task GetTreatment_WithoutBUR_ReturnsControl()
         {
             // Arrange.
-            using (var httpClientMock = GetHttpClientMock())
+            using (var httpClientMock = await GetHttpClientMock())
             {
                 var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
 
@@ -38,10 +39,10 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void GetTreatmentWithConfig_WithoutBUR_ReturnsControl()
+        public async Task GetTreatmentWithConfig_WithoutBUR_ReturnsControl()
         {
             // Arrange.           
-            using (var httpClientMock = GetHttpClientMock())
+            using (var httpClientMock = await GetHttpClientMock())
             {
                 var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
 
@@ -63,10 +64,10 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void GetTreatments_WithoutBUR_ReturnsControl()
+        public async Task GetTreatments_WithoutBUR_ReturnsControl()
         {
             // Arrange.           
-            using (var httpClientMock = GetHttpClientMock())
+            using (var httpClientMock = await GetHttpClientMock())
             {
                 var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
 
@@ -87,10 +88,10 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void GetTreatmentsWithConfig_WithoutBUR_ReturnsControl()
+        public async Task GetTreatmentsWithConfig_WithoutBUR_ReturnsControl()
         {
             // Arrange.           
-            using (var httpClientMock = GetHttpClientMock())
+            using (var httpClientMock = await GetHttpClientMock())
             {
                 var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
 
@@ -113,10 +114,10 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void GetTreatment_WithtBUR_ReturnsTimeOutException()
+        public async Task GetTreatment_WithtBUR_ReturnsTimeOutException()
         {
             // Arrange.           
-            using (var httpClientMock = GetHttpClientMock())
+            using (var httpClientMock = await GetHttpClientMock())
             {
                 var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
 
@@ -149,10 +150,10 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void Manager_SplitNames_WithoutBUR_ReturnsNull()
+        public async Task Manager_SplitNames_WithoutBUR_ReturnsNull()
         {
             // Arrange.
-            using (var httpClientMock = GetHttpClientMock())
+            using (var httpClientMock = await GetHttpClientMock())
             {
                 var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
 
@@ -172,10 +173,10 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void CheckingHeaders_WithIPAddressesEnabled_ReturnsWithIpAndName()
+        public async Task CheckingHeaders_WithIPAddressesEnabled_ReturnsWithIpAndName()
         {
             // Arrange.
-            using (var httpClientMock = GetHttpClientMock())
+            using (var httpClientMock = await GetHttpClientMock())
             {
                 var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
 
@@ -209,10 +210,10 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void CheckingHeaders_WithIPAddressesDisabled_ReturnsWithoutIpAndName()
+        public async Task CheckingHeaders_WithIPAddressesDisabled_ReturnsWithoutIpAndName()
         {
             // Arrange.           
-            using (var httpClientMock = GetHttpClientMock())
+            using (var httpClientMock = await GetHttpClientMock())
             {
                 var configurations = GetConfigurationOptions(httpClientMock.GetUrl(), ipAddressesEnabled: false);
 
@@ -246,10 +247,10 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void GetTreatments_ValidateDedupeImpressions_Optimized()
+        public async Task GetTreatments_ValidateDedupeImpressions_Optimized()
         {
             // Arrange.           
-            using (var httpClientMock = GetHttpClientMock())
+            using (var httpClientMock = await GetHttpClientMock())
             {
                 var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
 
@@ -292,10 +293,10 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void GetTreatments_ValidateDedupeImpressions_Debug()
+        public async Task GetTreatments_ValidateDedupeImpressions_Debug()
         {
             // Arrange.
-            using (var httpClientMock = GetHttpClientMock())
+            using (var httpClientMock = await GetHttpClientMock())
             {
                 var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
                 configurations.ImpressionsMode = ImpressionsMode.Debug;
@@ -331,13 +332,11 @@ namespace Splitio.Integration_tests
             }
         }
 
-        // TODO: None mode is not supported yet.
-        [Ignore]
         [TestMethod]
-        public void GetTreatments_WithImpressionsInNoneMode()
+        public async Task GetTreatments_WithImpressionsInNoneMode()
         {
             // Arrange.
-            using (var httpClientMock = GetHttpClientMock())
+            using (var httpClientMock = await GetHttpClientMock())
             {
                 var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
                 configurations.ImpressionsMode = ImpressionsMode.None;
@@ -376,10 +375,10 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void Telemetry_ValidatesConfigInitAndStats()
+        public async Task Telemetry_ValidatesConfigInitAndStats()
         {
             // Arrange.
-            using (var httpClientMock = GetHttpClientMock())
+            using (var httpClientMock = await GetHttpClientMock())
             {
                 var impressionListener = new IntegrationTestsImpressionListener(50);
                 var configurations = GetConfigurationOptions(httpClientMock.GetUrl(), impressionListener: impressionListener);
@@ -455,7 +454,7 @@ namespace Splitio.Integration_tests
             };
         }
 
-        protected override HttpClientMock GetHttpClientMock()
+        protected override Task<HttpClientMock> GetHttpClientMock()
         {
             var httpClientMock = new HttpClientMock();
             httpClientMock.SplitChangesOk("split_changes.json", "-1");
@@ -473,12 +472,12 @@ namespace Splitio.Integration_tests
             httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
             httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 
-            return httpClientMock;
+            return Task.FromResult(httpClientMock);
         }
 
-        protected override void AssertSentImpressions(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
+        protected override Task<bool> AssertSentImpressions(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
         {
-            if (sentImpressionsCount <= 0) return;
+            if (sentImpressionsCount <= 0) return Task.FromResult(true);
 
             var sentImpressions = GetImpressionsSentBackend(httpClientMock);
 
@@ -492,7 +491,7 @@ namespace Splitio.Integration_tests
 
                 Thread.Sleep(time);
 
-                time = time + 100;
+                time += 100;
                 sentImpressions = GetImpressionsSentBackend(httpClientMock);
             }
 
@@ -509,6 +508,8 @@ namespace Splitio.Integration_tests
 
                 AssertImpression(expectedImp, impressions);
             }
+
+            return Task.FromResult(true);
         }
 
         protected void AssertImpression(KeyImpression impressionExpected, List<ImpressionData> sentImpressions)
@@ -522,7 +523,7 @@ namespace Splitio.Integration_tests
                 .Any());
         }
 
-        protected override void AssertSentEvents(List<EventBackend> eventsExpected, HttpClientMock httpClientMock = null, int sleepTime = 5000, int? eventsCount = null, bool validateEvents = true)
+        protected override Task<bool> AssertSentEvents(List<EventBackend> eventsExpected, HttpClientMock httpClientMock = null, int sleepTime = 5000, int? eventsCount = null, bool validateEvents = true)
         {
             Thread.Sleep(sleepTime);
 
@@ -543,6 +544,8 @@ namespace Splitio.Integration_tests
                         .Any());
                 }
             }
+
+            return Task.FromResult(true);
         }
         #endregion
 

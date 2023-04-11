@@ -90,7 +90,7 @@ namespace Splitio_Tests.Integration_Tests
             var splitCacheMock = new Mock<ISplitCache>();
 
             splitCacheMock
-                .Setup(x => x.GetSplit(It.IsAny<string>()))
+                .Setup(x => x.GetSplitAsync(It.IsAny<string>()))
                 .Throws<Exception>();
 
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", null, splitCacheMock.Object);
@@ -329,7 +329,7 @@ namespace Splitio_Tests.Integration_Tests
             var splitCacheMock = new Mock<ISplitCache>();
 
             splitCacheMock
-                .Setup(x => x.GetSplit(It.IsAny<string>()))
+                .Setup(x => x.GetSplitAsync(It.IsAny<string>()))
                 .Throws<Exception>();
 
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", splitCacheInstance: splitCacheMock.Object, impressionsLog: impressionsLogMock.Object);
@@ -885,8 +885,8 @@ namespace Splitio_Tests.Integration_Tests
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", trafficTypeValidator: trafficTypeValidator.Object);
 
             trafficTypeValidator
-                .Setup(mock => mock.IsValid(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(new ValidatorResult { Success = true }); ;
+                .Setup(mock => mock.IsValidAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new ValidatorResult { Success = true }); ;
 
             // Act.
             var result = client.Track("key", "traffic_type", "event_type");

@@ -5,6 +5,6 @@ namespace Splitio.Services.SplitFetcher.Interfaces
 {
     public interface ISplitChangeFetcher
     {
-        Task<SplitChangesResult> Fetch(long since, FetchOptions fetchOptions);
+        Task<SplitChangesResult> FetchAsync(long since, FetchOptions fetchOptions);
     }
 }

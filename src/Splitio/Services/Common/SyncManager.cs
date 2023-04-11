@@ -10,6 +10,7 @@ using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
 {
@@ -61,38 +62,7 @@ namespace Splitio.Services.Common
         #region Public Methods
         public void Start()
         {
-            _tasksManager.Start(() =>
-            {
-                try
-                {
-                    while (!_synchronizer.SyncAll(_ctsShutdown, asynchronous: false))
-                    {
-                        _wrapperAdapter.TaskDelay(500).Wait();
-                    }
-
-                    _statusManager.SetReady();
-                    _telemetrySyncTask.RecordConfigInit();
-                    _synchronizer.StartPeriodicDataRecording();
-
-                    if (_streamingEnabled)
-                    {
-                        _log.Debug("Starting streaming mode...");
-                        _tasksManager.Start(OnSSEClientStatus, "SSE Client Status");
-                        var connected = _pushManager.StartSse().Result;
-
-                        if (connected) return;
-                    }
-
-                    _log.Debug("Starting polling mode ...");
-                    _synchronizer.StartPeriodicFetching();
-                    _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
-                }
-                catch (Exception ex)
-                {
-                    _log.Debug("Exception initialization SDK.", ex);
-                }
-                
-            }, _ctsShutdown, "SDK Initialization");
+            _tasksManager.Start(StartTask, _ctsShutdown, "SDK Initialization");
         }
 
         public void Shutdown()
@@ -188,7 +158,7 @@ namespace Splitio.Services.Common
 
                 if (retry)
                 {
-                    _pushManager.StartSse();
+                    _pushManager.StartSseAsync();
                 }
             }
         }
@@ -212,6 +182,38 @@ namespace Splitio.Services.Common
         {
             _pushManager.StopSse();
             _ctsStreaming.Cancel();
+        }
+
+        private async Task StartTask()
+        {
+            try
+            {
+                while (!_synchronizer.SyncAll(_ctsShutdown, asynchronous: false))
+                {
+                    _wrapperAdapter.TaskDelay(500).Wait();
+                }
+
+                _statusManager.SetReady();
+                _telemetrySyncTask.RecordConfigInit();
+                _synchronizer.StartPeriodicDataRecording();
+
+                if (_streamingEnabled)
+                {
+                    _log.Debug("Starting streaming mode...");
+                    _tasksManager.Start(OnSSEClientStatus, "SSE Client Status");
+                    var connected = await _pushManager.StartSseAsync();
+
+                    if (connected) return;
+                }
+
+                _log.Debug("Starting polling mode ...");
+                _synchronizer.StartPeriodicFetching();
+                _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
+            }
+            catch (Exception ex)
+            {
+                _log.Debug("Exception initialization SDK.", ex);
+            }
         }
         #endregion
     }

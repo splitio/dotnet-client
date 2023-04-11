@@ -6,6 +6,7 @@ using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
@@ -13,7 +14,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
     public class RedisCacheBaseTests
     {
         [TestMethod]
-        public void UseSplitioPrefix()
+        public async Task UseSplitioPrefix()
         {
             //Arrange
             var splitName = "test_split";
@@ -50,7 +51,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 });
 
             //Act
-            var result = splitCache.GetSplit(splitName);
+            var result = await splitCache.GetSplitAsync(splitName);
 
             //Assert
             Assert.IsNotNull(result);
@@ -63,7 +64,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
-        public void UseSplitioAndUserPrefix()
+        public async Task UseSplitioAndUserPrefix()
         {
             //Arrange
             var splitName = "test_split";
@@ -100,7 +101,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 });
 
             //Act
-            var result = splitCache.GetSplit(splitName);
+            var result = await splitCache.GetSplitAsync(splitName);
 
             //Assert
             Assert.IsNotNull(result);

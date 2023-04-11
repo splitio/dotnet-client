@@ -5,6 +5,7 @@ using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource.Workers
 {
@@ -51,7 +52,7 @@ namespace Splitio.Services.EventSource.Workers
             }
         }
 
-        public void KillSplit(long changeNumber, string splitName, string defaultTreatment)
+        public async Task KillSplitAsync(long changeNumber, string splitName, string defaultTreatment)
         {
             try
             {
@@ -61,10 +62,10 @@ namespace Splitio.Services.EventSource.Workers
                     return;
                 }
 
-                if (changeNumber > _splitCache.GetChangeNumber())
+                if (changeNumber > await _splitCache.GetChangeNumberAsync())
                 {
                     _log.Debug($"Kill Split: {splitName}, changeNumber: {changeNumber} and defaultTreatment: {defaultTreatment}");
-                    _splitCache.Kill(changeNumber, splitName, defaultTreatment);
+                    await _splitCache.KillAsync(changeNumber, splitName, defaultTreatment);
                 }
             }
             catch (Exception ex)
@@ -88,7 +89,7 @@ namespace Splitio.Services.EventSource.Workers
                     _log.Debug("SplitsWorker starting ...");
                     _cancellationTokenSource = new CancellationTokenSource();
                     _running = true;
-                    _tasksManager.Start(() => ExecuteAsync(), _cancellationTokenSource, "Splits Worker.");                    
+                    _tasksManager.Start(ExecuteAsync, _cancellationTokenSource, "Splits Worker.");                    
                 }
                 catch (Exception ex)
                 {
@@ -124,7 +125,7 @@ namespace Splitio.Services.EventSource.Workers
         #endregion
 
         #region Private Mthods
-        private async void ExecuteAsync()
+        private async Task ExecuteAsync()
         {
             try
             {

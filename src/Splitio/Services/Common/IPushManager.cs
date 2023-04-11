@@ -4,7 +4,7 @@ namespace Splitio.Services.Common
 {
     public interface IPushManager
     {
-        Task<bool> StartSse();
+        Task<bool> StartSseAsync();
         void StopSse();
     }
 }

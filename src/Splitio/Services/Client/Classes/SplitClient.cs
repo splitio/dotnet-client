@@ -21,6 +21,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -83,7 +84,7 @@ namespace Splitio.Services.Client.Classes
 
         public SplitResult GetTreatmentWithConfig(Key key, string feature, Dictionary<string, object> attributes = null)
         {
-            var result = GetTreatmentResult(key, feature, nameof(GetTreatmentWithConfig), attributes);
+            var result = GetTreatmentResultAsync(key, feature, nameof(GetTreatmentWithConfig), attributes).Result;
 
             return new SplitResult
             {
@@ -99,7 +100,7 @@ namespace Splitio.Services.Client.Classes
 
         public virtual string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null)
         {
-            var result = GetTreatmentResult(key, feature, nameof(GetTreatment), attributes);
+            var result = GetTreatmentResultAsync(key, feature, nameof(GetTreatment), attributes).Result;
 
             return result.Treatment;
         }
@@ -111,7 +112,7 @@ namespace Splitio.Services.Client.Classes
 
         public Dictionary<string, SplitResult> GetTreatmentsWithConfig(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            var results = GetTreatmentsResult(key, features, nameof(GetTreatmentsWithConfig), attributes);
+            var results = GetTreatmentsResultAsync(key, features, nameof(GetTreatmentsWithConfig), attributes).Result;
 
             return results
                 .ToDictionary(r => r.Key, r => new SplitResult
@@ -121,6 +122,13 @@ namespace Splitio.Services.Client.Classes
                 });
         }
 
+        public async Task<Dictionary<string, string>> GetTreatmentsAsync(string key, List<string> features, Dictionary<string, object> attributes = null)
+        {
+            var results = await GetTreatmentsResultAsync(new Key(key, null), features, nameof(GetTreatments), attributes);
+
+            return results.ToDictionary(r => r.Key, r => r.Value.Treatment);
+        }
+
         public Dictionary<string, string> GetTreatments(string key, List<string> features, Dictionary<string, object> attributes = null)
         {
             return GetTreatments(new Key(key, null), features, attributes);
@@ -128,10 +136,9 @@ namespace Splitio.Services.Client.Classes
 
         public Dictionary<string, string> GetTreatments(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            var results = GetTreatmentsResult(key, features, nameof(GetTreatments), attributes);
+            var results = GetTreatmentsResultAsync(key, features, nameof(GetTreatments), attributes).Result;
 
-            return results
-                .ToDictionary(r => r.Key, r => r.Value.Treatment);
+            return results.ToDictionary(r => r.Key, r => r.Value.Treatment);
         }
 
         public virtual bool Track(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null)
@@ -147,7 +154,7 @@ namespace Splitio.Services.Client.Classes
                 var eventPropertiesResult = _eventPropertiesValidator.IsValid(properties);
 
                 var trafficTypeResult = _blockUntilReadyService.IsSdkReady()
-                    ? _trafficTypeValidator.IsValid(trafficType, nameof(trafficType))
+                    ? _trafficTypeValidator.IsValidAsync(trafficType, nameof(trafficType)).Result
                     : new ValidatorResult { Success = true, Value = trafficType };
 
                 if (!keyResult || !trafficTypeResult.Success || !eventTypeResult || !eventPropertiesResult.Success)
@@ -250,7 +257,7 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Private Methods
-        private TreatmentResult GetTreatmentResult(Key key, string feature, string method, Dictionary<string, object> attributes = null)
+        private async Task<TreatmentResult> GetTreatmentResultAsync(Key key, string feature, string method, Dictionary<string, object> attributes = null)
         {
             if (!IsClientReady(method)) return new TreatmentResult(string.Empty, Control, null);
 
@@ -262,7 +269,7 @@ namespace Splitio.Services.Client.Classes
 
             feature = splitNameResult.Value;
 
-            var result = _evaluator.EvaluateFeature(key, feature, attributes);
+            var result = await _evaluator.EvaluateFeatureAsync(key, feature, attributes);
 
             if (result.Exception)
             {
@@ -279,7 +286,7 @@ namespace Splitio.Services.Client.Classes
             return result;
         }
 
-        private Dictionary<string, TreatmentResult> GetTreatmentsResult(Key key, List<string> features, string method, Dictionary<string, object> attributes = null)
+        private async Task<Dictionary<string, TreatmentResult>> GetTreatmentsResultAsync(Key key, List<string> features, string method, Dictionary<string, object> attributes = null)
         {
             var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
 
@@ -299,7 +306,7 @@ namespace Splitio.Services.Client.Classes
             {
                 features = _splitNameValidator.SplitNamesAreValid(features, method);
                 
-                var results = _evaluator.EvaluateFeatures(key, features, attributes);
+                var results = await _evaluator.EvaluateFeaturesAsync(key, features, attributes);
 
                 foreach (var treatmentResult in results.TreatmentResults)
                 {

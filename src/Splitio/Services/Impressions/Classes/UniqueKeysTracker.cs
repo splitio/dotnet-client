@@ -59,6 +59,7 @@ namespace Splitio.Services.Impressions.Classes
             _tasksManager.StartPeriodic(() => _filterAdapter.Clear(), IntervalToClearLongTermCache, _cancellationTokenSource, "Cache Long Term clear.");
         }
 
+        // TODO: VERIFICAR ASYNC METHODS
         protected override void SendBulkData()
         {
             lock (_lock)
@@ -77,7 +78,7 @@ namespace Splitio.Services.Impressions.Classes
 
                     if (values.Count <= _maxBulkSize)
                     {
-                        _senderAdapter.RecordUniqueKeys(values);
+                        _senderAdapter.RecordUniqueKeysAsync(values);
                         return;
                     }
 
@@ -85,7 +86,7 @@ namespace Splitio.Services.Impressions.Classes
                     {
                         var bulkToPost = Util.Helper.TakeFromList(values, _maxBulkSize);
 
-                        _senderAdapter.RecordUniqueKeys(bulkToPost);
+                        _senderAdapter.RecordUniqueKeysAsync(bulkToPost);
                     }
                 }
                 catch (Exception e)

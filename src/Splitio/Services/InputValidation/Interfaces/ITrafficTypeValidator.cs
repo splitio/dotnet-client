@@ -1,9 +1,10 @@
 ﻿using Splitio.Domain;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.InputValidation.Interfaces
 {
     public interface ITrafficTypeValidator
     {
-        ValidatorResult IsValid(string trafficType, string method);
+        Task<ValidatorResult> IsValidAsync(string trafficType, string method);
     }
 }

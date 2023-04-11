@@ -40,13 +40,13 @@ namespace Splitio_Tests.Integration_Tests.Impressions
         [TestMethod]
         public async Task RecordUniqueKeysAndExpire()
         {
-            _impressionsCache.RecordUniqueKeys(new List<Mtks>
+            await _impressionsCache.RecordUniqueKeysAsync(new List<Mtks>
             {
                 new Mtks("Feature1", new HashSet<string>{ "key-1", "key-2" }),
                 new Mtks("Feature2", new HashSet<string>{ "key-1", "key-2" })
             });
 
-            _impressionsCache.RecordUniqueKeys(new List<Mtks>
+            await _impressionsCache.RecordUniqueKeysAsync(new List<Mtks>
             {
                 new Mtks("Feature1", new HashSet<string>{ "key-1", "key-2" }),
                 new Mtks("Feature2", new HashSet<string>{ "key-1", "key-2" })

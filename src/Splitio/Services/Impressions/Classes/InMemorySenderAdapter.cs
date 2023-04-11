@@ -5,6 +5,7 @@ using Splitio.Telemetry.Common;
 using Splitio.Telemetry.Domain;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -22,11 +23,11 @@ namespace Splitio.Services.Impressions.Classes
             _impressionsSdkApiClient = impressionsSdkApiClient;
         }
 
-        public void RecordUniqueKeys(List<Mtks> uniques)
+        public async Task RecordUniqueKeysAsync(List<Mtks> uniques)
         {
             try
             {
-                _telemetryApi.RecordUniqueKeys(new UniqueKeys(uniques));
+                await _telemetryApi.RecordUniqueKeysAsync(new UniqueKeys(uniques));
             }
             catch (Exception ex)
             {
@@ -34,11 +35,11 @@ namespace Splitio.Services.Impressions.Classes
             }
         }
 
-        public void RecordImpressionsCount(List<ImpressionsCountModel> values)
+        public async Task RecordImpressionsCountAsync(List<ImpressionsCountModel> values)
         {
             try
             {
-                _impressionsSdkApiClient.SendBulkImpressionsCount(values);
+                await _impressionsSdkApiClient.SendBulkImpressionsCountAsync(values);
             }
             catch (Exception ex)
             {

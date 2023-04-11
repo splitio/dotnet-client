@@ -5,6 +5,7 @@ using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Cache.Classes
 {
@@ -19,7 +20,7 @@ namespace Splitio.Services.Cache.Classes
             _segments = segments;
         }
 
-        public void AddToSegment(string segmentName, List<string> segmentKeys)
+        public Task AddToSegmentAsync(string segmentName, List<string> segmentKeys)
         {
             _segments.TryGetValue(segmentName, out Segment segment);
 
@@ -30,27 +31,31 @@ namespace Splitio.Services.Cache.Classes
             }
 
             segment.AddKeys(segmentKeys);
+
+            return Task.FromResult(0);
         }
 
-        public void RemoveFromSegment(string segmentName, List<string> segmentKeys)
+        public Task RemoveFromSegmentAsync(string segmentName, List<string> segmentKeys)
         {
             if (_segments.TryGetValue(segmentName, out Segment segment))
             {
                 segment.RemoveKeys(segmentKeys);
             }
+
+            return Task.FromResult(0);
         }
 
-        public bool IsInSegment(string segmentName, string key)
+        public Task<bool> IsInSegmentAsync(string segmentName, string key)
         {
             if (_segments.TryGetValue(segmentName, out Segment segment))
             {
-                return segment.Contains(key);
+                return Task.FromResult(segment.Contains(key));
             }
 
-            return false;
+            return Task.FromResult(false);
         }
 
-        public void SetChangeNumber(string segmentName, long changeNumber)
+        public Task SetChangeNumberAsync(string segmentName, long changeNumber)
         {
             if (_segments.TryGetValue(segmentName, out Segment segment))
             {
@@ -60,16 +65,18 @@ namespace Splitio.Services.Cache.Classes
                 }
                 segment.changeNumber = changeNumber;              
             }
+
+            return Task.FromResult(0);
         }
 
-        public long GetChangeNumber(string segmentName)
+        public Task<long> GetChangeNumberAsync(string segmentName)
         {
             if (_segments.TryGetValue(segmentName, out Segment segment))
             {
-                return segment.changeNumber;
+                return Task.FromResult(segment.changeNumber);
             }
 
-            return -1;
+            return Task.FromResult(-1L);
         }
 
         public void Clear()
@@ -77,26 +84,30 @@ namespace Splitio.Services.Cache.Classes
             _segments.Clear();
         }
 
-        public List<string> GetSegmentNames()
+        public Task<List<string>> GetSegmentNamesAsync()
         {
-            return _segments
+            var names = _segments
                 .Keys
                 .ToList();
+
+            return Task.FromResult(names);
         }
 
-        public List<string> GetSegmentKeys(string segmentName)
+        public Task<List<string>> GetSegmentKeysAsync(string segmentName)
         {
             if (_segments.TryGetValue(segmentName, out Segment segment))
             {
-                return segment.GetKeys();
+                return Task.FromResult(segment.GetKeys());
             }
 
-            return new List<string>();
+            return Task.FromResult(new List<string>());
         }
 
-        public int SegmentsCount()
+        public async Task<int> SegmentsCountAsync()
         {
-            return GetSegmentNames().Count;
+            var names = await GetSegmentNamesAsync();
+
+            return names.Count;
         }
 
         public int SegmentKeysCount()

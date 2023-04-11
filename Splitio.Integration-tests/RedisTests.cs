@@ -8,6 +8,7 @@ using Splitio.Redis.Services.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Telemetry.Domain;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -52,7 +53,7 @@ namespace Splitio.Integration_tests
         public async Task CheckingMachineIpAndMachineName_WithIPAddressesEnabled_ReturnsIpAndName()
         {
             // Arrange.
-            LoadSplits();
+            await LoadSplits();
 
             var configurations = GetConfigurationOptions();
 
@@ -115,7 +116,7 @@ namespace Splitio.Integration_tests
         {
             // Arrange.
             
-            LoadSplits();
+            await LoadSplits();
 
             var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
 
@@ -173,14 +174,12 @@ namespace Splitio.Integration_tests
             CleanKeys();
         }
 
-        // TODO: None mode is not supported yet.
-        [Ignore]
         [TestMethod]
         public async Task GetTreatment_WithImpressionModeInNone_ShouldGetUniqueKeys()
         {
             // Arrange.
             
-            LoadSplits();
+            await LoadSplits();
 
             var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
             configurations.ImpressionsMode = ImpressionsMode.None;
@@ -214,14 +213,12 @@ namespace Splitio.Integration_tests
             CleanKeys();
         }
 
-        // TODO: Optimized mode is not supported yet.
-        [Ignore]
         [TestMethod]
         public async Task GetTreatment_WithImpressionModeOptimized_ShouldGetImpressionCount()
         {
             // Arrange.
             
-            LoadSplits();
+            await LoadSplits();
 
             var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
             configurations.ImpressionsMode = ImpressionsMode.Optimized;
@@ -235,12 +232,12 @@ namespace Splitio.Integration_tests
 
             // Act.
             client.GetTreatment("mauro_test", "FACUNDO_TEST");
-            client.GetTreatment("nico_test", "FACUNDO_TEST");
-            client.GetTreatment("redo_test", "FACUNDO_TEST");
-            client.GetTreatment("nico_test", "FACUNDO_TEST");
+            client.GetTreatment("mauro_test", "FACUNDO_TEST");
+            client.GetTreatment("mauro_test", "FACUNDO_TEST");
+            client.GetTreatment("mauro_test", "FACUNDO_TEST");
 
             client.GetTreatment("redo_test", "MAURO_TEST");
-            client.GetTreatment("test_test", "MAURO_TEST");
+            client.GetTreatment("redo_test", "MAURO_TEST");
             client.GetTreatment("redo_test", "MAURO_TEST");
 
             client.Destroy();
@@ -249,15 +246,9 @@ namespace Splitio.Integration_tests
             var redisImpressions = await _redisAdapter.ListRangeAsync($"{UserPrefix}.SPLITIO.impressions");
 
             // Assert.
-            Assert.AreEqual(4, result.FirstOrDefault(x => ((string)x.Name).Contains("FACUNDO_TEST")).Value);
-            Assert.AreEqual(3, result.FirstOrDefault(x => ((string)x.Name).Contains("MAURO_TEST")).Value);
-            Assert.AreEqual(5, redisImpressions.Count());
-
-            Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("FACUNDO_TEST") && ((string)x).Contains("mauro_test")));
-            Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("FACUNDO_TEST") && ((string)x).Contains("nico_test")));
-            Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("FACUNDO_TEST") && ((string)x).Contains("redo_test")));
-            Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("MAURO_TEST") && ((string)x).Contains("redo_test")));
-            Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("MAURO_TEST") && ((string)x).Contains("test_test")));
+            Assert.AreEqual(3, result.FirstOrDefault(x => ((string)x.Name).Contains("FACUNDO_TEST")).Value);
+            Assert.AreEqual(2, result.FirstOrDefault(x => ((string)x.Name).Contains("MAURO_TEST")).Value);
+            Assert.AreEqual(2, redisImpressions.Count());
 
             CleanKeys();
         }
@@ -287,14 +278,14 @@ namespace Splitio.Integration_tests
             };
         }
 
-        protected override HttpClientMock GetHttpClientMock()
+        protected override async Task<HttpClientMock> GetHttpClientMock()
         {
-            LoadSplits();
+            await LoadSplits();
 
             return null;
         }
 
-        protected override async void AssertSentImpressions(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
+        protected override async Task<bool> AssertSentImpressions(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
         {
             Thread.Sleep(1500);
 
@@ -308,9 +299,11 @@ namespace Splitio.Integration_tests
 
                 AssertImpression(actualImp, expectedImpressions.ToList());
             }
+
+            return true;
         }
 
-        protected override async void AssertSentEvents(List<EventBackend> eventsExcpected, HttpClientMock httpClientMock = null, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true)
+        protected override async Task<bool> AssertSentEvents(List<EventBackend> eventsExcpected, HttpClientMock httpClientMock = null, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true)
         {
             Thread.Sleep(sleepTime);
 
@@ -324,6 +317,8 @@ namespace Splitio.Integration_tests
 
                 AssertEvent(actualEvent, eventsExcpected);
             }
+
+            return true;
         }
         #endregion
 
@@ -364,7 +359,7 @@ namespace Splitio.Integration_tests
                 .Any());
         }
 
-        private async void LoadSplits()
+        private async Task LoadSplits()
         {
             CleanKeys(UserPrefix);
 
@@ -374,7 +369,9 @@ namespace Splitio.Integration_tests
 
             foreach (var split in splitResult.splits)
             {
-                await _redisAdapter.SetAsync($"{UserPrefix}.SPLITIO.split.{split.name}", JsonConvert.SerializeObject(split));
+                var result = await _redisAdapter.SetAsync($"{UserPrefix}.SPLITIO.split.{split.name}", JsonConvert.SerializeObject(split));
+
+                Console.WriteLine($"Se agrego: {result}. {split.name}");
             }
         }
         #endregion

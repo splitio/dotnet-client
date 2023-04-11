@@ -6,6 +6,7 @@ using Splitio.Services.Parsing.Interfaces;
 using StackExchange.Redis;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
@@ -24,19 +25,19 @@ namespace Splitio.Redis.Services.Cache.Classes
             _splitParser = splitParser;
         }
 
-        public long GetChangeNumber()
+        public async Task<long> GetChangeNumberAsync()
         {
             var key = $"{RedisKeyPrefix}{splitsKeyPrefix}till";
-            var changeNumberString = _redisAdapter.GetAsync(key).Result;
+            var changeNumberString = await _redisAdapter.GetAsync(key);
             var result = long.TryParse(changeNumberString, out long changeNumberParsed);
 
             return result ? changeNumberParsed : -1;
         }
 
-        public ParsedSplit GetSplit(string splitName)
+        public async Task<ParsedSplit> GetSplitAsync(string splitName)
         {
             var key = $"{RedisKeyPrefix}{splitKeyPrefix}{splitName}";
-            var splitJson = _redisAdapter.GetAsync(key).Result;
+            var splitJson = await _redisAdapter.GetAsync(key);
 
             if (string.IsNullOrEmpty(splitJson))
                 return null;
@@ -46,11 +47,11 @@ namespace Splitio.Redis.Services.Cache.Classes
             return _splitParser.Parse(split);
         }
 
-        public List<ParsedSplit> GetAllSplits()
+        public async Task<List<ParsedSplit>> GetAllSplitsAsync()
         {
             var pattern = $"{RedisKeyPrefix}{splitKeyPrefix}*";
             var splitKeys = _redisAdapter.Keys(pattern);
-            var splitValues = _redisAdapter.MGetAsync(splitKeys).Result;
+            var splitValues = await _redisAdapter.MGetAsync(splitKeys);
 
             if (splitValues != null && splitValues.Any())
             {
@@ -80,11 +81,11 @@ namespace Splitio.Redis.Services.Cache.Classes
             return;
         }
 
-        public bool TrafficTypeExists(string trafficType)
+        public async Task<bool> TrafficTypeExistsAsync(string trafficType)
         {
             if (string.IsNullOrEmpty(trafficType)) return false;
 
-            var value = _redisAdapter.GetAsync(GetTrafficTypeKey(trafficType)).Result;
+            var value = await _redisAdapter.GetAsync(GetTrafficTypeKey(trafficType));
 
             var quantity = value ?? "0";
 
@@ -128,7 +129,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             // No-op
         }
 
-        public List<ParsedSplit> FetchMany(List<string> splitNames)
+        public async Task<List<ParsedSplit>> FetchManyAsync(List<string> splitNames)
         {
             if (!splitNames.Any()) return new List<ParsedSplit>();
 
@@ -139,7 +140,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 redisKey.Add($"{RedisKeyPrefix}{splitKeyPrefix}{name}");
             }
 
-            var splitValues = _redisAdapter.MGetAsync(redisKey.ToArray()).Result;
+            var splitValues = await _redisAdapter.MGetAsync(redisKey.ToArray());
 
             if (splitValues == null || !splitValues.Any()) return new List<ParsedSplit>();
 
@@ -152,21 +153,21 @@ namespace Splitio.Redis.Services.Cache.Classes
                 .ToList();
         }
 
-        public void Kill(long changeNumber, string splitName, string defaultTreatment)
+        public Task KillAsync(long changeNumber, string splitName, string defaultTreatment)
         {
             throw new System.NotImplementedException();
         }
 
-        public List<string> GetSplitNames()
+        public async Task<List<string>> GetSplitNamesAsync()
         {
-            return GetAllSplits()
-                .Select(s => s.name)
-                .ToList();
+            var splits = await GetAllSplitsAsync();
+            
+            return splits.Select(s => s.name).ToList();
         }
 
-        public int SplitsCount()
+        public Task<int> SplitsCountAsync()
         {
-            return 0; // No-op
+            return Task.FromResult(0); // No-op
         }
     }
 }

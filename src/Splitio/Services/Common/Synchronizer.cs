@@ -166,7 +166,7 @@ namespace Splitio.Services.Common
         {
             try
             {
-                if (targetChangeNumber <= _splitCache.GetChangeNumber()) return;
+                if (targetChangeNumber <= await _splitCache.GetChangeNumberAsync()) return;
 
                 var fetchOptions = new FetchOptions { CacheControlHeaders = true };
 
@@ -246,9 +246,9 @@ namespace Splitio.Services.Common
                 while (true)
                 {
                     remainingAttempts--;
-                    var result = await _splitFetcher.FetchSplits(fetchOptions);
+                    var result = await _splitFetcher.FetchSplitsAsync(fetchOptions);
 
-                    if (targetChangeNumber <= _splitCache.GetChangeNumber())
+                    if (targetChangeNumber <= await _splitCache.GetChangeNumberAsync())
                     {
                         return new SyncResult(true, remainingAttempts, result.SegmentNames);
                     }
@@ -271,7 +271,7 @@ namespace Splitio.Services.Common
 
         private bool SyncAll()
         {
-            var splitsResult = _splitFetcher.FetchSplits(_defaultFetchOptions).Result;
+            var splitsResult = _splitFetcher.FetchSplitsAsync(_defaultFetchOptions).Result;
 
             return splitsResult.Success && _segmentFetcher.FetchAll();
         }

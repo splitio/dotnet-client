@@ -6,6 +6,7 @@ using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -42,7 +43,7 @@ namespace Splitio.Services.Impressions.Classes
                 if (_running) return;
 
                 _running = true;
-                _tasksManager.StartPeriodic(() => SendBulkImpressions(), _interval * 1000, _cancellationTokenSource, "Main Impressions Log.");
+                _tasksManager.StartPeriodic(async () => await SendBulkImpressions(), _interval * 1000, _cancellationTokenSource, "Main Impressions Log.");
             }
         }
 
@@ -54,7 +55,7 @@ namespace Splitio.Services.Impressions.Classes
 
                 _running = false;
                 _cancellationTokenSource.Cancel();
-                SendBulkImpressions();
+                var _ = SendBulkImpressions();
             }
         }
 
@@ -63,7 +64,7 @@ namespace Splitio.Services.Impressions.Classes
             return _impressionsCache.AddItems(impressions);
         }
 
-        private void SendBulkImpressions()
+        private async Task SendBulkImpressions()
         {
             if (_impressionsCache.HasReachedMaxSize())
             {
@@ -76,7 +77,7 @@ namespace Splitio.Services.Impressions.Classes
             {
                 try
                 {
-                    _apiClient.SendBulkImpressions(impressions);
+                    await _apiClient.SendBulkImpressionsAsync(impressions);
                 }
                 catch (Exception e)
                 {

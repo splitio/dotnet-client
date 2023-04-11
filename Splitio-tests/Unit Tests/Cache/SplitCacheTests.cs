@@ -2,6 +2,7 @@
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
@@ -10,7 +11,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
     {
 
         [TestMethod]
-        public void AddAndGetSplitTest()
+        public async Task AddAndGetSplitTest()
         {
             //Arrange
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
@@ -18,14 +19,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             //Act
             splitCache.AddSplit(splitName, new ParsedSplit() { name = splitName });
-            var result = splitCache.GetSplit(splitName);
+            var result = await splitCache.GetSplitAsync(splitName);
 
             //Assert
             Assert.IsNotNull(result);
         }
 
         [TestMethod]
-        public void AddDuplicateSplitTest()
+        public async Task AddDuplicateSplitTest()
         {
             //Arrange
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
@@ -36,7 +37,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             splitCache.AddSplit(splitName, parsedSplit1);
             var parsedSplit2 = new ParsedSplit() { name = splitName };
             splitCache.AddSplit(splitName, parsedSplit2);
-            var result = splitCache.GetAllSplits();
+            var result = await splitCache.GetAllSplitsAsync();
 
             //Assert
             Assert.IsNotNull(result);
@@ -46,21 +47,21 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
-        public void GetInexistentSplitTest()
+        public async Task GetInexistentSplitTest()
         {
             //Arrange
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
             var splitName = "test1";
 
             //Act
-            var result = splitCache.GetSplit(splitName);
+            var result = await splitCache.GetSplitAsync(splitName);
 
             //Assert
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void RemoveSplitTest()
+        public async Task RemoveSplitTest()
         {
             //Arrange
             var splitName = "test1";
@@ -70,14 +71,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
             
             //Act
             splitCache.RemoveSplit(splitName);
-            var result = splitCache.GetSplit(splitName);
+            var result = await splitCache.GetSplitAsync(splitName);
 
             //Assert
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void SetAndGetChangeNumberTest()
+        public async Task SetAndGetChangeNumberTest()
         {
             //Arrange
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
@@ -85,14 +86,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             //Act
             splitCache.SetChangeNumber(changeNumber);
-            var result = splitCache.GetChangeNumber();
+            var result = await splitCache.GetChangeNumberAsync();
 
             //Assert
             Assert.AreEqual(changeNumber, result);
         }
 
         [TestMethod]
-        public void GetAllSplitsTest()
+        public async Task GetAllSplitsTest()
         {
             //Arrange
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
@@ -103,14 +104,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
             splitCache.AddSplit(splitName, new ParsedSplit() { name = splitName });
             splitCache.AddSplit(splitName2, new ParsedSplit() { name = splitName2 });
 
-            var result = splitCache.GetAllSplits();
+            var result = await splitCache.GetAllSplitsAsync();
 
             //Assert
             Assert.AreEqual(2, result.Count);
         }
 
         [TestMethod]
-        public void AddOrUpdate_WhenUpdateTraffictType_ReturnsTrue()
+        public async Task AddOrUpdate_WhenUpdateTraffictType_ReturnsTrue()
         {
             // Arrange 
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
@@ -129,9 +130,9 @@ namespace Splitio_Tests.Unit_Tests.Cache
             splitCache.AddOrUpdate(splitName2, split4);
 
             // Act
-            var result1 = splitCache.TrafficTypeExists("traffic_type_1");
-            var result2 = splitCache.TrafficTypeExists("traffic_type_2");
-            var result3 = splitCache.TrafficTypeExists("traffic_type_3");
+            var result1 = await splitCache.TrafficTypeExistsAsync("traffic_type_1");
+            var result2 = await splitCache.TrafficTypeExistsAsync("traffic_type_2");
+            var result3 = await splitCache.TrafficTypeExistsAsync("traffic_type_3");
 
             // Assert
             Assert.IsFalse(result1);

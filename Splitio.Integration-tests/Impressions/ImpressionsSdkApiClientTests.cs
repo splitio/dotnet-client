@@ -9,6 +9,7 @@ using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests.Impressions
 {
@@ -32,7 +33,7 @@ namespace Splitio.Integration_tests.Impressions
         }
 
         [TestMethod]
-        public void SendBulkImpressions_WithThreeBulks()
+        public async Task SendBulkImpressions_WithThreeBulks()
         {
             var impressions = new List<KeyImpression>();
 
@@ -52,7 +53,7 @@ namespace Splitio.Integration_tests.Impressions
                 httpClientMock.Post_Response("/api/testImpressions/bulk", 200, data3, "ok");
 
                 var impressionsSdkApiClient = new ImpressionsSdkApiClient(_splitioHttpClient, _telemetryRuntimeProducer.Object, httpClientMock.GetUrl(), _wrapperAdapter, 5);
-                impressionsSdkApiClient.SendBulkImpressions(impressions);
+                await impressionsSdkApiClient.SendBulkImpressionsAsync(impressions);
 
                 Thread.Sleep(5000);
 
@@ -66,7 +67,7 @@ namespace Splitio.Integration_tests.Impressions
         }
 
         [TestMethod]
-        public void SendBulkImpressions_WithOneBulk()
+        public async Task SendBulkImpressions_WithOneBulk()
         {
             var impressions = new List<KeyImpression>();
 
@@ -82,7 +83,7 @@ namespace Splitio.Integration_tests.Impressions
                 httpClientMock.Post_Response("/api/testImpressions/bulk", 200, data1, "ok");
 
                 var impressionsSdkApiClient = new ImpressionsSdkApiClient(_splitioHttpClient, _telemetryRuntimeProducer.Object, httpClientMock.GetUrl(), _wrapperAdapter, 10);
-                impressionsSdkApiClient.SendBulkImpressions(impressions);
+                await impressionsSdkApiClient.SendBulkImpressionsAsync(impressions);
 
                 Thread.Sleep(5000);
 
@@ -93,7 +94,7 @@ namespace Splitio.Integration_tests.Impressions
         }
 
         [TestMethod]
-        public void SendBulkImpressions_WithRetries()
+        public async Task SendBulkImpressions_WithRetries()
         {
             var impressions = new List<KeyImpression>();
 
@@ -109,7 +110,7 @@ namespace Splitio.Integration_tests.Impressions
                 httpClientMock.Post_Response("/api/testImpressions/bulk", 500, data1, "fail");
 
                 var impressionsSdkApiClient = new ImpressionsSdkApiClient(_splitioHttpClient, _telemetryRuntimeProducer.Object, httpClientMock.GetUrl(), _wrapperAdapter, 10);
-                impressionsSdkApiClient.SendBulkImpressions(impressions);
+                await impressionsSdkApiClient.SendBulkImpressionsAsync(impressions);
 
                 Thread.Sleep(5000);
 

@@ -40,7 +40,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             // Assert.
             Thread.Sleep(1500);
-            _senderAdapter.Verify(mock => mock.RecordImpressionsCount(It.IsAny<List<ImpressionsCountModel>>()), Times.Once);
+            _senderAdapter.Verify(mock => mock.RecordImpressionsCountAsync(It.IsAny<List<ImpressionsCountModel>>()), Times.Once);
         }
 
         [TestMethod]
@@ -55,7 +55,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             // Assert.
             Thread.Sleep(1500);
-            _senderAdapter.Verify(mock => mock.RecordImpressionsCount(It.IsAny<List<ImpressionsCountModel>>()), Times.Never);
+            _senderAdapter.Verify(mock => mock.RecordImpressionsCountAsync(It.IsAny<List<ImpressionsCountModel>>()), Times.Never);
         }
 
         [TestMethod]
@@ -76,7 +76,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             impressionsCounter.Stop();
 
             // Assert.
-            _senderAdapter.Verify(mock => mock.RecordImpressionsCount(It.IsAny<List<ImpressionsCountModel>>()), Times.Once);
+            _senderAdapter.Verify(mock => mock.RecordImpressionsCountAsync(It.IsAny<List<ImpressionsCountModel>>()), Times.Once);
         }
 
         [TestMethod]
@@ -99,7 +99,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             impressionsCounter.Stop();
 
             // Assert.
-            _senderAdapter.Verify(mock => mock.RecordImpressionsCount(It.IsAny<List<ImpressionsCountModel>>()), Times.Exactly(2));
+            _senderAdapter.Verify(mock => mock.RecordImpressionsCountAsync(It.IsAny<List<ImpressionsCountModel>>()), Times.Exactly(2));
+            _senderAdapter.Verify(mock => mock.RecordImpressionsCountAsync(It.IsAny<List<ImpressionsCountModel>>()), Times.Exactly(2));
         }
     }
 }

@@ -10,6 +10,7 @@ using Splitio.Telemetry.Storages;
 using System;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Telemetry.Common
 {
@@ -66,7 +67,7 @@ namespace Splitio.Telemetry.Common
                     var intervalInMilliseconds = _configurationOptions.TelemetryRefreshRate * 1000;
                     _wrapperAdapter.TaskDelay(intervalInMilliseconds).Wait();
 
-                    _tasksManager.StartPeriodic(() => RecordStats(), intervalInMilliseconds, _cancellationTokenSource, "Telemetry Stats.");
+                    _tasksManager.StartPeriodic(async () => await RecordStats(), intervalInMilliseconds, _cancellationTokenSource, "Telemetry Stats.");
                 }, _cancellationTokenSource, "Main Telemetry.");
             }
         }
@@ -79,18 +80,18 @@ namespace Splitio.Telemetry.Common
 
                 _running = false;
                 _cancellationTokenSource.Cancel();
-                RecordStats();
+                var _ = RecordStats();
             }            
         }
 
         public void RecordConfigInit()
         {
-            _tasksManager.Start(() => RecordInit(), new CancellationTokenSource(), "Telemetry ConfigInit.");
+            _tasksManager.Start(RecordInit, new CancellationTokenSource(), "Telemetry ConfigInit.");
         }
         #endregion
 
         #region Private Methods
-        private void RecordInit()
+        private async Task RecordInit()
         {
             try
             {
@@ -128,7 +129,7 @@ namespace Splitio.Telemetry.Common
                     HTTPProxyDetected = IsHTTPProxyDetected()
                 };
 
-                _telemetryAPI.RecordConfigInit(config);
+                await _telemetryAPI.RecordConfigInitAsync(config);
             }
             catch (Exception ex)
             {
@@ -136,7 +137,7 @@ namespace Splitio.Telemetry.Common
             }
         }
 
-        private void RecordStats()
+        private async Task RecordStats()
         {
             try
             {
@@ -157,12 +158,12 @@ namespace Splitio.Telemetry.Common
                     StreamingEvents = _telemetryStorageConsumer.PopStreamingEvents().ToList(),
                     Tags = _telemetryStorageConsumer.PopTags().ToList(),
                     TokenRefreshes = _telemetryStorageConsumer.PopTokenRefreshes(),
-                    SplitCount = _splitCache.SplitsCount(),
+                    SplitCount = await _splitCache.SplitsCountAsync(),
                     SegmentCount = _segmentCache.SegmentsCount(),
                     SegmentKeyCount = _segmentCache.SegmentKeysCount()
                 };
 
-                _telemetryAPI.RecordStats(stats);
+                await   _telemetryAPI.RecordStatsAsync(stats);
             }
             catch (Exception ex)
             {

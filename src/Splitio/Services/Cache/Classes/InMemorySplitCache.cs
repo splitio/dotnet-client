@@ -5,6 +5,7 @@ using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Cache.Classes
 {
@@ -86,24 +87,26 @@ namespace Splitio.Services.Cache.Classes
             _changeNumber = changeNumber;
         }
 
-        public long GetChangeNumber()
+        public Task<long> GetChangeNumberAsync()
         {
-            return _changeNumber;
+            return Task.FromResult(_changeNumber);
         }
 
-        public ParsedSplit GetSplit(string splitName)
+        public Task<ParsedSplit> GetSplitAsync(string splitName)
         {
             _splits.TryGetValue(splitName, out ParsedSplit value);
 
-            return value;
+            return Task.FromResult(value);
         }
 
-        public List<ParsedSplit> GetAllSplits()
-        {            
-            return _splits
+        public Task<List<ParsedSplit>> GetAllSplitsAsync()
+        {
+            var splits = _splits
                 .Values
                 .Where(s => s != null)
                 .ToList();
+
+            return Task.FromResult(splits);
         }
 
         public void Clear()
@@ -112,15 +115,16 @@ namespace Splitio.Services.Cache.Classes
             _trafficTypes.Clear();
         }
 
-        public bool TrafficTypeExists(string trafficType)
+        public Task<bool> TrafficTypeExistsAsync(string trafficType)
         {
-            var quantity = 0;
+            if (string.IsNullOrEmpty(trafficType))
+            {
+                return Task.FromResult(false);
+            }
 
-            var exists = string.IsNullOrEmpty(trafficType) 
-                ? false 
-                : _trafficTypes.TryGetValue(trafficType, out quantity);
+            var exists = _trafficTypes.ContainsKey(trafficType);
 
-            return exists && quantity > 0;
+            return Task.FromResult(exists);
         }
 
         private void IncreaseTrafficTypeCount(string trafficType)
@@ -149,23 +153,26 @@ namespace Splitio.Services.Cache.Classes
             }
         }
 
-        public List<ParsedSplit> FetchMany(List<string> splitNames)
+        public async Task<List<ParsedSplit>> FetchManyAsync(List<string> splitNames)
         {
             var splits = new List<ParsedSplit>();
 
             foreach (var name in splitNames)
             {
-                splits.Add(GetSplit(name));
+                var split = await GetSplitAsync(name);
+                splits.Add(split);
             }
 
-            return splits
+            var toReturn = splits
                 .Where(s => s != null)
                 .ToList();
+
+            return toReturn;
         }
 
-        public void Kill(long changeNumber, string splitName, string defaultTreatment)
+        public async Task KillAsync(long changeNumber, string splitName, string defaultTreatment)
         {
-            var split = GetSplit(splitName);
+            var split = await GetSplitAsync(splitName);
 
             if (split == null) return;
 
@@ -176,17 +183,21 @@ namespace Splitio.Services.Cache.Classes
             AddOrUpdate(splitName, split);
         }
 
-        public List<string> GetSplitNames()
+        public Task<List<string>> GetSplitNamesAsync()
         {
-            return _splits
+            var names = _splits
                 .Keys
                 .Where(name => !string.IsNullOrEmpty(name))
                 .ToList();
+
+            return Task.FromResult(names);
         }
 
-        public int SplitsCount()
+        public async Task<int> SplitsCountAsync()
         {
-            return GetSplitNames().Count;
+            var names = await GetSplitNamesAsync();
+
+            return names.Count;
         }
     }
 }

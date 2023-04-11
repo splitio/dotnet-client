@@ -46,12 +46,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             Thread.Sleep(1500);
 
-            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<List<Mtks>>()), Times.Once);
+            _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Once);
 
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test", "feature-name-test"));
             _uniqueKeysTracker.Stop();
 
-            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<List<Mtks>>()), Times.Exactly(2));
+            _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Exactly(2));
 
             _cache.Clear();
         }
@@ -92,7 +92,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Assert.AreEqual(1, values3.Count);
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-5"));
 
-            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<List<Mtks>>()), Times.Once);
+            _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Once);
 
             _cache.Clear();
         }
@@ -114,7 +114,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-5"));
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-6"));
             
-            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<List<Mtks>>()), Times.Exactly(2));
+            _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Exactly(2));
 
             _cache.Clear();
         }

@@ -80,8 +80,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetAllSplits())
-                .Returns(splits);
+                .Setup(mock => mock.GetAllSplitsAsync())
+                .ReturnsAsync(splits);
 
             //Act
             var result = _splitManager.Splits();
@@ -137,8 +137,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetAllSplits())
-                .Returns(splits);
+                .Setup(mock => mock.GetAllSplitsAsync())
+                .ReturnsAsync(splits);
 
             //Act
             var result = _splitManager.Splits();
@@ -179,8 +179,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetSplit("test1"))
-                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
+                .Setup(mock => mock.GetSplitAsync("test1"))
+                .ReturnsAsync(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
 
             //Act
             var result = _splitManager.Split("test1");
@@ -234,8 +234,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetSplit("test1"))
-                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
+                .Setup(mock => mock.GetSplitAsync("test1"))
+                .ReturnsAsync(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
 
             //Act
             var result = _splitManager.Split("test1");
@@ -275,8 +275,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetSplit("test1"))
-                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
+                .Setup(mock => mock.GetSplitAsync("test1"))
+                .ReturnsAsync(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
 
             //Act
             var result = _splitManager.Split("test1");
@@ -328,8 +328,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetAllSplits())
-                .Returns(new List<ParsedSplit>());
+                .Setup(mock => mock.GetAllSplitsAsync())
+                .ReturnsAsync(new List<ParsedSplit>());
 
             //Act
             var result = _splitManager.Splits();
@@ -437,8 +437,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetSplitNames())
-                .Returns(splitNames);
+                .Setup(mock => mock.GetSplitNamesAsync())
+                .ReturnsAsync(splitNames);
             
             _splitManager.BlockUntilReady(1000);
 
@@ -490,8 +490,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetAllSplits())
-                .Returns(splits);
+                .Setup(mock => mock.GetAllSplitsAsync())
+                .ReturnsAsync(splits);
             
             _splitManager.BlockUntilReady(1000);
 
@@ -536,16 +536,16 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetSplit("test1"))
-                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, configurations = configurations });
+                .Setup(mock => mock.GetSplitAsync("test1"))
+                .ReturnsAsync(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, configurations = configurations });
 
             _splitCache
-                .Setup(mock => mock.GetSplit("test2"))
-                .Returns(new ParsedSplit { name = "test2", conditions = conditionsWithLogic, configurations = configurations });
+                .Setup(mock => mock.GetSplitAsync("test2"))
+                .ReturnsAsync(new ParsedSplit { name = "test2", conditions = conditionsWithLogic, configurations = configurations });
 
             _splitCache
-                .Setup(mock => mock.GetSplit("test3"))
-                .Returns(new ParsedSplit { name = "test3", conditions = conditionsWithLogic });
+                .Setup(mock => mock.GetSplitAsync("test3"))
+                .ReturnsAsync(new ParsedSplit { name = "test3", conditions = conditionsWithLogic });
 
             _splitManager.BlockUntilReady(1000);
 
