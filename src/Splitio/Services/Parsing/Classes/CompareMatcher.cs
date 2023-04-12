@@ -15,18 +15,18 @@ namespace Splitio.Services.Parsing
         protected long start;
         protected long end;
 
-        public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        public override Task<bool> Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             switch (dataType)
             {
                 case DataTypeEnum.DATETIME:
                     var date = key.ToDateTime();
-                    return date != null ? Match(date.Value) : false;
+                    return Task.FromResult(date.HasValue && Match(date.Value));
                 case DataTypeEnum.NUMBER:
-                    long number;
-                    var result = long.TryParse(key, out number);
-                    return result ? Match(number) : false;
-                default: return false;
+                    var result = long.TryParse(key, out long number);
+                    return Task.FromResult(result && Match(number));
+                default:
+                    return Task.FromResult(false);
             }
         }
 
@@ -41,7 +41,7 @@ namespace Splitio.Services.Parsing
 
         public override Task<bool> Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            return Task.FromResult(Match(key.matchingKey, attributes, evaluator));
+            return Match(key.matchingKey, attributes, evaluator);
         }
         
          public override bool Match(bool key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)

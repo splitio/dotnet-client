@@ -42,7 +42,7 @@ namespace Splitio.Services.Client.Classes
                     name = x.name,
                     killed = x.killed,
                     changeNumber = x.changeNumber,
-                    treatments = (x.conditions.Where(z => z.conditionType == ConditionType.ROLLOUT).FirstOrDefault() ?? x.conditions.FirstOrDefault())?.partitions.Select(y => y.treatment).ToList(),
+                    treatments = (x.conditions.Where(z => z.ConditionType == ConditionType.ROLLOUT).FirstOrDefault() ?? x.conditions.FirstOrDefault())?.Partitions.Select(y => y.treatment).ToList(),
                     trafficType = x.trafficTypeName,
                     configs = x.configurations
                 });
@@ -75,9 +75,9 @@ namespace Splitio.Services.Client.Classes
                 return null;
             }
 
-            var condition = split.conditions.Where(x => x.conditionType == ConditionType.ROLLOUT).FirstOrDefault() ?? split.conditions.FirstOrDefault();
+            var condition = split.conditions.Where(x => x.ConditionType == ConditionType.ROLLOUT).FirstOrDefault() ?? split.conditions.FirstOrDefault();
 
-            var treatments = condition != null ? condition.partitions.Select(y => y.treatment).ToList() : new List<string>();
+            var treatments = condition != null ? condition.Partitions.Select(y => y.treatment).ToList() : new List<string>();
 
             var lightSplit = new SplitView()
             {

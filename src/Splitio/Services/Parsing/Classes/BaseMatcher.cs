@@ -8,7 +8,7 @@ namespace Splitio.Services.Parsing.Classes
 {
     public abstract class BaseMatcher : IMatcher
     {
-        public abstract bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
+        public abstract Task<bool> Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
 
         public abstract bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
 
@@ -28,7 +28,7 @@ namespace Splitio.Services.Parsing.Classes
             }
             else if (value is string)
             {
-                return Match((string)value, attributes, evaluator);
+                return await Match((string)value, attributes, evaluator);
             }
             else if (value is DateTime)
             {

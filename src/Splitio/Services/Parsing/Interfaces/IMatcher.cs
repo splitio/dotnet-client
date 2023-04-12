@@ -10,7 +10,7 @@ namespace Splitio.Services.Parsing
     {
         Task<bool> Match(object value, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
 
-        bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
+        Task<bool> Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
 
         Task<bool> Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
 

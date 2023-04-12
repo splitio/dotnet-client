@@ -84,26 +84,26 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingStringNotBoolean()
+        public async Task MatchShouldReturnFalseIfMatchingStringNotBoolean()
         {
             //Arrange
             var matcher = new EqualToBooleanMatcher(true);
 
             //Act
-            var result = matcher.Match("testring");
+            var result = await matcher.Match("testring");
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueIfMatchingStringBoolean()
+        public async Task MatchShouldReturnTrueIfMatchingStringBoolean()
         {
             //Arrange
             var matcher = new EqualToBooleanMatcher(true);
 
             //Act
-            var result = matcher.Match("true");
+            var result = await matcher.Match("true");
 
             //Assert
             Assert.IsTrue(result);

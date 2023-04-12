@@ -4,9 +4,9 @@ namespace Splitio.Domain
 {
     public class ConditionWithLogic
     {
-        public ConditionType conditionType { get; set; }
-        public CombiningMatcher matcher { get; set; }
-        public List<PartitionDefinition> partitions { get; set; }
-        public string label { get; set; }
+        public ConditionType ConditionType { get; set; }
+        public CombiningMatcher Matcher { get; set; }
+        public List<PartitionDefinition> Partitions { get; set; }
+        public string Label { get; set; }
     }
 }

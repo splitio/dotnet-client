@@ -126,8 +126,8 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 {
                     new ConditionWithLogic
                     {
-                        conditionType = ConditionType.ROLLOUT,
-                        partitions = new List<PartitionDefinition>
+                        ConditionType = ConditionType.ROLLOUT,
+                        Partitions = new List<PartitionDefinition>
                         {
                            new PartitionDefinition
                            {
@@ -135,10 +135,10 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                                size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher()
                             }
@@ -183,9 +183,9 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 {
                     new ConditionWithLogic
                     {
-                        label = "labelCondition",
-                        conditionType = ConditionType.ROLLOUT,
-                        partitions = new List<PartitionDefinition>
+                        Label = "labelCondition",
+                        ConditionType = ConditionType.ROLLOUT,
+                        Partitions = new List<PartitionDefinition>
                         {
                            new PartitionDefinition
                            {
@@ -193,10 +193,10 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                                size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher
                                 {
@@ -247,9 +247,9 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 {
                     new ConditionWithLogic
                     {
-                        label = "label",
-                        conditionType = ConditionType.WHITELIST,
-                        partitions = new List<PartitionDefinition>
+                        Label = "label",
+                        ConditionType = ConditionType.WHITELIST,
+                        Partitions = new List<PartitionDefinition>
                         {
                            new PartitionDefinition
                            {
@@ -257,10 +257,10 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                                size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher
                                 {
@@ -309,9 +309,9 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 {
                     new ConditionWithLogic
                     {
-                        label = "label",
-                        conditionType = ConditionType.WHITELIST,
-                        partitions = new List<PartitionDefinition>
+                        Label = "label",
+                        ConditionType = ConditionType.WHITELIST,
+                        Partitions = new List<PartitionDefinition>
                         {
                            new PartitionDefinition
                            {
@@ -319,10 +319,10 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                                size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher
                                 {
@@ -366,9 +366,9 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 {
                     new ConditionWithLogic
                     {
-                        label = "label",
-                        conditionType = ConditionType.WHITELIST,
-                        partitions = new List<PartitionDefinition>
+                        Label = "label",
+                        ConditionType = ConditionType.WHITELIST,
+                        Partitions = new List<PartitionDefinition>
                         {
                            new PartitionDefinition
                            {
@@ -376,10 +376,10 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                                size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher
                                 {
@@ -390,9 +390,9 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                     },
                     new ConditionWithLogic
                     {
-                        label = "labelEndsWith",
-                        conditionType = ConditionType.WHITELIST,
-                        partitions = new List<PartitionDefinition>
+                        Label = "labelEndsWith",
+                        ConditionType = ConditionType.WHITELIST,
+                        Partitions = new List<PartitionDefinition>
                         {
                            new PartitionDefinition
                            {
@@ -400,10 +400,10 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                                size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher
                                 {
@@ -454,9 +454,9 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 {
                     new ConditionWithLogic
                     {
-                        label = "labelEndsWithMatcher",
-                        conditionType = ConditionType.ROLLOUT,
-                        partitions = new List<PartitionDefinition>
+                        Label = "labelEndsWithMatcher",
+                        ConditionType = ConditionType.ROLLOUT,
+                        Partitions = new List<PartitionDefinition>
                         {
                            new PartitionDefinition
                            {
@@ -464,10 +464,10 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                                size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher
                                 {
@@ -491,9 +491,9 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 {
                     new ConditionWithLogic
                     {
-                        label = "labelWhiteList",
-                        conditionType = ConditionType.WHITELIST,
-                        partitions = new List<PartitionDefinition>
+                        Label = "labelWhiteList",
+                        ConditionType = ConditionType.WHITELIST,
+                        Partitions = new List<PartitionDefinition>
                         {
                            new PartitionDefinition
                            {
@@ -501,10 +501,10 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                                size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher
                                 {
@@ -515,9 +515,9 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                     },
                     new ConditionWithLogic
                     {
-                        label = "labelRollout",
-                        conditionType = ConditionType.ROLLOUT,
-                        partitions = new List<PartitionDefinition>
+                        Label = "labelRollout",
+                        ConditionType = ConditionType.ROLLOUT,
+                        Partitions = new List<PartitionDefinition>
                         {
                            new PartitionDefinition
                            {
@@ -525,10 +525,10 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                                size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher
                                 {

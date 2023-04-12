@@ -35,26 +35,26 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueForAnyStringKey()
+        public async Task MatchShouldReturnTrueForAnyStringKey()
         {
             //Arrange
             var matcher = new AllKeysMatcher();
 
             //Act
-            var result = matcher.Match("test");
+            var result = await matcher.Match("test");
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfNullString()
+        public async Task MatchShouldReturnFalseIfNullString()
         {
             //Arrange
             var matcher = new AllKeysMatcher();
 
             //Act
-            var result2 = matcher.Match((string)null);
+            var result2 = await matcher.Match((string)null);
 
             //Assert
             Assert.IsFalse(result2);

@@ -11,7 +11,7 @@ namespace Splitio_Tests.Unit_Tests
     public class EndsWithMatcherTests
     {
         [TestMethod]
-        public void MatchShouldReturnTrueOnMatchingKeyString()
+        public async Task MatchShouldReturnTrueOnMatchingKeyString()
         {
             //Arrange
             var toCompare = new List<string>
@@ -22,14 +22,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new EndsWithMatcher(toCompare);
 
             //Act
-            var result = matcher.Match("starttest1");
+            var result = await matcher.Match("starttest1");
 
             //Assert
             Assert.IsTrue(result); //starttest1 ends with test1
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseOnNonMatchingKeyString()
+        public async Task MatchShouldReturnFalseOnNonMatchingKeyString()
         {
             //Arrange
             var toCompare = new List<string>
@@ -40,28 +40,28 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new EndsWithMatcher(toCompare);
 
             //Act
-            var result = matcher.Match("starttest3");
+            var result = await matcher.Match("starttest3");
 
             //Assert
             Assert.IsFalse(result); //key not ends with any element of whitelist
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfEmptyWhitelistString()
+        public async Task MatchShouldReturnFalseIfEmptyWhitelistString()
         {
             //Arrange
             var toCompare = new List<string>();
             var matcher = new EndsWithMatcher(toCompare);
 
             //Act
-            var result = matcher.Match("test1");
+            var result = await matcher.Match("test1");
 
             //Assert
             Assert.IsFalse(result); //Empty whitelist
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfNullKeyString()
+        public async Task MatchShouldReturnFalseIfNullKeyString()
         {
             //Arrange
             var toCompare = new List<string>
@@ -73,14 +73,14 @@ namespace Splitio_Tests.Unit_Tests
 
             //Act
             string key = null;
-            var result = matcher.Match(key);
+            var result = await matcher.Match(key);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfEmptyKeyString()
+        public async Task MatchShouldReturnFalseIfEmptyKeyString()
         {
             //Arrange
             var toCompare = new List<string>
@@ -92,7 +92,7 @@ namespace Splitio_Tests.Unit_Tests
 
             //Act
             string key = "";
-            var result = matcher.Match(key);
+            var result = await matcher.Match(key);
 
             //Assert
             Assert.IsFalse(result);

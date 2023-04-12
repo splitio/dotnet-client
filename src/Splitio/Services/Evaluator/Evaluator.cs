@@ -144,7 +144,7 @@ namespace Splitio.Services.Evaluator
             // use the first matching condition
             foreach (var condition in split.conditions)
             {
-                if (!inRollout && condition.conditionType == ConditionType.ROLLOUT)
+                if (!inRollout && condition.ConditionType == ConditionType.ROLLOUT)
                 {
                     if (split.trafficAllocation < 100)
                     {
@@ -160,13 +160,13 @@ namespace Splitio.Services.Evaluator
                     inRollout = true;
                 }
 
-                var combiningMatcher = condition.matcher;
+                var combiningMatcher = condition.Matcher;
 
                 if (combiningMatcher.Match(key, attributes, this))
                 {
-                    var treatment = _splitter.GetTreatment(key.bucketingKey, split.seed, condition.partitions, split.algo);
+                    var treatment = _splitter.GetTreatment(key.bucketingKey, split.seed, condition.Partitions, split.algo);
 
-                    return new TreatmentResult(condition.label, treatment, split.changeNumber);
+                    return new TreatmentResult(condition.Label, treatment, split.changeNumber);
                 }
             }
 

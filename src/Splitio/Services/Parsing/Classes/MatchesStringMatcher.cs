@@ -16,9 +16,9 @@ namespace Splitio.Services.Parsing.Classes
             regex = new Regex(pattern);
         }
 
-        public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        public override Task<bool> Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            return regex.IsMatch(key);
+            return Task.FromResult(regex.IsMatch(key));
         }
 
         public override Task<bool> Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)

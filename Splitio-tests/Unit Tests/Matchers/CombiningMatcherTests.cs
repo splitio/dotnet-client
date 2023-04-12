@@ -14,8 +14,8 @@ namespace Splitio_Tests.Unit_Tests
             //Arrange
             var matcher = new CombiningMatcher()
             {
-                delegates = null,
-                combiner = CombinerEnum.AND
+                Delegates = null,
+                Combiner = CombinerEnum.AND
             };
 
             var attributes = new Dictionary<string, object>
@@ -57,8 +57,8 @@ namespace Splitio_Tests.Unit_Tests
 
             var matcher = new CombiningMatcher()
             {
-                delegates = delegates,
-                combiner = CombinerEnum.AND
+                Delegates = delegates,
+                Combiner = CombinerEnum.AND
             };
 
             //Act
@@ -93,8 +93,8 @@ namespace Splitio_Tests.Unit_Tests
 
             var matcher = new CombiningMatcher()
             {
-                delegates = delegates,
-                combiner = CombinerEnum.AND
+                Delegates = delegates,
+                Combiner = CombinerEnum.AND
             };
 
             //Act

@@ -35,9 +35,9 @@ namespace Splitio.Services.Parsing
             return Task.FromResult(false);
         }
 
-        public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        public override Task<bool> Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         public override bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)

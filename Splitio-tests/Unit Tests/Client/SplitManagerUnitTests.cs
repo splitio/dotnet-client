@@ -42,8 +42,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Arrange            
             var conditionWithLogic = new ConditionWithLogic()
             {
-                conditionType = ConditionType.WHITELIST,
-                partitions = new List<PartitionDefinition>()
+                ConditionType = ConditionType.WHITELIST,
+                Partitions = new List<PartitionDefinition>()
                 {
                     new PartitionDefinition(){size = 100, treatment = "off"}
                 }
@@ -51,8 +51,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             
             var conditionWithLogic2 = new ConditionWithLogic()
             {
-                conditionType = ConditionType.ROLLOUT,
-                partitions = new List<PartitionDefinition>()
+                ConditionType = ConditionType.ROLLOUT,
+                Partitions = new List<PartitionDefinition>()
                 {
                     new PartitionDefinition {size = 90, treatment = "on"},
                     new PartitionDefinition {size = 10, treatment = "off"}
@@ -110,8 +110,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Arrange            
             var conditionWithLogic = new ConditionWithLogic()
             {
-                conditionType = ConditionType.WHITELIST,
-                partitions = new List<PartitionDefinition>()
+                ConditionType = ConditionType.WHITELIST,
+                Partitions = new List<PartitionDefinition>()
                 {
                     new PartitionDefinition(){size = 100, treatment = "on"}
                 }
@@ -152,7 +152,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(firstResult.changeNumber, 10000);
             Assert.AreEqual(firstResult.killed, false);
             Assert.AreEqual(firstResult.trafficType, "user");
-            Assert.AreEqual(conditionWithLogic.partitions.Count, firstResult.treatments.Count);
+            Assert.AreEqual(conditionWithLogic.Partitions.Count, firstResult.treatments.Count);
         }
 
         [TestMethod]
@@ -161,8 +161,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Arrange            
             var conditionWithLogic = new ConditionWithLogic()
             {
-                conditionType = ConditionType.ROLLOUT,
-                partitions = new List<PartitionDefinition>()
+                ConditionType = ConditionType.ROLLOUT,
+                Partitions = new List<PartitionDefinition>()
                 {
                     new PartitionDefinition(){size = 90, treatment = "on"},
                     new PartitionDefinition(){size = 10, treatment = "off"}
@@ -206,8 +206,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Arrange
             var conditionWithLogic = new ConditionWithLogic()
             {
-                conditionType = ConditionType.WHITELIST,
-                partitions = new List<PartitionDefinition>()
+                ConditionType = ConditionType.WHITELIST,
+                Partitions = new List<PartitionDefinition>()
                 {
                     new PartitionDefinition(){size = 100, treatment = "on"},
                 }
@@ -215,8 +215,8 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var conditionWithLogic2 = new ConditionWithLogic()
             {
-                conditionType = ConditionType.ROLLOUT,
-                partitions = new List<PartitionDefinition>()
+                ConditionType = ConditionType.ROLLOUT,
+                Partitions = new List<PartitionDefinition>()
                 {
                     new PartitionDefinition(){size = 90, treatment = "on"},
                     new PartitionDefinition(){size = 10, treatment = "off"},
@@ -258,8 +258,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Arrange
             var conditionWithLogic = new ConditionWithLogic()
             {
-                conditionType = ConditionType.WHITELIST,
-                partitions = new List<PartitionDefinition>()
+                ConditionType = ConditionType.WHITELIST,
+                Partitions = new List<PartitionDefinition>()
                 {
                     new PartitionDefinition(){size = 100, treatment = "on"},
                 }
@@ -284,7 +284,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(result.name, "test1");
-            Assert.AreEqual(conditionWithLogic.partitions.Count, result.treatments.Count);
+            Assert.AreEqual(conditionWithLogic.Partitions.Count, result.treatments.Count);
         }
 
         [TestMethod]
@@ -411,7 +411,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Arrange
             var conditionWithLogic = new ConditionWithLogic()
             {
-                partitions = new List<PartitionDefinition>()
+                Partitions = new List<PartitionDefinition>()
                 {
                     new PartitionDefinition(){size = 100, treatment = "on"}
                 }
@@ -464,7 +464,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             
             var conditionWithLogic = new ConditionWithLogic()
             {
-                partitions = new List<PartitionDefinition>()
+                Partitions = new List<PartitionDefinition>()
                 {
                     new PartitionDefinition(){size = 100, treatment = "on"}
                 }
@@ -520,7 +520,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             
             var conditionWithLogic = new ConditionWithLogic()
             {
-                partitions = new List<PartitionDefinition>()
+                Partitions = new List<PartitionDefinition>()
                 {
                     new PartitionDefinition(){size = 100, treatment = "on"}
                 }

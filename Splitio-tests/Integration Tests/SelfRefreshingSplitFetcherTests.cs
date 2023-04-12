@@ -81,7 +81,7 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(result.trafficAllocation == 100);
             Assert.IsTrue(result.trafficAllocationSeed == 0);
             Assert.IsTrue(result.conditions.Count > 0);
-            Assert.IsNotNull(result.conditions.Find(x => x.conditionType == ConditionType.ROLLOUT));
+            Assert.IsNotNull(result.conditions.Find(x => x.ConditionType == ConditionType.ROLLOUT));
         }
 
         [TestMethod]

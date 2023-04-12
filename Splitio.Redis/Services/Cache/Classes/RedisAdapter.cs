@@ -83,7 +83,6 @@ namespace Splitio.Redis.Services.Cache.Classes
         #endregion
 
         #region Public Methdos async
-
         public async Task<bool> SetAsync(string key, string value)
         {
             try

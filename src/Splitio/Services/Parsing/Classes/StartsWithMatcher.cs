@@ -20,19 +20,19 @@ namespace Splitio.Services.Parsing
             }
         }
 
-        public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        public override Task<bool> Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             if (string.IsNullOrEmpty(key))
             {
-                return false;
+                return Task.FromResult(false);
             }
 
-            return itemsToCompare.Any(i => key.StartsWith(i));
+            return Task.FromResult(itemsToCompare.Any(i => key.StartsWith(i)));
         }
 
         public override Task<bool> Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            return Task.FromResult(Match(key.matchingKey, attributes, evaluator));
+            return Match(key.matchingKey, attributes, evaluator);
         }
 
         public override bool Match(List<string> key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)

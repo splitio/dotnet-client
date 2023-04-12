@@ -62,10 +62,10 @@ namespace Splitio.Services.Parsing
 
                 parsedSplit.conditions.Add(new ConditionWithLogic()
                 {
-                    conditionType = isValidCondition ? result : ConditionType.WHITELIST,
-                    partitions = condition.partitions,
-                    matcher = ParseMatcherGroup(parsedSplit, condition.matcherGroup),
-                    label = condition.label
+                    ConditionType = isValidCondition ? result : ConditionType.WHITELIST,
+                    Partitions = condition.partitions,
+                    Matcher = ParseMatcherGroup(parsedSplit, condition.matcherGroup),
+                    Label = condition.label
                 });
             }
 
@@ -82,8 +82,8 @@ namespace Splitio.Services.Parsing
             return new CombiningMatcher()
             {
                 // TODO: REMOVE .Result
-                delegates = matcherGroupDefinition.matchers.Select(x => ParseMatcherAsync(parsedSplit, x).Result).ToList(),
-                combiner = ParseCombiner(matcherGroupDefinition.combiner)
+                Delegates = matcherGroupDefinition.matchers.Select(x => ParseMatcherAsync(parsedSplit, x).Result).ToList(),
+                Combiner = ParseCombiner(matcherGroupDefinition.combiner)
             };
         }
 

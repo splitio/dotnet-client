@@ -63,21 +63,13 @@ namespace Splitio_Tests.Integration_Tests
             File.AppendAllText($"{rootFilePath}test.splits", Environment.NewLine +"other_test_feature2     off" + Environment.NewLine);
             Thread.Sleep(50);
 
-            //Act
-            var result1 = client.GetTreatment("id", "double_writes_to_cassandra");
-            var result2 = client.GetTreatment("id", "double_writes_to_cassandra");
-            var result3 = client.GetTreatment("id", "other_test_feature");
-            var result4 = client.GetTreatment("id", "other_test_feature");
-            var result5 = client.GetTreatment("id", "other_test_feature2");
-            var result6 = client.GetTreatment("id", "other_test_feature2");
-
-            //Assert
-            Assert.IsTrue(result1 == "off"); //default treatment
-            Assert.IsTrue(result2 == "off"); //default treatment
-            Assert.IsTrue(result3 == "on"); //default treatment
-            Assert.IsTrue(result4 == "on"); //default treatment
-            Assert.IsTrue(result5 == "off"); //default treatment
-            Assert.IsTrue(result6 == "off"); //default treatment
+            //Assert && Act
+            Assert.AreEqual("off", client.GetTreatment("id", "double_writes_to_cassandra")); //default treatment
+            Assert.AreEqual("off", client.GetTreatment("id", "double_writes_to_cassandra")); //default treatment
+            Assert.AreEqual("on", client.GetTreatment("id", "other_test_feature")); //default treatment
+            Assert.AreEqual("on", client.GetTreatment("id", "other_test_feature")); //default treatment
+            Assert.AreEqual("off", client.GetTreatment("id", "other_test_feature2")); //default treatment
+            Assert.AreEqual("off", client.GetTreatment("id", "other_test_feature2")); //default treatment
         }
 
         [DeploymentItem(@"Resources\test.splits")]

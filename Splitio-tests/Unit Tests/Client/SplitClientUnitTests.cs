@@ -342,9 +342,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             {
                 new  ConditionWithLogic
                 {
-                    conditionType = ConditionType.WHITELIST,
-                    label = "default rule",
-                    partitions = new List<PartitionDefinition>
+                    ConditionType = ConditionType.WHITELIST,
+                    Label = "default rule",
+                    Partitions = new List<PartitionDefinition>
                     {
                         new PartitionDefinition
                         {
@@ -357,7 +357,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                             treatment = "off"
                         }
                     },
-                    matcher = _combiningMatcher.Object
+                    Matcher = _combiningMatcher.Object
                 }
             };
 
@@ -502,9 +502,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             {
                 new  ConditionWithLogic
                 {
-                    conditionType = ConditionType.ROLLOUT,
-                    label = "default rule",
-                    partitions = new List<PartitionDefinition>
+                    ConditionType = ConditionType.ROLLOUT,
+                    Label = "default rule",
+                    Partitions = new List<PartitionDefinition>
                     {
                         new PartitionDefinition
                         {
@@ -517,7 +517,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                             treatment = "on"
                         }
                     },
-                    matcher = _combiningMatcher.Object
+                    Matcher = _combiningMatcher.Object
                 }
             };
 
@@ -802,9 +802,9 @@ namespace Splitio_Tests.Unit_Tests.Client
                 {
                     new  ConditionWithLogic
                     {
-                        conditionType = ConditionType.ROLLOUT,
-                        label = "default rule",
-                        partitions = new List<PartitionDefinition>
+                        ConditionType = ConditionType.ROLLOUT,
+                        Label = "default rule",
+                        Partitions = new List<PartitionDefinition>
                         {
                             new PartitionDefinition
                             {
@@ -817,7 +817,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                                 treatment = "off"
                             }
                         },
-                        matcher = _combiningMatcher.Object
+                        Matcher = _combiningMatcher.Object
                     }
                 }
             };

@@ -107,7 +107,7 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
             //Act
-            var result = matcher.Match("test2");
+            var result = await matcher.Match("test2");
 
             //Assert
             Assert.IsTrue(result);
@@ -130,7 +130,7 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
             //Act
-            var result = matcher.Match("test3");
+            var result = await matcher.Match("test3");
 
             //Assert
             Assert.IsFalse(result);
@@ -147,14 +147,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
             //Act
-            var result = matcher.Match("test2");
+            var result = await matcher.Match("test2");
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfCacheEmpty()
+        public async Task MatchShouldReturnFalseIfCacheEmpty()
         {
             //Arrange
             var segmentName = "test-segment";
@@ -163,7 +163,7 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
             //Act
-            var result = matcher.Match("test2");
+            var result = await matcher.Match("test2");
 
             //Assert
             Assert.IsFalse(result);

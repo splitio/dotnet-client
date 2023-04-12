@@ -138,26 +138,26 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchNumberShouldReturnFalseOnInvalidNumberWithStringKey()
+        public async Task MatchNumberShouldReturnFalseOnInvalidNumberWithStringKey()
         {
             //Arrange
             var matcher = new BetweenMatcher(DataTypeEnum.NUMBER, 1000001, 10540001);
 
             //Act
-            var result = matcher.Match("1aaaaa0");
+            var result = await matcher.Match("1aaaaa0");
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchDateShouldReturnFalseOnInvalidDateWithStringKey()
+        public async Task MatchDateShouldReturnFalseOnInvalidDateWithStringKey()
         {
             //Arrange
             var matcher = new BetweenMatcher(DataTypeEnum.DATETIME, 1470960000000, 1480960000000);
 
             //Act
-            var result = matcher.Match("1aaa0000000");
+            var result = await matcher.Match("1aaa0000000");
 
             //Assert
             Assert.IsFalse(result);
@@ -165,27 +165,27 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseOnInvalidDataTypeWithStringKey()
+        public async Task MatchShouldReturnFalseOnInvalidDataTypeWithStringKey()
         {
             //Arrange
             var matcher = new BetweenMatcher(DataTypeEnum.STRING, 1470960000000, 1480960000000);
 
             //Act
-            var result = matcher.Match("abcd");
+            var result = await matcher.Match("abcd");
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfNullOrEmptyWithStringKey()
+        public async Task MatchShouldReturnFalseIfNullOrEmptyWithStringKey()
         {
             //Arrange
             var matcher = new BetweenMatcher(DataTypeEnum.DATETIME, 1470960000000, 1480960000000);
 
             //Act
-            var result = matcher.Match("");
-            var result2 = matcher.Match((string)null);
+            var result = await matcher.Match("");
+            var result2 = await matcher.Match((string)null);
 
             //Assert
             Assert.IsFalse(result);

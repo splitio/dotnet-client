@@ -25,13 +25,13 @@ namespace Splitio_tests.Unit_Tests.Matchers
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueOnMatchingKeyString()
+        public async Task MatchShouldReturnTrueOnMatchingKeyString()
         {
             //Arrange
             var matcher = new MatchesStringMatcher("^a");
 
             //Act
-            var result = matcher.Match("arrive");
+            var result = await matcher.Match("arrive");
 
             //Assert
             Assert.IsTrue(result);
@@ -51,13 +51,13 @@ namespace Splitio_tests.Unit_Tests.Matchers
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseOnNonMatchingKey()
+        public async Task MatchShouldReturnFalseOnNonMatchingKey()
         {
             //Arrange
             var matcher = new MatchesStringMatcher("^a");
 
             //Act
-            var result = matcher.Match("split");
+            var result = await matcher.Match("split");
 
             //Assert
             Assert.IsFalse(result);

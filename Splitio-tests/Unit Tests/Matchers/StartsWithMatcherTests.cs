@@ -102,9 +102,11 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseIfMatchingLong()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string>
+            {
+                "test1",
+                "test2"
+            };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
@@ -118,9 +120,11 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseIfMatchingDate()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string>
+            {
+                "test1",
+                "test2"
+            };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
@@ -134,14 +138,18 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseIfMatchingSet()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string>
+            {
+                "test1",
+                "test2"
+            };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
-            var keys = new List<string>();
-            keys.Add("test1");
+            var keys = new List<string>
+            {
+                "test1"
+            };
             var result = matcher.Match(keys);
 
             //Assert
@@ -152,9 +160,11 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseIfMatchingBoolean()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string>
+            {
+                "test1",
+                "test2"
+            };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
@@ -165,80 +175,88 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueOnMatchingKeyString()
+        public async Task MatchShouldReturnTrueOnMatchingKeyString()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string>
+            {
+                "test1",
+                "test2"
+            };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
-            var result = matcher.Match("test1end");
+            var result = await matcher.Match("test1end");
 
             //Assert
             Assert.IsTrue(result); //test1end starts with test1
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseOnNonMatchingKeyString()
+        public async Task MatchShouldReturnFalseOnNonMatchingKeyString()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string>
+            {
+                "test1",
+                "test2"
+            };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
-            var result = matcher.Match("test3end");
+            var result = await matcher.Match("test3end");
 
             //Assert
             Assert.IsFalse(result); //key not starts with any element of whitelist
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfEmptyWhitelistString()
+        public async Task MatchShouldReturnFalseIfEmptyWhitelistString()
         {
             //Arrange
             var toCompare = new List<string>();
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
-            var result = matcher.Match("test1");
+            var result = await matcher.Match("test1");
 
             //Assert
             Assert.IsFalse(result); //Empty whitelist
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfNullKeyString()
+        public async Task MatchShouldReturnFalseIfNullKeyString()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string>
+            {
+                "test1",
+                "test2"
+            };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
             string key = null;
-            var result = matcher.Match(key);
+            var result = await matcher.Match(key);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfEmptyKeyString()
+        public async Task MatchShouldReturnFalseIfEmptyKeyString()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string>
+            {
+                "test1",
+                "test2"
+            };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
             string key = "";
-            var result = matcher.Match(key);
+            var result = await matcher.Match(key);
 
             //Assert
             Assert.IsFalse(result);

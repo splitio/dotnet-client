@@ -149,7 +149,7 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingString()
+        public async Task MatchShouldReturnFalseIfMatchingString()
         {
             //Arrange
             var treatments = new List<string>() { "on" };
@@ -162,7 +162,7 @@ namespace Splitio_Tests.Unit_Tests
                 .ReturnsAsync(new TreatmentResult("label", "on"));
 
             //Act
-            var result = matcher.Match("test", null, evaluatorMock.Object);
+            var result = await matcher.Match("test", null, evaluatorMock.Object);
 
             //Assert
             Assert.IsFalse(result);

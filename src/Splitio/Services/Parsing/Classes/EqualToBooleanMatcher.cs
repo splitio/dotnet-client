@@ -20,15 +20,15 @@ namespace Splitio.Services.Parsing.Classes
             return key.Equals(Value);
         }
 
-        public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        public override Task<bool> Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             if (bool.TryParse(key, out bool boolValue))
             {
-                return Match(boolValue, attributes, evaluator);
+                return Task.FromResult(Match(boolValue, attributes, evaluator));
             }
             else
             {
-                return false;
+                return Task.FromResult(false);
             }
         }
 

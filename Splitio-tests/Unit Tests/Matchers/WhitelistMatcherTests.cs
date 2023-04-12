@@ -89,7 +89,7 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueOnMatchingKey()
+        public async Task MatchShouldReturnTrueOnMatchingKey()
         {
             //Arrange
             var keys = new List<string>
@@ -100,14 +100,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = matcher.Match("test2");
+            var result = await matcher.Match("test2");
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseOnNonMatchingKey()
+        public async Task MatchShouldReturnFalseOnNonMatchingKey()
         {
             //Arrange
             var keys = new List<string>
@@ -118,21 +118,21 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = matcher.Match("test3");
+            var result = await matcher.Match("test3");
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfEmptyWhitelist()
+        public async Task MatchShouldReturnFalseIfEmptyWhitelist()
         {
             //Arrange
             var keys = new List<string>();
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = matcher.Match("test2");
+            var result = await matcher.Match("test2");
 
             //Assert
             Assert.IsFalse(result);

@@ -9,9 +9,9 @@ namespace Splitio.Services.Parsing
 {
     public class AllKeysMatcher : BaseMatcher
     {
-        public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        public override Task<bool> Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            return key != null;
+            return Task.FromResult(key != null);
         }
 
         public override bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)

@@ -15,14 +15,14 @@ namespace Splitio.Services.Parsing
         {
             _list = list ?? new List<string>();
         }
-        public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        public override Task<bool> Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            return _list.Contains(key);
+            return Task.FromResult(_list.Contains(key));
         }
 
         public override Task<bool> Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            return Task.FromResult(Match(key.matchingKey, attributes, evaluator));
+            return Match(key.matchingKey, attributes, evaluator);
         }
 
         public override bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)

@@ -36,11 +36,11 @@ namespace Splitio.Services.Shared.Classes
             {
                 return new ConditionWithLogic
                 {
-                    conditionType = ConditionType.WHITELIST,
-                    matcher = new CombiningMatcher
+                    ConditionType = ConditionType.WHITELIST,
+                    Matcher = new CombiningMatcher
                     {
-                        combiner = CombinerEnum.AND,
-                        delegates = new List<AttributeMatcher>
+                        Combiner = CombinerEnum.AND,
+                        Delegates = new List<AttributeMatcher>
                         {
                             new AttributeMatcher
                             {
@@ -49,7 +49,7 @@ namespace Splitio.Services.Shared.Classes
                             }
                         }
                     },
-                    partitions = new List<PartitionDefinition>
+                    Partitions = new List<PartitionDefinition>
                     {
                         new PartitionDefinition
                         {
@@ -57,18 +57,18 @@ namespace Splitio.Services.Shared.Classes
                             treatment = treatment
                         }
                     },
-                    label = $"whitelisted {string.Join(", ", keys)}"
+                    Label = $"whitelisted {string.Join(", ", keys)}"
                 };
             }
             else
             {
                 return new ConditionWithLogic
                 {
-                    conditionType = ConditionType.ROLLOUT,
-                    matcher = new CombiningMatcher
+                    ConditionType = ConditionType.ROLLOUT,
+                    Matcher = new CombiningMatcher
                     {
-                        combiner = CombinerEnum.AND,
-                        delegates = new List<AttributeMatcher>
+                        Combiner = CombinerEnum.AND,
+                        Delegates = new List<AttributeMatcher>
                         {
                             new AttributeMatcher
                             {
@@ -77,7 +77,7 @@ namespace Splitio.Services.Shared.Classes
                             }
                         }
                     },
-                    partitions = new List<PartitionDefinition>
+                    Partitions = new List<PartitionDefinition>
                     {
                         new PartitionDefinition
                         {
@@ -85,7 +85,7 @@ namespace Splitio.Services.Shared.Classes
                             treatment = treatment
                         }
                     },
-                    label = "Default rule"
+                    Label = "Default rule"
                 };
             }
         }

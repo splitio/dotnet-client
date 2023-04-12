@@ -201,7 +201,7 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingString()
+        public async Task MatchShouldReturnFalseIfMatchingString()
         {
             //Arrange
             var toCompare = new List<string>
@@ -212,7 +212,7 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new PartOfSetMatcher(toCompare);
 
             //Act
-            var result = matcher.Match("test");
+            var result = await matcher.Match("test");
 
             //Assert
             Assert.IsFalse(result);
