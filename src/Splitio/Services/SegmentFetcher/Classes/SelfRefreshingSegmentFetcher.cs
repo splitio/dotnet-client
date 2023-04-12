@@ -1,5 +1,4 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
@@ -94,7 +93,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             _segmentCache.Clear();
         }
 
-        public override void InitializeSegment(string name)
+        public override Task InitializeSegmentAsync(string name)
         {
             _segments.TryGetValue(name, out SelfRefreshingSegment segment);
 
@@ -112,6 +111,8 @@ namespace Splitio.Services.SegmentFetcher.Classes
                     }
                 }                
             }
+
+            return Task.FromResult(0);
         }
 
         public bool FetchAll()
@@ -123,7 +124,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
             foreach (var segment in _segments.Values)
             {
-                tasks.Add(segment.FetchSegment(fetchOptions));
+                tasks.Add(segment.FetchSegmentAsync(fetchOptions));
             }
 
             Task.WaitAll(tasks.ToArray());
@@ -135,9 +136,9 @@ namespace Splitio.Services.SegmentFetcher.Classes
         {
             try
             {
-                InitializeSegment(segmentName);
+                await InitializeSegmentAsync(segmentName);
                 _segments.TryGetValue(segmentName, out SelfRefreshingSegment fetcher);
-                await fetcher.FetchSegment(fetchOptions);
+                await fetcher.FetchSegmentAsync(fetchOptions);
             }
             catch (Exception ex)
             {
@@ -154,7 +155,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
             foreach (var name in uniqueNames)
             {
-                var changeNumber = _segmentCache.GetChangeNumber(name);
+                var changeNumber = await _segmentCache.GetChangeNumberAsync(name);
 
                 if (changeNumber == -1) await Fetch(name, new FetchOptions());
             }

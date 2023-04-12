@@ -1,5 +1,6 @@
 ﻿using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
@@ -12,6 +13,9 @@ namespace Splitio.Services.SegmentFetcher.Classes
             _segmentCache = segmentCache;
         }
 
-        public virtual void InitializeSegment(string name) { }
+        public virtual Task InitializeSegmentAsync(string name)
+        {
+            return Task.FromResult(0); // No-op
+        }
     }
 }

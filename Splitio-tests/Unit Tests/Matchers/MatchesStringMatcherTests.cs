@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio_tests.Unit_Tests.Matchers
 {
@@ -37,13 +38,13 @@ namespace Splitio_tests.Unit_Tests.Matchers
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueOnMatchingKey()
+        public async Task MatchShouldReturnTrueOnMatchingKey()
         {
             //Arrange
             var matcher = new MatchesStringMatcher("^a");
 
             //Act
-            var result = matcher.Match(new Key("arrive", "arrive"));
+            var result = await matcher.Match(new Key("arrive", "arrive"));
 
             //Assert
             Assert.IsTrue(result);

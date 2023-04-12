@@ -4,6 +4,7 @@ using Splitio.Domain;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using Splitio.Services.Cache.Classes;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests
 {
@@ -11,66 +12,70 @@ namespace Splitio_Tests.Unit_Tests
     public class UserDefinedSegmentMatcherTests
     {
         [TestMethod]
-        public void MatchShouldReturnTrueOnMatchingSegmentWithKey()
+        public async Task MatchShouldReturnTrueOnMatchingSegmentWithKey()
         {
             //Arrange
-            var keys = new List<string>();
-            keys.Add("test1");
-            keys.Add("test2");
+            var keys = new List<string>
+            {
+                "test1",
+                "test2"
+            };
 
             var segmentName = "test-segment";
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            segmentCache.AddToSegment(segmentName, keys);
+            await segmentCache.AddToSegmentAsync(segmentName, keys);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
             //Act
-            var result = matcher.Match(new Key("test2", "test2"));
+            var result = await matcher.Match(new Key("test2", "test2"));
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseOnNonMatchingSegmentWithKey()
+        public async Task MatchShouldReturnFalseOnNonMatchingSegmentWithKey()
         {
             //Arrange
-            var keys = new List<string>();
-            keys.Add("test1");
-            keys.Add("test2");
+            var keys = new List<string>
+            {
+                "test1",
+                "test2"
+            };
 
             var segmentName = "test-segment";
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            segmentCache.AddToSegment(segmentName, keys);
+            await segmentCache.AddToSegmentAsync(segmentName, keys);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
             //Act
-            var result = matcher.Match(new Key("test3", "test3"));
+            var result = await matcher.Match(new Key("test3", "test3"));
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfSegmentEmptyWithKey()
+        public async Task MatchShouldReturnFalseIfSegmentEmptyWithKey()
         {
             //Arrange
             var segmentName = "test-segment";
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            segmentCache.AddToSegment(segmentName, null);
+            await segmentCache.AddToSegmentAsync(segmentName, null);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
             //Act
-            var result = matcher.Match(new Key("test2", "test2"));
+            var result = await matcher.Match(new Key("test2", "test2"));
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfCacheEmptyWithKey()
+        public async Task MatchShouldReturnFalseIfCacheEmptyWithKey()
         {
             //Arrange
             var segmentName = "test-segment";
@@ -79,23 +84,25 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
             //Act
-            var result = matcher.Match(new Key("test2", "test2"));
+            var result = await matcher.Match(new Key("test2", "test2"));
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueOnMatchingSegment()
+        public async Task MatchShouldReturnTrueOnMatchingSegment()
         {
             //Arrange
-            var keys = new List<string>();
-            keys.Add("test1");
-            keys.Add("test2");
+            var keys = new List<string>
+            {
+                "test1",
+                "test2"
+            };
 
             var segmentName = "test-segment";
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            segmentCache.AddToSegment(segmentName, keys);
+            await segmentCache.AddToSegmentAsync(segmentName, keys);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
@@ -107,16 +114,18 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseOnNonMatchingSegment()
+        public async Task MatchShouldReturnFalseOnNonMatchingSegment()
         {
             //Arrange
-            var keys = new List<string>();
-            keys.Add("test1");
-            keys.Add("test2");
+            var keys = new List<string>
+            {
+                "test1",
+                "test2"
+            };
 
             var segmentName = "test-segment";
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            segmentCache.AddToSegment(segmentName, keys);
+            await segmentCache.AddToSegmentAsync(segmentName, keys);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
@@ -128,12 +137,12 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfSegmentEmpty()
+        public async Task MatchShouldReturnFalseIfSegmentEmpty()
         {
             //Arrange
             var segmentName = "test-segment";
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            segmentCache.AddToSegment(segmentName, null);
+            await segmentCache.AddToSegmentAsync(segmentName, null);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 

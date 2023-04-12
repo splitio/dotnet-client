@@ -2,6 +2,7 @@
 using Splitio.Services.Evaluator;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Parsing.Classes
 {
@@ -15,11 +16,11 @@ namespace Splitio.Services.Parsing.Classes
 
         public abstract bool Match(List<string> key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
 
-        public abstract bool Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
+        public abstract Task<bool> Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
 
         public abstract bool Match(bool key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
 
-        public bool Match(object value, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        public async Task<bool> Match(object value, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             if (value is bool)
             {
@@ -47,7 +48,7 @@ namespace Splitio.Services.Parsing.Classes
             }
             else if (value is Key)
             {
-                return Match((Key)value, attributes, evaluator);
+                return await Match((Key)value, attributes, evaluator);
             }
 
             return false;

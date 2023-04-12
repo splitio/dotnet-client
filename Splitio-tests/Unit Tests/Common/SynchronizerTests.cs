@@ -125,9 +125,9 @@ namespace Splitio_Tests.Unit_Tests.Common
             var segmentName = "segment-test";
 
             _segmentCache
-                .SetupSequence(mock => mock.GetChangeNumber(segmentName))
-                .Returns(-1)
-                .Returns(2);
+                .SetupSequence(mock => mock.GetChangeNumberAsync(segmentName))
+                .ReturnsAsync(-1)
+                .ReturnsAsync(2);
 
             // Act.
             _synchronizer.SynchronizeSegment(segmentName, 1);
@@ -143,8 +143,8 @@ namespace Splitio_Tests.Unit_Tests.Common
             var segmentName = "segment-test";
 
             _segmentCache
-                .Setup(mock => mock.GetChangeNumber(segmentName))
-                .Returns(2);
+                .Setup(mock => mock.GetChangeNumberAsync(segmentName))
+                .ReturnsAsync(2);
 
             // Act.
             _synchronizer.SynchronizeSegment(segmentName, 100);
@@ -162,13 +162,13 @@ namespace Splitio_Tests.Unit_Tests.Common
             var segmentName = "segment-test";
 
             _segmentCache
-                .SetupSequence(mock => mock.GetChangeNumber(segmentName))
-                .Returns(-1)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(110);
+                .SetupSequence(mock => mock.GetChangeNumberAsync(segmentName))
+                .ReturnsAsync(-1)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(110);
 
             // Act.
             _synchronizer.SynchronizeSegment(segmentName, 100);
@@ -186,25 +186,25 @@ namespace Splitio_Tests.Unit_Tests.Common
             var segmentName = "segment-test";
 
             _segmentCache
-                .SetupSequence(mock => mock.GetChangeNumber(segmentName))
-                .Returns(-1)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(2)
-                .Returns(110);
+                .SetupSequence(mock => mock.GetChangeNumberAsync(segmentName))
+                .ReturnsAsync(-1)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(2)
+                .ReturnsAsync(110);
 
             // Act.
             _synchronizer.SynchronizeSegment(segmentName, 100);

@@ -3,12 +3,13 @@ using Splitio.Services.Evaluator;
 using Splitio.Services.Parsing.Classes;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Parsing
 {
     public class EqualToSetMatcher : BaseMatcher
     {
-        private HashSet<string> itemsToCompare = new HashSet<string>();
+        private readonly HashSet<string> itemsToCompare = new HashSet<string>();
 
         public EqualToSetMatcher(List<string> compareTo)
         {
@@ -18,9 +19,9 @@ namespace Splitio.Services.Parsing
             }
         }
 
-        public override bool Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        public override Task<bool> Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         public override bool Match(List<string> key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)

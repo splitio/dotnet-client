@@ -2,6 +2,7 @@
 using Splitio.Services.Evaluator;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Parsing.Classes
 {
@@ -31,9 +32,9 @@ namespace Splitio.Services.Parsing.Classes
             }
         }
 
-        public override bool Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        public override Task<bool> Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         public override bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)

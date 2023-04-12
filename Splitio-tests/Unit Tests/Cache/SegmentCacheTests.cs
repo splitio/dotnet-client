@@ -3,6 +3,7 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
@@ -10,7 +11,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
     public class SegmentCacheTests
     {
         [TestMethod]
-        public void RegisterSegmentTest()
+        public async Task RegisterSegmentTest()
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
@@ -18,15 +19,15 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var segmentName = "test";
 
             //Act
-            segmentCache.AddToSegment(segmentName, keys);
-            var result = segmentCache.IsInSegment(segmentName, "abcd");
+            await segmentCache.AddToSegmentAsync(segmentName, keys);
+            var result = await segmentCache.IsInSegmentAsync(segmentName, "abcd");
             
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void IsNotInSegmentTest()
+        public async Task IsNotInSegmentTest()
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
@@ -34,28 +35,28 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var segmentName = "test";
 
             //Act
-            segmentCache.AddToSegment(segmentName, keys);
-            var result = segmentCache.IsInSegment(segmentName, "abcd");
+            await segmentCache.AddToSegmentAsync(segmentName, keys);
+            var result = await segmentCache.IsInSegmentAsync(segmentName, "abcd");
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void IsInSegmentWithInexistentSegmentTest()
+        public async Task IsInSegmentAsyncWithInexistentSegmentTest()
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
 
             //Act
-            var result = segmentCache.IsInSegment("test", "abcd");
+            var result = await segmentCache.IsInSegmentAsync("test", "abcd");
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void RemoveKeyFromSegmentTest()
+        public async Task RemoveKeyFromSegmentTest()
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
@@ -63,10 +64,10 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var segmentName = "test";
 
             //Act
-            segmentCache.AddToSegment(segmentName, keys);
-            var result = segmentCache.IsInSegment(segmentName, "1234");
-            segmentCache.RemoveFromSegment(segmentName, keys);
-            var result2 = segmentCache.IsInSegment(segmentName, "1234");
+            await segmentCache.AddToSegmentAsync(segmentName, keys);
+            var result = await segmentCache.IsInSegmentAsync(segmentName, "1234");
+            await segmentCache.RemoveFromSegmentAsync(segmentName, keys);
+            var result2 = await segmentCache.IsInSegmentAsync(segmentName, "1234");
 
             //Assert
             Assert.IsTrue(result);
@@ -74,63 +75,63 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
-        public void SetAndGetChangeNumberTest()
+        public async Task SetAndGetChangeNumberTest()
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var segmentName = "test";
 
             //Act
-            segmentCache.AddToSegment(segmentName, null);
-            segmentCache.SetChangeNumber(segmentName, 1234);
-            var result = segmentCache.GetChangeNumber(segmentName);
+            await segmentCache.AddToSegmentAsync(segmentName, null);
+            await segmentCache.SetChangeNumberAsync(segmentName, 1234);
+            var result = await segmentCache.GetChangeNumberAsync(segmentName);
 
             //Assert
             Assert.AreEqual(1234, result);
         }
 
         [TestMethod]
-        public void GetSegmentKeysTest()
+        public async Task GetSegmentKeysTest()
         {
             // Arrange.
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var keys = new List<string> { "abcd", "1234" };
             var segmentName = "test";
-            segmentCache.AddToSegment(segmentName, keys);
+            await segmentCache.AddToSegmentAsync(segmentName, keys);
 
             // Act & Assert.
-            var result = segmentCache.GetSegmentKeys(segmentName);
+            var result = await segmentCache.GetSegmentKeysAsync(segmentName);
             Assert.AreEqual(2, result.Count);
             Assert.IsTrue(result.Contains("abcd"));
             Assert.IsTrue(result.Contains("1234"));
 
             var otherSegment = "segmentName";
             var otherKeys = new List<string>();
-            result = segmentCache.GetSegmentKeys(otherSegment);
+            result = await segmentCache.GetSegmentKeysAsync(otherSegment);
             Assert.AreEqual(0, result.Count);
 
-            segmentCache.AddToSegment(otherSegment, otherKeys);
-            result = segmentCache.GetSegmentKeys(otherSegment);
+            await segmentCache.AddToSegmentAsync(otherSegment, otherKeys);
+            result = await segmentCache.GetSegmentKeysAsync(otherSegment);
             Assert.AreEqual(0, result.Count);
         }
 
         [TestMethod]
-        public void GetSegmentNamesTest()
+        public async Task GetSegmentNamesTest()
         {
             // Arrange.
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
 
             // Act & Assert.
-            var result = segmentCache.GetSegmentNames();
+            var result = await segmentCache.GetSegmentNamesAsync();
             Assert.AreEqual(0, result.Count);
 
             var keys = new List<string> { "abcd", "1234" };
             var segmentName = "test";
-            segmentCache.AddToSegment(segmentName, keys);
-            segmentCache.AddToSegment($"{segmentName}-1", keys);
-            segmentCache.AddToSegment($"{segmentName}-2", keys);
+            await segmentCache.AddToSegmentAsync(segmentName, keys);
+            await segmentCache.AddToSegmentAsync($"{segmentName}-1", keys);
+            await segmentCache.AddToSegmentAsync($"{segmentName}-2", keys);
 
-            result = segmentCache.GetSegmentNames();
+            result = await segmentCache.GetSegmentNamesAsync();
             Assert.AreEqual(3, result.Count);
             Assert.IsTrue(result.Contains(segmentName));
             Assert.IsTrue(result.Contains($"{segmentName}-1"));

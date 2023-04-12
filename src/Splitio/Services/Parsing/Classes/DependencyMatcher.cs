@@ -2,6 +2,7 @@
 using Splitio.Services.Evaluator;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Parsing.Classes
 {
@@ -16,15 +17,14 @@ namespace Splitio.Services.Parsing.Classes
             Treatments = treatments;
         }
 
-        public override bool Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        public override async Task<bool> Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             if (evaluator == null)
             {
                 return false;
             }
 
-            // TODO: REMOVE .Result
-            var result = evaluator.EvaluateFeatureAsync(key, Split, attributes).Result;
+            var result = await evaluator.EvaluateFeatureAsync(key, Split, attributes);
 
             return Treatments.Contains(result.Treatment);
         }

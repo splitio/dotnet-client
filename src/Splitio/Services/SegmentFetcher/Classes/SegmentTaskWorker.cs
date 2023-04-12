@@ -18,7 +18,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
         //Worker is always one task, so when it is signaled, after the
         //task stops its wait, this variable is auto-reseted
-        private AutoResetEvent waitForExecution = new AutoResetEvent(false);
+        private readonly AutoResetEvent waitForExecution = new AutoResetEvent(false);
 
         public SegmentTaskWorker(int numberOfParallelTasks,
             ISegmentTaskQueue segmentTaskQueue)
@@ -58,7 +58,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
                             if (!token.IsCancellationRequested)
                             {
                                 IncrementCounter();
-                                Task task = new Task(async () => await segment.FetchSegment(new FetchOptions()), token);
+                                Task task = new Task(async () => await segment.FetchSegmentAsync(new FetchOptions()), token);
                                 task.ContinueWith((x) => { DecrementCounter(); }, token);
                                 task.Start();
                             }

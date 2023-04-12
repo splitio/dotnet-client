@@ -1,7 +1,9 @@
-﻿namespace Splitio.Services.SegmentFetcher.Interfaces
+﻿using System.Threading.Tasks;
+
+namespace Splitio.Services.SegmentFetcher.Interfaces
 {
     public interface ISegmentFetcher
     {
-        void InitializeSegment(string name);
+        Task InitializeSegmentAsync(string name);
     }
 }

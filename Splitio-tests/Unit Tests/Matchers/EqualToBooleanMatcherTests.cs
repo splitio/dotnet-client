@@ -3,6 +3,7 @@ using Splitio.Domain;
 using Splitio.Services.Parsing.Classes;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests
 {
@@ -70,13 +71,13 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingKey()
+        public async Task MatchShouldReturnFalseIfMatchingKey()
         {
             //Arrange
             var matcher = new EqualToBooleanMatcher(true);
 
             //Act
-            var result = matcher.Match(new Key("test", "test"));
+            var result = await matcher.Match(new Key("test", "test"));
 
             //Assert
             Assert.IsFalse(result);

@@ -159,7 +159,7 @@ namespace Splitio.Telemetry.Common
                     Tags = _telemetryStorageConsumer.PopTags().ToList(),
                     TokenRefreshes = _telemetryStorageConsumer.PopTokenRefreshes(),
                     SplitCount = await _splitCache.SplitsCountAsync(),
-                    SegmentCount = _segmentCache.SegmentsCount(),
+                    SegmentCount = await _segmentCache.SegmentsCountAsync(),
                     SegmentKeyCount = _segmentCache.SegmentKeysCount()
                 };
 

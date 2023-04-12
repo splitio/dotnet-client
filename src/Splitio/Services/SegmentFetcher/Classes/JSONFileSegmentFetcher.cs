@@ -3,12 +3,13 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class JSONFileSegmentFetcher : SegmentFetcher
     {
-        List<string> added;
+        private readonly List<string> _added;
 
         public JSONFileSegmentFetcher(string filePath, 
             ISegmentCache segmentsCache) : base(segmentsCache)
@@ -17,15 +18,15 @@ namespace Splitio.Services.SegmentFetcher.Classes
             {
                 var json = File.ReadAllText(filePath);
                 var segmentChangesResult = JsonConvert.DeserializeObject<SegmentChange>(json);
-                added = segmentChangesResult.added;
+                _added = segmentChangesResult.added;
             }
         }
 
-        public override void InitializeSegment(string name)
+        public override async Task InitializeSegmentAsync(string name)
         {
-            if (added != null)
+            if (_added != null)
             {
-                _segmentCache.AddToSegment(name, added);
+                await _segmentCache.AddToSegmentAsync(name, _added);
             }
         }
     }

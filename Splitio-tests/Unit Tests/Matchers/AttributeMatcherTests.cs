@@ -3,6 +3,7 @@ using Splitio.Domain;
 using Splitio.Services.Parsing;
 using Splitio.Services.Parsing.Classes;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests
 {
@@ -10,7 +11,7 @@ namespace Splitio_Tests.Unit_Tests
     public class AttributeMatcherTests
     {
         [TestMethod]
-        public void MatchShouldReturnTrueIfAttributeInAttributesIsMatching()
+        public async Task MatchShouldReturnTrueIfAttributeInAttributesIsMatching()
         {
             //Arrange
             var matcher = new AttributeMatcher()
@@ -20,19 +21,21 @@ namespace Splitio_Tests.Unit_Tests
                 negate = false
             };
 
-            var attributes = new Dictionary<string, object>();
-            attributes.Add("card_number", 12012);
-            attributes.Add("card_type", "ABC");
-            
+            var attributes = new Dictionary<string, object>
+            {
+                { "card_number", 12012 },
+                { "card_type", "ABC" }
+            };
+
             //Act
-            var result = matcher.Match(null, attributes);
+            var result = await matcher.Match(null, attributes);
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfAttributeInAttributesIsMatchingButResultIsNegated()
+        public async Task MatchShouldReturnFalseIfAttributeInAttributesIsMatchingButResultIsNegated()
         {
             //Arrange
             var matcher = new AttributeMatcher()
@@ -47,7 +50,7 @@ namespace Splitio_Tests.Unit_Tests
             attributes.Add("card_type", "ABC");
 
             //Act
-            var result = matcher.Match(null, attributes);
+            var result = await matcher.Match(null, attributes);
 
             //Assert
             Assert.IsFalse(result);
@@ -55,7 +58,7 @@ namespace Splitio_Tests.Unit_Tests
 
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfAttributesDictionaryIsNull()
+        public async Task MatchShouldReturnFalseIfAttributesDictionaryIsNull()
         {
             //Arrange
             var matcher = new AttributeMatcher()
@@ -66,14 +69,14 @@ namespace Splitio_Tests.Unit_Tests
             };
 
             //Act
-            var result = matcher.Match(null, null);
+            var result = await matcher.Match(null, null);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfValueForAttributeIsNullAndKeyIsNull()
+        public async Task MatchShouldReturnFalseIfValueForAttributeIsNullAndKeyIsNull()
         {
             //Arrange
             var matcher = new AttributeMatcher()
@@ -83,19 +86,21 @@ namespace Splitio_Tests.Unit_Tests
                 negate = false
             };
 
-            var attributes = new Dictionary<string, object>();
-            attributes.Add("card_number", 12012);
-            attributes.Add("card_type", "ABC");
+            var attributes = new Dictionary<string, object>
+            {
+                { "card_number", 12012 },
+                { "card_type", "ABC" }
+            };
 
             //Act
-            var result = matcher.Match(new Key(null, null), attributes);
+            var result = await matcher.Match(new Key(null, null), attributes);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfValueForAttributeIsNullAndKeyNotMatching()
+        public async Task MatchShouldReturnFalseIfValueForAttributeIsNullAndKeyNotMatching()
         {
             //Arrange
             var matcher = new AttributeMatcher()
@@ -105,19 +110,21 @@ namespace Splitio_Tests.Unit_Tests
                 negate = false
             };
 
-            var attributes = new Dictionary<string, object>();
-            attributes.Add("card_number", 12012);
-            attributes.Add("card_type", "ABC");
+            var attributes = new Dictionary<string, object>
+            {
+                { "card_number", 12012 },
+                { "card_type", "ABC" }
+            };
 
             //Act
-            var result = matcher.Match(new Key("1", "1"), attributes);
+            var result = await matcher.Match(new Key("1", "1"), attributes);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueIfValueForAttributeIsNullAndKeyMatching()
+        public async Task MatchShouldReturnTrueIfValueForAttributeIsNullAndKeyMatching()
         {
             //Arrange
             var matcher = new AttributeMatcher()
@@ -127,28 +134,32 @@ namespace Splitio_Tests.Unit_Tests
                 negate = false
             };
 
-            var attributes = new Dictionary<string, object>();
-            attributes.Add("card_number", 12012);
-            attributes.Add("card_type", "ABC");
+            var attributes = new Dictionary<string, object>
+            {
+                { "card_number", 12012 },
+                { "card_type", "ABC" }
+            };
 
             //Act
-            var result = matcher.Match(new Key ("12012", "12012"), attributes);
+            var result = await matcher.Match(new Key ("12012", "12012"), attributes);
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueIfValueBooleanOrStringBooleanMatching()
+        public async Task MatchShouldReturnTrueIfValueBooleanOrStringBooleanMatching()
         {
             //Arrange
-            var possibleValues = new List<object>();
-            possibleValues.Add(true);
-            possibleValues.Add("true");
-            possibleValues.Add("TRUE");
-            possibleValues.Add("True");
-            possibleValues.Add("TrUe");
-            possibleValues.Add("truE");
+            var possibleValues = new List<object>
+            {
+                true,
+                "true",
+                "TRUE",
+                "True",
+                "TrUe",
+                "truE"
+            };
 
             var matcher = new AttributeMatcher()
             {
@@ -163,7 +174,7 @@ namespace Splitio_Tests.Unit_Tests
                 attributes.Add("test1", value);
 
                 //Act
-                var result = matcher.Match(new Key("12012", "12012"), attributes);
+                var result = await matcher.Match(new Key("12012", "12012"), attributes);
 
                 //Assert
                 Assert.IsTrue(result);
@@ -171,13 +182,15 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfValueBooleanOrStringBooleanNotMatching()
+        public async Task MatchShouldReturnFalseIfValueBooleanOrStringBooleanNotMatching()
         {
             //Arrange
-            var possibleValues = new List<object>();
-            possibleValues.Add(false);
-            possibleValues.Add("False");
-            possibleValues.Add("test");
+            var possibleValues = new List<object>
+            {
+                false,
+                "False",
+                "test"
+            };
 
             var matcher = new AttributeMatcher()
             {
@@ -188,11 +201,13 @@ namespace Splitio_Tests.Unit_Tests
 
             foreach (var value in possibleValues)
             {
-                var attributes = new Dictionary<string, object>();
-                attributes.Add("test1", value);
+                var attributes = new Dictionary<string, object>
+                {
+                    { "test1", value }
+                };
 
                 //Act
-                var result = matcher.Match(new Key("12012", "12012"), attributes);
+                var result = await matcher.Match(new Key("12012", "12012"), attributes);
 
                 //Assert
                 Assert.IsFalse(result);

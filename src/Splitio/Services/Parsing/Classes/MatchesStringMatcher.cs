@@ -3,12 +3,13 @@ using Splitio.Services.Evaluator;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Parsing.Classes
 {
     public class MatchesStringMatcher : BaseMatcher
     {
-        Regex regex;
+        private readonly Regex regex;
 
         public MatchesStringMatcher(string pattern)
         {
@@ -20,9 +21,9 @@ namespace Splitio.Services.Parsing.Classes
             return regex.IsMatch(key);
         }
 
-        public override bool Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        public override Task<bool> Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            return regex.IsMatch(key.matchingKey);
+            return Task.FromResult(regex.IsMatch(key.matchingKey));
         }
 
         public override bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)

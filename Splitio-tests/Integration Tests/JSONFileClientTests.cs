@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -106,7 +107,7 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         [DeploymentItem(@"Resources\splits_staging_3.json")]
         [DeploymentItem(@"Resources\segment_payed.json")]
-        public void ExecuteGetTreatmentOnRemovedUserFromSegmentShouldReturnOff()
+        public async Task ExecuteGetTreatmentOnRemovedUserFromSegmentShouldReturnOff()
         {
             //Arrange
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", $"{rootFilePath}segment_payed.json");
@@ -115,7 +116,7 @@ namespace Splitio_Tests.Integration_Tests
 
             //Act           
             var result = client.GetTreatment("abcdz", "test_jw2", null);
-            client.RemoveKeyFromSegmentCache("payed", new List<string>() { "abcdz" });
+            await client.RemoveKeyFromSegmentCacheAsync("payed", new List<string>() { "abcdz" });
             var result2 = client.GetTreatment("abcdz", "test_jw2", null);
 
 

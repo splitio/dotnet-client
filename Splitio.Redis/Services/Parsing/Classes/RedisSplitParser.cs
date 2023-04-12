@@ -1,6 +1,7 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing;
+using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Parsing.Classes
 {
@@ -11,11 +12,12 @@ namespace Splitio.Redis.Services.Parsing.Classes
             _segmentsCache = segmentsCache;
         }
 
-        protected override IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit)
+        protected override Task<IMatcher> GetInSegmentMatcherAsync(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit)
         {
             var matcherData = matcherDefinition.userDefinedSegmentMatcherData;
-
-            return new UserDefinedSegmentMatcher(matcherData.segmentName, _segmentsCache);
+            var userDefinedSegmentMatcher = new UserDefinedSegmentMatcher(matcherData.segmentName, _segmentsCache);
+            
+            return Task.FromResult((IMatcher)userDefinedSegmentMatcher);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace Splitio.Domain
             {
                 case CombinerEnum.AND:
                 default:
-                    return delegates.All(matcher => matcher.Match(key, attributes, evaluator));
+                    return delegates.All(matcher => matcher.Match(key, attributes, evaluator).Result);
             }
         }
     }

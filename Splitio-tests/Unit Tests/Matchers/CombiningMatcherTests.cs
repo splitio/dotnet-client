@@ -17,10 +17,12 @@ namespace Splitio_Tests.Unit_Tests
                 delegates = null,
                 combiner = CombinerEnum.AND
             };
-            
-            var attributes = new Dictionary<string, object>();
-            attributes.Add("card_number", 12012);
-            attributes.Add("card_type", "ABC");
+
+            var attributes = new Dictionary<string, object>
+            {
+                { "card_number", 12012 },
+                { "card_type", "ABC" }
+            };
 
             //Act
             var key = new Key("test", "test");
@@ -34,18 +36,20 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnTrueIfAllMatchersMatch()
         {
             //Arrange
-            var attributes = new Dictionary<string, object>();
-            attributes.Add("card_number", 12012);
-            attributes.Add("card_type", "ABC");
+            var attributes = new Dictionary<string, object>
+            {
+                { "card_number", 12012 },
+                { "card_type", "ABC" }
+            };
 
             var delegates = new List<AttributeMatcher>();
             var mock1 = new Mock<AttributeMatcher>();
             var key = new Key("test", "test");
-            mock1.Setup(x=>x.Match(key, attributes, null)).Returns(true);
+            mock1.Setup(x=>x.Match(key, attributes, null)).ReturnsAsync(true);
             var mock2 = new Mock<AttributeMatcher>();
-            mock2.Setup(x=>x.Match(key, attributes, null)).Returns(true);
+            mock2.Setup(x=>x.Match(key, attributes, null)).ReturnsAsync(true);
             var mock3 = new Mock<AttributeMatcher>();
-            mock3.Setup(x=>x.Match(key, attributes, null)).Returns(true);
+            mock3.Setup(x=>x.Match(key, attributes, null)).ReturnsAsync(true);
 
             delegates.Add(mock1.Object);
             delegates.Add(mock2.Object);
@@ -68,18 +72,20 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseIfAnyMatchersNoMatch()
         {
             //Arrange
-            var attributes = new Dictionary<string, object>();
-            attributes.Add("card_number", 12012);
-            attributes.Add("card_type", "ABC");
+            var attributes = new Dictionary<string, object>
+            {
+                { "card_number", 12012 },
+                { "card_type", "ABC" }
+            };
 
             var delegates = new List<AttributeMatcher>();
             var mock1 = new Mock<AttributeMatcher>();
             var key = new Key("test", "test");
-            mock1.Setup(x => x.Match(key, attributes, null)).Returns(true);
+            mock1.Setup(x => x.Match(key, attributes, null)).ReturnsAsync(true);
             var mock2 = new Mock<AttributeMatcher>();
-            mock2.Setup(x => x.Match(key, attributes, null)).Returns(false);
+            mock2.Setup(x => x.Match(key, attributes, null)).ReturnsAsync(false);
             var mock3 = new Mock<AttributeMatcher>();
-            mock3.Setup(x => x.Match(key, attributes, null)).Returns(true);
+            mock3.Setup(x => x.Match(key, attributes, null)).ReturnsAsync(true);
 
             delegates.Add(mock1.Object);
             delegates.Add(mock2.Object);

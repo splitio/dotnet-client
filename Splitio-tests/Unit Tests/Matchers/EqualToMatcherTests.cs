@@ -1,7 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Parsing;
-using Splitio.Domain;
 using Splitio.CommonLibraries;
+using Splitio.Domain;
+using Splitio.Services.Parsing;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests
 {
@@ -24,13 +25,13 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchNumberShouldReturnFalseOnKey()
+        public async Task MatchNumberShouldReturnFalseOnKey()
         {
             //Arrange
             var matcher = new EqualToMatcher(DataTypeEnum.NUMBER, 1000001);
 
             //Act
-            var result = matcher.Match(new Key("1aaaaa0", "1aaaaa0"));
+            var result = await matcher.Match(new Key("1aaaaa0", "1aaaaa0"));
 
             //Assert
             Assert.IsFalse(result);
@@ -73,40 +74,40 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchDateShouldReturnFalseOnInvalidDateKey()
+        public async Task MatchDateShouldReturnFalseOnInvalidDateKey()
         {
             //Arrange
             var matcher = new EqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
 
             //Act
-            var result = matcher.Match(new Key("1aaa0000000", "1aaa0000000"));
+            var result = await matcher.Match(new Key("1aaa0000000", "1aaa0000000"));
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseOnInvalidDataTypeKey()
+        public async Task MatchShouldReturnFalseOnInvalidDataTypeKey()
         {
             //Arrange
             var matcher = new EqualToMatcher(DataTypeEnum.STRING, 1470960000000);
 
             //Act
-            var result = matcher.Match(new Key("abcd", "abcd"));
+            var result = await matcher.Match(new Key("abcd", "abcd"));
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfNullOrEmptyKey()
+        public async Task MatchShouldReturnFalseIfNullOrEmptyKey()
         {
             //Arrange
             var matcher = new EqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
 
             //Act
-            var result = matcher.Match(new Key("", ""));
-            var result2 = matcher.Match(new Key((string)null, (string)null));
+            var result = await matcher.Match(new Key("", ""));
+            var result2 = await matcher.Match(new Key((string)null, (string)null));
 
             //Assert
             Assert.IsFalse(result);

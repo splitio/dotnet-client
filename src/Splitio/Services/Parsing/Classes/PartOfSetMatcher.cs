@@ -4,12 +4,13 @@ using Splitio.Services.Parsing.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Parsing
 {
     public class PartOfSetMatcher : BaseMatcher
     {
-        private HashSet<string> itemsToCompare = new HashSet<string>();
+        private readonly HashSet<string> itemsToCompare = new HashSet<string>();
 
         public PartOfSetMatcher(List<string> compareTo)
         {
@@ -29,9 +30,9 @@ namespace Splitio.Services.Parsing
             return key.All(k => itemsToCompare.Contains(k));
         }
 
-        public override bool Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        public override Task<bool> Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)

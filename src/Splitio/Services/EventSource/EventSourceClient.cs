@@ -87,7 +87,7 @@ namespace Splitio.Services.EventSource
 
         public void Disconnect(SSEClientActions action = SSEClientActions.DISCONNECT)
         {
-            if (_cancellationTokenSource.IsCancellationRequested) return;
+            if (_cancellationTokenSource == null || _cancellationTokenSource.IsCancellationRequested) return;
 
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();

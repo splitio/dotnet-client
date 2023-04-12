@@ -75,7 +75,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             return keys.Select(k => (string)k).ToList();
         }
 
-        public Task<int> SegmentsCount()
+        public Task<int> SegmentsCountAsync()
         {
             return Task.FromResult(0); // No-op
         }
@@ -93,6 +93,14 @@ namespace Splitio.Redis.Services.Cache.Classes
         public void Clear()
         {
             return;
+        }
+
+        public async Task<long> RegisterSegmentsAsync(List<string> segmentNames)
+        {
+            var key = $"{RedisKeyPrefix}{segmentsKeyPrefix}registered";
+            var segments = segmentNames.Select(x => (RedisValue)x).ToArray();
+
+            return await _redisAdapter.SAddAsync(key, segments);
         }
     }
 }

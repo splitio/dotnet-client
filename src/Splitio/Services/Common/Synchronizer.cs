@@ -130,7 +130,7 @@ namespace Splitio.Services.Common
         {
             try
             {
-                if (targetChangeNumber <= _segmentCache.GetChangeNumber(segmentName)) return;
+                if (targetChangeNumber <= await _segmentCache.GetChangeNumberAsync(segmentName)) return;
 
                 var fetchOptions = new FetchOptions { CacheControlHeaders = true };
 
@@ -214,7 +214,7 @@ namespace Splitio.Services.Common
                     remainingAttempts--;
                     await _segmentFetcher.Fetch(name, fetchOptions);
 
-                    if (targetChangeNumber <= _segmentCache.GetChangeNumber(name))
+                    if (targetChangeNumber <= await _segmentCache.GetChangeNumberAsync(name))
                     {
                         return new SyncResult(true, remainingAttempts);
                     }

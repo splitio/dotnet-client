@@ -5,6 +5,7 @@ using Splitio.Services.Evaluator;
 using Splitio.Services.Parsing.Classes;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests
 {
@@ -12,7 +13,7 @@ namespace Splitio_Tests.Unit_Tests
     public class DependencyMatcherTests
     {
         [TestMethod]
-        public void MatchShouldReturnTrueOnMatchingKey()
+        public async Task MatchShouldReturnTrueOnMatchingKey()
         {
             //Arrange
             var treatments = new List<string>() { "on" };
@@ -25,14 +26,14 @@ namespace Splitio_Tests.Unit_Tests
                 .ReturnsAsync(new TreatmentResult("label", "on"));
 
             //Act
-            var result = matcher.Match(key, null, evaluatorMock.Object);
+            var result = await matcher.Match(key, null, evaluatorMock.Object);
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseOnNonMatchingKey()
+        public async Task MatchShouldReturnFalseOnNonMatchingKey()
         {
             //Arrange
             var treatments = new List<string>() { "off" };
@@ -45,14 +46,14 @@ namespace Splitio_Tests.Unit_Tests
                 .ReturnsAsync(new TreatmentResult("label", "on"));
 
             //Act
-            var result = matcher.Match(key, null, evaluatorMock.Object);
+            var result = await matcher.Match(key, null, evaluatorMock.Object);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfNullSplitClient()
+        public async Task MatchShouldReturnFalseIfNullSplitClient()
         {
             //Arrange
             var treatments = new List<string>();
@@ -60,14 +61,14 @@ namespace Splitio_Tests.Unit_Tests
             IEvaluator evaluator = null;
 
             //Act
-            var result = matcher.Match(new Key("test2", "test2"), null, evaluator);
+            var result = await matcher.Match(new Key("test2", "test2"), null, evaluator);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfEmptyTreatmentList()
+        public async Task MatchShouldReturnFalseIfEmptyTreatmentList()
         {
             //Arrange
             var treatments = new List<string>();
@@ -80,7 +81,7 @@ namespace Splitio_Tests.Unit_Tests
                 .ReturnsAsync(new TreatmentResult("label", "on"));
 
             //Act
-            var result = matcher.Match(key, null, evaluatorMock.Object);
+            var result = await matcher.Match(key, null, evaluatorMock.Object);
 
             //Assert
             Assert.IsFalse(result);

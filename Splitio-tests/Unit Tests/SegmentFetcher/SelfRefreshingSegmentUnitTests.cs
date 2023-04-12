@@ -15,7 +15,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
     public class SelfRefreshingSegmentUnitTests
     {
         [TestMethod]
-        public void FetchSegmentNullChangesFetcherResponseShouldNotUpdateCache()
+        public async Task FetchSegmentNullChangesFetcherResponseShouldNotUpdateCache()
         {
             //Arrange
             var apiClient = new Mock<ISegmentSdkApiClient>();
@@ -28,14 +28,14 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, cache);
             
             //Act
-            segmentFetcher.FetchSegment(new FetchOptions());
+            await segmentFetcher.FetchSegmentAsync(new FetchOptions());
 
             //Assert
             Assert.AreEqual(0, segments.Count);
         }
 
         [TestMethod]
-        public void FetchSegmentShouldUpdateSegmentsCache()
+        public async Task FetchSegmentShouldUpdateSegmentsCache()
         {
             //Arrange
             var apiClient = new Mock<ISegmentSdkApiClient>();
@@ -58,7 +58,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, cache);
 
             //Act
-            segmentFetcher.FetchSegment(new FetchOptions());
+            await segmentFetcher.FetchSegmentAsync(new FetchOptions());
 
             //Assert
             Assert.AreEqual(1, segments.Count);
