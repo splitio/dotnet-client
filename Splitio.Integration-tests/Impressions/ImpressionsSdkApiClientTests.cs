@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
+using Splitio.Services.Common;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
@@ -16,11 +17,18 @@ namespace Splitio.Integration_tests.Impressions
     {
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private readonly IWrapperAdapter _wrapperAdapter;
+        private readonly ISplitioHttpClient _splitioHttpClient;
 
         public ImpressionsSdkApiClientTests()
         {
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _wrapperAdapter = WrapperAdapter.Instance();
+            var config = new SelfRefreshingConfig
+            {
+                HttpConnectionTimeout = 10000,
+                HttpReadTimeout = 10000
+            };
+            _splitioHttpClient = new SplitioHttpClient("api-key-test", config, new Dictionary<string, string>());
         }
 
         [TestMethod]
@@ -43,7 +51,7 @@ namespace Splitio.Integration_tests.Impressions
                 httpClientMock.Post_Response("/api/testImpressions/bulk", 200, data2, "ok");
                 httpClientMock.Post_Response("/api/testImpressions/bulk", 200, data3, "ok");
 
-                var impressionsSdkApiClient = new ImpressionsSdkApiClient("", new Dictionary<string, string>(), httpClientMock.GetUrl(), 10000, 10000, _telemetryRuntimeProducer.Object, _wrapperAdapter, 5);
+                var impressionsSdkApiClient = new ImpressionsSdkApiClient(_splitioHttpClient, _telemetryRuntimeProducer.Object, httpClientMock.GetUrl(), _wrapperAdapter, 5);
                 impressionsSdkApiClient.SendBulkImpressions(impressions);
 
                 Thread.Sleep(5000);
@@ -73,7 +81,7 @@ namespace Splitio.Integration_tests.Impressions
             {
                 httpClientMock.Post_Response("/api/testImpressions/bulk", 200, data1, "ok");
 
-                var impressionsSdkApiClient = new ImpressionsSdkApiClient("", new Dictionary<string, string>(), httpClientMock.GetUrl(), 10000, 10000, _telemetryRuntimeProducer.Object, _wrapperAdapter, 10);
+                var impressionsSdkApiClient = new ImpressionsSdkApiClient(_splitioHttpClient, _telemetryRuntimeProducer.Object, httpClientMock.GetUrl(), _wrapperAdapter, 10);
                 impressionsSdkApiClient.SendBulkImpressions(impressions);
 
                 Thread.Sleep(5000);
@@ -100,7 +108,7 @@ namespace Splitio.Integration_tests.Impressions
             {
                 httpClientMock.Post_Response("/api/testImpressions/bulk", 500, data1, "fail");
 
-                var impressionsSdkApiClient = new ImpressionsSdkApiClient("", new Dictionary<string, string>(), httpClientMock.GetUrl(), 10000, 10000, _telemetryRuntimeProducer.Object, _wrapperAdapter, 10);
+                var impressionsSdkApiClient = new ImpressionsSdkApiClient(_splitioHttpClient, _telemetryRuntimeProducer.Object, httpClientMock.GetUrl(), _wrapperAdapter, 10);
                 impressionsSdkApiClient.SendBulkImpressions(impressions);
 
                 Thread.Sleep(5000);

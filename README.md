@@ -9,9 +9,9 @@ This SDK is designed to work with Split, the platform for controlled rollouts, w
  
 ## Compatibility
 This SDK is compatible with:
-    - .NET Framework 4.5 and above
-    - .NET Core 2.x and 3.x
-    - .NET 5 and .NET 6
+* .NET Framework 4.5 and above
+* .NET Core 2.x and 3.x
+* .NET 7, .NET 6 and .NET 5
 
 ## Getting started
 Below is a simple example that describes the instantiation and most basic usage of our SDK:

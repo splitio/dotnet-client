@@ -19,7 +19,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _splitioHttpClientMock = new Mock<ISplitioHttpClient>();
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
 
-            _authApiClient = new AuthApiClient("https://auth.fake.io/auth", "test-apikey", _splitioHttpClientMock.Object, _telemetryRuntimeProducer.Object);
+            _authApiClient = new AuthApiClient("https://auth.fake.io/auth", _splitioHttpClientMock.Object, _telemetryRuntimeProducer.Object);
         }
 
         [TestMethod]
@@ -29,11 +29,12 @@ namespace Splitio_Tests.Unit_Tests.Common
             var authResponse = "{\"pushEnabled\":true,\"token\":\"khdkjdahs987498217.eyJ4LWFibHktY2FwYWJpbGl0eSI6IntcInh4eHhfeHh4eF9zZWdtZW50c1wiOltcInN1YnNjcmliZVwiXSxcInh4eHhfeHh4eF9zcGxpdHNcIjpbXCJzdWJzY3JpYmVcIl0sXCJjb250cm9sXCI6W1wic3Vic2NyaWJlXCJdfSJ9\"}";
 
             _splitioHttpClientMock
-                .Setup(mock => mock.GetAsync(It.IsAny<string>()))
+                .Setup(mock => mock.GetAsync(It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(new HTTPResult
                 {
-                    statusCode = System.Net.HttpStatusCode.OK,
-                    content = authResponse
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Content = authResponse,
+                    IsSuccessStatusCode = true
                 });
 
             //Act
@@ -53,11 +54,12 @@ namespace Splitio_Tests.Unit_Tests.Common
             var authResponse = "{\"pushEnabled\":false}";
 
             _splitioHttpClientMock
-                .Setup(mock => mock.GetAsync(It.IsAny<string>()))
+                .Setup(mock => mock.GetAsync(It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(new HTTPResult
                 {
-                    statusCode = System.Net.HttpStatusCode.OK,
-                    content = authResponse
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Content = authResponse,
+                    IsSuccessStatusCode = true
                 });
 
             //Act
@@ -75,10 +77,11 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             //Arrange
             _splitioHttpClientMock
-                .Setup(mock => mock.GetAsync(It.IsAny<string>()))
+                .Setup(mock => mock.GetAsync(It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(new HTTPResult
                 {
-                    statusCode = System.Net.HttpStatusCode.InternalServerError,
+                    StatusCode = System.Net.HttpStatusCode.InternalServerError,
+                    IsSuccessStatusCode = false
                 });
 
             //Act
@@ -96,10 +99,11 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             //Arrange
             _splitioHttpClientMock
-                .Setup(mock => mock.GetAsync(It.IsAny<string>()))
+                .Setup(mock => mock.GetAsync(It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(new HTTPResult
                 {
-                    statusCode = System.Net.HttpStatusCode.BadRequest,
+                    StatusCode = System.Net.HttpStatusCode.BadRequest,
+                    IsSuccessStatusCode = false
                 });
 
             //Act
@@ -117,10 +121,10 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             //Arrange
             _splitioHttpClientMock
-                .Setup(mock => mock.GetAsync(It.IsAny<string>()))
+                .Setup(mock => mock.GetAsync(It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(new HTTPResult
                 {
-                    statusCode = System.Net.HttpStatusCode.Unauthorized,
+                    StatusCode = System.Net.HttpStatusCode.Unauthorized,
                 });
 
             //Act

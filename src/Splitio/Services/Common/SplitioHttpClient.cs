@@ -1,4 +1,5 @@
 ﻿using Splitio.CommonLibraries;
+using Splitio.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
@@ -14,12 +15,36 @@ namespace Splitio.Services.Common
 {
     public class SplitioHttpClient : ISplitioHttpClient
     {
-        private readonly ISplitLogger _log;
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitioHttpClient));
+        
         private readonly HttpClient _httpClient;
 
-        public SplitioHttpClient(Dictionary<string, string> headers)
+        private bool _disposed;
+
+        public SplitioHttpClient(string apiKey,
+            SelfRefreshingConfig config,
+            Dictionary<string, string> headers)
         {
-            _httpClient = new HttpClient();
+#if NET45
+            ServicePointManager.SecurityProtocol = (SecurityProtocolType)12288 | (SecurityProtocolType)3072;
+#endif
+            var handler = new HttpClientHandler()
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+            };
+
+            if (!string.IsNullOrEmpty(config.ProxyHost))
+            {
+                handler.Proxy = new WebProxy(config.ProxyHost, config.ProxyPort);
+            }
+
+            _httpClient = new HttpClient(handler)
+            {
+                Timeout = TimeSpan.FromMilliseconds(config.HttpConnectionTimeout + config.HttpReadTimeout)
+            };
+
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Constants.Http.Bearer, apiKey);
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(Constants.Http.MediaTypeJson));
 
             foreach (var header in headers)
             {
@@ -27,40 +52,25 @@ namespace Splitio.Services.Common
             }
         }
 
-        public SplitioHttpClient(string apiKey,
-            long connectionTimeOut,
-            Dictionary<string, string> headers = null)
-        {
-#if NET45
-            ServicePointManager.SecurityProtocol = (SecurityProtocolType)12288 | (SecurityProtocolType)3072;
-#endif
-            _log = WrapperAdapter.Instance().GetLogger(typeof(SplitioHttpClient));
-            _httpClient = new HttpClient()
-            {
-                Timeout = TimeSpan.FromMilliseconds(connectionTimeOut)
-            };
-
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Constants.Http.Bearer, apiKey);
-
-            if (headers != null)
-            {
-                foreach (var header in headers)
-                {
-                    _httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
-                }
-            }
-        }
-
-        public async Task<HTTPResult> GetAsync(string url)
+        public async Task<HTTPResult> GetAsync(string url, bool cacheControlHeadersEnabled = false)
         {
             var result = new HTTPResult();
+            var request = new HttpRequestMessage
+            {
+                RequestUri = new Uri(url),
+                Method = HttpMethod.Get
+            };
+
+            if (cacheControlHeadersEnabled)
+                request.Headers.Add(Constants.Http.CacheControlKey, Constants.Http.CacheControlValue);
 
             try
             {
-                using (var response = await _httpClient.GetAsync(new Uri(url)))
+                using (var response = await _httpClient.SendAsync(request))
                 {
-                    result.statusCode = response.StatusCode;
-                    result.content = await response.Content.ReadAsStringAsync();
+                    result.StatusCode = response.StatusCode;
+                    result.Content = await response.Content.ReadAsStringAsync();
+                    result.IsSuccessStatusCode = response.IsSuccessStatusCode;
                 }
             }
             catch (Exception e)
@@ -76,12 +86,6 @@ namespace Splitio.Services.Common
             return _httpClient.GetAsync(new Uri(url), HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         }
 
-        public void Dispose()
-        {
-            _httpClient.CancelPendingRequests();
-            _httpClient.Dispose();
-        }
-
         public async Task<HTTPResult> PostAsync(string url, string data)
         {
             var result = new HTTPResult();
@@ -90,8 +94,9 @@ namespace Splitio.Services.Common
             {
                 using (var response = await _httpClient.PostAsync(new Uri(url), new StringContent(data, Encoding.UTF8, "application/json")))
                 {
-                    result.statusCode = response.StatusCode;
-                    result.content = await response.Content.ReadAsStringAsync();
+                    result.StatusCode = response.StatusCode;
+                    result.Content = await response.Content.ReadAsStringAsync();
+                    result.IsSuccessStatusCode = response.IsSuccessStatusCode;
                 }
             }
             catch (Exception e)
@@ -100,6 +105,25 @@ namespace Splitio.Services.Common
             }
 
             return result;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _httpClient.CancelPendingRequests();
+            _httpClient.Dispose();
+
+            _disposed = true;
         }
     }
 }

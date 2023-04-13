@@ -88,7 +88,9 @@ namespace Splitio.Services.Shared.Classes
                 TelemetryServiceURL = string.IsNullOrEmpty(config.TelemetryServiceURL) ? Constants.Urls.TelemetryServiceURL : config.TelemetryServiceURL,
                 SdkStartTime = CurrentTimeHelper.CurrentTimeMillis(),
                 OnDemandFetchMaxRetries = 10,
-                OnDemandFetchRetryDelayMs = 50
+                OnDemandFetchRetryDelayMs = 50,
+                ProxyHost = config.ProxyHost,
+                ProxyPort = config.ProxyPort
             };
 
             selfRefreshingConfig.ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Optimized;

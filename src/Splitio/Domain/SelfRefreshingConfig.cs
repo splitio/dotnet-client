@@ -37,5 +37,9 @@ namespace Splitio.Domain
         public int EventLogRefreshRate { get; set; }
         public int TreatmentLogRefreshRate { get; set; }
         public int TelemetryRefreshRate { get; set; }
+
+        // Proxy
+        public string ProxyHost { get; set; }
+        public int ProxyPort { get; set; }
     }
 }
