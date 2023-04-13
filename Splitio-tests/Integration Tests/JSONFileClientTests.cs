@@ -3,10 +3,12 @@ using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -883,7 +885,8 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var trafficTypeValidator = new Mock<ITrafficTypeValidator>();
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", trafficTypeValidator: trafficTypeValidator.Object);
+            var eventLog = new Mock<IEventsLog>();
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", trafficTypeValidator: trafficTypeValidator.Object, eventsLog: eventLog.Object);
 
             trafficTypeValidator
                 .Setup(mock => mock.IsValidAsync(It.IsAny<string>(), It.IsAny<string>()))

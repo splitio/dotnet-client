@@ -32,7 +32,7 @@ namespace Splitio_Tests.Integration_Tests
             var segmentFetcher = new JSONFileSegmentFetcher($"{rootFilePath}segment_payed.json", segmentCache);
 
             //Act
-            await segmentFetcher.InitializeSegmentAsync("payed");
+            segmentFetcher.InitializeSegment("payed");
 
             //Assert
             Assert.IsTrue(await segmentCache.IsInSegmentAsync("payed", "abcdz"));

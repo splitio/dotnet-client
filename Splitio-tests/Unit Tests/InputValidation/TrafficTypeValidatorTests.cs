@@ -3,6 +3,7 @@ using Moq;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Logger;
+using Splitio.Services.Shared.Interfaces;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.InputValidation
@@ -12,6 +13,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
     {
         private Mock<ISplitLogger> _log;
         private Mock<ISplitCache> _splitCache;
+        private Mock<IBlockUntilReadyService> _blockUntilReadyService;
         private TrafficTypeValidator trafficTypeValidator;
 
         [TestInitialize]
@@ -19,8 +21,9 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         {
             _log = new Mock<ISplitLogger>();
             _splitCache = new Mock<ISplitCache>();
+            _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
 
-            trafficTypeValidator = new TrafficTypeValidator(_splitCache.Object, _log.Object);
+            trafficTypeValidator = new TrafficTypeValidator(_splitCache.Object, _blockUntilReadyService.Object, _log.Object);
         }
 
         [TestMethod]

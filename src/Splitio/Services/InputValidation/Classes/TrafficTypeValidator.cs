@@ -3,6 +3,7 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,15 +13,22 @@ namespace Splitio.Services.InputValidation.Classes
     {
         private readonly ISplitLogger _log;
         private readonly ISplitCache _splitCache;
+        private readonly IBlockUntilReadyService _blockUntilReadyService;
 
-        public TrafficTypeValidator(ISplitCache splitCache, ISplitLogger log = null)
+        public TrafficTypeValidator(ISplitCache splitCache, IBlockUntilReadyService blockUntilReadyService, ISplitLogger log = null)
         {
-            _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(TrafficTypeValidator));
             _splitCache = splitCache;
+            _blockUntilReadyService = blockUntilReadyService;
+            _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(TrafficTypeValidator));
         }
 
         public async Task<ValidatorResult> IsValidAsync(string trafficType, string method)
         {
+            if (!_blockUntilReadyService.IsSdkReady())
+            {
+                new ValidatorResult { Success = true, Value = trafficType };
+            }
+
             if (trafficType == null)
             {
                 _log.Error($"{method}: you passed a null traffic_type, traffic_type must be a non-empty string");

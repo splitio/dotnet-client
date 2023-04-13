@@ -110,9 +110,11 @@ namespace Splitio_tests.Unit_Tests.Matchers
             var matcher = new MatchesStringMatcher("^a");
 
             //Act
-            var keys = new List<string>();
-            keys.Add("test1");
-            keys.Add("test3");
+            var keys = new List<string>
+            {
+                "test1",
+                "test3"
+            };
 
             var result = matcher.Match(keys);
 
@@ -122,13 +124,13 @@ namespace Splitio_tests.Unit_Tests.Matchers
 
         [DeploymentItem(@"Resources\regex.txt")]
         [TestMethod]
-        public void VerifyRegexMatcher()
+        public async Task VerifyRegexMatcher()
         {
-            VerifyTestFile($"{rootFilePath}regex.txt", new string[] { "\r\n" });
+            await VerifyTestFile($"{rootFilePath}regex.txt", new string[] { "\r\n" });
         }
 
 
-        private void VerifyTestFile(string file, string[] sepparator)
+        private async Task VerifyTestFile(string file, string[] sepparator)
         {
             //Arrange
             var fileContent = File.ReadAllText(file);
@@ -146,7 +148,7 @@ namespace Splitio_tests.Unit_Tests.Matchers
                     var matcher = new MatchesStringMatcher(item[0]);
 
                     //Act
-                    var result = matcher.Match(item[1]);
+                    var result = await matcher.Match(item[1]);
 
                     //Assert
                     Assert.AreEqual(Convert.ToBoolean(item[2]), result, item[0] + "-" + item[1]);

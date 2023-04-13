@@ -7,7 +7,6 @@ using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Parsing
 {
@@ -52,7 +51,7 @@ namespace Splitio.Services.Parsing
             }
         }
 
-        protected abstract Task<IMatcher> GetInSegmentMatcherAsync(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit);
+        protected abstract IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit);
 
         private ParsedSplit ParseConditions(Split split, ParsedSplit parsedSplit)
         {
@@ -82,12 +81,12 @@ namespace Splitio.Services.Parsing
             return new CombiningMatcher()
             {
                 // TODO: REMOVE .Result
-                Delegates = matcherGroupDefinition.matchers.Select(x => ParseMatcherAsync(parsedSplit, x).Result).ToList(),
+                Delegates = matcherGroupDefinition.matchers.Select(x => ParseMatcher(parsedSplit, x)).ToList(),
                 Combiner = ParseCombiner(matcherGroupDefinition.combiner)
             };
         }
 
-        private async Task<AttributeMatcher> ParseMatcherAsync(ParsedSplit parsedSplit, MatcherDefinition matcherDefinition)
+        private AttributeMatcher ParseMatcher(ParsedSplit parsedSplit, MatcherDefinition matcherDefinition)
         {
             if (matcherDefinition.matcherType == null)
             {
@@ -114,7 +113,7 @@ namespace Splitio.Services.Parsing
                         case MatcherTypeEnum.GREATER_THAN_OR_EQUAL_TO:
                             matcher = GetGreaterThanOrEqualToMatcher(matcherDefinition); break;
                         case MatcherTypeEnum.IN_SEGMENT:
-                            matcher = await GetInSegmentMatcherAsync(matcherDefinition, parsedSplit); break;
+                            matcher = GetInSegmentMatcher(matcherDefinition, parsedSplit); break;
                         case MatcherTypeEnum.LESS_THAN_OR_EQUAL_TO:
                             matcher = GetLessThanOrEqualToMatcher(matcherDefinition); break;
                         case MatcherTypeEnum.WHITELIST:

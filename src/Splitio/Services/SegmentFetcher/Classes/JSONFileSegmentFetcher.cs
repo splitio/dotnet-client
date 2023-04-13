@@ -3,7 +3,6 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
@@ -22,11 +21,11 @@ namespace Splitio.Services.SegmentFetcher.Classes
             }
         }
 
-        public override async Task InitializeSegmentAsync(string name)
+        public override void InitializeSegment(string name)
         {
             if (_added != null)
             {
-                await _segmentCache.AddToSegmentAsync(name, _added);
+                _segmentCache.AddToSegmentAsync(name, _added).Wait();
             }
         }
     }

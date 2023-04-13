@@ -4,6 +4,7 @@ using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using StackExchange.Redis;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
@@ -26,6 +27,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public int AddItems(IList<WrappedEvent> items)
         {
+            var task = new List<Task<long>>();
             foreach (var item in items)
             {
                 var value = new RedisValue[]
@@ -37,8 +39,10 @@ namespace Splitio.Redis.Services.Cache.Classes
                     })
                 };
 
-                _redisAdapter.ListRightPushAsync($"{RedisKeyPrefix}events", value);
+                task.Add(_redisAdapter.ListRightPushAsync($"{RedisKeyPrefix}events", value));
             }
+
+            Task.WaitAll(task.ToArray());
 
             return 0;
         }

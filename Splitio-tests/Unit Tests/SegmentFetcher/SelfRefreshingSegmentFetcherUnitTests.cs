@@ -42,7 +42,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
                 .Returns(Task.FromResult(PayedSplitJson));
 
             // Act
-            await segmentFetcher.InitializeSegmentAsync("payed");
+            segmentFetcher.InitializeSegment("payed");
 
             // Assert
             Thread.Sleep(5000);
@@ -50,7 +50,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         }
 
         [TestMethod]
-        public async Task StartSchedullerSuccessfully()
+        public void StartSchedullerSuccessfully()
         {
             // Arrange
             var statusManager = new Mock<IStatusManager>();
@@ -66,7 +66,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
                 .Returns(Task.FromResult(PayedSplitJson));
 
             // Act
-            await segmentFetcher.InitializeSegmentAsync("payed");
+            segmentFetcher.InitializeSegment("payed");
             segmentFetcher.Start();
 
             // Assert

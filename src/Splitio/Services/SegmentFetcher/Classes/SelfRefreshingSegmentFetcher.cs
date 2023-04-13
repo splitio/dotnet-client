@@ -93,7 +93,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             _segmentCache.Clear();
         }
 
-        public override Task InitializeSegmentAsync(string name)
+        public override void InitializeSegment(string name)
         {
             _segments.TryGetValue(name, out SelfRefreshingSegment segment);
 
@@ -111,8 +111,6 @@ namespace Splitio.Services.SegmentFetcher.Classes
                     }
                 }                
             }
-
-            return Task.FromResult(0);
         }
 
         public bool FetchAll()
@@ -136,7 +134,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
         {
             try
             {
-                await InitializeSegmentAsync(segmentName);
+                InitializeSegment(segmentName);
                 _segments.TryGetValue(segmentName, out SelfRefreshingSegment fetcher);
                 await fetcher.FetchSegmentAsync(fetchOptions);
             }

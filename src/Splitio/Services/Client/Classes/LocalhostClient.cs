@@ -56,7 +56,7 @@ namespace Splitio.Services.Client.Classes
 
             ApiKey = "localhost";
 
-            _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
+            _trafficTypeValidator = new TrafficTypeValidator(_splitCache, _blockUntilReadyService);
 
             BuildEvaluator();
 

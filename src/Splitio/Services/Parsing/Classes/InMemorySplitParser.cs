@@ -1,7 +1,6 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Parsing.Classes
 {
@@ -15,10 +14,10 @@ namespace Splitio.Services.Parsing.Classes
             _segmentsCache = segmentsCache;
         }
 
-        protected override async Task<IMatcher> GetInSegmentMatcherAsync(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit)
+        protected override IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit)
         {
             var matcherData = matcherDefinition.userDefinedSegmentMatcherData;
-            await _segmentFetcher.InitializeSegmentAsync(matcherData.segmentName);
+            _segmentFetcher.InitializeSegment(matcherData.segmentName);
 
             return new UserDefinedSegmentMatcher(matcherData.segmentName, _segmentsCache);
         }

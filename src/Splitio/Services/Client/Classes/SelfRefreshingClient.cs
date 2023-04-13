@@ -59,18 +59,17 @@ namespace Splitio.Services.Client.Classes
             BuildTelemetryStorage();
             BuildTelemetrySyncTask();
             BuildSdkApiClients();
+            BuildBlockUntilReadyService();
             BuildSplitFetcher();
             BuildTreatmentLog(config);
-
             BuildSenderAdapter();
             BuildUniqueKeysTracker(_config);
             BuildImpressionsCounter(_config);
             BuildImpressionsObserver();
             BuildImpressionManager();
-
             BuildEventLog(config);
             BuildEvaluator();
-            BuildBlockUntilReadyService();
+            
             BuildManager();
             BuildSyncManager();
 
@@ -122,7 +121,7 @@ namespace Splitio.Services.Client.Classes
             var splitsRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SplitsRefreshRate) : _config.SplitsRefreshRate;
             _splitParser = new InMemorySplitParser((SelfRefreshingSegmentFetcher)_selfRefreshingSegmentFetcher, _segmentCache);            
             _splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, _splitParser, _statusManager, splitsRefreshRate, _tasksManager, _splitCache);
-            _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
+            _trafficTypeValidator = new TrafficTypeValidator(_splitCache, _blockUntilReadyService);
         }
 
         private void BuildTreatmentLog(ConfigurationOptions config)

@@ -182,10 +182,7 @@ namespace Splitio.Services.Client.Classes
                 var keyResult = _keyValidator.IsValid(new Key(key, null), nameof(Track));
                 var eventTypeResult = _eventTypeValidator.IsValid(eventType, nameof(eventType));
                 var eventPropertiesResult = _eventPropertiesValidator.IsValid(properties);
-
-                var trafficTypeResult = _blockUntilReadyService.IsSdkReady()
-                    ? _trafficTypeValidator.IsValidAsync(trafficType, nameof(trafficType)).Result
-                    : new ValidatorResult { Success = true, Value = trafficType };
+                var trafficTypeResult = _trafficTypeValidator.IsValidAsync(trafficType, nameof(trafficType)).Result;
 
                 if (!keyResult || !trafficTypeResult.Success || !eventTypeResult || !eventPropertiesResult.Success)
                     return false;
@@ -202,14 +199,11 @@ namespace Splitio.Services.Client.Classes
                         properties = (Dictionary<string, object>)eventPropertiesResult.Value
                     };
 
-                    _tasksManager.Start(() =>
+                    _eventsLog.Log(new WrappedEvent
                     {
-                        _eventsLog.Log(new WrappedEvent
-                        {
-                            Event = eventToLog,
-                            Size = eventPropertiesResult.EventSize
-                        });
-                    }, new CancellationTokenSource(), "Track");
+                        Event = eventToLog,
+                        Size = eventPropertiesResult.EventSize
+                    });
 
                     RecordLatency(nameof(Track), clock.ElapsedMilliseconds);
 

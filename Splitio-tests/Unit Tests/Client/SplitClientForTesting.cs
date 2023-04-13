@@ -22,7 +22,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             _eventsLog = eventsLog;
             _impressionsLog = impressionsLog;
             _blockUntilReadyService = blockUntilReadyService;
-            _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
+            _trafficTypeValidator = new TrafficTypeValidator(_splitCache, _blockUntilReadyService);
             _evaluator = evaluator;
             _impressionsManager = impressionsManager;
 
