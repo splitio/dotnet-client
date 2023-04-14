@@ -130,6 +130,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             return tasks.All(t => t.Result == true);
         }
 
+        // TODO: Rename to FetchAsync
         public async Task Fetch(string segmentName, FetchOptions fetchOptions)
         {
             try
@@ -153,7 +154,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
             foreach (var name in uniqueNames)
             {
-                var changeNumber = await _segmentCache.GetChangeNumberAsync(name);
+                var changeNumber = _segmentCache.GetChangeNumber(name);
 
                 if (changeNumber == -1) await Fetch(name, new FetchOptions());
             }

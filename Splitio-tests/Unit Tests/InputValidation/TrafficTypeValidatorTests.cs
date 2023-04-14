@@ -4,7 +4,6 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.InputValidation
 {
@@ -27,14 +26,14 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         }
 
         [TestMethod]
-        public async Task IsValidAsync_WHenTrafficTypeIsNull_ReturnsFalse()
+        public void IsValidAsync_WHenTrafficTypeIsNull_ReturnsFalse()
         {
             // Arrange.
             string trafficType = null;
             var method = "Tests";
 
             // Act.
-            var result = await trafficTypeValidator.IsValidAsync(trafficType, method);
+            var result = trafficTypeValidator.IsValid(trafficType, method);
 
             // Asserts.
             Assert.IsFalse(result.Success);
@@ -44,14 +43,14 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         }
 
         [TestMethod]
-        public async Task IsValidAsync_WHenTrafficTypeIsEmpty_ReturnsFalse()
+        public void IsValidAsync_WHenTrafficTypeIsEmpty_ReturnsFalse()
         {
             // Arrange.
             var trafficType = string.Empty;
             var method = "Tests";
 
             // Act.
-            var result = await trafficTypeValidator.IsValidAsync(trafficType, method);
+            var result = trafficTypeValidator.IsValid(trafficType, method);
 
             // Asserts.
             Assert.IsFalse(result.Success);
@@ -61,18 +60,18 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         }
 
         [TestMethod]
-        public async Task IsValidAsync_WHenTrafficTypeHasCapitalizedLetters_ReturnsTrue()
+        public void IsValidAsync_WHenTrafficTypeHasCapitalizedLetters_ReturnsTrue()
         {
             // Arrange.
             string trafficType = "aBcDeFg";
             var method = "Tests";
 
             _splitCache
-                .Setup(mock => mock.TrafficTypeExistsAsync(trafficType.ToLower()))
-                .ReturnsAsync(true);
+                .Setup(mock => mock.TrafficTypeExists(trafficType.ToLower()))
+                .Returns(true);
 
             // Act.
-            var result = await trafficTypeValidator.IsValidAsync(trafficType, method);
+            var result = trafficTypeValidator.IsValid(trafficType, method);
 
             // Asserts.
             Assert.IsTrue(result.Success);
@@ -84,18 +83,18 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         }
 
         [TestMethod]
-        public async Task IsValidAsync_WhenTrafficTypeDoesNotExist_ReturnsTrue()
+        public void IsValidAsync_WhenTrafficTypeDoesNotExist_ReturnsTrue()
         {
             // Arrange.
             string trafficType = "traffict_type_test";
             var method = "Tests";
 
             _splitCache
-                .Setup(mock => mock.TrafficTypeExistsAsync(trafficType))
-                .ReturnsAsync(false);
+                .Setup(mock => mock.TrafficTypeExists(trafficType))
+                .Returns(false);
 
             // Act.
-            var result = await trafficTypeValidator.IsValidAsync(trafficType, method);
+            var result = trafficTypeValidator.IsValid(trafficType, method);
 
             // Asserts.
             Assert.IsTrue(result.Success);

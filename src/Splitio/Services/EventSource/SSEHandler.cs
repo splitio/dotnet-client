@@ -92,7 +92,7 @@ namespace Splitio.Services.EventSource
             }
             else
             {
-                _notificationPorcessor.ProccessAsync(e.Event);
+                _notificationPorcessor.Proccess(e.Event);
             }
         }
         #endregion

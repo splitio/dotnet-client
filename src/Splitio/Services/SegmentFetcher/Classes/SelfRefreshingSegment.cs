@@ -31,7 +31,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
             while (true)
             {
-                var changeNumber = await _segmentCache.GetChangeNumberAsync(Name);
+                var changeNumber = _segmentCache.GetChangeNumber(Name);
 
                 try
                 {
@@ -50,8 +50,8 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                     if (response.added.Count() > 0 || response.removed.Count() > 0)
                     {
-                        await _segmentCache.AddToSegmentAsync(Name, response.added);
-                        await _segmentCache.RemoveFromSegmentAsync(Name, response.removed);
+                        _segmentCache.AddToSegment(Name, response.added);
+                        _segmentCache.RemoveFromSegment(Name, response.removed);
 
                         if (_log.IsDebugEnabled)
                         {
@@ -67,7 +67,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
                         }
                     }
 
-                    await _segmentCache.SetChangeNumberAsync(Name, response.till);
+                    _segmentCache.SetChangeNumber(Name, response.till);
                 }
                 catch (Exception e)
                 {
@@ -77,8 +77,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
                 {
                     if (_log.IsDebugEnabled)
                     {
-                        var cn = await _segmentCache.GetChangeNumberAsync(Name);
-                        _log.Debug($"segment {Name} fetch before: {changeNumber}, after: {cn}");
+                        _log.Debug($"segment {Name} fetch before: {changeNumber}, after: {_segmentCache.GetChangeNumber(Name)}");
                     }
                 }
             }

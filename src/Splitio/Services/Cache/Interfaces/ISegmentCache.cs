@@ -1,18 +1,17 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Cache.Interfaces
 {
     public interface ISegmentCache
     {
-        Task AddToSegmentAsync(string segmentName, List<string> segmentKeys);
-        Task RemoveFromSegmentAsync(string segmentName, List<string> segmentKeys);
-        Task<bool> IsInSegmentAsync(string segmentName, string key);
-        Task SetChangeNumberAsync(string segmentName, long changeNumber);
-        Task<long> GetChangeNumberAsync(string segmentName);
-        Task<List<string>> GetSegmentNamesAsync();
-        Task<List<string>> GetSegmentKeysAsync(string segmentName);
-        Task<int> SegmentsCountAsync();
+        void AddToSegment(string segmentName, List<string> segmentKeys);
+        void RemoveFromSegment(string segmentName, List<string> segmentKeys);
+        List<string> GetSegmentKeys(string segmentName);
+        void SetChangeNumber(string segmentName, long changeNumber);
+        long GetChangeNumber(string segmentName);
+        List<string> GetSegmentNames();
+        int SegmentsCount();
+        bool IsInSegment(string segmentName, string key);
         void Clear();
         int SegmentKeysCount();
     }

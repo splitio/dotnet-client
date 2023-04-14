@@ -3,7 +3,6 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -24,7 +23,7 @@ namespace Splitio_Tests.Integration_Tests
 
         [TestMethod]
         [DeploymentItem(@"Resources\segment_payed.json")]
-        public async Task ExecuteGetSuccessfulWithResultsFromJSONFile()
+        public void ExecuteGetSuccessfulWithResultsFromJSONFile()
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
@@ -35,7 +34,7 @@ namespace Splitio_Tests.Integration_Tests
             segmentFetcher.InitializeSegment("payed");
 
             //Assert
-            Assert.IsTrue(await segmentCache.IsInSegmentAsync("payed", "abcdz"));
+            Assert.IsTrue(segmentCache.IsInSegment("payed", "abcdz"));
         }
     }
 }

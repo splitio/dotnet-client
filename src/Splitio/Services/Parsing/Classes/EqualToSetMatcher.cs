@@ -1,9 +1,6 @@
-﻿using Splitio.Domain;
-using Splitio.Services.Evaluator;
+﻿using Splitio.Services.Evaluator;
 using Splitio.Services.Parsing.Classes;
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Parsing
 {
@@ -19,11 +16,6 @@ namespace Splitio.Services.Parsing
             }
         }
 
-        public override Task<bool> Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return Task.FromResult(false);
-        }
-
         public override bool Match(List<string> key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             if (key == null)
@@ -32,26 +24,6 @@ namespace Splitio.Services.Parsing
             }
 
             return itemsToCompare.SetEquals(key);
-        }
-
-        public override Task<bool> Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return Task.FromResult(false);
-        }
-
-        public override bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
-        }
-
-        public override bool Match(long key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
-        }
-
-        public override bool Match(bool key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
         }
     }
 }

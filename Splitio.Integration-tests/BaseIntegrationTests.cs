@@ -368,7 +368,7 @@ namespace Splitio.Integration_tests
                 client.BlockUntilReady(10000);
 
                 // Act.
-                var result = await client.GetTreatmentsAsync("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+                var result = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
 
                 // Assert.
                 Assert.AreEqual("on", result["FACUNDO_TEST"]);
@@ -425,9 +425,9 @@ namespace Splitio.Integration_tests
                 client.BlockUntilReady(10000);
 
                 // Act.
-                var result1 = await client.GetTreatmentsAsync("nico_test", new List<string> { "FACUNDO_TEST", string.Empty, "Test_Save_1" });
-                var result2 = await client.GetTreatmentsAsync("mauro", new List<string> { string.Empty, "MAURO_TEST", "Test_Save_1" });
-                var result3 = await client.GetTreatmentsAsync(string.Empty, new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+                var result1 = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", string.Empty, "Test_Save_1" });
+                var result2 = client.GetTreatments("mauro", new List<string> { string.Empty, "MAURO_TEST", "Test_Save_1" });
+                var result3 = client.GetTreatments(string.Empty, new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
 
                 // Assert.
                 Assert.AreEqual("on", result1["FACUNDO_TEST"]);
@@ -494,7 +494,7 @@ namespace Splitio.Integration_tests
                 client.BlockUntilReady(10000);
 
                 // Act.
-                var result = await client.GetTreatmentsAsync("nico_test", new List<string> { "FACUNDO_TEST", "Random_Treatment", "MAURO_TEST", "Test_Save_1", "Random_Treatment_2", });
+                var result = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", "Random_Treatment", "MAURO_TEST", "Test_Save_1", "Random_Treatment_2", });
 
                 // Assert.
                 Assert.AreEqual("on", result["FACUNDO_TEST"]);

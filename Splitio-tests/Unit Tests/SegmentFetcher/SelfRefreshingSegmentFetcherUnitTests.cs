@@ -24,7 +24,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         private static readonly string PayedSplitJson = @"{'name': 'payed','added': ['abcdz','bcadz','xzydz'],'removed': [],'since': -1,'till': 10001}";
 
         [TestMethod]
-        public async Task InitializeSegmentNotExistent()
+        public void InitializeSegmentNotExistent()
         {
             // Arrange
             var gates = new InMemoryReadinessGatesCache();
@@ -46,7 +46,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
 
             // Assert
             Thread.Sleep(5000);
-            Assert.IsTrue(await cache.IsInSegmentAsync("payed", "abcdz"));
+            Assert.IsTrue(cache.IsInSegment("payed", "abcdz"));
         }
 
         [TestMethod]
@@ -86,17 +86,17 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var segment2 = "segment-2";
             var segment3 = "segment-3";
 
-            cache.Setup(mock => mock.GetChangeNumberAsync(segment1)).ReturnsAsync(-1);
-            cache.Setup(mock => mock.GetChangeNumberAsync(segment2)).ReturnsAsync(30);
-            cache.Setup(mock => mock.GetChangeNumberAsync(segment3)).ReturnsAsync(-1);
+            cache.Setup(mock => mock.GetChangeNumber(segment1)).Returns(-1);
+            cache.Setup(mock => mock.GetChangeNumber(segment2)).Returns(30);
+            cache.Setup(mock => mock.GetChangeNumber(segment3)).Returns(-1);
 
             // Act
             await segmentFetcher.FetchSegmentsIfNotExists(new List<string> { segment1, segment2, segment3, segment2, segment3, segment3, segment3 });
 
             // Assert
-            cache.Verify(mock => mock.GetChangeNumberAsync(segment1), Times.Exactly(2));
-            cache.Verify(mock => mock.GetChangeNumberAsync(segment2), Times.Once);
-            cache.Verify(mock => mock.GetChangeNumberAsync(segment3), Times.Exactly(2));
+            cache.Verify(mock => mock.GetChangeNumber(segment1), Times.Exactly(2));
+            cache.Verify(mock => mock.GetChangeNumber(segment2), Times.Once);
+            cache.Verify(mock => mock.GetChangeNumber(segment3), Times.Exactly(2));
 
             apiFetcher.Verify(mock => mock.Fetch(segment1, -1, It.IsAny<FetchOptions>()), Times.Once);
             apiFetcher.Verify(mock => mock.Fetch(segment3, -1, It.IsAny<FetchOptions>()), Times.Once);

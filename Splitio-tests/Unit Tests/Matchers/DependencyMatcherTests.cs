@@ -13,7 +13,7 @@ namespace Splitio_Tests.Unit_Tests
     public class DependencyMatcherTests
     {
         [TestMethod]
-        public async Task MatchShouldReturnTrueOnMatchingKey()
+        public void MatchShouldReturnTrueOnMatchingKey()
         {
             //Arrange
             var treatments = new List<string>() { "on" };
@@ -22,18 +22,18 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeatureAsync(key, "test1", null))
-                .ReturnsAsync(new TreatmentResult("label", "on"));
+                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
+                .Returns(new TreatmentResult("label", "on"));
 
             //Act
-            var result = await matcher.Match(key, null, evaluatorMock.Object);
+            var result = matcher.Match(key, null, evaluatorMock.Object);
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseOnNonMatchingKey()
+        public void MatchShouldReturnFalseOnNonMatchingKey()
         {
             //Arrange
             var treatments = new List<string>() { "off" };
@@ -42,18 +42,18 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeatureAsync(key, "test1", null))
-                .ReturnsAsync(new TreatmentResult("label", "on"));
+                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
+                .Returns(new TreatmentResult("label", "on"));
 
             //Act
-            var result = await matcher.Match(key, null, evaluatorMock.Object);
+            var result = matcher.Match(key, null, evaluatorMock.Object);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfNullSplitClient()
+        public void MatchShouldReturnFalseIfNullSplitClient()
         {
             //Arrange
             var treatments = new List<string>();
@@ -61,14 +61,14 @@ namespace Splitio_Tests.Unit_Tests
             IEvaluator evaluator = null;
 
             //Act
-            var result = await matcher.Match(new Key("test2", "test2"), null, evaluator);
+            var result = matcher.Match(new Key("test2", "test2"), null, evaluator);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfEmptyTreatmentList()
+        public void MatchShouldReturnFalseIfEmptyTreatmentList()
         {
             //Arrange
             var treatments = new List<string>();
@@ -77,11 +77,11 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeatureAsync(key, "test1", null))
-                .ReturnsAsync(new TreatmentResult("label", "on"));
+                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
+                .Returns(new TreatmentResult("label", "on"));
 
             //Act
-            var result = await matcher.Match(key, null, evaluatorMock.Object);
+            var result = matcher.Match(key, null, evaluatorMock.Object);
 
             //Assert
             Assert.IsFalse(result);
@@ -97,8 +97,8 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeatureAsync(key, "test1", null))
-                .ReturnsAsync(new TreatmentResult("label", "on"));
+                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
+                .Returns(new TreatmentResult("label", "on"));
 
             //Act
             var result = matcher.Match(123, null, evaluatorMock.Object);
@@ -117,8 +117,8 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeatureAsync(key, "test1", null))
-                .ReturnsAsync(new TreatmentResult("label", "on"));
+                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
+                .Returns(new TreatmentResult("label", "on"));
 
             //Act
             var result = matcher.Match(DateTime.UtcNow, null, evaluatorMock.Object);
@@ -138,8 +138,8 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeatureAsync(key, "test1", null))
-                .ReturnsAsync(new TreatmentResult("label", "on"));
+                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
+                .Returns(new TreatmentResult("label", "on"));
 
             //Act
             var result = matcher.Match(DateTime.UtcNow, null, evaluatorMock.Object);
@@ -149,7 +149,7 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfMatchingString()
+        public void MatchShouldReturnFalseIfMatchingString()
         {
             //Arrange
             var treatments = new List<string>() { "on" };
@@ -158,11 +158,11 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeatureAsync(key, "test1", null))
-                .ReturnsAsync(new TreatmentResult("label", "on"));
+                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
+                .Returns(new TreatmentResult("label", "on"));
 
             //Act
-            var result = await matcher.Match("test", null, evaluatorMock.Object);
+            var result = matcher.Match("test", null, evaluatorMock.Object);
 
             //Assert
             Assert.IsFalse(result);
@@ -178,8 +178,8 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeatureAsync(key, "test1", null))
-                .ReturnsAsync(new TreatmentResult("label", "on"));
+                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
+                .Returns(new TreatmentResult("label", "on"));
 
             //Act
             var result = matcher.Match(true, null, evaluatorMock.Object);

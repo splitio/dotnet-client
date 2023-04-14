@@ -25,19 +25,19 @@ namespace Splitio.Redis.Services.Cache.Classes
             _splitParser = splitParser;
         }
 
-        public async Task<long> GetChangeNumberAsync()
+        public long GetChangeNumber()
         {
             var key = $"{RedisKeyPrefix}{splitsKeyPrefix}till";
-            var changeNumberString = await _redisAdapter.GetAsync(key);
+            var changeNumberString = _redisAdapter.GetAsync(key).Result;
             var result = long.TryParse(changeNumberString, out long changeNumberParsed);
 
             return result ? changeNumberParsed : -1;
         }
 
-        public async Task<ParsedSplit> GetSplitAsync(string splitName)
+        public ParsedSplit GetSplit(string splitName)
         {
             var key = $"{RedisKeyPrefix}{splitKeyPrefix}{splitName}";
-            var splitJson = await _redisAdapter.GetAsync(key);
+            var splitJson = _redisAdapter.GetAsync(key).Result;
 
             if (string.IsNullOrEmpty(splitJson))
                 return null;
@@ -47,11 +47,11 @@ namespace Splitio.Redis.Services.Cache.Classes
             return _splitParser.Parse(split);
         }
 
-        public async Task<List<ParsedSplit>> GetAllSplitsAsync()
+        public List<ParsedSplit> GetAllSplits()
         {
             var pattern = $"{RedisKeyPrefix}{splitKeyPrefix}*";
             var splitKeys = _redisAdapter.Keys(pattern);
-            var splitValues = await _redisAdapter.MGetAsync(splitKeys);
+            var splitValues = _redisAdapter.MGetAsync(splitKeys).Result;
 
             if (splitValues != null && splitValues.Any())
             {
@@ -81,15 +81,15 @@ namespace Splitio.Redis.Services.Cache.Classes
             return;
         }
 
-        public async Task<bool> TrafficTypeExistsAsync(string trafficType)
+        public bool TrafficTypeExists(string trafficType)
         {
             if (string.IsNullOrEmpty(trafficType)) return false;
 
-            var value = await _redisAdapter.GetAsync(GetTrafficTypeKey(trafficType));
+            var value = _redisAdapter.GetAsync(GetTrafficTypeKey(trafficType)).Result;
 
             var quantity = value ?? "0";
 
-            int.TryParse(quantity, out int quantityInt);
+            _ = int.TryParse(quantity, out int quantityInt);
 
             return quantityInt > 0;
         }
@@ -129,7 +129,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             // No-op
         }
 
-        public async Task<List<ParsedSplit>> FetchManyAsync(List<string> splitNames)
+        public List<ParsedSplit> FetchMany(List<string> splitNames)
         {
             if (!splitNames.Any()) return new List<ParsedSplit>();
 
@@ -140,7 +140,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 redisKey.Add($"{RedisKeyPrefix}{splitKeyPrefix}{name}");
             }
 
-            var splitValues = await _redisAdapter.MGetAsync(redisKey.ToArray());
+            var splitValues = _redisAdapter.MGetAsync(redisKey.ToArray()).Result;
 
             if (splitValues == null || !splitValues.Any()) return new List<ParsedSplit>();
 
@@ -153,21 +153,23 @@ namespace Splitio.Redis.Services.Cache.Classes
                 .ToList();
         }
 
-        public Task KillAsync(long changeNumber, string splitName, string defaultTreatment)
+        public void Kill(long changeNumber, string splitName, string defaultTreatment)
         {
-            throw new System.NotImplementedException();
+            throw new System.NotImplementedException(); // No-op
         }
 
-        public async Task<List<string>> GetSplitNamesAsync()
+        public List<string> GetSplitNames()
         {
-            var splits = await GetAllSplitsAsync();
+            var splits = GetAllSplits();
             
-            return splits.Select(s => s.name).ToList();
+            return splits
+                .Select(s => s.name)
+                .ToList();
         }
 
-        public Task<int> SplitsCountAsync()
+        public int SplitsCount()
         {
-            return Task.FromResult(0); // No-op
+            return 0; // No-op
         }
     }
 }

@@ -30,10 +30,5 @@ namespace Splitio.Services.Parsing
 
             return date.ToUniversalTime().Date == key.ToUniversalTime().Date; // Compare just date part
         }
-
-        public override bool Match(bool key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
-        }
     }
 }

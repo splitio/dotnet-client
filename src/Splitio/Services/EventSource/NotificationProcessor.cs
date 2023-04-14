@@ -2,7 +2,6 @@
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource
 {
@@ -19,7 +18,7 @@ namespace Splitio.Services.EventSource
             _segmentsWorker = segmentsWorker;
         }
 
-        public async Task ProccessAsync(IncomingNotification notification)
+        public void Proccess(IncomingNotification notification)
         {
             try
             {
@@ -31,7 +30,7 @@ namespace Splitio.Services.EventSource
                         break;
                     case NotificationType.SPLIT_KILL:
                         var skn = (SplitKillNotification)notification;
-                        await _splitsWorker.KillSplitAsync(skn.ChangeNumber, skn.SplitName, skn.DefaultTreatment);
+                        _splitsWorker.KillSplit(skn.ChangeNumber, skn.SplitName, skn.DefaultTreatment);
                         _splitsWorker.AddToQueue(skn.ChangeNumber);
                         break;
                     case NotificationType.SEGMENT_UPDATE:

@@ -67,7 +67,7 @@ namespace Splitio.Telemetry.Common
                     var intervalInMilliseconds = _configurationOptions.TelemetryRefreshRate * 1000;
                     _wrapperAdapter.TaskDelay(intervalInMilliseconds).Wait();
 
-                    _tasksManager.StartPeriodic(async () => await RecordStats(), intervalInMilliseconds, _cancellationTokenSource, "Telemetry Stats.");
+                    _tasksManager.StartPeriodic(async () => await RecordStatsAsync(), intervalInMilliseconds, _cancellationTokenSource, "Telemetry Stats.");
                 }, _cancellationTokenSource, "Main Telemetry.");
             }
         }
@@ -80,18 +80,18 @@ namespace Splitio.Telemetry.Common
 
                 _running = false;
                 _cancellationTokenSource.Cancel();
-                var _ = RecordStats();
+                var _ = RecordStatsAsync();
             }            
         }
 
         public void RecordConfigInit()
         {
-            _tasksManager.Start(RecordInit, new CancellationTokenSource(), "Telemetry ConfigInit.");
+            _tasksManager.Start(RecordInitAsync, new CancellationTokenSource(), "Telemetry ConfigInit.");
         }
         #endregion
 
         #region Private Methods
-        private async Task RecordInit()
+        private async Task RecordInitAsync()
         {
             try
             {
@@ -137,7 +137,7 @@ namespace Splitio.Telemetry.Common
             }
         }
 
-        private async Task RecordStats()
+        private async Task RecordStatsAsync()
         {
             try
             {
@@ -158,8 +158,8 @@ namespace Splitio.Telemetry.Common
                     StreamingEvents = _telemetryStorageConsumer.PopStreamingEvents().ToList(),
                     Tags = _telemetryStorageConsumer.PopTags().ToList(),
                     TokenRefreshes = _telemetryStorageConsumer.PopTokenRefreshes(),
-                    SplitCount = await _splitCache.SplitsCountAsync(),
-                    SegmentCount = await _segmentCache.SegmentsCountAsync(),
+                    SplitCount = _splitCache.SplitsCount(),
+                    SegmentCount = _segmentCache.SegmentsCount(),
                     SegmentKeyCount = _segmentCache.SegmentKeysCount()
                 };
 

@@ -5,7 +5,6 @@ using Splitio.Redis.Services.Cache.Interfaces;
 using StackExchange.Redis;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
@@ -17,7 +16,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         private const string segmentsKeyPrefix = "SPLITIO.segments.";
 
         [TestMethod]
-        public async Task RegisterSegmentTest()
+        public void RegisterSegmentTest()
         {
             //Arrange
             var segmentName = "test";
@@ -26,14 +25,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
             
             //Act
-            var result = await segmentCache.RegisterSegmentsAsync(new List<string> { segmentName });
+            var result = segmentCache.RegisterSegmentsAsync(new List<string> { segmentName });
 
             //Assert
             Assert.AreEqual(1, result);
         }
 
         [TestMethod]
-        public async Task AddToSegmentTest()
+        public void AddToSegmentTest()
         {
             //Arrange
             var segmentName = "test";
@@ -42,14 +41,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
             //Act
-            await segmentCache.AddToSegmentAsync(segmentName, new List<string>() { "test" });
+            segmentCache.AddToSegment(segmentName, new List<string>() { "test" });
 
             //Assert
             redisAdapterMock.Verify(mock => mock.SAddAsync(segmentKeyPrefix + segmentName, It.IsAny<RedisValue[]>()));
         }
 
         [TestMethod]
-        public async Task GetRegisteredSegmentTest()
+        public void GetRegisteredSegmentTest()
         {
             //Arrange
             var segmentName = "segment_test";
@@ -58,7 +57,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
             //Act
-            var result = await segmentCache.GetSegmentNamesAsync();
+            var result = segmentCache.GetSegmentNames();
 
             //Assert
             Assert.IsNotNull(result);
@@ -66,7 +65,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
-        public async Task IsNotInSegmentOrRedisExceptionTest()
+        public void IsNotInSegmentOrRedisExceptionTest()
         {
             //Arrange
             var segmentName = "segment_test";
@@ -76,14 +75,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
             //Act
-            var result = await segmentCache.IsInSegmentAsync(segmentName, "abcd");
+            var result = segmentCache.IsInSegment(segmentName, "abcd");
 
             //Assert
             Assert.IsFalse(result);
         }
         
         [TestMethod]
-        public async Task IsInSegmentWithInexistentSegmentTest()
+        public void IsInSegmentWithInexistentSegmentTest()
         {
             //Arrange
             var redisAdapterMock = new Mock<IRedisAdapter>();
@@ -92,14 +91,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
             //Act
-            var result = await segmentCache.IsInSegmentAsync("test", "abcd");
+            var result = segmentCache.IsInSegment("test", "abcd");
 
             //Assert
             Assert.IsFalse(result);
         }
  
         [TestMethod]
-        public async Task RemoveKeyFromSegmentTest()
+        public void RemoveKeyFromSegmentTest()
         {
             //Arrange
             var segmentName = "segment_test";
@@ -111,8 +110,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
             //Act
-            await segmentCache.RemoveFromSegmentAsync(segmentName, keys);
-            var result = await segmentCache.IsInSegmentAsync(segmentName, keys.First());
+            segmentCache.RemoveFromSegment(segmentName, keys);
+            var result = segmentCache.IsInSegment(segmentName, keys.First());
 
             //Assert
             Assert.IsFalse(result);
@@ -120,7 +119,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         
 
         [TestMethod]
-        public async Task SetAndGetChangeNumberTest()
+        public void SetAndGetChangeNumberTest()
         {
             //Arrange
             var changeNumber = 1234;
@@ -131,15 +130,15 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
             //Act
-            await segmentCache.SetChangeNumberAsync(segmentName, 1234);
-            var result = await segmentCache.GetChangeNumberAsync(segmentName);
+            segmentCache.SetChangeNumber(segmentName, 1234);
+            var result = segmentCache.GetChangeNumber(segmentName);
 
             //Assert
             Assert.AreEqual(1234, result);
         }
 
         [TestMethod]
-        public async Task GetChangeNumberWhenNotSetOrRedisExceptionTest()
+        public void GetChangeNumberWhenNotSetOrRedisExceptionTest()
         {
             //Arrange
             var changeNumber = -1;
@@ -149,7 +148,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
             //Act
-            var result = await segmentCache.GetChangeNumberAsync(segmentName);
+            var result = segmentCache.GetChangeNumber(segmentName);
 
             //Assert
             Assert.AreEqual(changeNumber, result);
@@ -170,7 +169,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
-        public async Task GetSegmentKeysTest()
+        public void GetSegmentKeysTest()
         {
             // Arrange.
             var redisAdapterMock = new Mock<IRedisAdapter>();
@@ -178,7 +177,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             var keys = new List<string> { "abcd", "1234" };
             var segmentName = "test";
-            await segmentCache.AddToSegmentAsync(segmentName, keys);
+            segmentCache.AddToSegment(segmentName, keys);
 
             redisAdapterMock
                 .Setup(mock => mock.SMembersAsync($"SPLITIO.segment.{segmentName}"))
@@ -189,24 +188,24 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 }.ToArray());
 
             // Act & Assert.
-            var result = await segmentCache.GetSegmentKeysAsync(segmentName);
+            var result = segmentCache.GetSegmentKeys(segmentName);
             Assert.AreEqual(2, result.Count);
             Assert.IsTrue(result.Contains("abcd"));
             Assert.IsTrue(result.Contains("1234"));
 
-            result = await segmentCache.GetSegmentKeysAsync("segmentName");
+            result = segmentCache.GetSegmentKeys("segmentName");
             Assert.AreEqual(0, result.Count);
         }
 
         [TestMethod]
-        public async Task GetSegmentNamesTest()
+        public void GetSegmentNamesTest()
         {
             // Arrange.
             var redisAdapterMock = new Mock<IRedisAdapter>();
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);            
 
             // Act & Assert.
-            var result = await segmentCache.GetSegmentNamesAsync();
+            var result = segmentCache.GetSegmentNames();
             Assert.AreEqual(0, result.Count);
 
             var segmentName = "test";
@@ -220,7 +219,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
                     $"{segmentName}-2"
                 }.ToArray());
 
-            result = await segmentCache.GetSegmentNamesAsync();
+            result = segmentCache.GetSegmentNames();
             Assert.AreEqual(3, result.Count);
             Assert.IsTrue(result.Contains(segmentName));
             Assert.IsTrue(result.Contains($"{segmentName}-1"));

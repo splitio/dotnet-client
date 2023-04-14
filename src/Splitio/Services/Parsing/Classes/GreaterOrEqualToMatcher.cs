@@ -25,10 +25,5 @@ namespace Splitio.Services.Parsing
             key = key.Truncate(TimeSpan.FromMinutes(1)); // Truncate to whole minute
             return key.ToUniversalTime() >= date.ToUniversalTime();
         }
-
-        public override bool Match(bool key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
-        }
     }
 }

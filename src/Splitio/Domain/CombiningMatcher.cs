@@ -1,7 +1,6 @@
 ﻿using Splitio.Services.Evaluator;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Splitio.Domain
 {
@@ -21,7 +20,7 @@ namespace Splitio.Domain
             {
                 case CombinerEnum.AND:
                 default:
-                    return Delegates.All(matcher => matcher.Match(key, attributes, evaluator).Result);
+                    return Delegates.All(matcher => matcher.Match(key, attributes, evaluator));
             }
         }
     }

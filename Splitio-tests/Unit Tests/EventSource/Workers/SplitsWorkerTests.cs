@@ -56,12 +56,12 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             Thread.Sleep(500);
 
             // Assert.
-            _splitCache.Verify(mock => mock.GetChangeNumberAsync(), Times.Never);
+            _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Never);
             _synchronizer.Verify(mock => mock.SynchronizeSplits(It.IsAny<long>()), Times.Never);
         }
 
         [TestMethod]
-        public async Task Kill_ShouldTriggerFetch()
+        public void Kill_ShouldTriggerFetch()
         {
             // Arrange.            
             var changeNumber = 1585956698457;
@@ -69,21 +69,21 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             var defaultTreatment = "off";
 
             _splitCache
-                .Setup(mock => mock.GetChangeNumberAsync())
-                .ReturnsAsync(1585956698447);
+                .Setup(mock => mock.GetChangeNumber())
+                .Returns(1585956698447);
 
             _splitsWorker.Start();
 
             // Act.            
-            await _splitsWorker.KillSplitAsync(changeNumber, splitName, defaultTreatment);
+            _splitsWorker.KillSplit(changeNumber, splitName, defaultTreatment);
             Thread.Sleep(1000);
 
             // Assert.
-            _splitCache.Verify(mock => mock.KillAsync(changeNumber, splitName, defaultTreatment), Times.Once);
+            _splitCache.Verify(mock => mock.Kill(changeNumber, splitName, defaultTreatment), Times.Once);
         }
 
         [TestMethod]
-        public async Task Kill_ShouldNotTriggerFetch()
+        public void Kill_ShouldNotTriggerFetch()
         {
             // Arrange.            
             var changeNumber = 1585956698457;
@@ -91,17 +91,17 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             var defaultTreatment = "off";
 
             _splitCache
-                .Setup(mock => mock.GetChangeNumberAsync())
-                .ReturnsAsync(1585956698467);
+                .Setup(mock => mock.GetChangeNumber())
+                .Returns(1585956698467);
 
             _splitsWorker.Start();
 
             // Act.            
-            await _splitsWorker.KillSplitAsync(changeNumber, splitName, defaultTreatment);
+            _splitsWorker.KillSplit(changeNumber, splitName, defaultTreatment);
             Thread.Sleep(1000);
 
             // Assert.
-            _splitCache.Verify(mock => mock.KillAsync(changeNumber, splitName, defaultTreatment), Times.Never);
+            _splitCache.Verify(mock => mock.Kill(changeNumber, splitName, defaultTreatment), Times.Never);
         }
     }
 }

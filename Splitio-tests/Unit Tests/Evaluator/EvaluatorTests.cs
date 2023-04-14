@@ -8,7 +8,6 @@ using Splitio.Services.Parsing;
 using Splitio.Services.Parsing.Classes;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Evaluator
 {
@@ -18,7 +17,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
         private readonly Mock<ISplitter> _splitter;
         private readonly Mock<ISplitCache> _splitCache;
 
-        private IEvaluator _evaluator;
+        private readonly IEvaluator _evaluator;
 
         public EvaluatorTests()
         {
@@ -30,7 +29,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
 
         #region EvaluateFeature
         [TestMethod]
-        public async Task EvaluateFeature_WhenSplitNameDoesntExist_ReturnsControl()
+        public void EvaluateFeature_WhenSplitNameDoesntExist_ReturnsControl()
         {
             // Arrange.
             var splitName = "always_on";
@@ -38,11 +37,11 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             ParsedSplit parsedSplit = null;
 
             _splitCache
-                .Setup(mock => mock.GetSplitAsync(splitName))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.GetSplit(splitName))
+                .Returns(parsedSplit);
 
             // Act.
-            var result = await _evaluator.EvaluateFeatureAsync(key, splitName);
+            var result = _evaluator.EvaluateFeature(key, splitName);
 
             // Assert.
             Assert.AreEqual("control", result.Treatment);
@@ -50,7 +49,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
         }
 
         [TestMethod]
-        public async Task EvaluateFeature_WhenSplitIsKilled_ReturnsDefaultTreatment()
+        public void EvaluateFeature_WhenSplitIsKilled_ReturnsDefaultTreatment()
         {
             // Arrange.
             var splitName = "always_on";
@@ -66,11 +65,11 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             };
 
             _splitCache
-                .Setup(mock => mock.GetSplitAsync(splitName))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.GetSplit(splitName))
+                .Returns(parsedSplit);
 
             // Act.
-            var result = await _evaluator.EvaluateFeatureAsync(key, splitName);
+            var result = _evaluator.EvaluateFeature(key, splitName);
 
             // Assert.
             Assert.AreEqual(parsedSplit.defaultTreatment, result.Treatment);
@@ -79,7 +78,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
         }
 
         [TestMethod]
-        public async Task EvaluateFeature_WhenSplitWithoutConditions_ReturnsDefaultTreatment()
+        public void EvaluateFeature_WhenSplitWithoutConditions_ReturnsDefaultTreatment()
         {
             // Arrange.
             var splitName = "always_on";
@@ -95,11 +94,11 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             };
 
             _splitCache
-                .Setup(mock => mock.GetSplitAsync(splitName))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.GetSplit(splitName))
+                .Returns(parsedSplit);
 
             // Act.
-            var result = await _evaluator.EvaluateFeatureAsync(key, splitName);
+            var result = _evaluator.EvaluateFeature(key, splitName);
 
             // Assert.
             Assert.AreEqual(parsedSplit.defaultTreatment, result.Treatment);
@@ -108,7 +107,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
         }
 
         [TestMethod]
-        public async Task EvaluateFeature_WithRolloutCondition_BucketIsBiggerTrafficAllocation_ReturnsDefailtTreatment()
+        public void EvaluateFeature_WithRolloutCondition_BucketIsBiggerTrafficAllocation_ReturnsDefailtTreatment()
         {
             // Arrange.
             var splitName = "always_on";
@@ -148,15 +147,15 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             };
 
             _splitCache
-                .Setup(mock => mock.GetSplitAsync(splitName))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.GetSplit(splitName))
+                .Returns(parsedSplit);
 
             _splitter
                 .Setup(mock => mock.GetBucket(key.bucketingKey, parsedSplit.trafficAllocationSeed, AlgorithmEnum.Murmur))
                 .Returns(18);
 
             // Act.
-            var result = await _evaluator.EvaluateFeatureAsync(key, splitName);
+            var result = _evaluator.EvaluateFeature(key, splitName);
 
             // Assert.
             Assert.AreEqual(parsedSplit.defaultTreatment, result.Treatment);
@@ -165,7 +164,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
         }
 
         [TestMethod]
-        public async Task EvaluateFeature_WithRolloutCondition_TrafficAllocationIsBiggerBucket_ReturnsOn()
+        public void EvaluateFeature_WithRolloutCondition_TrafficAllocationIsBiggerBucket_ReturnsOn()
         {
             // Arrange.
             var splitName = "always_on";
@@ -200,7 +199,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                             {
                                 new AttributeMatcher
                                 {
-                                    matcher = new EndsWithMatcher(new List<string> { "@split.io" })
+                                    Matcher = new EndsWithMatcher(new List<string> { "@split.io" })
                                 }
                             }
                         }
@@ -208,7 +207,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 }
             };
 
-            _splitCache.Setup(mock => mock.GetSplitAsync(splitName)).ReturnsAsync(parsedSplit);
+            _splitCache.Setup(mock => mock.GetSplit(splitName)).Returns(parsedSplit);
 
             _splitter
                 .Setup(mock => mock.GetBucket(key.bucketingKey, parsedSplit.trafficAllocationSeed, AlgorithmEnum.Murmur))
@@ -219,7 +218,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns("on");
 
             // Act.
-            var result = await _evaluator.EvaluateFeatureAsync(key, splitName);
+            var result = _evaluator.EvaluateFeature(key, splitName);
 
             // Assert.
             Assert.AreEqual("on", result.Treatment);
@@ -228,7 +227,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
         }
 
         [TestMethod]
-        public async Task EvaluateFeature_WithWhitelistCondition_EqualToBooleanMatcher_ReturnsOn()
+        public void EvaluateFeature_WithWhitelistCondition_EqualToBooleanMatcher_ReturnsOn()
         {
             // Arrange.
             var splitName = "always_on";
@@ -264,8 +263,8 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                             {
                                 new AttributeMatcher
                                 {
-                                    matcher = new EqualToBooleanMatcher(true),
-                                    attribute = "true"
+                                    Matcher = new EqualToBooleanMatcher(true),
+                                    Attribute = "true"
                                 }
                             }                            
                         }
@@ -274,15 +273,15 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             };
 
             _splitCache
-                .Setup(mock => mock.GetSplitAsync(splitName))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.GetSplit(splitName))
+                .Returns(parsedSplit);
 
             _splitter
                 .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplit.seed, It.IsAny<List<PartitionDefinition>>(), parsedSplit.algo))
                 .Returns("on");
 
             // Act.
-            var result = await _evaluator.EvaluateFeatureAsync(key, splitName, attributes);
+            var result = _evaluator.EvaluateFeature(key, splitName, attributes);
 
             // Assert.
             Assert.AreEqual("on", result.Treatment);
@@ -291,7 +290,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
         }
 
         [TestMethod]
-        public async Task EvaluateFeature_WithWhitelistCondition_EqualToBooleanMatcher_ReturnsOff()
+        public void EvaluateFeature_WithWhitelistCondition_EqualToBooleanMatcher_ReturnsOff()
         {
             // Arrange.
             var splitName = "always_on";
@@ -326,7 +325,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                             {
                                 new AttributeMatcher
                                 {
-                                    matcher = new EqualToBooleanMatcher(false)
+                                    Matcher = new EqualToBooleanMatcher(false)
                                 }
                             }
                         }
@@ -335,11 +334,11 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             };
 
             _splitCache
-                .Setup(mock => mock.GetSplitAsync(splitName))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.GetSplit(splitName))
+                .Returns(parsedSplit);
 
             // Act.
-            var result = await _evaluator.EvaluateFeatureAsync(key, splitName);
+            var result = _evaluator.EvaluateFeature(key, splitName);
 
             // Assert.
             Assert.AreEqual("off", result.Treatment);
@@ -348,7 +347,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
         }
 
         [TestMethod]
-        public async Task EvaluateFeature_WithTwoConditions_EndsWithMatch_ReturnsOn()
+        public void EvaluateFeature_WithTwoConditions_EndsWithMatch_ReturnsOn()
         {
             // Arrange.
             var splitName = "always_on";
@@ -383,7 +382,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                             {
                                 new AttributeMatcher
                                 {
-                                    matcher = new EqualToBooleanMatcher(false)
+                                    Matcher = new EqualToBooleanMatcher(false)
                                 }
                             }
                         }
@@ -407,7 +406,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                             {
                                 new AttributeMatcher
                                 {
-                                    matcher = new EndsWithMatcher(new List<string> { "@split.io" })
+                                    Matcher = new EndsWithMatcher(new List<string> { "@split.io" })
                                 }
                             }
                         }
@@ -416,15 +415,15 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             };
 
             _splitCache
-                .Setup(mock => mock.GetSplitAsync(splitName))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.GetSplit(splitName))
+                .Returns(parsedSplit);
 
             _splitter
                 .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplit.seed, It.IsAny<List<PartitionDefinition>>(), parsedSplit.algo))
                 .Returns("on");
 
             // Act.
-            var result = await _evaluator.EvaluateFeatureAsync(key, splitName);
+            var result = _evaluator.EvaluateFeature(key, splitName);
 
             // Assert.
             Assert.AreEqual("on", result.Treatment);
@@ -435,7 +434,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
 
         #region EvaluateFeatures
         [TestMethod]
-        public async Task EvaluateFeatures_WhenSplitNameDoesntExist_ReturnsControl()
+        public void EvaluateFeatures_WhenSplitNameDoesntExist_ReturnsControl()
         {
             // Arrange.
             var splitNames = new List<string> { "always_on", "always_off" };
@@ -471,7 +470,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                             {
                                 new AttributeMatcher
                                 {
-                                    matcher = new EndsWithMatcher(new List<string> { "@split.io" })
+                                    Matcher = new EndsWithMatcher(new List<string> { "@split.io" })
                                 }
                             }
                         }
@@ -508,7 +507,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                             {
                                 new AttributeMatcher
                                 {
-                                    matcher = new EndsWithMatcher(new List<string> { "@split.io" })
+                                    Matcher = new EndsWithMatcher(new List<string> { "@split.io" })
                                 }
                             }
                         }
@@ -532,7 +531,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                             {
                                 new AttributeMatcher
                                 {
-                                    matcher = new EqualToMatcher(DataTypeEnum.NUMBER, 123)
+                                    Matcher = new EqualToMatcher(DataTypeEnum.NUMBER, 123)
                                 }
                             }
                         }
@@ -545,8 +544,8 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(18);
 
             _splitCache
-                .Setup(mock => mock.FetchManyAsync(It.IsAny<List<string>>()))
-                .ReturnsAsync(new List<ParsedSplit>
+                .Setup(mock => mock.FetchMany(It.IsAny<List<string>>()))
+                .Returns(new List<ParsedSplit>
                 {
                     parsedSplitOff,
                     parsedSplitOn
@@ -561,7 +560,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns("off");
 
             // Act.
-            var result = await _evaluator.EvaluateFeaturesAsync(key, splitNames);
+            var result = _evaluator.EvaluateFeatures(key, splitNames);
 
             // Assert.
             var resultOn = result.TreatmentResults.FirstOrDefault(tr => tr.Key.Equals("always_on"));

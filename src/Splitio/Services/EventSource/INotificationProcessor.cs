@@ -1,9 +1,7 @@
-﻿using System.Threading.Tasks;
-
-namespace Splitio.Services.EventSource
+﻿namespace Splitio.Services.EventSource
 {
     public interface INotificationProcessor
     {
-        Task ProccessAsync(IncomingNotification notification);
+        void Proccess(IncomingNotification notification);
     }
 }

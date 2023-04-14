@@ -3,7 +3,6 @@ using Splitio.Domain;
 using Splitio.Services.Parsing;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests
 {
@@ -11,7 +10,7 @@ namespace Splitio_Tests.Unit_Tests
     public class ContainsStringMatcherTests
     {
         [TestMethod]
-        public async Task MatchShouldReturnTrueOnMatchingKeyString()
+        public void MatchShouldReturnTrueOnMatchingKeyString()
         {
             //Arrange
             var toCompare = new List<string>
@@ -22,14 +21,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new ContainsStringMatcher(toCompare);
 
             //Act
-            var result = await matcher.Match("test1");
+            var result = matcher.Match("test1");
 
             //Assert
             Assert.IsTrue(result); //keys contains test1
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnTrueOnKeyContainingElementString()
+        public void MatchShouldReturnTrueOnKeyContainingElementString()
         {
             //Arrange
             var toCompare = new List<string>
@@ -40,14 +39,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new ContainsStringMatcher(toCompare);
 
             //Act
-            var result = await matcher.Match("abctest1abc");
+            var result = matcher.Match("abctest1abc");
 
             //Assert
             Assert.IsTrue(result); //keys contains test1
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseOnNonMatchingKeyString()
+        public void MatchShouldReturnFalseOnNonMatchingKeyString()
         {
             //Arrange
             var toCompare = new List<string>
@@ -58,28 +57,28 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new ContainsStringMatcher(toCompare);
 
             //Act
-            var result = await matcher.Match("test3");
+            var result = matcher.Match("test3");
 
             //Assert
             Assert.IsFalse(result); //key not contains any element of whitelist
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfEmptyWhitelistString()
+        public void MatchShouldReturnFalseIfEmptyWhitelistString()
         {
             //Arrange
             var toCompare = new List<string>();
             var matcher = new ContainsStringMatcher(toCompare);
 
             //Act
-            var result = await matcher.Match("test1");
+            var result = matcher.Match("test1");
 
             //Assert
             Assert.IsFalse(result); //Empty whitelist
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfNullKeyString()
+        public void MatchShouldReturnFalseIfNullKeyString()
         {
             //Arrange
             var toCompare = new List<string>
@@ -91,14 +90,14 @@ namespace Splitio_Tests.Unit_Tests
 
             //Act
             string key = null;
-            var result = await matcher.Match(key);
+            var result = matcher.Match(key);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfEmptyKeyString()
+        public void MatchShouldReturnFalseIfEmptyKeyString()
         {
             //Arrange
             var toCompare = new List<string>
@@ -110,14 +109,14 @@ namespace Splitio_Tests.Unit_Tests
 
             //Act
             string key = "";
-            var result = await matcher.Match(key);
+            var result = matcher.Match(key);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnTrueOnMatchingKey()
+        public void MatchShouldReturnTrueOnMatchingKey()
         {
             //Arrange
             var toCompare = new List<string>
@@ -128,14 +127,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new ContainsStringMatcher(toCompare);
 
             //Act
-            var result = await matcher.Match(new Key("test1", "test1"));
+            var result = matcher.Match(new Key("test1", "test1"));
 
             //Assert
             Assert.IsTrue(result); //keys contains test1
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnTrueOnKeyContainingElement()
+        public void MatchShouldReturnTrueOnKeyContainingElement()
         {
             //Arrange
             var toCompare = new List<string>
@@ -146,14 +145,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new ContainsStringMatcher(toCompare);
 
             //Act
-            var result = await matcher.Match(new Key("abctest1abc", "abctest1abc"));
+            var result = matcher.Match(new Key("abctest1abc", "abctest1abc"));
 
             //Assert
             Assert.IsTrue(result); //keys contains test1
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseOnNonMatchingKey()
+        public void MatchShouldReturnFalseOnNonMatchingKey()
         {
             //Arrange
             var toCompare = new List<string>
@@ -164,45 +163,47 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new ContainsStringMatcher(toCompare);
 
             //Act
-            var result = await matcher.Match(new Key("test3", "test3"));
+            var result = matcher.Match(new Key("test3", "test3"));
 
             //Assert
             Assert.IsFalse(result); //key not contains any element of whitelist
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfEmptyWhitelist()
+        public void MatchShouldReturnFalseIfEmptyWhitelist()
         {
             //Arrange
             var toCompare = new List<string>();
             var matcher = new ContainsStringMatcher(toCompare);
 
             //Act
-            var result = await matcher.Match(new Key("test1", "test1"));
+            var result = matcher.Match(new Key("test1", "test1"));
 
             //Assert
             Assert.IsFalse(result); //Empty whitelist
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfNullKey()
+        public void MatchShouldReturnFalseIfNullKey()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string>
+            {
+                "test1",
+                "test2"
+            };
             var matcher = new ContainsStringMatcher(toCompare);
 
             //Act
             string key = null;
-            var result = await matcher.Match(new Key(key, key));
+            var result = matcher.Match(new Key(key, key));
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfEmptyKey()
+        public void MatchShouldReturnFalseIfEmptyKey()
         {
             //Arrange
             var toCompare = new List<string>
@@ -214,7 +215,7 @@ namespace Splitio_Tests.Unit_Tests
 
             //Act
             string key = "";
-            var result = await matcher.Match(new Key(key, key));
+            var result = matcher.Match(new Key(key, key));
 
             //Assert
             Assert.IsFalse(result);

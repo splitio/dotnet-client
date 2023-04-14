@@ -26,11 +26,11 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<ISplitLogger> _log;
         private readonly Mock<IImpressionsCounter> _impressionsCounter;
         private readonly Mock<IWrapperAdapter> _wrapperAdapter;
-        private readonly Mock<IStatusManager> _statusManager;
         private readonly Mock<ITelemetrySyncTask> _telemetrySyncTask;
         private readonly Mock<ISplitCache> _splitCache;
         private readonly Mock<ISegmentCache> _segmentCache;
-        private readonly Mock<IBackOff> _backOff;
+        private readonly Mock<IBackOff> _bfSplits;
+        private readonly Mock<IBackOff> _bfSegments;
         private readonly Mock<IUniqueKeysTracker> _uniqueKeysTracker;
         private readonly ISynchronizer _synchronizer;
 
@@ -43,14 +43,14 @@ namespace Splitio_Tests.Unit_Tests.Common
             _log = new Mock<ISplitLogger>();
             _impressionsCounter = new Mock<IImpressionsCounter>();
             _wrapperAdapter = new Mock<IWrapperAdapter>();
-            _statusManager = new Mock<IStatusManager>();
             _telemetrySyncTask = new Mock<ITelemetrySyncTask>();
             _splitCache = new Mock<ISplitCache>();
-            _backOff = new Mock<IBackOff>();
+            _bfSplits = new Mock<IBackOff>();
+            _bfSegments = new Mock<IBackOff>();
             _segmentCache = new Mock<ISegmentCache>();
             _uniqueKeysTracker = new Mock<IUniqueKeysTracker>();
 
-            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCounter.Object, _wrapperAdapter.Object, _statusManager.Object, _telemetrySyncTask.Object, new TasksManager(_wrapperAdapter.Object), _splitCache.Object, _backOff.Object, 10, 5, _segmentCache.Object, _uniqueKeysTracker.Object, _log.Object);
+            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCounter.Object, _wrapperAdapter.Object, _telemetrySyncTask.Object, new TasksManager(_wrapperAdapter.Object), _splitCache.Object, _bfSplits.Object, _bfSegments.Object, 10, 5, _segmentCache.Object, _uniqueKeysTracker.Object, _log.Object);
         }
 
         [TestMethod]
@@ -125,9 +125,9 @@ namespace Splitio_Tests.Unit_Tests.Common
             var segmentName = "segment-test";
 
             _segmentCache
-                .SetupSequence(mock => mock.GetChangeNumberAsync(segmentName))
-                .ReturnsAsync(-1)
-                .ReturnsAsync(2);
+                .SetupSequence(mock => mock.GetChangeNumber(segmentName))
+                .Returns(-1)
+                .Returns(2);
 
             // Act.
             _synchronizer.SynchronizeSegment(segmentName, 1);
@@ -143,8 +143,8 @@ namespace Splitio_Tests.Unit_Tests.Common
             var segmentName = "segment-test";
 
             _segmentCache
-                .Setup(mock => mock.GetChangeNumberAsync(segmentName))
-                .ReturnsAsync(2);
+                .Setup(mock => mock.GetChangeNumber(segmentName))
+                .Returns(2);
 
             // Act.
             _synchronizer.SynchronizeSegment(segmentName, 100);
@@ -162,13 +162,13 @@ namespace Splitio_Tests.Unit_Tests.Common
             var segmentName = "segment-test";
 
             _segmentCache
-                .SetupSequence(mock => mock.GetChangeNumberAsync(segmentName))
-                .ReturnsAsync(-1)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(110);
+                .SetupSequence(mock => mock.GetChangeNumber(segmentName))
+                .Returns(-1)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(110);
 
             // Act.
             _synchronizer.SynchronizeSegment(segmentName, 100);
@@ -186,25 +186,25 @@ namespace Splitio_Tests.Unit_Tests.Common
             var segmentName = "segment-test";
 
             _segmentCache
-                .SetupSequence(mock => mock.GetChangeNumberAsync(segmentName))
-                .ReturnsAsync(-1)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(110);
+                .SetupSequence(mock => mock.GetChangeNumber(segmentName))
+                .Returns(-1)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(110);
 
             // Act.
             _synchronizer.SynchronizeSegment(segmentName, 100);
@@ -224,9 +224,9 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .ReturnsAsync(new FetchResult());
 
             _splitCache
-                .SetupSequence(mock => mock.GetChangeNumberAsync())
-                .ReturnsAsync(-1)
-                .ReturnsAsync(2);
+                .SetupSequence(mock => mock.GetChangeNumber())
+                .Returns(-1)
+                .Returns(2);
 
             // Act.
             _synchronizer.SynchronizeSplits(1);
@@ -241,8 +241,8 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             _splitCache
-                .Setup(mock => mock.GetChangeNumberAsync())
-                .ReturnsAsync(2);
+                .Setup(mock => mock.GetChangeNumber())
+                .Returns(2);
 
             // Act.
             _synchronizer.SynchronizeSplits(100);
@@ -262,13 +262,13 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .ReturnsAsync(new FetchResult());
 
             _splitCache
-                .SetupSequence(mock => mock.GetChangeNumberAsync())
-                .ReturnsAsync(-1)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(110);
+                .SetupSequence(mock => mock.GetChangeNumber())
+                .Returns(-1)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(110);
 
             // Act.
             _synchronizer.SynchronizeSplits(100);
@@ -288,25 +288,24 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .ReturnsAsync(new FetchResult());
 
             _splitCache
-                .SetupSequence(mock => mock.GetChangeNumberAsync())
-                .ReturnsAsync(-1)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(2)
-                .ReturnsAsync(110);
+                .SetupSequence(mock => mock.GetChangeNumber())
+                .Returns(-1)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(2)
+                .Returns(110);
 
             // Act.
             _synchronizer.SynchronizeSplits(100);

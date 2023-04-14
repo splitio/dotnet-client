@@ -3,7 +3,6 @@ using Splitio.Domain;
 using Splitio.Services.Parsing;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests
 {
@@ -202,7 +201,7 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfMatchingKey()
+        public void MatchShouldReturnFalseIfMatchingKey()
         {
             //Arrange
             var toCompare = new List<string>
@@ -213,14 +212,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new EqualToSetMatcher(toCompare);
 
             //Act
-            var result = await matcher.Match(new Key("test", "test"));
+            var result = matcher.Match(new Key("test", "test"));
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfMatchingString()
+        public void MatchShouldReturnFalseIfMatchingString()
         {
             //Arrange
             var toCompare = new List<string>
@@ -231,7 +230,7 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new EqualToSetMatcher(toCompare);
 
             //Act
-            var result = await matcher.Match("test");
+            var result = matcher.Match("test");
 
             //Assert
             Assert.IsFalse(result);

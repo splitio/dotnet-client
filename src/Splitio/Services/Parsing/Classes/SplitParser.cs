@@ -150,13 +150,13 @@ namespace Splitio.Services.Parsing
 
             AttributeMatcher attributeMatcher = new AttributeMatcher()
             {
-                matcher = matcher,
-                negate = matcherDefinition.negate
+                Matcher = matcher,
+                Negate = matcherDefinition.negate
             };
 
             if (matcherDefinition.keySelector != null && matcherDefinition.keySelector.attribute != null)
             {
-                attributeMatcher.attribute = matcherDefinition.keySelector.attribute;
+                attributeMatcher.Attribute = matcherDefinition.keySelector.attribute;
             }
 
             return attributeMatcher;

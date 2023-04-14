@@ -93,7 +93,7 @@ namespace Splitio_Tests.Integration_Tests
             var splitCacheMock = new Mock<ISplitCache>();
 
             splitCacheMock
-                .Setup(x => x.GetSplitAsync(It.IsAny<string>()))
+                .Setup(x => x.GetSplit(It.IsAny<string>()))
                 .Throws<Exception>();
 
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", null, splitCacheMock.Object);
@@ -109,7 +109,7 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         [DeploymentItem(@"Resources\splits_staging_3.json")]
         [DeploymentItem(@"Resources\segment_payed.json")]
-        public async Task ExecuteGetTreatmentOnRemovedUserFromSegmentShouldReturnOff()
+        public void ExecuteGetTreatmentOnRemovedUserFromSegmentShouldReturnOff()
         {
             //Arrange
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", $"{rootFilePath}segment_payed.json");
@@ -118,7 +118,7 @@ namespace Splitio_Tests.Integration_Tests
 
             //Act           
             var result = client.GetTreatment("abcdz", "test_jw2", null);
-            await client.RemoveKeyFromSegmentCacheAsync("payed", new List<string>() { "abcdz" });
+            client.RemoveKeyFromSegmentCache("payed", new List<string>() { "abcdz" });
             var result2 = client.GetTreatment("abcdz", "test_jw2", null);
 
 
@@ -332,7 +332,7 @@ namespace Splitio_Tests.Integration_Tests
             var splitCacheMock = new Mock<ISplitCache>();
 
             splitCacheMock
-                .Setup(x => x.GetSplitAsync(It.IsAny<string>()))
+                .Setup(x => x.GetSplit(It.IsAny<string>()))
                 .Throws<Exception>();
 
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", splitCacheInstance: splitCacheMock.Object, impressionsLog: impressionsLogMock.Object);
@@ -889,8 +889,8 @@ namespace Splitio_Tests.Integration_Tests
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", trafficTypeValidator: trafficTypeValidator.Object, eventsLog: eventLog.Object);
 
             trafficTypeValidator
-                .Setup(mock => mock.IsValidAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(new ValidatorResult { Success = true }); ;
+                .Setup(mock => mock.IsValid(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(new ValidatorResult { Success = true }); ;
 
             // Act.
             var result = client.Track("key", "traffic_type", "event_type");

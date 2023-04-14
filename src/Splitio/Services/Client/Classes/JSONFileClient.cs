@@ -11,7 +11,6 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -72,9 +71,9 @@ namespace Splitio.Services.Client.Classes
             _splitCache.RemoveSplit(splitName);
         }
 
-        public async Task RemoveKeyFromSegmentCacheAsync(string segmentName, List<string> keys)
+        public void RemoveKeyFromSegmentCache(string segmentName, List<string> keys)
         {
-            await _segmentCache.RemoveFromSegmentAsync(segmentName, keys);
+            _segmentCache.RemoveFromSegment(segmentName, keys);
         }
 
         public override void Destroy()

@@ -29,7 +29,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 // Act.
-                var treatmentResult = await client.GetTreatmentAsync("nico_test", "FACUNDO_TEST");
+                var treatmentResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
 
                 // Assert.
                 Assert.AreEqual("control", treatmentResult);
@@ -52,7 +52,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 // Act.
-                var treatmentResult = await client.GetTreatmentWithConfigAsync("nico_test", "FACUNDO_TEST");
+                var treatmentResult = client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
 
                 // Assert.
                 Assert.AreEqual("control", treatmentResult.Treatment);
@@ -77,7 +77,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 // Act.
-                var treatmentResults = await client.GetTreatmentsAsync("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
+                var treatmentResults = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
                 // Assert.            
                 Assert.AreEqual("control", treatmentResults["FACUNDO_TEST"]);
@@ -101,7 +101,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 // Act.
-                var treatmentResults = await client.GetTreatmentsWithConfigAsync("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
+                var treatmentResults = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
                 // Assert.            
                 Assert.AreEqual("control", treatmentResults["FACUNDO_TEST"].Treatment);
@@ -188,7 +188,7 @@ namespace Splitio.Integration_tests
                 client.BlockUntilReady(10000);
 
                 // Act.
-                var treatmentResult = await client.GetTreatmentAsync("nico_test", "FACUNDO_TEST");
+                var treatmentResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
 
                 // Assert.
                 Assert.AreEqual("on", treatmentResult);
@@ -225,7 +225,7 @@ namespace Splitio.Integration_tests
                 client.BlockUntilReady(10000);
 
                 // Act.
-                var treatmentResult = await client.GetTreatmentAsync("nico_test", "FACUNDO_TEST");
+                var treatmentResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
 
                 // Assert.
                 Assert.AreEqual("on", treatmentResult);
@@ -262,15 +262,15 @@ namespace Splitio.Integration_tests
                 client.BlockUntilReady(10000);
 
                 // Act.
-                await client.GetTreatmentWithConfigAsync("nico_test", "FACUNDO_TEST");
-                await client.GetTreatmentWithConfigAsync("nico_test", "FACUNDO_TEST");
-                await client.GetTreatmentWithConfigAsync("test", "MAURO_TEST");
-                await client.GetTreatmentWithConfigAsync("mauro", "MAURO_TEST");
-                await client.GetTreatmentWithConfigAsync("mauro", "MAURO_TEST");
-                await client.GetTreatmentsAsync("admin", new List<string> { "FACUNDO_TEST", "Test_Save_1" });
-                await client.GetTreatmentAsync("admin", "FACUNDO_TEST");
-                await client.GetTreatmentAsync("admin", "Test_Save_1");
-                await client.GetTreatmentsWithConfigAsync("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
+                client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+                client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+                client.GetTreatmentWithConfig("test", "MAURO_TEST");
+                client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
+                client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
+                client.GetTreatments("admin", new List<string> { "FACUNDO_TEST", "Test_Save_1" });
+                client.GetTreatment("admin", "FACUNDO_TEST");
+                client.GetTreatment("admin", "Test_Save_1");
+                client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
                 client.Destroy();
                 Thread.Sleep(3000);
@@ -309,13 +309,13 @@ namespace Splitio.Integration_tests
                 client.BlockUntilReady(10000);
 
                 // Act.
-                await client.GetTreatmentWithConfigAsync("nico_test", "FACUNDO_TEST");
-                await client.GetTreatmentWithConfigAsync("nico_test", "FACUNDO_TEST");
-                await client.GetTreatmentWithConfigAsync("test", "MAURO_TEST");
-                await client.GetTreatmentWithConfigAsync("mauro", "MAURO_TEST");
-                await client.GetTreatmentsAsync("admin", new List<string> { "FACUNDO_TEST", "Test_Save_1" });
-                await client.GetTreatmentAsync("admin", "FACUNDO_TEST");
-                await client.GetTreatmentsWithConfigAsync("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
+                client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+                client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+                client.GetTreatmentWithConfig("test", "MAURO_TEST");
+                client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
+                client.GetTreatments("admin", new List<string> { "FACUNDO_TEST", "Test_Save_1" });
+                client.GetTreatment("admin", "FACUNDO_TEST");
+                client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
                 client.Destroy();
                 Thread.Sleep(3000);
@@ -349,13 +349,13 @@ namespace Splitio.Integration_tests
                 client.BlockUntilReady(10000);
 
                 // Act.
-                await client.GetTreatmentWithConfigAsync("nico_test", "FACUNDO_TEST");
-                await client.GetTreatmentWithConfigAsync("nico_test", "FACUNDO_TEST");
-                await client.GetTreatmentWithConfigAsync("test", "MAURO_TEST");
-                await client.GetTreatmentWithConfigAsync("mauro", "MAURO_TEST");
-                await client.GetTreatmentsAsync("admin", new List<string> { "FACUNDO_TEST", "Test_Save_1" });
-                await client.GetTreatmentAsync("admin", "FACUNDO_TEST");
-                await client.GetTreatmentsWithConfigAsync("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
+                client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+                client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+                client.GetTreatmentWithConfig("test", "MAURO_TEST");
+                client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
+                client.GetTreatments("admin", new List<string> { "FACUNDO_TEST", "Test_Save_1" });
+                client.GetTreatment("admin", "FACUNDO_TEST");
+                client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
                 client.Destroy();
                 Thread.Sleep(3000);
@@ -399,7 +399,7 @@ namespace Splitio.Integration_tests
                 }
 
                 // Act.
-                var result = await client.GetTreatmentAsync("nico_test", "FACUNDO_TEST");
+                var result = client.GetTreatment("nico_test", "FACUNDO_TEST");
 
                 Thread.Sleep(3000);
 

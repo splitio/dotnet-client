@@ -25,7 +25,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
         {
             if (_added != null)
             {
-                _segmentCache.AddToSegmentAsync(name, _added).Wait();
+                _segmentCache.AddToSegment(name, _added);
             }
         }
     }

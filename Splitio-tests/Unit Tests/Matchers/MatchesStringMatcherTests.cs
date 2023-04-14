@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Splitio_tests.Unit_Tests.Matchers
 {
@@ -25,39 +24,39 @@ namespace Splitio_tests.Unit_Tests.Matchers
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnTrueOnMatchingKeyString()
+        public void MatchShouldReturnTrueOnMatchingKeyString()
         {
             //Arrange
             var matcher = new MatchesStringMatcher("^a");
 
             //Act
-            var result = await matcher.Match("arrive");
+            var result = matcher.Match("arrive");
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnTrueOnMatchingKey()
+        public void MatchShouldReturnTrueOnMatchingKey()
         {
             //Arrange
             var matcher = new MatchesStringMatcher("^a");
 
             //Act
-            var result = await matcher.Match(new Key("arrive", "arrive"));
+            var result = matcher.Match(new Key("arrive", "arrive"));
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseOnNonMatchingKey()
+        public void MatchShouldReturnFalseOnNonMatchingKey()
         {
             //Arrange
             var matcher = new MatchesStringMatcher("^a");
 
             //Act
-            var result = await matcher.Match("split");
+            var result = matcher.Match("split");
 
             //Assert
             Assert.IsFalse(result);
@@ -124,13 +123,13 @@ namespace Splitio_tests.Unit_Tests.Matchers
 
         [DeploymentItem(@"Resources\regex.txt")]
         [TestMethod]
-        public async Task VerifyRegexMatcher()
+        public void VerifyRegexMatcher()
         {
-            await VerifyTestFile($"{rootFilePath}regex.txt", new string[] { "\r\n" });
+            VerifyTestFile($"{rootFilePath}regex.txt", new string[] { "\r\n" });
         }
 
 
-        private async Task VerifyTestFile(string file, string[] sepparator)
+        private void VerifyTestFile(string file, string[] sepparator)
         {
             //Arrange
             var fileContent = File.ReadAllText(file);
@@ -148,7 +147,7 @@ namespace Splitio_tests.Unit_Tests.Matchers
                     var matcher = new MatchesStringMatcher(item[0]);
 
                     //Act
-                    var result = await matcher.Match(item[1]);
+                    var result = matcher.Match(item[1]);
 
                     //Assert
                     Assert.AreEqual(Convert.ToBoolean(item[2]), result, item[0] + "-" + item[1]);

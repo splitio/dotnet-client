@@ -2,9 +2,7 @@
 using Splitio.Domain;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Parsing.Classes;
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Parsing
 {
@@ -15,38 +13,24 @@ namespace Splitio.Services.Parsing
         protected long start;
         protected long end;
 
-        public override Task<bool> Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             switch (dataType)
             {
                 case DataTypeEnum.DATETIME:
                     var date = key.ToDateTime();
-                    return Task.FromResult(date.HasValue && Match(date.Value));
+                    return date.HasValue && Match(date.Value);
                 case DataTypeEnum.NUMBER:
                     var result = long.TryParse(key, out long number);
-                    return Task.FromResult(result && Match(number));
+                    return result && Match(number);
                 default:
-                    return Task.FromResult(false);
+                    return false;
             }
         }
 
-        public abstract override bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
-
-        public abstract override bool Match(long key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
-
-        public override bool Match(List<string> key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
-        }
-
-        public override Task<bool> Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        public override bool Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             return Match(key.matchingKey, attributes, evaluator);
-        }
-        
-         public override bool Match(bool key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
         }
     }
 }

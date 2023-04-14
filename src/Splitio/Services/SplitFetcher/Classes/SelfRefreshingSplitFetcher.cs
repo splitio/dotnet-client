@@ -83,7 +83,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
             while (true)
             {
-                var changeNumber = await _splitCache.GetChangeNumberAsync();
+                var changeNumber = _splitCache.GetChangeNumber();
 
                 try
                 {
@@ -116,8 +116,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                 {
                     if (_log.IsDebugEnabled)
                     {
-                        var cn = await _splitCache.GetChangeNumberAsync();
-                        _log.Debug($"split fetch before: {changeNumber}, after: {cn}");
+                        _log.Debug($"split fetch before: {changeNumber}, after: {_splitCache.GetChangeNumber()}");
                     }
                 }
             }

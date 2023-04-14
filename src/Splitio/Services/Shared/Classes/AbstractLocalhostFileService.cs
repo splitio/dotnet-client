@@ -44,8 +44,8 @@ namespace Splitio.Services.Shared.Classes
                         {
                             new AttributeMatcher
                             {
-                                negate = false,
-                                matcher = new WhitelistMatcher(keys)
+                                Negate = false,
+                                Matcher = new WhitelistMatcher(keys)
                             }
                         }
                     },
@@ -72,8 +72,8 @@ namespace Splitio.Services.Shared.Classes
                         {
                             new AttributeMatcher
                             {
-                                negate = false,
-                                matcher = new AllKeysMatcher()
+                                Negate = false,
+                                Matcher = new AllKeysMatcher()
                             }
                         }
                     },

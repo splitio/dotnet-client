@@ -1,26 +1,43 @@
-﻿using Splitio.Domain;
+﻿    using Splitio.Domain;
 using Splitio.Services.Evaluator;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Parsing.Classes
 {
     public abstract class BaseMatcher : IMatcher
     {
-        public abstract Task<bool> Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
+        public virtual bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return false;
+        }
 
-        public abstract bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
+        public virtual bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return false;
+        }
 
-        public abstract bool Match(long key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
+        public virtual bool Match(long key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return false;
+        }
 
-        public abstract bool Match(List<string> key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
+        public virtual bool Match(List<string> key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return false;
+        }
 
-        public abstract Task<bool> Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
+        public virtual bool Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return false;
+        }
 
-        public abstract bool Match(bool key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
+        public virtual bool Match(bool key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return false;
+        }
 
-        public async Task<bool> Match(object value, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        public bool Match(object value, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             if (value is bool)
             {
@@ -28,7 +45,7 @@ namespace Splitio.Services.Parsing.Classes
             }
             else if (value is string)
             {
-                return await Match((string)value, attributes, evaluator);
+                return Match((string)value, attributes, evaluator);
             }
             else if (value is DateTime)
             {
@@ -48,7 +65,7 @@ namespace Splitio.Services.Parsing.Classes
             }
             else if (value is Key)
             {
-                return await Match((Key)value, attributes, evaluator);
+                return Match((Key)value, attributes, evaluator);
             }
 
             return false;

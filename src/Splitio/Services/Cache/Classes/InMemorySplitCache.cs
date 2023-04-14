@@ -13,8 +13,8 @@ namespace Splitio.Services.Cache.Classes
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemorySplitCache));
 
-        private ConcurrentDictionary<string, ParsedSplit> _splits;
-        private ConcurrentDictionary<string, int> _trafficTypes;
+        private readonly ConcurrentDictionary<string, ParsedSplit> _splits;
+        private readonly ConcurrentDictionary<string, int> _trafficTypes;
         private long _changeNumber;
 
         public InMemorySplitCache(ConcurrentDictionary<string, ParsedSplit> splits, long changeNumber = -1)
@@ -87,26 +87,24 @@ namespace Splitio.Services.Cache.Classes
             _changeNumber = changeNumber;
         }
 
-        public Task<long> GetChangeNumberAsync()
+        public long GetChangeNumber()
         {
-            return Task.FromResult(_changeNumber);
+            return _changeNumber;
         }
 
-        public Task<ParsedSplit> GetSplitAsync(string splitName)
+        public ParsedSplit GetSplit(string splitName)
         {
             _splits.TryGetValue(splitName, out ParsedSplit value);
 
-            return Task.FromResult(value);
+            return value;
         }
 
-        public Task<List<ParsedSplit>> GetAllSplitsAsync()
+        public List<ParsedSplit> GetAllSplits()
         {
-            var splits = _splits
+            return _splits
                 .Values
                 .Where(s => s != null)
                 .ToList();
-
-            return Task.FromResult(splits);
         }
 
         public void Clear()
@@ -115,16 +113,14 @@ namespace Splitio.Services.Cache.Classes
             _trafficTypes.Clear();
         }
 
-        public Task<bool> TrafficTypeExistsAsync(string trafficType)
+        public bool TrafficTypeExists(string trafficType)
         {
             if (string.IsNullOrEmpty(trafficType))
             {
-                return Task.FromResult(false);
+                return false;
             }
 
-            var exists = _trafficTypes.ContainsKey(trafficType);
-
-            return Task.FromResult(exists);
+            return _trafficTypes.ContainsKey(trafficType);
         }
 
         private void IncreaseTrafficTypeCount(string trafficType)
@@ -142,7 +138,7 @@ namespace Splitio.Services.Cache.Classes
             {
                 if (quantity <= 1)
                 {
-                    _trafficTypes.TryRemove(split.trafficTypeName, out int value);
+                    _trafficTypes.TryRemove(split.trafficTypeName, out _);
 
                     return;
                 }
@@ -153,13 +149,13 @@ namespace Splitio.Services.Cache.Classes
             }
         }
 
-        public async Task<List<ParsedSplit>> FetchManyAsync(List<string> splitNames)
+        public List<ParsedSplit> FetchMany(List<string> splitNames)
         {
             var splits = new List<ParsedSplit>();
 
             foreach (var name in splitNames)
             {
-                var split = await GetSplitAsync(name);
+                var split = GetSplit(name);
                 splits.Add(split);
             }
 
@@ -170,9 +166,9 @@ namespace Splitio.Services.Cache.Classes
             return toReturn;
         }
 
-        public async Task KillAsync(long changeNumber, string splitName, string defaultTreatment)
+        public void Kill(long changeNumber, string splitName, string defaultTreatment)
         {
-            var split = await GetSplitAsync(splitName);
+            var split = GetSplit(splitName);
 
             if (split == null) return;
 
@@ -183,19 +179,17 @@ namespace Splitio.Services.Cache.Classes
             AddOrUpdate(splitName, split);
         }
 
-        public Task<List<string>> GetSplitNamesAsync()
+        public List<string> GetSplitNames()
         {
-            var names = _splits
+            return _splits
                 .Keys
                 .Where(name => !string.IsNullOrEmpty(name))
                 .ToList();
-
-            return Task.FromResult(names);
         }
 
-        public async Task<int> SplitsCountAsync()
+        public int SplitsCount()
         {
-            var names = await GetSplitNamesAsync();
+            var names = GetSplitNames();
 
             return names.Count;
         }

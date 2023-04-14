@@ -31,7 +31,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             };
 
             // Act.
-            _notificationPorcessor.ProccessAsync(notification);
+            _notificationPorcessor.Proccess(notification);
 
             // Assert.
             _splitsWorker.Verify(mock => mock.AddToQueue(notification.ChangeNumber), Times.Once);
@@ -50,10 +50,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             };
 
             // Act.
-            _notificationPorcessor.ProccessAsync(notification);
+            _notificationPorcessor.Proccess(notification);
 
             // Assert.
-            _splitsWorker.Verify(mock => mock.KillSplitAsync(notification.ChangeNumber, notification.SplitName, notification.DefaultTreatment), Times.Once);
+            _splitsWorker.Verify(mock => mock.KillSplit(notification.ChangeNumber, notification.SplitName, notification.DefaultTreatment), Times.Once);
             _splitsWorker.Verify(mock => mock.AddToQueue(notification.ChangeNumber), Times.Once);
         }
 
@@ -69,7 +69,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             };
 
             // Act.
-            _notificationPorcessor.ProccessAsync(notification);
+            _notificationPorcessor.Proccess(notification);
 
             // Assert.
             _segmentsWorker.Verify(mock => mock.AddToQueue(notification.ChangeNumber, notification.SegmentName), Times.Once);

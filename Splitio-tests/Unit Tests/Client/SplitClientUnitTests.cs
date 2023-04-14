@@ -5,7 +5,6 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Threading;
@@ -96,8 +95,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeatureAsync(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new TreatmentResult("definition not found", "control", null));
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("definition not found", "control", null));
 
             // Act
             var result = _splitClientForTesting.GetTreatment("key", "not_exist");
@@ -162,16 +161,16 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCacheMock
-                .Setup(mock => mock.GetSplitAsync(feature))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.GetSplit(feature))
+                .Returns(parsedSplit);
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeatureAsync(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new TreatmentResult("label", treatmentExpected, null, configExpected));
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("label", treatmentExpected, null, configExpected));
 
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
@@ -201,16 +200,16 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(false);
 
             _splitCacheMock
-                .Setup(mock => mock.GetSplitAsync(feature))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.GetSplit(feature))
+                .Returns(parsedSplit);
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeatureAsync(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new TreatmentResult("label", defaultTreatment, null, configExpected));
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("label", defaultTreatment, null, configExpected));
 
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
@@ -235,12 +234,12 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCacheMock
-                .Setup(mock => mock.GetSplitAsync(feature))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.GetSplit(feature))
+                .Returns(parsedSplit);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeatureAsync(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new TreatmentResult("label", treatmentExpected, null));
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("label", treatmentExpected, null));
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
@@ -270,16 +269,16 @@ namespace Splitio_Tests.Unit_Tests.Client
             var parsedSplit = GetParsedSplit(feature, defaultTreatment, killed: true, configurations: configurations);
 
             _splitCacheMock
-                .Setup(mock => mock.GetSplitAsync(feature))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.GetSplit(feature))
+                .Returns(parsedSplit);
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeatureAsync(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new TreatmentResult("label", defaultTreatment, null, configExpected));
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("label", defaultTreatment, null, configExpected));
 
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
@@ -305,16 +304,16 @@ namespace Splitio_Tests.Unit_Tests.Client
             var parsedSplit = GetParsedSplit(feature, defaultTreatment, configurations: configurations, trafficAllocation: 20);
 
             _splitCacheMock
-                .Setup(mock => mock.GetSplitAsync(feature))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.GetSplit(feature))
+                .Returns(parsedSplit);
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeatureAsync(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new TreatmentResult("label", defaultTreatment, config: configExpected));
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("label", defaultTreatment, config: configExpected));
 
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
@@ -368,12 +367,12 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCacheMock
-                .Setup(mock => mock.GetSplitAsync(feature))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.GetSplit(feature))
+                .Returns(parsedSplit);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeatureAsync(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new TreatmentResult("label", treatmentExpected, config: configExpected));
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("label", treatmentExpected, config: configExpected));
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
@@ -402,16 +401,16 @@ namespace Splitio_Tests.Unit_Tests.Client
             var parsedSplit = GetParsedSplit(feature, defaultTreatment, configurations: configurations, trafficAllocation: 20, conditions: new List<ConditionWithLogic>());
 
             _splitCacheMock
-                .Setup(mock => mock.GetSplitAsync(feature))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.GetSplit(feature))
+                .Returns(parsedSplit);
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeatureAsync(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new TreatmentResult("label", defaultTreatment, config: configExpected));
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("label", defaultTreatment, config: configExpected));
 
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
@@ -430,8 +429,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeatureAsync(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new TreatmentResult("definition not found", "control"));
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("definition not found", "control"));
 
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("key", "not_exist");
@@ -529,16 +528,16 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCacheMock
-                .Setup(mock => mock.GetSplitAsync(treatmenOn))
-                .ReturnsAsync(parsedSplitOn);
+                .Setup(mock => mock.GetSplit(treatmenOn))
+                .Returns(parsedSplitOn);
 
             _splitCacheMock
-                .Setup(mock => mock.GetSplitAsync(treatmenOff))
-                .ReturnsAsync(parsedSplitOff);
+                .Setup(mock => mock.GetSplit(treatmenOff))
+                .Returns(parsedSplitOff);
 
             _evaluatorMock
-                .SetupSequence(mock => mock.EvaluateFeaturesAsync(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new MultipleEvaluatorResult
+                .SetupSequence(mock => mock.EvaluateFeatures(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new MultipleEvaluatorResult
                 {
                     TreatmentResults = new Dictionary<string, TreatmentResult>
                     {
@@ -575,8 +574,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluatorMock
-                .SetupSequence(mock => mock.EvaluateFeaturesAsync(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new MultipleEvaluatorResult
+                .SetupSequence(mock => mock.EvaluateFeatures(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new MultipleEvaluatorResult
                 {
                     TreatmentResults = new Dictionary<string, TreatmentResult>
                     {
@@ -723,8 +722,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             var trafficType = "traffict_type";
 
             _splitCacheMock
-                .Setup(mock => mock.TrafficTypeExistsAsync(trafficType))
-                .ReturnsAsync(false);
+                .Setup(mock => mock.TrafficTypeExists(trafficType))
+                .Returns(false);
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
@@ -750,8 +749,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             var trafficType = "traffict_type";
 
             _splitCacheMock
-                .Setup(mock => mock.TrafficTypeExistsAsync(trafficType))
-                .ReturnsAsync(true);
+                .Setup(mock => mock.TrafficTypeExists(trafficType))
+                .Returns(true);
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())

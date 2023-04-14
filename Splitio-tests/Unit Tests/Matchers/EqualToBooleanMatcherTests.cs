@@ -3,7 +3,6 @@ using Splitio.Domain;
 using Splitio.Services.Parsing.Classes;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests
 {
@@ -71,39 +70,39 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfMatchingKey()
+        public void MatchShouldReturnFalseIfMatchingKey()
         {
             //Arrange
             var matcher = new EqualToBooleanMatcher(true);
 
             //Act
-            var result = await matcher.Match(new Key("test", "test"));
+            var result = matcher.Match(new Key("test", "test"));
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfMatchingStringNotBoolean()
+        public void MatchShouldReturnFalseIfMatchingStringNotBoolean()
         {
             //Arrange
             var matcher = new EqualToBooleanMatcher(true);
 
             //Act
-            var result = await matcher.Match("testring");
+            var result = matcher.Match("testring");
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnTrueIfMatchingStringBoolean()
+        public void MatchShouldReturnTrueIfMatchingStringBoolean()
         {
             //Arrange
             var matcher = new EqualToBooleanMatcher(true);
 
             //Act
-            var result = await matcher.Match("true");
+            var result = matcher.Match("true");
 
             //Assert
             Assert.IsTrue(result);
@@ -116,9 +115,11 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new EqualToBooleanMatcher(true);
 
             //Act
-            var keys = new List<string>();
-            keys.Add("test1");
-            keys.Add("test3");
+            var keys = new List<string>
+            {
+                "test1",
+                "test3"
+            };
 
             var result = matcher.Match(keys);
 

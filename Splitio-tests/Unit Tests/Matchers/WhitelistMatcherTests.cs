@@ -11,7 +11,7 @@ namespace Splitio_Tests.Unit_Tests
     public class WhitelistMatcherTests
     {
         [TestMethod]
-        public async Task MatchShouldReturnTrueOnMatchingKeyWithKey()
+        public void MatchShouldReturnTrueOnMatchingKeyWithKey()
         {
             //Arrange
             var keys = new List<string>
@@ -22,14 +22,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = await matcher.Match(new Key("test2", "test2"));
+            var result = matcher.Match(new Key("test2", "test2"));
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseOnNonMatchingKeyWithKey()
+        public void MatchShouldReturnFalseOnNonMatchingKeyWithKey()
         {
             //Arrange
             var keys = new List<string>
@@ -40,21 +40,21 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = await matcher.Match(new Key("test3", "test3"));
+            var result = matcher.Match(new Key("test3", "test3"));
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfEmptyWhitelistWithKey()
+        public void MatchShouldReturnFalseIfEmptyWhitelistWithKey()
         {
             //Arrange
             var keys = new List<string>();
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = await matcher.Match(new Key("test2", "test2"));
+            var result = matcher.Match(new Key("test2", "test2"));
 
             //Assert
             Assert.IsFalse(result);
@@ -89,7 +89,7 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnTrueOnMatchingKey()
+        public void MatchShouldReturnTrueOnMatchingKey()
         {
             //Arrange
             var keys = new List<string>
@@ -100,14 +100,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = await matcher.Match("test2");
+            var result = matcher.Match("test2");
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseOnNonMatchingKey()
+        public void MatchShouldReturnFalseOnNonMatchingKey()
         {
             //Arrange
             var keys = new List<string>
@@ -118,21 +118,21 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = await matcher.Match("test3");
+            var result = matcher.Match("test3");
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfEmptyWhitelist()
+        public void MatchShouldReturnFalseIfEmptyWhitelist()
         {
             //Arrange
             var keys = new List<string>();
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = await matcher.Match("test2");
+            var result = matcher.Match("test2");
 
             //Assert
             Assert.IsFalse(result);

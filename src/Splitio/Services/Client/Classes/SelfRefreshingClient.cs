@@ -67,7 +67,7 @@ namespace Splitio.Services.Client.Classes
             BuildImpressionsCounter(_config);
             BuildImpressionsObserver();
             BuildImpressionManager();
-            BuildEventLog(config);
+            BuildEventLog();
             BuildEvaluator();
             
             BuildManager();
@@ -154,7 +154,7 @@ namespace Splitio.Services.Client.Classes
             _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, true, _config.ImpressionsMode, _telemetryRuntimeProducer, _tasksManager, _uniqueKeysTracker, _impressionsObserver);
         }
 
-        private void BuildEventLog(ConfigurationOptions config)
+        private void BuildEventLog()
         {
             var eventsCache = new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(_config.EventLogSize));
             _eventsLog = new EventsLog(_eventSdkApiClient, _config.EventsFirstPushWindow, _config.EventLogRefreshRate, eventsCache, _telemetryRuntimeProducer, _tasksManager);
@@ -208,8 +208,9 @@ namespace Splitio.Services.Client.Classes
             try
             {
                 // Synchronizer
-                var backOff = new BackOff(backOffBase: 10, attempt: 0, maxAllowed: 60);
-                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _impressionsCounter, _wrapperAdapter, _statusManager, _telemetrySyncTask, _tasksManager, _splitCache, backOff, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs, _segmentCache, _uniqueKeysTracker);
+                var backOffSplits = new BackOff(backOffBase: 10, attempt: 0, maxAllowed: 60);
+                var backOffSegments = new BackOff(backOffBase: 10, attempt: 0, maxAllowed: 60);
+                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _impressionsCounter, _wrapperAdapter, _telemetrySyncTask, _tasksManager, _splitCache, backOffSplits, backOffSegments, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs, _segmentCache, _uniqueKeysTracker);
 
                 // Workers
                 var splitsWorker = new SplitsWorker(_splitCache, synchronizer, _tasksManager);

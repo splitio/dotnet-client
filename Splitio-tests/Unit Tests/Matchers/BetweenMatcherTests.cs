@@ -1,8 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Parsing;
-using Splitio.Domain;
 using Splitio.CommonLibraries;
-using System.Threading.Tasks;
+using Splitio.Domain;
+using Splitio.Services.Parsing;
 
 namespace Splitio_Tests.Unit_Tests
 {
@@ -27,13 +26,13 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async Task MatchNumberShouldReturnFalseOnInvalidNumber()
+        public void MatchNumberShouldReturnFalseOnInvalidNumber()
         {
             //Arrange
             var matcher = new BetweenMatcher(DataTypeEnum.NUMBER, 1000001, 10540001);
 
             //Act
-            var result = await matcher.Match(new Key("1aaaaa0", "1aaaaa0"));
+            var result = matcher.Match(new Key("1aaaaa0", "1aaaaa0"));
 
             //Assert
             Assert.IsFalse(result);
@@ -83,13 +82,13 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async Task MatchDateShouldReturnFalseOnInvalidDate()
+        public void MatchDateShouldReturnFalseOnInvalidDate()
         {
             //Arrange
             var matcher = new BetweenMatcher(DataTypeEnum.DATETIME, 1470960000000, 1480960000000);
 
             //Act
-            var result = await matcher.Match(new Key("1aaa0000000", "1aaa0000000"));
+            var result = matcher.Match(new Key("1aaa0000000", "1aaa0000000"));
 
             //Assert
             Assert.IsFalse(result);
@@ -97,13 +96,13 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseOnInvalidDataTypeString()
+        public void MatchShouldReturnFalseOnInvalidDataTypeString()
         {
             //Arrange
             var matcher = new BetweenMatcher(DataTypeEnum.STRING, 1470960000000, 1480960000000);
 
             //Act
-            var result = await matcher.Match(new Key("abcd", "abcd"));
+            var result = matcher.Match(new Key("abcd", "abcd"));
 
             //Assert
             Assert.IsFalse(result);
@@ -123,14 +122,14 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfNullOrEmpty()
+        public void MatchShouldReturnFalseIfNullOrEmpty()
         {
             //Arrange
             var matcher = new BetweenMatcher(DataTypeEnum.DATETIME, 1470960000000, 1480960000000);
 
             //Act
-            var result = await matcher.Match(new Key("", ""));
-            var result2 = await matcher.Match(new Key((string)null, null));
+            var result = matcher.Match(new Key("", ""));
+            var result2 = matcher.Match(new Key((string)null, null));
 
             //Assert
             Assert.IsFalse(result);
@@ -138,26 +137,26 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async Task MatchNumberShouldReturnFalseOnInvalidNumberWithStringKey()
+        public void MatchNumberShouldReturnFalseOnInvalidNumberWithStringKey()
         {
             //Arrange
             var matcher = new BetweenMatcher(DataTypeEnum.NUMBER, 1000001, 10540001);
 
             //Act
-            var result = await matcher.Match("1aaaaa0");
+            var result = matcher.Match("1aaaaa0");
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public async Task MatchDateShouldReturnFalseOnInvalidDateWithStringKey()
+        public void MatchDateShouldReturnFalseOnInvalidDateWithStringKey()
         {
             //Arrange
             var matcher = new BetweenMatcher(DataTypeEnum.DATETIME, 1470960000000, 1480960000000);
 
             //Act
-            var result = await matcher.Match("1aaa0000000");
+            var result = matcher.Match("1aaa0000000");
 
             //Assert
             Assert.IsFalse(result);
@@ -165,27 +164,27 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseOnInvalidDataTypeWithStringKey()
+        public void MatchShouldReturnFalseOnInvalidDataTypeWithStringKey()
         {
             //Arrange
             var matcher = new BetweenMatcher(DataTypeEnum.STRING, 1470960000000, 1480960000000);
 
             //Act
-            var result = await matcher.Match("abcd");
+            var result = matcher.Match("abcd");
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfNullOrEmptyWithStringKey()
+        public void MatchShouldReturnFalseIfNullOrEmptyWithStringKey()
         {
             //Arrange
             var matcher = new BetweenMatcher(DataTypeEnum.DATETIME, 1470960000000, 1480960000000);
 
             //Act
-            var result = await matcher.Match("");
-            var result2 = await matcher.Match((string)null);
+            var result = matcher.Match("");
+            var result2 = matcher.Match((string)null);
 
             //Assert
             Assert.IsFalse(result);

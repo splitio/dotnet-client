@@ -13,14 +13,14 @@ namespace Splitio.Services.Cache.Classes
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemorySegmentCache));
 
-        private ConcurrentDictionary<string, Segment> _segments;
+        private readonly ConcurrentDictionary<string, Segment> _segments;
 
         public InMemorySegmentCache(ConcurrentDictionary<string, Segment> segments)
         {
             _segments = segments;
         }
 
-        public Task AddToSegmentAsync(string segmentName, List<string> segmentKeys)
+        public void AddToSegment(string segmentName, List<string> segmentKeys)
         {
             _segments.TryGetValue(segmentName, out Segment segment);
 
@@ -31,52 +31,46 @@ namespace Splitio.Services.Cache.Classes
             }
 
             segment.AddKeys(segmentKeys);
-
-            return Task.FromResult(0);
         }
 
-        public Task RemoveFromSegmentAsync(string segmentName, List<string> segmentKeys)
+        public void RemoveFromSegment(string segmentName, List<string> segmentKeys)
         {
             if (_segments.TryGetValue(segmentName, out Segment segment))
             {
                 segment.RemoveKeys(segmentKeys);
             }
-
-            return Task.FromResult(0);
         }
 
-        public Task<bool> IsInSegmentAsync(string segmentName, string key)
+        public bool IsInSegment(string segmentName, string key)
         {
             if (_segments.TryGetValue(segmentName, out Segment segment))
             {
-                return Task.FromResult(segment.Contains(key));
+                return segment.Contains(key);
             }
 
-            return Task.FromResult(false);
+            return false;
         }
 
-        public Task SetChangeNumberAsync(string segmentName, long changeNumber)
+        public void SetChangeNumber(string segmentName, long changeNumber)
+        {
+            if (!_segments.TryGetValue(segmentName, out Segment segment)) return;
+
+            if (changeNumber < segment.changeNumber)
+            {
+                _log.Error("ChangeNumber for segment cache is less than previous");
+            }
+
+            segment.changeNumber = changeNumber;
+        }
+
+        public long GetChangeNumber(string segmentName)
         {
             if (_segments.TryGetValue(segmentName, out Segment segment))
             {
-                if (changeNumber < segment.changeNumber)
-                {
-                    _log.Error("ChangeNumber for segment cache is less than previous");
-                }
-                segment.changeNumber = changeNumber;              
+                return segment.changeNumber;
             }
 
-            return Task.FromResult(0);
-        }
-
-        public Task<long> GetChangeNumberAsync(string segmentName)
-        {
-            if (_segments.TryGetValue(segmentName, out Segment segment))
-            {
-                return Task.FromResult(segment.changeNumber);
-            }
-
-            return Task.FromResult(-1L);
+            return -1;
         }
 
         public void Clear()
@@ -84,28 +78,26 @@ namespace Splitio.Services.Cache.Classes
             _segments.Clear();
         }
 
-        public Task<List<string>> GetSegmentNamesAsync()
+        public List<string> GetSegmentNames()
         {
-            var names = _segments
+            return _segments
                 .Keys
                 .ToList();
-
-            return Task.FromResult(names);
         }
 
-        public Task<List<string>> GetSegmentKeysAsync(string segmentName)
+        public List<string> GetSegmentKeys(string segmentName)
         {
             if (_segments.TryGetValue(segmentName, out Segment segment))
             {
-                return Task.FromResult(segment.GetKeys());
+                return segment.GetKeys();
             }
 
-            return Task.FromResult(new List<string>());
+            return new List<string>();
         }
 
-        public async Task<int> SegmentsCountAsync()
+        public int SegmentsCount()
         {
-            var names = await GetSegmentNamesAsync();
+            var names = GetSegmentNames();
 
             return names.Count;
         }

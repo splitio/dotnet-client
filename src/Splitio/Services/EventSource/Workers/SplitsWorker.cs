@@ -52,7 +52,7 @@ namespace Splitio.Services.EventSource.Workers
             }
         }
 
-        public async Task KillSplitAsync(long changeNumber, string splitName, string defaultTreatment)
+        public void KillSplit(long changeNumber, string splitName, string defaultTreatment)
         {
             try
             {
@@ -62,10 +62,10 @@ namespace Splitio.Services.EventSource.Workers
                     return;
                 }
 
-                if (changeNumber > await _splitCache.GetChangeNumberAsync())
+                if (changeNumber > _splitCache.GetChangeNumber())
                 {
                     _log.Debug($"Kill Split: {splitName}, changeNumber: {changeNumber} and defaultTreatment: {defaultTreatment}");
-                    await _splitCache.KillAsync(changeNumber, splitName, defaultTreatment);
+                    _splitCache.Kill(changeNumber, splitName, defaultTreatment);
                 }
             }
             catch (Exception ex)

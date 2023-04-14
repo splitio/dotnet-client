@@ -8,7 +8,6 @@ namespace Splitio.Services.Parsing
 {
     public class BetweenMatcher : CompareMatcher
     {
-
         public BetweenMatcher(DataTypeEnum? dataType, long start, long end)
         {
             this.dataType = dataType;

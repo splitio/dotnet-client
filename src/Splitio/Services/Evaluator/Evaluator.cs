@@ -6,7 +6,6 @@ using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Evaluator
 {
@@ -27,7 +26,7 @@ namespace Splitio.Services.Evaluator
         }
 
         #region Public Method
-        public async Task<TreatmentResult> EvaluateFeatureAsync(Key key, string featureName, Dictionary<string, object> attributes = null)
+        public TreatmentResult EvaluateFeature(Key key, string featureName, Dictionary<string, object> attributes = null)
         {
             using (var clock = new Util.SplitStopwatch())
             {
@@ -35,7 +34,7 @@ namespace Splitio.Services.Evaluator
 
                 try
                 {
-                    var parsedSplit = await _splitCache.GetSplitAsync(featureName);
+                    var parsedSplit = _splitCache.GetSplit(featureName);
 
                     return EvaluateTreatment(key, parsedSplit, featureName, clock, attributes);
                 }
@@ -48,7 +47,7 @@ namespace Splitio.Services.Evaluator
             }
         }
 
-        public async Task<MultipleEvaluatorResult> EvaluateFeaturesAsync(Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
+        public MultipleEvaluatorResult EvaluateFeatures(Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
         {
             var exception = false;
             var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();            
@@ -58,7 +57,7 @@ namespace Splitio.Services.Evaluator
 
                 try
                 {
-                    var splits = await _splitCache.FetchManyAsync(featureNames);
+                    var splits = _splitCache.FetchMany(featureNames);
 
                     foreach (var feature in featureNames)
                     {

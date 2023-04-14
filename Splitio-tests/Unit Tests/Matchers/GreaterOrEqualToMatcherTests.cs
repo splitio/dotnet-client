@@ -2,7 +2,6 @@
 using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Parsing;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests
 {
@@ -27,13 +26,13 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async Task MatchNumberShouldReturnFalseOnInvalidNumberKey()
+        public void MatchNumberShouldReturnFalseOnInvalidNumberKey()
         {
             //Arrange
             var matcher = new GreaterOrEqualToMatcher(DataTypeEnum.NUMBER, 1000001);
 
             //Act
-            var result = await matcher.Match(new Key("1aaaaa0", "1aaaaa0"));
+            var result = matcher.Match(new Key("1aaaaa0", "1aaaaa0"));
 
             //Assert
             Assert.IsFalse(result);
@@ -83,13 +82,13 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async Task MatchDateShouldReturnFalseOnInvalidDateKey()
+        public void MatchDateShouldReturnFalseOnInvalidDateKey()
         {
             //Arrange
             var matcher = new GreaterOrEqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
 
             //Act
-            var result = await matcher.Match(new Key("1aaa0000000", "1aaa0000000"));
+            var result = matcher.Match(new Key("1aaa0000000", "1aaa0000000"));
 
             //Assert
             Assert.IsFalse(result);
@@ -97,27 +96,27 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseOnInvalidDataTypeKey()
+        public void MatchShouldReturnFalseOnInvalidDataTypeKey()
         {
             //Arrange
             var matcher = new GreaterOrEqualToMatcher(DataTypeEnum.STRING, 1470960000000);
 
             //Act
-            var result = await matcher.Match(new Key("abcd", "abcd"));
+            var result = matcher.Match(new Key("abcd", "abcd"));
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfNullOrEmptyKey()
+        public void MatchShouldReturnFalseIfNullOrEmptyKey()
         {
             //Arrange
             var matcher = new GreaterOrEqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
 
             //Act
-            var result = await matcher.Match(new Key("", ""));
-            var result2 = await matcher.Match(new Key((string)null, null));
+            var result = matcher.Match(new Key("", ""));
+            var result2 = matcher.Match(new Key((string)null, null));
 
             //Assert
             Assert.IsFalse(result);
@@ -125,26 +124,26 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async Task MatchNumberShouldReturnFalseOnInvalidNumber()
+        public void MatchNumberShouldReturnFalseOnInvalidNumber()
         {
             //Arrange
             var matcher = new GreaterOrEqualToMatcher(DataTypeEnum.NUMBER, 1000001);
 
             //Act
-            var result = await matcher.Match("1aaaaa0");
+            var result = matcher.Match("1aaaaa0");
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public async Task MatchDateShouldReturnFalseOnInvalidDate()
+        public void MatchDateShouldReturnFalseOnInvalidDate()
         {
             //Arrange
             var matcher = new GreaterOrEqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
 
             //Act
-            var result = await matcher.Match("1aaa0000000");
+            var result = matcher.Match("1aaa0000000");
 
             //Assert
             Assert.IsFalse(result);
@@ -152,13 +151,13 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseOnInvalidDataType()
+        public void MatchShouldReturnFalseOnInvalidDataType()
         {
             //Arrange
             var matcher = new GreaterOrEqualToMatcher(DataTypeEnum.STRING, 1470960000000);
 
             //Act
-            var result = await matcher.Match("abcd");
+            var result = matcher.Match("abcd");
 
             //Assert
             Assert.IsFalse(result);
@@ -178,14 +177,14 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async Task MatchShouldReturnFalseIfNullOrEmpty()
+        public void MatchShouldReturnFalseIfNullOrEmpty()
         {
             //Arrange
             var matcher = new GreaterOrEqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
 
             //Act
-            var result = await matcher.Match("");
-            var result2 = await matcher.Match((string)null);
+            var result = matcher.Match("");
+            var result2 = matcher.Match((string)null);
 
             //Assert
             Assert.IsFalse(result);

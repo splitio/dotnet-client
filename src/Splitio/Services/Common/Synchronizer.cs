@@ -25,7 +25,6 @@ namespace Splitio.Services.Common
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISplitLogger _log;
         private readonly IImpressionsCounter _impressionsCounter;
-        private readonly IStatusManager _statusManager;
         private readonly ITelemetrySyncTask _telemetrySyncTask;
         private readonly ITasksManager _tasksManager;
         private readonly ISplitCache _splitCache;
@@ -43,11 +42,11 @@ namespace Splitio.Services.Common
             IEventsLog eventsLog,
             IImpressionsCounter impressionsCounter,
             IWrapperAdapter wrapperAdapter,
-            IStatusManager statusManager,
             ITelemetrySyncTask telemetrySyncTask,
             ITasksManager tasksManager,
             ISplitCache splitCache,
-            IBackOff backOff,
+            IBackOff backOffSplits,
+            IBackOff backOffSegments,
             int onDemandFetchMaxRetries,
             int onDemandFetchRetryDelayMs,
             ISegmentCache segmentCache,
@@ -60,12 +59,11 @@ namespace Splitio.Services.Common
             _eventsLog = eventsLog;
             _impressionsCounter = impressionsCounter;            
             _wrapperAdapter = wrapperAdapter;
-            _statusManager = statusManager;
             _telemetrySyncTask = telemetrySyncTask;
             _tasksManager = tasksManager;
             _splitCache = splitCache;
-            _backOffSplits = backOff;
-            _backOffSegments = backOff;
+            _backOffSplits = backOffSplits;
+            _backOffSegments = backOffSegments;
             _onDemandFetchMaxRetries = onDemandFetchMaxRetries;
             _onDemandFetchRetryDelayMs = onDemandFetchRetryDelayMs;
             _segmentCache = segmentCache;
@@ -130,7 +128,7 @@ namespace Splitio.Services.Common
         {
             try
             {
-                if (targetChangeNumber <= await _segmentCache.GetChangeNumberAsync(segmentName)) return;
+                if (targetChangeNumber <= _segmentCache.GetChangeNumber(segmentName)) return;
 
                 var fetchOptions = new FetchOptions { CacheControlHeaders = true };
 
@@ -166,7 +164,7 @@ namespace Splitio.Services.Common
         {
             try
             {
-                if (targetChangeNumber <= await _splitCache.GetChangeNumberAsync()) return;
+                if (targetChangeNumber <= _splitCache.GetChangeNumber()) return;
 
                 var fetchOptions = new FetchOptions { CacheControlHeaders = true };
 
@@ -207,14 +205,14 @@ namespace Splitio.Services.Common
             {
                 var remainingAttempts = maxRetries;
 
-                if (withBackoff) _backOffSplits.Reset();
+                if (withBackoff) _backOffSegments.Reset();
 
                 while (true)
                 {
                     remainingAttempts--;
                     await _segmentFetcher.Fetch(name, fetchOptions);
 
-                    if (targetChangeNumber <= await _segmentCache.GetChangeNumberAsync(name))
+                    if (targetChangeNumber <= _segmentCache.GetChangeNumber(name))
                     {
                         return new SyncResult(true, remainingAttempts);
                     }
@@ -223,7 +221,7 @@ namespace Splitio.Services.Common
                         return new SyncResult(false, remainingAttempts);
                     }
 
-                    var delay = withBackoff ? _backOffSplits.GetInterval(inMiliseconds: true) : retryDelayMs.Value;
+                    var delay = withBackoff ? _backOffSegments.GetInterval(inMiliseconds: true) : retryDelayMs.Value;
                     _wrapperAdapter.TaskDelay((int)delay).Wait();
                 }
             }
@@ -248,7 +246,7 @@ namespace Splitio.Services.Common
                     remainingAttempts--;
                     var result = await _splitFetcher.FetchSplitsAsync(fetchOptions);
 
-                    if (targetChangeNumber <= await _splitCache.GetChangeNumberAsync())
+                    if (targetChangeNumber <= _splitCache.GetChangeNumber())
                     {
                         return new SyncResult(true, remainingAttempts, result.SegmentNames);
                     }
