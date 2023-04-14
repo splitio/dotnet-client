@@ -25,7 +25,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
             
             //Act
-            var result = segmentCache.RegisterSegmentsAsync(new List<string> { segmentName });
+            var result = segmentCache.RegisterSegmentsAsync(new List<string> { segmentName }).Result;
 
             //Assert
             Assert.AreEqual(1, result);

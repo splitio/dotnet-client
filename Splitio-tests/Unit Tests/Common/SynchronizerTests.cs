@@ -311,8 +311,8 @@ namespace Splitio_Tests.Unit_Tests.Common
             _synchronizer.SynchronizeSplits(100);
 
             // Assert.
-            _splitFetcher.Verify(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()), Times.Exactly(17));
-            _log.Verify(mock => mock.Debug($"Refresh completed bypassing the CDN in 7 attempts."), Times.Once);
+            _splitFetcher.Verify(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()), Times.Exactly(16));
+            _log.Verify(mock => mock.Debug($"Refresh completed bypassing the CDN in 6 attempts."), Times.Once);
             _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
         }
     }

@@ -32,6 +32,10 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             string trafficType = null;
             var method = "Tests";
 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act.
             var result = trafficTypeValidator.IsValid(trafficType, method);
 
@@ -48,6 +52,10 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             // Arrange.
             var trafficType = string.Empty;
             var method = "Tests";
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
             // Act.
             var result = trafficTypeValidator.IsValid(trafficType, method);
@@ -68,6 +76,10 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
 
             _splitCache
                 .Setup(mock => mock.TrafficTypeExists(trafficType.ToLower()))
+                .Returns(true);
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
             // Act.
@@ -92,6 +104,10 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             _splitCache
                 .Setup(mock => mock.TrafficTypeExists(trafficType))
                 .Returns(false);
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
             // Act.
             var result = trafficTypeValidator.IsValid(trafficType, method);
