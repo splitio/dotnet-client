@@ -1,30 +1,31 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
+using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Impressions.Classes;
-using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Impressions
 {
     [TestClass]
     public class RedisImpressionsLogUnitTests
     {
-        private Mock<ISimpleCache<KeyImpression>> _impressionsCache;
+        private Mock<IRedisImpressionsCache> _impressionsCache;
         private RedisImpressionLog _redisImpressionLog;
 
         [TestInitialize]
         public void Initialization()
         {
-            _impressionsCache = new Mock<ISimpleCache<KeyImpression>>();
+            _impressionsCache = new Mock<IRedisImpressionsCache>();
 
             _redisImpressionLog = new RedisImpressionLog(_impressionsCache.Object);
         }
 
         [TestMethod]
-        public void LogSuccessfully()
+        public async Task LogSuccessfully()
         {
             //Arrange
             var impressions = new List<KeyImpression>
@@ -33,14 +34,14 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             };
 
             //Act
-            _redisImpressionLog.Log(impressions);
+            await _redisImpressionLog.LogAsync(impressions);
 
             //Assert
-            _impressionsCache.Verify(mock => mock.AddItems(It.IsAny<IList<KeyImpression>>()), Times.Once());
+            _impressionsCache.Verify(mock => mock.AddItemsAsync(It.IsAny<IList<KeyImpression>>()), Times.Once());
         }
 
         [TestMethod]
-        public void LogSuccessfullyUsingBucketingKey()
+        public async Task LogSuccessfullyUsingBucketingKey()
         {
             //Arrange
             var key = new Key(bucketingKey: "a", matchingKey: "testkey");
@@ -51,11 +52,11 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             };
 
             //Act
-            _redisImpressionLog.Log(impressions);
+            await _redisImpressionLog.LogAsync(impressions);
 
             //Assert
             _impressionsCache
-                .Verify(mock => mock.AddItems(It.Is<IList<KeyImpression>>(v => v.Any(ki => ki.keyName == key.matchingKey
+                .Verify(mock => mock.AddItemsAsync(It.Is<IList<KeyImpression>>(v => v.Any(ki => ki.keyName == key.matchingKey
                                                                                        && ki.feature == "test"
                                                                                        && ki.treatment == "on"
                                                                                        && ki.time == 7000

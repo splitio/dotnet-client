@@ -19,7 +19,7 @@ namespace Splitio_Tests.Unit_Tests.Events
         private readonly IWrapperAdapter wrapperAdapter = WrapperAdapter.Instance();
 
         private BlockingQueue<WrappedEvent> _queue;
-        private InMemorySimpleCache<WrappedEvent> _eventsCache;
+        private IEventCache _eventsCache;
         private Mock<IEventSdkApiClient> _apiClientMock;
         private Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private EventsLog _eventLog;
@@ -28,11 +28,11 @@ namespace Splitio_Tests.Unit_Tests.Events
         public void Initialize()
         {
             _queue = new BlockingQueue<WrappedEvent>(10);
-            _eventsCache = new InMemorySimpleCache<WrappedEvent>(_queue);
+            _eventsCache = new InMemoryEventCache(_queue);
             _apiClientMock = new Mock<IEventSdkApiClient>();
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
 
-            _eventLog = new EventsLog(_apiClientMock.Object, 1, 1, _eventsCache, _telemetryRuntimeProducer.Object, new TasksManager(wrapperAdapter), 10);
+            _eventLog = new EventsLog(_apiClientMock.Object, 1, 1, _eventsCache, _telemetryRuntimeProducer.Object, new TasksManager(wrapperAdapter));
         }
 
         [TestMethod]
@@ -222,11 +222,11 @@ namespace Splitio_Tests.Unit_Tests.Events
         {
             // Arrange.
             var eventToLog = new Event { key = "Key1", eventTypeId = "testEventType", trafficTypeName = "testTrafficType", timestamp = 7000 };
-            var wrappedEventsCache = new Mock<ISimpleProducerCache<WrappedEvent>>();          
-            var eventLog = new EventsLog(_apiClientMock.Object, 1, 1, wrappedEventsCache.Object, _telemetryRuntimeProducer.Object, new TasksManager(wrapperAdapter), 10);
+            var wrappedEventsCache = new Mock<IEventCache>();          
+            var eventLog = new EventsLog(_apiClientMock.Object, 1, 1, wrappedEventsCache.Object, _telemetryRuntimeProducer.Object, new TasksManager(wrapperAdapter));
 
             wrappedEventsCache
-                .Setup(mock => mock.AddItems(It.IsAny<List<WrappedEvent>>()))
+                .Setup(mock => mock.Add(It.IsAny<WrappedEvent>()))
                 .Returns(1);
 
             // Act.

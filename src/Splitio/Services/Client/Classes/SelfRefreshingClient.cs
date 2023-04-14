@@ -126,7 +126,7 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildTreatmentLog(ConfigurationOptions config)
         {
-            var impressionsCache = new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(_config.TreatmentLogSize));
+            var impressionsCache = new InMemoryImpressionCache(new BlockingQueue<KeyImpression>(_config.TreatmentLogSize));
             _impressionsLog = new ImpressionsLog(_impressionsSdkApiClient, _config.TreatmentLogRefreshRate, impressionsCache, _tasksManager);
 
             _customerImpressionListener = config.ImpressionListener;
@@ -156,7 +156,7 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildEventLog()
         {
-            var eventsCache = new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(_config.EventLogSize));
+            var eventsCache = new InMemoryEventCache(new BlockingQueue<WrappedEvent>(_config.EventLogSize));
             _eventsLog = new EventsLog(_eventSdkApiClient, _config.EventsFirstPushWindow, _config.EventLogRefreshRate, eventsCache, _telemetryRuntimeProducer, _tasksManager);
         }
 

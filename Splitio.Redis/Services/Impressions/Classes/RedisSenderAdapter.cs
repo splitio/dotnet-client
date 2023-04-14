@@ -14,9 +14,9 @@ namespace Splitio.Redis.Services.Impressions.Classes
     {
         private static readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger(typeof(RedisSenderAdapter));
 
-        private readonly IImpressionsCache _impressionsCache;
+        private readonly IRedisImpressionsCache _impressionsCache;
 
-        public RedisSenderAdapter(IImpressionsCache impressionsCache)
+        public RedisSenderAdapter(IRedisImpressionsCache impressionsCache)
         {
             _impressionsCache = impressionsCache;
         }

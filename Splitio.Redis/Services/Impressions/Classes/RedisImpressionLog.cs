@@ -1,22 +1,23 @@
-﻿using System.Collections.Generic;
-using Splitio.Domain;
+﻿using Splitio.Domain;
+using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Shared.Interfaces;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Impressions.Classes
 {
     public class RedisImpressionLog : IImpressionsLog
     {
-        private readonly ISimpleCache<KeyImpression> _impressionsCache;
+        private readonly IRedisImpressionsCache _impressionsCache;
 
-        public RedisImpressionLog(ISimpleCache<KeyImpression> impressionsCache)
+        public RedisImpressionLog(IRedisImpressionsCache impressionsCache)
         {
             _impressionsCache = impressionsCache;
         }
 
-        public int Log(IList<KeyImpression> impressions)
+        public async Task<int> LogAsync(IList<KeyImpression> impressions)
         {
-            return _impressionsCache.AddItems(impressions);
+            return await _impressionsCache.AddItemsAsync(impressions);
         }
 
         public void Start()

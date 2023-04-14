@@ -6,7 +6,6 @@ using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
@@ -19,7 +18,7 @@ namespace Splitio.Services.Events.Classes
 
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly IEventSdkApiClient _apiClient;
-        private readonly ISimpleProducerCache<WrappedEvent> _wrappedEventsCache;
+        private readonly IEventCache _eventCache;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly ITasksManager _tasksManager;
         private readonly CancellationTokenSource _cancellationTokenSource;
@@ -35,14 +34,13 @@ namespace Splitio.Services.Events.Classes
         public EventsLog(IEventSdkApiClient apiClient, 
             int firstPushWindow, 
             int interval, 
-            ISimpleCache<WrappedEvent> eventsCache,
+            IEventCache eventsCache,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
-            ITasksManager tasksManager,
-            int maximumNumberOfKeysToCache = -1)
+            ITasksManager tasksManager)
         {
             _cancellationTokenSource = new CancellationTokenSource();
 
-            _wrappedEventsCache = (eventsCache as ISimpleProducerCache<WrappedEvent>) ?? new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(maximumNumberOfKeysToCache));
+            _eventCache = eventsCache;
             _apiClient = apiClient;
             _interval = interval;
             _firstPushWindow = firstPushWindow;
@@ -81,7 +79,7 @@ namespace Splitio.Services.Events.Classes
 
         public void Log(WrappedEvent wrappedEvent)
         {
-            var dropped = _wrappedEventsCache.AddItems(new List<WrappedEvent> { wrappedEvent });
+            var dropped = _eventCache.Add(wrappedEvent);
 
             if (dropped == 0)
             {
@@ -90,7 +88,7 @@ namespace Splitio.Services.Events.Classes
 
             RecordStats(dropped);
 
-            if (_wrappedEventsCache.HasReachedMaxSize() || _acumulateSize >= MAX_SIZE_BYTES)
+            if (_eventCache.HasReachedMaxSize() || _acumulateSize >= MAX_SIZE_BYTES)
             {
                 SendBulkEvents();
             }
@@ -100,14 +98,14 @@ namespace Splitio.Services.Events.Classes
         {
             lock (_sendBulkEventsLock)
             {
-                if (_wrappedEventsCache.IsEmpty()) return;
+                if (_eventCache.IsEmpty()) return;
 
-                if (_wrappedEventsCache.HasReachedMaxSize())
+                if (_eventCache.HasReachedMaxSize())
                 {
                     Logger.Warn("Split SDK events queue is full. Events may have been dropped. Consider increasing capacity.");
                 }
 
-                var wrappedEvents = _wrappedEventsCache.FetchAllAndClear();
+                var wrappedEvents = _eventCache.FetchAllAndClear();
 
                 if (wrappedEvents.Count <= 0) return;
 

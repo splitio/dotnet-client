@@ -1,22 +1,20 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Events.Interfaces;
-using Splitio.Services.Shared.Interfaces;
-using System.Collections.Generic;
 
 namespace Splitio.Redis.Services.Events.Classes
 {
     public class RedisEvenstLog : IEventsLog
     {
-        private readonly ISimpleCache<WrappedEvent> _eventsCache;
+        private readonly IEventCache _eventsCache;
 
-        public RedisEvenstLog(ISimpleCache<WrappedEvent> eventsCache)
+        public RedisEvenstLog(IEventCache eventsCache)
         {
             _eventsCache = eventsCache;
         }
 
         public void Log(WrappedEvent wrappedEvent)
         {
-            _eventsCache.AddItems(new List<WrappedEvent> { wrappedEvent });
+            _eventsCache.Add(wrappedEvent);
         }
 
         public void Start()

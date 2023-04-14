@@ -4,6 +4,8 @@ namespace Splitio.Services.Shared.Interfaces
 {
     public interface ISimpleCache<T>
     {
-        int AddItems(IList<T> items);
+        List<T> FetchAllAndClear();
+        bool HasReachedMaxSize();
+        bool IsEmpty();
     }
 }

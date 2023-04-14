@@ -7,6 +7,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Impressions
 {
@@ -17,7 +18,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
         private Mock<IImpressionsSdkApiClient> _apiClientMock;
         private BlockingQueue<KeyImpression> _queue;
-        private InMemorySimpleCache<KeyImpression> _impressionsCache;
+        private IImpressionCache _impressionsCache;
         private ImpressionsLog _impressionsLog;
 
         [TestInitialize]
@@ -25,13 +26,13 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         {
             _apiClientMock = new Mock<IImpressionsSdkApiClient>();
             _queue = new BlockingQueue<KeyImpression>(10);
-            _impressionsCache = new InMemorySimpleCache<KeyImpression>(_queue);
+            _impressionsCache = new InMemoryImpressionCache(_queue);
 
-            _impressionsLog = new ImpressionsLog(_apiClientMock.Object, 1, _impressionsCache, new TasksManager(wrapperAdapter), 10);
+            _impressionsLog = new ImpressionsLog(_apiClientMock.Object, 1, _impressionsCache, new TasksManager(wrapperAdapter));
         }
 
         [TestMethod]
-        public void LogSuccessfully()
+        public async Task LogSuccessfully()
         {
             //Act
             var impressions = new List<KeyImpression>
@@ -39,7 +40,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 new KeyImpression { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test" }
             };
 
-            _impressionsLog.Log(impressions);
+            await _impressionsLog.LogAsync(impressions);
 
             //Assert
             KeyImpression element = null;
@@ -55,7 +56,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public void LogSuccessfullyUsingBucketingKey()
+        public async Task LogSuccessfullyUsingBucketingKey()
         {
             //Act
             Key key = new Key(bucketingKey: "a", matchingKey: "testkey");
@@ -65,7 +66,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 new KeyImpression { keyName = key.matchingKey, feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label", bucketingKey = key.bucketingKey }
             };
 
-            _impressionsLog.Log(impressions);
+            await _impressionsLog.LogAsync(impressions);
 
             //Assert
             KeyImpression element = null;
@@ -82,7 +83,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public void LogSuccessfullyAndSendImpressions()
+        public async Task LogSuccessfullyAndSendImpressions()
         {
             //Act            
             var impressions = new List<KeyImpression>
@@ -91,7 +92,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             };
 
             _impressionsLog.Start();
-            _impressionsLog.Log(impressions);
+            await _impressionsLog.LogAsync(impressions);
 
             //Assert
             Thread.Sleep(2000);

@@ -5,6 +5,7 @@ using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using StackExchange.Redis;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
@@ -12,7 +13,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
     public class RedisImpressionCacheTests
     {
         [TestMethod]
-        public void AddImpressionSuccessfully()
+        public async Task AddImpressionSuccessfully()
         {
             //Arrange
             var key = "SPLITIO.impressions";
@@ -24,7 +25,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             };
 
             //Act
-            cache.AddItems(impressions);
+            await cache.AddItemsAsync(impressions);
 
             //Assert
             redisAdapterMock.Verify(mock => mock.ListRightPushAsync(key, It.IsAny<RedisValue[]>()));

@@ -7,6 +7,7 @@ using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -83,15 +84,15 @@ namespace Splitio.Services.Impressions.Classes
             return impression;
         }
 
-        public void BuildAndTrack(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey)
+        public async Task BuildAndTrackAsync(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey)
         {
-            Track(new List<KeyImpression>()
+            await TrackAsync(new List<KeyImpression>()
             {
                 BuildImpression(matchingKey, feature, treatment, time, changeNumber, label, bucketingKey)
             });
         }
 
-        public void Track(List<KeyImpression> impressions)
+        public async Task TrackAsync(List<KeyImpression> impressions)
         {
             if (!impressions.Any()) return;
 
@@ -104,11 +105,11 @@ namespace Splitio.Services.Impressions.Classes
                 switch (_impressionsMode)
                 {
                     case ImpressionsMode.Debug:
-                        TrackDebugMode(impressions, telemetryStats);
+                        await TrackDebugModeAsync(impressions, telemetryStats);
                         break;
                     case ImpressionsMode.Optimized:
                     default:
-                        TrackOptimizedMode(impressions, telemetryStats);
+                        await TrackOptimizedModeAsync(impressions, telemetryStats);
                         break;
                 }
             }
@@ -150,21 +151,21 @@ namespace Splitio.Services.Impressions.Classes
             _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsQueued, telemetryStats.Queued);
         }
 
-        private void TrackOptimizedMode(List<KeyImpression> impressions, TelemetryStats telemetryStats)
+        private async Task TrackOptimizedModeAsync(List<KeyImpression> impressions, TelemetryStats telemetryStats)
         {
             var optimizedImpressions = impressions.Where(i => i.Optimized).ToList();
             telemetryStats.Deduped = impressions.Count() - optimizedImpressions.Count;
 
             if (optimizedImpressions.Any())
             {
-                telemetryStats.Dropped = _impressionsLog.Log(optimizedImpressions);
+                telemetryStats.Dropped = await _impressionsLog.LogAsync(optimizedImpressions);
                 telemetryStats.Queued = optimizedImpressions.Count - telemetryStats.Dropped;
             }
         }
 
-        private void TrackDebugMode(List<KeyImpression> impressions, TelemetryStats telemetryStats)
+        private async Task TrackDebugModeAsync(List<KeyImpression> impressions, TelemetryStats telemetryStats)
         {
-            telemetryStats.Dropped = _impressionsLog.Log(impressions);
+            telemetryStats.Dropped = await _impressionsLog.LogAsync(impressions);
             telemetryStats.Queued = impressions.Count - telemetryStats.Dropped;
         }
 

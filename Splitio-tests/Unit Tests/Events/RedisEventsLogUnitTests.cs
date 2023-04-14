@@ -2,6 +2,7 @@
 using Moq;
 using Splitio.Domain;
 using Splitio.Redis.Services.Events.Classes;
+using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -11,12 +12,12 @@ namespace Splitio_Tests.Unit_Tests.Events
     [TestClass]
     public class RedisEventsLogUnitTests
     {
-        private readonly Mock<ISimpleCache<WrappedEvent>> _eventsCacheMock;
+        private readonly Mock<IEventCache> _eventsCacheMock;
         private readonly RedisEvenstLog _redisEventsLog;
 
         public RedisEventsLogUnitTests()
         {
-            _eventsCacheMock = new Mock<ISimpleCache<WrappedEvent>>();
+            _eventsCacheMock = new Mock<IEventCache>();
 
             _redisEventsLog = new RedisEvenstLog(_eventsCacheMock.Object);
         }
@@ -37,7 +38,7 @@ namespace Splitio_Tests.Unit_Tests.Events
             _redisEventsLog.Log(wrappedEvent);
 
             //Assert
-            _eventsCacheMock.Verify(mock => mock.AddItems(It.IsAny<IList<WrappedEvent>>()), Times.Once());
+            _eventsCacheMock.Verify(mock => mock.Add(It.IsAny<WrappedEvent>()), Times.Once());
         }
 
         [TestMethod]

@@ -15,7 +15,7 @@ namespace Splitio_Tests.Integration_Tests.Impressions
         private const string RedisPrefix = "test-mtks:";
 
         private readonly IRedisAdapter _redisAdapter;
-        private readonly IImpressionsCache _impressionsCache;
+        private readonly IRedisImpressionsCache _impressionsCache;
 
         public RedisImpressionsCacheTests()
         {

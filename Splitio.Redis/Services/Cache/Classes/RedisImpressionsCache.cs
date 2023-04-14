@@ -10,11 +10,9 @@ using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
-    public class RedisImpressionsCache : RedisCacheBase, IImpressionsCache
+    public class RedisImpressionsCache : RedisCacheBase, IRedisImpressionsCache
     {
         private static readonly TimeSpan _expireTimeOneHour = new TimeSpan(0, 0, 3600);
-        private readonly object _lock = new object();
-
         private string UniqueKeysKey => "{prefix}.SPLITIO.uniquekeys"
             .Replace("{prefix}.", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
 
@@ -31,7 +29,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             string userPrefix = null) : base(redisAdapter, machineIP, sdkVersion, machineName, userPrefix)
         { }
 
-        public int AddItems(IList<KeyImpression> items)
+        public async Task<int> AddItemsAsync(IList<KeyImpression> items)
         {
             var impressions = items.Select(item => JsonConvert.SerializeObject(new
             {
@@ -39,11 +37,11 @@ namespace Splitio.Redis.Services.Cache.Classes
                 i = new { k = item.keyName, b = item.bucketingKey, f = item.feature, t = item.treatment, r = item.label, c = item.changeNumber, m = item.time, pt = item.previousTime }
             }));
 
-            var lengthRedis = _redisAdapter.ListRightPushAsync(ImpressionsKey, impressions.Select(i => (RedisValue)i).ToArray()).GetAwaiter().GetResult();
+            var lengthRedis = await _redisAdapter.ListRightPushAsync(ImpressionsKey, impressions.Select(i => (RedisValue)i).ToArray());
 
             if (lengthRedis == items.Count)
             {
-                _redisAdapter.KeyExpireAsync(ImpressionsKey, _expireTimeOneHour);
+                await _redisAdapter.KeyExpireAsync(ImpressionsKey, _expireTimeOneHour);
             }
 
             return 0;
@@ -76,6 +74,21 @@ namespace Splitio.Redis.Services.Cache.Classes
             {
                 await _redisAdapter.KeyExpireAsync(UniqueKeysKey, _expireTimeOneHour);
             }
+        }
+
+        public List<KeyImpression> FetchAllAndClear()
+        {
+            throw new NotImplementedException(); // No-op
+        }
+
+        public bool HasReachedMaxSize()
+        {
+            throw new NotImplementedException(); // No-op
+        }
+
+        public bool IsEmpty()
+        {
+            throw new NotImplementedException(); // No-op
         }
     }
 }

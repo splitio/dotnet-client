@@ -1,14 +1,13 @@
 ﻿using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
-using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Events.Interfaces;
 using StackExchange.Redis;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
-    public class RedisEventsCache : RedisCacheBase, ISimpleCache<WrappedEvent>
+    public class RedisEventsCache : RedisCacheBase, IEventCache
     {
         private readonly string _machineName;
         private readonly string _machineIP;
@@ -25,26 +24,33 @@ namespace Splitio.Redis.Services.Cache.Classes
             _sdkVersion = sdkVersion;
         }
 
-        public int AddItems(IList<WrappedEvent> items)
+        public int Add(WrappedEvent wrappedEvent)
         {
-            var task = new List<Task<long>>();
-            foreach (var item in items)
+            var value = new RedisValue[]
             {
-                var value = new RedisValue[]
+                JsonConvert.SerializeObject(new
                 {
-                    JsonConvert.SerializeObject(new
-                    {
-                        m = new { s = _sdkVersion, i = _machineIP, n = _machineName },
-                        e = item.Event
-                    })
-                };
+                    m = new { s = _sdkVersion, i = _machineIP, n = _machineName },
+                    e = wrappedEvent.Event
+                })
+            };
 
-                task.Add(_redisAdapter.ListRightPushAsync($"{RedisKeyPrefix}events", value));
-            }
+            return (int)_redisAdapter.ListRightPushAsync($"{RedisKeyPrefix}events", value).Result;
+        }
 
-            Task.WaitAll(task.ToArray());
+        public List<WrappedEvent> FetchAllAndClear()
+        {
+            throw new System.NotImplementedException();
+        }
 
-            return 0;
+        public bool HasReachedMaxSize()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool IsEmpty()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

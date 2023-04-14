@@ -15,7 +15,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     {
         private Mock<IRedisAdapter> _redisAdapter;
         
-        private IImpressionsCache _cache;
+        private IRedisImpressionsCache _cache;
 
         [TestInitialize]
         public void Initialization()

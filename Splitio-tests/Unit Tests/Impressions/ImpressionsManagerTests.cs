@@ -11,6 +11,7 @@ using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Impressions
 {
@@ -145,7 +146,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public void BuildAndTrack()
+        public async Task BuildAndTrack()
         {
             // Arrange.
             var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
@@ -161,19 +162,19 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
             // Act.
-            impressionsManager.BuildAndTrack("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key");
+            await impressionsManager.BuildAndTrackAsync("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key");
            
             // Assert.
             _impressionsObserver.Verify(mock => mock.TestAndSet(It.IsAny<KeyImpression>()), Times.Once);
             _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Never);
 
             Thread.Sleep(1000);
-            _impressionsLog.Verify(mock => mock.Log(It.IsAny<List<KeyImpression>>()), Times.Once);
+            _impressionsLog.Verify(mock => mock.LogAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
             _customerImpressionListener.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAndTrackWithoutCustomerListener()
+        public async Task BuildAndTrackWithoutCustomerListener()
         {
             // Arrange.
             var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
@@ -189,19 +190,19 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
             // Act.
-            impressionsManager.BuildAndTrack("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key");
+            await impressionsManager.BuildAndTrackAsync("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key");
 
             // Assert.
             _impressionsObserver.Verify(mock => mock.TestAndSet(It.IsAny<KeyImpression>()), Times.Once);
             _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Never);
 
             Thread.Sleep(1000);
-            _impressionsLog.Verify(mock => mock.Log(It.IsAny<List<KeyImpression>>()), Times.Once);
+            _impressionsLog.Verify(mock => mock.LogAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
             _customerImpressionListener.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Never);
         }
 
         [TestMethod]
-        public void Track_Optimized()
+        public async Task Track_Optimized()
         {
             // Arrange.
             var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
@@ -222,11 +223,11 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             };
 
             // Act.
-            impressionsManager.Track(impressions);
+            await impressionsManager.TrackAsync(impressions);
 
             // Assert.
             Thread.Sleep(1000);
-            _impressionsLog.Verify(mock => mock.Log(impressions), Times.Once);
+            _impressionsLog.Verify(mock => mock.LogAsync(impressions), Times.Once);
             _customerImpressionListener.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Exactly(2));
             _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, 0), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, 0), Times.Once);
@@ -234,7 +235,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public void Track_Optimized_WithOneImpressionDropped()
+        public async Task Track_Optimized_WithOneImpressionDropped()
         {
             // Arrange.
             var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
@@ -255,15 +256,15 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             };
 
             _impressionsLog
-                .Setup(mock => mock.Log(It.IsAny<List<KeyImpression>>()))
-                .Returns(1);
+                .Setup(mock => mock.LogAsync(It.IsAny<List<KeyImpression>>()))
+                .ReturnsAsync(1);
 
             // Act.
-            impressionsManager.Track(impressions);
+            await impressionsManager.TrackAsync(impressions);
 
             // Assert.
             Thread.Sleep(1000);
-            _impressionsLog.Verify(mock => mock.Log(impressions), Times.Once);
+            _impressionsLog.Verify(mock => mock.LogAsync(impressions), Times.Once);
             _customerImpressionListener.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Exactly(2));
             _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, 0), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, 1), Times.Once);
@@ -271,7 +272,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public void Track_Optimized_ShouldnotLog()
+        public async Task Track_Optimized_ShouldnotLog()
         {
             // Arrange.
             var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
@@ -292,11 +293,11 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             };
 
             // Act.
-            impressionsManager.Track(impressions);
+            await impressionsManager.TrackAsync(impressions);
 
             // Assert.
             Thread.Sleep(1000);
-            _impressionsLog.Verify(mock => mock.Log(impressions), Times.Never);
+            _impressionsLog.Verify(mock => mock.LogAsync(impressions), Times.Never);
             _customerImpressionListener.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Exactly(2));
             _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, 2), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, 0), Times.Once);
@@ -304,7 +305,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public void Track_Debug()
+        public async Task Track_Debug()
         {
             // Arrange.
             var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
@@ -325,11 +326,11 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             };
 
             // Act.
-            impressionsManager.Track(impressions);
+            await impressionsManager.TrackAsync(impressions);
 
             // Assert.
             Thread.Sleep(1000);
-            _impressionsLog.Verify(mock => mock.Log(impressions), Times.Once);
+            _impressionsLog.Verify(mock => mock.LogAsync(impressions), Times.Once);
             _customerImpressionListener.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Exactly(2));
             _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, 0), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, 0), Times.Once);
@@ -337,7 +338,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public void TrackWithoutCustomerListener_Optimized()
+        public async Task TrackWithoutCustomerListener_Optimized()
         {
             // Arrange.
             var impressionsObserver = new ImpressionsObserver(new ImpressionHasher());
@@ -363,13 +364,13 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var optimizedImpressions = impressions.Where(i => impressionsManager.ShouldQueueImpression(i)).ToList();
 
             // Act.
-            impressionsManager.Track(impressions);
+            await impressionsManager.TrackAsync(impressions);
 
             // Assert.
             Thread.Sleep(1000);
             Assert.AreEqual(2, optimizedImpressions.Count());
-            _impressionsLog.Verify(mock => mock.Log(optimizedImpressions), Times.Once);
-            _impressionsLog.Verify(mock => mock.Log(impressions), Times.Never);
+            _impressionsLog.Verify(mock => mock.LogAsync(optimizedImpressions), Times.Once);
+            _impressionsLog.Verify(mock => mock.LogAsync(impressions), Times.Never);
             _customerImpressionListener.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Never);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, 2), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, 0), Times.Once);
@@ -377,7 +378,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public void TrackWithoutCustomerListener_Debug()
+        public async Task TrackWithoutCustomerListener_Debug()
         {
             // Arrange.
             var impressionsObserver = new ImpressionsObserver(new ImpressionHasher());
@@ -401,11 +402,11 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             };
 
             // Act.
-            impressionsManager.Track(impressions);
+            await impressionsManager.TrackAsync(impressions);
 
             // Assert.
             Thread.Sleep(1000);
-            _impressionsLog.Verify(mock => mock.Log(impressions), Times.Once);
+            _impressionsLog.Verify(mock => mock.LogAsync(impressions), Times.Once);
             _customerImpressionListener.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Never);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, 0), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, 0), Times.Once);
@@ -446,7 +447,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public void BuildAndTrackWithNoneMode()
+        public async Task BuildAndTrackWithNoneMode()
         {
             // Arrange.
             var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
@@ -463,7 +464,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
 
             // Act.
-            impressionsManager.BuildAndTrack("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key");
+            await impressionsManager.BuildAndTrackAsync("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key");
 
             // Assert.
             _impressionsObserver.Verify(mock => mock.TestAndSet(It.IsAny<KeyImpression>()), Times.Never);
@@ -472,7 +473,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public void TrackWithNoneMode()
+        public async Task TrackWithNoneMode()
         {
             // Arrange.
             var impressionsManager = new ImpressionsManager(_impressionsLog.Object,
@@ -496,10 +497,10 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             };
 
             // Act.
-            impressionsManager.Track(impressions);
+            await impressionsManager.TrackAsync(impressions);
 
             // Assert.
-            _impressionsLog.Verify(mock => mock.Log(It.IsAny<List<KeyImpression>>()), Times.Never);
+            _impressionsLog.Verify(mock => mock.LogAsync(It.IsAny<List<KeyImpression>>()), Times.Never);
         }
     }
 }

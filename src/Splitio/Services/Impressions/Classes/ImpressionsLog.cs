@@ -2,7 +2,6 @@
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -15,7 +14,7 @@ namespace Splitio.Services.Impressions.Classes
         protected static readonly ISplitLogger Logger = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsLog));
 
         private readonly IImpressionsSdkApiClient _apiClient;
-        private readonly ISimpleProducerCache<KeyImpression> _impressionsCache;
+        private readonly IImpressionCache _impressionsCache;
         private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly ITasksManager _tasksManager;
         private readonly int _interval;
@@ -25,12 +24,11 @@ namespace Splitio.Services.Impressions.Classes
 
         public ImpressionsLog(IImpressionsSdkApiClient apiClient,
             int interval,
-            ISimpleCache<KeyImpression> impressionsCache,
-            ITasksManager tasksManager,
-            int maximumNumberOfKeysToCache = -1)
+            IImpressionCache impressionsCache,
+            ITasksManager tasksManager)
         {
             _apiClient = apiClient;
-            _impressionsCache = (impressionsCache as ISimpleProducerCache<KeyImpression>) ?? new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(maximumNumberOfKeysToCache));            
+            _impressionsCache = impressionsCache;
             _interval = interval;
             _cancellationTokenSource = new CancellationTokenSource();
             _tasksManager = tasksManager;
@@ -59,9 +57,9 @@ namespace Splitio.Services.Impressions.Classes
             }
         }
 
-        public int Log(IList<KeyImpression> impressions)
+        public async Task<int> LogAsync(IList<KeyImpression> impressions)
         {
-            return _impressionsCache.AddItems(impressions);
+            return await _impressionsCache.AddItemsAsync(impressions);
         }
 
         private async Task SendBulkImpressions()

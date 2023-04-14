@@ -1,5 +1,6 @@
 ﻿using Splitio.Domain;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Interfaces
 {
@@ -7,6 +8,6 @@ namespace Splitio.Services.Impressions.Interfaces
     {
         void Start();
         void Stop();
-        int Log(IList<KeyImpression> impressions);
+        Task<int> LogAsync(IList<KeyImpression> impressions);
     }
 }

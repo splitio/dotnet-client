@@ -21,7 +21,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private readonly RedisConfig _config;
 
         private IRedisAdapter _redisAdapter;
-        private IImpressionsCache _impressionsCache;
+        private IRedisImpressionsCache _impressionsCache;
         private IConnectionPoolManager _connectionPoolManager;
 
         public RedisClient(ConfigurationOptions config, string apiKey) : base()
