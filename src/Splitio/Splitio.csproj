@@ -12,8 +12,6 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Splitio.snk</AssemblyOriginatorKeyFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/splitio/dotnet-client</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/splitio/dotnet-client</RepositoryUrl>
     <PackageReadmeFile>../README.md</PackageReadmeFile>
   </PropertyGroup>
 
