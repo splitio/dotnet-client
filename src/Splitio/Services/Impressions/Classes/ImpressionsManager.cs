@@ -72,7 +72,7 @@ namespace Splitio.Services.Impressions.Classes
                         if (impression.previousTime.HasValue)
                             _impressionsCounter.Inc(feature, time);
 
-                        impression.Optimized = ShouldQueueImpression(impression);
+                        impression.Optimized = ImpressionsManager.ShouldQueueImpression(impression);
                         break;
                 }
             }
@@ -135,7 +135,7 @@ namespace Splitio.Services.Impressions.Classes
         }
 
         // Public only for tests
-        public bool ShouldQueueImpression(KeyImpression impression)
+        public static bool ShouldQueueImpression(KeyImpression impression)
         {
             return !impression.previousTime.HasValue || (ImpressionsHelper.TruncateTimeFrame(impression.previousTime.Value) != ImpressionsHelper.TruncateTimeFrame(impression.time));
         }

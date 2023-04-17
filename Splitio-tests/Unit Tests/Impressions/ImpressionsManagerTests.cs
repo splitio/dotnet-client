@@ -361,7 +361,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 impressionsManager.BuildImpression("matching-key-2", "feature-2", "off", impTime, 432543, "label-2", "bucketing-key")
             };
 
-            var optimizedImpressions = impressions.Where(i => impressionsManager.ShouldQueueImpression(i)).ToList();
+            var optimizedImpressions = impressions.Where(i => ImpressionsManager.ShouldQueueImpression(i)).ToList();
 
             // Act.
             await impressionsManager.TrackAsync(impressions);
