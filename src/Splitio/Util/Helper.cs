@@ -37,7 +37,7 @@ namespace Splitio.Util
                 telemetryRuntimeProducer.RecordSyncError(resource, (int)response.StatusCode);
             }
 
-            log.Error($"Http status executing {method}: {response.StatusCode}");
+            log.Debug($"Http status executing {method}: {response.StatusCode}");
         }
     }
 }
