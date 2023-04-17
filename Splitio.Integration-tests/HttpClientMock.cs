@@ -309,6 +309,9 @@ namespace Splitio.Integration_tests
 
         public List<LogEntry> GetLogs()
         {
+            if (_mockServer.LogEntries.Count() == 0)
+                return new List<LogEntry>();
+
             return _mockServer.LogEntries.ToList();
         }
 
