@@ -13,6 +13,8 @@
     <AssemblyOriginatorKeyFile>Splitio.snk</AssemblyOriginatorKeyFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageReadmeFile>../README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/splitio/dotnet-client</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/splitio/dotnet-client</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net7.0' Or '$(TargetFramework)' == 'net6.0' Or '$(TargetFramework)' == 'net5.0'">
