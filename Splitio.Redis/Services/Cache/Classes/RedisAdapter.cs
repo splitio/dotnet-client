@@ -88,7 +88,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             try
             {
                 var db = GetDatabase();
-                return await db.StringSetAsync(key, value);
+                return await db.StringSetAsync(key, value).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -103,7 +103,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             try
             {
                 var db = GetDatabase();
-                return await db.StringGetAsync(key);
+                return await db.StringGetAsync(key).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -118,7 +118,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             try
             {
                 var db = GetDatabase();
-                return await db.StringGetAsync(keys);
+                return await db.StringGetAsync(keys).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -133,7 +133,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             try
             {
                 var db = GetDatabase();
-                return await db.SetAddAsync(key, values);
+                return await db.SetAddAsync(key, values).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -148,7 +148,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             try
             {
                 var db = GetDatabase();
-                return await db.SetRemoveAsync(key, values);
+                return await db.SetRemoveAsync(key, values).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -163,7 +163,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             try
             {
                 var db = GetDatabase();
-                return await db.SetContainsAsync(key, value);
+                return await db.SetContainsAsync(key, value).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -178,7 +178,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             try
             {
                 var db = GetDatabase();
-                return await db.SetMembersAsync(key);
+                return await db.SetMembersAsync(key).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -193,7 +193,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             try
             {
                 var db = GetDatabase();
-                return await db.StringIncrementAsync(key, value);
+                return await db.StringIncrementAsync(key, value).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -208,7 +208,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             try
             {
                 var db = GetDatabase();
-                return await db.ListRightPushAsync(key, values);
+                return await db.ListRightPushAsync(key, values).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -223,7 +223,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             try
             {
                 var db = GetDatabase();
-                return await db.KeyExpireAsync(key, expiry);
+                return await db.KeyExpireAsync(key, expiry).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -238,7 +238,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             try
             {
                 var db = GetDatabase();
-                return await db.ListRangeAsync(key, start, stop);
+                return await db.ListRangeAsync(key, start, stop).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -253,7 +253,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             try
             {
                 var db = GetDatabase();
-                return await db.HashIncrementAsync(key, hashField, value);
+                return await db.HashIncrementAsync(key, hashField, value).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -268,7 +268,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             try
             {
                 var db = GetDatabase();
-                return await db.HashSetAsync(key, hashField, value);
+                return await db.HashSetAsync(key, hashField, value).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -283,7 +283,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             try
             {
                 var db = GetDatabase();
-                return await db.HashGetAllAsync(key);
+                return await db.HashGetAllAsync(key).ConfigureAwait(false);
             }
             catch (Exception e)
             {
