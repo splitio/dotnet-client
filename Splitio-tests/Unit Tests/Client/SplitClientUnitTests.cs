@@ -105,7 +105,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual("control", result);
 
             Thread.Sleep(10000);
-            _impressionsLogMock.Verify(mock => mock.LogAsync(It.IsAny<IList<KeyImpression>>()), Times.Never);
+            _impressionsLogMock.Verify(mock => mock.Log(It.IsAny<IList<KeyImpression>>()), Times.Never);
         }
         #endregion
 
@@ -440,7 +440,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.IsNull(result.Config);
 
             Thread.Sleep(10000);
-            _impressionsLogMock.Verify(mock => mock.LogAsync(It.IsAny<IList<KeyImpression>>()), Times.Never);
+            _impressionsLogMock.Verify(mock => mock.Log(It.IsAny<IList<KeyImpression>>()), Times.Never);
         }
         #endregion
 
@@ -594,7 +594,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             }
 
             Thread.Sleep(10000);
-            _impressionsLogMock.Verify(mock => mock.LogAsync(It.IsAny<IList<KeyImpression>>()), Times.Never);
+            _impressionsLogMock.Verify(mock => mock.Log(It.IsAny<IList<KeyImpression>>()), Times.Never);
         }
         #endregion
 

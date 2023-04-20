@@ -57,9 +57,9 @@ namespace Splitio.Services.Impressions.Classes
             }
         }
 
-        public async Task<int> LogAsync(IList<KeyImpression> impressions)
+        public int Log(IList<KeyImpression> impressions)
         {
-            return await _impressionsCache.AddItemsAsync(impressions);
+            return _impressionsCache.AddItems(impressions);
         }
 
         private async Task SendBulkImpressions()

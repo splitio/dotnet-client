@@ -7,7 +7,6 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Impressions
 {
@@ -32,7 +31,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public async Task LogSuccessfully()
+        public void LogSuccessfully()
         {
             //Act
             var impressions = new List<KeyImpression>
@@ -40,7 +39,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 new KeyImpression { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test" }
             };
 
-            await _impressionsLog.LogAsync(impressions);
+            _impressionsLog.Log(impressions);
 
             //Assert
             KeyImpression element = null;
@@ -56,7 +55,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public async Task LogSuccessfullyUsingBucketingKey()
+        public void LogSuccessfullyUsingBucketingKey()
         {
             //Act
             Key key = new Key(bucketingKey: "a", matchingKey: "testkey");
@@ -66,7 +65,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 new KeyImpression { keyName = key.matchingKey, feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label", bucketingKey = key.bucketingKey }
             };
 
-            await _impressionsLog.LogAsync(impressions);
+            _impressionsLog.Log(impressions);
 
             //Assert
             KeyImpression element = null;
@@ -83,7 +82,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public async Task LogSuccessfullyAndSendImpressions()
+        public void LogSuccessfullyAndSendImpressions()
         {
             //Act            
             var impressions = new List<KeyImpression>
@@ -92,7 +91,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             };
 
             _impressionsLog.Start();
-            await _impressionsLog.LogAsync(impressions);
+            _impressionsLog.Log(impressions);
 
             //Assert
             Thread.Sleep(2000);

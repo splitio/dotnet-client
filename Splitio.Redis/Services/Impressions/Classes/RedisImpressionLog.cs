@@ -2,7 +2,6 @@
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Impressions.Classes
 {
@@ -15,9 +14,9 @@ namespace Splitio.Redis.Services.Impressions.Classes
             _impressionsCache = impressionsCache;
         }
 
-        public async Task<int> LogAsync(IList<KeyImpression> impressions)
+        public int Log(IList<KeyImpression> impressions)
         {
-            return await _impressionsCache.AddItemsAsync(impressions);
+            return _impressionsCache.AddItems(impressions);
         }
 
         public void Start()

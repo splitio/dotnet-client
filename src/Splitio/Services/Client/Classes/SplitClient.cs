@@ -266,7 +266,7 @@ namespace Splitio.Services.Client.Classes
             if (!Labels.SplitNotFound.Equals(result.Label))
             {
                 //TODO: check this
-                _impressionsManager.BuildAndTrackAsync(key.matchingKey, feature, result.Treatment, CurrentTimeHelper.CurrentTimeMillis(), result.ChangeNumber, LabelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null);
+                _impressionsManager.BuildAndTrack(key.matchingKey, feature, result.Treatment, CurrentTimeHelper.CurrentTimeMillis(), result.ChangeNumber, LabelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null);
             }
 
             return result;
@@ -312,7 +312,7 @@ namespace Splitio.Services.Client.Classes
                 RecordLatency(method, results.ElapsedMilliseconds);
 
                 //TODO: check this
-                _impressionsManager.TrackAsync(ImpressionsQueue);
+                _impressionsManager.Track(ImpressionsQueue);
             }
             else
             {

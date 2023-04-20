@@ -3,7 +3,6 @@ using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -16,9 +15,9 @@ namespace Splitio.Services.Impressions.Classes
             _queue = queue;
         }
 
-        public Task<int> AddItemsAsync(IList<KeyImpression> items)
+        public int AddItems(IList<KeyImpression> items)
         {
-            if (_queue == null) return Task.FromResult(0);
+            if (_queue == null) return 0;
 
             var droppedItems = 0;
 
@@ -29,7 +28,7 @@ namespace Splitio.Services.Impressions.Classes
                 if (!added) droppedItems++;
             }
 
-            return Task.FromResult(droppedItems);
+            return droppedItems;
         }
 
         public List<KeyImpression> FetchAllAndClear()

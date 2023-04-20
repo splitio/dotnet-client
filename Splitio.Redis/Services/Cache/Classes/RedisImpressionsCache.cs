@@ -29,7 +29,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             string userPrefix = null) : base(redisAdapter, machineIP, sdkVersion, machineName, userPrefix)
         { }
 
-        public async Task<int> AddItemsAsync(IList<KeyImpression> items)
+        public int AddItems(IList<KeyImpression> items)
         {
             var impressions = items.Select(item => JsonConvert.SerializeObject(new
             {
@@ -37,11 +37,11 @@ namespace Splitio.Redis.Services.Cache.Classes
                 i = new { k = item.keyName, b = item.bucketingKey, f = item.feature, t = item.treatment, r = item.label, c = item.changeNumber, m = item.time, pt = item.previousTime }
             }));
 
-            var lengthRedis = await _redisAdapter.ListRightPushAsync(ImpressionsKey, impressions.Select(i => (RedisValue)i).ToArray());
+            var lengthRedis = _redisAdapter.ListRightPushAsync(ImpressionsKey, impressions.Select(i => (RedisValue)i).ToArray()).Result;
 
             if (lengthRedis == items.Count)
             {
-                await _redisAdapter.KeyExpireAsync(ImpressionsKey, _expireTimeOneHour);
+                _redisAdapter.KeyExpireAsync(ImpressionsKey, _expireTimeOneHour).Wait();
             }
 
             return 0;

@@ -25,7 +25,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public async Task LogSuccessfully()
+        public void LogSuccessfully()
         {
             //Arrange
             var impressions = new List<KeyImpression>
@@ -34,14 +34,14 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             };
 
             //Act
-            await _redisImpressionLog.LogAsync(impressions);
+            _redisImpressionLog.Log(impressions);
 
             //Assert
-            _impressionsCache.Verify(mock => mock.AddItemsAsync(It.IsAny<IList<KeyImpression>>()), Times.Once());
+            _impressionsCache.Verify(mock => mock.AddItems(It.IsAny<IList<KeyImpression>>()), Times.Once());
         }
 
         [TestMethod]
-        public async Task LogSuccessfullyUsingBucketingKey()
+        public void LogSuccessfullyUsingBucketingKey()
         {
             //Arrange
             var key = new Key(bucketingKey: "a", matchingKey: "testkey");
@@ -52,11 +52,11 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             };
 
             //Act
-            await _redisImpressionLog.LogAsync(impressions);
+            _redisImpressionLog.Log(impressions);
 
             //Assert
             _impressionsCache
-                .Verify(mock => mock.AddItemsAsync(It.Is<IList<KeyImpression>>(v => v.Any(ki => ki.keyName == key.matchingKey
+                .Verify(mock => mock.AddItems(It.Is<IList<KeyImpression>>(v => v.Any(ki => ki.keyName == key.matchingKey
                                                                                        && ki.feature == "test"
                                                                                        && ki.treatment == "on"
                                                                                        && ki.time == 7000

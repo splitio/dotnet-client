@@ -267,7 +267,7 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             Thread.Sleep(10000);
-            impressionsLogMock.Verify(x => x.LogAsync(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "test" &&
+            impressionsLogMock.Verify(x => x.Log(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "test" &&
                                                                                        p.FirstOrDefault().feature == "test_jw3" &&
                                                                                        p.FirstOrDefault().treatment == "off" &&
                                                                                        p.FirstOrDefault().time > 0 &&
@@ -291,7 +291,7 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             Thread.Sleep(10000);
-            impressionsLogMock.Verify(x => x.LogAsync(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "test" &&
+            impressionsLogMock.Verify(x => x.Log(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "test" &&
                                                                                        p.FirstOrDefault().feature == "whitelisting_elements" &&
                                                                                        p.FirstOrDefault().treatment == "off" &&
                                                                                        p.FirstOrDefault().time > 0 &&
@@ -314,7 +314,7 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             Assert.AreEqual("control", result);
-            impressionsLogMock.Verify(x => x.LogAsync(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "test" &&
+            impressionsLogMock.Verify(x => x.Log(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "test" &&
                                                                                        p.FirstOrDefault().feature == "asd" &&
                                                                                        p.FirstOrDefault().treatment == "control" &&
                                                                                        p.FirstOrDefault().time > 0 &&
@@ -344,7 +344,7 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             Thread.Sleep(1000);
-            impressionsLogMock.Verify(x => x.LogAsync(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "test" &&
+            impressionsLogMock.Verify(x => x.Log(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "test" &&
                                                                                        p.FirstOrDefault().feature == "asd" &&
                                                                                        p.FirstOrDefault().treatment == "control" &&
                                                                                        p.FirstOrDefault().time > 0 &&
@@ -367,7 +367,7 @@ namespace Splitio_Tests.Integration_Tests
             var result = client.GetTreatment("test", "Traffic_Allocation_UI2", null);
 
             //Assert
-            impressionsLogMock.Verify(x => x.LogAsync(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "test" &&
+            impressionsLogMock.Verify(x => x.Log(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "test" &&
                                                                                        p.FirstOrDefault().feature == "Traffic_Allocation_UI2" &&
                                                                                        p.FirstOrDefault().treatment == "off" &&
                                                                                        p.FirstOrDefault().time > 0 &&
@@ -391,7 +391,7 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             Thread.Sleep(1000);
-            impressionsLogMock.Verify(x => x.LogAsync(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "db765170-e9f2-11e5-885c-c2f58c3a47a7" &&
+            impressionsLogMock.Verify(x => x.Log(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "db765170-e9f2-11e5-885c-c2f58c3a47a7" &&
                                                                                        p.FirstOrDefault().feature == "Segments_Restructuring_UI" &&
                                                                                        p.FirstOrDefault().treatment == "on" &&
                                                                                        p.FirstOrDefault().time > 0 &&
@@ -428,7 +428,7 @@ namespace Splitio_Tests.Integration_Tests
             var result = client.GetTreatment("db765170-e9f2-11e5-885c-c2f58c3a47a7", "Segments_Restructuring_UI", null);
 
             //Assert
-            impressionsLogMock.Verify(x => x.LogAsync(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "db765170-e9f2-11e5-885c-c2f58c3a47a7" &&
+            impressionsLogMock.Verify(x => x.Log(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "db765170-e9f2-11e5-885c-c2f58c3a47a7" &&
                                                                                        p.FirstOrDefault().feature == "Segments_Restructuring_UI" &&
                                                                                        p.FirstOrDefault().treatment == "on" &&
                                                                                        p.FirstOrDefault().time > 0 &&
@@ -453,7 +453,7 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             Thread.Sleep(1000);
-            impressionsLogMock.Verify(x => x.LogAsync(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "db765170-e9f2-11e5-885c-c2f58c3a47a7" &&
+            impressionsLogMock.Verify(x => x.Log(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "db765170-e9f2-11e5-885c-c2f58c3a47a7" &&
                                                                                        p.FirstOrDefault().feature == "Segments_Restructuring_UI" &&
                                                                                        p.FirstOrDefault().treatment == "on" &&
                                                                                        p.FirstOrDefault().time > 0 &&
@@ -641,7 +641,7 @@ namespace Splitio_Tests.Integration_Tests
 
             // Assert.
             Assert.AreEqual("control", result);
-            impressionsLogMock.Verify(x => x.LogAsync(It.IsAny<IList<KeyImpression>>()), Times.Never);
+            impressionsLogMock.Verify(x => x.Log(It.IsAny<IList<KeyImpression>>()), Times.Never);
         }
 
         [DeploymentItem(@"Resources\splits_staging_3.json")]
@@ -793,7 +793,7 @@ namespace Splitio_Tests.Integration_Tests
                 Assert.AreEqual("control", res.Value);
             }
 
-            impressionsLogMock.Verify(x => x.LogAsync(It.IsAny<IList<KeyImpression>>()), Times.Never);
+            impressionsLogMock.Verify(x => x.Log(It.IsAny<IList<KeyImpression>>()), Times.Never);
         }
 
         [DeploymentItem(@"Resources\splits_staging_3.json")]
@@ -918,7 +918,7 @@ namespace Splitio_Tests.Integration_Tests
             // Assert.
             Assert.AreEqual("control", result.Treatment);
             Assert.IsNull(result.Config);
-            impressionsLogMock.Verify(x => x.LogAsync(It.IsAny<IList<KeyImpression>>()), Times.Never);
+            impressionsLogMock.Verify(x => x.Log(It.IsAny<IList<KeyImpression>>()), Times.Never);
         }
 
         [DeploymentItem(@"Resources\splits_staging_3.json")]
@@ -959,7 +959,7 @@ namespace Splitio_Tests.Integration_Tests
                 Assert.IsNull(res.Value.Config);
             }
 
-            impressionsLogMock.Verify(x => x.LogAsync(It.IsAny<IList<KeyImpression>>()), Times.Never);
+            impressionsLogMock.Verify(x => x.Log(It.IsAny<IList<KeyImpression>>()), Times.Never);
         }
 
         [DeploymentItem(@"Resources\splits_staging_3.json")]
