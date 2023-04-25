@@ -73,7 +73,7 @@ namespace Splitio.Services.Parsing
 
         private CombiningMatcher ParseMatcherGroup(ParsedSplit parsedSplit, MatcherGroupDefinition matcherGroupDefinition)
         {
-            if (matcherGroupDefinition.matchers == null || matcherGroupDefinition.matchers.Count() == 0)
+            if (matcherGroupDefinition.matchers == null || matcherGroupDefinition.matchers.Count == 0)
             {
                 throw new Exception("Missing or empty matchers");
             }
@@ -147,7 +147,7 @@ namespace Splitio.Services.Parsing
                 throw new Exception(string.Format("Unable to create matcher for matcher type: {0}", matcherType));
             }
 
-            AttributeMatcher attributeMatcher = new AttributeMatcher()
+            var attributeMatcher = new AttributeMatcher()
             {
                 matcher = matcher,
                 negate = matcherDefinition.negate
@@ -161,105 +161,105 @@ namespace Splitio.Services.Parsing
             return attributeMatcher;
         }
 
-        private IMatcher GetMatchesStringMatcher(MatcherDefinition matcherDefinition)
+        private static IMatcher GetMatchesStringMatcher(MatcherDefinition matcherDefinition)
         {
             var matcherData = matcherDefinition.stringMatcherData;
             return new MatchesStringMatcher(matcherData);
         }
 
-        private IMatcher GetEqualToBooleanMatcher(MatcherDefinition matcherDefinition)
+        private static IMatcher GetEqualToBooleanMatcher(MatcherDefinition matcherDefinition)
         {
             var matcherData = matcherDefinition.booleanMatcherData;
             return new EqualToBooleanMatcher(matcherData.Value);
         }
 
 
-        private IMatcher GetDependencyMatcher(MatcherDefinition matcherDefinition)
+        private static IMatcher GetDependencyMatcher(MatcherDefinition matcherDefinition)
         {
             var matcherData = matcherDefinition.dependencyMatcherData;
             return new DependencyMatcher(matcherData.split, matcherData.treatments);
         }
 
-        private IMatcher GetBetweenMatcher(MatcherDefinition matcherDefinition)
+        private static IMatcher GetBetweenMatcher(MatcherDefinition matcherDefinition)
         {
             var matcherData = matcherDefinition.betweenMatcherData;
             return new BetweenMatcher(matcherData.dataType, matcherData.start, matcherData.end);
         }
 
-        private IMatcher GetLessThanOrEqualToMatcher(MatcherDefinition matcherDefinition)
+        private static IMatcher GetLessThanOrEqualToMatcher(MatcherDefinition matcherDefinition)
         {
             var matcherData = matcherDefinition.unaryNumericMatcherData;
             return new LessOrEqualToMatcher(matcherData.dataType, matcherData.value);
         }
 
-        private IMatcher GetGreaterThanOrEqualToMatcher(MatcherDefinition matcherDefinition)
+        private static IMatcher GetGreaterThanOrEqualToMatcher(MatcherDefinition matcherDefinition)
         {
             var matcherData = matcherDefinition.unaryNumericMatcherData;
             return new GreaterOrEqualToMatcher(matcherData.dataType, matcherData.value);
         }
 
-        private IMatcher GetEqualToMatcher(MatcherDefinition matcherDefinition)
+        private static IMatcher GetEqualToMatcher(MatcherDefinition matcherDefinition)
         {
             var matcherData = matcherDefinition.unaryNumericMatcherData;
             return new EqualToMatcher(matcherData.dataType, matcherData.value);
         }
 
-        private IMatcher GetWhitelistMatcher(MatcherDefinition matcherDefinition)
+        private static IMatcher GetWhitelistMatcher(MatcherDefinition matcherDefinition)
         {
             var matcherData = matcherDefinition.whitelistMatcherData;
             return new WhitelistMatcher(matcherData.whitelist);
         }
 
-        private IMatcher GetEqualToSetMatcher(MatcherDefinition matcherDefinition)
+        private static IMatcher GetEqualToSetMatcher(MatcherDefinition matcherDefinition)
         {
             var matcherData = matcherDefinition.whitelistMatcherData;
             return new EqualToSetMatcher(matcherData.whitelist);
         }
 
-        private IMatcher GetContainsAnyOfSetMatcher(MatcherDefinition matcherDefinition)
+        private static IMatcher GetContainsAnyOfSetMatcher(MatcherDefinition matcherDefinition)
         {
             var matcherData = matcherDefinition.whitelistMatcherData;
             return new ContainsAnyOfSetMatcher(matcherData.whitelist);
         }
 
-        private IMatcher GetContainsStringMatcher(MatcherDefinition matcherDefinition)
+        private static IMatcher GetContainsStringMatcher(MatcherDefinition matcherDefinition)
         {
             var matcherData = matcherDefinition.whitelistMatcherData;
             return new ContainsStringMatcher(matcherData.whitelist);
         }
 
-        private IMatcher GetEndsWithMatcher(MatcherDefinition matcherDefinition)
+        private static IMatcher GetEndsWithMatcher(MatcherDefinition matcherDefinition)
         {
             var matcherData = matcherDefinition.whitelistMatcherData;
             return new EndsWithMatcher(matcherData.whitelist);
         }
 
-        private IMatcher GetStartsWithMatcher(MatcherDefinition matcherDefinition)
+        private static IMatcher GetStartsWithMatcher(MatcherDefinition matcherDefinition)
         {
             var matcherData = matcherDefinition.whitelistMatcherData;
             return new StartsWithMatcher(matcherData.whitelist);
         }
 
-        private IMatcher GetPartOfSetMatcher(MatcherDefinition matcherDefinition)
+        private static IMatcher GetPartOfSetMatcher(MatcherDefinition matcherDefinition)
         {
             var matcherData = matcherDefinition.whitelistMatcherData;
             return new PartOfSetMatcher(matcherData.whitelist);
         }
 
-        private IMatcher GetContainsAllOfSetMatcher(MatcherDefinition matcherDefinition)
+        private static IMatcher GetContainsAllOfSetMatcher(MatcherDefinition matcherDefinition)
         {
             var matcherData = matcherDefinition.whitelistMatcherData;
             return new ContainsAllOfSetMatcher(matcherData.whitelist);
         }
-        
-        private IMatcher GetAllKeysMatcher()
+
+        private static IMatcher GetAllKeysMatcher()
         {
             return new AllKeysMatcher();
         }
 
-        private CombinerEnum ParseCombiner(string combinerEnum)
+        private static CombinerEnum ParseCombiner(string combinerEnum)
         {
-            var isValidCombiner = Enum.TryParse(combinerEnum, out CombinerEnum result);
+            _ = Enum.TryParse(combinerEnum, out CombinerEnum result);
 
             return result;
         }

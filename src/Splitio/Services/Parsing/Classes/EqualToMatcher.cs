@@ -10,30 +10,25 @@ namespace Splitio.Services.Parsing
     {
         public EqualToMatcher(DataTypeEnum? dataType, long value)
         {
-            this.dataType = dataType;
-            this.value = value;
+            _dataType = dataType;
+            _value = value;
         }
 
         public override bool Match(long key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            if (dataType == DataTypeEnum.DATETIME)
+            if (_dataType == DataTypeEnum.DATETIME)
             {
                 return Match(key.ToDateTime(), attributes, evaluator);
             }
 
-            return value == key;
+            return _value == key;
         }
 
         public override bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            var date = value.ToDateTime();
+            var date = _value.ToDateTime();
 
             return date.ToUniversalTime().Date == key.ToUniversalTime().Date; // Compare just date part
-        }
-
-        public override bool Match(bool key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
         }
     }
 }

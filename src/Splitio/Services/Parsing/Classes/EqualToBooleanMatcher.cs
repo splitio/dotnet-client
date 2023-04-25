@@ -1,22 +1,20 @@
-﻿using Splitio.Domain;
-using Splitio.Services.Evaluator;
-using System;
+﻿using Splitio.Services.Evaluator;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Parsing.Classes
 {
     public class EqualToBooleanMatcher : BaseMatcher
     {
-        private readonly bool Value;
+        private readonly bool _value;
 
         public EqualToBooleanMatcher(bool value)
         {
-            Value = value;
+            _value = value;
         }
 
         public override bool Match(bool key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            return key.Equals(Value);
+            return key.Equals(_value);
         }
 
         public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
@@ -29,26 +27,6 @@ namespace Splitio.Services.Parsing.Classes
             {
                 return false;
             }
-        }
-
-        public override bool Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
-        }
-
-        public override bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
-        }
-
-        public override bool Match(long key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
-        }
-
-        public override bool Match(List<string> key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
         }
     }
 }

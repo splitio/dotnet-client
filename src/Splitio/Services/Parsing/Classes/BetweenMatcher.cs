@@ -11,20 +11,20 @@ namespace Splitio.Services.Parsing
 
         public BetweenMatcher(DataTypeEnum? dataType, long start, long end)
         {
-            this.dataType = dataType;
-            this.start = start;
-            this.end = end;
+            _dataType = dataType;
+            _start = start;
+            _end = end;
         }
 
         public override bool Match(long key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            return (start <= key) && (key <= end);         
+            return (_start <= key) && (key <= _end);         
         }
 
         public override bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            var startDate = start.ToDateTime();
-            var endDate = end.ToDateTime();
+            var startDate = _start.ToDateTime();
+            var endDate = _end.ToDateTime();
             key = key.Truncate(TimeSpan.FromMinutes(1)); // Truncate to whole minute
             return (startDate.ToUniversalTime() <= key.ToUniversalTime()) && (key.ToUniversalTime() <= endDate.ToUniversalTime());
         }

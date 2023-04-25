@@ -17,8 +17,6 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     [TestClass]
     public class ImpressionsManagerTests
     {
-        private readonly IWrapperAdapter wrapperAdapter = WrapperAdapter.Instance();
-
         private readonly Mock<IImpressionsObserver> _impressionsObserver;
         private readonly Mock<IImpressionsLog> _impressionsLog;
         private readonly Mock<IImpressionListener> _customerImpressionListener;
@@ -367,7 +365,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             // Assert.
             Thread.Sleep(1000);
-            Assert.AreEqual(2, optimizedImpressions.Count());
+            Assert.AreEqual(2, optimizedImpressions.Count);
             _impressionsLog.Verify(mock => mock.Log(optimizedImpressions), Times.Once);
             _impressionsLog.Verify(mock => mock.Log(impressions), Times.Never);
             _customerImpressionListener.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Never);

@@ -112,7 +112,7 @@ namespace Splitio_Tests.Integration_Tests
             var result = adapter.MGet(new RedisKey[] { "test_key", "test_key2", "test_key3" });
 
             //Assert
-            Assert.AreEqual(0, result.Count());
+            Assert.AreEqual(0, result.Length);
         }
 
         [TestMethod]
@@ -129,7 +129,7 @@ namespace Splitio_Tests.Integration_Tests
             //Assert
             Assert.IsNotNull(result);
             Assert.IsTrue(isSet1 & isSet2 & isSet3);
-            Assert.AreEqual(3, result.Count());
+            Assert.AreEqual(3, result.Length);
             Assert.IsTrue(result.Contains("test.test_key"));
             Assert.IsTrue(result.Contains("test.test_key2"));
             Assert.IsTrue(result.Contains("test.test_key3"));
@@ -148,7 +148,7 @@ namespace Splitio_Tests.Integration_Tests
             var result = adapter.Keys("test.*");
 
             //Assert
-            Assert.AreEqual(0, result.Count());
+            Assert.AreEqual(0, result.Length);
         }
 
 
@@ -196,7 +196,7 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             Assert.IsTrue(isSet1);
-            Assert.AreEqual(0, result.Count());
+            Assert.AreEqual(0, result.Length);
         }
 
         [TestMethod]
@@ -210,7 +210,7 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             Assert.AreEqual(true, setCount);
-            Assert.AreEqual(1, result.Count());
+            Assert.AreEqual(1, result.Length);
             Assert.IsTrue(result.Contains("test_value_1"));
         }
 
@@ -243,7 +243,7 @@ namespace Splitio_Tests.Integration_Tests
             var result = adapter.SMembers("test_key_set");
 
             //Assert
-            Assert.AreEqual(0, result.Count());
+            Assert.AreEqual(0, result.Length);
         }
 
         [TestMethod]
@@ -257,7 +257,7 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             Assert.AreEqual(2, setCount);
-            Assert.AreEqual(2, result.Count());
+            Assert.AreEqual(2, result.Length);
             Assert.IsTrue(result.Contains("test_value"));
             Assert.IsTrue(result.Contains("test_value2"));
         }
