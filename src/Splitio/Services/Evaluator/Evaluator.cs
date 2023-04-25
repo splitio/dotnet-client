@@ -142,7 +142,8 @@ namespace Splitio.Services.Evaluator
             var inRollout = false;
 
             // use the first matching condition
-            foreach (var condition in split.conditions)
+            var conditions = split.conditions.OrderBy(c => c.conditionType);
+            foreach (var condition in conditions)
             {
                 if (!inRollout && condition.conditionType == ConditionType.ROLLOUT)
                 {
