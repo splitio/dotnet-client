@@ -78,7 +78,7 @@ namespace Splitio.Services.Shared.Classes
                         }
 
                         splitToAdd.conditions.AddRange(oldSplit.conditions);
-
+                        splitToAdd.conditions = splitToAdd.conditions.OrderBy(c => c.conditionType).ToList();
                         splits.TryUpdate(splitName, splitToAdd, oldSplit);
                     }
                     else

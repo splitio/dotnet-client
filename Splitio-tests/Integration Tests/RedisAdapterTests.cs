@@ -93,7 +93,7 @@ namespace Splitio_Tests.Integration_Tests
             //Assert
             Assert.IsNotNull(result);
             Assert.IsTrue(isSet1 & isSet2 & isSet3);
-            Assert.AreEqual(3, result.Count());
+            Assert.AreEqual(3, result.Length);
             Assert.IsTrue(result.Contains("test_value"));
             Assert.IsTrue(result.Contains("test_value2"));
             Assert.IsTrue(result.Contains("test_value3"));

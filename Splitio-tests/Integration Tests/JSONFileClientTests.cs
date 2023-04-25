@@ -868,10 +868,10 @@ namespace Splitio_Tests.Integration_Tests
             //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual("on", result); // !Contains any of "create","delete","update"
-            Assert.IsTrue(resultDestroy1 == "control");
-            Assert.AreEqual(resultDestroy2.Count, 0);
-            Assert.AreEqual(resultDestroy3.Count, 0);
-            Assert.IsTrue(resultDestroy4 == null);
+            Assert.AreEqual("control", resultDestroy1);
+            Assert.AreEqual(0, resultDestroy2.Count);
+            Assert.AreEqual(0, resultDestroy3.Count);
+            Assert.IsNull(resultDestroy4);
         }
         #endregion
 
