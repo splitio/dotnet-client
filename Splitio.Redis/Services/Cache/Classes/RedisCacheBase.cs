@@ -14,7 +14,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         protected string MachineIp;
         protected string MachineName;
 
-        public RedisCacheBase(IRedisAdapter redisAdapter, 
+        protected RedisCacheBase(IRedisAdapter redisAdapter, 
             string userPrefix = null)
         {
             _redisAdapter = redisAdapter;
@@ -28,7 +28,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
         }
 
-        public RedisCacheBase(IRedisAdapter redisAdapter, 
+        protected RedisCacheBase(IRedisAdapter redisAdapter, 
             string machineIP, 
             string sdkVersion, 
             string machineName, 

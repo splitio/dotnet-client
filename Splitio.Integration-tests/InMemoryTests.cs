@@ -331,8 +331,6 @@ namespace Splitio.Integration_tests
             }
         }
 
-        // TODO: None mode is not supported yet.
-        [Ignore]
         [TestMethod]
         public void GetTreatments_WithImpressionsInNoneMode()
         {
@@ -511,7 +509,7 @@ namespace Splitio.Integration_tests
             }
         }
 
-        protected void AssertImpression(KeyImpression impressionExpected, List<ImpressionData> sentImpressions)
+        protected static void AssertImpression(KeyImpression impressionExpected, List<ImpressionData> sentImpressions)
         {
             Assert.IsTrue(sentImpressions
                 .Where(si => impressionExpected.bucketingKey == si.B)
@@ -547,7 +545,7 @@ namespace Splitio.Integration_tests
         #endregion
 
         #region Private Methods
-        private List<KeyImpressionBackend> GetImpressionsSentBackend(HttpClientMock httpClientMock = null)
+        private static List<KeyImpressionBackend> GetImpressionsSentBackend(HttpClientMock httpClientMock = null)
         {
             var impressions = new List<KeyImpressionBackend>();
             var logs = httpClientMock.GetImpressionLogs();
@@ -562,7 +560,7 @@ namespace Splitio.Integration_tests
             return impressions;
         }
 
-        private Telemetry.Domain.Config GetMetricsConfigSentBackend(HttpClientMock httpClientMock)
+        private static Telemetry.Domain.Config GetMetricsConfigSentBackend(HttpClientMock httpClientMock)
         {
             var logs = httpClientMock.GetMetricsConfigLog();
 
@@ -571,7 +569,7 @@ namespace Splitio.Integration_tests
             return JsonConvert.DeserializeObject<Telemetry.Domain.Config>(logs.FirstOrDefault().RequestMessage.Body);
         }
 
-        private List<Telemetry.Domain.Stats> GetMetricsStatsSentBackend(HttpClientMock httpClientMock)
+        private static List<Telemetry.Domain.Stats> GetMetricsStatsSentBackend(HttpClientMock httpClientMock)
         {
             var stats = new List<Telemetry.Domain.Stats>();
             var logs = httpClientMock.GetMetricsUsageLog();
@@ -586,7 +584,7 @@ namespace Splitio.Integration_tests
             return stats;
         }
 
-        private List<ImpressionCount> GetImpressionsCountsSentBackend(HttpClientMock httpClientMock = null)
+        private static List<ImpressionCount> GetImpressionsCountsSentBackend(HttpClientMock httpClientMock = null)
         {
             var impressions = new List<ImpressionCount>();
             var logs = httpClientMock.GetImpressionCountsLogs();
@@ -601,7 +599,7 @@ namespace Splitio.Integration_tests
             return impressions;
         }
 
-        private List<EventBackend> GetEventsSentBackend(HttpClientMock httpClientMock = null)
+        private static List<EventBackend> GetEventsSentBackend(HttpClientMock httpClientMock = null)
         {
             var events = new List<EventBackend>();
             var logs = httpClientMock.GetEventsLog();

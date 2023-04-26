@@ -73,11 +73,6 @@ namespace Splitio.Redis.Services.Cache.Classes
             _redisAdapter.Flush();
         }
 
-        public void Clear()
-        {
-            return;
-        }
-
         public List<string> GetSegmentNames()
         {
             var key = $"{RedisKeyPrefix}{segmentsKeyPrefix}registered";
@@ -106,5 +101,10 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             return 0; // No-op
         }
+
+        public void Clear()
+        {
+            // No-op
+        } 
     }
 }

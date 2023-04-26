@@ -356,6 +356,7 @@ namespace Splitio.Integration_tests
         {
             _mockServer.Stop();
             _mockServer.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

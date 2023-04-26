@@ -18,7 +18,7 @@ namespace Splitio.Integration_tests
     [TestClass]
     public class PushClientTests
     {
-        private string EventSourcePath => "/eventsource";
+        private static string EventSourcePath => "/eventsource";
 
         [TestMethod]
         public void GetTreatment_SplitUpdate_ShouldFetch()
@@ -120,7 +120,7 @@ namespace Splitio.Integration_tests
             }
         }
         
-        [Ignore]
+        [Ignore("Flaky test.")]
         [TestMethod]
         public void GetTreatment_SplitKill_ShouldFetch()
         {
@@ -173,8 +173,8 @@ namespace Splitio.Integration_tests
             }
         }
 
+        [Ignore("Flaky test.")]
         [TestMethod]
-        [Ignore]
         public void GetTreatment_SplitKill_ShouldNotFetch()
         {
             using (var httpClientMock = new HttpClientMock())
@@ -223,7 +223,7 @@ namespace Splitio.Integration_tests
             }
         }
 
-        [Ignore]
+        [Ignore("Flaky test.")]
         [TestMethod]
         public void GetTreatment_SegmentUpdate_ShouldFetch()
         {
@@ -529,7 +529,7 @@ namespace Splitio.Integration_tests
             }
         }
 
-        private string EvaluateWithDelay(string key, string splitName, string expected, ISplitClient client, int attemps = 10)
+        private static string EvaluateWithDelay(string key, string splitName, string expected, ISplitClient client, int attemps = 10)
         {
             var result = string.Empty;
             for (int i = 0; i < attemps; i++)

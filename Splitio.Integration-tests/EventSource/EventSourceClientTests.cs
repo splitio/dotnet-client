@@ -227,7 +227,7 @@ namespace Splitio.Integration_tests.EventSource
             }
         }
 
-        private (IEventSourceClient, BlockingCollection<EventReceivedEventArgs>, BlockingCollection<SSEClientActions>) GetEventSourceClient()
+        private static (IEventSourceClient, BlockingCollection<EventReceivedEventArgs>, BlockingCollection<SSEClientActions>) GetEventSourceClient()
         {
             var eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
             var sseClientStatus = new BlockingCollection<SSEClientActions>(new ConcurrentQueue<SSEClientActions>());

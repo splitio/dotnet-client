@@ -51,7 +51,7 @@ namespace Splitio_Tests.Unit_Tests
             VerifyTestFile($"{rootFilePath}murmur3-sample-data-non-alpha-numeric-v2.csv", new string[] { "\n" }, false);
         }
 
-        private void VerifyTestFile(string file, string[] sepparator, bool legacy = true)
+        private static void VerifyTestFile(string file, string[] sepparator, bool legacy = true)
         {
             //Arrange
             var fileContent = File.ReadAllText(file);

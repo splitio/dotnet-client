@@ -172,8 +172,6 @@ namespace Splitio.Integration_tests
             CleanKeys();
         }
 
-        // TODO: None mode is not supported yet.
-        [Ignore]
         [TestMethod]
         public void GetTreatment_WithImpressionModeInNone_ShouldGetUniqueKeys()
         {
@@ -203,7 +201,7 @@ namespace Splitio.Integration_tests
             var result = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.uniquekeys");
 
             // Assert.
-            Assert.AreEqual(2, result.Count());
+            Assert.AreEqual(2, result.Length);
 
             var uniques = result.Select(x => JsonConvert.DeserializeObject<Mtks>(x)).ToList();
 
@@ -213,8 +211,6 @@ namespace Splitio.Integration_tests
             CleanKeys();
         }
 
-        // TODO: Optimized mode is not supported yet.
-        [Ignore]
         [TestMethod]
         public void GetTreatment_WithImpressionModeOptimized_ShouldGetImpressionCount()
         {
@@ -337,7 +333,7 @@ namespace Splitio.Integration_tests
             }
         }
 
-        private void AssertImpression(KeyImpressionRedis impressionActual, List<KeyImpression> sentImpressions)
+        private static void AssertImpression(KeyImpressionRedis impressionActual, List<KeyImpression> sentImpressions)
         {
             Assert.IsFalse(string.IsNullOrEmpty(impressionActual.M.I));
             Assert.IsFalse(string.IsNullOrEmpty(impressionActual.M.N));
@@ -352,7 +348,7 @@ namespace Splitio.Integration_tests
                 .Any());
         }
 
-        private void AssertEvent(EventRedis eventActual, List<EventBackend> eventsExcpected)
+        private static void AssertEvent(EventRedis eventActual, List<EventBackend> eventsExcpected)
         {
             Assert.IsFalse(string.IsNullOrEmpty(eventActual.M.I));
             Assert.IsFalse(string.IsNullOrEmpty(eventActual.M.N));

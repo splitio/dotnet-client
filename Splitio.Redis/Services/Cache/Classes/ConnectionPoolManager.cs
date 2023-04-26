@@ -52,11 +52,8 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public void Dispose()
         {
-            lock (_lock)
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public IConnectionMultiplexer GetConnection()
@@ -92,7 +89,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             _disposed = true;
         }
 
-        private ConfigurationOptions GetConfig(RedisConfig redisCfg)
+        private static ConfigurationOptions GetConfig(RedisConfig redisCfg)
         {
             var config = new ConfigurationOptions
             {

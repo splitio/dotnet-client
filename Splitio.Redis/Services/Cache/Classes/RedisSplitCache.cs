@@ -75,11 +75,6 @@ namespace Splitio.Redis.Services.Cache.Classes
             return result;
         }
 
-        public void Clear()
-        {
-            return;
-        }
-
         public bool TrafficTypeExists(string trafficType)
         {
             if (string.IsNullOrEmpty(trafficType)) return false;
@@ -88,9 +83,12 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             var quantity = value ?? "0";
 
-            int.TryParse(quantity, out int quantityInt);
+            if (int.TryParse(quantity, out int quantityInt))
+            {
+                return quantityInt > 0;
+            }
 
-            return quantityInt > 0;
+            return false;
         }
 
         private string GetTrafficTypeKey(string type)
@@ -124,6 +122,11 @@ namespace Splitio.Redis.Services.Cache.Classes
         }
 
         public void Flush()
+        {
+            // No-op
+        }
+
+        public void Clear()
         {
             // No-op
         }

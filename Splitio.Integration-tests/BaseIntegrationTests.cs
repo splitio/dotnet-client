@@ -994,7 +994,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        [Ignore]
+        [Ignore("Flaky Test.")]
         public void Track_WithLowQueue_ReturnsTrue()
         {
             // Arrange.           
@@ -1065,7 +1065,7 @@ namespace Splitio.Integration_tests
                 client.Destroy();
 
                 var destroyResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
-                var managerDestroyResult = manager.Split("MAURO_TEST");
+                manager.Split("MAURO_TEST");
 
                 // Assert.
                 Assert.AreEqual("on", treatmentResult);
@@ -1081,7 +1081,7 @@ namespace Splitio.Integration_tests
         #endregion
 
         #region Protected Methods
-        protected void AssertImpression(KeyImpression impression, long changeNumber, string feature, string keyName, string label, string treatment)
+        protected static void AssertImpression(KeyImpression impression, long changeNumber, string feature, string keyName, string label, string treatment)
         {
             Assert.AreEqual(changeNumber, impression.changeNumber);
             Assert.AreEqual(feature, impression.feature);
