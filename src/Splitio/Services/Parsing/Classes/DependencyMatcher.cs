@@ -1,19 +1,18 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Evaluator;
-using System;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Parsing.Classes
 {
     public class DependencyMatcher : BaseMatcher
     {
-        private readonly string Split;
-        private readonly List<string> Treatments;
+        private readonly string _split;
+        private readonly List<string> _treatments;
 
         public DependencyMatcher(string split, List<string> treatments)
         {
-            Split = split;
-            Treatments = treatments;
+            _split = split;
+            _treatments = treatments;
         }
 
         public override bool Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
@@ -23,35 +22,9 @@ namespace Splitio.Services.Parsing.Classes
                 return false;
             }
 
-            var result = evaluator.EvaluateFeature(key, Split, attributes);
+            var result = evaluator.EvaluateFeature(key, _split, attributes);
 
-            return Treatments.Contains(result.Treatment);
-        }
-
-        public override bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
-        }
-
-        public override bool Match(long key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
-
-        }
-
-        public override bool Match(List<string> key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
-        }
-
-        public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
-        }
-
-        public override bool Match(bool key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
+            return _treatments.Contains(result.Treatment);
         }
     }
 }
