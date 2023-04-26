@@ -23,19 +23,9 @@ namespace Splitio.Services.Parsing
             return true;
         }
 
-        public override bool Match(List<string> key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
-        }
-
         public override bool Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             return key.matchingKey != null;
-        }
-
-        public override bool Match(bool key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
-        {
-            return false;
         }
     }
 }

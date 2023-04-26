@@ -1,6 +1,6 @@
 ﻿namespace Splitio.Constants
 {
-    public class Push
+    public static class Push
     {        
         public static string ControlPri => "control_pri";
         public static string ControlSec => "control_sec";
@@ -8,7 +8,7 @@
         public static int SecondsBeforeExpiration => 600; // how many seconds prior to token expiration to trigger reauth
     }
 
-    public class Http
+    public static class Http
     {
         public static string Bearer => "Bearer";
         public static string SplitSDKVersion => "SplitSDKVersion";
@@ -25,13 +25,13 @@
         public static string MediaTypeJson => "application/json";
     }
 
-    public class Gral
+    public static class Gral
     {
         public static string Unknown => "unknown";
         public static string NA => "NA";
     }
 
-    public class Urls
+    public static class Urls
     {
         public static string BaseUrl => "https://sdk.split.io";
         public static string EventsBaseUrl => "https://events.split.io";
@@ -40,7 +40,7 @@
         public static string TelemetryServiceURL => "https://telemetry.split.io/api/v1";
     }
 
-    public class StorageType
+    public static class StorageType
     {
         public static string Memory => "memory";
         public static string Redis => "redis";

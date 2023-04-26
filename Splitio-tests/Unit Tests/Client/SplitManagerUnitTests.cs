@@ -1,12 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
-using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Shared.Interfaces;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -91,17 +89,17 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(6, result.Count);
 
             var firstResult = result.Find(x => x.name == "test1");
-            Assert.AreEqual(firstResult.name, "test1");
-            Assert.AreEqual(firstResult.changeNumber, 10000);
-            Assert.AreEqual(firstResult.killed, false);
-            Assert.AreEqual(firstResult.trafficType, "user");
-            Assert.AreEqual(firstResult.treatments.Count, 2);
+            Assert.AreEqual("test1", firstResult.name);
+            Assert.AreEqual(10000, firstResult.changeNumber);
+            Assert.IsFalse(firstResult.killed);
+            Assert.AreEqual("user", firstResult.trafficType);
+            Assert.AreEqual(2, firstResult.treatments.Count);
 
             var firstTreatment = firstResult.treatments[0];
-            Assert.AreEqual(firstTreatment, "on");
+            Assert.AreEqual("on", firstTreatment);
 
             var secondTreatment = firstResult.treatments[1];
-            Assert.AreEqual(secondTreatment, "off");
+            Assert.AreEqual("off", secondTreatment);
         }
 
         [TestMethod]
@@ -148,10 +146,10 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(6, result.Count);
 
             var firstResult = result.Find(x => x.name == "test1");
-            Assert.AreEqual(firstResult.name, "test1");
-            Assert.AreEqual(firstResult.changeNumber, 10000);
-            Assert.AreEqual(firstResult.killed, false);
-            Assert.AreEqual(firstResult.trafficType, "user");
+            Assert.AreEqual("test1", firstResult.name);
+            Assert.AreEqual(10000, firstResult.changeNumber);
+            Assert.IsFalse(firstResult.killed);
+            Assert.AreEqual("user", firstResult.trafficType);
             Assert.AreEqual(conditionWithLogic.partitions.Count, firstResult.treatments.Count);
         }
 
@@ -187,17 +185,17 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             //Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(result.name, "test1");
-            Assert.AreEqual(result.changeNumber, 10000);
-            Assert.AreEqual(result.killed, false);
-            Assert.AreEqual(result.trafficType, "user");
-            Assert.AreEqual(result.treatments.Count, 2);
+            Assert.AreEqual("test1", result.name);
+            Assert.AreEqual(10000, result.changeNumber);
+            Assert.IsFalse(result.killed);
+            Assert.AreEqual("user", result.trafficType);
+            Assert.AreEqual(2, result.treatments.Count);
 
             var firstTreatment = result.treatments[0];
-            Assert.AreEqual(firstTreatment, "on");
+            Assert.AreEqual("on", firstTreatment);
 
             var secondTreatment = result.treatments[1];
-            Assert.AreEqual(secondTreatment, "off");
+            Assert.AreEqual("off", secondTreatment);
         }
 
         [TestMethod]
@@ -242,14 +240,14 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             //Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(result.name, "test1");
-            Assert.AreEqual(result.treatments.Count, 2);
+            Assert.AreEqual("test1", result.name);
+            Assert.AreEqual(2, result.treatments.Count);
 
             var firstTreatment = result.treatments[0];
-            Assert.AreEqual(firstTreatment, "on");
+            Assert.AreEqual("on", firstTreatment);
 
             var secondTreatment = result.treatments[1];
-            Assert.AreEqual(secondTreatment, "off");
+            Assert.AreEqual("off", secondTreatment);
         }
 
         [TestMethod]
@@ -283,7 +281,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             //Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(result.name, "test1");
+            Assert.AreEqual("test1", result.name);
             Assert.AreEqual(conditionWithLogic.partitions.Count, result.treatments.Count);
         }
 
@@ -450,7 +448,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(6, result.Count);
 
             var firstResult = result.Find(x => x == "test1");
-            Assert.AreEqual(firstResult, "test1");
+            Assert.AreEqual("test1", firstResult);
         }
 
         [TestMethod]
@@ -676,7 +674,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(splitViewExpected.configs.Count, splitViewResult.configs.Count);
             foreach (var config in splitViewExpected.configs)
             {
-                Assert.AreEqual(config.Value, splitViewResult.configs[config.Key]);
+                Assert.AreEqual(expected: config.Value, splitViewResult.configs[config.Key]);
             }
 
             Assert.AreEqual(splitViewExpected.treatments.Count, splitViewResult.treatments.Count);
@@ -724,7 +722,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(splitViewExpected.configs.Count, splitViewResult.configs.Count);
             foreach (var config in splitViewExpected.configs)
             {
-                Assert.AreEqual(config.Value, splitViewResult.configs[config.Key]);
+                Assert.AreEqual(expected: config.Value, splitViewResult.configs[config.Key]);
             }
 
             Assert.AreEqual(splitViewExpected.treatments.Count, splitViewResult.treatments.Count);

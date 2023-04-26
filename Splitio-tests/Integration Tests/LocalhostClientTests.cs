@@ -104,12 +104,12 @@ namespace Splitio_Tests.Integration_Tests
 
 
             //Asert
-            Assert.IsTrue(result1 == "off");
-            Assert.IsTrue(result2 == "off");
-            Assert.IsTrue(resultDestroy1 == "control");
-            Assert.AreEqual(resultDestroy2.Count, 0);
-            Assert.AreEqual(resultDestroy3.Count, 0);
-            Assert.IsTrue(resultDestroy4 == null);
+            Assert.AreEqual("off", result1);
+            Assert.AreEqual("off", result2);
+            Assert.AreEqual("control", resultDestroy1);
+            Assert.AreEqual(0, resultDestroy2.Count);
+            Assert.AreEqual(0, resultDestroy3.Count);
+            Assert.IsNull(resultDestroy4);
         }
 
         [DeploymentItem(@"Resources\split.yaml")]

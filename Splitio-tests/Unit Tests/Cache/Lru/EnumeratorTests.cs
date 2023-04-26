@@ -365,7 +365,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.Lru
         /// Checks to ensure that all expected enumerator methods fail after the collection has updated
         /// </summary>
         /// <param name="enumerator">Enumerator to check</param>
-        private void CheckForInvalidEnumerator(IEnumerator<KeyValuePair<int, int>> enumerator)
+        private static void CheckForInvalidEnumerator(IEnumerator<KeyValuePair<int, int>> enumerator)
         {
             bool thrown = false;
             try
@@ -405,7 +405,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.Lru
         /// Creats a test linked list of nodes
         /// </summary>
         /// <returns>Head of the list</returns>
-        private Node<int, int> CreateTestList()
+        private static Node<int, int> CreateTestList()
         {
             Node<int, int> head = null;
             Node<int, int> current = null;

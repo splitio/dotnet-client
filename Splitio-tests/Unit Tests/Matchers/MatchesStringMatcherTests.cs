@@ -127,7 +127,7 @@ namespace Splitio_tests.Unit_Tests.Matchers
         }
 
 
-        private void VerifyTestFile(string file, string[] sepparator)
+        private static void VerifyTestFile(string file, string[] sepparator)
         {
             //Arrange
             var fileContent = File.ReadAllText(file);
