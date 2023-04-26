@@ -2,7 +2,6 @@
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;

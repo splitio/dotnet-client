@@ -1,5 +1,8 @@
 CHANGES
 
+7.4.2 (Apr 26, 2023)
+- Fixed localhost mode to order conditions and evaluate correctly.
+
 7.4.1 (Apr 18, 2023)
 - Fixed log level for Http Request statuses.
 

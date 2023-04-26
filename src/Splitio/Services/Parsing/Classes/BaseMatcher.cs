@@ -7,17 +7,35 @@ namespace Splitio.Services.Parsing.Classes
 {
     public abstract class BaseMatcher : IMatcher
     {
-        public abstract bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
+        public virtual bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return false;
+        }
 
-        public abstract bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
+        public virtual bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return false;
+        }
 
-        public abstract bool Match(long key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
+        public virtual bool Match(long key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return false;
+        }
 
-        public abstract bool Match(List<string> key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
+        public virtual bool Match(List<string> key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return false;
+        }
 
-        public abstract bool Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
+        public virtual bool Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return false;
+        }
 
-        public abstract bool Match(bool key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
+        public virtual bool Match(bool key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return false;
+        }
 
         public bool Match(object value, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {

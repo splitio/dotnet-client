@@ -11,7 +11,7 @@ namespace Splitio.CommonLibraries
     /// </summary>
     public static class PeriodicTaskFactory
     {
-        private static ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(PeriodicTaskFactory));
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(PeriodicTaskFactory));
 
         /// <summary>
         /// Starts the periodic task.
@@ -20,7 +20,7 @@ namespace Splitio.CommonLibraries
         {
             void mainAction()
             {
-                MainPeriodicTaskAction(intervalInMilliseconds, cancelToken, action);
+                MainPeriodicTaskAction(intervalInMilliseconds, action, cancelToken);
             }
 
             return Task.Factory.StartNew(mainAction, cancelToken, TaskCreationOptions.LongRunning, TaskScheduler.Current);
@@ -29,13 +29,13 @@ namespace Splitio.CommonLibraries
         /// <summary>
         /// Mains the periodic task action.
         /// </summary>
-        private static void MainPeriodicTaskAction(int intervalInMilliseconds, CancellationToken cancelToken, Action wrapperAction)
+        private static void MainPeriodicTaskAction(int intervalInMilliseconds, Action wrapperAction, CancellationToken cancelToken)
         {
             // using a ManualResetEventSlim as it is more efficient in small intervals.
             // In the case where longer intervals are used, it will automatically use 
             // a standard WaitHandle....
             // see http://msdn.microsoft.com/en-us/library/vstudio/5hbefs30(v=vs.100).aspx
-            using (ManualResetEventSlim periodResetEvent = new ManualResetEventSlim(false))
+            using (var periodResetEvent = new ManualResetEventSlim(false))
             {
                 while (true)
                 {
@@ -44,7 +44,7 @@ namespace Splitio.CommonLibraries
                         break;
                     }
 
-                    Task subTask = Task.Factory.StartNew(wrapperAction, cancelToken);
+                    var subTask = Task.Factory.StartNew(wrapperAction, cancelToken);
 
                     try
                     {

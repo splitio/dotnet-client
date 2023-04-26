@@ -15,7 +15,7 @@ namespace Splitio.Services.Shared.Classes
 
         public abstract ConcurrentDictionary<string, ParsedSplit> ParseSplitFile(string filePath);
 
-        protected ParsedSplit CreateParsedSplit(string name, string treatment, List<ConditionWithLogic> codnitions = null)
+        protected static ParsedSplit CreateParsedSplit(string name, string treatment, List<ConditionWithLogic> codnitions = null)
         {
             var split = new ParsedSplit()
             {
@@ -30,7 +30,7 @@ namespace Splitio.Services.Shared.Classes
             return split;
         }
 
-        protected ConditionWithLogic CreateCondition(string treatment, List<string> keys = null)
+        protected static ConditionWithLogic CreateCondition(string treatment, List<string> keys = null)
         {
             if (keys != null)
             {
@@ -60,34 +60,32 @@ namespace Splitio.Services.Shared.Classes
                     label = $"whitelisted {string.Join(", ", keys)}"
                 };
             }
-            else
+
+            return new ConditionWithLogic
             {
-                return new ConditionWithLogic
+                conditionType = ConditionType.ROLLOUT,
+                matcher = new CombiningMatcher
                 {
-                    conditionType = ConditionType.ROLLOUT,
-                    matcher = new CombiningMatcher
+                    combiner = CombinerEnum.AND,
+                    delegates = new List<AttributeMatcher>
                     {
-                        combiner = CombinerEnum.AND,
-                        delegates = new List<AttributeMatcher>
+                        new AttributeMatcher
                         {
-                            new AttributeMatcher
-                            {
-                                negate = false,
-                                matcher = new AllKeysMatcher()
-                            }
+                            negate = false,
+                            matcher = new AllKeysMatcher()
                         }
-                    },
-                    partitions = new List<PartitionDefinition>
+                    }
+                },
+                partitions = new List<PartitionDefinition>
+                {
+                    new PartitionDefinition
                     {
-                        new PartitionDefinition
-                        {
-                            size = 100,
-                            treatment = treatment
-                        }
-                    },
-                    label = "Default rule"
-                };
-            }
+                        size = 100,
+                        treatment = treatment
+                    }
+                },
+                label = "Default rule"
+            };
         }
     }
 }

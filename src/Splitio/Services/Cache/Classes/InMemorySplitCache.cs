@@ -12,8 +12,8 @@ namespace Splitio.Services.Cache.Classes
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemorySplitCache));
 
-        private ConcurrentDictionary<string, ParsedSplit> _splits;
-        private ConcurrentDictionary<string, int> _trafficTypes;
+        private readonly ConcurrentDictionary<string, ParsedSplit> _splits;
+        private readonly ConcurrentDictionary<string, int> _trafficTypes;
         private long _changeNumber;
 
         public InMemorySplitCache(ConcurrentDictionary<string, ParsedSplit> splits, long changeNumber = -1)
@@ -114,11 +114,7 @@ namespace Splitio.Services.Cache.Classes
 
         public bool TrafficTypeExists(string trafficType)
         {
-            var quantity = 0;
-
-            var exists = string.IsNullOrEmpty(trafficType) 
-                ? false 
-                : _trafficTypes.TryGetValue(trafficType, out quantity);
+            var exists = _trafficTypes.TryGetValue(trafficType, out int quantity);
 
             return exists && quantity > 0;
         }
@@ -138,7 +134,7 @@ namespace Splitio.Services.Cache.Classes
             {
                 if (quantity <= 1)
                 {
-                    _trafficTypes.TryRemove(split.trafficTypeName, out int value);
+                    _trafficTypes.TryRemove(split.trafficTypeName, out _);
 
                     return;
                 }
