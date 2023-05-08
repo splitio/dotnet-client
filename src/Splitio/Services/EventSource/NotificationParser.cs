@@ -1,12 +1,13 @@
 ﻿using Newtonsoft.Json;
+using Splitio.Domain;
+using Splitio.Util;
 using System;
+using System.Text;
 
 namespace Splitio.Services.EventSource
 {
     public class NotificationParser : INotificationParser
     {
-        private const string _exceptionMessage = "Unexpected type received from EventSource";
-
         public IncomingNotification Parse(string notification)
         {
             if (notification.Contains("event: message"))
@@ -26,17 +27,17 @@ namespace Splitio.Services.EventSource
             return null;
         }
 
-        private IncomingNotification ParseMessage(string notificationString)
+        private static IncomingNotification ParseMessage(string notificationString)
         {
-            var result = new IncomingNotification();
-
             var notificationData = GetNotificationData<NotificationData>(notificationString);
             var data = JsonConvert.DeserializeObject<IncomingNotification>(notificationData.Data);
 
+            IncomingNotification result;
             switch (data?.Type)
             {
                 case NotificationType.SPLIT_UPDATE:
-                    result = JsonConvert.DeserializeObject<SplitChangeNotifiaction>(notificationData.Data);
+                    var changeNotification = JsonConvert.DeserializeObject<SplitChangeNotifiaction>(notificationData.Data);
+                    result = DecompressSplitDefinition(changeNotification);
                     break;
                 case NotificationType.SPLIT_KILL:
                     result = JsonConvert.DeserializeObject<SplitKillNotification>(notificationData.Data);
@@ -53,7 +54,7 @@ namespace Splitio.Services.EventSource
             return result;
         }
 
-        private IncomingNotification ParseControlChannelMessage(string notificationString)
+        private static IncomingNotification ParseControlChannelMessage(string notificationString)
         {
             var notificationData = GetNotificationData<NotificationData>(notificationString);
             var channel = notificationData.Channel.Replace(Constants.Push.OccupancyPrefix, string.Empty);
@@ -70,7 +71,7 @@ namespace Splitio.Services.EventSource
             return ParseOccupancy(notificationData.Data, channel);
         }
 
-        private IncomingNotification ParseOccupancy(string payload, string channel)
+        private static IncomingNotification ParseOccupancy(string payload, string channel)
         {
             var occupancyNotification = JsonConvert.DeserializeObject<OccupancyNotification>(payload);
 
@@ -83,7 +84,7 @@ namespace Splitio.Services.EventSource
             return occupancyNotification;
         }
 
-        private IncomingNotification ParseError(string notificationString)
+        private static IncomingNotification ParseError(string notificationString)
         {
             var notificatinError = GetNotificationData<NotificationError>(notificationString);
 
@@ -95,12 +96,46 @@ namespace Splitio.Services.EventSource
             return notificatinError;
         }
 
-        private T GetNotificationData<T>(string notificationString)
+        private static T GetNotificationData<T>(string notificationString)
         {
             var notificationArray = notificationString.Split('\n');
             var index = Array.FindIndex(notificationArray, row => row.Contains("data: "));
 
             return JsonConvert.DeserializeObject<T>(notificationArray[index].Replace("data: ", string.Empty));
+        }
+
+        private static IncomingNotification DecompressSplitDefinition(SplitChangeNotifiaction notification)
+        {
+            try
+            {
+                if (!notification.CompressionType.HasValue) return notification;
+
+                var input = Convert.FromBase64String(notification.SplitDefinition);
+
+                switch (notification.CompressionType)
+                {
+                    case CompressionType.Gzip:
+                        notification.Split = DeserializeSplitDefinitionObject(DecompressionUtil.GZip(input));
+                        break;
+                    case CompressionType.Zlib:
+                        notification.Split = DeserializeSplitDefinitionObject(DecompressionUtil.ZLib(input));
+                        break;
+                    case CompressionType.NotCompressed:
+                        notification.Split = DeserializeSplitDefinitionObject(input);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                // log error.
+            }
+
+            return notification;
+        }
+
+        private static Split DeserializeSplitDefinitionObject(byte[] input)
+        {
+            return JsonConvert.DeserializeObject<Split>(Encoding.UTF8.GetString(input));
         }
     }
 }

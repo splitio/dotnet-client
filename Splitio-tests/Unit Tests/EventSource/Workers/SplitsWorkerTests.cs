@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource.Workers;
 using Splitio.Services.Shared.Classes;
@@ -15,16 +14,14 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         private readonly IWrapperAdapter wrapperAdapter = WrapperAdapter.Instance();
 
         private readonly Mock<ISynchronizer> _synchronizer;
-        private readonly Mock<ISplitCache> _splitCache;
 
         private readonly ISplitsWorker _splitsWorker;
 
         public SplitsWorkerTests()
         {
             _synchronizer = new Mock<ISynchronizer>();
-            _splitCache = new Mock<ISplitCache>();
 
-            _splitsWorker = new SplitsWorker(_splitCache.Object, _synchronizer.Object, new TasksManager(wrapperAdapter));
+            _splitsWorker = new SplitsWorker(_synchronizer.Object, new TasksManager(wrapperAdapter));
         }
 
         [TestMethod]        
@@ -55,52 +52,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             Thread.Sleep(500);
 
             // Assert.
-            _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Never);
             _synchronizer.Verify(mock => mock.SynchronizeSplits(It.IsAny<long>()), Times.Never);
-        }
-
-        [TestMethod]
-        public void Kill_ShouldTriggerFetch()
-        {
-            // Arrange.            
-            var changeNumber = 1585956698457;
-            var splitName = "split-test";
-            var defaultTreatment = "off";
-
-            _splitCache
-                .Setup(mock => mock.GetChangeNumber())
-                .Returns(1585956698447);
-
-            _splitsWorker.Start();
-
-            // Act.            
-            _splitsWorker.KillSplit(changeNumber, splitName, defaultTreatment);
-            Thread.Sleep(1000);
-
-            // Assert.
-            _splitCache.Verify(mock => mock.Kill(changeNumber, splitName, defaultTreatment), Times.Once);
-        }
-
-        [TestMethod]
-        public void Kill_ShouldNotTriggerFetch()
-        {
-            // Arrange.            
-            var changeNumber = 1585956698457;
-            var splitName = "split-test";
-            var defaultTreatment = "off";
-
-            _splitCache
-                .Setup(mock => mock.GetChangeNumber())
-                .Returns(1585956698467);
-
-            _splitsWorker.Start();
-
-            // Act.            
-            _splitsWorker.KillSplit(changeNumber, splitName, defaultTreatment);
-            Thread.Sleep(1000);
-
-            // Assert.
-            _splitCache.Verify(mock => mock.Kill(changeNumber, splitName, defaultTreatment), Times.Never);
         }
     }
 }

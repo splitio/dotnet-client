@@ -213,11 +213,11 @@ namespace Splitio.Services.Client.Classes
                 var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _impressionsCounter, _wrapperAdapter, _statusManager, _telemetrySyncTask, _tasksManager, _splitCache, backOff, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs, _segmentCache, _uniqueKeysTracker);
 
                 // Workers
-                var splitsWorker = new SplitsWorker(_splitCache, synchronizer, _tasksManager);
+                var splitsWorker = new SplitsWorker(synchronizer, _tasksManager);
                 var segmentsWorker = new SegmentsWorker(synchronizer, _tasksManager);
 
                 // NotificationProcessor
-                var notificationProcessor = new NotificationProcessor(splitsWorker, segmentsWorker);
+                var notificationProcessor = new NotificationProcessor(splitsWorker, segmentsWorker, _splitCache);
 
                 // NotificationParser
                 var notificationParser = new NotificationParser();

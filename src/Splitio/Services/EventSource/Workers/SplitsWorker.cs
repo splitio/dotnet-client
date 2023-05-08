@@ -1,5 +1,4 @@
-﻿using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Common;
+﻿using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
@@ -11,7 +10,6 @@ namespace Splitio.Services.EventSource.Workers
     public class SplitsWorker : ISplitsWorker
     {
         private readonly ISplitLogger _log;
-        private readonly ISplitCache _splitCache;
         private readonly ISynchronizer _synchronizer;
         private readonly ITasksManager _tasksManager;
         private readonly BlockingCollection<long> _queue;
@@ -20,11 +18,9 @@ namespace Splitio.Services.EventSource.Workers
         private CancellationTokenSource _cancellationTokenSource;
         private bool _running;
 
-        public SplitsWorker(ISplitCache splitCache,
-            ISynchronizer synchronizer,
+        public SplitsWorker(ISynchronizer synchronizer,
             ITasksManager tasksManager)
         {
-            _splitCache = splitCache;
             _synchronizer = synchronizer;
             _tasksManager = tasksManager;
             _log = WrapperAdapter.Instance().GetLogger(typeof(SplitsWorker));
@@ -48,28 +44,6 @@ namespace Splitio.Services.EventSource.Workers
             catch (Exception ex)
             {
                 _log.Error($"AddToQueue: {ex.Message}");
-            }
-        }
-
-        public void KillSplit(long changeNumber, string splitName, string defaultTreatment)
-        {
-            try
-            {
-                if (!_running)
-                {
-                    _log.Debug("Splits Worker not running.");
-                    return;
-                }
-
-                if (changeNumber > _splitCache.GetChangeNumber())
-                {
-                    _log.Debug($"Kill Split: {splitName}, changeNumber: {changeNumber} and defaultTreatment: {defaultTreatment}");
-                    _splitCache.Kill(changeNumber, splitName, defaultTreatment);
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Error($"KillSplit: {ex.Message}");
             }
         }
 
