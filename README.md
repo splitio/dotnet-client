@@ -3,7 +3,7 @@
 ![CI Status](https://ci.appveyor.com/api/projects/status/hi6g2vl7s34vc225/branch/main?svg=true)
 
 ## Overview
-This SDK is designed to work with Split, the platform for controlled rollouts, which serves features to your users via a Split feature flag to manage your complete customer experience.
+This SDK is designed to work with Split, the platform for controlled rollouts, which serves features to your users via a feature flag to manage your complete customer experience.
  
 [![Twitter Follow](https://img.shields.io/twitter/follow/splitsoftware.svg?style=social&label=Follow&maxAge=1529000)](https://twitter.com/intent/follow?screen_name=splitsoftware)
  
@@ -30,7 +30,7 @@ catch (Exception ex)
     // log & handle 
 }
 
-var treatment = sdk.GetTreatment("CUSTOMER_ID","SPLIT_NAME");
+var treatment = sdk.GetTreatment("CUSTOMER_ID","FEATURE_FLAG_NAME");
 
 if (treatment == "on") 
 {
