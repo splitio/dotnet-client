@@ -11,7 +11,7 @@ namespace Splitio.Services.EventSource.Workers
     public class SplitsWorker : ISplitsWorker
     {
         private readonly ISplitLogger _log;
-        private readonly ISplitCache _splitCache;
+        private readonly ISplitCache _featureFlagCache;
         private readonly ISynchronizer _synchronizer;
         private readonly ITasksManager _tasksManager;
         private readonly BlockingCollection<long> _queue;
@@ -20,11 +20,11 @@ namespace Splitio.Services.EventSource.Workers
         private CancellationTokenSource _cancellationTokenSource;
         private bool _running;
 
-        public SplitsWorker(ISplitCache splitCache,
+        public SplitsWorker(ISplitCache featureFlagCache,
             ISynchronizer synchronizer,
             ITasksManager tasksManager)
         {
-            _splitCache = splitCache;
+            _featureFlagCache = featureFlagCache;
             _synchronizer = synchronizer;
             _tasksManager = tasksManager;
             _log = WrapperAdapter.Instance().GetLogger(typeof(SplitsWorker));
@@ -38,7 +38,7 @@ namespace Splitio.Services.EventSource.Workers
             {
                 if (!_running)
                 {
-                    _log.Debug("Splits Worker not running.");
+                    _log.Debug("FeatureFlags Worker not running.");
                     return;
                 }
 
@@ -57,19 +57,19 @@ namespace Splitio.Services.EventSource.Workers
             {
                 if (!_running)
                 {
-                    _log.Debug("Splits Worker not running.");
+                    _log.Debug("FeatureFlags Worker not running.");
                     return;
                 }
 
-                if (changeNumber > _splitCache.GetChangeNumber())
+                if (changeNumber > _featureFlagCache.GetChangeNumber())
                 {
-                    _log.Debug($"Kill Split: {splitName}, changeNumber: {changeNumber} and defaultTreatment: {defaultTreatment}");
-                    _splitCache.Kill(changeNumber, splitName, defaultTreatment);
+                    _log.Debug($"Kill Feature Flag: {splitName}, changeNumber: {changeNumber} and defaultTreatment: {defaultTreatment}");
+                    _featureFlagCache.Kill(changeNumber, splitName, defaultTreatment);
                 }
             }
             catch (Exception ex)
             {
-                _log.Error($"KillSplit: {ex.Message}");
+                _log.Error($"Errir killing the following Feature Flag: {splitName}", ex);
             }
         }
 
@@ -81,14 +81,14 @@ namespace Splitio.Services.EventSource.Workers
                 {
                     if (_running)
                     {
-                        _log.Debug("Splits Worker already running.");
+                        _log.Debug("FeatureFlags Worker already running.");
                         return;
                     }
 
-                    _log.Debug("SplitsWorker starting ...");
+                    _log.Debug("FeatureFlags Wroker starting ...");
                     _cancellationTokenSource = new CancellationTokenSource();
                     _running = true;
-                    _tasksManager.Start(() => ExecuteAsync(), _cancellationTokenSource, "Splits Worker.");                    
+                    _tasksManager.Start(() => ExecuteAsync(), _cancellationTokenSource, "FeatureFlags Worker.");                    
                 }
                 catch (Exception ex)
                 {
@@ -105,14 +105,14 @@ namespace Splitio.Services.EventSource.Workers
                 {
                     if (!_running)
                     {
-                        _log.Debug("Splits Worker not running.");
+                        _log.Debug("FeatureFlags Worker not running.");
                         return;
                     }
 
                     _cancellationTokenSource?.Cancel();
                     _cancellationTokenSource?.Dispose();
 
-                    _log.Debug("SplitsWorker stopped ...");
+                    _log.Debug("FeatureFlags Worker stopped ...");
                     _running = false;
                 }
                 catch (Exception ex)
@@ -128,7 +128,7 @@ namespace Splitio.Services.EventSource.Workers
         {
             try
             {
-                _log.Debug($"Splits Worker, Token: {_cancellationTokenSource.IsCancellationRequested}; Running: {_running}.");
+                _log.Debug($"FeatureFlags Worker, Token: {_cancellationTokenSource.IsCancellationRequested}; Running: {_running}.");
                 while (!_cancellationTokenSource.IsCancellationRequested && _running)
                 {
                     // Wait indefinitely until a segment is queued
@@ -146,7 +146,7 @@ namespace Splitio.Services.EventSource.Workers
             }
             finally
             {
-                _log.Debug("Split Worker execution finished.");
+                _log.Debug("FeatureFlags Worker execution finished.");
             }
         }
         #endregion
