@@ -69,7 +69,7 @@ namespace Splitio.Services.EventSource.Workers
             }
             catch (Exception ex)
             {
-                _log.Error($"Errir killing the following Feature Flag: {splitName}", ex);
+                _log.Error($"Error killing the following feature flag: {splitName}", ex);
             }
         }
 

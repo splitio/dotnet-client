@@ -70,7 +70,7 @@ namespace Splitio.Services.Client.Classes
 
             if (featureFlag == null)
             {
-                _log.Warn($"feature flag: you passed {featureName} that does not exist in this environment, please double check what Feature Flags exist in the web console.");
+                _log.Warn($"feature flag: you passed {featureName} that does not exist in this environment, please double check what feature flags exist in the web console.");
 
                 return null;
             }
