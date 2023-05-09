@@ -103,7 +103,7 @@ namespace Splitio.Services.Evaluator
 
                 if (parsedSplit == null)
                 {
-                    _log.Warn($"GetTreatment: you passed {featureName} that does not exist in this environment, please double check what Feature Flags exist in the web console.");
+                    _log.Warn($"GetTreatment: you passed {featureName} that does not exist in this environment, please double check what feature flags exist in the user interface.");
 
                     return new TreatmentResult(Labels.SplitNotFound, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
                 }
