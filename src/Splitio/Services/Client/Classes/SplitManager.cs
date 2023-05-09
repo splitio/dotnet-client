@@ -70,7 +70,7 @@ namespace Splitio.Services.Client.Classes
 
             if (split == null)
             {
-                _log.Warn($"split: you passed {featureName} that does not exist in this environment, please double check what Splits exist in the web console.");
+                _log.Warn($"split: you passed {featureName} that does not exist in this environment, please double check what feature flag exist in the Split user interface.");
 
                 return null;
             }
