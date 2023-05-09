@@ -80,7 +80,7 @@ namespace Splitio.Services.Cache.Classes
         {
             if (changeNumber < _changeNumber)
             {
-                _log.Error("ChangeNumber for splits cache is less than previous");
+                _log.Error("ChangeNumber for feature flags cache is less than previous");
             }
 
             _changeNumber = changeNumber;

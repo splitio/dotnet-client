@@ -40,7 +40,7 @@ namespace Splitio.Services.Evaluator
                 }
                 catch (Exception e)
                 {
-                    _log.Error($"Exception caught getting treatment for feature: {featureName}", e);
+                    _log.Error($"Exception caught getting treatment for feature flag: {featureName}", e);
 
                     return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds, exception: true);
                 }
