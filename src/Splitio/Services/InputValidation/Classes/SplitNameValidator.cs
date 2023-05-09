@@ -22,13 +22,13 @@ namespace Splitio.Services.InputValidation.Classes
         {
             if (splitNames == null)
             {
-                _log.Error($"{method}: split_names must be a non-empty array");
+                _log.Error($"{method}: feature_flag_names must be a non-empty array");
                 return splitNames;
             }
 
             if (!splitNames.Any())
             {
-                _log.Error($"{method}: split_names must be a non-empty array");
+                _log.Error($"{method}: feature_flag_names must be a non-empty array");
                 return splitNames;
             }
 
@@ -46,7 +46,7 @@ namespace Splitio.Services.InputValidation.Classes
                     }
                     catch
                     {
-                        _log.Warn($"{method}: error adding splitName into list.");
+                        _log.Warn($"{method}: error adding feature flag name into list.");
                     }
                 }
             }
@@ -58,13 +58,13 @@ namespace Splitio.Services.InputValidation.Classes
         {
             if (splitName == null)
             {
-                _log.Error($"{method}: you passed a null split_name, split_name must be a non-empty string");
+                _log.Error($"{method}: you passed a null feature_flag_name, feature_flag_name must be a non-empty string");
                 return new ValidatorResult { Success = false };
             }
 
             if (splitName == string.Empty)
             {
-                _log.Error($"{method}: you passed an empty split_name, split_name must be a non-empty string");
+                _log.Error($"{method}: you passed an empty feature_flag_name, feature_flag_name must be a non-empty string");
                 return new ValidatorResult { Success = false };
             }
 
@@ -77,7 +77,7 @@ namespace Splitio.Services.InputValidation.Classes
         {
             if (splitName.StartsWith(WHITESPACE) || splitName.EndsWith(WHITESPACE))
             {
-                _log.Warn($"{method}: split name {splitName} has extra whitespace, trimming");
+                _log.Warn($"{method}: feature flag name {splitName} has extra whitespace, trimming");
 
                 splitName = splitName.TrimStart();
                 splitName = splitName.TrimEnd();
