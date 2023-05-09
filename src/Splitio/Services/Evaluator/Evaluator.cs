@@ -2,7 +2,6 @@
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Logger;
-using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
@@ -41,7 +40,7 @@ namespace Splitio.Services.Evaluator
                 }
                 catch (Exception e)
                 {
-                    _log.Error($"Exception caught getting treatment for feature: {featureName}", e);
+                    _log.Error($"Exception caught getting treatment for feature flag: {featureName}", e);
 
                     return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds, exception: true);
                 }
@@ -104,7 +103,7 @@ namespace Splitio.Services.Evaluator
 
                 if (parsedSplit == null)
                 {
-                    _log.Warn($"GetTreatment: you passed {featureName} that does not exist in this environment, please double check what Splits exist in the web console.");
+                    _log.Warn($"GetTreatment: you passed {featureName} that does not exist in this environment, please double check what feature flags exist in the user interface.");
 
                     return new TreatmentResult(Labels.SplitNotFound, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
                 }
@@ -122,7 +121,7 @@ namespace Splitio.Services.Evaluator
             }
             catch (Exception e)
             {
-                _log.Error($"Exception caught getting treatment for feature: {featureName}", e);
+                _log.Error($"Exception caught getting treatment for feature flag: {featureName}", e);
 
                 return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
             }
