@@ -91,7 +91,7 @@ namespace Splitio.Services.Evaluator
         #endregion
 
         #region Private Methods
-        private TreatmentResult EvaluateTreatment(Key key, ParsedSplit parsedSplit, string featureName, Util.SplitStopwatch clock = null, Dictionary<string, object> attributes = null)
+        private TreatmentResult EvaluateTreatment(Key key, ParsedSplit parsedSplit, string featureFlagName, Util.SplitStopwatch clock = null, Dictionary<string, object> attributes = null)
         {
             try
             {
@@ -103,7 +103,7 @@ namespace Splitio.Services.Evaluator
 
                 if (parsedSplit == null)
                 {
-                    _log.Warn($"GetTreatment: you passed {featureName} that does not exist in this environment, please double check what feature flags exist in the user interface.");
+                    _log.Warn($"GetTreatment: you passed {featureFlagName} that does not exist in this environment, please double check what feature flags exist in the Split user interface.");
 
                     return new TreatmentResult(Labels.SplitNotFound, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
                 }
@@ -121,7 +121,7 @@ namespace Splitio.Services.Evaluator
             }
             catch (Exception e)
             {
-                _log.Error($"Exception caught getting treatment for feature flag: {featureName}", e);
+                _log.Error($"Exception caught getting treatment for feature flag: {featureFlagName}", e);
 
                 return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
             }

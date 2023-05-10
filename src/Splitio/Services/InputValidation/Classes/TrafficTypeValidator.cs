@@ -41,7 +41,7 @@ namespace Splitio.Services.InputValidation.Classes
 
             if (!_splitCache.TrafficTypeExists(trafficType))
             {
-                _log.Warn($"Track: Traffic Type {trafficType} does not have any corresponding Splits in this environment, make sure you’re tracking your events to a valid traffic type defined in the Split console.");
+                _log.Warn($"Track: Traffic Type {trafficType} does not have any corresponding feature flags in this environment, make sure you’re tracking your events to a valid traffic type defined in the Split user interface.");
             }
 
             return new ValidatorResult { Success = true, Value = trafficType };
