@@ -33,7 +33,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
 
             // Assert.
             Assert.IsFalse(result.Success);
-            _log.Verify(mock => mock.Error($"{method}: you passed an empty split_name, split_name must be a non-empty string"), Times.Once());
+            _log.Verify(mock => mock.Error($"{method}: you passed an empty featureFlagName, flag name must be a non-empty string"), Times.Once());
         }
 
         [TestMethod]
@@ -48,7 +48,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
 
             // Assert.
             Assert.IsFalse(result.Success);
-            _log.Verify(mock => mock.Error($"{method}: you passed a null split_name, split_name must be a non-empty string"), Times.Once());
+            _log.Verify(mock => mock.Error($"{method}: you passed a null featureFlagName, flag name must be a non-empty string"), Times.Once());
         }
 
         [TestMethod]
@@ -65,7 +65,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             Assert.IsTrue(result.Success);
             Assert.AreNotEqual(splitName, result.Value);
             Assert.AreEqual("ASD F654", result.Value);
-            _log.Verify(mock => mock.Warn($"{method}: split name {splitName} has extra whitespace, trimming"), Times.Once());
+            _log.Verify(mock => mock.Warn($"{method}: feature flag name {splitName} has extra whitespace, trimming"), Times.Once());
         }
 
         [TestMethod]
@@ -95,7 +95,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
 
             // Assert.
             Assert.IsNull(result);
-            _log.Verify(mock => mock.Error($"{method}: split_names must be a non-empty array"));
+            _log.Verify(mock => mock.Error($"{method}: featureFlagNames must be a non-empty array"));
         }
 
         [TestMethod]
@@ -110,7 +110,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
 
             // Assert.
             Assert.IsFalse(result.Any());
-            _log.Verify(mock => mock.Error($"{method}: split_names must be a non-empty array"));
+            _log.Verify(mock => mock.Error($"{method}: featureFlagNames must be a non-empty array"));
         }
 
         [TestMethod]
