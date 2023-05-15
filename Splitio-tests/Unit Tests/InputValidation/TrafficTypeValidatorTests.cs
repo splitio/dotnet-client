@@ -96,7 +96,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             // Asserts.
             Assert.IsTrue(result.Success);
             Assert.AreEqual(trafficType, result.Value);
-            _log.Verify(mock => mock.Warn($"Track: Traffic Type {trafficType} does not have any corresponding Splits in this environment, make sure you’re tracking your events to a valid traffic type defined in the Split console."), Times.Once());
+            _log.Verify(mock => mock.Warn($"Track: Traffic Type {trafficType} does not have any corresponding feature flags in this environment, make sure you’re tracking your events to a valid traffic type defined in the Split user interface."), Times.Once());
             _log.Verify(mock => mock.Warn(It.IsAny<string>()), Times.Exactly(1));
             _log.Verify(mock => mock.Error(It.IsAny<string>()), Times.Never);
         }

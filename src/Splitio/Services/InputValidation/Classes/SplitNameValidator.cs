@@ -18,23 +18,23 @@ namespace Splitio.Services.InputValidation.Classes
             _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(SplitNameValidator));
         }
 
-        public List<string> SplitNamesAreValid(List<string> splitNames, string method)
+        public List<string> SplitNamesAreValid(List<string> featureFlagNames, string method)
         {
-            if (splitNames == null)
+            if (featureFlagNames == null)
             {
-                _log.Error($"{method}: split_names must be a non-empty array");
-                return splitNames;
+                _log.Error($"{method}: featureFlagNames must be a non-empty array");
+                return featureFlagNames;
             }
 
-            if (!splitNames.Any())
+            if (!featureFlagNames.Any())
             {
-                _log.Error($"{method}: split_names must be a non-empty array");
-                return splitNames;
+                _log.Error($"{method}: featureFlagNames must be a non-empty array");
+                return featureFlagNames;
             }
 
             var dicSplits = new Dictionary<string, string>();
 
-            foreach (var name in splitNames)
+            foreach (var name in featureFlagNames)
             {
                 var splitNameResult = SplitNameIsValid(name, method);
 
@@ -46,7 +46,7 @@ namespace Splitio.Services.InputValidation.Classes
                     }
                     catch
                     {
-                        _log.Warn($"{method}: error adding splitName into list.");
+                        _log.Warn($"{method}: error adding feature flag name into list.");
                     }
                 }
             }
@@ -54,36 +54,36 @@ namespace Splitio.Services.InputValidation.Classes
             return dicSplits.Keys.ToList();
         }
 
-        public ValidatorResult SplitNameIsValid(string splitName, string method)
+        public ValidatorResult SplitNameIsValid(string featureFlagName, string method)
         {
-            if (splitName == null)
+            if (featureFlagName == null)
             {
-                _log.Error($"{method}: you passed a null split_name, split_name must be a non-empty string");
+                _log.Error($"{method}: you passed a null featureFlagName, flag name must be a non-empty string");
                 return new ValidatorResult { Success = false };
             }
 
-            if (splitName == string.Empty)
+            if (featureFlagName == string.Empty)
             {
-                _log.Error($"{method}: you passed an empty split_name, split_name must be a non-empty string");
+                _log.Error($"{method}: you passed an empty featureFlagName, flag name must be a non-empty string");
                 return new ValidatorResult { Success = false };
             }
 
-            splitName = CheckWhiteSpaces(splitName, method);
+            featureFlagName = CheckWhiteSpaces(featureFlagName, method);
 
-            return new ValidatorResult { Success = true, Value = splitName };
+            return new ValidatorResult { Success = true, Value = featureFlagName };
         }
 
-        private string CheckWhiteSpaces(string splitName, string method)
+        private string CheckWhiteSpaces(string featureFlagName, string method)
         {
-            if (splitName.StartsWith(WHITESPACE) || splitName.EndsWith(WHITESPACE))
+            if (featureFlagName.StartsWith(WHITESPACE) || featureFlagName.EndsWith(WHITESPACE))
             {
-                _log.Warn($"{method}: split name {splitName} has extra whitespace, trimming");
+                _log.Warn($"{method}: feature flag name {featureFlagName} has extra whitespace, trimming");
 
-                splitName = splitName.TrimStart();
-                splitName = splitName.TrimEnd();
+                featureFlagName = featureFlagName.TrimStart();
+                featureFlagName = featureFlagName.TrimEnd();
             }
 
-            return splitName;
+            return featureFlagName;
         }
     }
 }
