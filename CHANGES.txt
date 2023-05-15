@@ -1,7 +1,7 @@
 CHANGES
 
 7.4.3 (May 15, 2023)
-- Updated terminology on the SDKs codebase to be more aligned with current standard without causing a breaking change. The core change is the term split for feature flag on things like logs and intensense comments.
+- Updated terminology on the SDKs codebase to be more aligned with current standard without causing a breaking change. The core change is the term split for feature flag on things like logs and IntelliSense comments.
 
 7.4.2 (Apr 26, 2023)
 - Fixed localhost mode to order conditions and evaluate correctly.
