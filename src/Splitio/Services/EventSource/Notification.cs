@@ -52,8 +52,8 @@ namespace Splitio.Services.EventSource
         public long ChangeNumber { get; set; }
         [JsonProperty("pcn")]
         public long? PreviousChangeNumber { get; set; }
-        [JsonProperty("splitDef")]
-        public string SplitDefinition { get; set; }
+        [JsonProperty("d")]
+        public string Data { get; set; }
         [JsonProperty("c")]
         public CompressionType? CompressionType { get; set; }
 

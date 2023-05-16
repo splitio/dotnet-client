@@ -29,6 +29,7 @@ namespace Splitio.Services.EventSource
 
         private static IncomingNotification ParseMessage(string notificationString)
         {
+            Console.WriteLine(notificationString);
             var notificationData = GetNotificationData<NotificationData>(notificationString);
             var data = JsonConvert.DeserializeObject<IncomingNotification>(notificationData.Data);
 
@@ -110,7 +111,7 @@ namespace Splitio.Services.EventSource
             {
                 if (!notification.CompressionType.HasValue) return notification;
 
-                var input = Convert.FromBase64String(notification.SplitDefinition);
+                var input = Convert.FromBase64String(notification.Data);
 
                 switch (notification.CompressionType)
                 {

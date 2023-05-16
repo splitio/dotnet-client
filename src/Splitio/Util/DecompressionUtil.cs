@@ -1,4 +1,4 @@
-﻿using Splitio.Util.Zip.Compression.Streams;
+﻿using System;
 using System.IO;
 using System.IO.Compression;
 
@@ -6,6 +6,8 @@ namespace Splitio.Util
 {
     public class DecompressionUtil
     {
+        private static readonly int kZlibHeaderSize = 2;
+
         public static byte[] GZip(byte[] input)
         {
             try
@@ -30,14 +32,15 @@ namespace Splitio.Util
         {
             try
             {
+                input = RemoveHeader(input);
+
                 using (var outputStream = new MemoryStream())
                 {
-                    using (var compressedInput = new MemoryStream(input))
+                    using (var compressedStream = new MemoryStream(input))
                     {
-                        using (var inputStream = new InflaterInputStream(compressedInput))
+                        using (var deflateStream = new DeflateStream(compressedStream, CompressionMode.Decompress))
                         {
-                            inputStream.CopyTo(outputStream);
-                            outputStream.Position = 0;
+                            deflateStream.CopyTo(outputStream);
                         }
                     }
 
@@ -45,6 +48,17 @@ namespace Splitio.Util
                 }
             }
             catch { return new byte[0]; }
+        }
+
+        private static byte[] RemoveHeader(byte[] input)
+        {
+            // Create a new array
+            byte[] toReturn = new byte[input.Length - kZlibHeaderSize];
+
+            // Copy the elements after the range
+            Array.Copy(input, kZlibHeaderSize, toReturn, 0, input.Length - kZlibHeaderSize);
+
+            return toReturn;
         }
     }
 }
