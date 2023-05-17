@@ -529,7 +529,7 @@ namespace Splitio.Integration_tests
             }
         }
 
-        private string EvaluateWithDelay(string key, string splitName, string expected, ISplitClient client, int attemps = 10)
+        public static string EvaluateWithDelay(string key, string splitName, string expected, ISplitClient client, int attemps = 10)
         {
             var result = string.Empty;
             for (int i = 0; i < attemps; i++)

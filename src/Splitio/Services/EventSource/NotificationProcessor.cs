@@ -1,6 +1,7 @@
 ﻿using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EventSource.Workers;
 using Splitio.Services.Logger;
+using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System;
 
@@ -9,16 +10,18 @@ namespace Splitio.Services.EventSource
     public class NotificationProcessor : INotificationProcessor
     {
         private readonly ISplitLogger _log;
-        private readonly ISplitsWorker _splitsWorker;
+        private readonly ISplitsWorker _featureFlagsWorker;
         private readonly ISegmentsWorker _segmentsWorker;
         private readonly ISplitCache _featureFlagCache;
+        private readonly ISplitParser _featureFlagParser;
 
-        public NotificationProcessor(ISplitsWorker splitsWorker, ISegmentsWorker segmentsWorker, ISplitCache featureFlagCache)
+        public NotificationProcessor(ISplitsWorker featureFlagsWorker, ISegmentsWorker segmentsWorker, ISplitCache featureFlagCache, ISplitParser featureFlagParser)
         {
             _log = WrapperAdapter.Instance().GetLogger(typeof(EventSourceClient));
-            _splitsWorker = splitsWorker;
+            _featureFlagsWorker = featureFlagsWorker;
             _segmentsWorker = segmentsWorker;
             _featureFlagCache = featureFlagCache;
+            _featureFlagParser = featureFlagParser;
         }
 
         public void Proccess(IncomingNotification notification)
@@ -55,11 +58,11 @@ namespace Splitio.Services.EventSource
 
             if (scn.FeatureFlag != null && _featureFlagCache.GetChangeNumber() == scn.PreviousChangeNumber)
             {
-                _featureFlagCache.AddOrUpdate(scn.FeatureFlag.name, scn.FeatureFlag);
+                _featureFlagCache.AddOrUpdate(scn.FeatureFlag.name, _featureFlagParser.Parse(scn.FeatureFlag));
                 return;
             }
 
-            _splitsWorker.AddToQueue(scn.ChangeNumber);
+            _featureFlagsWorker.AddToQueue(scn.ChangeNumber);
         }
 
         private void ProcessSplitKill(IncomingNotification notification)
@@ -72,7 +75,7 @@ namespace Splitio.Services.EventSource
                 _featureFlagCache.Kill(skn.ChangeNumber, skn.SplitName, skn.DefaultTreatment);
             }
 
-            _splitsWorker.AddToQueue(skn.ChangeNumber);
+            _featureFlagsWorker.AddToQueue(skn.ChangeNumber);
         }
 
         private void ProcessSegmentUpdate(IncomingNotification notification)

@@ -217,7 +217,7 @@ namespace Splitio.Services.Client.Classes
                 var segmentsWorker = new SegmentsWorker(synchronizer, _tasksManager);
 
                 // NotificationProcessor
-                var notificationProcessor = new NotificationProcessor(splitsWorker, segmentsWorker, _splitCache);
+                var notificationProcessor = new NotificationProcessor(splitsWorker, segmentsWorker, _splitCache, _splitParser);
 
                 // NotificationParser
                 var notificationParser = new NotificationParser();
