@@ -34,7 +34,7 @@ namespace Splitio.Services.EventSource.Workers
             {
                 if (!_running)
                 {
-                    _log.Debug("Splits Worker not running.");
+                    _log.Debug("FeatureFlags Worker not running.");
                     return;
                 }
 
@@ -55,14 +55,14 @@ namespace Splitio.Services.EventSource.Workers
                 {
                     if (_running)
                     {
-                        _log.Debug("Splits Worker already running.");
+                        _log.Debug("FeatureFlags Worker already running.");
                         return;
                     }
 
-                    _log.Debug("SplitsWorker starting ...");
+                    _log.Debug("FeatureFlags Wroker starting ...");
                     _cancellationTokenSource = new CancellationTokenSource();
                     _running = true;
-                    _tasksManager.Start(() => ExecuteAsync(), _cancellationTokenSource, "Splits Worker.");                    
+                    _tasksManager.Start(() => ExecuteAsync(), _cancellationTokenSource, "FeatureFlags Worker.");                    
                 }
                 catch (Exception ex)
                 {
@@ -79,14 +79,14 @@ namespace Splitio.Services.EventSource.Workers
                 {
                     if (!_running)
                     {
-                        _log.Debug("Splits Worker not running.");
+                        _log.Debug("FeatureFlags Worker not running.");
                         return;
                     }
 
                     _cancellationTokenSource?.Cancel();
                     _cancellationTokenSource?.Dispose();
 
-                    _log.Debug("SplitsWorker stopped ...");
+                    _log.Debug("FeatureFlags Worker stopped ...");
                     _running = false;
                 }
                 catch (Exception ex)
@@ -102,7 +102,7 @@ namespace Splitio.Services.EventSource.Workers
         {
             try
             {
-                _log.Debug($"Splits Worker, Token: {_cancellationTokenSource.IsCancellationRequested}; Running: {_running}.");
+                _log.Debug($"FeatureFlags Worker, Token: {_cancellationTokenSource.IsCancellationRequested}; Running: {_running}.");
                 while (!_cancellationTokenSource.IsCancellationRequested && _running)
                 {
                     // Wait indefinitely until a segment is queued
@@ -120,7 +120,7 @@ namespace Splitio.Services.EventSource.Workers
             }
             finally
             {
-                _log.Debug("Split Worker execution finished.");
+                _log.Debug("FeatureFlags Worker execution finished.");
             }
         }
         #endregion
