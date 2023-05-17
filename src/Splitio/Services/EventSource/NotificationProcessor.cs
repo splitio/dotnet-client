@@ -53,9 +53,9 @@ namespace Splitio.Services.EventSource
 
             if (_splitCache.GetChangeNumber() >= scn.ChangeNumber) return;
 
-            if (scn.Split != null && _splitCache.GetChangeNumber() == scn.PreviousChangeNumber)
+            if (scn.FeatureFlag != null && _splitCache.GetChangeNumber() == scn.PreviousChangeNumber)
             {
-                _splitCache.AddOrUpdate(scn.Split.name, scn.Split);
+                _splitCache.AddOrUpdate(scn.FeatureFlag.name, scn.FeatureFlag);
                 return;
             }
 

@@ -57,7 +57,7 @@ namespace Splitio.Services.EventSource
         [JsonProperty("c")]
         public CompressionType? CompressionType { get; set; }
 
-        public Split Split { get; set; }
+        public Split FeatureFlag { get; set; }
     }
 
     public class SplitKillNotification : IncomingNotification
