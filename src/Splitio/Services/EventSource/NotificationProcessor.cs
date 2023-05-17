@@ -11,14 +11,14 @@ namespace Splitio.Services.EventSource
         private readonly ISplitLogger _log;
         private readonly ISplitsWorker _splitsWorker;
         private readonly ISegmentsWorker _segmentsWorker;
-        private readonly ISplitCache _splitCache;
+        private readonly ISplitCache _featureFlagCache;
 
-        public NotificationProcessor(ISplitsWorker splitsWorker, ISegmentsWorker segmentsWorker, ISplitCache splitCache)
+        public NotificationProcessor(ISplitsWorker splitsWorker, ISegmentsWorker segmentsWorker, ISplitCache featureFlagCache)
         {
             _log = WrapperAdapter.Instance().GetLogger(typeof(EventSourceClient));
             _splitsWorker = splitsWorker;
             _segmentsWorker = segmentsWorker;
-            _splitCache = splitCache;
+            _featureFlagCache = featureFlagCache;
         }
 
         public void Proccess(IncomingNotification notification)
@@ -51,11 +51,11 @@ namespace Splitio.Services.EventSource
         {
             var scn = (SplitChangeNotifiaction)notification;
 
-            if (_splitCache.GetChangeNumber() >= scn.ChangeNumber) return;
+            if (_featureFlagCache.GetChangeNumber() >= scn.ChangeNumber) return;
 
-            if (scn.FeatureFlag != null && _splitCache.GetChangeNumber() == scn.PreviousChangeNumber)
+            if (scn.FeatureFlag != null && _featureFlagCache.GetChangeNumber() == scn.PreviousChangeNumber)
             {
-                _splitCache.AddOrUpdate(scn.FeatureFlag.name, scn.FeatureFlag);
+                _featureFlagCache.AddOrUpdate(scn.FeatureFlag.name, scn.FeatureFlag);
                 return;
             }
 
@@ -66,10 +66,10 @@ namespace Splitio.Services.EventSource
         {
             var skn = (SplitKillNotification)notification;
 
-            if (skn.ChangeNumber > _splitCache.GetChangeNumber())
+            if (skn.ChangeNumber > _featureFlagCache.GetChangeNumber())
             {
                 _log.Debug($"Kill Split: {skn.SplitName}, changeNumber: {skn.ChangeNumber} and defaultTreatment: {skn.DefaultTreatment}");
-                _splitCache.Kill(skn.ChangeNumber, skn.SplitName, skn.DefaultTreatment);
+                _featureFlagCache.Kill(skn.ChangeNumber, skn.SplitName, skn.DefaultTreatment);
             }
 
             _splitsWorker.AddToQueue(skn.ChangeNumber);
