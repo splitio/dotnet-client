@@ -8,7 +8,7 @@ namespace Splitio.Integration_tests
     [TestClass]
     public class PushClientDecompressionTests
     {
-        private string EventSourcePath => "/eventsource";
+        private const string TreatmentExpected = "v5";
 
         [TestMethod]
         public void GetTreatmentSplitUpdateBase64ShouldAddOrUpdate()
@@ -30,10 +30,10 @@ namespace Splitio.Integration_tests
             var notification = "id: 123123\nevent: message\ndata: {\"id\":\"1111\",\"clientId\":\"pri:ODc1NjQyNzY1\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"xxxx_xxxx_splits\",\"data\":\"{\\\"type\\\":\\\"SPLIT_UPDATE\\\",\\\"changeNumber\\\":1684265694505,\\\"pcn\\\":-1,\\\"c\\\":2,\\\"d\\\":\\\"eJzMk99u2kwQxV8lOtdryQZj8N6hD5QPlThSTVNVEUKDPYZt1jZar1OlyO9emf8lVFWv2ss5zJyd82O8hTWUZSqZvW04opwhUVdsIKBSSKR+10vS1HWW7pIdz2NyBjRwHS8IXEopTLgbQqDYT+ZUm3LxlV4J4mg81LpMyKqygPRc94YeM6eQTtjphp4fegLVXvD6Qdjt9wPXF6gs2bqCxPC/2eRpDIEXpXXblpGuWCDljGptZ4bJ5lxYSJRZBoFkTcWKozpfsoH0goHfCXpB6PfcngDpVQnZEUjKIlOr2uwWqiC3zU5L1aF+3p7LFhUkPv8/mY2nk3gGgZxssmZzb8p6A9n25ktVtA9iGI3ODXunQ3HDp+AVWT6F+rZWlrWq7MN+YkSWWvuTDvkMSnNV7J6oTdl6qKTEvGnmjcCGjL2IYC/ovPYgUKnvvPtbmrmApiVryLM7p2jE++AfH6fTx09/HvuF32LWnNjStM0Xh3c8ukZcsZlEi3h8/zCObsBpJ0acqYLTmFdtqitK1V6NzrfpdPBbLmVx4uK26e27izpDu/r5yf/16AXun2Cr4u6w591xw7+LfDidLj6Mv8TXwP8xbofv/c7UmtHMmx8BAAD//0fclvU=\\\"}\"}";
 
             // Act.
-            var result = EvaluateGetTreatment(notification, "admin", "mauro_java", "v5");
+            var result = EvaluateGetTreatment(notification, "admin", "mauro_java", TreatmentExpected);
 
             // Assert.
-            Assert.AreEqual("v5", result);
+            Assert.AreEqual(TreatmentExpected, result);
         }
 
         [TestMethod]
@@ -46,7 +46,7 @@ namespace Splitio.Integration_tests
             var result = EvaluateGetTreatment(notification, "admin", "mauro_java", "v5");
 
             // Assert.
-            Assert.AreEqual("v5", result);
+            Assert.AreEqual(TreatmentExpected, result);
         }
 
         private string EvaluateGetTreatment(string notification, string key, string featureName, string treatmentExpected)
@@ -57,7 +57,7 @@ namespace Splitio.Integration_tests
                 httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
                 httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 
-                httpClientMock.SSE_Channels_Response_WithPath(EventSourcePath, notification);
+                httpClientMock.SSE_Channels_Response_WithPath(PushClientTests.EventSourcePath, notification);
 
                 var authResponse = new AuthenticationResponse
                 {
@@ -75,7 +75,7 @@ namespace Splitio.Integration_tests
                     FeaturesRefreshRate = 3000,
                     SegmentsRefreshRate = 3000,
                     AuthServiceURL = $"{url}/api/auth",
-                    StreamingServiceURL = $"{url}{EventSourcePath}",
+                    StreamingServiceURL = $"{url}{PushClientTests.EventSourcePath}",
                     StreamingEnabled = true
                 };
 

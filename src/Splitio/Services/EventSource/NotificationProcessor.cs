@@ -52,7 +52,7 @@ namespace Splitio.Services.EventSource
 
         private void ProcessSplitUpdate(IncomingNotification notification)
         {
-            var scn = (SplitChangeNotifiaction)notification;
+            var scn = (SplitChangeNotification)notification;
 
             if (_featureFlagCache.GetChangeNumber() >= scn.ChangeNumber) return;
 

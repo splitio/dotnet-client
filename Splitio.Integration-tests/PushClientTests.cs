@@ -18,7 +18,7 @@ namespace Splitio.Integration_tests
     [TestClass]
     public class PushClientTests
     {
-        private string EventSourcePath => "/eventsource";
+        public static string EventSourcePath => "/eventsource";
 
         [TestMethod]
         public void GetTreatment_SplitUpdate_ShouldFetch()

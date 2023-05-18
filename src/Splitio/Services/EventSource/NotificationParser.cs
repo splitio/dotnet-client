@@ -43,7 +43,7 @@ namespace Splitio.Services.EventSource
             switch (data?.Type)
             {
                 case NotificationType.SPLIT_UPDATE:
-                    var changeNotification = JsonConvert.DeserializeObject<SplitChangeNotifiaction>(notificationData.Data);
+                    var changeNotification = JsonConvert.DeserializeObject<SplitChangeNotification>(notificationData.Data);
                     result = DecompressData(changeNotification);
                     break;
                 case NotificationType.SPLIT_KILL:
@@ -111,7 +111,7 @@ namespace Splitio.Services.EventSource
             return JsonConvert.DeserializeObject<T>(notificationArray[index].Replace("data: ", string.Empty));
         }
 
-        private static IncomingNotification DecompressData(SplitChangeNotifiaction notification)
+        private static IncomingNotification DecompressData(SplitChangeNotification notification)
         {
             try
             {

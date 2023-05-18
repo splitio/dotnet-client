@@ -32,7 +32,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         public void Proccess_SplitUpdate_AddToQueueInWorker()
         {
             // Arrange.
-            var notification = new SplitChangeNotifiaction
+            var notification = new SplitChangeNotification
             {
                 Type = NotificationType.SPLIT_UPDATE,
                 ChangeNumber = 1585867723838
@@ -87,7 +87,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         public void Process_SplitUpdate_ShouldAddOrUpdate()
         {
             // Arrange.
-            var notification = new SplitChangeNotifiaction
+            var notification = new SplitChangeNotification
             {
                 Type = NotificationType.SPLIT_UPDATE,
                 ChangeNumber = 1585867723838,
@@ -117,7 +117,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         public void Process_SplitUpdate_ShouldAddToWorkerQueue()
         {
             // Arrange.
-            var notification = new SplitChangeNotifiaction
+            var notification = new SplitChangeNotification
             {
                 Type = NotificationType.SPLIT_UPDATE,
                 ChangeNumber = 1585867723838,
@@ -147,7 +147,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         public void Process_SplitUpdate_Donothing()
         {
             // Arrange.
-            var notification = new SplitChangeNotifiaction
+            var notification = new SplitChangeNotification
             {
                 Type = NotificationType.SPLIT_UPDATE,
                 ChangeNumber = 1585867723838,

@@ -47,7 +47,7 @@ namespace Splitio.Services.EventSource
         public int Code { get; set; }
     }
 
-    public class SplitChangeNotifiaction : IncomingNotification
+    public class SplitChangeNotification : IncomingNotification
     {
         public long ChangeNumber { get; set; }
         [JsonProperty("pcn")]

@@ -24,7 +24,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             var result = _notificationParser.Parse(text);
 
             // Assert.
-            Assert.AreEqual(1585867723838, ((SplitChangeNotifiaction)result).ChangeNumber);
+            Assert.AreEqual(1585867723838, ((SplitChangeNotification)result).ChangeNumber);
             Assert.AreEqual(NotificationType.SPLIT_UPDATE, result.Type);
             Assert.AreEqual("xxxx_xxxx_splits", result.Channel);
         }
@@ -187,7 +187,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             // Assert.
             Assert.AreEqual(NotificationType.SPLIT_UPDATE, result.Type);
             Assert.AreEqual("xxxx_xxxx_splits", result.Channel);
-            var changeNotification = (SplitChangeNotifiaction)result;
+            var changeNotification = (SplitChangeNotification)result;
             Assert.AreEqual(1684265694505, changeNotification.ChangeNumber);
             Assert.AreEqual(111, changeNotification.PreviousChangeNumber);
             Assert.AreEqual(CompressionType.Gzip, changeNotification.CompressionType);
@@ -208,7 +208,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             // Assert.
             Assert.AreEqual(NotificationType.SPLIT_UPDATE, result.Type);
             Assert.AreEqual("xxxx_xxxx_splits", result.Channel);
-            var changeNotification = (SplitChangeNotifiaction)result;
+            var changeNotification = (SplitChangeNotification)result;
             Assert.AreEqual(1684265694505, changeNotification.ChangeNumber);
             Assert.AreEqual(111, changeNotification.PreviousChangeNumber);
             Assert.AreEqual(CompressionType.Zlib, changeNotification.CompressionType);
@@ -230,7 +230,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             // Assert.
             Assert.AreEqual(NotificationType.SPLIT_UPDATE, result.Type);
             Assert.AreEqual("xxxx_xxxx_splits", result.Channel);
-            var changeNotification = (SplitChangeNotifiaction)result;
+            var changeNotification = (SplitChangeNotification)result;
             Assert.AreEqual(1684265694505, changeNotification.ChangeNumber);
             Assert.AreEqual(111, changeNotification.PreviousChangeNumber);
             Assert.AreEqual(CompressionType.NotCompressed, changeNotification.CompressionType);
