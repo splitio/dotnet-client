@@ -35,7 +35,6 @@ namespace Splitio.Services.EventSource
 
         private static IncomingNotification ParseMessage(string notificationString)
         {
-            Console.WriteLine(notificationString);
             var notificationData = GetNotificationData<NotificationData>(notificationString);
             var data = JsonConvert.DeserializeObject<IncomingNotification>(notificationData.Data);
 
