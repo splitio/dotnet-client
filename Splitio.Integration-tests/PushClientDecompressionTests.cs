@@ -11,19 +11,6 @@ namespace Splitio.Integration_tests
         private const string TreatmentExpected = "v5";
 
         [TestMethod]
-        public void ControlGetTreatment()
-        {
-            // Arrange.
-            var notification = "KeepAlive";
-
-            // Act.
-            var result = EvaluateGetTreatment(notification, "admin", "mauro_java", "off");
-
-            // Assert.
-            Assert.AreEqual("control", result);
-        }
-
-        [TestMethod]
         public void GetTreatmentSplitUpdateBase64ShouldAddOrUpdate()
         {
             // Arrange.

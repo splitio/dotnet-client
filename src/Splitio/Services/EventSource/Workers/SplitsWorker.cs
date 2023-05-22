@@ -41,12 +41,6 @@ namespace Splitio.Services.EventSource.Workers
         {
             try
             {
-                if (!_running)
-                {
-                    _log.Debug("FeatureFlags Worker not running.");
-                    return;
-                }
-
                 _log.Debug($"Add to queue: {scn.ChangeNumber}");
                 _queue.TryAdd(scn);
             }
@@ -60,12 +54,6 @@ namespace Splitio.Services.EventSource.Workers
         {
             try
             {
-                if (!_running)
-                {
-                    _log.Debug("FeatureFlags Worker not running.");
-                    return;
-                }
-
                 if (skn.ChangeNumber > _featureFlagCache.GetChangeNumber())
                 {
                     _log.Debug($"Kill Feature Flag: {skn.SplitName}, changeNumber: {skn.ChangeNumber} and defaultTreatment: {skn.DefaultTreatment}");
