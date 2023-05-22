@@ -2,6 +2,7 @@
 {
     public interface ISplitsWorker : IWorker
     {
-        void AddToQueue(long changeNumber);
+        void AddToQueue(SplitChangeNotification scn);
+        void Kill(SplitKillNotification skn);
     }
 }
