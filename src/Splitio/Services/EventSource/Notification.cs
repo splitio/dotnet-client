@@ -58,6 +58,11 @@ namespace Splitio.Services.EventSource
         public CompressionType? CompressionType { get; set; }
 
         public Split FeatureFlag { get; set; }
+
+        public override string ToString()
+        {
+            return $"cn: {ChangeNumber} - pcn: {PreviousChangeNumber} - c: {CompressionType}";
+        }
     }
 
     public class SplitKillNotification : IncomingNotification
