@@ -1,4 +1,7 @@
-﻿namespace Splitio.Services.EventSource
+﻿using Newtonsoft.Json;
+using Splitio.Domain;
+
+namespace Splitio.Services.EventSource
 {
     public class Notification
     {
@@ -44,9 +47,22 @@
         public int Code { get; set; }
     }
 
-    public class SplitChangeNotifiaction : IncomingNotification
+    public class SplitChangeNotification : IncomingNotification
     {
         public long ChangeNumber { get; set; }
+        [JsonProperty("pcn")]
+        public long? PreviousChangeNumber { get; set; }
+        [JsonProperty("d")]
+        public string Data { get; set; }
+        [JsonProperty("c")]
+        public CompressionType? CompressionType { get; set; }
+
+        public Split FeatureFlag { get; set; }
+
+        public override string ToString()
+        {
+            return $"cn: {ChangeNumber} - pcn: {PreviousChangeNumber} - c: {CompressionType}";
+        }
     }
 
     public class SplitKillNotification : IncomingNotification

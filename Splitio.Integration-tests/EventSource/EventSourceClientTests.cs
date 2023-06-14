@@ -30,7 +30,7 @@ namespace Splitio.Integration_tests.EventSource
 
                 eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
                 Assert.AreEqual(NotificationType.SPLIT_UPDATE, ev.Event.Type);
-                Assert.AreEqual(1585867723838, ((SplitChangeNotifiaction)ev.Event).ChangeNumber);
+                Assert.AreEqual(1585867723838, ((SplitChangeNotification)ev.Event).ChangeNumber);
                 sseClientStatus.TryTake(out SSEClientActions action, 10000);
                 Assert.AreEqual(SSEClientActions.CONNECTED, action);
             }

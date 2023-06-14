@@ -1,6 +1,7 @@
 ﻿using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.Logger;
+using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Concurrent;
@@ -11,39 +12,37 @@ namespace Splitio.Services.EventSource.Workers
     public class SplitsWorker : ISplitsWorker
     {
         private readonly ISplitLogger _log;
-        private readonly ISplitCache _featureFlagCache;
         private readonly ISynchronizer _synchronizer;
         private readonly ITasksManager _tasksManager;
-        private readonly BlockingCollection<long> _queue;
+        private readonly ISplitCache _featureFlagCache;
+        private readonly ISplitParser _featureFlagParser;
+        private readonly BlockingCollection<SplitChangeNotification> _queue;
         private readonly object _lock = new object();
 
         private CancellationTokenSource _cancellationTokenSource;
         private bool _running;
 
-        public SplitsWorker(ISplitCache featureFlagCache,
-            ISynchronizer synchronizer,
-            ITasksManager tasksManager)
+        public SplitsWorker(ISynchronizer synchronizer,
+            ITasksManager tasksManager,
+            ISplitCache featureFlagCache,
+            ISplitParser featureFlagParser,
+            BlockingCollection<SplitChangeNotification>  queue)
         {
-            _featureFlagCache = featureFlagCache;
             _synchronizer = synchronizer;
             _tasksManager = tasksManager;
+            _featureFlagCache = featureFlagCache;
+            _featureFlagParser = featureFlagParser;
+            _queue = queue;
             _log = WrapperAdapter.Instance().GetLogger(typeof(SplitsWorker));
-            _queue = new BlockingCollection<long>(new ConcurrentQueue<long>());
         }
 
         #region Public Methods
-        public void AddToQueue(long changeNumber)
+        public void AddToQueue(SplitChangeNotification scn)
         {
             try
             {
-                if (!_running)
-                {
-                    _log.Debug("FeatureFlags Worker not running.");
-                    return;
-                }
-
-                _log.Debug($"Add to queue: {changeNumber}");
-                _queue.TryAdd(changeNumber);                
+                _log.Debug($"Add to queue: {scn.ChangeNumber}");
+                _queue.TryAdd(scn);
             }
             catch (Exception ex)
             {
@@ -51,25 +50,19 @@ namespace Splitio.Services.EventSource.Workers
             }
         }
 
-        public void KillSplit(long changeNumber, string splitName, string defaultTreatment)
+        public void Kill(SplitKillNotification skn)
         {
             try
             {
-                if (!_running)
+                if (skn.ChangeNumber > _featureFlagCache.GetChangeNumber())
                 {
-                    _log.Debug("FeatureFlags Worker not running.");
-                    return;
-                }
-
-                if (changeNumber > _featureFlagCache.GetChangeNumber())
-                {
-                    _log.Debug($"Kill Feature Flag: {splitName}, changeNumber: {changeNumber} and defaultTreatment: {defaultTreatment}");
-                    _featureFlagCache.Kill(changeNumber, splitName, defaultTreatment);
+                    _log.Debug($"Kill Feature Flag: {skn.SplitName}, changeNumber: {skn.ChangeNumber} and defaultTreatment: {skn.DefaultTreatment}");
+                    _featureFlagCache.Kill(skn.ChangeNumber, skn.SplitName, skn.DefaultTreatment);
                 }
             }
             catch (Exception ex)
             {
-                _log.Error($"Error killing the following feature flag: {splitName}", ex);
+                _log.Error($"Error killing the following feature flag: {skn.SplitName}", ex);
             }
         }
 
@@ -123,7 +116,7 @@ namespace Splitio.Services.EventSource.Workers
         }
         #endregion
 
-        #region Private Mthods
+        #region Private Methods
         private async void ExecuteAsync()
         {
             try
@@ -132,11 +125,13 @@ namespace Splitio.Services.EventSource.Workers
                 while (!_cancellationTokenSource.IsCancellationRequested && _running)
                 {
                     // Wait indefinitely until a segment is queued
-                    if (_queue.TryTake(out long changeNumber, -1, _cancellationTokenSource.Token))
+                    if (_queue.TryTake(out SplitChangeNotification scn, -1, _cancellationTokenSource.Token))
                     {
-                        _log.Debug($"ChangeNumber dequeue: {changeNumber}");
+                        _log.Debug($"ChangeNumber dequeue: {scn.ChangeNumber}");
 
-                        await _synchronizer.SynchronizeSplits(changeNumber);
+                        var success = ProcessSplitChangeNotification(scn);
+
+                        if (!success) await _synchronizer.SynchronizeSplits(scn.ChangeNumber);
                     }
                 }
             }
@@ -148,6 +143,38 @@ namespace Splitio.Services.EventSource.Workers
             {
                 _log.Debug("FeatureFlags Worker execution finished.");
             }
+        }
+
+        private bool ProcessSplitChangeNotification(SplitChangeNotification scn)
+        {
+            try
+            {
+                if (_featureFlagCache.GetChangeNumber() >= scn.ChangeNumber) return true;
+
+                if (scn.FeatureFlag != null && _featureFlagCache.GetChangeNumber() == scn.PreviousChangeNumber)
+                {
+                    var ffParsed = _featureFlagParser.Parse(scn.FeatureFlag);
+
+                    // if ffParsed is null it means that the status is ARCHIVED or different to ACTIVE.
+                    if (ffParsed == null)
+                    {
+                        _featureFlagCache.RemoveSplit(scn.FeatureFlag.name);
+                    }
+                    else
+                    {
+                        _featureFlagCache.AddOrUpdate(scn.FeatureFlag.name, ffParsed);
+                    }
+
+                    _featureFlagCache.SetChangeNumber(scn.ChangeNumber);
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Somenthing went wrong processing a Feature Flag notification", ex);
+            }
+
+            return false;
         }
         #endregion
     }

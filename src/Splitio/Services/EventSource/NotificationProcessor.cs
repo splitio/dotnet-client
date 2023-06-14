@@ -8,13 +8,13 @@ namespace Splitio.Services.EventSource
     public class NotificationProcessor : INotificationProcessor
     {
         private readonly ISplitLogger _log;
-        private readonly ISplitsWorker _splitsWorker;
+        private readonly ISplitsWorker _featureFlagsWorker;
         private readonly ISegmentsWorker _segmentsWorker;
 
-        public NotificationProcessor(ISplitsWorker splitsWorker, ISegmentsWorker segmentsWorker)
+        public NotificationProcessor(ISplitsWorker featureFlagsWorker, ISegmentsWorker segmentsWorker)
         {
             _log = WrapperAdapter.Instance().GetLogger(typeof(EventSourceClient));
-            _splitsWorker = splitsWorker;
+            _featureFlagsWorker = featureFlagsWorker;
             _segmentsWorker = segmentsWorker;
         }
 
@@ -25,13 +25,12 @@ namespace Splitio.Services.EventSource
                 switch (notification.Type)
                 {
                     case NotificationType.SPLIT_UPDATE:
-                        var scn = (SplitChangeNotifiaction)notification;
-                        _splitsWorker.AddToQueue(scn.ChangeNumber);
+                        _featureFlagsWorker.AddToQueue((SplitChangeNotification)notification);
                         break;
                     case NotificationType.SPLIT_KILL:
                         var skn = (SplitKillNotification)notification;
-                        _splitsWorker.KillSplit(skn.ChangeNumber, skn.SplitName, skn.DefaultTreatment);
-                        _splitsWorker.AddToQueue(skn.ChangeNumber);
+                        _featureFlagsWorker.Kill(skn);
+                        _featureFlagsWorker.AddToQueue(new SplitChangeNotification { ChangeNumber = skn.ChangeNumber });
                         break;
                     case NotificationType.SEGMENT_UPDATE:
                         var sc = (SegmentChangeNotification)notification;
