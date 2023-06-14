@@ -16,7 +16,7 @@ namespace Splitio.Services.EventSource
 {
     public class EventSourceClient : IEventSourceClient
     {
-        private const string KeepAliveResponse = ":keepalive\n\n";
+        private const string KeepAliveResponse = ":keepalive\n";
         private const int ReadTimeoutMs = 70000;
         private const int ConnectTimeoutMs = 30000;
         private const int BufferSize = 10000;
@@ -39,6 +39,7 @@ namespace Splitio.Services.EventSource
         private bool _firstEvent;
         
         private CancellationTokenSource _cancellationTokenSource;
+        private StreamReader _streamReader;
 
         public EventSourceClient(INotificationParser notificationParser,
             ISplitioHttpClient splitHttpClient,
@@ -94,6 +95,8 @@ namespace Splitio.Services.EventSource
             
             _connected = false;
 
+            ForceToCloseStreamReader();
+
             _disconnectSignal.Wait(ReadTimeoutMs);
 
             _sseClientStatusQueue.Add(action);
@@ -118,8 +121,6 @@ namespace Splitio.Services.EventSource
                     {
                         using (var stream = await response.Content.ReadAsStreamAsync())
                         {
-                            _log.Info($"Connected to {_url}");
-
                             await ReadStreamAsync(stream, cancellationToken);
                         }
                     }
@@ -156,62 +157,32 @@ namespace Splitio.Services.EventSource
         {
             try
             {
-                while (!cancellationToken.IsCancellationRequested && stream.CanRead && (IsConnected() || _firstEvent))
+                using (_streamReader = new StreamReader(stream))
                 {
-                    Array.Clear(_buffer, 0, BufferSize);
-
-                    using (var timeoutToken = new CancellationTokenSource(ReadTimeoutMs))
+                    while (!cancellationToken.IsCancellationRequested && _streamReader.BaseStream.CanRead && (IsConnected() || _firstEvent))
                     {
-                        using (timeoutToken.Token.Register(() => stream.Close()))
+                        using (var timeoutToken = new CancellationTokenSource(ReadTimeoutMs))
                         {
-                            var len = 0;
-                            try
+                            using (timeoutToken.Token.Register(() => ForceToCloseStreamReader()))
                             {
-                                _log.Debug($"Reading stream ....");
-                                len = await stream.ReadAsync(_buffer, 0, BufferSize, timeoutToken.Token).ConfigureAwait(false);
-                            }
-                            catch(Exception ex)
-                            {
-                                _log.Debug($"Read Stream exception: {ex.GetType()}.|| {ex}");
-                                throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Streaming read time out after {ReadTimeoutMs/1000} seconds.");
-                            }
-
-                            if (len == 0)
-                            {
-                                // Added for tests. 
-                                if (_url.StartsWith("http://localhost"))
-                                    throw new ReadStreamException(SSEClientActions.CONNECTED, "Streaming end of the file - for tests.");
-
-                                throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, "Streaming end of the file."); ;
-                            }
-
-                            var notificationString = _encoder.GetString(_buffer, 0, len);
-                            _log.Debug($"Read stream encoder buffer: {notificationString}");
-
-                            if (_firstEvent) ProcessFirtsEvent(notificationString);
-
-                            if (notificationString == KeepAliveResponse || !IsConnected()) continue;
-                            
-                            var lines = notificationString.Split(_notificationSplitArray, StringSplitOptions.None);
-
-                            foreach (var line in lines)
-                            {
-                                if (string.IsNullOrEmpty(line)) continue;
-
-                                var eventData = _notificationParser.Parse(line);
-
-                                if (eventData == null) continue;
-
-                                switch (eventData.Type)
+                                if (_streamReader.EndOfStream)
                                 {
-                                    case NotificationType.ERROR:
-                                        var notificationError = (NotificationError)eventData;
-                                        ProcessErrorNotification(notificationError);
-                                        break;
-                                    default:
-                                        DispatchEvent(eventData);
-                                        break;
+                                    // Added for tests. 
+                                    if (_url.StartsWith("http://localhost"))
+                                        throw new ReadStreamException(SSEClientActions.CONNECTED, "Streaming end of the file - for tests.");
+
+                                    throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, "Streaming end of the file.");
                                 }
+                                
+                                var message = await GetNotificationString();
+
+                                Console.WriteLine(message);
+
+                                if (_firstEvent) ProcessFirtsEvent(message);
+
+                                if (message == KeepAliveResponse || !IsConnected()) continue;
+
+                                ProcessMessage(message);
                             }
                         }
                     }
@@ -274,6 +245,55 @@ namespace Splitio.Services.EventSource
             _initializationSignal.Signal();
             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SSEConnectionEstablished));
             _sseClientStatusQueue.Add(SSEClientActions.CONNECTED);            
+        }
+
+        private async Task<string> GetNotificationString()
+        {
+            var sb = new StringBuilder();
+            while (true)
+            {
+                var line = await _streamReader.ReadLineAsync();
+
+                if (line == null) // EOF (Remote host closed the connection gracefully and the stream ended)
+                {
+                    throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, "connection closed by remote host.");
+                }
+
+                if (line == string.Empty)
+                {
+                    return sb.ToString();
+                }
+
+                sb.Append(line).Append("\n");
+            }
+        }
+
+        private void ProcessMessage(string message)
+        {
+            if (string.IsNullOrEmpty(message)) return;
+
+            var notification = _notificationParser.Parse(message);
+
+            if (notification == null) return;
+
+            switch (notification.Type)
+            {
+                case NotificationType.ERROR:
+                    var notificationError = (NotificationError)notification;
+                    ProcessErrorNotification(notificationError);
+                    break;
+                default:
+                    DispatchEvent(notification);
+                    break;
+            }
+        }
+
+        private void ForceToCloseStreamReader()
+        {
+            if (_streamReader == null) return;
+
+            _log.Debug($"Streaming read time out after {ReadTimeoutMs/1000} seconds.");
+            _streamReader.Close();
         }
         #endregion
     }
