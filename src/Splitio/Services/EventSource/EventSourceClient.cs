@@ -176,8 +176,6 @@ namespace Splitio.Services.EventSource
                                 
                                 var message = await GetNotificationString();
 
-                                Console.WriteLine(message);
-
                                 if (_firstEvent) ProcessFirtsEvent(message);
 
                                 if (message == KeepAliveResponse || !IsConnected()) continue;
