@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Splitio.Services.Common;
+﻿using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
@@ -10,7 +9,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -196,13 +194,10 @@ namespace Splitio.Services.EventSource
                             if (_firstEvent) ProcessFirtsEvent(message);
 
                             if (message == KeepAliveResponse || !IsConnected()) continue;
-
                             var lines = GetNotificationList(message);
 
                             foreach (var line in lines)
                             {
-                                if (string.IsNullOrEmpty(line)) continue;
-
                                 var eventData = _notificationParser.Parse(line);
 
                                 if (eventData == null) continue;
@@ -269,7 +264,7 @@ namespace Splitio.Services.EventSource
         private void ProcessFirtsEvent(string notification)
         {
             _firstEvent = false;
-            var eventData = _notificationParser.Parse(notification);
+            var eventData = _notificationParser.Parse(NotificationParser.GetNotificationData(notification));
 
             // This case is when in the first event received an error notification, mustn't dispatch connected.
             if (eventData != null && eventData.Type == NotificationType.ERROR) return;
@@ -280,9 +275,9 @@ namespace Splitio.Services.EventSource
             _sseClientStatusQueue.Add(SSEClientActions.CONNECTED);            
         }
 
-        private List<string> GetNotificationList(string message)
+        private List<NotificationStreamReader> GetNotificationList(string message)
         {
-            var toReturn = new List<string>();
+            var toReturn = new List<NotificationStreamReader>();
 
             var lines = message.Split(_notificationSplitArray, StringSplitOptions.RemoveEmptyEntries);
 
@@ -297,8 +292,7 @@ namespace Splitio.Services.EventSource
                         _notificationBuffer = string.Empty;
                     }
 
-                    //toReturn.Add(GetNotificationData(toAdd));
-                    toReturn.Add(toAdd);
+                    toReturn.Add(NotificationParser.GetNotificationData(toAdd));
                     continue;
                 }
 
@@ -310,19 +304,6 @@ namespace Splitio.Services.EventSource
 
             return toReturn;
         }
-
-        //private static NotificationStreamReader GetNotificationData(string line)
-        //{
-        //    var array = line.Split('\n');
-        //    var dataIndex = Array.FindIndex(array, row => row.Contains("data: "));
-        //    var eventIndex = Array.FindIndex(array, row => row.Contains("event: "));
-
-        //    return new NotificationStreamReader
-        //    {
-        //         Message = array[dataIndex].Replace("data: ", string.Empty),
-        //         Type = array[eventIndex].Replace("event: ", string.Empty)
-        //    };
-        //}
         #endregion
     }
 }

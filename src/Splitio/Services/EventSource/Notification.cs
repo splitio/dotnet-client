@@ -92,4 +92,10 @@ namespace Splitio.Services.EventSource
     {
         public int Publishers { get; set; }
     }
+
+    public class NotificationStreamReader
+    {
+        public string Message { get; set; }
+        public string Type { get; set; }
+    }
 }

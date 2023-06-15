@@ -11,21 +11,22 @@ namespace Splitio.Services.EventSource
     public class NotificationParser : INotificationParser
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(NotificationParser));
-        private static readonly string EventMessageType = "event: message";
-        private static readonly string EventErrorType = "event: error";
+        private static readonly string EventMessageType = "message";
+        private static readonly string EventErrorType = "error";
 
-        public IncomingNotification Parse(string notification)
+        #region Public Methods
+        public IncomingNotification Parse(NotificationStreamReader notification)
         {
-            if (notification.Contains(EventMessageType))
+            if (notification.Type == EventMessageType)
             {
-                if (notification.Contains(Constants.Push.OccupancyPrefix))
+                if (notification.Message.Contains(Constants.Push.OccupancyPrefix))
                 {
                     return ParseControlChannelMessage(notification);
                 }
 
                 return ParseMessage(notification);
             }
-            else if (notification.Contains(EventErrorType))
+            else if (notification.Type == EventErrorType)
             {
                 return ParseError(notification);
             }
@@ -33,9 +34,24 @@ namespace Splitio.Services.EventSource
             return null;
         }
 
-        private static IncomingNotification ParseMessage(string notificationString)
+        public static NotificationStreamReader GetNotificationData(string line)
         {
-            var notificationData = GetNotificationData<NotificationData>(notificationString);
+            var array = line.Split('\n');
+            var dataIndex = Array.FindIndex(array, row => row.Contains("data: "));
+            var eventIndex = Array.FindIndex(array, row => row.Contains("event: "));
+
+            return new NotificationStreamReader
+            {
+                Message = array[dataIndex].Replace("data: ", string.Empty),
+                Type = array[eventIndex].Replace("event: ", string.Empty)
+            };
+        }
+        #endregion
+
+        #region Private Methods
+        private static IncomingNotification ParseMessage(NotificationStreamReader notification)
+        {
+            var notificationData = JsonConvert.DeserializeObject<NotificationData>(notification.Message);
             var data = JsonConvert.DeserializeObject<IncomingNotification>(notificationData.Data);
 
             IncomingNotification result;
@@ -60,9 +76,9 @@ namespace Splitio.Services.EventSource
             return result;
         }
 
-        private static IncomingNotification ParseControlChannelMessage(string notificationString)
+        private static IncomingNotification ParseControlChannelMessage(NotificationStreamReader notification)
         {
-            var notificationData = GetNotificationData<NotificationData>(notificationString);
+            var notificationData = JsonConvert.DeserializeObject<NotificationData>(notification.Message);
             var channel = notificationData.Channel.Replace(Constants.Push.OccupancyPrefix, string.Empty);
 
             if (notificationData.Data.Contains("controlType"))
@@ -90,9 +106,9 @@ namespace Splitio.Services.EventSource
             return occupancyNotification;
         }
 
-        private static IncomingNotification ParseError(string notificationString)
+        private static IncomingNotification ParseError(NotificationStreamReader notification)
         {
-            var notificatinError = GetNotificationData<NotificationError>(notificationString);
+            var notificatinError = JsonConvert.DeserializeObject<NotificationError>(notification.Message);
 
             if (notificatinError.Message == null)
                 return null;
@@ -100,14 +116,6 @@ namespace Splitio.Services.EventSource
             notificatinError.Type = NotificationType.ERROR;
 
             return notificatinError;
-        }
-
-        private static T GetNotificationData<T>(string notificationString)
-        {
-            var notificationArray = notificationString.Split('\n');
-            var index = Array.FindIndex(notificationArray, row => row.Contains("data: "));
-
-            return JsonConvert.DeserializeObject<T>(notificationArray[index].Replace("data: ", string.Empty));
         }
 
         private static IncomingNotification DecompressData(SplitChangeNotification notification)
@@ -143,5 +151,6 @@ namespace Splitio.Services.EventSource
         {
             return JsonConvert.DeserializeObject<Split>(Encoding.UTF8.GetString(input));
         }
+        #endregion
     }
 }
