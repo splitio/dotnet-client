@@ -222,6 +222,8 @@ namespace Splitio.Services.EventSource
 
             if (_firstEvent) ProcessFirtsEvent(message);
 
+            if (!IsConnected()) return;
+
             var lines = GetNotificationList(message);
 
             foreach (var line in lines)
