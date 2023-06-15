@@ -17,34 +17,28 @@ namespace Splitio.Services.EventSource
         #region Public Methods
         public IncomingNotification Parse(NotificationStreamReader notification)
         {
-            if (notification.Type == EventMessageType)
+            try
             {
-                if (notification.Message.Contains(Constants.Push.OccupancyPrefix))
+                if (notification?.Type == EventMessageType)
                 {
-                    return ParseControlChannelMessage(notification);
-                }
+                    if (notification.Message.Contains(Constants.Push.OccupancyPrefix))
+                    {
+                        return ParseControlChannelMessage(notification);
+                    }
 
-                return ParseMessage(notification);
+                    return ParseMessage(notification);
+                }
+                else if (notification?.Type == EventErrorType)
+                {
+                    return ParseError(notification);
+                }
             }
-            else if (notification.Type == EventErrorType)
+            catch
             {
-                return ParseError(notification);
+                _log.Debug("Something went wrong parsing a notification");
             }
 
             return null;
-        }
-
-        public static NotificationStreamReader GetNotificationData(string line)
-        {
-            var array = line.Split('\n');
-            var dataIndex = Array.FindIndex(array, row => row.Contains("data: "));
-            var eventIndex = Array.FindIndex(array, row => row.Contains("event: "));
-
-            return new NotificationStreamReader
-            {
-                Message = array[dataIndex].Replace("data: ", string.Empty),
-                Type = array[eventIndex].Replace("event: ", string.Empty)
-            };
         }
         #endregion
 

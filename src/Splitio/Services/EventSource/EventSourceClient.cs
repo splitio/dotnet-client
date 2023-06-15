@@ -17,7 +17,7 @@ namespace Splitio.Services.EventSource
 {
     public class EventSourceClient : IEventSourceClient
     {
-        private const string KeepAliveResponse = ":keepalive\n\n";
+        private const string KeepAliveResponse = ":keepalive";
         private const int ReadTimeoutMs = 70000;
         private const int ConnectTimeoutMs = 30000;
         private const int BufferSize = 10000;
@@ -38,7 +38,7 @@ namespace Splitio.Services.EventSource
         private string _url;
         private bool _connected;
         private bool _firstEvent;
-        private string _notificationBuffer;
+        private string _lineBuffer;
         
         private CancellationTokenSource _cancellationTokenSource;
 
@@ -158,7 +158,7 @@ namespace Splitio.Services.EventSource
         {
             try
             {
-                _notificationBuffer = string.Empty;
+                _lineBuffer = string.Empty;
                 while (!cancellationToken.IsCancellationRequested && stream.CanRead && (IsConnected() || _firstEvent))
                 {
                     Array.Clear(_buffer, 0, BufferSize);
@@ -188,30 +188,7 @@ namespace Splitio.Services.EventSource
                                 throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, "Streaming end of the file."); ;
                             }
 
-                            var message = _encoder.GetString(_buffer, 0, len);
-                            _log.Debug($"Read stream encoder buffer: {message}");
-
-                            if (_firstEvent) ProcessFirtsEvent(message);
-
-                            if (message == KeepAliveResponse || !IsConnected()) continue;
-                            var lines = GetNotificationList(message);
-
-                            foreach (var line in lines)
-                            {
-                                var eventData = _notificationParser.Parse(line);
-
-                                if (eventData == null) continue;
-
-                                switch (eventData.Type)
-                                {
-                                    case NotificationType.ERROR:
-                                        ProcessErrorNotification((NotificationError)eventData);
-                                        break;
-                                    default:
-                                        DispatchEvent(eventData);
-                                        break;
-                                }
-                            }
+                            ReadStreamBuffer(len);
                         }
                     }
                 }
@@ -238,6 +215,79 @@ namespace Splitio.Services.EventSource
             }
         }
 
+        private void ReadStreamBuffer(int len)
+        {
+            var message = _encoder.GetString(_buffer, 0, len);
+            _log.Debug($"Read stream encoder buffer: {message}");
+
+            if (_firstEvent) ProcessFirtsEvent(message);
+
+            var lines = GetNotificationList(message);
+
+            foreach (var line in lines)
+            {
+                var eventData = _notificationParser.Parse(line);
+
+                if (eventData == null) continue;
+
+                switch (eventData.Type)
+                {
+                    case NotificationType.ERROR:
+                        ProcessErrorNotification((NotificationError)eventData);
+                        break;
+                    default:
+                        DispatchEvent(eventData);
+                        break;
+                }
+            }
+        }
+
+        private void ProcessFirtsEvent(string notification)
+        {
+            _firstEvent = false;
+            var eventData = _notificationParser.Parse(Utils.GetNotificationData(notification));
+
+            // This case is when in the first event received an error notification, mustn't dispatch connected.
+            if (eventData != null && eventData.Type == NotificationType.ERROR) return;
+
+            _connected = true;
+            _initializationSignal.Signal();
+            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SSEConnectionEstablished));
+            _sseClientStatusQueue.Add(SSEClientActions.CONNECTED);
+        }
+
+        private List<NotificationStreamReader> GetNotificationList(string message)
+        {
+            var toReturn = new List<NotificationStreamReader>();
+
+            var lines = message.Split(_notificationSplitArray, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var item in lines)
+            {
+                if (item.EndsWith("}"))
+                {
+                    var toAdd = item;
+                    if (!string.IsNullOrEmpty(_lineBuffer))
+                    {
+                        toAdd = _lineBuffer + item;
+                        Console.WriteLine($"# WITH BUFFER: {toAdd}\n");
+                        _lineBuffer = string.Empty;
+                    }
+
+                    toReturn.Add(Utils.GetNotificationData(toAdd));
+                    continue;
+                }
+
+                if (item != KeepAliveResponse)
+                {
+                    Console.WriteLine($"# BUFFER: {item}\n");
+                    _lineBuffer = item;
+                }
+            }
+
+            return toReturn;
+        }
+
         private void ProcessErrorNotification(NotificationError notificationError)
         {
             _log.Debug($"Notification error: {notificationError.Message}. Status Server: {notificationError.StatusCode}.");
@@ -259,50 +309,6 @@ namespace Splitio.Services.EventSource
         {
             _log.Debug($"DispatchEvent: {incomingNotification}");
             EventReceived?.Invoke(this, new EventReceivedEventArgs(incomingNotification));
-        }
-
-        private void ProcessFirtsEvent(string notification)
-        {
-            _firstEvent = false;
-            var eventData = _notificationParser.Parse(NotificationParser.GetNotificationData(notification));
-
-            // This case is when in the first event received an error notification, mustn't dispatch connected.
-            if (eventData != null && eventData.Type == NotificationType.ERROR) return;
-
-            _connected = true;
-            _initializationSignal.Signal();
-            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SSEConnectionEstablished));
-            _sseClientStatusQueue.Add(SSEClientActions.CONNECTED);            
-        }
-
-        private List<NotificationStreamReader> GetNotificationList(string message)
-        {
-            var toReturn = new List<NotificationStreamReader>();
-
-            var lines = message.Split(_notificationSplitArray, StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (var item in lines)
-            {
-                if (item.EndsWith("}"))
-                {
-                    var toAdd = item;
-                    if (!string.IsNullOrEmpty(_notificationBuffer))
-                    {
-                        toAdd = _notificationBuffer + item;
-                        _notificationBuffer = string.Empty;
-                    }
-
-                    toReturn.Add(NotificationParser.GetNotificationData(toAdd));
-                    continue;
-                }
-
-                if (item != KeepAliveResponse)
-                {
-                    _notificationBuffer = item;
-                }
-            }
-
-            return toReturn;
         }
         #endregion
     }
