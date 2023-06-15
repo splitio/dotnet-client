@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Common;
+﻿using Newtonsoft.Json;
+using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
@@ -6,8 +7,10 @@ using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,6 +40,7 @@ namespace Splitio.Services.EventSource
         private string _url;
         private bool _connected;
         private bool _firstEvent;
+        private string _notificationBuffer;
         
         private CancellationTokenSource _cancellationTokenSource;
 
@@ -156,6 +160,7 @@ namespace Splitio.Services.EventSource
         {
             try
             {
+                _notificationBuffer = string.Empty;
                 while (!cancellationToken.IsCancellationRequested && stream.CanRead && (IsConnected() || _firstEvent))
                 {
                     Array.Clear(_buffer, 0, BufferSize);
@@ -164,11 +169,11 @@ namespace Splitio.Services.EventSource
                     {
                         using (timeoutToken.Token.Register(() => stream.Close()))
                         {
-                            var len = 0;
+                            int len = 0;
                             try
                             {
                                 _log.Debug($"Reading stream ....");
-                                len = await stream.ReadAsync(_buffer, 0, BufferSize, timeoutToken.Token).ConfigureAwait(false);
+                                len = await stream.ReadAsync(_buffer, 0, BufferSize, timeoutToken.Token);
                             }
                             catch(Exception ex)
                             {
@@ -185,14 +190,14 @@ namespace Splitio.Services.EventSource
                                 throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, "Streaming end of the file."); ;
                             }
 
-                            var notificationString = _encoder.GetString(_buffer, 0, len);
-                            _log.Debug($"Read stream encoder buffer: {notificationString}");
+                            var message = _encoder.GetString(_buffer, 0, len);
+                            _log.Debug($"Read stream encoder buffer: {message}");
 
-                            if (_firstEvent) ProcessFirtsEvent(notificationString);
+                            if (_firstEvent) ProcessFirtsEvent(message);
 
-                            if (notificationString == KeepAliveResponse || !IsConnected()) continue;
-                            
-                            var lines = notificationString.Split(_notificationSplitArray, StringSplitOptions.None);
+                            if (message == KeepAliveResponse || !IsConnected()) continue;
+
+                            var lines = GetNotificationList(message);
 
                             foreach (var line in lines)
                             {
@@ -205,8 +210,7 @@ namespace Splitio.Services.EventSource
                                 switch (eventData.Type)
                                 {
                                     case NotificationType.ERROR:
-                                        var notificationError = (NotificationError)eventData;
-                                        ProcessErrorNotification(notificationError);
+                                        ProcessErrorNotification((NotificationError)eventData);
                                         break;
                                     default:
                                         DispatchEvent(eventData);
@@ -275,6 +279,50 @@ namespace Splitio.Services.EventSource
             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SSEConnectionEstablished));
             _sseClientStatusQueue.Add(SSEClientActions.CONNECTED);            
         }
+
+        private List<string> GetNotificationList(string message)
+        {
+            var toReturn = new List<string>();
+
+            var lines = message.Split(_notificationSplitArray, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var item in lines)
+            {
+                if (item.EndsWith("}"))
+                {
+                    var toAdd = item;
+                    if (!string.IsNullOrEmpty(_notificationBuffer))
+                    {
+                        toAdd = _notificationBuffer + item;
+                        _notificationBuffer = string.Empty;
+                    }
+
+                    //toReturn.Add(GetNotificationData(toAdd));
+                    toReturn.Add(toAdd);
+                    continue;
+                }
+
+                if (item != KeepAliveResponse)
+                {
+                    _notificationBuffer = item;
+                }
+            }
+
+            return toReturn;
+        }
+
+        //private static NotificationStreamReader GetNotificationData(string line)
+        //{
+        //    var array = line.Split('\n');
+        //    var dataIndex = Array.FindIndex(array, row => row.Contains("data: "));
+        //    var eventIndex = Array.FindIndex(array, row => row.Contains("event: "));
+
+        //    return new NotificationStreamReader
+        //    {
+        //         Message = array[dataIndex].Replace("data: ", string.Empty),
+        //         Type = array[eventIndex].Replace("event: ", string.Empty)
+        //    };
+        //}
         #endregion
     }
 }
