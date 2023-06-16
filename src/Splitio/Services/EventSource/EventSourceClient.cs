@@ -8,6 +8,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -38,7 +39,7 @@ namespace Splitio.Services.EventSource
         private string _url;
         private bool _connected;
         private bool _firstEvent;
-        private string _lineBuffer;
+        private List<string> _linesBuffer;
         
         private CancellationTokenSource _cancellationTokenSource;
 
@@ -158,7 +159,7 @@ namespace Splitio.Services.EventSource
         {
             try
             {
-                _lineBuffer = string.Empty;
+                _linesBuffer = new List<string>();
                 while (!cancellationToken.IsCancellationRequested && stream.CanRead && (IsConnected() || _firstEvent))
                 {
                     Array.Clear(_buffer, 0, BufferSize);
@@ -269,11 +270,12 @@ namespace Splitio.Services.EventSource
                 if (item.EndsWith("}"))
                 {
                     var toAdd = item;
-                    if (!string.IsNullOrEmpty(_lineBuffer))
+                    if (_linesBuffer.Count > 0)
                     {
-                        toAdd = _lineBuffer + item;
-                        Console.WriteLine($"# WITH BUFFER: {toAdd}\n");
-                        _lineBuffer = string.Empty;
+                        var lb = string.Join(string.Empty, _linesBuffer);
+                        toAdd = lb + item;
+
+                        _linesBuffer.Clear();
                     }
 
                     toReturn.Add(Utils.GetNotificationData(toAdd));
@@ -282,8 +284,7 @@ namespace Splitio.Services.EventSource
 
                 if (item != KeepAliveResponse)
                 {
-                    Console.WriteLine($"# BUFFER: {item}\n");
-                    _lineBuffer = item;
+                    _linesBuffer.Add(item);
                 }
             }
 
