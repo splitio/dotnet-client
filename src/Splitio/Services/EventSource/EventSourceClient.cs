@@ -121,8 +121,6 @@ namespace Splitio.Services.EventSource
                     {
                         using (var stream = await response.Content.ReadAsStreamAsync())
                         {
-                            _log.Info($"Connected to {_url}");
-
                             await ReadStreamAsync(stream, cancellationToken);
                         }
                     }
@@ -172,7 +170,7 @@ namespace Splitio.Services.EventSource
                             try
                             {
                                 _log.Debug($"Reading stream ....");
-                                len = await stream.ReadAsync(_buffer, 0, BufferSize, timeoutToken.Token);
+                                len = await stream.ReadAsync(_buffer, 0, BufferSize, timeoutToken.Token).ConfigureAwait(false);
                             }
                             catch(Exception ex)
                             {

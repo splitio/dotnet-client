@@ -131,8 +131,7 @@ namespace Splitio.Services.EventSource.Workers
 
                         var success = ProcessSplitChangeNotification(scn);
 
-                        if (!success)
-                            await _synchronizer.SynchronizeSplits(scn.ChangeNumber);
+                        if (!success) await _synchronizer.SynchronizeSplits(scn.ChangeNumber);
                     }
                 }
             }

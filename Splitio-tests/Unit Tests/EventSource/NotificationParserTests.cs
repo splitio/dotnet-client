@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Services.EventSource;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Splitio_Tests.Unit_Tests.EventSource
 {
