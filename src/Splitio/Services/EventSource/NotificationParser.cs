@@ -36,7 +36,6 @@ namespace Splitio.Services.EventSource
             catch
             {
                 _log.Debug("Something went wrong parsing a notification");
-                _log.Error($"{notification.Type} - {notification.Message}");
             }
 
             return null;
