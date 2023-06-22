@@ -6,6 +6,7 @@ using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
@@ -21,7 +22,6 @@ namespace Splitio.Services.EventSource
         private const int ConnectTimeoutMs = 30000;
         private const int BufferSize = 10000;
 
-        private readonly string[] _notificationSplitArray = new[] { "\n\n" };
         private readonly byte[] _buffer = new byte[BufferSize];
         private readonly UTF8Encoding _encoder = new UTF8Encoding();
         private readonly CountdownEvent _disconnectSignal = new CountdownEvent(1);
@@ -35,6 +35,7 @@ namespace Splitio.Services.EventSource
         private readonly BlockingCollection<SSEClientActions> _sseClientStatusQueue;
 
         private string _url;
+        private string _lineBuffer;
         private bool _connected;
         private bool _firstEvent;
         
@@ -156,6 +157,7 @@ namespace Splitio.Services.EventSource
         {
             try
             {
+                _lineBuffer = string.Empty;
                 while (!cancellationToken.IsCancellationRequested && stream.CanRead && (IsConnected() || _firstEvent))
                 {
                     Array.Clear(_buffer, 0, BufferSize);
@@ -191,8 +193,8 @@ namespace Splitio.Services.EventSource
                             if (_firstEvent) ProcessFirtsEvent(notificationString);
 
                             if (notificationString == KeepAliveResponse || !IsConnected()) continue;
-                            
-                            var lines = notificationString.Split(_notificationSplitArray, StringSplitOptions.None);
+
+                            var lines = ReadLines(notificationString);
 
                             foreach (var line in lines)
                             {
@@ -274,6 +276,36 @@ namespace Splitio.Services.EventSource
             _initializationSignal.Signal();
             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SSEConnectionEstablished));
             _sseClientStatusQueue.Add(SSEClientActions.CONNECTED);            
+        }
+
+        private List<string> ReadLines(string message)
+        {
+            var toReturn = new List<string>();
+            var sbs = string.Empty;
+
+            if (!string.IsNullOrEmpty(_lineBuffer))
+            {
+                sbs += _lineBuffer;
+                _lineBuffer = string.Empty;
+            }
+
+            foreach (var item in message)
+            {
+                sbs += item;
+
+                if (sbs.EndsWith("\n\n"))
+                {
+                    toReturn.Add(sbs);
+                    sbs = string.Empty;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(sbs))
+            {
+                _lineBuffer = sbs;
+            }
+
+            return toReturn;
         }
         #endregion
     }
