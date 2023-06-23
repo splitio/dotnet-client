@@ -6,7 +6,7 @@ using Splitio.Services.Client.Classes;
 namespace Splitio.Integration_tests
 {
     [TestClass]
-    public class PushClientDecompressionTests
+    public class StreamingClientDecompressionTests
     {
         private const string TreatmentExpected = "v5";
 
@@ -49,7 +49,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual(TreatmentExpected, result);
         }
 
-        private string EvaluateGetTreatment(string notification, string key, string featureName, string treatmentExpected)
+        private static string EvaluateGetTreatment(string notification, string key, string featureName, string treatmentExpected)
         {
             using (var httpClientMock = new HttpClientMock())
             {
@@ -57,7 +57,7 @@ namespace Splitio.Integration_tests
                 httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
                 httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 
-                httpClientMock.SSE_Channels_Response_WithPath(PushClientTests.EventSourcePath, notification);
+                httpClientMock.SSE_Channels_Response_WithPath(StreamingClientTests.EventSourcePath, notification);
 
                 var authResponse = new AuthenticationResponse
                 {
@@ -75,7 +75,7 @@ namespace Splitio.Integration_tests
                     FeaturesRefreshRate = 3000,
                     SegmentsRefreshRate = 3000,
                     AuthServiceURL = $"{url}/api/auth",
-                    StreamingServiceURL = $"{url}{PushClientTests.EventSourcePath}",
+                    StreamingServiceURL = $"{url}{StreamingClientTests.EventSourcePath}",
                     StreamingEnabled = true
                 };
 
@@ -86,7 +86,7 @@ namespace Splitio.Integration_tests
 
                 client.BlockUntilReady(5000);
 
-                var result = PushClientTests.EvaluateWithDelay(key, featureName, treatmentExpected, client);
+                var result = StreamingClientTests.EvaluateWithDelay(key, featureName, treatmentExpected, client);
 
                 client.Destroy();
 

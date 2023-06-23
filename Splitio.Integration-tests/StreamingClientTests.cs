@@ -16,7 +16,7 @@ namespace Splitio.Integration_tests
     [DeploymentItem(@"Resources\split_segment4_updated.json")]
     [DeploymentItem(@"Resources\split_segment4_updated_empty.json")]
     [TestClass]
-    public class PushClientTests
+    public class StreamingClientTests
     {
         public static string EventSourcePath => "/eventsource";
 

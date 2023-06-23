@@ -1,4 +1,5 @@
 ﻿using Splitio.CommonLibraries;
+using Splitio.Domain;
 using Splitio.Services.Logger;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
@@ -38,6 +39,24 @@ namespace Splitio.Util
             }
 
             log.Debug($"Http status executing {method}: {response.StatusCode}");
+        }
+
+        public static IList<string> GetSegmentNamesBySplit(Split split)
+        {
+            var names = new List<string>();
+
+            foreach (var condition in split.conditions)
+            {
+                foreach (var matcher in condition.matcherGroup.matchers)
+                {
+                    if (matcher.userDefinedSegmentMatcherData != null)
+                    {
+                        names.Add(matcher.userDefinedSegmentMatcherData.segmentName);
+                    }
+                }
+            }
+
+            return names;
         }
     }
 }

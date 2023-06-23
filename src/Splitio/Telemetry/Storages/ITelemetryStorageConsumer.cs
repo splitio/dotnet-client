@@ -20,6 +20,7 @@ namespace Splitio.Telemetry.Storages
         IList<StreamingEvent> PopStreamingEvents();
         IList<string> PopTags();
         long GetSessionLength();
+        UpdatesFromSSE PopUpdatesFromSSE();
     }
 
     public interface ITelemetryInitConsumer

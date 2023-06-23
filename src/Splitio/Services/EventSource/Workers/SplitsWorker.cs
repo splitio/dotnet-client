@@ -2,10 +2,14 @@
 using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Interfaces;
+using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource.Workers
 {
@@ -16,6 +20,8 @@ namespace Splitio.Services.EventSource.Workers
         private readonly ITasksManager _tasksManager;
         private readonly ISplitCache _featureFlagCache;
         private readonly ISplitParser _featureFlagParser;
+        private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
+        private readonly ISelfRefreshingSegmentFetcher _segmentFetcher;
         private readonly BlockingCollection<SplitChangeNotification> _queue;
         private readonly object _lock = new object();
 
@@ -26,13 +32,17 @@ namespace Splitio.Services.EventSource.Workers
             ITasksManager tasksManager,
             ISplitCache featureFlagCache,
             ISplitParser featureFlagParser,
-            BlockingCollection<SplitChangeNotification>  queue)
+            BlockingCollection<SplitChangeNotification>  queue,
+            ITelemetryRuntimeProducer telemetryRuntimeProducer,
+            ISelfRefreshingSegmentFetcher segmentFetcher)
         {
             _synchronizer = synchronizer;
             _tasksManager = tasksManager;
             _featureFlagCache = featureFlagCache;
             _featureFlagParser = featureFlagParser;
             _queue = queue;
+            _telemetryRuntimeProducer = telemetryRuntimeProducer;
+            _segmentFetcher = segmentFetcher;
             _log = WrapperAdapter.Instance().GetLogger(typeof(SplitsWorker));
         }
 
@@ -129,7 +139,7 @@ namespace Splitio.Services.EventSource.Workers
                     {
                         _log.Debug($"ChangeNumber dequeue: {scn.ChangeNumber}");
 
-                        var success = ProcessSplitChangeNotification(scn);
+                        var success = await ProcessSplitChangeNotification(scn);
 
                         if (!success) await _synchronizer.SynchronizeSplits(scn.ChangeNumber);
                     }
@@ -145,7 +155,7 @@ namespace Splitio.Services.EventSource.Workers
             }
         }
 
-        private bool ProcessSplitChangeNotification(SplitChangeNotification scn)
+        private async Task<bool> ProcessSplitChangeNotification(SplitChangeNotification scn)
         {
             try
             {
@@ -163,9 +173,15 @@ namespace Splitio.Services.EventSource.Workers
                     else
                     {
                         _featureFlagCache.AddOrUpdate(scn.FeatureFlag.name, ffParsed);
+                        var segmentNames = Util.Helper.GetSegmentNamesBySplit(scn.FeatureFlag);
+
+                        if (segmentNames.Count > 0)
+                            await _segmentFetcher.FetchSegmentsIfNotExists(segmentNames);
                     }
 
                     _featureFlagCache.SetChangeNumber(scn.ChangeNumber);
+                    _telemetryRuntimeProducer.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits);
+
                     return true;
                 }
             }

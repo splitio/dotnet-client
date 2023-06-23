@@ -41,5 +41,7 @@ namespace Splitio.Telemetry.Domain
         public List<StreamingEvent> StreamingEvents { get; set; }
         [JsonProperty("t")]
         public List<string> Tags { get; set; }
+        [JsonProperty("ufs")]
+        public UpdatesFromSSE UpdatesFromSSE { get; set; }
     }
 }

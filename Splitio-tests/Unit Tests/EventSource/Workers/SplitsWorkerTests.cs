@@ -6,9 +6,13 @@ using Splitio.Services.Common;
 using Splitio.Services.EventSource;
 using Splitio.Services.EventSource.Workers;
 using Splitio.Services.Parsing.Interfaces;
+using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Telemetry.Domain.Enums;
+using Splitio.Telemetry.Storages;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.EventSource.Workers
@@ -21,6 +25,8 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         private readonly Mock<ISynchronizer> _synchronizer;
         private readonly Mock<ISplitCache> _featureFlagCache;
         private readonly Mock<ISplitParser> _featureFlagParser;
+        private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
+        private readonly Mock<ISelfRefreshingSegmentFetcher> _segmentFetcher;
         private readonly BlockingCollection<SplitChangeNotification> _queue;
 
         private readonly ISplitsWorker _splitsWorker;
@@ -30,8 +36,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _synchronizer = new Mock<ISynchronizer>();
             _featureFlagCache = new Mock<ISplitCache>();
             _featureFlagParser = new Mock<ISplitParser>();
+            _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
+            _segmentFetcher = new Mock<ISelfRefreshingSegmentFetcher>();
             _queue = new BlockingCollection<SplitChangeNotification>(new ConcurrentQueue<SplitChangeNotification>());
-            _splitsWorker = new SplitsWorker(_synchronizer.Object, new TasksManager(wrapperAdapter), _featureFlagCache.Object, _featureFlagParser.Object, _queue);
+            _splitsWorker = new SplitsWorker(_synchronizer.Object, new TasksManager(wrapperAdapter), _featureFlagCache.Object, _featureFlagParser.Object, _queue, _telemetryRuntimeProducer.Object, _segmentFetcher.Object);
         }
 
         [TestMethod]
@@ -66,6 +74,63 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         }
 
         [TestMethod]
+        public void AddToQueueWithSegmentNameShouldFetchSegment()
+        {
+            // Arrange.
+            _featureFlagCache
+                .Setup(mock => mock.GetChangeNumber())
+                .Returns(5);
+
+            _featureFlagParser
+                .Setup(mock => mock.Parse(It.IsAny<Split>()))
+                .Returns(new ParsedSplit());
+
+            _splitsWorker.AddToQueue(new SplitChangeNotification
+            {
+                ChangeNumber = 6,
+                PreviousChangeNumber = 5,
+                FeatureFlag = new Split
+                {
+                    status = "ACTIVE",
+                    name = "mauro_ff",
+                    defaultTreatment = "off",
+                    conditions = new List<ConditionDefinition>()
+                    { 
+                        new ConditionDefinition()
+                        {
+                            conditionType = "",
+                            matcherGroup = new MatcherGroupDefinition()
+                            {
+                                matchers = new List<MatcherDefinition>
+                                {
+                                    new MatcherDefinition()
+                                    {
+                                        userDefinedSegmentMatcherData = new UserDefinedSegmentData()
+                                        {
+                                            segmentName = "segment-test"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Act.
+            _splitsWorker.Start();
+            Thread.Sleep(500);
+
+            // Assert.
+            _featureFlagCache.Verify(mock => mock.RemoveSplit(It.IsAny<string>()), Times.Never);
+            _featureFlagCache.Verify(mock => mock.AddOrUpdate(It.IsAny<string>(), It.IsAny<SplitBase>()), Times.Once);
+            _synchronizer.Verify(mock => mock.SynchronizeSplits(It.IsAny<long>()), Times.Never);
+            _featureFlagCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Once);
+            _telemetryRuntimeProducer.Verify(mock => mock.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits), Times.Once);
+            _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExists(It.IsAny<List<string>>()), Times.Once);
+        }
+
+        [TestMethod]
         public void AddToQueueWithNewFormatAndSamePcnShouldUpdateInMemory()
         {
             // Arrange.
@@ -85,7 +150,8 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
                 {
                     status = "ACTIVE",
                     name = "mauro_ff",
-                    defaultTreatment = "off"
+                    defaultTreatment = "off",
+                    conditions = new List<ConditionDefinition>()
                 }
             });
 
@@ -98,6 +164,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _featureFlagCache.Verify(mock => mock.AddOrUpdate(It.IsAny<string>(), It.IsAny<SplitBase>()), Times.Once);
             _synchronizer.Verify(mock => mock.SynchronizeSplits(It.IsAny<long>()), Times.Never);
             _featureFlagCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Once);
+            _telemetryRuntimeProducer.Verify(mock => mock.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits), Times.Once);
         }
 
         [TestMethod]

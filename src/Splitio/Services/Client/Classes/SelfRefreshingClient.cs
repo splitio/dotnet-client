@@ -214,7 +214,7 @@ namespace Splitio.Services.Client.Classes
 
                 // Workers
                 var queue = new BlockingCollection<SplitChangeNotification>(new ConcurrentQueue<SplitChangeNotification>());
-                var splitsWorker = new SplitsWorker(synchronizer, _tasksManager, _splitCache, _splitParser, queue);
+                var splitsWorker = new SplitsWorker(synchronizer, _tasksManager, _splitCache, _splitParser, queue, _telemetryRuntimeProducer, _selfRefreshingSegmentFetcher);
                 var segmentsWorker = new SegmentsWorker(synchronizer, _tasksManager);
 
                 // NotificationProcessor
