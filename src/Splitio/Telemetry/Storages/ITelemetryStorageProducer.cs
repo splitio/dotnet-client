@@ -25,6 +25,7 @@ namespace Splitio.Telemetry.Storages
         void RecordTokenRefreshes();
         void RecordStreamingEvent(StreamingEvent streamingEvent);
         void RecordSessionLength(long session);
+        void RecordUpdatesFromSSE(UpdatesFromSSEEnum sseUpdate);
     }
 
     public interface ITelemetryInitProducer
