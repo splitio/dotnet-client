@@ -91,7 +91,7 @@ namespace Splitio.Services.EventSource.Workers
                     _log.Debug("FeatureFlags Wroker starting ...");
                     _cancellationTokenSource = new CancellationTokenSource();
                     _running = true;
-                    _tasksManager.Start(() => ExecuteAsync(), _cancellationTokenSource, "FeatureFlags Worker.");                    
+                    _tasksManager.Start(async () => await ExecuteAsync(), _cancellationTokenSource, "FeatureFlags Worker.");
                 }
                 catch (Exception ex)
                 {
@@ -127,7 +127,7 @@ namespace Splitio.Services.EventSource.Workers
         #endregion
 
         #region Private Methods
-        private async void ExecuteAsync()
+        private async Task ExecuteAsync()
         {
             try
             {
@@ -173,7 +173,7 @@ namespace Splitio.Services.EventSource.Workers
                     else
                     {
                         _featureFlagCache.AddOrUpdate(scn.FeatureFlag.name, ffParsed);
-                        var segmentNames = Util.Helper.GetSegmentNamesBySplit(scn.FeatureFlag);
+                        var segmentNames = scn.FeatureFlag.GetSegments();
 
                         if (segmentNames.Count > 0)
                             await _segmentFetcher.FetchSegmentsIfNotExists(segmentNames);

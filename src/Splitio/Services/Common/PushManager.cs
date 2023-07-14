@@ -117,11 +117,10 @@ namespace Splitio.Services.Common
 
         private void ForceCancellationToken()
         {
-            if (_cancellationTokenSourceRefreshToken != null)
-                _cancellationTokenSourceRefreshToken.Cancel();            
+            _cancellationTokenSourceRefreshToken?.Cancel();            
         }
 
-        private long CalcularteNextTokenExpiration(double time)
+        private static long CalcularteNextTokenExpiration(double time)
         {
             return CurrentTimeHelper.CurrentTimeMillis() + Convert.ToInt64(time * 1000);
         }

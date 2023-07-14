@@ -74,7 +74,7 @@ namespace Splitio.Services.EventSource
             _initializationSignal.Reset();
             _cancellationTokenSource = new CancellationTokenSource();
 
-            _tasksManager.Start(() => ConnectAsync(_cancellationTokenSource.Token).Wait(), _cancellationTokenSource, "SSE - ConnectAsync");
+            _tasksManager.Start(async () => await ConnectAsync(_cancellationTokenSource.Token), _cancellationTokenSource, "SSE - ConnectAsync");
 
             _initializationSignal.Wait(ConnectTimeoutMs);
 
@@ -150,6 +150,7 @@ namespace Splitio.Services.EventSource
                 Disconnect(action);                
 
                 _log.Debug("Finished Event Source client ConnectAsync.");
+                Console.WriteLine("\nFinished Event Source client ConnectAsync.");
             }            
         }
 
