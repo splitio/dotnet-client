@@ -150,7 +150,6 @@ namespace Splitio.Services.EventSource
                 Disconnect(action);                
 
                 _log.Debug("Finished Event Source client ConnectAsync.");
-                Console.WriteLine("\nFinished Event Source client ConnectAsync.");
             }            
         }
 
