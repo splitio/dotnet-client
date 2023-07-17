@@ -61,7 +61,7 @@ namespace Splitio.Services.Common
         #region Public Methods
         public void Start()
         {
-            _tasksManager.Start(() =>
+            _tasksManager.Start(async () =>
             {
                 try
                 {
@@ -78,7 +78,7 @@ namespace Splitio.Services.Common
                     {
                         _log.Debug("Starting streaming mode...");
                         _tasksManager.Start(OnSSEClientStatus, "SSE Client Status");
-                        var connected = _pushManager.StartSse().Result;
+                        var connected = await _pushManager.StartSse().ConfigureAwait(false);
 
                         if (connected) return;
                     }

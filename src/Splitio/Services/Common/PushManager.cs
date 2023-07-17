@@ -42,7 +42,7 @@ namespace Splitio.Services.Common
         {
             try
             {
-                var response = await _authApiClient.AuthenticateAsync();
+                var response = await _authApiClient.AuthenticateAsync().ConfigureAwait(false);
 
                 _log.Debug($"Auth service response pushEnabled: {response.PushEnabled}.");
 
