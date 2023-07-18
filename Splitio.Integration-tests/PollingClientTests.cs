@@ -33,6 +33,7 @@ namespace Splitio.Integration_tests
                 // Assert.
                 Assert.AreEqual("control", treatmentResult);
 
+                client.BlockUntilReady(10000);
                 client.Destroy();
             }
         }
@@ -82,6 +83,7 @@ namespace Splitio.Integration_tests
                 Assert.AreEqual("control", treatmentResults["FACUNDO_TEST"]);
                 Assert.AreEqual("control", treatmentResults["MAURO_TEST"]);
 
+                client.BlockUntilReady(10000);
                 client.Destroy();
             }
         }
@@ -108,6 +110,7 @@ namespace Splitio.Integration_tests
                 Assert.IsNull(treatmentResults["FACUNDO_TEST"].Config);
                 Assert.IsNull(treatmentResults["MAURO_TEST"].Config);
 
+                client.BlockUntilReady(10000);
                 client.Destroy();
             }
         }
@@ -144,6 +147,7 @@ namespace Splitio.Integration_tests
                 Assert.IsFalse(isSdkReady);
                 Assert.AreEqual("SDK was not ready in 1 miliseconds", exceptionMessage);
 
+                client.BlockUntilReady(10000);
                 client.Destroy();
             }
         }
@@ -167,6 +171,7 @@ namespace Splitio.Integration_tests
                 // Assert.
                 Assert.IsNull(result);
 
+                splitFactory.Client().BlockUntilReady(10000);
                 splitFactory.Client().Destroy();
             }
         }
