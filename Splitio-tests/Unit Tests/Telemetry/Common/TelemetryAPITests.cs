@@ -3,7 +3,6 @@ using Moq;
 using Splitio.CommonLibraries;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
-using Splitio.Services.Logger;
 using Splitio.Telemetry.Common;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
@@ -48,10 +47,10 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
                 }
             };
 
-            var data = "{\"oM\":1,\"sE\":false,\"rR\":{\"sp\":4,\"se\":3,\"im\":2,\"ev\":1,\"te\":0},\"iQ\":0,\"eQ\":3,\"iM\":0,\"iL\":false,\"hp\":false,\"aF\":1,\"rF\":0,\"tR\":0,\"bT\":2,\"nR\":0}";
+            var expected = "{\"oM\":1,\"sE\":false,\"rR\":{\"sp\":4,\"se\":3,\"im\":2,\"ev\":1,\"te\":0},\"iQ\":0,\"eQ\":3,\"iM\":0,\"iL\":false,\"hp\":false,\"aF\":1,\"rF\":0,\"tR\":0,\"bT\":2,\"nR\":0}";
 
             _splitioHttpClient
-                .Setup(mock => mock.PostAsync("www.fake-url.com/metrics/config", data))
+                .Setup(mock => mock.PostAsync("www.fake-url.com/metrics/config", expected))
                 .ReturnsAsync(new HTTPResult
                 {
                     StatusCode = System.Net.HttpStatusCode.OK
@@ -64,7 +63,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             _telemetryAPI.RecordConfigInit(config);
 
             // Assert.
-            _splitioHttpClient.Verify(mock => mock.PostAsync("www.fake-url.com/metrics/config", data), Times.Once);
+            _splitioHttpClient.Verify(mock => mock.PostAsync("www.fake-url.com/metrics/config", expected), Times.Once);
         }
 
         [TestMethod]
@@ -83,23 +82,23 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
                 {
                     Splits = new Dictionary<int, long> { { 500, 5 }, { 400, 5 } },
                     Events = new Dictionary<int, long> { { 500, 2 }, { 400, 2 } }
-                }
+                },
+                UpdatesFromSSE = new UpdatesFromSSE { Splits = 11 }
             };
 
-            var data = "{\"hE\":{\"sp\":{\"500\":5,\"400\":5},\"ev\":{\"500\":2,\"400\":2}},\"hL\":{\"se\":[88,22,99],\"ev\":[55,66,77]},\"tR\":0,\"aR\":2,\"iQ\":0,\"iDe\":0,\"iDr\":0,\"spC\":0,\"seC\":0,\"skC\":0,\"sL\":0,\"eQ\":0,\"eD\":0}";
+            var expected = "{\"hE\":{\"sp\":{\"500\":5,\"400\":5},\"ev\":{\"500\":2,\"400\":2}},\"hL\":{\"se\":[88,22,99],\"ev\":[55,66,77]},\"tR\":0,\"aR\":2,\"iQ\":0,\"iDe\":0,\"iDr\":0,\"spC\":0,\"seC\":0,\"skC\":0,\"sL\":0,\"eQ\":0,\"eD\":0,\"ufs\":{\"sp\":11}}";
 
             _splitioHttpClient
-                .Setup(mock => mock.PostAsync("www.fake-url.com/metrics/usage", data))
+                .Setup(mock => mock.PostAsync("www.fake-url.com/metrics/usage", expected))
                 .ReturnsAsync(new HTTPResult
                 {
                     StatusCode = System.Net.HttpStatusCode.OK
                 });
-
             // Act.
             _telemetryAPI.RecordStats(stats);
 
             // Assert.
-            _splitioHttpClient.Verify(mock => mock.PostAsync("www.fake-url.com/metrics/usage", data), Times.Once);
+            _splitioHttpClient.Verify(mock => mock.PostAsync("www.fake-url.com/metrics/usage", expected), Times.Once);
         }
 
         [TestMethod]
@@ -107,12 +106,11 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
         {
             // Arrange.
             var values = new List<Mtks> { new Mtks("feature-01", new HashSet<string> { "key-01", "key-02", "key-03", "key-04" }) };
-
             var uniqueKeys = new UniqueKeys(values);
+            var expected = "{\"keys\":[{\"f\":\"feature-01\",\"ks\":[\"key-01\",\"key-02\",\"key-03\",\"key-04\"]}]}";
 
-            var data = "{\"keys\":[{\"f\":\"feature-01\",\"ks\":[\"key-01\",\"key-02\",\"key-03\",\"key-04\"]}]}";
             _splitioHttpClient
-                .Setup(mock => mock.PostAsync("www.fake-url.com/keys/ss", data))
+                .Setup(mock => mock.PostAsync("www.fake-url.com/keys/ss", expected))
                 .ReturnsAsync(new HTTPResult
                 {
                     StatusCode = System.Net.HttpStatusCode.OK
@@ -122,7 +120,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             _telemetryAPI.RecordUniqueKeys(uniqueKeys);
 
             // Assert.
-            _splitioHttpClient.Verify(mock => mock.PostAsync("www.fake-url.com/keys/ss", data), Times.Once);
+            _splitioHttpClient.Verify(mock => mock.PostAsync("www.fake-url.com/keys/ss", expected), Times.Once);
         }
     }
 }

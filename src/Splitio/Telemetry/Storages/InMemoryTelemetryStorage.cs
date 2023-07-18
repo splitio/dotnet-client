@@ -16,7 +16,6 @@ namespace Splitio.Telemetry.Storages
         // Latencies
         private readonly ConcurrentDictionary<MethodEnum, long[]> _methodLatencies = new ConcurrentDictionary<MethodEnum, long[]>();
         private readonly ConcurrentDictionary<ResourceEnum, long[]> _httpLatencies = new ConcurrentDictionary<ResourceEnum, long[]>();
-        private readonly object _methodLatenciesLock = new object();
         private readonly object _httpLatenciesLock = new object();
 
         // Counters
@@ -29,7 +28,7 @@ namespace Splitio.Telemetry.Storages
         private readonly ConcurrentDictionary<EventsEnum, long> _eventsDataRecords = new ConcurrentDictionary<EventsEnum, long>();
         private readonly ConcurrentDictionary<ResourceEnum, long> _lastSynchronizationRecords = new ConcurrentDictionary<ResourceEnum, long>();
         private readonly ConcurrentDictionary<SdkRecordsEnum, long> _sdkRecords = new ConcurrentDictionary<SdkRecordsEnum, long>();
-        private readonly ConcurrentDictionary<FactoryRecordsEnum, long> _factoryRecords = new ConcurrentDictionary<FactoryRecordsEnum, long>();
+        private readonly ConcurrentDictionary<UpdatesFromSSEEnum, long> _updatesFromSSERecords = new ConcurrentDictionary<UpdatesFromSSEEnum, long>();
 
         // HttpErrors
         private readonly ConcurrentDictionary<ResourceEnum, ConcurrentDictionary<int, long>> _httpErrors = new ConcurrentDictionary<ResourceEnum, ConcurrentDictionary<int, long>>();
@@ -256,6 +255,18 @@ namespace Splitio.Telemetry.Storages
         {
             // No-Op. Config Data will be sent directly to Split Servers. No need to store.
         }
+
+        public void RecordUpdatesFromSSE(UpdatesFromSSEEnum sseUpdate)
+        {
+            try
+            {
+                _updatesFromSSERecords.AddOrUpdate(sseUpdate, 1, (key, value) => value + 1);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Exception caught executing RecordAuthRejections", ex);
+            }
+        }
         #endregion
 
         #region Public Methods - Consumer
@@ -410,6 +421,16 @@ namespace Splitio.Telemetry.Storages
             _pushCounters.TryRemove(PushCountersEnum.TokenRefreshes, out long tokenRefreshes);
 
             return tokenRefreshes;
+        }
+
+        public UpdatesFromSSE PopUpdatesFromSSE()
+        {
+            _updatesFromSSERecords.TryRemove(UpdatesFromSSEEnum.Splits, out long splits);
+
+            return new UpdatesFromSSE
+            {
+                Splits = splits
+            };
         }
         #endregion
     }
