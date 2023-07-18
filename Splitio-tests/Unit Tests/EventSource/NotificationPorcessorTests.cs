@@ -24,7 +24,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         public void Proccess_SplitUpdate_AddToQueueInWorker()
         {
             // Arrange.
-            var notification = new SplitChangeNotifiaction
+            var notification = new SplitChangeNotification
             {
                 Type = NotificationType.SPLIT_UPDATE,
                 ChangeNumber = 1585867723838
@@ -34,7 +34,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationPorcessor.Proccess(notification);
 
             // Assert.
-            _splitsWorker.Verify(mock => mock.AddToQueue(notification.ChangeNumber), Times.Once);
+            _splitsWorker.Verify(mock => mock.AddToQueue(notification), Times.Once);
         }
 
         [TestMethod]
@@ -53,8 +53,8 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationPorcessor.Proccess(notification);
 
             // Assert.
-            _splitsWorker.Verify(mock => mock.KillSplit(notification.ChangeNumber, notification.SplitName, notification.DefaultTreatment), Times.Once);
-            _splitsWorker.Verify(mock => mock.AddToQueue(notification.ChangeNumber), Times.Once);
+            _splitsWorker.Verify(mock => mock.Kill(notification), Times.Once);
+            _splitsWorker.Verify(mock => mock.AddToQueue(It.IsAny<SplitChangeNotification>()), Times.Once);
         }
 
         [TestMethod]

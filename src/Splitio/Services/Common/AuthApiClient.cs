@@ -77,11 +77,11 @@ namespace Splitio.Services.Common
             if (authResponse.PushEnabled == false) 
                 return authResponse;
 
-            var tokenDecoded = AuthApiClient.DecodeJwt(authResponse.Token);
+            var tokenDecoded = DecodeJwt(authResponse.Token);
             var token = JsonConvert.DeserializeObject<Jwt>(tokenDecoded);
 
-            authResponse.Channels = AuthApiClient.GetChannels(token);
-            authResponse.Expiration = AuthApiClient.GetExpirationSeconds(token);
+            authResponse.Channels = GetChannels(token);
+            authResponse.Expiration = GetExpirationSeconds(token);
 
             _telemetryRuntimeProducer.RecordTokenRefreshes();
 
@@ -96,7 +96,7 @@ namespace Splitio.Services.Common
                 .Select(c => c.First.Path)
                 .ToList();
 
-            var channels = AuthApiClient.AddPrefixControlChannels(string.Join(",", channelsList));
+            var channels = AddPrefixControlChannels(string.Join(",", channelsList));
 
             return channels;
         }

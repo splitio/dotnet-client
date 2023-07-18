@@ -12,9 +12,9 @@ namespace Splitio.Services.EventSource
         private readonly ISegmentsWorker _segmentsWorker;
         private readonly INotificationProcessor _notificationPorcessor;
         private readonly INotificationManagerKeeper _notificationManagerKeeper;
+        private readonly IEventSourceClient _eventSourceClient;
         private readonly string _streaminServiceUrl;
 
-        private IEventSourceClient _eventSourceClient;
 
         public SSEHandler(string streaminServiceUrl,
             ISplitsWorker splitsWorker,

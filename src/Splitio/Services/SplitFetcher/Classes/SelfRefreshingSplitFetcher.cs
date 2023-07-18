@@ -156,7 +156,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                         addedSplits.Add(split);
                     }
 
-                    segmentNames.AddRange(GetSegmentNames(split));
+                    segmentNames.AddRange(Util.Helper.GetSegmentNamesBySplit(split));
                 }
             }
 
@@ -179,24 +179,6 @@ namespace Splitio.Services.SplitFetcher.Classes
             }
 
             return segmentNames;
-        }
-
-        public IList<string> GetSegmentNames(Split split)
-        {
-            var names = new List<string>();
-
-            foreach (var condition in split.conditions)
-            {
-                foreach (var matcher in condition.matcherGroup.matchers)
-                {
-                    if (matcher.userDefinedSegmentMatcherData != null)
-                    {
-                        names.Add(matcher.userDefinedSegmentMatcherData.segmentName);
-                    }
-                }
-            }
-
-            return names;
         }
         #endregion
     }

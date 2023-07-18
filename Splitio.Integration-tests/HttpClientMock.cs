@@ -27,6 +27,21 @@ namespace Splitio.Integration_tests
         }
 
         #region SplitChanges
+        public void SplitChangesOkWithBody(string body, string since)
+        {
+            _mockServer
+                .Given(
+                    Request.Create()
+                    .WithPath("/api/splitChanges")
+                    .WithParam("since", since)
+                    .UsingGet()
+                )
+                .RespondWith(
+                    Response.Create()
+                    .WithStatusCode(200)
+                    .WithBody(body));
+        }
+
         public void SplitChangesOk(string fileName, string since)
         {
             var jsonBody = File.ReadAllText($"{rootFilePath}{fileName}");
