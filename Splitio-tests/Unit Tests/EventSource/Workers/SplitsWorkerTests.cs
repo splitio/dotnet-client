@@ -64,7 +64,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Act.
             _splitsWorker.Start();
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             // Assert.
             _featureFlagCache.Verify(mock => mock.RemoveSplit(It.IsAny<string>()), Times.Never);
@@ -119,7 +119,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Act.
             _splitsWorker.Start();
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             // Assert.
             _featureFlagCache.Verify(mock => mock.RemoveSplit(It.IsAny<string>()), Times.Never);
@@ -157,7 +157,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Act.
             _splitsWorker.Start();
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             // Assert.
             _featureFlagCache.Verify(mock => mock.RemoveSplit(It.IsAny<string>()), Times.Never);
@@ -193,7 +193,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Act.
             _splitsWorker.Start();
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             // Assert.
             _featureFlagCache.Verify(mock => mock.RemoveSplit("mauro_ff"), Times.Once);
@@ -227,7 +227,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         {
             // Act.
             _splitsWorker.Start();
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             // Assert.
             _synchronizer.Verify(mock => mock.SynchronizeSplits(It.IsAny<long>()), Times.Never);

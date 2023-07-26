@@ -9,11 +9,11 @@ namespace Splitio.Services.Shared.Classes
         private static FactoryInstantiationsService _instance;
         private static readonly object _instanceLock = new object();
         private static readonly object _lock = new object();
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(FactoryInstantiationsService));
 
-        private ISplitLogger _log;
-        private ConcurrentDictionary<string, int> _factoryInstantiations;
+        private readonly ConcurrentDictionary<string, int> _factoryInstantiations;
 
-        public static IFactoryInstantiationsService Instance(ISplitLogger log = null)
+        public static IFactoryInstantiationsService Instance()
         {
             if (_instance == null)
             {
@@ -21,7 +21,7 @@ namespace Splitio.Services.Shared.Classes
                 {
                     if (_instance == null)
                     {
-                        _instance = new FactoryInstantiationsService(log);
+                        _instance = new FactoryInstantiationsService();
                     }
                 }
             }
@@ -29,9 +29,8 @@ namespace Splitio.Services.Shared.Classes
             return _instance;
         }
 
-        private FactoryInstantiationsService(ISplitLogger log = null)
+        private FactoryInstantiationsService()
         {
-            _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(FactoryInstantiationsService));
             _factoryInstantiations = new ConcurrentDictionary<string, int>();
         }
 

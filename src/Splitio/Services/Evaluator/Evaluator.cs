@@ -11,10 +11,11 @@ namespace Splitio.Services.Evaluator
 {
     public class Evaluator : IEvaluator
     {
-        protected const string Control = "control";
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(Evaluator));
 
+        protected const string Control = "control";
+        
         private readonly ISplitter _splitter;
-        private readonly ISplitLogger _log;
         private readonly ISplitCache _splitCache;
 
         public Evaluator(ISplitCache splitCache,
@@ -22,7 +23,6 @@ namespace Splitio.Services.Evaluator
         {
             _splitCache = splitCache;
             _splitter = splitter;
-            _log = WrapperAdapter.Instance().GetLogger(typeof(Evaluator));
         }
 
         #region Public Method

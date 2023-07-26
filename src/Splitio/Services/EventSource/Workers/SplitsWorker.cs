@@ -15,7 +15,8 @@ namespace Splitio.Services.EventSource.Workers
 {
     public class SplitsWorker : ISplitsWorker
     {
-        private readonly ISplitLogger _log;
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitsWorker));
+
         private readonly ISynchronizer _synchronizer;
         private readonly ITasksManager _tasksManager;
         private readonly ISplitCache _featureFlagCache;
@@ -43,7 +44,6 @@ namespace Splitio.Services.EventSource.Workers
             _queue = queue;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _segmentFetcher = segmentFetcher;
-            _log = WrapperAdapter.Instance().GetLogger(typeof(SplitsWorker));
         }
 
         #region Public Methods

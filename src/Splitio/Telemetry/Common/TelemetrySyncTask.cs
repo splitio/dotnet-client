@@ -15,11 +15,12 @@ namespace Splitio.Telemetry.Common
 {
     public class TelemetrySyncTask : ITelemetrySyncTask
     {
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(TelemetrySyncTask));
+
         private readonly ITelemetryStorageConsumer _telemetryStorageConsumer;
         private readonly ITelemetryAPI _telemetryAPI;
         private readonly ISplitCache _splitCache;
         private readonly ISegmentCache _segmentCache;        
-        private readonly ISplitLogger _log;
         private readonly IFactoryInstantiationsService _factoryInstantiationsService;
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ITasksManager _tasksManager;
@@ -44,7 +45,6 @@ namespace Splitio.Telemetry.Common
             _segmentCache = segmentCache;
             _configurationOptions = configurationOptions;
             _factoryInstantiationsService = factoryInstantiationsService;
-            _log = WrapperAdapter.Instance().GetLogger(typeof(TelemetrySyncTask));
             _wrapperAdapter = wrapperAdapter;
             _tasksManager = tasksManager;
 

@@ -10,7 +10,7 @@ namespace Splitio.Services.EventSource.Workers
 {
     public class SegmentsWorker : ISegmentsWorker
     {
-        private readonly ISplitLogger _log;
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SegmentsWorker));
         private readonly ISynchronizer _synchronizer;
         private readonly ITasksManager _tasksManager;
         private readonly BlockingCollection<SegmentQueueDto> _queue;
@@ -23,7 +23,6 @@ namespace Splitio.Services.EventSource.Workers
         {
             _synchronizer = synchronizer;
             _tasksManager = tasksManager;
-            _log = WrapperAdapter.Instance().GetLogger(typeof(SegmentsWorker));
             _queue = new BlockingCollection<SegmentQueueDto>(new ConcurrentQueue<SegmentQueueDto>());
         }
 

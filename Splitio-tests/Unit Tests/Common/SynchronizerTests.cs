@@ -7,7 +7,6 @@ using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
-using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Common;
@@ -23,7 +22,6 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<ISelfRefreshingSegmentFetcher> _segmentFetcher;
         private readonly Mock<IImpressionsLog> _impressionsLog;
         private readonly Mock<IEventsLog> _eventsLog;
-        private readonly Mock<ISplitLogger> _log;
         private readonly Mock<IImpressionsCounter> _impressionsCounter;
         private readonly Mock<IWrapperAdapter> _wrapperAdapter;
         private readonly Mock<ITelemetrySyncTask> _telemetrySyncTask;
@@ -39,7 +37,6 @@ namespace Splitio_Tests.Unit_Tests.Common
             _segmentFetcher = new Mock<ISelfRefreshingSegmentFetcher>();
             _impressionsLog = new Mock<IImpressionsLog>();
             _eventsLog = new Mock<IEventsLog>();
-            _log = new Mock<ISplitLogger>();
             _impressionsCounter = new Mock<IImpressionsCounter>();
             _wrapperAdapter = new Mock<IWrapperAdapter>();
             _telemetrySyncTask = new Mock<ITelemetrySyncTask>();
@@ -48,7 +45,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _segmentCache = new Mock<ISegmentCache>();
             _uniqueKeysTracker = new Mock<IUniqueKeysTracker>();
 
-            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCounter.Object, _wrapperAdapter.Object, _telemetrySyncTask.Object, _splitCache.Object, _backOff.Object, _backOff.Object, 10, 5, _segmentCache.Object, _uniqueKeysTracker.Object, _log.Object);
+            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCounter.Object, _wrapperAdapter.Object, _telemetrySyncTask.Object, _splitCache.Object, _backOff.Object, _backOff.Object, 10, 5, _segmentCache.Object, _uniqueKeysTracker.Object);
         }
 
         [TestMethod]
@@ -149,8 +146,6 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Assert.
             _segmentFetcher.Verify(mock => mock.Fetch(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(20));
-            _log.Verify(mock => mock.Debug($"No changes fetched for segment {segmentName} after 10 attempts with CDN bypassed."), Times.Once);
-            _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -173,8 +168,6 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Assert.
             _segmentFetcher.Verify(mock => mock.Fetch(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(5));
-            _log.Verify(mock => mock.Debug($"Segment {segmentName} refresh completed in 5 attempts."), Times.Once);
-            _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -209,8 +202,6 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Assert.
             _segmentFetcher.Verify(mock => mock.Fetch(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(17));
-            _log.Verify(mock => mock.Debug($"Segment {segmentName} refresh completed bypassing the CDN in 7 attempts."), Times.Once);
-            _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -247,8 +238,6 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Assert.
             _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Exactly(20));
-            _log.Verify(mock => mock.Debug($"No changes fetched after 10 attempts with CDN bypassed."), Times.Once);
-            _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -273,8 +262,6 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Assert.
             _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Exactly(5));
-            _log.Verify(mock => mock.Debug($"Refresh completed in 5 attempts."), Times.Once);
-            _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -311,8 +298,6 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Assert.
             _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Exactly(17));
-            _log.Verify(mock => mock.Debug($"Refresh completed bypassing the CDN in 7 attempts."), Times.Once);
-            _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
         }
     }
 }

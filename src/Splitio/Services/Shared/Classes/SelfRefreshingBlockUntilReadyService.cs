@@ -8,15 +8,15 @@ namespace Splitio.Services.Shared.Classes
 {
     public class SelfRefreshingBlockUntilReadyService : IBlockUntilReadyService
     {
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingBlockUntilReadyService));
+
         private readonly IStatusManager _statusManager;
-        private readonly ISplitLogger _log;
         private readonly ITelemetryInitProducer _telemetryInitProducer;
 
         public SelfRefreshingBlockUntilReadyService(IStatusManager statusManager, ITelemetryInitProducer telemetryInitProducer)
         {
             _statusManager = statusManager;
             _telemetryInitProducer = telemetryInitProducer;
-            _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingBlockUntilReadyService));
         }
 
         public void BlockUntilReady(int blockMilisecondsUntilReady)

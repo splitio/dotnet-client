@@ -9,8 +9,9 @@ namespace Splitio.Services.EventSource
 {
     public class NotificationManagerKeeper : INotificationManagerKeeper
     {
-        private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
-        private readonly ISplitLogger _log;
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(NotificationManagerKeeper));
+
+        private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;        
         private readonly BlockingCollection<SSEClientActions> _sseClientStatusQueue;
         private readonly object _eventOccupancyLock = new object();
 
@@ -22,7 +23,6 @@ namespace Splitio.Services.EventSource
         {
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _sseClientStatusQueue = sseClientStatus;
-            _log = WrapperAdapter.Instance().GetLogger(typeof(NotificationManagerKeeper));
 
             _publisherAvailable = true;
         }

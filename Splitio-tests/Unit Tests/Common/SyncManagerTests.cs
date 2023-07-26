@@ -346,7 +346,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Act.
             _sseClientStatus.Add(SSEClientActions.SUBSYSTEM_READY);
-            Thread.Sleep(50);
+            Thread.Sleep(100);
 
             // Assert.
             _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
