@@ -45,8 +45,8 @@ namespace Splitio_Tests.Unit_Tests.Common
             // Arrange.
             var streamingEnabled = false;
             _synchronizer
-                .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
-                .Returns(true);
+                .Setup(mock => mock.SyncAllAsync())
+                .ReturnsAsync(true);
 
             var syncManager = GetSyncManager(streamingEnabled);
 
@@ -55,7 +55,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Assert.
             Thread.Sleep(1000);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
+            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicDataRecording(), Times.Once);
             _pushManager.Verify(mock => mock.StartSse(), Times.Never);
@@ -66,8 +66,8 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             _synchronizer
-                .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
-                .Returns(true);
+                .Setup(mock => mock.SyncAllAsync())
+                .ReturnsAsync(true);
 
             _pushManager
                 .Setup(mock => mock.StartSse())
@@ -81,7 +81,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Assert.            
             Thread.Sleep(1000);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
+            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Once);
             _pushManager.Verify(mock => mock.StartSse(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Never);
             _synchronizer.Verify(mock => mock.StartPeriodicDataRecording(), Times.Once);
@@ -92,8 +92,8 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             _synchronizer
-                .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
-                .Returns(true);
+                .Setup(mock => mock.SyncAllAsync())
+                .ReturnsAsync(true);
 
             _pushManager
                 .Setup(mock => mock.StartSse())
@@ -107,7 +107,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Assert.            
             Thread.Sleep(1000);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
+            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Once);
             _pushManager.Verify(mock => mock.StartSse(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicDataRecording(), Times.Once);
@@ -134,8 +134,8 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             _synchronizer
-                .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
-                .Returns(true);
+                .Setup(mock => mock.SyncAllAsync())
+                .ReturnsAsync(true);
 
             _pushManager
                 .Setup(mock => mock.StartSse())
@@ -147,7 +147,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             Thread.Sleep(1000);
 
             // Act & Assert.
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
+            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Once);
 
             _sseClientStatus.Add(SSEClientActions.CONNECTED);
             Thread.Sleep(50);
@@ -160,7 +160,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             Thread.Sleep(50);
 
             _sseHandler.Verify(mock => mock.StartWorkers(), Times.Once);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
+            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Exactly(2));
             _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
         }
 
@@ -169,8 +169,8 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             _synchronizer
-                .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
-                .Returns(true);
+                .Setup(mock => mock.SyncAllAsync())
+                .ReturnsAsync(true);
 
             _pushManager
                 .Setup(mock => mock.StartSse())
@@ -182,7 +182,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             Thread.Sleep(1000);
 
             // Act & Assert.
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
+            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Once);
             _pushManager.Verify(mock => mock.StartSse(), Times.Once);
 
             _sseClientStatus.Add(SSEClientActions.DISCONNECT);
@@ -190,7 +190,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             _sseHandler.Verify(mock => mock.StopWorkers(), Times.Never);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Never);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Never);
+            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Exactly(1));
 
             // Act & Assert.
             _sseClientStatus.Add(SSEClientActions.CONNECTED);
@@ -204,7 +204,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             Thread.Sleep(50);
 
             _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Exactly(2));
+            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Exactly(3));
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
             _pushManager.Verify(mock => mock.StartSse(), Times.Once);
         }
@@ -214,10 +214,10 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            
+
             _synchronizer
-                .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
-                .Returns(true);
+                .Setup(mock => mock.SyncAllAsync())
+                .ReturnsAsync(true);
 
             _pushManager
                 .Setup(mock => mock.StartSse())
@@ -228,14 +228,14 @@ namespace Splitio_Tests.Unit_Tests.Common
             Thread.Sleep(1000);
 
             // Act & Assert.
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
+            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Once);
 
             _sseClientStatus.Add(SSEClientActions.RETRYABLE_ERROR);
             Thread.Sleep(50);
 
             _sseHandler.Verify(mock => mock.StopWorkers(), Times.Never);
-            
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Never);
+
+            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Exactly(1));
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
             _pushManager.Verify(mock => mock.StartSse(), Times.Once);
 
@@ -243,14 +243,14 @@ namespace Splitio_Tests.Unit_Tests.Common
             _sseClientStatus.Add(SSEClientActions.CONNECTED);
             Thread.Sleep(50);
             _sseHandler.Verify(mock => mock.StartWorkers(), Times.Once);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Once);
+            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Exactly(2));
             _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
 
             _sseClientStatus.Add(SSEClientActions.RETRYABLE_ERROR);
             Thread.Sleep(50);
 
             _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Exactly(2));
+            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Exactly(3));
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Exactly(2));
             _pushManager.Verify(mock => mock.StartSse(), Times.Exactly(2));
         }
@@ -260,10 +260,10 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            
+
             _synchronizer
-                .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
-                .Returns(true);
+                .Setup(mock => mock.SyncAllAsync())
+                .ReturnsAsync(true);
 
             _pushManager
                 .Setup(mock => mock.StartSse())
@@ -278,8 +278,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             Thread.Sleep(50);
 
             _sseHandler.Verify(mock => mock.StopWorkers(), Times.Never);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Never);
+            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
             _pushManager.Verify(mock => mock.StartSse(), Times.Once);
 
@@ -287,14 +286,14 @@ namespace Splitio_Tests.Unit_Tests.Common
             _sseClientStatus.Add(SSEClientActions.CONNECTED);
             Thread.Sleep(50);
             _sseHandler.Verify(mock => mock.StartWorkers(), Times.Once);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Once);
+            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Exactly(2));
             _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
 
             _sseClientStatus.Add(SSEClientActions.NONRETRYABLE_ERROR);
             Thread.Sleep(50);
 
             _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Exactly(2));
+            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Exactly(3));
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Exactly(2));
             _pushManager.Verify(mock => mock.StartSse(), Times.Once);
         }
@@ -306,8 +305,8 @@ namespace Splitio_Tests.Unit_Tests.Common
             var streamingEnabled = true;
 
             _synchronizer
-                .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
-                .Returns(true);
+                .Setup(mock => mock.SyncAllAsync())
+                .ReturnsAsync(true);
 
             _pushManager
                 .Setup(mock => mock.StartSse())
@@ -334,8 +333,8 @@ namespace Splitio_Tests.Unit_Tests.Common
             var streamingEnabled = true;
 
             _synchronizer
-                .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
-                .Returns(true);
+                .Setup(mock => mock.SyncAllAsync())
+                .ReturnsAsync(true);
 
             _pushManager
                 .Setup(mock => mock.StartSse())
@@ -351,8 +350,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Assert.
             _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false), Times.Once);
-            _synchronizer.Verify(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), true), Times.Once);
+            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Exactly(2));
             _sseHandler.Verify(mock => mock.StartWorkers(), Times.Once);
         }
 
@@ -363,8 +361,8 @@ namespace Splitio_Tests.Unit_Tests.Common
             var streamingEnabled = true;
 
             _synchronizer
-                .Setup(mock => mock.SyncAll(It.IsAny<CancellationTokenSource>(), false))
-                .Returns(true);
+                .Setup(mock => mock.SyncAllAsync())
+                .ReturnsAsync(true);
 
             _pushManager
                 .Setup(mock => mock.StartSse())

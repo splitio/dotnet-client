@@ -26,7 +26,6 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<ISplitLogger> _log;
         private readonly Mock<IImpressionsCounter> _impressionsCounter;
         private readonly Mock<IWrapperAdapter> _wrapperAdapter;
-        private readonly Mock<IStatusManager> _statusManager;
         private readonly Mock<ITelemetrySyncTask> _telemetrySyncTask;
         private readonly Mock<ISplitCache> _splitCache;
         private readonly Mock<ISegmentCache> _segmentCache;
@@ -43,14 +42,13 @@ namespace Splitio_Tests.Unit_Tests.Common
             _log = new Mock<ISplitLogger>();
             _impressionsCounter = new Mock<IImpressionsCounter>();
             _wrapperAdapter = new Mock<IWrapperAdapter>();
-            _statusManager = new Mock<IStatusManager>();
             _telemetrySyncTask = new Mock<ITelemetrySyncTask>();
             _splitCache = new Mock<ISplitCache>();
             _backOff = new Mock<IBackOff>();
             _segmentCache = new Mock<ISegmentCache>();
             _uniqueKeysTracker = new Mock<IUniqueKeysTracker>();
 
-            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCounter.Object, _wrapperAdapter.Object, _statusManager.Object, _telemetrySyncTask.Object, new TasksManager(_wrapperAdapter.Object), _splitCache.Object, _backOff.Object, 10, 5, _segmentCache.Object, _uniqueKeysTracker.Object, _log.Object);
+            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCounter.Object, _wrapperAdapter.Object, _telemetrySyncTask.Object, _splitCache.Object, _backOff.Object, _backOff.Object, 10, 5, _segmentCache.Object, _uniqueKeysTracker.Object, _log.Object);
         }
 
         [TestMethod]
@@ -110,7 +108,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Setup(mock => mock.FetchSplits(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(new FetchResult { Success = true });
 
-            _synchronizer.SyncAll(new CancellationTokenSource());
+            _synchronizer.SyncAllAsync();
 
             // Assert.
             Thread.Sleep(2000);

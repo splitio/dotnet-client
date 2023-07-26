@@ -209,8 +209,9 @@ namespace Splitio.Services.Client.Classes
             try
             {
                 // Synchronizer
-                var backOff = new BackOff(backOffBase: 10, attempt: 0, maxAllowed: 60);
-                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _impressionsCounter, _wrapperAdapter, _statusManager, _telemetrySyncTask, _tasksManager, _splitCache, backOff, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs, _segmentCache, _uniqueKeysTracker);
+                var splitsBackOff = new BackOff(backOffBase: 10, attempt: 0, maxAllowed: 60);
+                var segmentsBackOff = new BackOff(backOffBase: 10, attempt: 0, maxAllowed: 60);
+                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _impressionsCounter, _wrapperAdapter, _telemetrySyncTask, _splitCache, splitsBackOff, segmentsBackOff, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs, _segmentCache, _uniqueKeysTracker);
 
                 // Workers
                 var queue = new BlockingCollection<SplitChangeNotification>(new ConcurrentQueue<SplitChangeNotification>());

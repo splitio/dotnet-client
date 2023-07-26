@@ -9,7 +9,6 @@ using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Common;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
@@ -25,13 +24,11 @@ namespace Splitio.Services.Common
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISplitLogger _log;
         private readonly IImpressionsCounter _impressionsCounter;
-        private readonly IStatusManager _statusManager;
         private readonly ITelemetrySyncTask _telemetrySyncTask;
-        private readonly ITasksManager _tasksManager;
         private readonly ISplitCache _splitCache;
         private readonly ISegmentCache _segmentCache;
-        private readonly IBackOff _backOffSplits;
-        private readonly IBackOff _backOffSegments;
+        private readonly IBackOff _splitsBackOff;
+        private readonly IBackOff _segmentsBackOff;
         private readonly IUniqueKeysTracker _uniqueKeysTracker;
         private readonly int _onDemandFetchMaxRetries;
         private readonly int _onDemandFetchRetryDelayMs;
@@ -43,11 +40,10 @@ namespace Splitio.Services.Common
             IEventsLog eventsLog,
             IImpressionsCounter impressionsCounter,
             IWrapperAdapter wrapperAdapter,
-            IStatusManager statusManager,
             ITelemetrySyncTask telemetrySyncTask,
-            ITasksManager tasksManager,
             ISplitCache splitCache,
-            IBackOff backOff,
+            IBackOff splitsBackOff,
+            IBackOff segmentsBackOff,
             int onDemandFetchMaxRetries,
             int onDemandFetchRetryDelayMs,
             ISegmentCache segmentCache,
@@ -60,12 +56,10 @@ namespace Splitio.Services.Common
             _eventsLog = eventsLog;
             _impressionsCounter = impressionsCounter;            
             _wrapperAdapter = wrapperAdapter;
-            _statusManager = statusManager;
             _telemetrySyncTask = telemetrySyncTask;
-            _tasksManager = tasksManager;
             _splitCache = splitCache;
-            _backOffSplits = backOff;
-            _backOffSegments = backOff;
+            _splitsBackOff = splitsBackOff;
+            _segmentsBackOff = segmentsBackOff;
             _onDemandFetchMaxRetries = onDemandFetchMaxRetries;
             _onDemandFetchRetryDelayMs = onDemandFetchRetryDelayMs;
             _segmentCache = segmentCache;
@@ -115,15 +109,12 @@ namespace Splitio.Services.Common
             _segmentFetcher.Clear();
         }
 
-        public bool SyncAll(CancellationTokenSource cancellationTokenSource, bool asynchronous = true)
+        public async Task<bool> SyncAllAsync()
         {
-            if (asynchronous)
-            {
-                _tasksManager.Start(() => SyncAll(), cancellationTokenSource, "SyncAll");
-                return true;
-            }
-            
-            return SyncAll();
+            var splitsResult = await _splitFetcher.FetchSplits(_defaultFetchOptions);
+            var segmentsResult = _segmentFetcher.FetchAll();
+
+            return splitsResult.Success && segmentsResult;
         }
 
         public async Task SynchronizeSegment(string segmentName, long targetChangeNumber)
@@ -207,7 +198,7 @@ namespace Splitio.Services.Common
             {
                 var remainingAttempts = maxRetries;
 
-                if (withBackoff) _backOffSplits.Reset();
+                if (withBackoff) _segmentsBackOff.Reset();
 
                 while (true)
                 {
@@ -223,13 +214,13 @@ namespace Splitio.Services.Common
                         return new SyncResult(false, remainingAttempts);
                     }
 
-                    var delay = withBackoff ? _backOffSplits.GetInterval(inMiliseconds: true) : retryDelayMs.Value;
+                    var delay = withBackoff ? _segmentsBackOff.GetInterval(inMiliseconds: true) : retryDelayMs.Value;
                     _wrapperAdapter.TaskDelay((int)delay).Wait();
                 }
             }
             catch (Exception ex)
             {
-                _log.Debug("Exception while AttempSplitsSync.", ex);
+                _log.Debug("Exception while AttempSegmentSync.", ex);
             }
 
             return new SyncResult(false, 0);
@@ -241,7 +232,7 @@ namespace Splitio.Services.Common
             {
                 var remainingAttempts = maxRetries;
 
-                if (withBackoff) _backOffSplits.Reset();
+                if (withBackoff) _splitsBackOff.Reset();
 
                 while (true)
                 {
@@ -257,7 +248,7 @@ namespace Splitio.Services.Common
                         return new SyncResult(false, remainingAttempts, result.SegmentNames);
                     }
 
-                    var delay = withBackoff ? _backOffSplits.GetInterval(inMiliseconds: true) : retryDelayMs.Value;
+                    var delay = withBackoff ? _splitsBackOff.GetInterval(inMiliseconds: true) : retryDelayMs.Value;
                     _wrapperAdapter.TaskDelay((int)delay).Wait();
                 }
             }
@@ -267,13 +258,6 @@ namespace Splitio.Services.Common
             }
 
             return new SyncResult(false, 0);
-        }
-
-        private bool SyncAll()
-        {
-            var splitsResult = _splitFetcher.FetchSplits(_defaultFetchOptions).Result;
-
-            return splitsResult.Success && _segmentFetcher.FetchAll();
         }
         #endregion
     }

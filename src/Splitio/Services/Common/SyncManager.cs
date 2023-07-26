@@ -61,11 +61,11 @@ namespace Splitio.Services.Common
         #region Public Methods
         public void Start()
         {
-            _tasksManager.Start(() =>
+            _tasksManager.Start(async () =>
             {
                 try
                 {
-                    while (!_synchronizer.SyncAll(_ctsShutdown, asynchronous: false))
+                    while (!await _synchronizer.SyncAllAsync())
                     {
                         _wrapperAdapter.TaskDelay(500).Wait();
                     }
@@ -78,7 +78,7 @@ namespace Splitio.Services.Common
                     {
                         _log.Debug("Starting streaming mode...");
                         _tasksManager.Start(OnSSEClientStatus, "SSE Client Status");
-                        var connected = _pushManager.StartSse().Result;
+                        var connected = await _pushManager.StartSse().ConfigureAwait(false);
 
                         if (connected) return;
                     }
@@ -91,7 +91,6 @@ namespace Splitio.Services.Common
                 {
                     _log.Debug("Exception initialization SDK.", ex);
                 }
-                
             }, _ctsShutdown, "SDK Initialization");
         }
 
@@ -164,7 +163,7 @@ namespace Splitio.Services.Common
 
                 _streamingConnected = true;
                 _sseHandler.StartWorkers();
-                _synchronizer.SyncAll(_ctsShutdown);
+                SyncAll(nameof(ProcessConnected));
                 _synchronizer.StopPeriodicFetching();
                 _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Streaming));
             }
@@ -182,7 +181,7 @@ namespace Splitio.Services.Common
 
                 _streamingConnected = false;
                 _sseHandler.StopWorkers();
-                _synchronizer.SyncAll(_ctsShutdown);
+                SyncAll(nameof(ProcessDisconnect));
                 _synchronizer.StartPeriodicFetching();
                 _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
 
@@ -203,7 +202,7 @@ namespace Splitio.Services.Common
         private void ProcessSubsystemReady()
         {
             _synchronizer.StopPeriodicFetching();
-            _synchronizer.SyncAll(_ctsShutdown);
+            SyncAll(nameof(ProcessSubsystemReady));
             _sseHandler.StartWorkers();
             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Streaming));
         }
@@ -212,6 +211,11 @@ namespace Splitio.Services.Common
         {
             _pushManager.StopSse();
             _ctsStreaming.Cancel();
+        }
+
+        private void SyncAll(string method)
+        {
+            _tasksManager.Start(async() => await _synchronizer.SyncAllAsync(), _ctsShutdown, $"SyncAll - {method}");
         }
         #endregion
     }

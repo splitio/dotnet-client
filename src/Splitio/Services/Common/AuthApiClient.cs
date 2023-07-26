@@ -39,7 +39,7 @@ namespace Splitio.Services.Common
 
                 try
                 {
-                    var response = await _splitioHttpClient.GetAsync(_url);
+                    var response = await _splitioHttpClient.GetAsync(_url).ConfigureAwait(false);
 
                     Util.Helper.RecordTelemetrySync(nameof(AuthenticateAsync), response, ResourceEnum.TokenSync, clock, _telemetryRuntimeProducer, _log);
 

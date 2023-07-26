@@ -156,7 +156,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                         addedSplits.Add(split);
                     }
 
-                    segmentNames.AddRange(Util.Helper.GetSegmentNamesBySplit(split));
+                    segmentNames.AddRange(split.GetSegments());
                 }
             }
 

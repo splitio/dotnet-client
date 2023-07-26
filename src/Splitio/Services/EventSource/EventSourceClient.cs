@@ -74,7 +74,7 @@ namespace Splitio.Services.EventSource
             _initializationSignal.Reset();
             _cancellationTokenSource = new CancellationTokenSource();
 
-            _tasksManager.Start(() => ConnectAsync(_cancellationTokenSource.Token).Wait(), _cancellationTokenSource, "SSE - ConnectAsync");
+            _tasksManager.Start(async () => await ConnectAsync(_cancellationTokenSource.Token), _cancellationTokenSource, "SSE - ConnectAsync");
 
             _initializationSignal.Wait(ConnectTimeoutMs);
 
@@ -109,7 +109,7 @@ namespace Splitio.Services.EventSource
 
             try
             {
-                using (var response = await _splitHttpClient.GetAsync(_url, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
+                using (var response = await _splitHttpClient.GetAsync(_url, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
                 {
                     _log.Debug($"Response from {_url}: {response.StatusCode}");
 
@@ -117,7 +117,7 @@ namespace Splitio.Services.EventSource
 
                     try
                     {
-                        using (var stream = await response.Content.ReadAsStreamAsync())
+                        using (var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
                         {
                             _log.Info($"Connected to {_url}");
 

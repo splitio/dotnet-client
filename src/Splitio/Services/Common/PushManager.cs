@@ -42,7 +42,7 @@ namespace Splitio.Services.Common
         {
             try
             {
-                var response = await _authApiClient.AuthenticateAsync();
+                var response = await _authApiClient.AuthenticateAsync().ConfigureAwait(false);
 
                 _log.Debug($"Auth service response pushEnabled: {response.PushEnabled}.");
 
@@ -117,11 +117,10 @@ namespace Splitio.Services.Common
 
         private void ForceCancellationToken()
         {
-            if (_cancellationTokenSourceRefreshToken != null)
-                _cancellationTokenSourceRefreshToken.Cancel();            
+            _cancellationTokenSourceRefreshToken?.Cancel();            
         }
 
-        private long CalcularteNextTokenExpiration(double time)
+        private static long CalcularteNextTokenExpiration(double time)
         {
             return CurrentTimeHelper.CurrentTimeMillis() + Convert.ToInt64(time * 1000);
         }
