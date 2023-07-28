@@ -5,7 +5,6 @@ using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Telemetry.Storages;
 using Splitio.Services.Client.Classes;
-using Splitio.Services.Logger;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 

@@ -35,7 +35,8 @@ namespace Splitio.Integration_tests
                 RedisPort = Port,
                 RedisPassword = Password,
                 RedisDatabase = Database,
-                PoolSize = 1
+                PoolSize = 1,
+                RedisUserPrefix = UserPrefix,
             };
             var pool = new ConnectionPoolManager(config);
             _redisAdapter = new RedisAdapter(config, pool);
@@ -105,8 +106,6 @@ namespace Splitio.Integration_tests
             {
                 Assert.IsFalse(key.ToString().Contains("/NA/"));
             }
-
-            CleanKeys();
         }
 
         [TestMethod]
@@ -168,8 +167,6 @@ namespace Splitio.Integration_tests
             {
                 Assert.IsTrue(key.ToString().Contains("/NA/"));
             }
-
-            CleanKeys();
         }
 
         // TODO: None mode is not supported yet.
@@ -209,8 +206,6 @@ namespace Splitio.Integration_tests
 
             Assert.IsTrue(uniques.Any(u => u.Feature.Equals("FACUNDO_TEST") && u.Keys.Contains("mauro_test") && u.Keys.Contains("nico_test") && u.Keys.Contains("redo_test")));
             Assert.IsTrue(uniques.Any(u => u.Feature.Equals("MAURO_TEST") && u.Keys.Contains("redo_test")));
-
-            CleanKeys();
         }
 
         // TODO: Optimized mode is not supported yet.
@@ -257,8 +252,6 @@ namespace Splitio.Integration_tests
             Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("FACUNDO_TEST") && ((string)x).Contains("redo_test")));
             Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("MAURO_TEST") && ((string)x).Contains("redo_test")));
             Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("MAURO_TEST") && ((string)x).Contains("test_test")));
-
-            CleanKeys();
         }
 
         #region Protected Methods
@@ -326,17 +319,14 @@ namespace Splitio.Integration_tests
         }
         #endregion
 
-        #region Private Methods
-        private void CleanKeys(string pattern = UserPrefix)
+        [TestCleanup]
+        public void CleanKeys()
         {
-            var keys = _redisAdapter.Keys($"{pattern}*");
-
-            foreach (var k in keys)
-            {
-                _redisAdapter.Del(k);
-            }
+            var keys = _redisAdapter.Keys($"{UserPrefix}*");
+            _redisAdapter.Del(keys);
         }
 
+        #region Private Methods
         private void AssertImpression(KeyImpressionRedis impressionActual, List<KeyImpression> sentImpressions)
         {
             Assert.IsFalse(string.IsNullOrEmpty(impressionActual.M.I));
@@ -369,7 +359,7 @@ namespace Splitio.Integration_tests
 
         private void LoadSplits()
         {
-            CleanKeys(UserPrefix);
+            CleanKeys();
 
             var splitsJson = File.ReadAllText($"{rootFilePath}split_changes.json");
 
