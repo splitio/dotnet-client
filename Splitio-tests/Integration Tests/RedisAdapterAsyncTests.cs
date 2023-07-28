@@ -6,6 +6,7 @@ using Splitio.Redis.Services.Domain;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using YamlDotNet.Core.Tokens;
 
@@ -94,7 +95,9 @@ namespace Splitio_Tests.Integration_Tests
 
             // Assert
             var result = await _adapter.SMembersAsync(key);
-            CollectionAssert.AreEqual(values, result);
+            Assert.AreEqual(2, result.Length);
+            Assert.IsTrue(result.Any(r => r == "value1"));
+            Assert.IsTrue(result.Any(r => r == "value2"));
         }
 
         [TestMethod]
@@ -110,7 +113,9 @@ namespace Splitio_Tests.Integration_Tests
 
             // Assert
             var result = await _adapter.SMembersAsync(key);
-            CollectionAssert.AreEqual(values, result);
+            Assert.AreEqual(2, result.Length);
+            Assert.IsTrue(result.Any(r=> r == "value1"));
+            Assert.IsTrue(result.Any(r => r == "value2"));
         }
 
         [TestMethod]
