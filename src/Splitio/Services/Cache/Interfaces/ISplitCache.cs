@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Splitio.Services.Cache.Interfaces
 {
-    public interface ISplitCache
+    public interface ISplitCache : ISplitCacheAsync
     {
         void AddSplit(string splitName, SplitBase split);
         bool RemoveSplit(string splitName);
