@@ -2,7 +2,7 @@
 
 namespace Splitio.Services.Cache.Interfaces
 {
-    public interface ISegmentCache
+    public interface ISegmentCache : ISegmentCacheAsync
     {
         void AddToSegment(string segmentName, List<string> segmentKeys);
         void RemoveFromSegment(string segmentName, List<string> segmentKeys);
