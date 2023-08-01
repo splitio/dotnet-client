@@ -7,6 +7,7 @@ using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
 using StackExchange.Redis;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -104,194 +105,162 @@ namespace Splitio_Tests.Unit_Tests.Cache
             Assert.AreEqual(2, result.Count);
         }
 
-        //[TestMethod]
-        //public async Task GetAllSplitsShouldReturnEmptyListIfGetReturnsEmpty()
-        //{
-        //    //Arrange
-        //    _redisAdapterMock
-        //        .Setup(x => x.Keys(splitKeyPrefix + "*"))
-        //        .Returns(Array.Empty<RedisKey>());
+        [TestMethod]
+        public async Task GetAllSplitsShouldReturnEmptyListIfGetReturnsEmpty()
+        {
+            //Arrange
+            _redisAdapterMock
+                .Setup(x => x.Keys(SplitKeyPrefix + "*"))
+                .Returns(Array.Empty<RedisKey>());
 
-        //    _redisAdapterMock
-        //        .Setup(x => x.MGet(It.IsAny<RedisKey[]>()))
-        //        .Returns(Array.Empty<RedisValue>());
+            _redisAdapterMock
+                .Setup(x => x.MGetAsync(It.IsAny<RedisKey[]>()))
+                .ReturnsAsync(Array.Empty<RedisValue>());
 
-        //    //Act
-        //    var result = _redisSplitCache.GetAllSplits();
+            //Act
+            var result = await _redisSplitCache.GetAllSplitsAsync();
 
-        //    //Assert
-        //    Assert.IsNotNull(result);
-        //    Assert.AreEqual(0, result.Count);
-        //}
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+        }
 
-        //[TestMethod]
-        //public async Task GetAllSplitsShouldReturnEmptyListIfGetReturnsNull()
-        //{
-        //    //Arrange
-        //    RedisValue[] expectedResult = null;
+        [TestMethod]
+        public async Task GetAllSplitsShouldReturnEmptyListIfGetReturnsNull()
+        {
+            //Arrange
+            RedisValue[] expectedResult = null;
 
-        //    _redisAdapterMock
-        //        .Setup(x => x.Keys(splitKeyPrefix + "*"))
-        //        .Returns(Array.Empty<RedisKey>());
+            _redisAdapterMock
+                .Setup(x => x.Keys(SplitKeyPrefix + "*"))
+                .Returns(Array.Empty<RedisKey>());
 
-        //    _redisAdapterMock
-        //        .Setup(x => x.MGet(It.IsAny<RedisKey[]>()))
-        //        .Returns(expectedResult);
+            _redisAdapterMock
+                .Setup(x => x.MGetAsync(It.IsAny<RedisKey[]>()))
+                .ReturnsAsync(expectedResult);
 
-        //    //Act
-        //    var result = _redisSplitCache.GetAllSplits();
+            //Act
+            var result = await _redisSplitCache.GetAllSplitsAsync();
 
-        //    //Assert
-        //    Assert.IsNotNull(result);
-        //    Assert.AreEqual(0, result.Count);
-        //}
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+        }
 
-        //[TestMethod]
-        //public async Task GetKeysTestSuccessfully()
-        //{
-        //    //Arrange
-        //    _redisAdapterMock
-        //        .Setup(x => x.Keys(splitKeyPrefix + "*"))
-        //        .Returns(new RedisKey[] { "test_split", "test_split2" });
+        #region TrafficTypeExists
+        [TestMethod]
+        public async Task TrafficTypeExists_WhenHasQuantity_ReturnsTrue()
+        {
+            //Arrange
+            var trafficType = "test";
 
-        //    //Act
-        //    var result = _redisSplitCache.GetKeys();
+            var ttKey = $"{TrafficTypeKeyPrefix}{trafficType}";
 
-        //    //Assert
-        //    Assert.IsNotNull(result);
-        //    Assert.AreEqual(2, result.Count);
-        //}
+            _redisAdapterMock
+                .Setup(mock => mock.GetAsync(ttKey))
+                .ReturnsAsync("1");
 
-        //[TestMethod]
-        //public async Task GetKeysShouldReturnEmptyResultIfNoKeysOrRedisException()
-        //{
-        //    //Arrange
-        //    _redisAdapterMock
-        //        .Setup(x => x.Keys(splitKeyPrefix + "*"))
-        //        .Returns(Array.Empty<RedisKey>());
+            //Act
+            var result = await _redisSplitCache.TrafficTypeExistsAsync(trafficType);
 
-        //    //Act
-        //    var result = _redisSplitCache.GetKeys();
+            //Assert
+            Assert.IsTrue(result);
+        }
 
-        //    //Assert
-        //    Assert.IsNotNull(result);
-        //    Assert.AreEqual(0, result.Count);
-        //}
+        [TestMethod]
+        public async Task TrafficTypeExists_WhenQuantityIs0_ReturnsFalse()
+        {
+            //Arrange
+            var trafficType = "test";
 
-        //#region TrafficTypeExists
-        //[TestMethod]
-        //public async Task TrafficTypeExists_WhenHasQuantity_ReturnsTrue()
-        //{
-        //    //Arrange
-        //    var trafficType = "test";
+            var ttKey = $"{TrafficTypeKeyPrefix}{trafficType}";
 
-        //    var ttKey = $"{trafficTypeKeyPrefix}{trafficType}";
+            _redisAdapterMock
+                .Setup(mock => mock.GetAsync(ttKey))
+                .ReturnsAsync("0");
 
-        //    _redisAdapterMock
-        //        .Setup(mock => mock.Get(ttKey))
-        //        .Returns("1");
+            //Act
+            var result = await _redisSplitCache.TrafficTypeExistsAsync(trafficType);
 
-        //    //Act
-        //    var result = _redisSplitCache.TrafficTypeExists(trafficType);
+            //Assert
+            Assert.IsFalse(result);
+        }
 
-        //    //Assert
-        //    Assert.IsTrue(result);
-        //}
+        [TestMethod]
+        public async Task TrafficTypeExists_WhenKeyDoesNotExist_ReturnsFalse()
+        {
+            //Arrange
+            var trafficType = "test";
 
-        //[TestMethod]
-        //public async Task TrafficTypeExists_WhenQuantityIs0_ReturnsFalse()
-        //{
-        //    //Arrange
-        //    var trafficType = "test";
+            var ttKey = $"{TrafficTypeKeyPrefix}{trafficType}";
 
-        //    var ttKey = $"{trafficTypeKeyPrefix}{trafficType}";
+            _redisAdapterMock
+                .Setup(mock => mock.GetAsync(ttKey))
+                .ReturnsAsync((string)null);
 
-        //    _redisAdapterMock
-        //        .Setup(mock => mock.Get(ttKey))
-        //        .Returns("0");
+            //Act
+            var result = await _redisSplitCache.TrafficTypeExistsAsync(trafficType);
 
-        //    //Act
-        //    var result = _redisSplitCache.TrafficTypeExists(trafficType);
+            //Assert
+            Assert.IsFalse(result);
+        }
 
-        //    //Assert
-        //    Assert.IsFalse(result);
-        //}
+        [TestMethod]
+        public async Task TrafficTypeExists_WhenValueIsEmpty_ReturnsFalse()
+        {
+            //Arrange
+            var trafficType = "test";
 
-        //[TestMethod]
-        //public async Task TrafficTypeExists_WhenKeyDoesNotExist_ReturnsFalse()
-        //{
-        //    //Arrange
-        //    var trafficType = "test";
+            var ttKey = $"{TrafficTypeKeyPrefix}{trafficType}";
 
-        //    var ttKey = $"{trafficTypeKeyPrefix}{trafficType}";
+            _redisAdapterMock
+                .Setup(mock => mock.GetAsync(ttKey))
+                .ReturnsAsync(string.Empty);
 
-        //    _redisAdapterMock
-        //        .Setup(mock => mock.Get(ttKey))
-        //        .Returns((string)null);
+            //Act
+            var result = await _redisSplitCache.TrafficTypeExistsAsync(trafficType);
 
-        //    //Act
-        //    var result = _redisSplitCache.TrafficTypeExists(trafficType);
+            //Assert
+            Assert.IsFalse(result);
+        }
 
-        //    //Assert
-        //    Assert.IsFalse(result);
-        //}
+        [TestMethod]
+        public async Task TrafficTypeExists_WhenKeyIsNull_ReturnsFalse()
+        {
+            //Arrange
+            var trafficType = "test";
 
-        //[TestMethod]
-        //public async Task TrafficTypeExists_WhenValueIsEmpty_ReturnsFalse()
-        //{
-        //    //Arrange
-        //    var trafficType = "test";
+            var ttKey = $"{TrafficTypeKeyPrefix}{trafficType}";
 
-        //    var ttKey = $"{trafficTypeKeyPrefix}{trafficType}";
+            _redisAdapterMock
+                .Setup(mock => mock.GetAsync(ttKey))
+                .ReturnsAsync(string.Empty);
 
-        //    _redisAdapterMock
-        //        .Setup(mock => mock.Get(ttKey))
-        //        .Returns(string.Empty);
+            //Act
+            var result = await _redisSplitCache.TrafficTypeExistsAsync(null);
 
-        //    //Act
-        //    var result = _redisSplitCache.TrafficTypeExists(trafficType);
+            //Assert
+            Assert.IsFalse(result);
+        }
+        #endregion
 
-        //    //Assert
-        //    Assert.IsFalse(result);
-        //}
+        [TestMethod]
+        public async Task FetchMany_VerifyMGetCall_Once()
+        {
+            // Arrange.
+            var splitNames = new List<string> { "Split_1", "Split_2", "Split_3" };
 
-        //[TestMethod]
-        //public async Task TrafficTypeExists_WhenKeyIsNull_ReturnsFalse()
-        //{
-        //    //Arrange
-        //    var trafficType = "test";
+            _redisAdapterMock
+                .Setup(mock => mock.MGetAsync(It.IsAny<RedisKey[]>()))
+                .ReturnsAsync(new RedisValue[3]);
 
-        //    var ttKey = $"{trafficTypeKeyPrefix}{trafficType}";
+            // Act.
+            var result = await _redisSplitCache.FetchManyAsync(splitNames);
 
-        //    _redisAdapterMock
-        //        .Setup(mock => mock.Get(ttKey))
-        //        .Returns(string.Empty);
-
-        //    //Act
-        //    var result = _redisSplitCache.TrafficTypeExists(null);
-
-        //    //Assert
-        //    Assert.IsFalse(result);
-        //}
-        //#endregion
-
-        //[TestMethod]
-        //public async Task FetchMany_VerifyMGetCall_Once()
-        //{
-        //    // Arrange.
-        //    var splitNames = new List<string> { "Split_1", "Split_2", "Split_3" };
-
-        //    _redisAdapterMock
-        //        .Setup(mock => mock.MGet(It.IsAny<RedisKey[]>()))
-        //        .Returns(new RedisValue[3]);
-
-        //    // Act.
-        //    var result = _redisSplitCache.FetchMany(splitNames);
-
-        //    // Assert.
-        //    _redisAdapterMock.Verify(mock => mock.MGet(It.IsAny<RedisKey[]>()), Times.Once);
-        //    _redisAdapterMock.Verify(mock => mock.Get(It.IsAny<string>()), Times.Never);
-        //}
+            // Assert.
+            _redisAdapterMock.Verify(mock => mock.MGetAsync(It.IsAny<RedisKey[]>()), Times.Once);
+            _redisAdapterMock.Verify(mock => mock.GetAsync(It.IsAny<string>()), Times.Never);
+        }
 
         private static Split BuildSplit(string splitName)
         {
