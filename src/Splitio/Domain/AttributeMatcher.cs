@@ -1,6 +1,7 @@
 ﻿using Splitio.Services.Evaluator;
 using Splitio.Services.Parsing;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Domain
 {
@@ -30,6 +31,28 @@ namespace Splitio.Domain
             }
 
             return (negate ^ matcher.Match(value, attributes, evaluator));
+        }
+
+        public virtual async Task<bool> MatchAsync(Key key, Dictionary<string, object> attributes, IEvaluatorAsync evaluator = null)
+        {
+            if (attribute == null)
+            {
+                return (negate ^ await matcher.MatchAsync(key, attributes, evaluator));
+            }
+
+            if (attributes == null)
+            {
+                return false;
+            }
+
+            attributes.TryGetValue(attribute, out object value);
+
+            if (value == null)
+            {
+                return false;
+            }
+
+            return (negate ^ await matcher.MatchAsync(value, attributes, evaluator));
         }
     }
 }

@@ -3,14 +3,17 @@ using Splitio.Domain;
 using Splitio.Services.Parsing;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Splitio_Tests.Unit_Tests
+namespace Splitio_Tests.Unit_Tests.Matchers
 {
     [TestClass]
-    public class WhitelistMatcherTests
+    public class WhitelistMatcherAsyncTests
     {
         [TestMethod]
-        public void MatchShouldReturnTrueOnMatchingKeyWithKey()
+        public async Task MatchAsyncShouldReturnTrueOnMatchingKeyWithKey()
         {
             //Arrange
             var keys = new List<string>
@@ -21,14 +24,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = matcher.Match(new Key("test2", "test2"));
+            var result = await matcher.MatchAsync(new Key("test2", "test2"));
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseOnNonMatchingKeyWithKey()
+        public async Task MatchAsyncShouldReturnFalseOnNonMatchingKeyWithKey()
         {
             //Arrange
             var keys = new List<string>
@@ -39,56 +42,56 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = matcher.Match(new Key("test3", "test3"));
+            var result = await matcher.MatchAsync(new Key("test3", "test3"));
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfEmptyWhitelistWithKey()
+        public async Task MatchAsyncShouldReturnFalseIfEmptyWhitelistWithKey()
         {
             //Arrange
             var keys = new List<string>();
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = matcher.Match(new Key("test2", "test2"));
+            var result = await matcher.MatchAsync(new Key("test2", "test2"));
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingLong()
+        public async Task MatchAsyncShouldReturnFalseIfMatchingLong()
         {
             //Arrange
             var keys = new List<string>();
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = matcher.Match(123);
+            var result = await matcher.MatchAsync(123);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingDate()
+        public async Task MatchAsyncShouldReturnFalseIfMatchingDate()
         {
             //Arrange
             var keys = new List<string>();
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = matcher.Match(DateTime.UtcNow);
+            var result = await matcher.MatchAsync(DateTime.UtcNow);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueOnMatchingKey()
+        public async Task MatchAsyncShouldReturnTrueOnMatchingKey()
         {
             //Arrange
             var keys = new List<string>
@@ -99,49 +102,49 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = matcher.Match("test2");
+            var result = await matcher.MatchAsync("test2");
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseOnNonMatchingKey()
+        public async Task MatchAsyncShouldReturnFalseOnNonMatchingKey()
         {
             //Arrange
             var keys = new List<string> { "test1", "test2" };
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = matcher.Match("test3");
+            var result = await matcher.MatchAsync("test3");
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfEmptyWhitelist()
+        public async Task MatchAsyncShouldReturnFalseIfEmptyWhitelist()
         {
             //Arrange
             var keys = new List<string>();
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = matcher.Match("test2");
+            var result = await matcher.MatchAsync("test2");
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingBoolean()
+        public async Task MatchAsyncShouldReturnFalseIfMatchingBoolean()
         {
             //Arrange
             var keys = new List<string>();
             var matcher = new WhitelistMatcher(keys);
 
             //Act
-            var result = matcher.Match(true);
+            var result = await matcher.MatchAsync(true);
 
             //Assert
             Assert.IsFalse(result);

@@ -1,28 +1,16 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Splitio.Services.Evaluator
 {
-    public class Evaluator : IEvaluator
+    public class Evaluator : EvaluatorAsync, IEvaluator
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(Evaluator));
-
-        protected const string Control = "control";
-        
-        private readonly ISplitter _splitter;
-        private readonly ISplitCache _splitCache;
-
-        public Evaluator(ISplitCache splitCache,
-            ISplitter splitter)
+        public Evaluator(ISplitCache splitCache, ISplitter splitter) : base(splitCache, splitter)
         {
-            _splitCache = splitCache;
-            _splitter = splitter;
         }
 
         #region Public Method
@@ -133,43 +121,24 @@ namespace Splitio.Services.Evaluator
 
         private TreatmentResult GetTreatmentResult(Key key, ParsedSplit split, Dictionary<string, object> attributes = null)
         {
-            if (split.killed)
-            {
-                return new TreatmentResult(Labels.Killed, split.defaultTreatment, split.changeNumber);
-            }
+            if (IsSplitKilled(split, out TreatmentResult result)) return result;
 
             var inRollout = false;
 
             // use the first matching condition
             foreach (var condition in split.conditions)
             {
-                if (!inRollout && condition.conditionType == ConditionType.ROLLOUT)
-                {
-                    if (split.trafficAllocation < 100)
-                    {
-                        // bucket ranges from 1-100.
-                        var bucket = _splitter.GetBucket(key.bucketingKey, split.trafficAllocationSeed, split.algo);
+                inRollout = IsInRollout(inRollout, condition, key, split, out TreatmentResult rResult);
 
-                        if (bucket > split.trafficAllocation)
-                        {
-                            return new TreatmentResult(Labels.TrafficAllocationFailed, split.defaultTreatment, split.changeNumber);
-                        }
-                    }
+                if (rResult != null) return rResult;
 
-                    inRollout = true;
-                }
+                var matched = condition.matcher.Match(key, attributes, this);
+                var treatment = IfMatchedGetTreatment(matched, key, split, condition);
 
-                var combiningMatcher = condition.matcher;
-
-                if (combiningMatcher.Match(key, attributes, this))
-                {
-                    var treatment = _splitter.GetTreatment(key.bucketingKey, split.seed, condition.partitions, split.algo);
-
-                    return new TreatmentResult(condition.label, treatment, split.changeNumber);
-                }
+                if (treatment != null) return treatment;
             }
 
-            return new TreatmentResult(Labels.DefaultRule, split.defaultTreatment, split.changeNumber);   
+            return ReturnDefaultTreatment(split);
         }
         #endregion
     }

@@ -1,17 +1,18 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Parsing;
 using Splitio.Domain;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
 using Splitio.Services.Cache.Classes;
+using Splitio.Services.Parsing;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace Splitio_Tests.Unit_Tests
+namespace Splitio_Tests.Unit_Tests.Matchers
 {
     [TestClass]
-    public class UserDefinedSegmentMatcherTests
+    public class UserDefinedSegmentMatcherAsyncTests
     {
         [TestMethod]
-        public void MatchShouldReturnTrueOnMatchingSegmentWithKey()
+        public async Task MatchAsyncShouldReturnTrueOnMatchingSegmentWithKey()
         {
             //Arrange
             var keys = new List<string>
@@ -27,14 +28,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
             //Act
-            var result = matcher.Match(new Key("test2", "test2"));
+            var result = await matcher.MatchAsync(new Key("test2", "test2"));
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseOnNonMatchingSegmentWithKey()
+        public async Task MatchAsyncShouldReturnFalseOnNonMatchingSegmentWithKey()
         {
             //Arrange
             var keys = new List<string>
@@ -50,14 +51,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
             //Act
-            var result = matcher.Match(new Key("test3", "test3"));
+            var result = await matcher.MatchAsync(new Key("test3", "test3"));
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfSegmentEmptyWithKey()
+        public async Task MatchAsyncShouldReturnFalseIfSegmentEmptyWithKey()
         {
             //Arrange
             var segmentName = "test-segment";
@@ -67,14 +68,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
             //Act
-            var result = matcher.Match(new Key("test2", "test2"));
+            var result = await matcher.MatchAsync(new Key("test2", "test2"));
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfCacheEmptyWithKey()
+        public async Task MatchAsyncShouldReturnFalseIfCacheEmptyWithKey()
         {
             //Arrange
             var segmentName = "test-segment";
@@ -83,14 +84,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
             //Act
-            var result = matcher.Match(new Key("test2", "test2"));
+            var result = await matcher.MatchAsync(new Key("test2", "test2"));
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueOnMatchingSegment()
+        public async Task MatchAsyncShouldReturnTrueOnMatchingSegment()
         {
             //Arrange
             var keys = new List<string>
@@ -106,14 +107,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
             //Act
-            var result = matcher.Match("test2");
+            var result = await matcher.MatchAsync("test2");
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseOnNonMatchingSegment()
+        public async Task MatchAsyncShouldReturnFalseOnNonMatchingSegment()
         {
             //Arrange
             var keys = new List<string>
@@ -129,14 +130,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
             //Act
-            var result = matcher.Match("test3");
+            var result = await matcher.MatchAsync("test3");
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfSegmentEmpty()
+        public async Task MatchAsyncShouldReturnFalseIfSegmentEmpty()
         {
             //Arrange
             var segmentName = "test-segment";
@@ -146,14 +147,14 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
             //Act
-            var result = matcher.Match("test2");
+            var result = await matcher.MatchAsync("test2");
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfCacheEmpty()
+        public async Task MatchAsyncShouldReturnFalseIfCacheEmpty()
         {
             //Arrange
             var segmentName = "test-segment";
@@ -162,7 +163,7 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
             //Act
-            var result = matcher.Match("test2");
+            var result = await matcher.MatchAsync("test2");
 
             //Assert
             Assert.IsFalse(result);

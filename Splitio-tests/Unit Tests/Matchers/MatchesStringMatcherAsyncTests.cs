@@ -5,15 +5,17 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Splitio_tests.Unit_Tests.Matchers
+namespace Splitio_Tests.Unit_Tests.Matchers
 {
     [TestClass]
-    public class MatchesStringMatcherTests
+    public class MatchesStringMatcherAsyncTests
     {
         private readonly string rootFilePath;
 
-        public MatchesStringMatcherTests()
+        public MatchesStringMatcherAsyncTests()
         {
             // This line is to clean the warnings.
             rootFilePath = string.Empty;
@@ -24,39 +26,39 @@ namespace Splitio_tests.Unit_Tests.Matchers
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueOnMatchingKeyString()
+        public async Task MatchAsyncShouldReturnTrueOnMatchingKeyString()
         {
             //Arrange
             var matcher = new MatchesStringMatcher("^a");
 
             //Act
-            var result = matcher.Match("arrive");
+            var result = await matcher.MatchAsync("arrive");
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueOnMatchingKey()
+        public async Task MatchAsyncShouldReturnTrueOnMatchingKey()
         {
             //Arrange
             var matcher = new MatchesStringMatcher("^a");
 
             //Act
-            var result = matcher.Match(new Key("arrive", "arrive"));
+            var result = await matcher.MatchAsync(new Key("arrive", "arrive"));
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseOnNonMatchingKey()
+        public async Task MatchAsyncShouldReturnFalseOnNonMatchingKey()
         {
             //Arrange
             var matcher = new MatchesStringMatcher("^a");
 
             //Act
-            var result = matcher.Match("split");
+            var result = await matcher.MatchAsync("split");
 
             //Assert
             Assert.IsFalse(result);
@@ -64,46 +66,46 @@ namespace Splitio_tests.Unit_Tests.Matchers
 
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingLong()
+        public async Task MatchAsyncShouldReturnFalseIfMatchingLong()
         {
             //Arrange
             var matcher = new MatchesStringMatcher("^a");
 
             //Act
-            var result = matcher.Match(123);
+            var result = await matcher.MatchAsync(123);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingDate()
+        public async Task MatchAsyncShouldReturnFalseIfMatchingDate()
         {
             //Arrange
             var matcher = new MatchesStringMatcher("^a");
 
             //Act
-            var result = matcher.Match(DateTime.UtcNow);
+            var result = await matcher.MatchAsync(DateTime.UtcNow);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingBoolean()
+        public async Task MatchAsyncShouldReturnFalseIfMatchingBoolean()
         {
             //Arrange
             var matcher = new MatchesStringMatcher("^a");
 
             //Act
-            var result = matcher.Match(true);
+            var result = await matcher.MatchAsync(true);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingSet()
+        public async Task MatchAsyncShouldReturnFalseIfMatchingSet()
         {
             //Arrange
             var matcher = new MatchesStringMatcher("^a");
@@ -115,7 +117,7 @@ namespace Splitio_tests.Unit_Tests.Matchers
                 "test3"
             };
 
-            var result = matcher.Match(keys);
+            var result = await matcher.MatchAsync(keys);
 
             //Assert
             Assert.IsFalse(result);
@@ -123,13 +125,13 @@ namespace Splitio_tests.Unit_Tests.Matchers
 
         [DeploymentItem(@"Resources\regex.txt")]
         [TestMethod]
-        public void VerifyRegexMatcher()
+        public async Task VerifyRegexMatcherAsync()
         {
-            VerifyTestFile($"{rootFilePath}regex.txt", new string[] { "\r\n" });
+            await VerifyTestFile($"{rootFilePath}regex.txt", new string[] { "\r\n" });
         }
 
 
-        private static void VerifyTestFile(string file, string[] sepparator)
+        private static async Task VerifyTestFile(string file, string[] sepparator)
         {
             //Arrange
             var fileContent = File.ReadAllText(file);
@@ -147,7 +149,7 @@ namespace Splitio_tests.Unit_Tests.Matchers
                     var matcher = new MatchesStringMatcher(item[0]);
 
                     //Act
-                    var result = matcher.Match(item[1]);
+                    var result = await matcher.MatchAsync(item[1]);
 
                     //Assert
                     Assert.AreEqual(Convert.ToBoolean(item[2]), result, item[0] + "-" + item[1]);

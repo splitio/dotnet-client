@@ -1,11 +1,12 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Evaluator;
+using Splitio.Services.Parsing.Interfaces;
 using System;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Parsing
 {
-    public interface IMatcher
+    public interface IMatcher : IMatcherAsync
     {
         bool Match(object value, Dictionary<string, object> attributes = null, IEvaluator evaluator = null);
 
