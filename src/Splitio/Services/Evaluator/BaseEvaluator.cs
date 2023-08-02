@@ -3,6 +3,9 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Util;
+using System;
+using System.Collections.Generic;
 
 namespace Splitio.Services.Evaluator
 {
@@ -62,13 +65,60 @@ namespace Splitio.Services.Evaluator
             return new TreatmentResult(Labels.DefaultRule, split.defaultTreatment, split.changeNumber);
         }
 
-        protected TreatmentResult IfMatchedGetTreatment(bool matched, Key key, ParsedSplit split, ConditionWithLogic condition)
+        protected TreatmentResult IfConditionMatched(bool matched, Key key, ParsedSplit split, ConditionWithLogic condition)
         {
             if (!matched) return null;
 
             var treatment = _splitter.GetTreatment(key.bucketingKey, split.seed, condition.partitions, split.algo);
 
             return new TreatmentResult(condition.label, treatment, split.changeNumber);
+        }
+
+        protected TreatmentResult EvaluateFeatureException(Exception e, string featureName, SplitStopwatch clock)
+        {
+            _log.Error($"Exception caught getting treatment for feature flag: {featureName}", e);
+
+            return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds, exception: true);
+        }
+
+        protected bool EvaluateFeaturesException(Exception e, List<string> featureNames, SplitStopwatch clock, out Dictionary<string, TreatmentResult> results)
+        {
+            results = new Dictionary<string, TreatmentResult>();
+
+            _log.Error($"Exception caught getting treatments", e);
+
+            foreach (var name in featureNames)
+            {
+                results.Add(name, new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds));
+            }
+
+            return true;
+        }
+
+        protected bool IsSplitNotFound(string featureFlagName, ParsedSplit parsedSplit, SplitStopwatch clock, out TreatmentResult result)
+        {
+            result = null;
+
+            if (parsedSplit != null)
+                return false;
+
+            _log.Warn($"GetTreatment: you passed {featureFlagName} that does not exist in this environment, please double check what feature flags exist in the Split user interface.");
+
+            result =  new TreatmentResult(Labels.SplitNotFound, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
+
+            return true;
+        }
+
+        protected TreatmentResult ParseConfigurationAndReturnTreatment(ParsedSplit parsedSplit, TreatmentResult treatmentResult, SplitStopwatch clock)
+        {
+            if (parsedSplit.configurations != null && parsedSplit.configurations.ContainsKey(treatmentResult.Treatment))
+            {
+                treatmentResult.Config = parsedSplit.configurations[treatmentResult.Treatment];
+            }
+
+            treatmentResult.ElapsedMilliseconds = clock.ElapsedMilliseconds;
+
+            return treatmentResult;
         }
     }
 }

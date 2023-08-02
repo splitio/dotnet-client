@@ -1,9 +1,9 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
+using Splitio.Util;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,100 +17,75 @@ namespace Splitio.Services.Evaluator
 
         public async Task<TreatmentResult> EvaluateFeatureAsync(Key key, string featureName, Dictionary<string, object> attributes = null)
         {
-            var clock = new Stopwatch();
-            clock.Start();
-
-            try
+            using (var clock = new SplitStopwatch())
             {
-                var parsedSplit = await _splitCache.GetSplitAsync(featureName);
+                clock.Start();
 
-                return await EvaluateTreatmentAsync(key, parsedSplit, featureName, clock, attributes);
-            }
-            catch (Exception e)
-            {
-                _log.Error($"Exception caught getting treatment for feature flag: {featureName}", e);
+                try
+                {
+                    var parsedSplit = await _splitCache.GetSplitAsync(featureName);
 
-                return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds, exception: true);
+                    return await EvaluateTreatmentAsync(key, parsedSplit, featureName, clock, attributes);
+                }
+                catch (Exception e)
+                {
+                    return EvaluateFeatureException(e, featureName, clock);
+                }
             }
-            finally { clock.Stop(); }
         }
 
         public async Task<MultipleEvaluatorResult> EvaluateFeaturesAsync(Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
         {
             var exception = false;
             var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
-            var clock = new Stopwatch();
-            clock.Start();
 
-            try
+            using (var clock = new SplitStopwatch())
             {
-                var splits = _splitCache.FetchMany(featureNames);
+                clock.Start();
 
-                foreach (var feature in featureNames)
+                try
                 {
-                    var split = splits.FirstOrDefault(s => feature.Equals(s?.name));
+                    var splits = await _splitCache.FetchManyAsync(featureNames);
 
-                    var result = await EvaluateTreatmentAsync(key, split, feature, attributes: attributes);
+                    foreach (var feature in featureNames)
+                    {
+                        var split = splits.FirstOrDefault(s => feature.Equals(s?.name));
 
-                    treatmentsForFeatures.Add(feature, result);
+                        var result = await EvaluateTreatmentAsync(key, split, feature, attributes: attributes);
+
+                        treatmentsForFeatures.Add(feature, result);
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                _log.Error($"Exception caught getting treatments", e);
-
-                foreach (var name in featureNames)
+                catch (Exception e)
                 {
-                    treatmentsForFeatures.Add(name, new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds));
+                    exception = EvaluateFeaturesException(e, featureNames, clock, out treatmentsForFeatures);
                 }
 
-                exception = true;
+                return new MultipleEvaluatorResult(treatmentsForFeatures, clock.ElapsedMilliseconds, exception);
             }
-            finally { clock.Stop(); }
-
-            return new MultipleEvaluatorResult
-            {
-                TreatmentResults = treatmentsForFeatures,
-                ElapsedMilliseconds = clock.ElapsedMilliseconds,
-                Exception = exception
-            };
         }
 
-        private async Task<TreatmentResult> EvaluateTreatmentAsync(Key key, ParsedSplit parsedSplit, string featureFlagName, Stopwatch clock = null, Dictionary<string, object> attributes = null)
+        private async Task<TreatmentResult> EvaluateTreatmentAsync(Key key, ParsedSplit parsedSplit, string featureFlagName, SplitStopwatch clock = null, Dictionary<string, object> attributes = null)
         {
             try
             {
                 if (clock == null)
                 {
-                    clock = new Stopwatch();
+                    clock = new SplitStopwatch();
                     clock.Start();
                 }
 
-                if (parsedSplit == null)
-                {
-                    _log.Warn($"GetTreatment: you passed {featureFlagName} that does not exist in this environment, please double check what feature flags exist in the Split user interface.");
-
-                    return new TreatmentResult(Labels.SplitNotFound, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
-                }
+                if (IsSplitNotFound(featureFlagName, parsedSplit, clock, out TreatmentResult resultNotFound)) return resultNotFound;
 
                 var treatmentResult = await GetTreatmentResultAsync(key, parsedSplit, attributes);
 
-                if (parsedSplit.configurations != null && parsedSplit.configurations.ContainsKey(treatmentResult.Treatment))
-                {
-                    treatmentResult.Config = parsedSplit.configurations[treatmentResult.Treatment];
-                }
-
-                treatmentResult.ElapsedMilliseconds = clock.ElapsedMilliseconds;
-
-                return treatmentResult;
+                return ParseConfigurationAndReturnTreatment(parsedSplit, treatmentResult, clock);
             }
             catch (Exception e)
             {
-                _log.Error($"Exception caught getting treatment for feature flag: {featureFlagName}", e);
-
-                return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
+                return EvaluateFeatureException(e, featureFlagName, clock);
             }
-            finally { clock.Stop(); }
+            finally { clock.Dispose(); }
         }
 
         private async Task<TreatmentResult> GetTreatmentResultAsync(Key key, ParsedSplit split, Dictionary<string, object> attributes = null)
@@ -127,7 +102,7 @@ namespace Splitio.Services.Evaluator
                 if (rResult != null) return rResult;
 
                 var matched = await condition.matcher.MatchAsync(key, attributes, this);
-                var treatment = IfMatchedGetTreatment(matched, key, split, condition);
+                var treatment = IfConditionMatched(matched, key, split, condition);
 
                 if (treatment != null) return treatment;
             }

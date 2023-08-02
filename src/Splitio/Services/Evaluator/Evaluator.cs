@@ -28,9 +28,7 @@ namespace Splitio.Services.Evaluator
                 }
                 catch (Exception e)
                 {
-                    _log.Error($"Exception caught getting treatment for feature flag: {featureName}", e);
-
-                    return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds, exception: true);
+                    return EvaluateFeatureException(e, featureName, clock);
                 }
             }
         }
@@ -38,7 +36,8 @@ namespace Splitio.Services.Evaluator
         public MultipleEvaluatorResult EvaluateFeatures(Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
         {
             var exception = false;
-            var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();            
+            var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
+
             using(var clock = new Util.SplitStopwatch())
             {
                 clock.Start();
@@ -58,22 +57,10 @@ namespace Splitio.Services.Evaluator
                 }
                 catch (Exception e)
                 {
-                    _log.Error($"Exception caught getting treatments", e);
-
-                    foreach (var name in featureNames)
-                    {
-                        treatmentsForFeatures.Add(name, new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds));
-                    }
-
-                    exception = true;
+                    exception = EvaluateFeaturesException(e, featureNames, clock, out treatmentsForFeatures);
                 }
 
-                return new MultipleEvaluatorResult
-                {
-                    TreatmentResults = treatmentsForFeatures,
-                    ElapsedMilliseconds = clock.ElapsedMilliseconds,
-                    Exception = exception
-                };
+                return new MultipleEvaluatorResult(treatmentsForFeatures, clock.ElapsedMilliseconds, exception);
             }
         }
         #endregion
@@ -89,34 +76,17 @@ namespace Splitio.Services.Evaluator
                     clock.Start();
                 }
 
-                if (parsedSplit == null)
-                {
-                    _log.Warn($"GetTreatment: you passed {featureFlagName} that does not exist in this environment, please double check what feature flags exist in the Split user interface.");
-
-                    return new TreatmentResult(Labels.SplitNotFound, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
-                }
+                if (IsSplitNotFound(featureFlagName, parsedSplit, clock, out TreatmentResult resultNotFound)) return resultNotFound;
 
                 var treatmentResult = GetTreatmentResult(key, parsedSplit, attributes);
 
-                if (parsedSplit.configurations != null && parsedSplit.configurations.ContainsKey(treatmentResult.Treatment))
-                {
-                    treatmentResult.Config = parsedSplit.configurations[treatmentResult.Treatment];
-                }
-
-                treatmentResult.ElapsedMilliseconds = clock.ElapsedMilliseconds;
-
-                return treatmentResult;
+                return ParseConfigurationAndReturnTreatment(parsedSplit, treatmentResult, clock);
             }
             catch (Exception e)
             {
-                _log.Error($"Exception caught getting treatment for feature flag: {featureFlagName}", e);
-
-                return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
+                return EvaluateFeatureException(e, featureFlagName, clock);
             }
-            finally
-            {
-                clock.Dispose();
-            }
+            finally { clock.Dispose(); }
         }
 
         private TreatmentResult GetTreatmentResult(Key key, ParsedSplit split, Dictionary<string, object> attributes = null)
@@ -133,7 +103,7 @@ namespace Splitio.Services.Evaluator
                 if (rResult != null) return rResult;
 
                 var matched = condition.matcher.Match(key, attributes, this);
-                var treatment = IfMatchedGetTreatment(matched, key, split, condition);
+                var treatment = IfConditionMatched(matched, key, split, condition);
 
                 if (treatment != null) return treatment;
             }
