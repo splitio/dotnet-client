@@ -15,7 +15,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             IImpressionsLog impressionsLog,
             IBlockUntilReadyService blockUntilReadyService,
             IEvaluator evaluator,
-            IImpressionsManager impressionsManager)
+            IImpressionsManager impressionsManager,
+            bool labelsEnabled = false)
             : base()
         {
             _splitCache = splitCache;
@@ -25,6 +26,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
             _evaluator = evaluator;
             _impressionsManager = impressionsManager;
+            LabelsEnabled = labelsEnabled;
 
             ApiKey = "SplitClientForTesting";
         }

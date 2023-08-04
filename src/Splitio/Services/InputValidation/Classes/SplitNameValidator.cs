@@ -2,6 +2,7 @@
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -44,9 +45,9 @@ namespace Splitio.Services.InputValidation.Classes
                     {
                         dicSplits.Add(splitNameResult.Value, splitNameResult.Value);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        _log.Warn($"{method}: error adding feature flag name into list.");
+                        _log.Warn($"{method}: error adding feature flag name: {splitNameResult.Value} into list.", ex);
                     }
                 }
             }

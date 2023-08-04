@@ -7,11 +7,12 @@ using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {
     [TestClass]
-    public class SplitManagerUnitTests
+    public class SplitManagerAsyncTests
     {
         private readonly Mock<IBlockUntilReadyService> _blockUntilReadyService;
         private readonly Mock<ISplitCache> _splitCache;
@@ -19,7 +20,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
         private readonly ISplitManager _splitManager;
 
-        public SplitManagerUnitTests()
+        public SplitManagerAsyncTests()
         {
             _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
             _splitCache = new Mock<ISplitCache>();
@@ -35,7 +36,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
 
         [TestMethod]
-        public void SplitsReturnSuccessfully()
+        public async Task SplitsReturnSuccessfully()
         {
             //Arrange            
             var conditionWithLogic = new ConditionWithLogic()
@@ -46,7 +47,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                     new PartitionDefinition(){size = 100, treatment = "off"}
                 }
             };
-            
+
             var conditionWithLogic2 = new ConditionWithLogic()
             {
                 conditionType = ConditionType.ROLLOUT,
@@ -78,11 +79,11 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetAllSplits())
-                .Returns(splits);
+                .Setup(mock => mock.GetAllSplitsAsync())
+                .ReturnsAsync(splits);
 
             //Act
-            var result = _splitManager.Splits();
+            var result = await _splitManager.SplitsAsync();
 
             //Assert
             Assert.IsNotNull(result);
@@ -103,7 +104,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
 
         [TestMethod]
-        public void SplitsReturnWithNoRolloutConditionSuccessfully()
+        public async Task SplitsReturnWithNoRolloutConditionSuccessfully()
         {
             //Arrange            
             var conditionWithLogic = new ConditionWithLogic()
@@ -129,17 +130,17 @@ namespace Splitio_Tests.Unit_Tests.Client
                 new ParsedSplit { name = "test5", conditions = conditionsWithLogic },
                 new ParsedSplit { name = "test6", conditions = conditionsWithLogic }
             };
-            
+
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetAllSplits())
-                .Returns(splits);
+                .Setup(mock => mock.GetAllSplitsAsync())
+                .ReturnsAsync(splits);
 
             //Act
-            var result = _splitManager.Splits();
+            var result = await _splitManager.SplitsAsync();
 
             //Assert
             Assert.IsNotNull(result);
@@ -154,7 +155,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
 
         [TestMethod]
-        public void SplitReturnSuccessfully()
+        public async Task SplitReturnSuccessfully()
         {
             //Arrange            
             var conditionWithLogic = new ConditionWithLogic()
@@ -177,11 +178,11 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetSplit("test1"))
-                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
+                .Setup(mock => mock.GetSplitAsync("test1"))
+                .ReturnsAsync(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
 
             //Act
-            var result = _splitManager.Split("test1");
+            var result = await _splitManager.SplitAsync("test1");
 
             //Assert
             Assert.IsNotNull(result);
@@ -199,7 +200,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
 
         [TestMethod]
-        public void SplitReturnRolloutConditionTreatmentsSuccessfully()
+        public async Task SplitReturnRolloutConditionTreatmentsSuccessfully()
         {
             //Arrange
             var conditionWithLogic = new ConditionWithLogic()
@@ -232,11 +233,11 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetSplit("test1"))
-                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
+                .Setup(mock => mock.GetSplitAsync("test1"))
+                .ReturnsAsync(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
 
             //Act
-            var result = _splitManager.Split("test1");
+            var result = await _splitManager.SplitAsync("test1");
 
             //Assert
             Assert.IsNotNull(result);
@@ -251,7 +252,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
 
         [TestMethod]
-        public void SplitReturnDefaultTreatmentsWhenNoRolloutCondition()
+        public async Task SplitReturnDefaultTreatmentsWhenNoRolloutCondition()
         {
             //Arrange
             var conditionWithLogic = new ConditionWithLogic()
@@ -267,17 +268,17 @@ namespace Splitio_Tests.Unit_Tests.Client
             {
                 conditionWithLogic
             };
-            
+
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetSplit("test1"))
-                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
+                .Setup(mock => mock.GetSplitAsync("test1"))
+                .ReturnsAsync(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
 
             //Act
-            var result = _splitManager.Split("test1");
+            var result = await _splitManager.SplitAsync("test1");
 
             //Assert
             Assert.IsNotNull(result);
@@ -286,22 +287,22 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
 
         [TestMethod]
-        public void SplitReturnsNullWhenInexistent()
+        public async Task SplitReturnsNullWhenInexistent()
         {
             //Arrange
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
-            
+
             //Act
-            var result = _splitManager.Split("test1");
+            var result = await _splitManager.SplitAsync("test1");
 
             //Assert
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void SplitReturnsNullWhenCacheIsNull()
+        public async Task SplitReturnsNullWhenCacheIsNull()
         {
             //Arrange
             _blockUntilReadyService
@@ -309,16 +310,16 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             var manager = new SplitManager(null, _blockUntilReadyService.Object);
-            
+
             //Act
-            var result = manager.Split("test1");
+            var result = await manager.SplitAsync("test1");
 
             //Assert
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void SplitsWhenCacheIsEmptyShouldReturnEmptyList()
+        public async Task SplitsWhenCacheIsEmptyShouldReturnEmptyList()
         {
             //Arrange
             _blockUntilReadyService
@@ -326,11 +327,11 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetAllSplits())
-                .Returns(new List<ParsedSplit>());
+                .Setup(mock => mock.GetAllSplitsAsync())
+                .ReturnsAsync(new List<ParsedSplit>());
 
             //Act
-            var result = _splitManager.Splits();
+            var result = await _splitManager.SplitsAsync();
 
             //Assert
             Assert.IsNotNull(result);
@@ -338,7 +339,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
 
         [TestMethod]
-        public void SplitsWhenCacheIsNotInstancedShouldReturnNull()
+        public async Task SplitsWhenCacheIsNotInstancedShouldReturnNull()
         {
             //Arrange
             _blockUntilReadyService
@@ -348,14 +349,14 @@ namespace Splitio_Tests.Unit_Tests.Client
             var manager = new SplitManager(null, _blockUntilReadyService.Object);
 
             //Act
-            var result = manager.Splits();
+            var result = await manager.SplitsAsync();
 
             //Assert
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void SplitWhenCacheIsNotInstancedShouldReturnNull()
+        public async Task SplitWhenCacheIsNotInstancedShouldReturnNull()
         {
             //Arrange
             _blockUntilReadyService
@@ -363,16 +364,16 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             var manager = new SplitManager(null, _blockUntilReadyService.Object);
-            
+
             //Act
-            var result = manager.Split("name");
+            var result = await manager.SplitAsync("name");
 
             //Assert
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void SplitWithNullNameShouldReturnNull()
+        public async Task SplitWithNullNameShouldReturnNull()
         {
             //Arrange
             _blockUntilReadyService
@@ -380,14 +381,14 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             //Act
-            var result = _splitManager.Split(null);
+            var result = await _splitManager.SplitAsync(null);
 
             //Assert
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void SplitNamessWhenCacheIsNotInstancedShouldReturnNull()
+        public async Task SplitNamessWhenCacheIsNotInstancedShouldReturnNull()
         {
             //Arrange
             _blockUntilReadyService
@@ -395,16 +396,16 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             var manager = new SplitManager(null, _blockUntilReadyService.Object);
-            
+
             //Act
-            var result = manager.SplitNames();
+            var result = await manager.SplitNamesAsync();
 
             //Assert
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void SplitNamesReturnSuccessfully()
+        public async Task SplitNamesReturnSuccessfully()
         {
             //Arrange
             var conditionWithLogic = new ConditionWithLogic()
@@ -429,19 +430,19 @@ namespace Splitio_Tests.Unit_Tests.Client
                 "test5",
                 "test6"
             };
-            
+
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetSplitNames())
-                .Returns(splitNames);
-            
+                .Setup(mock => mock.GetSplitNamesAsync())
+                .ReturnsAsync(splitNames);
+
             _splitManager.BlockUntilReady(1000);
 
             //Act
-            var result = _splitManager.SplitNames();
+            var result = await _splitManager.SplitNamesAsync();
 
             //Assert
             Assert.IsNotNull(result);
@@ -452,14 +453,14 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
 
         [TestMethod]
-        public void Splits_WithConfigs_ReturnSuccessfully()
+        public async Task Splits_WithConfigs_ReturnSuccessfully()
         {
             //Arrange
             var configurations = new Dictionary<string, string>
             {
                 { "On", "\"Name = \"Test Config\"" }
             };
-            
+
             var conditionWithLogic = new ConditionWithLogic()
             {
                 partitions = new List<PartitionDefinition>()
@@ -482,19 +483,19 @@ namespace Splitio_Tests.Unit_Tests.Client
                 new ParsedSplit { name = "test5", conditions = conditionsWithLogic },
                 new ParsedSplit { name = "test6", conditions = conditionsWithLogic }
             };
-            
+
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetAllSplits())
-                .Returns(splits);
-            
+                .Setup(mock => mock.GetAllSplitsAsync())
+                .ReturnsAsync(splits);
+
             _splitManager.BlockUntilReady(1000);
 
             //Act
-            var result = _splitManager.Splits();
+            var result = await _splitManager.SplitsAsync();
 
             //Assert
             Assert.IsNotNull(result);
@@ -508,14 +509,14 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
 
         [TestMethod]
-        public void Split_WithConfigs_ReturnSuccessfully()
+        public async Task Split_WithConfigs_ReturnSuccessfully()
         {
             //Arrange
             var configurations = new Dictionary<string, string>
             {
                 { "On", "\"Name = \"Test Config\"" }
             };
-            
+
             var conditionWithLogic = new ConditionWithLogic()
             {
                 partitions = new List<PartitionDefinition>()
@@ -528,29 +529,29 @@ namespace Splitio_Tests.Unit_Tests.Client
             {
                 conditionWithLogic
             };
-            
+
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
             _splitCache
-                .Setup(mock => mock.GetSplit("test1"))
-                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, configurations = configurations });
+                .Setup(mock => mock.GetSplitAsync("test1"))
+                .ReturnsAsync(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, configurations = configurations });
 
             _splitCache
-                .Setup(mock => mock.GetSplit("test2"))
-                .Returns(new ParsedSplit { name = "test2", conditions = conditionsWithLogic, configurations = configurations });
+                .Setup(mock => mock.GetSplitAsync("test2"))
+                .ReturnsAsync(new ParsedSplit { name = "test2", conditions = conditionsWithLogic, configurations = configurations });
 
             _splitCache
-                .Setup(mock => mock.GetSplit("test3"))
-                .Returns(new ParsedSplit { name = "test3", conditions = conditionsWithLogic });
+                .Setup(mock => mock.GetSplitAsync("test3"))
+                .ReturnsAsync(new ParsedSplit { name = "test3", conditions = conditionsWithLogic });
 
             _splitManager.BlockUntilReady(1000);
 
             //Act
-            var result1 = _splitManager.Split("test1");
-            var result2 = _splitManager.Split("test2");
-            var result3 = _splitManager.Split("test3");
+            var result1 = await _splitManager.SplitAsync("test1");
+            var result2 = await _splitManager.SplitAsync("test2");
+            var result3 = await _splitManager.SplitAsync("test3");
 
             //Assert
             Assert.IsNotNull(result1);
@@ -563,7 +564,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
         [TestMethod]
         [DeploymentItem(@"Resources\split.yaml")]
-        public void Split_WithLocalhostClient_WhenNameIsTestingSplitOn_ReturnsSplit()
+        public async Task Split_WithLocalhostClient_WhenNameIsTestingSplitOn_ReturnsSplit()
         {
             // Arrange.
             var splitViewExpected = new SplitView
@@ -586,7 +587,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             manager.BlockUntilReady(1000);
 
             // Act.
-            var splitViewResult = manager.Split("testing_split_on");
+            var splitViewResult = await manager.SplitAsync("testing_split_on");
 
             // Assert.
             Assert.AreEqual(splitViewExpected.name, splitViewResult.name);
@@ -602,7 +603,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
         [TestMethod]
         [DeploymentItem(@"Resources\split.yaml")]
-        public void Split_WithLocalhostClient_WhenNameIsTestingSplitOnlyWl_ReturnsSplit()
+        public async Task Split_WithLocalhostClient_WhenNameIsTestingSplitOnlyWl_ReturnsSplit()
         {
             // Arrange.
             var splitViewExpected = new SplitView
@@ -625,7 +626,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             manager.BlockUntilReady(1000);
 
             // Act.
-            var splitViewResult = manager.Split("testing_split_only_wl");
+            var splitViewResult = await manager.SplitAsync("testing_split_only_wl");
 
             // Assert.
             Assert.AreEqual(splitViewExpected.name, splitViewResult.name);
@@ -637,7 +638,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
         [TestMethod]
         [DeploymentItem(@"Resources\split.yaml")]
-        public void Split_WithLocalhostClient_WhenNameIsTestingSplitWithWl_ReturnsSplit()
+        public async Task Split_WithLocalhostClient_WhenNameIsTestingSplitWithWl_ReturnsSplit()
         {
             // Arrange.
             var splitViewExpected = new SplitView
@@ -665,7 +666,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             manager.BlockUntilReady(1000);
 
             // Act.
-            var splitViewResult = manager.Split("testing_split_with_wl");
+            var splitViewResult = await manager.SplitAsync("testing_split_with_wl");
 
             // Assert.
             Assert.AreEqual(splitViewExpected.name, splitViewResult.name);
@@ -686,7 +687,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
         [TestMethod]
         [DeploymentItem(@"Resources\split.yaml")]
-        public void Split_WithLocalhostClient_WhenNameIsTestingSplitOffWithConfig_ReturnsSplit()
+        public async Task Split_WithLocalhostClient_WhenNameIsTestingSplitOffWithConfig_ReturnsSplit()
         {
             // Arrange.
             var splitViewExpected = new SplitView
@@ -713,7 +714,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             manager.BlockUntilReady(1000);
 
             // Act.
-            var splitViewResult = manager.Split("testing_split_off_with_config");
+            var splitViewResult = await manager.SplitAsync("testing_split_off_with_config");
 
             // Assert.
             Assert.AreEqual(splitViewExpected.name, splitViewResult.name);
