@@ -155,20 +155,6 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
-        public void FlushTest()
-        {
-            //Arrange
-            var redisAdapterMock = new Mock<IRedisAdapter>();
-            var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
-
-            //Act
-            segmentCache.Flush();
-
-            //Assert
-            redisAdapterMock.Verify(mock => mock.Flush(), Times.Once());
-        }
-
-        [TestMethod]
         public void GetSegmentKeysTest()
         {
             // Arrange.

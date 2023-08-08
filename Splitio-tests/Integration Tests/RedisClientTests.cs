@@ -12,6 +12,8 @@ namespace Splitio_Tests.Integration_Tests
     [TestClass]
     public class RedisClientTests
     {
+        private readonly string _prefix = "SPLITIO-TEST";
+
         private const string HOST = "localhost";
         private const string PORT = "6379";
         private const string PASSWORD = "";
@@ -29,7 +31,8 @@ namespace Splitio_Tests.Integration_Tests
                 Host = HOST,
                 Port = PORT,
                 Password = PASSWORD,
-                Database = DB
+                Database = DB,
+                UserPrefix = _prefix
             };
 
             config = new ConfigurationOptions
@@ -44,10 +47,13 @@ namespace Splitio_Tests.Integration_Tests
                 RedisPort = PORT,
                 RedisPassword = PASSWORD,
                 RedisDatabase = DB,
-                PoolSize = 1
+                PoolSize = 1,
+                RedisUserPrefix = _prefix
             };
             var pool = new ConnectionPoolManager(rconfig);
             _redisAdapter = new RedisAdapter(rconfig, pool);
+
+            CleanKeys();
             LoadSplits();
         }
 
@@ -232,12 +238,18 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(client.IsDestroyed());
         }
 
+        [TestCleanup]
+        public void CleanKeys()
+        {
+            var keys = _redisAdapter.Keys($"{_prefix}*");
+
+            _redisAdapter.Del(keys);
+        }
+
         private void LoadSplits()
         {
-            _redisAdapter.Flush();
-
-            _redisAdapter.Set("SPLITIO.split.always_on", SplitsHelper.AlwaysOn);
-            _redisAdapter.Set("SPLITIO.split.always_off", SplitsHelper.AlwaysOff);
+            _redisAdapter.Set($"{_prefix}.SPLITIO.split.always_on", SplitsHelper.AlwaysOn);
+            _redisAdapter.Set($"{_prefix}.SPLITIO.split.always_off", SplitsHelper.AlwaysOff);
         }
     }
 }

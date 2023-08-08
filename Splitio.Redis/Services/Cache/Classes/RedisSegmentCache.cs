@@ -68,11 +68,6 @@ namespace Splitio.Redis.Services.Cache.Classes
             return _redisAdapter.SAdd(key, segments);
         }
 
-        public void Flush()
-        {
-            _redisAdapter.Flush();
-        }
-
         public void Clear()
         {
             return;
