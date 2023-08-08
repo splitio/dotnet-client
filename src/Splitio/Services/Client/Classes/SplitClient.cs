@@ -26,9 +26,10 @@ namespace Splitio.Services.Client.Classes
 {
     public abstract class SplitClient : ISplitClient
     {
+        protected static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitClient));
+
         protected const string Control = "control";
-        
-        protected readonly ISplitLogger _log;
+
         protected readonly IKeyValidator _keyValidator;
         protected readonly ISplitNameValidator _splitNameValidator;
         protected readonly IEventTypeValidator _eventTypeValidator;
@@ -64,7 +65,6 @@ namespace Splitio.Services.Client.Classes
         public SplitClient()
         {
             _wrapperAdapter = WrapperAdapter.Instance();
-            _log = _wrapperAdapter.GetLogger(typeof(SplitClient));
             _keyValidator = new KeyValidator();
             _splitNameValidator = new SplitNameValidator();
             _eventTypeValidator = new EventTypeValidator();

@@ -7,7 +7,8 @@ namespace Splitio.Services.EventSource
 {
     public class SSEHandler : ISSEHandler
     {
-        private readonly ISplitLogger _log;
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SSEHandler));
+
         private readonly ISplitsWorker _splitsWorker;
         private readonly ISegmentsWorker _segmentsWorker;
         private readonly INotificationProcessor _notificationPorcessor;
@@ -28,7 +29,6 @@ namespace Splitio.Services.EventSource
             _segmentsWorker = segmentsWorker;
             _notificationPorcessor = notificationPorcessor;
             _notificationManagerKeeper = notificationManagerKeeper;
-            _log = WrapperAdapter.Instance().GetLogger(typeof(SSEHandler));
             _eventSourceClient = eventSourceClient;
 
             _eventSourceClient.EventReceived += EventReceived;

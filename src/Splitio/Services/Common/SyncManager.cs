@@ -15,11 +15,12 @@ namespace Splitio.Services.Common
 {
     public class SyncManager : ISyncManager
     {
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(Synchronizer));
+
         private readonly bool _streamingEnabled;
         private readonly ISynchronizer _synchronizer;
         private readonly IPushManager _pushManager;
         private readonly ISSEHandler _sseHandler;
-        private readonly ISplitLogger _log;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly IStatusManager _statusManager;
         private readonly ITasksManager _tasksManager;
@@ -47,7 +48,6 @@ namespace Splitio.Services.Common
             _synchronizer = synchronizer;
             _pushManager = pushManager;
             _sseHandler = sseHandler;
-            _log = WrapperAdapter.Instance().GetLogger(typeof(Synchronizer));
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _statusManager = statusManager;
             _tasksManager = tasksManager;

@@ -9,13 +9,13 @@ namespace Splitio.Services.Shared.Classes
 {
     public class ConfigService : IConfigService
     {
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(ConfigService));
+
         private readonly IWrapperAdapter _wrapperAdapter;
-        private readonly ISplitLogger _log;
 
         public ConfigService(IWrapperAdapter wrapperAdapter)
         {
             _wrapperAdapter = wrapperAdapter;
-            _log = _wrapperAdapter.GetLogger(typeof(ConfigService));
         }
 
         #region Public Methods

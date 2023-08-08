@@ -7,13 +7,13 @@ namespace Splitio.Services.EventSource
 {
     public class NotificationProcessor : INotificationProcessor
     {
-        private readonly ISplitLogger _log;
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(EventSourceClient));
+
         private readonly ISplitsWorker _featureFlagsWorker;
         private readonly ISegmentsWorker _segmentsWorker;
 
         public NotificationProcessor(ISplitsWorker featureFlagsWorker, ISegmentsWorker segmentsWorker)
         {
-            _log = WrapperAdapter.Instance().GetLogger(typeof(EventSourceClient));
             _featureFlagsWorker = featureFlagsWorker;
             _segmentsWorker = segmentsWorker;
         }

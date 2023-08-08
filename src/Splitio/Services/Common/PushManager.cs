@@ -14,8 +14,9 @@ namespace Splitio.Services.Common
 {
     public class PushManager : IPushManager
     {
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(PushManager));
+
         private readonly IAuthApiClient _authApiClient;
-        private readonly ISplitLogger _log;
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISSEHandler _sseHandler;
         private readonly IBackOff _backOff;
@@ -31,7 +32,6 @@ namespace Splitio.Services.Common
         {
             _sseHandler = sseHandler;
             _authApiClient = authApiClient;
-            _log = WrapperAdapter.Instance().GetLogger(typeof(PushManager));
             _wrapperAdapter = wrapperAdapter;
             _backOff = backOff;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;

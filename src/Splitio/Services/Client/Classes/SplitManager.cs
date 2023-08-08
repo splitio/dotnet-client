@@ -13,7 +13,8 @@ namespace Splitio.Services.Client.Classes
 {
     public class SplitManager : ISplitManager
     {
-        private readonly ISplitLogger _log;
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitManager));
+
         private readonly ISplitCache _featureFlagCache;
         private readonly ISplitNameValidator _splitNameValidator;
         private readonly IBlockUntilReadyService _blockUntilReadyService;
@@ -21,7 +22,6 @@ namespace Splitio.Services.Client.Classes
         public SplitManager(ISplitCache featureFlagCache, IBlockUntilReadyService blockUntilReadyService)
         {
             _featureFlagCache = featureFlagCache;
-            _log = WrapperAdapter.Instance().GetLogger(typeof(SplitManager));
             _splitNameValidator = new SplitNameValidator(_log);
             _blockUntilReadyService = blockUntilReadyService;
         }

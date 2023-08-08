@@ -8,11 +8,6 @@ namespace Splitio.Services.Shared.Classes
 {
     public class LocalhostFileService : AbstractLocalhostFileService
     {
-        public LocalhostFileService()
-        {
-            _log = WrapperAdapter.Instance().GetLogger(typeof(LocalhostFileService));
-        }
-
         public override ConcurrentDictionary<string, ParsedSplit> ParseSplitFile(string filePath)
         {
             var splits = new ConcurrentDictionary<string, ParsedSplit>();

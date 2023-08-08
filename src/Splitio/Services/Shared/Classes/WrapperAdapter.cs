@@ -1,4 +1,7 @@
-﻿using Splitio.Domain;
+﻿#if NET_LATEST
+using Microsoft.Extensions.Logging;
+#endif
+using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
@@ -18,7 +21,6 @@ namespace Splitio.Services.Shared.Classes
         private static readonly object _instanceLock = new object();
 
         private static IWrapperAdapter _instance;
-        private static ISplitLogger _log;
         private static ISplitLogger _customLogger;
 
         public static IWrapperAdapter Instance(ISplitLogger customLogger = null)
@@ -40,7 +42,6 @@ namespace Splitio.Services.Shared.Classes
         private WrapperAdapter(ISplitLogger customLogger)
         {
             _customLogger = customLogger;
-            _log = GetLogger(typeof(IWrapperAdapter));
         }
 
         public ReadConfigData ReadConfig(ConfigurationOptions config, ISplitLogger log)
@@ -96,7 +97,10 @@ namespace Splitio.Services.Shared.Classes
             }
 
 #if NET_LATEST
-            return new MicrosoftExtensionsLogging(type);
+            if (SplitLoggerFactoryExtensions.LoggerFactoryHasValue)
+                return new MicrosoftExtensionsLogging(type);
+            else
+                return new NoopLogging();
 #else
             return new CommonLogging(type);
 #endif
@@ -110,7 +114,10 @@ namespace Splitio.Services.Shared.Classes
             }
 
 #if NET_LATEST
-            return new MicrosoftExtensionsLogging(type);
+            if (SplitLoggerFactoryExtensions.LoggerFactoryHasValue)
+                return new MicrosoftExtensionsLogging(type);
+            else
+                return new NoopLogging();
 #else
             return new CommonLogging(type);
 #endif
