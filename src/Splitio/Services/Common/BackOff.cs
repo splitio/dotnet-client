@@ -6,6 +6,7 @@ namespace Splitio.Services.Common
     {
         private readonly int _backOffBase;
         private readonly double _maxAllowed;
+        private readonly int _minAttemptAllowed;
         private int _attempt;
 
         public BackOff(int backOffBase, int attempt = 0, double maxAllowed = 1800)
@@ -13,6 +14,7 @@ namespace Splitio.Services.Common
             _backOffBase = backOffBase;
             _maxAllowed = maxAllowed;
             _attempt = attempt;
+            _minAttemptAllowed = attempt;
         }
 
         public int GetAttempt()
@@ -38,7 +40,7 @@ namespace Splitio.Services.Common
 
         public void Reset()
         {
-            _attempt = 0;
+            _attempt = _minAttemptAllowed;
         }
     }
 }

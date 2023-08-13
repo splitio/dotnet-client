@@ -34,7 +34,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _uniqueKeysTracker = new Mock<IUniqueKeysTracker>();
 
-            _tasksManager = new TasksManager(WrapperAdapter.Instance());
+            _tasksManager = new TasksManager();
         }
 
         [TestMethod]

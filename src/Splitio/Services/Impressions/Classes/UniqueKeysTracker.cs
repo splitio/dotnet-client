@@ -2,32 +2,37 @@
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Domain;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Timers;
 
 namespace Splitio.Services.Impressions.Classes
 {
     public class UniqueKeysTracker : TrackerComponent, IUniqueKeysTracker
     {
         private static readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger(typeof(UniqueKeysTracker));
-        private static readonly int IntervalToClearLongTermCache = 3600000;        
 
         private readonly IFilterAdapter _filterAdapter;
         private readonly ConcurrentDictionary<string, HashSet<string>> _cache;
         private readonly IImpressionsSenderAdapter _senderAdapter;
+        private readonly ISplitTask _cacheLongTermCleaningTask;
 
         public UniqueKeysTracker(ComponentConfig config,
             IFilterAdapter filterAdapter,
             ConcurrentDictionary<string, HashSet<string>> cache,
             IImpressionsSenderAdapter senderAdapter,
-            ITasksManager tasksManager) : base(config, tasksManager)
+            ISplitTask mtksTask,
+            ISplitTask cacheLongTermCleaningTask) : base(config, mtksTask)
         {
             _filterAdapter = filterAdapter;
             _cache = cache;
             _senderAdapter = senderAdapter;
+            _cacheLongTermCleaningTask = cacheLongTermCleaningTask;
+            _cacheLongTermCleaningTask.SetEventHandler((object sender, ElapsedEventArgs e) => _filterAdapter.Clear());
         }
 
         #region Public Methods
@@ -55,8 +60,14 @@ namespace Splitio.Services.Impressions.Classes
         #region Protected Methods
         protected override void StartTask()
         {
-            _tasksManager.StartPeriodic(() => SendBulkData(), _taskInterval * 1000, _cancellationTokenSource, "MTKs sender.");
-            _tasksManager.StartPeriodic(() => _filterAdapter.Clear(), IntervalToClearLongTermCache, _cancellationTokenSource, "Cache Long Term clear.");
+            base.StartTask();
+            _cacheLongTermCleaningTask.Start();
+        }
+
+        protected override void StopTask()
+        {
+            base.StopTask();
+            _cacheLongTermCleaningTask.Stop();
         }
 
         protected override void SendBulkData()

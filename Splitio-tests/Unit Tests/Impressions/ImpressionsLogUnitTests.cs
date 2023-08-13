@@ -27,7 +27,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _queue = new BlockingQueue<KeyImpression>(10);
             _impressionsCache = new InMemorySimpleCache<KeyImpression>(_queue);
 
-            _impressionsLog = new ImpressionsLog(_apiClientMock.Object, 1, _impressionsCache, new TasksManager(wrapperAdapter), 10);
+            _impressionsLog = new ImpressionsLog(_apiClientMock.Object, 1, _impressionsCache, new TasksManager(), 10);
         }
 
         [TestMethod]

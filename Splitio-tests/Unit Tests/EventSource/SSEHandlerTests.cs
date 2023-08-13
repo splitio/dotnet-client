@@ -2,7 +2,6 @@
 using Moq;
 using Splitio.Services.EventSource;
 using Splitio.Services.EventSource.Workers;
-using Splitio.Services.Logger;
 
 namespace Splitio_Tests.Unit_Tests.EventSource
 {
@@ -63,7 +62,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
 
             // Assert.
             Assert.IsTrue(result);
-            _eventSourceClient.Verify(mock => mock.Disconnect(It.IsAny<SSEClientActions>()), Times.Once);
+            _eventSourceClient.Verify(mock => mock.Disconnect(), Times.Once);
         }
     }
 }

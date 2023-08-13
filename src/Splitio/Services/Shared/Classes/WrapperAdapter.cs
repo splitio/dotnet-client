@@ -18,10 +18,9 @@ namespace Splitio.Services.Shared.Classes
         private static readonly object _instanceLock = new object();
 
         private static IWrapperAdapter _instance;
-        private static ISplitLogger _log;
-        private static ISplitLogger _customLogger;
+        private ISplitLogger _customLogger;
 
-        public static IWrapperAdapter Instance(ISplitLogger customLogger = null)
+        public static IWrapperAdapter Instance()
         {
             if (_instance == null)
             {
@@ -29,18 +28,12 @@ namespace Splitio.Services.Shared.Classes
                 {
                     if (_instance == null)
                     {
-                        _instance = new WrapperAdapter(customLogger);
+                        _instance = new WrapperAdapter();
                     }
                 }
             }
 
             return _instance;
-        }
-
-        private WrapperAdapter(ISplitLogger customLogger)
-        {
-            _customLogger = customLogger;
-            _log = GetLogger(typeof(IWrapperAdapter));
         }
 
         public ReadConfigData ReadConfig(ConfigurationOptions config, ISplitLogger log)
@@ -86,6 +79,11 @@ namespace Splitio.Services.Shared.Classes
 #else
             return FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
 #endif
+        }
+
+        public void SetCustomerLogger(ISplitLogger splitLogger)
+        {
+            _customLogger = splitLogger;
         }
 
         public ISplitLogger GetLogger(Type type)

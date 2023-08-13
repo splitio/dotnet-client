@@ -5,7 +5,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.Timers;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -15,34 +15,27 @@ namespace Splitio.Services.Impressions.Classes
 
         private readonly IImpressionsSdkApiClient _apiClient;
         private readonly ISimpleProducerCache<KeyImpression> _impressionsCache;
-        private readonly CancellationTokenSource _cancellationTokenSource;
-        private readonly ITasksManager _tasksManager;
-        private readonly int _interval;
+        private readonly ISplitTask _task;
         private readonly object _lock = new object();
 
-        private bool _running;
-
         public ImpressionsLog(IImpressionsSdkApiClient apiClient,
-            int interval,
             ISimpleCache<KeyImpression> impressionsCache,
-            ITasksManager tasksManager,
+            ISplitTask task,
             int maximumNumberOfKeysToCache = -1)
         {
             _apiClient = apiClient;
             _impressionsCache = (impressionsCache as ISimpleProducerCache<KeyImpression>) ?? new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(maximumNumberOfKeysToCache));            
-            _interval = interval;
-            _cancellationTokenSource = new CancellationTokenSource();
-            _tasksManager = tasksManager;
+            _task = task;
+            _task.SetEventHandler((object sender, ElapsedEventArgs e) => SendBulkImpressions());
         }
 
         public void Start()
         {
             lock (_lock)
             {
-                if (_running) return;
+                if (_task.IsRunning()) return;
 
-                _running = true;
-                _tasksManager.StartPeriodic(() => SendBulkImpressions(), _interval * 1000, _cancellationTokenSource, "Main Impressions Log.");
+                _task.Start();
             }
         }
 
@@ -50,10 +43,10 @@ namespace Splitio.Services.Impressions.Classes
         {
             lock (_lock)
             {
-                if (!_running) return;
+                if (!_task.IsRunning())
+                    return;
 
-                _running = false;
-                _cancellationTokenSource.Cancel();
+                _task.Stop();
                 SendBulkImpressions();
             }
         }

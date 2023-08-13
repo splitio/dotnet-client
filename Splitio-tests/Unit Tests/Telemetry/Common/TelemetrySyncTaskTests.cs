@@ -52,7 +52,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
                 config,
                 _factoryInstantiationsService.Object,
                 wrapperAdapter: _wrapperAdapter.Object,
-                tasksManager: new TasksManager(_wrapperAdapter.Object)
+                tasksManager: new TasksManager()
             );
 
             // Act.
@@ -90,7 +90,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             // Arrange.
             MockRecordStats();
 
-            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, new SelfRefreshingConfig(), _factoryInstantiationsService.Object, wrapperAdapter: _wrapperAdapter.Object, tasksManager: new TasksManager(_wrapperAdapter.Object));
+            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, new SelfRefreshingConfig(), _factoryInstantiationsService.Object, wrapperAdapter: _wrapperAdapter.Object, tasksManager: new TasksManager());
 
             // Act.
             _telemetrySyncTask.Start();

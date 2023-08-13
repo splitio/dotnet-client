@@ -82,11 +82,10 @@ namespace Splitio.Services.EventSource.Workers
                         return;
                     }
 
+                    _running = false;
+
                     _cancellationTokenSource?.Cancel();
                     _cancellationTokenSource?.Dispose();
-
-                    _log.Debug($"Segments worker stoped ...");
-                    _running = false;
                 }
                 catch (Exception ex)
                 {
@@ -112,13 +111,13 @@ namespace Splitio.Services.EventSource.Workers
                     }
                 }
             }
+            catch (OperationCanceledException)
+            {
+                _log.Debug($"Segments worker stoped ...");
+            }
             catch (Exception ex)
             {
-                _log.Debug($"Execute: {ex.Message}");
-            }
-            finally
-            {
-                _log.Debug("Segment Worker execution finished.");
+                _log.Debug($"Segments worker Execute exception", ex);
             }
         }
         #endregion

@@ -16,5 +16,7 @@ namespace Splitio.Services.Shared.Interfaces
         Task<T> TaskFromResult<T>(T result);
         ISplitLogger GetLogger(string type);
         ISplitLogger GetLogger(Type type);
+
+        void SetCustomerLogger(ISplitLogger splitLogger);
     }
 }

@@ -25,7 +25,7 @@ namespace Splitio.Integration_tests.Events
         {
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _wrapperAdapter = WrapperAdapter.Instance();
-            _tasksManger = new TasksManager(_wrapperAdapter);
+            _tasksManger = new TasksManager();
             var config = new SelfRefreshingConfig
             {
                 HttpConnectionTimeout = 10000,

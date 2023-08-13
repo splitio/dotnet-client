@@ -11,8 +11,6 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
     [TestClass]
     public class SegmentsWorkerTests
     {
-        private readonly IWrapperAdapter wrapperAdapter = WrapperAdapter.Instance();
-
         private readonly Mock<ISynchronizer> _synchronizer;
 
         private readonly ISegmentsWorker _segmentsWorker;
@@ -21,7 +19,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         {
             _synchronizer = new Mock<ISynchronizer>();
 
-            _segmentsWorker = new SegmentsWorker(_synchronizer.Object, new TasksManager(wrapperAdapter));
+            _segmentsWorker = new SegmentsWorker(_synchronizer.Object, new TasksManager());
         }
 
         [TestMethod]

@@ -39,7 +39,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _segmentFetcher = new Mock<ISelfRefreshingSegmentFetcher>();
             _queue = new BlockingCollection<SplitChangeNotification>(new ConcurrentQueue<SplitChangeNotification>());
-            _splitsWorker = new SplitsWorker(_synchronizer.Object, new TasksManager(wrapperAdapter), _featureFlagCache.Object, _featureFlagParser.Object, _queue, _telemetryRuntimeProducer.Object, _segmentFetcher.Object);
+            _splitsWorker = new SplitsWorker(_synchronizer.Object, new TasksManager(), _featureFlagCache.Object, _featureFlagParser.Object, _queue, _telemetryRuntimeProducer.Object, _segmentFetcher.Object);
         }
 
         [TestMethod]
@@ -64,7 +64,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Act.
             _splitsWorker.Start();
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             // Assert.
             _featureFlagCache.Verify(mock => mock.RemoveSplit(It.IsAny<string>()), Times.Never);
@@ -119,7 +119,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Act.
             _splitsWorker.Start();
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             // Assert.
             _featureFlagCache.Verify(mock => mock.RemoveSplit(It.IsAny<string>()), Times.Never);
@@ -157,7 +157,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Act.
             _splitsWorker.Start();
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             // Assert.
             _featureFlagCache.Verify(mock => mock.RemoveSplit(It.IsAny<string>()), Times.Never);
@@ -193,7 +193,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Act.
             _splitsWorker.Start();
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             // Assert.
             _featureFlagCache.Verify(mock => mock.RemoveSplit("mauro_ff"), Times.Once);
@@ -213,9 +213,12 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _splitsWorker.AddToQueue(new SplitChangeNotification { ChangeNumber = 1585956698476 });
             Thread.Sleep(1000);
 
+            // Assert
+            _synchronizer.Verify(mock => mock.SynchronizeSplits(It.IsAny<long>()), Times.Exactly(4));
+
             _splitsWorker.Stop();
             _splitsWorker.AddToQueue(new SplitChangeNotification { ChangeNumber = 1585956698486 });
-            Thread.Sleep(100);
+            Thread.Sleep(1000);
             _splitsWorker.AddToQueue(new SplitChangeNotification { ChangeNumber = 1585956698496 });
 
             // Assert
@@ -227,7 +230,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         {
             // Act.
             _splitsWorker.Start();
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             // Assert.
             _synchronizer.Verify(mock => mock.SynchronizeSplits(It.IsAny<long>()), Times.Never);

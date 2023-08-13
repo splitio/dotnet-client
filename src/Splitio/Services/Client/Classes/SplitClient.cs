@@ -27,7 +27,8 @@ namespace Splitio.Services.Client.Classes
     public abstract class SplitClient : ISplitClient
     {
         protected const string Control = "control";
-        
+        private static readonly int IntervalToClearLongTermCache = 3600000;
+
         protected readonly ISplitLogger _log;
         protected readonly IKeyValidator _keyValidator;
         protected readonly ISplitNameValidator _splitNameValidator;
@@ -71,8 +72,8 @@ namespace Splitio.Services.Client.Classes
             _eventPropertiesValidator = new EventPropertiesValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
             _configService = new ConfigService(_wrapperAdapter);
-            _tasksManager = new TasksManager(_wrapperAdapter);
             _statusManager = new InMemoryReadinessGatesCache();
+            _tasksManager = new TasksManager(_statusManager);
         }
 
         #region Public Methods
@@ -230,9 +231,12 @@ namespace Splitio.Services.Client.Classes
             var bloomFilter = new BloomFilter(config.BfExpectedElements, config.BfErrorRate);
             var filterAdapter = new FilterAdapter(bloomFilter);
             var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
-            var trackerConfig = new ComponentConfig(config.UniqueKeysRefreshRate, config.UniqueKeysCacheMaxSize, config.UniqueKeysBulkSize);
+            var trackerConfig = new ComponentConfig(config.UniqueKeysCacheMaxSize, config.UniqueKeysBulkSize);
 
-            _uniqueKeysTracker = new UniqueKeysTracker(trackerConfig, filterAdapter, trackerCache, _impressionsSenderAdapter, _tasksManager);
+            var mtksTask = _tasksManager.NewPeriodicTask(Enums.Task.MTKsSender, config.UniqueKeysRefreshRate * 1000);
+            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Enums.Task.CacheLongTermCleaning, IntervalToClearLongTermCache);
+
+            _uniqueKeysTracker = new UniqueKeysTracker(trackerConfig, filterAdapter, trackerCache, _impressionsSenderAdapter, mtksTask, cacheLongTermCleaningTask);
         }
 
         protected void BuildImpressionsCounter(BaseConfig config)
@@ -243,9 +247,10 @@ namespace Splitio.Services.Client.Classes
                 return;
             }
 
-            var trackerConfig = new ComponentConfig(config.ImpressionsCounterRefreshRate, config.ImpressionsCounterCacheMaxSize, config.ImpressionsCountBulkSize);
+            var trackerConfig = new ComponentConfig(config.ImpressionsCounterCacheMaxSize, config.ImpressionsCountBulkSize);
+            var task = _tasksManager.NewPeriodicTask(Enums.Task.ImpressionsCountSender, config.ImpressionsCounterRefreshRate);
 
-            _impressionsCounter = new ImpressionsCounter(trackerConfig, _impressionsSenderAdapter, _tasksManager);
+            _impressionsCounter = new ImpressionsCounter(trackerConfig, _impressionsSenderAdapter, task);
         }
         #endregion
 

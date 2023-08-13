@@ -14,8 +14,6 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     [TestClass]
     public class ImpressionsCounterTests
     {
-        private readonly IWrapperAdapter wrapperAdapter = WrapperAdapter.Instance();
-
         private readonly Mock<IImpressionsSenderAdapter> _senderAdapter;
 
         public ImpressionsCounterTests()
@@ -28,7 +26,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         {
             // Arrange.
             var config = new ComponentConfig(1, 5, 5);
-            var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, new TasksManager(wrapperAdapter));
+            var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, new TasksManager());
 
 
             // Act.
@@ -48,7 +46,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         {
             // Arrange.
             var config = new ComponentConfig(1, 5, 5);
-            var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, new TasksManager(wrapperAdapter));
+            var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, new TasksManager());
 
             // Act.
             impressionsCounter.Start();
@@ -63,7 +61,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         {
             // Arrange.
             var config = new ComponentConfig(100, 5, 5);
-            var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, new TasksManager(wrapperAdapter));
+            var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, new TasksManager());
 
             impressionsCounter.Inc("feature1", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 15, 11, DateTimeKind.Utc)));
             impressionsCounter.Inc("feature1", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 50, 11, DateTimeKind.Utc)));
@@ -83,7 +81,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void ShouldSend2BulksOfImpressions()
         {
             var config = new ComponentConfig(100, 6, 3);
-            var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, new TasksManager(wrapperAdapter));
+            var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, new TasksManager());
 
             impressionsCounter.Inc("feature1", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 15, 11, DateTimeKind.Utc)));
             impressionsCounter.Inc("feature1", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 50, 11, DateTimeKind.Utc)));

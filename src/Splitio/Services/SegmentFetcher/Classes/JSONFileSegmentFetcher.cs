@@ -8,7 +8,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class JSONFileSegmentFetcher : SegmentFetcher
     {
-        List<string> added;
+        readonly List<string> added;
 
         public JSONFileSegmentFetcher(string filePath, 
             ISegmentCache segmentsCache) : base(segmentsCache)

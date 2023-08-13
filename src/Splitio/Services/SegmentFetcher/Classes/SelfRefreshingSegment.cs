@@ -11,7 +11,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class SelfRefreshingSegment : ISelfRefreshingSegment
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingSegment));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingSegment));
 
         public string Name;
         private readonly ISegmentChangeFetcher _segmentChangeFetcher;
@@ -31,13 +31,16 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
             while (true)
             {
+                if (fetchOptions.Token.IsCancellationRequested)
+                    break;
+
                 var changeNumber = _segmentCache.GetChangeNumber(Name);
 
                 try
                 {
                     var response = await _segmentChangeFetcher.Fetch(Name, changeNumber, fetchOptions);
 
-                    if (response == null)
+                    if (response == null || fetchOptions.Token.IsCancellationRequested)
                     {
                         break;
                     }

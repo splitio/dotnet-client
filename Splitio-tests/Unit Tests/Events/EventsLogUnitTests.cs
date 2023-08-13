@@ -32,7 +32,7 @@ namespace Splitio_Tests.Unit_Tests.Events
             _apiClientMock = new Mock<IEventSdkApiClient>();
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
 
-            _eventLog = new EventsLog(_apiClientMock.Object, 1, 1, _eventsCache, _telemetryRuntimeProducer.Object, new TasksManager(wrapperAdapter), 10);
+            _eventLog = new EventsLog(_apiClientMock.Object, 1, 1, _eventsCache, _telemetryRuntimeProducer.Object, new TasksManager(), 10);
         }
 
         [TestMethod]
@@ -223,7 +223,7 @@ namespace Splitio_Tests.Unit_Tests.Events
             // Arrange.
             var eventToLog = new Event { key = "Key1", eventTypeId = "testEventType", trafficTypeName = "testTrafficType", timestamp = 7000 };
             var wrappedEventsCache = new Mock<ISimpleProducerCache<WrappedEvent>>();          
-            var eventLog = new EventsLog(_apiClientMock.Object, 1, 1, wrappedEventsCache.Object, _telemetryRuntimeProducer.Object, new TasksManager(wrapperAdapter), 10);
+            var eventLog = new EventsLog(_apiClientMock.Object, 1, 1, wrappedEventsCache.Object, _telemetryRuntimeProducer.Object, new TasksManager(), 10);
 
             wrappedEventsCache
                 .Setup(mock => mock.AddItems(It.IsAny<List<WrappedEvent>>()))

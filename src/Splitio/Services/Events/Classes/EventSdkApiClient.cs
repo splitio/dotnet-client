@@ -9,7 +9,6 @@ using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,7 +18,7 @@ namespace Splitio.Services.Events.Classes
     {
         private const int MaxAttempts = 3; 
         
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(EventSdkApiClient));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(EventSdkApiClient));
         
         private readonly ISplitioHttpClient _httpClient;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
@@ -45,7 +44,7 @@ namespace Splitio.Services.Events.Classes
 
         public void SendBulkEventsTask(List<Event> events)
         {
-            _tasksManager.Start(async () => await SendBulkEventsAsync(events), new CancellationTokenSource(), "Send Bulk Events.");
+            _tasksManager.Start(async () => await SendBulkEventsAsync(events), new CancellationTokenSource(), "Send Bulk Events API.");
         }
 
         #region Private Methods

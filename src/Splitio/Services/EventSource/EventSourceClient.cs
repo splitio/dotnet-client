@@ -1,14 +1,15 @@
-﻿using Splitio.Services.Common;
+﻿using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,26 +33,29 @@ namespace Splitio.Services.EventSource
         private readonly ISplitioHttpClient _splitHttpClient;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly ITasksManager _tasksManager;
-        private readonly BlockingCollection<SSEClientActions> _sseClientStatusQueue;
+        private readonly INotificationManagerKeeper _notificationManagerKeeper;
+        private readonly IStatusManager _statusManager;
 
         private string _url;
         private string _lineBuffer;
         private bool _connected;
         private bool _firstEvent;
-        
-        private CancellationTokenSource _cancellationTokenSource;
+
+        private Stream _ongoindStream;
 
         public EventSourceClient(INotificationParser notificationParser,
             ISplitioHttpClient splitHttpClient,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
             ITasksManager tasksManager,
-            BlockingCollection<SSEClientActions> sseClientStatus)
+            INotificationManagerKeeper notificationManagerKeeper,
+            IStatusManager statusManager)
         {            
             _notificationParser = notificationParser;
             _splitHttpClient = splitHttpClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _tasksManager = tasksManager;
-            _sseClientStatusQueue = sseClientStatus;
+            _notificationManagerKeeper = notificationManagerKeeper;
+            _statusManager = statusManager;
             _firstEvent = true;
             _log = WrapperAdapter.Instance().GetLogger(typeof(EventSourceClient));
         }
@@ -59,80 +63,68 @@ namespace Splitio.Services.EventSource
         public event EventHandler<EventReceivedEventArgs> EventReceived;
 
         #region Public Methods
+        // TODO: rename this method
         public bool ConnectAsync(string url)
         {
-            if (IsConnected())
+            if (_connected)
             {
                 _log.Debug("Event source Client already connected.");
 
                 return false;
             }
 
+            _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.INITIALIZATION_IN_PROGRESS);
+
             _firstEvent = true;
             _url = url;
             _disconnectSignal.Reset();
             _initializationSignal.Reset();
-            _cancellationTokenSource = new CancellationTokenSource();
 
-            _tasksManager.Start(() => ConnectAsync(_cancellationTokenSource.Token).Wait(), _cancellationTokenSource, "SSE - ConnectAsync");
+            _tasksManager.Start(() => ConnectAsync().Wait(), "SSE - ConnectAsync");
 
             _initializationSignal.Wait(ConnectTimeoutMs);
 
-            return IsConnected();
-        }
-
-        public bool IsConnected()
-        {
             return _connected;
         }
 
-        public void Disconnect(SSEClientActions action = SSEClientActions.DISCONNECT)
+        public void Disconnect()
         {
-            if (_cancellationTokenSource.IsCancellationRequested) return;
+            if (!_connected) return;
 
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
-            
             _connected = false;
+
+            _ongoindStream.Close();
 
             _disconnectSignal.Wait(ReadTimeoutMs);
 
-            _sseClientStatusQueue.Add(action);
-            _log.Debug($"Disconnected from {_url}");
+            _log.Debug($"Streaming Disconnected.");
         }
         #endregion
 
         #region Private Methods
-        private async Task ConnectAsync(CancellationToken cancellationToken)
+        private async Task ConnectAsync()
         {
-            var action = SSEClientActions.DISCONNECT;
-
             try
             {
-                using (var response = await _splitHttpClient.GetAsync(_url, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
+                using (var response = await _splitHttpClient.GetAsync(_url, HttpCompletionOption.ResponseHeadersRead, new CancellationToken()))
                 {
-                    _log.Debug($"Response from {_url}: {response.StatusCode}");
-
                     if (!response.IsSuccessStatusCode) return;
 
                     try
                     {
-                        using (var stream = await response.Content.ReadAsStreamAsync())
-                        {
-                            _log.Info($"Connected to {_url}");
+                        _ongoindStream = await response.Content.ReadAsStreamAsync();
+                        _log.Info($"Streaming Connected.");
 
-                            await ReadStreamAsync(stream, cancellationToken);
-                        }
-                    }
-                    catch (ReadStreamException ex)
-                    {
-                        _log.Debug(ex.Message);
-                        action = ex.Action;
+                        await ReadStreamAsync();
                     }
                     catch (Exception ex)
                     {
                         _log.Debug($"Error reading stream: {ex.Message}");
-                        action = SSEClientActions.RETRYABLE_ERROR;
+                        _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
+                    }
+                    finally
+                    {
+                        _ongoindStream.Dispose();
                     }
                 }
             }
@@ -146,45 +138,68 @@ namespace Splitio.Services.EventSource
                     _initializationSignal.Signal();
 
                 _disconnectSignal.Signal();
-                
-                Disconnect(action);                
+
+                _connected = false;
 
                 _log.Debug("Finished Event Source client ConnectAsync.");
             }            
         }
 
-        private async Task ReadStreamAsync(Stream stream, CancellationToken cancellationToken)
+        private async Task ReadStreamAsync()
         {
             try
             {
                 _lineBuffer = string.Empty;
-                while (!cancellationToken.IsCancellationRequested && stream.CanRead && (IsConnected() || _firstEvent))
+                _connected = true;
+                _initializationSignal.Signal();
+                _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.CONNECTED);
+
+                while (_ongoindStream.CanRead && _connected && !_statusManager.IsDestroyed())
                 {
                     Array.Clear(_buffer, 0, BufferSize);
 
                     using (var timeoutToken = new CancellationTokenSource(ReadTimeoutMs))
                     {
-                        using (timeoutToken.Token.Register(() => stream.Close()))
+                        using (timeoutToken.Token.Register(() => _ongoindStream.Close()))
                         {
                             var len = 0;
                             try
                             {
                                 _log.Debug($"Reading stream ....");
-                                len = await stream.ReadAsync(_buffer, 0, BufferSize, timeoutToken.Token).ConfigureAwait(false);
+                                len = await _ongoindStream.ReadAsync(_buffer, 0, BufferSize, timeoutToken.Token).ConfigureAwait(false);
                             }
-                            catch(Exception ex)
+                            catch (IOException ex)
                             {
-                                _log.Debug($"Read Stream exception: {ex.GetType()}.|| {ex}");
-                                throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Streaming read time out after {ReadTimeoutMs/1000} seconds.");
+                                _log.Debug($"Streaming read was forced to stop.", ex);
+                                _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.FORCED_STOP);
+                                return;
+                            }
+                            catch (Exception ex)
+                            {
+                                if (timeoutToken.IsCancellationRequested)
+                                {
+                                    _log.Debug($"Streaming read time out after {ReadTimeoutMs / 1000} seconds.");
+                                    
+                                }
+
+                                _log.Debug($"Streaming IOException", ex);
+                                _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
+                                return;
                             }
 
                             if (len == 0)
                             {
                                 // Added for tests. 
                                 if (_url.StartsWith("http://localhost"))
-                                    throw new ReadStreamException(SSEClientActions.CONNECTED, "Streaming end of the file - for tests.");
+                                {
+                                    _log.Debug("Streaming end of the file - for tests.");
+                                    _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.CONNECTED);
+                                    return;
+                                }
 
-                                throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, "Streaming end of the file."); ;
+                                _log.Debug("Streaming end of the file.");
+                                _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
+                                return;
                             }
 
                             var notificationString = _encoder.GetString(_buffer, 0, len);
@@ -192,7 +207,7 @@ namespace Splitio.Services.EventSource
 
                             if (_firstEvent) ProcessFirtsEvent(notificationString);
 
-                            if (notificationString == KeepAliveResponse || !IsConnected()) continue;
+                            if (notificationString == KeepAliveResponse || !_connected) continue;
 
                             var lines = ReadLines(notificationString);
 
@@ -219,42 +234,38 @@ namespace Splitio.Services.EventSource
                     }
                 }
             }
-            catch (ReadStreamException ex)
-            {
-                _log.Debug("ReadStreamException", ex);
-
-                throw ex;
-            }
             catch (Exception ex)
             {
-                if (!cancellationToken.IsCancellationRequested)
+                if (_connected && !_statusManager.IsDestroyed())
                 {
                     _log.Debug("Stream ended abruptly, proceeding to reconnect.", ex);
-                    throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, ex.Message);
+                    _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
+                    return;
                 }
 
                 _log.Debug("Stream Token cancelled.", ex);
             }
             finally
             {
-                _log.Debug($"Stop read stream");
+                _log.Debug($"Stream read finished");
             }
         }
 
         private void ProcessErrorNotification(NotificationError notificationError)
         {
-            _log.Debug($"Notification error: {notificationError.Message}. Status Server: {notificationError.StatusCode}.");
-
+            _log.Debug($"Ably Notification error: {notificationError.Message}.\nStatus Server: {notificationError.StatusCode}.\n AblyCode: {notificationError.Code}");
             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.AblyError, notificationError.Code));
 
             if (notificationError.Code >= 40140 && notificationError.Code <= 40149)
             {
-                throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Ably Notification code: {notificationError.Code}");
+                _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
+                return;
             }
 
             if (notificationError.Code >= 40000 && notificationError.Code <= 49999)
             {
-                throw new ReadStreamException(SSEClientActions.NONRETRYABLE_ERROR, $"Ably Notification code: {notificationError.Code}");
+                _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.NONRETRYABLE_ERROR);
+                return;
             }            
         }
 
@@ -272,10 +283,7 @@ namespace Splitio.Services.EventSource
             // This case is when in the first event received an error notification, mustn't dispatch connected.
             if (eventData != null && eventData.Type == NotificationType.ERROR) return;
 
-            _connected = true;
-            _initializationSignal.Signal();
-            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SSEConnectionEstablished));
-            _sseClientStatusQueue.Add(SSEClientActions.CONNECTED);            
+            _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.FIRST_EVENT);
         }
 
         private List<string> ReadLines(string message)

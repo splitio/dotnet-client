@@ -15,7 +15,6 @@ namespace Splitio.Services.EventSource
         private readonly IEventSourceClient _eventSourceClient;
         private readonly string _streaminServiceUrl;
 
-
         public SSEHandler(string streaminServiceUrl,
             ISplitsWorker splitsWorker,
             ISegmentsWorker segmentsWorker,

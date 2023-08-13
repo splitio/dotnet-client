@@ -19,8 +19,6 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
     [TestClass]
     public class SelfRefreshingSegmentFetcherUnitTests
     {
-        private readonly IWrapperAdapter wrapperAdapter = WrapperAdapter.Instance();
-
         private static readonly string PayedSplitJson = @"{'name': 'payed','added': ['abcdz','bcadz','xzydz'],'removed': [],'since': -1,'till': 10001}";
 
         [TestMethod]
@@ -33,8 +31,10 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments = new ConcurrentDictionary<string, Segment>();
             var cache = new InMemorySegmentCache(segments);
-            var segmentTaskQueue = new SegmentTaskQueue();
-            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, gates, 1, cache, 1, segmentTaskQueue, new TasksManager(wrapperAdapter), wrapperAdapter);
+            var segmentTaskQueue = new BlockingCollection<SelfRefreshingSegment>(new ConcurrentQueue<SelfRefreshingSegment>());
+            var segmentsTask = new SplitTask(Splitio.Enums.Task.SegmentsFetcher, 500);
+            var worker = new SegmentTaskWorker(5, segmentTaskQueue, new TasksManager(), gates);
+            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, gates, cache, segmentTaskQueue, segmentsTask, worker);
             segmentFetcher.Start();
 
             apiClient
@@ -45,7 +45,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             segmentFetcher.InitializeSegment("payed");
 
             // Assert
-            Thread.Sleep(5000);
+            Thread.Sleep(1000);
             Assert.IsTrue(cache.IsInSegment("payed", "abcdz"));
         }
 
@@ -58,8 +58,10 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments = new ConcurrentDictionary<string, Segment>();
             var cache = new InMemorySegmentCache(segments);
-            var segmentTaskQueue = new SegmentTaskQueue();
-            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, statusManager.Object, 10, cache, 1, segmentTaskQueue, new TasksManager(wrapperAdapter), wrapperAdapter);
+            var segmentTaskQueue = new BlockingCollection<SelfRefreshingSegment>(new ConcurrentQueue<SelfRefreshingSegment>());
+            var segmentsTask = new Mock<ISplitTask>();
+            var worker = new Mock<IPeriodicTask>();
+            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, statusManager.Object, cache, segmentTaskQueue, segmentsTask.Object, worker.Object);
 
             apiClient
                 .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
@@ -70,7 +72,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             segmentFetcher.Start();
 
             // Assert
-            Assert.IsTrue(segmentTaskQueue.GetQueue().TryTake(out SelfRefreshingSegment segment, -1));
+            Assert.IsTrue(segmentTaskQueue.TryTake(out SelfRefreshingSegment segment, -1));
         }
 
         [TestMethod]
@@ -80,8 +82,10 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var statusManager = new Mock<IStatusManager>();
             var apiFetcher = new Mock<ISegmentChangeFetcher>();
             var cache = new Mock<ISegmentCache>();
-            var segmentTaskQueue = new Mock<ISegmentTaskQueue>();
-            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher.Object, statusManager.Object, 10, cache.Object, 1, segmentTaskQueue.Object, new TasksManager(wrapperAdapter), wrapperAdapter);
+            var segmentTaskQueue = new Mock<BlockingCollection<SelfRefreshingSegment>>();
+            var segmentsTask = new Mock<ISplitTask>();
+            var worker = new Mock<IPeriodicTask>();
+            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher.Object, statusManager.Object, cache.Object, segmentTaskQueue.Object, segmentsTask.Object, worker.Object);
             var segment1 = "segment-1";
             var segment2 = "segment-2";
             var segment3 = "segment-3";

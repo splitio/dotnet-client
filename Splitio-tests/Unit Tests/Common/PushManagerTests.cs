@@ -1,11 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource;
-using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Storages;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Common
 {
@@ -15,6 +16,9 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<IAuthApiClient> _authApiClient;
         private readonly Mock<ISSEHandler> _sseHandler;
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
+        private readonly Mock<INotificationManagerKeeper> _notificationManagerKeeper;
+        private readonly Mock<ISplitTask> _refreshTokenTask;
+        private readonly Mock<IStatusManager> _statusManager;
 
         private readonly IPushManager _pushManager;
 
@@ -23,14 +27,15 @@ namespace Splitio_Tests.Unit_Tests.Common
             _authApiClient = new Mock<IAuthApiClient>();
             _sseHandler = new Mock<ISSEHandler>();
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
-            var wrapper = WrapperAdapter.Instance();
-            var backoff = new BackOff(1, 1);
+            _notificationManagerKeeper = new Mock<INotificationManagerKeeper>();
+            _refreshTokenTask = new Mock<ISplitTask>();
+            _statusManager = new Mock<IStatusManager>();
 
-            _pushManager = new PushManager(_sseHandler.Object, _authApiClient.Object, wrapper, _telemetryRuntimeProducer.Object, backoff);
+            _pushManager = new PushManager(_sseHandler.Object, _authApiClient.Object, _telemetryRuntimeProducer.Object, _notificationManagerKeeper.Object, _refreshTokenTask.Object, _statusManager.Object);
         }
 
         [TestMethod]
-        public void StartSse_WithSSEError_ShouldRetry()
+        public async Task Start_WithSSEError_ShouldRetry()
         {
             _authApiClient
                 .Setup(mock => mock.AuthenticateAsync())
@@ -45,22 +50,19 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             _sseHandler
                 .SetupSequence(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(false)
-                .Returns(false)
-                .Returns(true);
-                
-            
+                .Returns(false);
+
             // Act.
-            var result = _pushManager.StartSse();
-            Thread.Sleep(8000);
+            await _pushManager.Start();
 
             // Assert.
-            _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Exactly(3));
-            _sseHandler.Verify(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(3));
+            _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Once);
+            _sseHandler.Verify(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _notificationManagerKeeper.Verify(mock => mock.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR), Times.Once);
         }
 
         [TestMethod]
-        public void StartSse_WithPushEnabled_ShouldConnect()
+        public async Task Start_WithPushEnabled_ShouldConnect()
         {
             // Arrange.
             var response = new AuthenticationResponse
@@ -83,28 +85,23 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             _authApiClient
                 .SetupSequence(mock => mock.AuthenticateAsync())
-                .ReturnsAsync(response)
-                .ReturnsAsync(response2);
+                .ReturnsAsync(response);
 
             _sseHandler
                 .Setup(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(true);
 
             // Act.
-            var result = _pushManager.StartSse();
+            await _pushManager.Start();
 
             // Assert.
-            Assert.IsTrue(result.Result);
             _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Once);
             _sseHandler.Verify(mock => mock.Start(response.Token, response.Channels), Times.Once);
-
-            Thread.Sleep(3000);
-            _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.AtLeast(2));
-            _sseHandler.Verify(mock => mock.Start(response2.Token, response2.Channels), Times.Once);
+            _notificationManagerKeeper.Verify(mock => mock.HandleSseStatus(It.IsAny<SSEClientStatusMessage>()), Times.Never);
         }
 
         [TestMethod]
-        public void StartSse_WithPushDisable_ShouldNotConnect()
+        public async Task Start_WithPushDisable_ShouldNotConnect()
         {
             // Arrange.
             var response = new AuthenticationResponse
@@ -118,22 +115,16 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .ReturnsAsync(response);
 
             // Act.
-            var result = _pushManager.StartSse();
+            await _pushManager.Start();
 
             // Assert.
-            Assert.IsFalse(result.Result);
             _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Once);
             _sseHandler.Verify(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _sseHandler.Verify(mock => mock.Stop(), Times.Once);
-
-            Thread.Sleep(5000);
-            _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Once);
-            _sseHandler.Verify(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _sseHandler.Verify(mock => mock.Stop(), Times.Once);
+            _notificationManagerKeeper.Verify(mock => mock.HandleSseStatus(It.IsAny<SSEClientStatusMessage>()), Times.Never);
         }
 
         [TestMethod]
-        public void StartSse_WithPushDisableAndRetryTrue_ShouldNotConnect()
+        public async Task Start_WithPushDisableAndRetryTrue_ShouldNotConnect()
         {
             // Arrange.
             var response = new AuthenticationResponse
@@ -157,17 +148,12 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .ReturnsAsync(response2);
 
             // Act.
-            var result = _pushManager.StartSse();
+            await _pushManager.Start();
 
             // Assert.
-            Assert.IsFalse(result.Result);
             _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Once);
             _sseHandler.Verify(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _sseHandler.Verify(mock => mock.Stop(), Times.Once);
-
-            Thread.Sleep(3500);
-            _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.AtLeast(2));
-            _sseHandler.Verify(mock => mock.Start(response2.Token, response2.Channels), Times.Once);
+            _notificationManagerKeeper.Verify(mock => mock.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR), Times.Once);
         }
     }
 }

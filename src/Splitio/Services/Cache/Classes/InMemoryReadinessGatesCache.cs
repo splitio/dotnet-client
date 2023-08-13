@@ -1,6 +1,4 @@
 ﻿using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
 using System.Threading;
 
 namespace Splitio.Services.Client.Classes

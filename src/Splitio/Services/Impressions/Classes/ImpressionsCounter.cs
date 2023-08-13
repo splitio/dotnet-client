@@ -1,9 +1,11 @@
 ﻿using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Timers;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -15,10 +17,9 @@ namespace Splitio.Services.Impressions.Classes
         private readonly IImpressionsSenderAdapter _senderAdapter;
         private readonly ConcurrentDictionary<KeyCache, int> _cache;
 
-
         public ImpressionsCounter(ComponentConfig config,
             IImpressionsSenderAdapter senderAdapter,
-            ITasksManager tasksManager) : base(config, tasksManager)
+            ISplitTask task) : base(config, task)
         {
             _cache = new ConcurrentDictionary<KeyCache, int>();
             _senderAdapter = senderAdapter;
@@ -34,11 +35,6 @@ namespace Splitio.Services.Impressions.Classes
             {
                 SendBulkData();
             }
-        }
-
-        protected override void StartTask()
-        {
-            _tasksManager.StartPeriodic(() => SendBulkData(), _taskInterval * 1000, _cancellationTokenSource, "Main Impressions Count Sender.");
         }
 
         protected override void SendBulkData()

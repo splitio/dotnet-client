@@ -112,11 +112,10 @@ namespace Splitio.Services.EventSource.Workers
                         return;
                     }
 
+                    _running = false;
+
                     _cancellationTokenSource?.Cancel();
                     _cancellationTokenSource?.Dispose();
-
-                    _log.Debug("FeatureFlags Worker stopped ...");
-                    _running = false;
                 }
                 catch (Exception ex)
                 {
@@ -145,13 +144,13 @@ namespace Splitio.Services.EventSource.Workers
                     }
                 }
             }
+            catch (OperationCanceledException)
+            {
+                _log.Debug("FeatureFlags Worker stopped ...");
+            }
             catch (Exception ex)
             {
-                _log.Debug($"Execute: {ex.Message}");
-            }
-            finally
-            {
-                _log.Debug("FeatureFlags Worker execution finished.");
+                _log.Warn($"FeatureFlags ExecuteAsync exception.", ex);
             }
         }
 

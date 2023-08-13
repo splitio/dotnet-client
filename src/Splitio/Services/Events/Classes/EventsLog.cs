@@ -8,62 +8,46 @@ using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+using System.Timers;
 
 namespace Splitio.Services.Events.Classes
 {
     public class EventsLog : IEventsLog
     {
         private static readonly long MAX_SIZE_BYTES = 5 * 1024 * 1024L;
-        protected static readonly ISplitLogger Logger = WrapperAdapter.Instance().GetLogger(typeof(EventsLog));
+        
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(EventsLog));
 
-        private readonly IWrapperAdapter _wrapperAdapter;
         private readonly IEventSdkApiClient _apiClient;
         private readonly ISimpleProducerCache<WrappedEvent> _wrappedEventsCache;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
-        private readonly ITasksManager _tasksManager;
-        private readonly CancellationTokenSource _cancellationTokenSource;
-        private readonly int _interval;
-        private readonly int _firstPushWindow;
+        private readonly ISplitTask _task;
         
         private readonly object _lock = new object();
         private readonly object _sendBulkEventsLock = new object();
 
-        private bool _running;
         private long _acumulateSize;
         
-        public EventsLog(IEventSdkApiClient apiClient, 
-            int firstPushWindow, 
-            int interval, 
+        public EventsLog(IEventSdkApiClient apiClient,
             ISimpleCache<WrappedEvent> eventsCache,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
-            ITasksManager tasksManager,
+            ISplitTask task,
             int maximumNumberOfKeysToCache = -1)
         {
-            _cancellationTokenSource = new CancellationTokenSource();
-
             _wrappedEventsCache = (eventsCache as ISimpleProducerCache<WrappedEvent>) ?? new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(maximumNumberOfKeysToCache));
             _apiClient = apiClient;
-            _interval = interval;
-            _firstPushWindow = firstPushWindow;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
-            _tasksManager = tasksManager;
-
-            _wrapperAdapter = WrapperAdapter.Instance();
+            _task = task;
+            _task.SetEventHandler((object sender, ElapsedEventArgs e) => SendBulkEvents());
         }
 
         public void Start()
         {
             lock (_lock)
             {
-                if (_running) return;
+                if (_task.IsRunning()) return;
 
-                _running = true;
-                _tasksManager.Start(() =>
-                {
-                    _wrapperAdapter.TaskDelay(_firstPushWindow * 1000).Wait();
-                    _tasksManager.StartPeriodic(() => SendBulkEvents(), _interval * 1000, _cancellationTokenSource, "Send Bulk Events.");
-                }, new CancellationTokenSource(), "Main Events Log.");
+                _task.Start();
             }
         }
 
@@ -71,10 +55,10 @@ namespace Splitio.Services.Events.Classes
         {
             lock (_lock)
             {
-                if (!_running) return;
+                if (!_task.IsRunning())
+                    return;
 
-                _running = false;
-                _cancellationTokenSource.Cancel();
+                _task.Stop();
                 SendBulkEvents();
             }
         }
@@ -104,7 +88,7 @@ namespace Splitio.Services.Events.Classes
 
                 if (_wrappedEventsCache.HasReachedMaxSize())
                 {
-                    Logger.Warn("Split SDK events queue is full. Events may have been dropped. Consider increasing capacity.");
+                    _log.Warn("Split SDK events queue is full. Events may have been dropped. Consider increasing capacity.");
                 }
 
                 var wrappedEvents = _wrappedEventsCache.FetchAllAndClear();
@@ -123,7 +107,7 @@ namespace Splitio.Services.Events.Classes
                 }
                 catch (Exception e)
                 {
-                    Logger.Error("Exception caught updating events.", e);
+                    _log.Error("Exception caught updating events.", e);
                 }
             }
         }

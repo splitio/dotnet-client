@@ -1,38 +1,42 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Services.Logger;
+﻿using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Shared.Interfaces;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Splitio.Services.Shared.Classes
 {
     public class TasksManager : ITasksManager
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(IWrapperAdapter));
+        private readonly List<ISplitTask> _tasks = new List<ISplitTask>();
 
-        private readonly IWrapperAdapter _wrapperAdapter;
+        private readonly IStatusManager _statusManager;
 
-        public TasksManager(IWrapperAdapter wrapperAdapter)
+        public TasksManager(IStatusManager statusManager)
         {
-            _wrapperAdapter = wrapperAdapter;
+            _statusManager = statusManager;
         }
 
-        public void Start(Action action, CancellationTokenSource cancellationToken, string description)
+        public ISplitTask NewOnTimeTask(Enums.Task taskName)
         {
-            _log.Debug($"Starting Task: {description}");
-            Task.Factory.StartNew(action, cancellationToken.Token);
+            var task = new SplitTask(taskName, 0.01, _statusManager, false);
+            _tasks.Add(task);
+
+            return task;
         }
 
-        public void Start(Action action, string description)
+        public ISplitTask NewPeriodicTask(Enums.Task taskName, int intervalMs)
         {
-            Start(action, new CancellationTokenSource(), description);
+            var task = new SplitTask(taskName, intervalMs, _statusManager, true);
+            _tasks.Add(task);
+
+            return task;
         }
 
-        public void StartPeriodic(Action action, int intervalInMilliseconds, CancellationTokenSource cancellationToken, string description)
+        public void Destroy()
         {
-            _log.Debug($"Starting Periodic Task: {description}");
-            PeriodicTaskFactory.Start(action, intervalInMilliseconds, cancellationToken.Token);
+            foreach (var task in _tasks)
+            {
+                if (task.IsRunning()) task.Kill();
+            }
         }
     }
 }

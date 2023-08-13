@@ -4,12 +4,12 @@ namespace Splitio.Services.EventSource
 {
     public class ReadStreamException : Exception
     {
-        public SSEClientActions Action { get; set; }
+        public SSEClientStatusMessage Status { get; set; }
 
-        public ReadStreamException(SSEClientActions action, string message)
+        public ReadStreamException(SSEClientStatusMessage status, string message)
             : base(message)
         {
-            Action = action;
+            Status = status;
         }
     }
 }

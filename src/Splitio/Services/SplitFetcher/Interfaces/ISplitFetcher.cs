@@ -1,5 +1,6 @@
 ﻿using Splitio.Domain;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Interfaces
