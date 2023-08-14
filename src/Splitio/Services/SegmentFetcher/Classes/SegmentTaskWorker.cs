@@ -3,6 +3,7 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
@@ -19,41 +20,38 @@ namespace Splitio.Services.SegmentFetcher.Classes
         private readonly AutoResetEvent _waitForExecution = new AutoResetEvent(false);
         private readonly int _numberOfParallelTasks;
         private readonly BlockingCollection<SelfRefreshingSegment> _segmentTaskQueue;
-        private readonly ITasksManager _tasksManager;
         private readonly IStatusManager _statusManager;
+        private readonly ISplitTask _task;
 
         private int _counter;
-        private bool _running;
-        private CancellationTokenSource _cancellationTokenSource;
+        private CancellationTokenSource _cts;
 
         public SegmentTaskWorker(int numberOfParallelTasks,
             BlockingCollection<SelfRefreshingSegment> segmentTaskQueue,
-            ITasksManager tasksManager,
-            IStatusManager statusManager)
+            IStatusManager statusManager,
+            ISplitTask task)
         {
             _numberOfParallelTasks = numberOfParallelTasks;            
             _segmentTaskQueue = segmentTaskQueue;
             _counter = 0;
-            _tasksManager = tasksManager;
             _statusManager = statusManager;
+            _task = task;
+            _task.SetAction(ExecuteTasks);
         }
 
         public void Start()
         {
-            if (_running || _statusManager.IsDestroyed()) return;
+            if (_task.IsRunning() || _statusManager.IsDestroyed()) return;
 
-            _running = true;
-            _cancellationTokenSource = new CancellationTokenSource();
-
-            _tasksManager.Start(() => ExecuteTasks(), _cancellationTokenSource, "SegmentsWorker");
+            _cts = new CancellationTokenSource();
+            _task.Start();
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
-            if (!_running) return;
-
-            _running = false;
-            _cancellationTokenSource.Cancel();
+            _cts.Cancel();
+            await _task.StopAsync();
+            _cts.Dispose();
         }
 
         private void IncrementCounter()
@@ -71,14 +69,14 @@ namespace Splitio.Services.SegmentFetcher.Classes
         {
             Console.WriteLine($"##### {Thread.CurrentThread.ManagedThreadId} SegmentTaskWorker Task");
 
-            while (_running && !_cancellationTokenSource.IsCancellationRequested)
+            while (!_cts.IsCancellationRequested)
             {
                 if (_counter < _numberOfParallelTasks)
                 {
                     try
                     {
                         //Wait indefinitely until a segment is queued
-                        if (_segmentTaskQueue.TryTake(out SelfRefreshingSegment segment, -1, _cancellationTokenSource.Token))
+                        if (_segmentTaskQueue.TryTake(out SelfRefreshingSegment segment, -1, _cts.Token))
                         {
                             Console.WriteLine($"########## {Thread.CurrentThread.ManagedThreadId} SegmentTaskWorker dequeued: {segment.Name}");
 
@@ -87,15 +85,15 @@ namespace Splitio.Services.SegmentFetcher.Classes
                                 _log.Debug($"Segment dequeued: {segment.Name}");
                             }
 
-                            if (!_cancellationTokenSource.IsCancellationRequested)
+                            if (!_cts.IsCancellationRequested)
                             {
                                 IncrementCounter();
                                 var task = new Task(async () => await segment.FetchSegment(new FetchOptions
                                 {
-                                    Token = _cancellationTokenSource.Token
-                                }), _cancellationTokenSource.Token);
-                                task.ContinueWith((x) => DecrementCounter(), _cancellationTokenSource.Token);
-                                task.ContinueWith((x) => Console.WriteLine($" {Thread.CurrentThread.ManagedThreadId} FetchSegment TASK FINISHED"), _cancellationTokenSource.Token);
+                                    Token = _cts.Token
+                                }), _cts.Token);
+                                task.ContinueWith((x) => DecrementCounter(), _cts.Token);
+                                task.ContinueWith((x) => Console.WriteLine($" {Thread.CurrentThread.ManagedThreadId} FetchSegment TASK FINISHED"), _cts.Token);
                                 task.Start();
                             }
                         }

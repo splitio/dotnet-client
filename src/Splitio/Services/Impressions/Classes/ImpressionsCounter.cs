@@ -1,11 +1,10 @@
 ﻿using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
-using System.Timers;
 
 namespace Splitio.Services.Impressions.Classes
 {

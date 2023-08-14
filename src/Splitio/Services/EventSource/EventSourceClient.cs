@@ -2,6 +2,7 @@
 using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
@@ -9,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,9 +32,9 @@ namespace Splitio.Services.EventSource
         private readonly INotificationParser _notificationParser;   
         private readonly ISplitioHttpClient _splitHttpClient;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
-        private readonly ITasksManager _tasksManager;
         private readonly INotificationManagerKeeper _notificationManagerKeeper;
         private readonly IStatusManager _statusManager;
+        private readonly ISplitTask _connectTask;
 
         private string _url;
         private string _lineBuffer;
@@ -46,17 +46,18 @@ namespace Splitio.Services.EventSource
         public EventSourceClient(INotificationParser notificationParser,
             ISplitioHttpClient splitHttpClient,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
-            ITasksManager tasksManager,
             INotificationManagerKeeper notificationManagerKeeper,
-            IStatusManager statusManager)
+            IStatusManager statusManager,
+            ISplitTask connectTask)
         {            
             _notificationParser = notificationParser;
             _splitHttpClient = splitHttpClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
-            _tasksManager = tasksManager;
             _notificationManagerKeeper = notificationManagerKeeper;
             _statusManager = statusManager;
             _firstEvent = true;
+            _connectTask = connectTask;
+            _connectTask.SetAction(() => ConnectAsync().Wait());
             _log = WrapperAdapter.Instance().GetLogger(typeof(EventSourceClient));
         }
         
@@ -80,7 +81,7 @@ namespace Splitio.Services.EventSource
             _disconnectSignal.Reset();
             _initializationSignal.Reset();
 
-            _tasksManager.Start(() => ConnectAsync().Wait(), "SSE - ConnectAsync");
+            _connectTask.Start();
 
             _initializationSignal.Wait(ConnectTimeoutMs);
 
@@ -90,6 +91,9 @@ namespace Splitio.Services.EventSource
         public void Disconnect()
         {
             if (!_connected) return;
+
+            // TODO: validate this
+            //await _connectTask.StopAsync();
 
             _connected = false;
 

@@ -2,7 +2,7 @@
 using Splitio.Services.EventSource;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using Splitio.Telemetry.Common;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
@@ -24,13 +24,14 @@ namespace Splitio.Services.Common
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly IStatusManager _statusManager;
         private readonly ITasksManager _tasksManager;
-        private readonly IWrapperAdapter _wrapperAdapter;
+
         private readonly ITelemetrySyncTask _telemetrySyncTask;
         private readonly CancellationTokenSource _ctsStreaming;
         private readonly BlockingCollection<StreamingStatus> _streamingStatusQueue;
         private readonly CancellationTokenSource _ctsShutdown;
         private readonly IBackOff _backOff;
-
+        private readonly ISplitTask _startupTask;
+        private readonly ISplitTask _onStreamingStatusTask;
 
         public SyncManager(bool streamingEnabled,
             ISynchronizer synchronizer,
@@ -39,10 +40,11 @@ namespace Splitio.Services.Common
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
             IStatusManager statusManager,
             ITasksManager tasksManager,
-            IWrapperAdapter wrapperAdapter,
             ITelemetrySyncTask telemetrySyncTask,
             BlockingCollection<StreamingStatus> streamingStatusQueue,
-            IBackOff backOff)
+            IBackOff backOff,
+            ISplitTask startupTask,
+            ISplitTask onStreamingStatusTask)
         {
             _streamingEnabled = streamingEnabled;
             _synchronizer = synchronizer;
@@ -52,24 +54,29 @@ namespace Splitio.Services.Common
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _statusManager = statusManager;
             _tasksManager = tasksManager;
-            _wrapperAdapter = wrapperAdapter;
             _telemetrySyncTask = telemetrySyncTask;
             _streamingStatusQueue = streamingStatusQueue;
             _ctsStreaming = new CancellationTokenSource();
             _ctsShutdown = new CancellationTokenSource();
             _backOff = backOff;
+            _startupTask = startupTask;
+            _startupTask.SetAction(async () => await StartupLogic());
+            _onStreamingStatusTask = onStreamingStatusTask;
+            _onStreamingStatusTask.SetAction(OnStreamingStatus);
         }
 
         #region Public Methods
         public void Start()
         {
-            _tasksManager.Start(async () => await StartupLogic(), _ctsShutdown, "SDK Initialization");
+            _startupTask.Start();
         }
 
-        public void Shutdown()
+        public async Task ShutdownAsync()
         {
             _log.Info("Initialitation sdk destroy.");
 
+            await _startupTask.StopAsync();
+            await _onStreamingStatusTask.StopAsync();
 
             _ctsStreaming.Cancel();
             _ctsStreaming.Dispose();
@@ -81,6 +88,8 @@ namespace Splitio.Services.Common
 
             _ctsShutdown.Cancel();
             _ctsShutdown.Dispose();
+
+            await _tasksManager.DestroyAsync();
 
             _log.Info("SDK has been destroyed.");
         }
@@ -114,7 +123,7 @@ namespace Splitio.Services.Common
                                 _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
                                 _sseHandler.StopWorkers();
                                 _pushManager.Stop();
-                                _wrapperAdapter.TaskDelay((int)interval).Wait();
+                                Task.Delay((int)interval).Wait();
                                 _pushManager.Start();
                                 break;
                             case StreamingStatus.STREAMING_DOWN:
@@ -151,7 +160,7 @@ namespace Splitio.Services.Common
         private async Task StartStreamingModeAsync()
         {
             _log.Debug("Starting streaming mode...");
-            _tasksManager.Start(OnStreamingStatus, "SSE Client Status");
+            _onStreamingStatusTask.Start();
             await _pushManager.Start();
             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Streaming));
         }
@@ -170,13 +179,14 @@ namespace Splitio.Services.Common
                 Console.WriteLine($"### {Thread.CurrentThread.ManagedThreadId} StartupLogic Starting ....");
                 while (!await _synchronizer.SyncAll(_ctsShutdown, asynchronous: false))
                 {
-                    _wrapperAdapter.TaskDelay(500).Wait();
+                    await Task.Delay(500);
                 }
 
                 if (_statusManager.IsDestroyed()) return;
 
                 _statusManager.SetReady();
-                _telemetrySyncTask.RecordConfigInit();
+                // TODO: calculate time to be ready
+                _telemetrySyncTask.RecordConfigInit(1000);
                 _synchronizer.StartPeriodicDataRecording();
 
                 if (_streamingEnabled)

@@ -4,6 +4,7 @@ using Splitio.Services.Cache.Filter;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

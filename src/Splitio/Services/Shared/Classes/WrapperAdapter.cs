@@ -8,7 +8,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Shared.Classes
@@ -50,16 +49,6 @@ namespace Splitio.Services.Shared.Classes
             data.SdkMachineIP = GetSdkMachineIP(config, ipAddressesEnabled, log);
 
             return data;
-        }
-
-        public Task TaskDelay(int millisecondsDelay, CancellationToken cancellationToken)
-        {
-            return Task.Delay(millisecondsDelay, cancellationToken);
-        }
-
-        public Task TaskDelay(int millisecondsDelay)
-        {
-            return Task.Delay(millisecondsDelay);
         }
 
         public Task<Task> WhenAny(params Task[] tasks)

@@ -5,6 +5,7 @@ using Splitio.Services.Common;
 using Splitio.Services.Events.Classes;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Linq;

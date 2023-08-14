@@ -3,8 +3,10 @@ using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace Splitio.Services.Impressions.Classes
@@ -16,7 +18,6 @@ namespace Splitio.Services.Impressions.Classes
         private readonly IImpressionsSdkApiClient _apiClient;
         private readonly ISimpleProducerCache<KeyImpression> _impressionsCache;
         private readonly ISplitTask _task;
-        private readonly object _lock = new object();
 
         public ImpressionsLog(IImpressionsSdkApiClient apiClient,
             ISimpleCache<KeyImpression> impressionsCache,
@@ -26,29 +27,23 @@ namespace Splitio.Services.Impressions.Classes
             _apiClient = apiClient;
             _impressionsCache = (impressionsCache as ISimpleProducerCache<KeyImpression>) ?? new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(maximumNumberOfKeysToCache));            
             _task = task;
-            _task.SetEventHandler((object sender, ElapsedEventArgs e) => SendBulkImpressions());
+            _task.SetAction(SendBulkImpressions);
         }
 
         public void Start()
         {
-            lock (_lock)
-            {
-                if (_task.IsRunning()) return;
+            if (_task.IsRunning()) return;
 
-                _task.Start();
-            }
+            _task.Start();
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
-            lock (_lock)
-            {
-                if (!_task.IsRunning())
-                    return;
+            if (!_task.IsRunning())
+                return;
 
-                _task.Stop();
-                SendBulkImpressions();
-            }
+            await _task.StopAsync();
+            SendBulkImpressions();
         }
 
         public int Log(IList<KeyImpression> impressions)

@@ -14,13 +14,13 @@ using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -73,7 +73,7 @@ namespace Splitio.Services.Client.Classes
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
             _configService = new ConfigService(_wrapperAdapter);
             _statusManager = new InMemoryReadinessGatesCache();
-            _tasksManager = new TasksManager(_statusManager);
+            _tasksManager = new TasksManager();
         }
 
         #region Public Methods
@@ -166,14 +166,14 @@ namespace Splitio.Services.Client.Classes
                         properties = (Dictionary<string, object>)eventPropertiesResult.Value
                     };
 
-                    _tasksManager.Start(() =>
+                    _tasksManager.NewOnTimeTaskAndStart(Enums.Task.Track, () =>
                     {
                         _eventsLog.Log(new WrappedEvent
                         {
                             Event = eventToLog,
                             Size = eventPropertiesResult.EventSize
                         });
-                    }, new CancellationTokenSource(), "Track");
+                    });
 
                     RecordLatency(nameof(Track), clock.ElapsedMilliseconds);
 

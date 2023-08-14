@@ -4,12 +4,11 @@ using Splitio.Services.Common;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Events.Classes
@@ -22,29 +21,27 @@ namespace Splitio.Services.Events.Classes
         
         private readonly ISplitioHttpClient _httpClient;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
-        private readonly ITasksManager _tasksManager;
-        private readonly IWrapperAdapter _wrapperAdapter;
+        private readonly ISplitTask _senderTask;
         private readonly int _maxBulkSize;
         private readonly string _baseUrl;
 
         public EventSdkApiClient(ISplitioHttpClient httpClient,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
-            ITasksManager tasksManager,
-            IWrapperAdapter wrapperAdapter,
             string baseUrl,
-            int maxBulkSize)
+            int maxBulkSize,
+            ISplitTask senderTask)
         {
             _httpClient = httpClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
-            _tasksManager = tasksManager;
-            _wrapperAdapter = wrapperAdapter;
             _maxBulkSize = maxBulkSize;
             _baseUrl = baseUrl;
+            _senderTask = senderTask;
         }
 
         public void SendBulkEventsTask(List<Event> events)
         {
-            _tasksManager.Start(async () => await SendBulkEventsAsync(events), new CancellationTokenSource(), "Send Bulk Events API.");
+            _senderTask.SetAction(async () => await SendBulkEventsAsync(events));
+            _senderTask.Start();
         }
 
         #region Private Methods
@@ -85,7 +82,7 @@ namespace Splitio.Services.Events.Classes
 
             for (int i = 0; i < MaxAttempts; i++)
             {
-                if (i > 0) _wrapperAdapter.TaskDelay(500).Wait();
+                if (i > 0) await Task.Delay(500);
 
                 var response = await _httpClient.PostAsync(EventsUrl, eventsJson);
 

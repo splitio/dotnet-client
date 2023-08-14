@@ -1,5 +1,5 @@
-﻿using Splitio.Services.Shared.Interfaces;
-using System.Timers;
+﻿using Splitio.Services.Tasks;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -9,7 +9,6 @@ namespace Splitio.Services.Impressions.Classes
         protected readonly int _cacheMaxSize;
         protected readonly int _maxBulkSize;
 
-        protected readonly object _taskLock = new object();
         protected readonly object _lock = new object();
 
         public TrackerComponent(ComponentConfig config,
@@ -19,28 +18,22 @@ namespace Splitio.Services.Impressions.Classes
             _maxBulkSize = config.MaxBulkSize;
 
             _task = task;
-            _task.SetEventHandler((object sender, ElapsedEventArgs e) => SendBulkData());
+            _task.SetAction(SendBulkData);
         }
         
         public void Start()
         {
-            lock (_taskLock)
-            {
-                if (_task.IsRunning()) return;
+            if (_task.IsRunning()) return;
 
-                StartTask();
-            }
+            StartTask();
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
-            lock (_taskLock)
-            {
-                if (!_task.IsRunning()) return;
+            if (!_task.IsRunning()) return;
                 
-                _task.Stop();
-                SendBulkData();
-            }
+            await StopTaskAsync();
+            SendBulkData();
         }
 
         protected virtual void StartTask()
@@ -48,9 +41,9 @@ namespace Splitio.Services.Impressions.Classes
             _task.Start();
         }
 
-        protected virtual void StopTask()
+        protected virtual async Task StopTaskAsync()
         {
-            _task.Stop();
+            await _task.StopAsync();
         }
 
         protected abstract void SendBulkData();

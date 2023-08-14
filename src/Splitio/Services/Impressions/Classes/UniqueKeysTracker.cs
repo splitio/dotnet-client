@@ -2,13 +2,13 @@
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Timers;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -32,7 +32,7 @@ namespace Splitio.Services.Impressions.Classes
             _cache = cache;
             _senderAdapter = senderAdapter;
             _cacheLongTermCleaningTask = cacheLongTermCleaningTask;
-            _cacheLongTermCleaningTask.SetEventHandler((object sender, ElapsedEventArgs e) => _filterAdapter.Clear());
+            _cacheLongTermCleaningTask.SetAction(() => _filterAdapter.Clear());
         }
 
         #region Public Methods
@@ -64,10 +64,10 @@ namespace Splitio.Services.Impressions.Classes
             _cacheLongTermCleaningTask.Start();
         }
 
-        protected override void StopTask()
+        protected override async Task StopTaskAsync()
         {
-            base.StopTask();
-            _cacheLongTermCleaningTask.Stop();
+            await base.StopTaskAsync();
+            await _cacheLongTermCleaningTask.StopAsync();
         }
 
         protected override void SendBulkData()

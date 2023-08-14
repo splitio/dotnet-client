@@ -7,6 +7,7 @@ using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
+using Splitio.Services.Tasks;
 using Splitio.Telemetry.Common;
 using System;
 using System.Threading;
