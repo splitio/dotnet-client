@@ -9,6 +9,7 @@ using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,7 +29,6 @@ namespace Splitio.Services.Common
         private readonly ITelemetrySyncTask _telemetrySyncTask;
         private readonly CancellationTokenSource _ctsStreaming;
         private readonly BlockingCollection<StreamingStatus> _streamingStatusQueue;
-        private readonly CancellationTokenSource _ctsShutdown;
         private readonly IBackOff _backOff;
         private readonly ISplitTask _startupTask;
         private readonly ISplitTask _onStreamingStatusTask;
@@ -57,12 +57,11 @@ namespace Splitio.Services.Common
             _telemetrySyncTask = telemetrySyncTask;
             _streamingStatusQueue = streamingStatusQueue;
             _ctsStreaming = new CancellationTokenSource();
-            _ctsShutdown = new CancellationTokenSource();
             _backOff = backOff;
             _startupTask = startupTask;
             _startupTask.SetAction(async () => await StartupLogic());
             _onStreamingStatusTask = onStreamingStatusTask;
-            _onStreamingStatusTask.SetAction(OnStreamingStatus);
+            _onStreamingStatusTask.SetAction(async () => await OnStreamingStatusAsync());
         }
 
         #region Public Methods
@@ -74,75 +73,108 @@ namespace Splitio.Services.Common
         public async Task ShutdownAsync()
         {
             _log.Info("Initialitation sdk destroy.");
-
-            await _startupTask.StopAsync();
-            await _onStreamingStatusTask.StopAsync();
-
+            
             _ctsStreaming.Cancel();
             _ctsStreaming.Dispose();
 
-            _pushManager.Stop();
-            _synchronizer.StopPeriodicFetching();
-            _synchronizer.ClearFetchersCache();
-            _synchronizer.StopPeriodicDataRecording();
+            try { await _startupTask.StopAsync(); }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            
+            try { await _onStreamingStatusTask.StopAsync(); }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
 
-            _ctsShutdown.Cancel();
-            _ctsShutdown.Dispose();
+            try { await _sseHandler.StopWorkersAsync(); }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
 
-            await _tasksManager.DestroyAsync();
+            try { await _pushManager.StopAsync(); }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            try { await _synchronizer.StopPeriodicFetchingAsync(); }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            try { await _synchronizer.ClearFetchersCacheAsync(); }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            try { await _synchronizer.StopPeriodicDataRecordingAsync(); }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            try { await _tasksManager.DestroyAsync(); }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
 
             _log.Info("SDK has been destroyed.");
         }
 
-        public void OnStreamingStatus()
+        public async Task OnStreamingStatusAsync()
         {
             try
-            {
-                while (!_ctsStreaming.IsCancellationRequested)
+            {   
+                if (_streamingStatusQueue.TryTake(out StreamingStatus status, -1, _ctsStreaming.Token))
                 {
-                    if (_streamingStatusQueue.TryTake(out StreamingStatus status, -1, _ctsStreaming.Token))
+                    _log.Debug($"Streaming status received: {status}");
+
+                    switch (status)
                     {
-                        _log.Debug($"Streaming status received: {status}");
+                        case StreamingStatus.STREAMING_READY:
+                            _backOff.Reset();
+                            await _synchronizer.StopPeriodicFetchingAsync();
+                            await _synchronizer.SyncAllAsync();
+                            _sseHandler.StartWorkers();
+                            await _pushManager.ScheduleConnectionResetAsync();
+                            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.StreamingStatus, (int)StreamingStatusEnum.Enabled));
 
-                        switch (status)
-                        {
-                            case StreamingStatus.STREAMING_READY:
-                                _backOff.Reset();
-                                _synchronizer.StopPeriodicFetching();
-                                _synchronizer.SyncAll(_ctsShutdown);
-                                _sseHandler.StartWorkers();
-                                _pushManager.ScheduleConnectionReset();
-                                _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.StreamingStatus, (int)StreamingStatusEnum.Enabled));
-
-                                _log.Debug("Streaming up and running.");
-                                break;
-                            case StreamingStatus.STREAMING_BACKOFF:
-                                var interval = _backOff.GetInterval(true);
-                                _log.Info($"Retryable error in streaming subsystem. Switching to polling and retrying in {interval} milliseconds.");
-                                _synchronizer.StartPeriodicFetching();
-                                _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
-                                _sseHandler.StopWorkers();
-                                _pushManager.Stop();
-                                Task.Delay((int)interval).Wait();
-                                _pushManager.Start();
-                                break;
-                            case StreamingStatus.STREAMING_DOWN:
-                                _log.Info("Streaming service temporarily unavailable, working in polling mode.");
-                                _sseHandler.StopWorkers();
-                                _synchronizer.StartPeriodicFetching();
-                                _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
-                                break;
-                            case StreamingStatus.STREAMING_OFF:
-                                _log.Info("Unrecoverable error in streaming subsystem. SDK will work in polling-mode and will not retry an SSE connection.");
-                                _pushManager.Stop();
-                                _synchronizer.StartPeriodicFetching();
-                                _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
-                                _ctsStreaming.Cancel();
-                                break;
-                            default:
-                                _log.Info($"OnStreamingStatus: Unrecognized status - {status}");
-                                break;
-                        }
+                            _log.Debug("Streaming up and running.");
+                            break;
+                        case StreamingStatus.STREAMING_BACKOFF:
+                            var interval = _backOff.GetInterval(true);
+                            _log.Info($"Retryable error in streaming subsystem. Switching to polling and retrying in {interval} milliseconds.");
+                            _synchronizer.StartPeriodicFetching();
+                            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
+                            await _sseHandler.StopWorkersAsync();
+                            await _pushManager.StopAsync();
+                            await Task.Delay((int)interval);
+                            await _pushManager.Start();
+                            break;
+                        case StreamingStatus.STREAMING_DOWN:
+                            _log.Info("Streaming service temporarily unavailable, working in polling mode.");
+                            await _sseHandler.StopWorkersAsync();
+                            _synchronizer.StartPeriodicFetching();
+                            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
+                            break;
+                        case StreamingStatus.STREAMING_OFF:
+                            _log.Info("Unrecoverable error in streaming subsystem. SDK will work in polling-mode and will not retry an SSE connection.");
+                            await _pushManager.StopAsync();
+                            _synchronizer.StartPeriodicFetching();
+                            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
+                            _ctsStreaming.Cancel();
+                            _ctsStreaming.Dispose();
+                            break;
+                        default:
+                            _log.Info($"OnStreamingStatus: Unrecognized status - {status}");
+                            break;
                     }
                 }
             }
@@ -151,8 +183,6 @@ namespace Splitio.Services.Common
                 if (!_ctsStreaming.IsCancellationRequested)
                     _log.Debug("OnStreamingStatus Exception", ex);
             }
-            finally
-            { _streamingStatusQueue.Dispose(); }
         }
         #endregion
 
@@ -176,17 +206,20 @@ namespace Splitio.Services.Common
         {
             try
             {
+                var clock = new Stopwatch();
+                clock.Start();
                 Console.WriteLine($"### {Thread.CurrentThread.ManagedThreadId} StartupLogic Starting ....");
-                while (!await _synchronizer.SyncAll(_ctsShutdown, asynchronous: false))
+                while (!await _synchronizer.SyncAllAsync())
                 {
                     await Task.Delay(500);
                 }
-
+                
                 if (_statusManager.IsDestroyed()) return;
 
                 _statusManager.SetReady();
-                // TODO: calculate time to be ready
-                _telemetrySyncTask.RecordConfigInit(1000);
+                clock.Stop();
+                var timeUntilSDKReady = clock.ElapsedMilliseconds;
+                _telemetrySyncTask.RecordConfigInit(timeUntilSDKReady);
                 _synchronizer.StartPeriodicDataRecording();
 
                 if (_streamingEnabled)

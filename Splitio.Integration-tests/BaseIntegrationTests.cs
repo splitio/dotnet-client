@@ -930,7 +930,6 @@ namespace Splitio.Integration_tests
 
                     // Assert. 
                     Assert.IsTrue(result);
-                    Thread.Sleep(1000);
                 }
 
                 //Validate Events sent to the be.

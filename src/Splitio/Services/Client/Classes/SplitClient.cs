@@ -166,13 +166,19 @@ namespace Splitio.Services.Client.Classes
                         properties = (Dictionary<string, object>)eventPropertiesResult.Value
                     };
 
-                    _tasksManager.NewOnTimeTaskAndStart(Enums.Task.Track, () =>
+                    //_tasksManager.NewOnTimeTaskAndStart(_statusManager, Enums.Task.Track, () =>
+                    //{
+                    //    _eventsLog.Log(new WrappedEvent
+                    //    {
+                    //        Event = eventToLog,
+                    //        Size = eventPropertiesResult.EventSize
+                    //    });
+                    //});
+
+                    _eventsLog.Log(new WrappedEvent
                     {
-                        _eventsLog.Log(new WrappedEvent
-                        {
-                            Event = eventToLog,
-                            Size = eventPropertiesResult.EventSize
-                        });
+                        Event = eventToLog,
+                        Size = eventPropertiesResult.EventSize
                     });
 
                     RecordLatency(nameof(Track), clock.ElapsedMilliseconds);
@@ -233,8 +239,8 @@ namespace Splitio.Services.Client.Classes
             var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
             var trackerConfig = new ComponentConfig(config.UniqueKeysCacheMaxSize, config.UniqueKeysBulkSize);
 
-            var mtksTask = _tasksManager.NewPeriodicTask(Enums.Task.MTKsSender, config.UniqueKeysRefreshRate * 1000);
-            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Enums.Task.CacheLongTermCleaning, IntervalToClearLongTermCache);
+            var mtksTask = _tasksManager.NewPeriodicTask(_statusManager, Enums.Task.MTKsSender, config.UniqueKeysRefreshRate * 1000);
+            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(_statusManager, Enums.Task.CacheLongTermCleaning, IntervalToClearLongTermCache);
 
             _uniqueKeysTracker = new UniqueKeysTracker(trackerConfig, filterAdapter, trackerCache, _impressionsSenderAdapter, mtksTask, cacheLongTermCleaningTask);
         }
@@ -248,7 +254,7 @@ namespace Splitio.Services.Client.Classes
             }
 
             var trackerConfig = new ComponentConfig(config.ImpressionsCounterCacheMaxSize, config.ImpressionsCountBulkSize);
-            var task = _tasksManager.NewPeriodicTask(Enums.Task.ImpressionsCountSender, config.ImpressionsCounterRefreshRate);
+            var task = _tasksManager.NewPeriodicTask(_statusManager, Enums.Task.ImpressionsCountSender, config.ImpressionsCounterRefreshRate * 1000);
 
             _impressionsCounter = new ImpressionsCounter(trackerConfig, _impressionsSenderAdapter, task);
         }

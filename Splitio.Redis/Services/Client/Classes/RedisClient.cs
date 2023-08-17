@@ -51,10 +51,12 @@ namespace Splitio.Redis.Services.Client.Classes
         {
             if (_statusManager.IsDestroyed()) return;
 
-            _uniqueKeysTracker.Stop();
-            _impressionsCounter.Stop();
-            _connectionPoolManager.Dispose();
             base.Destroy();
+            // TODO: CHECK this
+            _uniqueKeysTracker.StopAsync().Wait();
+            // TODO: CHECK this
+            _impressionsCounter.StopAsync().Wait();
+            _connectionPoolManager.Dispose();
         }
 
         #region Private Methods

@@ -95,7 +95,7 @@ namespace Splitio.Services.Impressions.Classes
 
             for (int i = 0; i < MaxAttempts; i++)
             {
-                if (i > 0) _wrapperAdapter.TaskDelay(500).Wait();
+                if (i > 0) await Task.Delay(500);
 
                 var response = await _httpClient.PostAsync(TestImpressionsUrl, impressionsJson);
 

@@ -71,28 +71,22 @@ namespace Splitio.Services.EventSource.Workers
         #region Protected Methods
         protected override async Task ExecuteAsync()
         {
+            _log.Debug($"FeatureFlags Worker, Token: {_cts.IsCancellationRequested}; Running: {_task.IsRunning()}.");
             try
             {
-                _log.Debug($"FeatureFlags Worker, Token: {_cancellationTokenSource.IsCancellationRequested}; Running: {_task.IsRunning()}.");
-                while (!_cancellationTokenSource.IsCancellationRequested && _task.IsRunning())
+                if (_queue.TryTake(out SplitChangeNotification scn, -1, _cts.Token))
                 {
-                    // Wait indefinitely until a segment is queued
-                    if (_queue.TryTake(out SplitChangeNotification scn, -1, _cancellationTokenSource.Token))
-                    {
-                        _log.Debug($"ChangeNumber dequeue: {scn.ChangeNumber}");
+                    _log.Debug($"ChangeNumber dequeue: {scn.ChangeNumber}");
 
-                        var success = await ProcessSplitChangeNotification(scn);
+                    var success = await ProcessSplitChangeNotification(scn);
 
-                        if (!success) await _synchronizer.SynchronizeSplits(scn.ChangeNumber);
-                    }
+                    if (!success) await _synchronizer.SynchronizeSplitsAsync(scn.ChangeNumber);
                 }
-            }
-            catch (OperationCanceledException)
-            {
-                _log.Debug("FeatureFlags Worker stopped ...");
             }
             catch (Exception ex)
             {
+                if (ex is OperationCanceledException) return;
+
                 _log.Warn($"FeatureFlags ExecuteAsync exception.", ex);
             }
         }
@@ -101,31 +95,33 @@ namespace Splitio.Services.EventSource.Workers
         {
             try
             {
-                if (_featureFlagCache.GetChangeNumber() >= scn.ChangeNumber) return true;
-
-                if (scn.FeatureFlag != null && _featureFlagCache.GetChangeNumber() == scn.PreviousChangeNumber)
-                {
-                    var ffParsed = _featureFlagParser.Parse(scn.FeatureFlag);
-
-                    // if ffParsed is null it means that the status is ARCHIVED or different to ACTIVE.
-                    if (ffParsed == null)
-                    {
-                        _featureFlagCache.RemoveSplit(scn.FeatureFlag.name);
-                    }
-                    else
-                    {
-                        _featureFlagCache.AddOrUpdate(scn.FeatureFlag.name, ffParsed);
-                        var segmentNames = Util.Helper.GetSegmentNamesBySplit(scn.FeatureFlag);
-
-                        if (segmentNames.Count > 0)
-                            await _segmentFetcher.FetchSegmentsIfNotExists(segmentNames);
-                    }
-
-                    _featureFlagCache.SetChangeNumber(scn.ChangeNumber);
-                    _telemetryRuntimeProducer.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits);
-
+                if (_featureFlagCache.GetChangeNumber() >= scn.ChangeNumber)
                     return true;
+
+                if (scn.FeatureFlag == null || _featureFlagCache.GetChangeNumber() != scn.PreviousChangeNumber)
+                    return false;
+
+                var ffParsed = _featureFlagParser.Parse(scn.FeatureFlag);
+
+                // if ffParsed is null it means that the status is ARCHIVED or different to ACTIVE.
+                if (ffParsed == null)
+                {
+                    _featureFlagCache.RemoveSplit(scn.FeatureFlag.name);
                 }
+                else
+                {
+                    _featureFlagCache.AddOrUpdate(scn.FeatureFlag.name, ffParsed);
+                    var segmentNames = Util.Helper.GetSegmentNamesBySplit(scn.FeatureFlag);
+
+                    if (segmentNames.Count > 0)
+                        await _segmentFetcher.FetchSegmentsIfNotExists(segmentNames);
+                }
+
+                _featureFlagCache.SetChangeNumber(scn.ChangeNumber);
+                _telemetryRuntimeProducer.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits);
+
+                return true;
+
             }
             catch (Exception ex)
             {

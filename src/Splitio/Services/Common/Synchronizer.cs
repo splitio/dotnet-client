@@ -5,12 +5,9 @@ using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
-using Splitio.Services.Tasks;
 using Splitio.Telemetry.Common;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
@@ -23,12 +20,10 @@ namespace Splitio.Services.Common
         private readonly ISelfRefreshingSegmentFetcher _segmentFetcher;
         private readonly IImpressionsLog _impressionsLog;
         private readonly IEventsLog _eventsLog;
-        private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISplitLogger _log;
         private readonly IImpressionsCounter _impressionsCounter;
         private readonly IStatusManager _statusManager;
         private readonly ITelemetrySyncTask _telemetrySyncTask;
-        private readonly ITasksManager _tasksManager;
         private readonly ISplitCache _splitCache;
         private readonly ISegmentCache _segmentCache;
         private readonly IBackOff _backOffFeatureFlags;
@@ -43,10 +38,8 @@ namespace Splitio.Services.Common
             IImpressionsLog impressionsLog,
             IEventsLog eventsLog,
             IImpressionsCounter impressionsCounter,
-            IWrapperAdapter wrapperAdapter,
             IStatusManager statusManager,
             ITelemetrySyncTask telemetrySyncTask,
-            ITasksManager tasksManager,
             ISplitCache splitCache,
             IBackOff backOffFeatureFlags,
             IBackOff backOffSegments,
@@ -60,11 +53,9 @@ namespace Splitio.Services.Common
             _segmentFetcher = segmentFetcher;
             _impressionsLog = impressionsLog;
             _eventsLog = eventsLog;
-            _impressionsCounter = impressionsCounter;            
-            _wrapperAdapter = wrapperAdapter;
+            _impressionsCounter = impressionsCounter;
             _statusManager = statusManager;
             _telemetrySyncTask = telemetrySyncTask;
-            _tasksManager = tasksManager;
             _splitCache = splitCache;
             _backOffFeatureFlags = backOffFeatureFlags;
             _backOffSegments = backOffSegments;
@@ -86,7 +77,6 @@ namespace Splitio.Services.Common
             _eventsLog.Start();
             _impressionsCounter.Start();
             _uniqueKeysTracker.Start();
-            _log.Debug("Periodic Data Recording started...");
         }
 
         public void StartPeriodicFetching()
@@ -95,41 +85,37 @@ namespace Splitio.Services.Common
 
             _splitFetcher.Start();
             _segmentFetcher.Start();
-            _log.Debug("Spltis and Segments fetchers started...");
         }
 
-        public void StopPeriodicDataRecording()
+        public async Task StopPeriodicDataRecordingAsync()
         {
-            _telemetrySyncTask.Stop();
-            _impressionsLog.Stop();
-            _eventsLog.Stop();
-            _impressionsCounter.Stop();
-            _uniqueKeysTracker.Stop();
-            _log.Debug("Periodic Data Recording stopped...");
+            await _telemetrySyncTask.StopAsync();
+            await _impressionsLog.StopAsync();
+            await _eventsLog.StopAsync();
+            await _impressionsCounter.StopAsync();
+            await _uniqueKeysTracker.StopAsync();
         }
 
-        public void StopPeriodicFetching()
+        public async Task StopPeriodicFetchingAsync()
         {
-            _splitFetcher.Stop();
-            _segmentFetcher.Stop();
-            _log.Debug("Spltis and Segments fetchers stopped...");
+            await _splitFetcher.StopAsync();
+            await _segmentFetcher.StopAsync();
         }
 
-        public void ClearFetchersCache()
+        public async Task ClearFetchersCacheAsync()
         {
-            _splitFetcher.Clear();
-            _segmentFetcher.Clear();
-            _log.Debug("Spltis and Segments cache disposed...");
+            await _splitFetcher.ClearAsync();
+            await _segmentFetcher.ClearAsync();
         }
 
-        public async Task<bool> SyncAll(CancellationTokenSource cancellationTokenSource, bool asynchronous = true)
+        public async Task<bool> SyncAllAsync()
         {
             var splitsResult = await _splitFetcher.FetchSplits(_defaultFetchOptions);
 
             return splitsResult.Success && _segmentFetcher.FetchAll();
         }
 
-        public async Task SynchronizeSegment(string segmentName, long targetChangeNumber)
+        public async Task SynchronizeSegmentAsync(string segmentName, long targetChangeNumber)
         {
             try
             {
@@ -165,7 +151,7 @@ namespace Splitio.Services.Common
             }
         }
 
-        public async Task SynchronizeSplits(long targetChangeNumber)
+        public async Task SynchronizeSplitsAsync(long targetChangeNumber)
         {
             try
             {
@@ -227,7 +213,7 @@ namespace Splitio.Services.Common
                     }
 
                     var delay = withBackoff ? _backOffSegments.GetInterval(inMiliseconds: true) : retryDelayMs.Value;
-                    _wrapperAdapter.TaskDelay((int)delay).Wait();
+                    await Task.Delay((int)delay);
                 }
             }
             catch (Exception ex)
@@ -261,7 +247,7 @@ namespace Splitio.Services.Common
                     }
 
                     var delay = withBackoff ? _backOffFeatureFlags.GetInterval(inMiliseconds: true) : retryDelayMs.Value;
-                    _wrapperAdapter.TaskDelay((int)delay).Wait();
+                    await Task.Delay((int)delay);
                 }
             }
             catch (Exception ex)
@@ -270,13 +256,6 @@ namespace Splitio.Services.Common
             }
 
             return new SyncResult(false, 0);
-        }
-
-        private async Task<bool> SyncAll()
-        {
-            var splitsResult = await _splitFetcher.FetchSplits(_defaultFetchOptions);
-
-            return splitsResult.Success && _segmentFetcher.FetchAll();
         }
         #endregion
     }

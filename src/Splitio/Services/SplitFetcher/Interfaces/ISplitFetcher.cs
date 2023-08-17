@@ -1,16 +1,14 @@
 ﻿using Splitio.Domain;
+using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Interfaces
 {
-    public interface ISplitFetcher
+    public interface ISplitFetcher : IPeriodicTask
     {
-        void Start();
-        void Stop();
         Task<FetchResult> FetchSplits(FetchOptions fetchOptions);
-        void Clear();
+        Task ClearAsync();
     }
 
     public class FetchResult

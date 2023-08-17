@@ -12,7 +12,7 @@ namespace Splitio.Services.EventSource.Workers
         private readonly ISynchronizer _synchronizer;
         private readonly BlockingCollection<SegmentQueueDto> _queue;
 
-        public SegmentsWorker(ISynchronizer synchronizer, ISplitTask task) : base ("", WrapperAdapter.Instance().GetLogger(typeof(SegmentsWorker)), task)
+        public SegmentsWorker(ISynchronizer synchronizer, ISplitTask task) : base("SegmentsWorker", WrapperAdapter.Instance().GetLogger(typeof(SegmentsWorker)), task)
         {
             _synchronizer = synchronizer;
             _queue = new BlockingCollection<SegmentQueueDto>(new ConcurrentQueue<SegmentQueueDto>());
@@ -44,23 +44,16 @@ namespace Splitio.Services.EventSource.Workers
         {
             try
             {
-                _log.Debug($"Segments Worker, Token: {_cancellationTokenSource.IsCancellationRequested}; Running: {_task.IsRunning()}.");
-                while (!_cancellationTokenSource.IsCancellationRequested && _task.IsRunning())
+                if (_queue.TryTake(out SegmentQueueDto segment, -1, _cts.Token))
                 {
-                    // Wait indefinitely until a segment is queued
-                    if (_queue.TryTake(out SegmentQueueDto segment, -1, _cancellationTokenSource.Token))
-                    {
-                        _log.Debug($"Segment dequeue: {segment.SegmentName}");
-                        await _synchronizer.SynchronizeSegment(segment.SegmentName, segment.ChangeNumber);
-                    }
+                    _log.Debug($"Segment dequeue: {segment.SegmentName}");
+                    await _synchronizer.SynchronizeSegmentAsync(segment.SegmentName, segment.ChangeNumber);
                 }
-            }
-            catch (OperationCanceledException)
-            {
-                _log.Debug($"Segments worker stoped ...");
             }
             catch (Exception ex)
             {
+                if (ex is OperationCanceledException) return;
+
                 _log.Debug($"Segments worker Execute exception", ex);
             }
         }

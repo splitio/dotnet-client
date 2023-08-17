@@ -3,13 +3,11 @@ using Moq;
 using Splitio.Domain;
 using Splitio.Services.Common;
 using Splitio.Services.Events.Classes;
-using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
-using Splitio.Services.Tasks;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests.Events
 {
@@ -17,26 +15,23 @@ namespace Splitio.Integration_tests.Events
     public class EventsLogTests
     {
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
-        private readonly ITasksManager _tasksManger;
-        private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISplitioHttpClient _splitioHttpClient;
         private readonly int _bulkSize = 5;
 
         public EventsLogTests()
         {
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
-            _wrapperAdapter = WrapperAdapter.Instance();
-            _tasksManger = new TasksManager();
             var config = new SelfRefreshingConfig
             {
                 HttpConnectionTimeout = 10000,
                 HttpReadTimeout = 10000
             };
+
             _splitioHttpClient = new SplitioHttpClient("api-key-test", config, new Dictionary<string, string>());
         }
 
         [TestMethod]
-        public void SendBulkEventsTask_With3Bulks()
+        public async Task SendBulkEventsTask_With3Bulks()
         {
             var events = new List<Event>
             {
@@ -65,8 +60,8 @@ namespace Splitio.Integration_tests.Events
                 httpClientMock.Post_Response("/api/events/bulk", 200, data2, "ok");
                 httpClientMock.Post_Response("/api/events/bulk", 200, data3, "ok");
 
-                var eventSdkApiClient = new EventSdkApiClient(_splitioHttpClient, _telemetryRuntimeProducer.Object, _tasksManger, _wrapperAdapter, httpClientMock.GetUrl(), _bulkSize);
-                eventSdkApiClient.SendBulkEventsTask(events);
+                var eventSdkApiClient = new EventSdkApiClient(_splitioHttpClient, _telemetryRuntimeProducer.Object, httpClientMock.GetUrl(), _bulkSize);
+                await eventSdkApiClient.SendBulkEventsAsync(events);
 
                 Thread.Sleep(5000);
 
@@ -80,7 +75,7 @@ namespace Splitio.Integration_tests.Events
         }
 
         [TestMethod]
-        public void SendBulkEventsTask_WithOneBulk()
+        public async Task SendBulkEventsTask_WithOneBulk()
         {
             var events = new List<Event>
             {
@@ -98,8 +93,8 @@ namespace Splitio.Integration_tests.Events
             {
                 httpClientMock.Post_Response("/api/events/bulk", 200, data, "ok");
 
-                var eventSdkApiClient = new EventSdkApiClient(_splitioHttpClient, _telemetryRuntimeProducer.Object, _tasksManger, _wrapperAdapter, httpClientMock.GetUrl(), 6);
-                eventSdkApiClient.SendBulkEventsTask(events);
+                var eventSdkApiClient = new EventSdkApiClient(_splitioHttpClient, _telemetryRuntimeProducer.Object, httpClientMock.GetUrl(), 6);
+                await eventSdkApiClient.SendBulkEventsAsync(events);
 
                 Thread.Sleep(5000);
 
@@ -111,7 +106,7 @@ namespace Splitio.Integration_tests.Events
         }
 
         [TestMethod]
-        public void SendBulkEventsTask_WithRetries()
+        public async Task SendBulkEventsTask_WithRetries()
         {
             var events = new List<Event>
             {
@@ -129,8 +124,8 @@ namespace Splitio.Integration_tests.Events
             {
                 httpClientMock.Post_Response("/api/events/bulk", 500, data, "fail");
 
-                var eventSdkApiClient = new EventSdkApiClient(_splitioHttpClient, _telemetryRuntimeProducer.Object, _tasksManger, _wrapperAdapter, httpClientMock.GetUrl(), 6);
-                eventSdkApiClient.SendBulkEventsTask(events);
+                var eventSdkApiClient = new EventSdkApiClient(_splitioHttpClient, _telemetryRuntimeProducer.Object, httpClientMock.GetUrl(), 6);
+                await eventSdkApiClient.SendBulkEventsAsync(events);
 
                 Thread.Sleep(5000);
 

@@ -9,5 +9,6 @@ namespace Splitio.Services.Tasks
         Task StopAsync();
         void SetAction(Action action);
         bool IsRunning();
+        void SetInterval(int interval);
     }
 }

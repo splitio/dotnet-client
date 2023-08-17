@@ -1,14 +1,15 @@
-﻿using System;
+﻿using Splitio.Services.Cache.Interfaces;
+using System;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Tasks
 {
     internal class SplitOneTimeTask : SplitTask
     {
-        public SplitOneTimeTask(Enums.Task taskName) : base(taskName, 0)
+        public SplitOneTimeTask(IStatusManager statusManager, Enums.Task taskName) : base(taskName, 0, statusManager)
         { 
         }
-        public SplitOneTimeTask(Enums.Task taskName, int interval) : base(taskName, interval)
+        public SplitOneTimeTask(IStatusManager statusManager, Enums.Task taskName, int interval) : base(taskName, interval, statusManager)
         {
         }
 

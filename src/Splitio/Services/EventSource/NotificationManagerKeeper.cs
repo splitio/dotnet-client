@@ -56,7 +56,8 @@ namespace Splitio.Services.EventSource
                 case SSEClientStatusMessage.RETRYABLE_ERROR:
                     if (CompareAndSet(SSEClientStatusMessage.INITIALIZATION_IN_PROGRESS, newStatus) ||
                         CompareAndSet(SSEClientStatusMessage.CONNECTED, newStatus) ||
-                        CompareAndSet(SSEClientStatusMessage.RETRYABLE_ERROR, newStatus))
+                        CompareAndSet(SSEClientStatusMessage.RETRYABLE_ERROR, newStatus) ||
+                        CompareAndSet(SSEClientStatusMessage.FORCED_STOP, newStatus))
                     {
                         _streamingStatusQueue.Add(StreamingStatus.STREAMING_BACKOFF);
                     }

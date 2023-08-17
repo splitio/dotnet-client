@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
@@ -20,15 +19,12 @@ namespace Splitio.Services.SegmentFetcher.Classes
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingSegmentFetcher));
 
         private readonly ISegmentChangeFetcher _segmentChangeFetcher;
-        private readonly IStatusManager _statusManager;
         private readonly BlockingCollection<SelfRefreshingSegment> _segmentTaskQueue;
         private readonly ISplitTask _addSegmentToQueueTask;
         private readonly ConcurrentDictionary<string, SelfRefreshingSegment> _segments;
         private readonly IPeriodicTask _segmentTaskWorker;
-        private readonly object _lock = new object();
 
-        public SelfRefreshingSegmentFetcher(ISegmentChangeFetcher segmentChangeFetcher, 
-            IStatusManager statusManager,
+        public SelfRefreshingSegmentFetcher(ISegmentChangeFetcher segmentChangeFetcher,
             ISegmentCache segmentsCache,
             BlockingCollection<SelfRefreshingSegment> segmentTaskQueue,
             ISplitTask addSegmentToQueueTask,
@@ -36,43 +32,33 @@ namespace Splitio.Services.SegmentFetcher.Classes
         {
             _segmentChangeFetcher = segmentChangeFetcher;
             _segments = new ConcurrentDictionary<string, SelfRefreshingSegment>();
-            _statusManager = statusManager;
             _segmentTaskQueue = segmentTaskQueue;
             _segmentTaskWorker = segmentTaskWorker;
             _addSegmentToQueueTask = addSegmentToQueueTask;
-            _addSegmentToQueueTask.SetEventHandler((object sender, ElapsedEventArgs e) => AddSegmentsToQueue());
+            _addSegmentToQueueTask.SetAction(AddSegmentsToQueue);
         }
 
         #region Public Methods
         public void Start()
         {
-            lock (_lock)
-            {
-                if (_addSegmentToQueueTask.IsRunning() || _statusManager.IsDestroyed()) return;
-
-                _segmentTaskWorker.Start();
-                _addSegmentToQueueTask.Start();
-            }
+            _segmentTaskWorker.Start();
+            _addSegmentToQueueTask.Start();
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
-            lock (_lock)
-            {
-                _segmentTaskWorker.Stop();
-
-                if (_addSegmentToQueueTask.IsRunning())
-                    _addSegmentToQueueTask.Stop();
-            }
+            await _segmentTaskWorker.StopAsync();
+            await _addSegmentToQueueTask.StopAsync();
         }
 
-        public void Clear()
+        public async Task ClearAsync()
         {
-            _addSegmentToQueueTask.Kill();
-            _segmentTaskWorker.Stop();
+            await _segmentTaskWorker.StopAsync();
+            await _addSegmentToQueueTask.StopAsync();
             _segments.Clear();
             _segmentCache.Clear();
             _segmentTaskQueue.Dispose();
+            _log.Debug("Segments cache disposed ...");
         }
 
         public override void InitializeSegment(string name)

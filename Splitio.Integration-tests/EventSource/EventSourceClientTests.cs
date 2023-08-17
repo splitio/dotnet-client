@@ -1,16 +1,14 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Tasks;
 using Splitio.Telemetry.Storages;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests.EventSource
 {
@@ -314,8 +312,10 @@ namespace Splitio.Integration_tests.EventSource
             var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
             var notificationManagerKeeper = new NotificationManagerKeeper(telemetryRuntimeProducer, streamingStatusQueue);
             var statusManager = new InMemoryReadinessGatesCache();
+            var tasksManager = new TasksManager();
+            var task = tasksManager.NewOnTimeTask(statusManager, Enums.Task.SSEConnect);
 
-            var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, telemetryRuntimeProducer, new TasksManager(), notificationManagerKeeper, statusManager);
+            var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, telemetryRuntimeProducer, notificationManagerKeeper, statusManager, task);
             eventSourceClient.EventReceived += delegate (object sender, EventReceivedEventArgs e)
             {
                 eventsReceived.TryAdd(e);

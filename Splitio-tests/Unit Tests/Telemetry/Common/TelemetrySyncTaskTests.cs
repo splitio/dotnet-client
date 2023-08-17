@@ -3,14 +3,15 @@ using Moq;
 using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using Splitio.Telemetry.Common;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 {
@@ -22,7 +23,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
         private Mock<ISplitCache> _splitCache;
         private Mock<ISegmentCache> _segmentCache;
         private Mock<IFactoryInstantiationsService> _factoryInstantiationsService;
-        private Mock<IWrapperAdapter> _wrapperAdapter;
+        private Mock<IStatusManager> _statusManager;
 
         private ITelemetrySyncTask _telemetrySyncTask;
 
@@ -34,13 +35,17 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             _splitCache = new Mock<ISplitCache>();
             _segmentCache = new Mock<ISegmentCache>();
             _factoryInstantiationsService = new Mock<IFactoryInstantiationsService>();
-            _wrapperAdapter = new Mock<IWrapperAdapter>();
+            _statusManager = new Mock<IStatusManager>();
         }
 
         [TestMethod]
         public void StartShouldPostConfigAndStats()
         {
             // Arrange.
+            var tasksManager = new TasksManager();
+            var statsTask = tasksManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.TelemetryStats, 500);
+            var initTask = tasksManager.NewOnTimeTask(_statusManager.Object, Splitio.Enums.Task.TelemetryInit);
+
             MockRecordStats();
             var config = MockConfigInit();
 
@@ -51,13 +56,13 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
                 _segmentCache.Object,
                 config,
                 _factoryInstantiationsService.Object,
-                wrapperAdapter: _wrapperAdapter.Object,
-                tasksManager: new TasksManager()
+                statsTask,
+                initTask
             );
 
             // Act.
             _telemetrySyncTask.Start();
-            _telemetrySyncTask.RecordConfigInit();
+            _telemetrySyncTask.RecordConfigInit(1000);
             Thread.Sleep(2000);
 
             // Assert.
@@ -85,16 +90,18 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
         }
 
         [TestMethod]
-        public void StopShouldPostStats()
+        public async Task StopShouldPostStats()
         {
             // Arrange.
             MockRecordStats();
-
-            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, new SelfRefreshingConfig(), _factoryInstantiationsService.Object, wrapperAdapter: _wrapperAdapter.Object, tasksManager: new TasksManager());
+            var tasksManager = new TasksManager();
+            var statsTask = tasksManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.TelemetryStats, 500);
+            var initTask = tasksManager.NewOnTimeTask(_statusManager.Object, Splitio.Enums.Task.TelemetryInit);
+            _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, new SelfRefreshingConfig(), _factoryInstantiationsService.Object, statsTask, initTask);
 
             // Act.
             _telemetrySyncTask.Start();
-            _telemetrySyncTask.Stop();
+            await _telemetrySyncTask.StopAsync();
             Thread.Sleep(2000);
 
             // Assert.

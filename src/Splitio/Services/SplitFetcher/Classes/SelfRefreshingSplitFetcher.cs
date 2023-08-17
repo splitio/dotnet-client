@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {
@@ -24,8 +23,6 @@ namespace Splitio.Services.SplitFetcher.Classes
         private readonly ISplitCache _splitCache;
         private readonly ISplitTask _periodicTask;
 
-        private readonly object _lock = new object();
-
         public SelfRefreshingSplitFetcher(ISplitChangeFetcher splitChangeFetcher,
             ISplitParser splitParser,
             IStatusManager statusManager,
@@ -37,35 +34,25 @@ namespace Splitio.Services.SplitFetcher.Classes
             _statusManager = statusManager;
             _splitCache = splitCache;
             _periodicTask = periodicTask;
-            _periodicTask.SetEventHandler(async (object sender, ElapsedEventArgs e) => await FetchSplits(new FetchOptions()));
+            _periodicTask.SetAction(async () => await FetchSplits(new FetchOptions()));
         }
 
         #region Public Methods
         public void Start()
         {
-            lock (_lock)
-            {
-                if (_periodicTask.IsRunning() || _statusManager.IsDestroyed()) return;
-
-                _periodicTask.Start();
-            }
+            _periodicTask.Start();
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
-            lock (_lock)
-            {
-                if (!_periodicTask.IsRunning())
-                    return;
-
-                _periodicTask.Stop();
-            }
+            await _periodicTask.StopAsync();
         }
 
-        public void Clear()
+        public async Task ClearAsync()
         {
             _splitCache.Clear();
-            _periodicTask.Kill();
+            await _periodicTask.StopAsync();
+            _log.Debug("FeatureFlags cache disposed ...");
         }
 
         public async Task<FetchResult> FetchSplits(FetchOptions fetchOptions)
@@ -104,7 +91,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                 catch (Exception e)
                 {
                     _log.Error("Exception caught refreshing splits", e);
-                    Stop();
+                    await StopAsync();
                 }
                 finally
                 {

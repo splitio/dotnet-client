@@ -5,12 +5,13 @@ using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
-using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Classes;
+using Splitio.Services.Tasks;
 using Splitio.Telemetry.Storages;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -32,7 +33,7 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         [DeploymentItem(@"Resources\splits_staging.json")]
         [DeploymentItem(@"Resources\segment_payed.json")]
-        public void ExecuteGetSuccessfulWithResultsFromJSONFile()
+        public async Task ExecuteGetSuccessfulWithResultsFromJSONFile()
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
@@ -40,7 +41,8 @@ namespace Splitio_Tests.Integration_Tests
             var splitChangeFetcher = new JSONFileSplitChangeFetcher($"{rootFilePath}splits_staging.json");
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
             var gates = new InMemoryReadinessGatesCache();
-            var task = new SplitTask(Splitio.Enums.Task.FeatureFlagsFetcher, 250);
+            var taskManager = new TasksManager();
+            var task = taskManager.NewPeriodicTask(gates, Splitio.Enums.Task.FeatureFlagsFetcher, 250);
             var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, splitParser, gates, splitCache, task);
             selfRefreshingSplitFetcher.Start();
             Thread.Sleep(500);
@@ -53,14 +55,14 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(result.name == "Pato_Test_1");
             Assert.IsTrue(result.conditions.Count > 0);
 
-            selfRefreshingSplitFetcher.Stop();
-            selfRefreshingSplitFetcher.Clear();
+            await selfRefreshingSplitFetcher.StopAsync();
+            await selfRefreshingSplitFetcher.ClearAsync();
         }
 
         [TestMethod]
         [DeploymentItem(@"Resources\splits_staging_4.json")]
         [DeploymentItem(@"Resources\segment_payed.json")]
-        public void ExecuteGetSuccessfulWithResultsFromJSONFileIncludingTrafficAllocation()
+        public async Task ExecuteGetSuccessfulWithResultsFromJSONFileIncludingTrafficAllocation()
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
@@ -68,7 +70,8 @@ namespace Splitio_Tests.Integration_Tests
             var splitChangeFetcher = new JSONFileSplitChangeFetcher($"{rootFilePath}splits_staging_4.json");
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
             var gates = new InMemoryReadinessGatesCache();
-            var task = new SplitTask(Splitio.Enums.Task.FeatureFlagsFetcher, 250);
+            var taskManager = new TasksManager();
+            var task = taskManager.NewPeriodicTask(gates, Splitio.Enums.Task.FeatureFlagsFetcher, 250);
             var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, splitParser, gates, splitCache, task);
             selfRefreshingSplitFetcher.Start();
             Thread.Sleep(500);
@@ -84,12 +87,12 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(result.conditions.Count > 0);
             Assert.IsNotNull(result.conditions.Find(x => x.conditionType == ConditionType.ROLLOUT));
 
-            selfRefreshingSplitFetcher.Stop();
-            selfRefreshingSplitFetcher.Clear();
+            await selfRefreshingSplitFetcher.StopAsync();
+            await selfRefreshingSplitFetcher.ClearAsync();
         }
 
         [TestMethod]
-        public void ExecuteGetWithoutResults()
+        public async Task ExecuteGetWithoutResults()
         {
             //Arrange
             var baseUrl = "https://sdk-aws-staging.split.io/api/";
@@ -114,12 +117,14 @@ namespace Splitio_Tests.Integration_Tests
             var gates = new InMemoryReadinessGatesCache();
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var segmentTaskQueue = new BlockingCollection<SelfRefreshingSegment>(new ConcurrentQueue<SelfRefreshingSegment>());
-            var segmentsTask = new SplitTask(Splitio.Enums.Task.SegmentsFetcher, 3000);
-            var worker = new SegmentTaskWorker(4, segmentTaskQueue, new TasksManager(), gates);
-            var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, gates, segmentCache, segmentTaskQueue, segmentsTask, worker);
+            var taskManager = new TasksManager();
+            var workerTask = taskManager.NewPeriodicTask(gates, Splitio.Enums.Task.SegmentsWorkerFetcher, 0);
+            var worker = new SegmentTaskWorker(4, segmentTaskQueue, gates, workerTask);
+            var segmentsTask = taskManager.NewPeriodicTask(gates, Splitio.Enums.Task.SegmentsFetcher, 3000);
+            var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, segmentCache, segmentTaskQueue, segmentsTask, worker);
             var splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, segmentCache);
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            var task = new SplitTask(Splitio.Enums.Task.FeatureFlagsFetcher, 3000);
+            var task = taskManager.NewPeriodicTask(gates, Splitio.Enums.Task.FeatureFlagsFetcher, 3000);
             var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(apiSplitChangeFetcher, splitParser, gates, splitCache, task);
             selfRefreshingSplitFetcher.Start();
 
@@ -131,8 +136,8 @@ namespace Splitio_Tests.Integration_Tests
             //Assert
             Assert.IsNull(result);
 
-            selfRefreshingSplitFetcher.Stop();
-            selfRefreshingSplitFetcher.Clear();
+            await selfRefreshingSplitFetcher.StopAsync();
+            await selfRefreshingSplitFetcher.ClearAsync();
         }
     }
 }

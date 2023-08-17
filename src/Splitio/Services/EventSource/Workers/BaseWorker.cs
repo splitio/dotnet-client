@@ -12,7 +12,7 @@ namespace Splitio.Services.EventSource.Workers
         protected readonly ISplitTask _task;
         protected readonly ISplitLogger _log;
 
-        protected CancellationTokenSource _cancellationTokenSource;
+        protected CancellationTokenSource _cts;
 
         public BaseWorker(string name, ISplitLogger log, ISplitTask task)
         {
@@ -26,13 +26,7 @@ namespace Splitio.Services.EventSource.Workers
         {
             try
             {
-                if (_task.IsRunning())
-                {
-                    _log.Debug($"{_name} already running.");
-                    return;
-                }
-
-                _cancellationTokenSource = new CancellationTokenSource();
+                _cts = new CancellationTokenSource();
                 _task.Start();
             }
             catch (Exception ex)
@@ -45,15 +39,9 @@ namespace Splitio.Services.EventSource.Workers
         {
             try
             {
-                if (!_task.IsRunning())
-                {
-                    _log.Debug($"{_name} not running.");
-                    return;
-                }
+                _cts?.Cancel();
                 await _task.StopAsync();
-
-                _cancellationTokenSource?.Cancel();
-                _cancellationTokenSource?.Dispose();
+                _cts?.Dispose();
             }
             catch (Exception ex)
             {

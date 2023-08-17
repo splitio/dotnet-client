@@ -21,31 +21,21 @@ namespace Splitio.Services.Events.Classes
         
         private readonly ISplitioHttpClient _httpClient;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
-        private readonly ISplitTask _senderTask;
         private readonly int _maxBulkSize;
         private readonly string _baseUrl;
 
         public EventSdkApiClient(ISplitioHttpClient httpClient,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
             string baseUrl,
-            int maxBulkSize,
-            ISplitTask senderTask)
+            int maxBulkSize)
         {
             _httpClient = httpClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _maxBulkSize = maxBulkSize;
             _baseUrl = baseUrl;
-            _senderTask = senderTask;
         }
 
-        public void SendBulkEventsTask(List<Event> events)
-        {
-            _senderTask.SetAction(async () => await SendBulkEventsAsync(events));
-            _senderTask.Start();
-        }
-
-        #region Private Methods
-        private async Task SendBulkEventsAsync(List<Event> events)
+        public async Task SendBulkEventsAsync(List<Event> events)
         {
             try
             {
@@ -72,7 +62,8 @@ namespace Splitio.Services.Events.Classes
                 _log.Error("Exception caught sending bulk of events", ex);
             }
         }
-
+        
+        #region Private Methods
         private async Task BuildJsonAndPost(List<Event> events, Util.SplitStopwatch clock)
         {
             var eventsJson = JsonConvert.SerializeObject(events, new JsonSerializerSettings
@@ -86,7 +77,7 @@ namespace Splitio.Services.Events.Classes
 
                 var response = await _httpClient.PostAsync(EventsUrl, eventsJson);
 
-                Util.Helper.RecordTelemetrySync(nameof(SendBulkEventsTask), response, ResourceEnum.EventSync, clock, _telemetryRuntimeProducer, _log);
+                Util.Helper.RecordTelemetrySync(nameof(SendBulkEventsAsync), response, ResourceEnum.EventSync, clock, _telemetryRuntimeProducer, _log);
 
                 if (response.IsSuccessStatusCode)
                 {

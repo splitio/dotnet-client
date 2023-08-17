@@ -88,18 +88,17 @@ namespace Splitio.Services.EventSource
             return _connected;
         }
 
-        public void Disconnect()
+        public async Task DisconnectAsync()
         {
             if (!_connected) return;
-
-            // TODO: validate this
-            //await _connectTask.StopAsync();
 
             _connected = false;
 
             _ongoindStream.Close();
 
             _disconnectSignal.Wait(ReadTimeoutMs);
+
+            await _connectTask.StopAsync();
 
             _log.Debug($"Streaming Disconnected.");
         }
@@ -143,8 +142,6 @@ namespace Splitio.Services.EventSource
 
                 _disconnectSignal.Signal();
 
-                _connected = false;
-
                 _log.Debug("Finished Event Source client ConnectAsync.");
             }            
         }
@@ -169,17 +166,18 @@ namespace Splitio.Services.EventSource
                             var len = 0;
                             try
                             {
-                                _log.Debug($"Reading stream ....");
+                                _log.Debug($"SSE client, waiting next notification ...");
                                 len = await _ongoindStream.ReadAsync(_buffer, 0, BufferSize, timeoutToken.Token).ConfigureAwait(false);
-                            }
-                            catch (IOException ex)
-                            {
-                                _log.Debug($"Streaming read was forced to stop.", ex);
-                                _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.FORCED_STOP);
-                                return;
                             }
                             catch (Exception ex)
                             {
+                                if (ex is IOException)
+                                {
+                                    _log.Debug($"Streaming read was forced to stop.");
+                                    _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.FORCED_STOP);
+                                    return;
+                                }
+
                                 if (timeoutToken.IsCancellationRequested)
                                 {
                                     _log.Debug($"Streaming read time out after {ReadTimeoutMs / 1000} seconds.");
@@ -246,12 +244,6 @@ namespace Splitio.Services.EventSource
                     _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
                     return;
                 }
-
-                _log.Debug("Stream Token cancelled.", ex);
-            }
-            finally
-            {
-                _log.Debug($"Stream read finished");
             }
         }
 
@@ -275,7 +267,6 @@ namespace Splitio.Services.EventSource
 
         private void DispatchEvent(IncomingNotification incomingNotification)
         {
-            _log.Debug($"DispatchEvent: {incomingNotification}");
             EventReceived?.Invoke(this, new EventReceivedEventArgs(incomingNotification));
         }
 

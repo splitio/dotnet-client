@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Splitio.Services.Cache.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -8,9 +9,9 @@ namespace Splitio.Services.Tasks
     {
         private readonly List<ISplitTask> _tasks = new List<ISplitTask>();
 
-        public ISplitTask NewOnTimeTaskAndStart(Enums.Task taskName, Action action)
+        public ISplitTask NewOnTimeTaskAndStart(IStatusManager statusManager, Enums.Task taskName, Action action)
         {
-            var task = new SplitOneTimeTask(taskName);
+            var task = new SplitOneTimeTask(statusManager, taskName);
             task.SetAction(action);
 
             _tasks.Add(task);
@@ -20,25 +21,25 @@ namespace Splitio.Services.Tasks
             return task;
         }
 
-        public ISplitTask NewOnTimeTask(Enums.Task taskName)
+        public ISplitTask NewOnTimeTask(IStatusManager statusManager, Enums.Task taskName)
         {
-            var task = new SplitOneTimeTask(taskName);
+            var task = new SplitOneTimeTask(statusManager, taskName);
             _tasks.Add(task);
 
             return task;
         }
 
-        public ISplitTask NewScheduledTask(Enums.Task taskName, int intervalMs)
+        public ISplitTask NewScheduledTask(IStatusManager statusManager, Enums.Task taskName, int intervalMs)
         {
-            var task = new SplitOneTimeTask(taskName, intervalMs);
+            var task = new SplitOneTimeTask(statusManager, taskName, intervalMs);
             _tasks.Add(task);
 
             return task;
         }
 
-        public ISplitTask NewPeriodicTask(Enums.Task taskName, int intervalMs)
+        public ISplitTask NewPeriodicTask(IStatusManager statusManager, Enums.Task taskName, int intervalMs)
         {
-            var task = new SplitPeriodicTask(taskName, intervalMs);
+            var task = new SplitPeriodicTask(statusManager, taskName, intervalMs);
             _tasks.Add(task);
 
             return task;
@@ -48,7 +49,11 @@ namespace Splitio.Services.Tasks
         {
             foreach (var task in _tasks)
             {
-                try { await task.StopAsync(); }
+                try
+                {
+                    if (task.IsRunning())
+                        await task.StopAsync();
+                }
                 catch (Exception ex) { }
             }
         }
