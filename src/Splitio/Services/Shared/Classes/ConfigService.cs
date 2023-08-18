@@ -1,9 +1,11 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 using System;
+using System.Collections.Generic;
 
 namespace Splitio.Services.Shared.Classes
 {
@@ -11,11 +13,13 @@ namespace Splitio.Services.Shared.Classes
     {
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISplitLogger _log;
+        private readonly IFlagSetsValidator _flagSetsValidator;
 
-        public ConfigService(IWrapperAdapter wrapperAdapter)
+        public ConfigService(IWrapperAdapter wrapperAdapter, IFlagSetsValidator flagSetsValidator)
         {
             _wrapperAdapter = wrapperAdapter;
             _log = _wrapperAdapter.GetLogger(typeof(ConfigService));
+            _flagSetsValidator = flagSetsValidator;
         }
 
         #region Public Methods
@@ -90,11 +94,12 @@ namespace Splitio.Services.Shared.Classes
                 OnDemandFetchMaxRetries = 10,
                 OnDemandFetchRetryDelayMs = 50,
                 ProxyHost = config.ProxyHost,
-                ProxyPort = config.ProxyPort
+                ProxyPort = config.ProxyPort,
+                FlagSets = FlagSetsValidations(config.FlagSets)
             };
 
             selfRefreshingConfig.ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Optimized;
-            selfRefreshingConfig.TreatmentLogRefreshRate = GetImpressionRefreshRate(selfRefreshingConfig.ImpressionsMode, config.ImpressionsRefreshRate);
+            selfRefreshingConfig.TreatmentLogRefreshRate = ConfigService.GetImpressionRefreshRate(selfRefreshingConfig.ImpressionsMode, config.ImpressionsRefreshRate);
 
             return selfRefreshingConfig;
         }
@@ -130,7 +135,16 @@ namespace Splitio.Services.Shared.Classes
             return value;
         }
 
-        private int GetImpressionRefreshRate(ImpressionsMode impressionsMode, int? impressionsRefreshRate)
+        private HashSet<string> FlagSetsValidations(List<string> flagSets)
+        {
+            if (flagSets == null) return new HashSet<string>();
+
+            var toReturn = _flagSetsValidator.Cleanup(flagSets);
+
+            return _flagSetsValidator.Items(toReturn);
+        }
+
+        private static int GetImpressionRefreshRate(ImpressionsMode impressionsMode, int? impressionsRefreshRate)
         {
             switch (impressionsMode)
             {

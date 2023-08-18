@@ -1,13 +1,16 @@
-﻿using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Domain;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource.Workers
@@ -16,25 +19,25 @@ namespace Splitio.Services.EventSource.Workers
     {
         private readonly ISynchronizer _synchronizer;
         private readonly ISplitCache _featureFlagCache;
-        private readonly ISplitParser _featureFlagParser;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly ISelfRefreshingSegmentFetcher _segmentFetcher;
+        private readonly IFeatureFlagSyncHelper _helper;
         private readonly BlockingCollection<SplitChangeNotification> _queue;
 
         public SplitsWorker(ISynchronizer synchronizer,
             ISplitCache featureFlagCache,
-            ISplitParser featureFlagParser,
             BlockingCollection<SplitChangeNotification>  queue,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
             ISelfRefreshingSegmentFetcher segmentFetcher,
-            ISplitTask task) : base("FeatureFlagsWorker", WrapperAdapter.Instance().GetLogger(typeof(SplitsWorker)), task)
+            ISplitTask task,
+            IFeatureFlagSyncHelper helper) : base("FeatureFlagsWorker", WrapperAdapter.Instance().GetLogger(typeof(SplitsWorker)), task)
         {
             _synchronizer = synchronizer;
             _featureFlagCache = featureFlagCache;
-            _featureFlagParser = featureFlagParser;
             _queue = queue;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _segmentFetcher = segmentFetcher;
+            _helper = helper;
         }
 
         #region Public Methods
@@ -101,23 +104,11 @@ namespace Splitio.Services.EventSource.Workers
                 if (scn.FeatureFlag == null || _featureFlagCache.GetChangeNumber() != scn.PreviousChangeNumber)
                     return false;
 
-                var ffParsed = _featureFlagParser.Parse(scn.FeatureFlag);
 
-                // if ffParsed is null it means that the status is ARCHIVED or different to ACTIVE.
-                if (ffParsed == null)
-                {
-                    _featureFlagCache.RemoveSplit(scn.FeatureFlag.name);
-                }
-                else
-                {
-                    _featureFlagCache.AddOrUpdate(scn.FeatureFlag.name, ffParsed);
-                    var segmentNames = Util.Helper.GetSegmentNamesBySplit(scn.FeatureFlag);
+                var segmentNames  = _helper.UpdateFeatureFlagsFromChanges(new List<Split> { scn.FeatureFlag }, scn.ChangeNumber);
+                
+                if (segmentNames.Count > 0) await _segmentFetcher.FetchSegmentsIfNotExists(segmentNames);
 
-                    if (segmentNames.Count > 0)
-                        await _segmentFetcher.FetchSegmentsIfNotExists(segmentNames);
-                }
-
-                _featureFlagCache.SetChangeNumber(scn.ChangeNumber);
                 _telemetryRuntimeProducer.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits);
 
                 return true;

@@ -1,5 +1,4 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
@@ -7,7 +6,8 @@ using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
-using System.Net;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
@@ -19,14 +19,21 @@ namespace Splitio.Services.SplitFetcher.Classes
         private readonly ISplitioHttpClient _httpClient;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly string _baseUrl;
+        private readonly bool _withFlagSets;
+        private readonly List<string> _flagSets;
 
         public SplitSdkApiClient(ISplitioHttpClient httpClient,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
-            string baseUrl)
+            string baseUrl,
+            HashSet<string> flagSets)
         {
             _httpClient = httpClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _baseUrl = baseUrl;
+            _withFlagSets = flagSets.Any();
+            _flagSets = flagSets
+                .OrderBy(fs => fs)
+                .ToList();
         }
 
         public async Task<string> FetchSplitChanges(long since, FetchOptions fetchOptions)
@@ -63,7 +70,10 @@ namespace Splitio.Services.SplitFetcher.Classes
             var uri = $"{_baseUrl}/api/splitChanges?since={Uri.EscapeDataString(since.ToString())}";
 
             if (till.HasValue)
-                return $"{uri}&till={Uri.EscapeDataString(till.Value.ToString())}";
+                uri = $"{uri}&till={Uri.EscapeDataString(till.Value.ToString())}";
+
+            //if (_withFlagSets)
+            //    uri = $"{uri}&sets={string.Join(",", _flagSets)}";
 
             return uri;
         }

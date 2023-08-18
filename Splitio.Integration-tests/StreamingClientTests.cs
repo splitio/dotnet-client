@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Client.Interfaces;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Splitio.Integration_tests
@@ -53,7 +54,8 @@ namespace Splitio.Integration_tests
                     SegmentsRefreshRate = 3000,
                     AuthServiceURL = $"{url}/api/auth",
                     StreamingServiceURL = $"{url}{EventSourcePath}",
-                    StreamingEnabled = true
+                    StreamingEnabled = true,
+                    FlagSets = new List<string> { "test_set" }
                 };
 
                 var apikey = "apikey1";
@@ -61,7 +63,7 @@ namespace Splitio.Integration_tests
                 var splitFactory = new SplitFactory(apikey, config);
                 var client = splitFactory.Client();
 
-                client.BlockUntilReady(5000);
+                client.BlockUntilReady(500000);
 
                 var result = EvaluateWithDelay("admin", "push_test", "after_fetch", client);
                 Assert.AreEqual("after_fetch", result);

@@ -12,5 +12,6 @@ namespace Splitio.Domain
         public string trafficTypeName { get; set; }
         public int trafficAllocation { get; set; }
         public Dictionary<string, string> configurations { get; set; }
+        public HashSet<string> Sets { get; set; }
     }
 }

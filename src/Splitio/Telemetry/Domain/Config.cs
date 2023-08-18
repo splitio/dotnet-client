@@ -40,5 +40,7 @@ namespace Splitio.Telemetry.Domain
         public List<string> Tags { get; set; }
         [JsonProperty("i")]
         public List<string> Integrations { get; set; }
+        [JsonProperty("fS")]
+        public int FlagSets { get; set; }
     }
 }

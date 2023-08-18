@@ -5,6 +5,7 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource;
 using Splitio.Services.EventSource.Workers;
+using Splitio.Services.Parsing;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
@@ -32,6 +33,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         private readonly Mock<IStatusManager> _statusManager;
         private readonly BlockingCollection<SplitChangeNotification> _queue;
 
+        private readonly IFeatureFlagSyncHelper _featureFlagSyncHelper;
         private readonly ISplitsWorker _splitsWorker;
 
         public SplitsWorkerTests()
@@ -44,10 +46,12 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _statusManager = new Mock<IStatusManager>();
             _queue = new BlockingCollection<SplitChangeNotification>(new ConcurrentQueue<SplitChangeNotification>());
 
+            _featureFlagSyncHelper = new FeatureFlagSyncHelper(_featureFlagParser.Object, _featureFlagCache.Object, new HashSet<string>());
+
             var tasksManager = new TasksManager();
             var task = tasksManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.FeatureFlagsWorker, 0);
 
-            _splitsWorker = new SplitsWorker(_synchronizer.Object, _featureFlagCache.Object, _featureFlagParser.Object, _queue, _telemetryRuntimeProducer.Object, _segmentFetcher.Object, task);
+            _splitsWorker = new SplitsWorker(_synchronizer.Object, _featureFlagCache.Object, _queue, _telemetryRuntimeProducer.Object, _segmentFetcher.Object, task, _featureFlagSyncHelper);
         }
 
         [TestMethod]

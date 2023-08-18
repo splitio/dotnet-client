@@ -1,5 +1,4 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
@@ -52,21 +51,6 @@ namespace Splitio.Telemetry.Common
         public void Start()
         {
             _statsTask.Start();
-            //lock (_lock)
-            //{
-            //    if (_running) return;
-
-            //    _running = true;
-
-            //    //_tasksManager.Start(() =>
-            //    //{
-            //    //    //Delay first execution until expected time has passed
-            //    //    var intervalInMilliseconds = _configurationOptions.TelemetryRefreshRate * 1000;
-            //    //    _wrapperAdapter.TaskDelay(intervalInMilliseconds).Wait();
-
-            //    //    _tasksManager.StartPeriodic(() => RecordStats(), intervalInMilliseconds, _cancellationTokenSource, "Telemetry Stats.");
-            //    //}, _cancellationTokenSource, "Main Telemetry.");
-            //}
         }
 
         public async Task StopAsync()
@@ -113,12 +97,13 @@ namespace Splitio.Telemetry.Common
                     OperationMode = (int)_configurationOptions.Mode,
                     ImpressionsQueueSize = _configurationOptions.TreatmentLogSize,
                     Tags = _telemetryStorageConsumer.PopTags().ToList(),
-                    TimeUntilSDKReady = CurrentTimeHelper.CurrentTimeMillis() - _configurationOptions.SdkStartTime, // timeUntilSDKReady
+                    TimeUntilSDKReady = timeUntilSDKReady,
                     ActiveFactories = _factoryInstantiationsService.GetActiveFactories(),
                     RedundantActiveFactories = _factoryInstantiationsService.GetRedundantActiveFactories(),
                     Storage = Constants.StorageType.Memory,
                     SDKNotReadyUsage = _telemetryStorageConsumer.GetNonReadyUsages(),
-                    HTTPProxyDetected = IsHTTPProxyDetected()
+                    HTTPProxyDetected = IsHTTPProxyDetected(),
+                    FlagSets = _configurationOptions.FlagSets.Count
                 };
 
                 _telemetryAPI.RecordConfigInit(config);

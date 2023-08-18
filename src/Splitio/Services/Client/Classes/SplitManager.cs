@@ -44,7 +44,8 @@ namespace Splitio.Services.Client.Classes
                     changeNumber = x.changeNumber,
                     treatments = (x.conditions.Where(z => z.conditionType == ConditionType.ROLLOUT).FirstOrDefault() ?? x.conditions.FirstOrDefault())?.partitions.Select(y => y.treatment).ToList(),
                     trafficType = x.trafficTypeName,
-                    configs = x.configurations
+                    configs = x.configurations,
+                    sets = GetFlagSets(x)
                 });
 
             return lightFeatureFlags.ToList();
@@ -86,7 +87,8 @@ namespace Splitio.Services.Client.Classes
                 changeNumber = featureFlag.changeNumber,
                 treatments = treatments,
                 trafficType = featureFlag.trafficTypeName,
-                configs = featureFlag.configurations
+                configs = featureFlag.configurations,
+                sets = GetFlagSets(featureFlag)
             };
 
             return lightSplit;
@@ -102,6 +104,11 @@ namespace Splitio.Services.Client.Classes
             return _featureFlagCache.GetSplitNames();
         }
 
+        public void BlockUntilReady(int blockMilisecondsUntilReady)
+        {
+            _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);
+        }
+
         private bool IsSdkReady(string methodName)
         {
             if (!_blockUntilReadyService.IsSdkReady())
@@ -113,9 +120,9 @@ namespace Splitio.Services.Client.Classes
             return true;
         }
 
-        public void BlockUntilReady(int blockMilisecondsUntilReady)
+        private static List<string> GetFlagSets(ParsedSplit featureFlag)
         {
-            _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);
+            return featureFlag.Sets == null ? new List<string>() : featureFlag.Sets.ToList();
         }
     }
 }

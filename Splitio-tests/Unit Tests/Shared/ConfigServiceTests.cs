@@ -2,6 +2,7 @@
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
@@ -12,14 +13,16 @@ namespace Splitio_Tests.Unit_Tests.Shared
     public class ConfigServiceTests
     {
         private readonly Mock<IWrapperAdapter> _wrapperAdapter;
+        private readonly Mock<IFlagSetsValidator> _flagSetsValidator;
 
         private readonly IConfigService _configService;
 
         public ConfigServiceTests()
         {
             _wrapperAdapter = new Mock<IWrapperAdapter>();
+            _flagSetsValidator = new Mock<IFlagSetsValidator>();
 
-            _configService = new ConfigService(_wrapperAdapter.Object);
+            _configService = new ConfigService(_wrapperAdapter.Object, _flagSetsValidator.Object);
         }
 
         [TestMethod]

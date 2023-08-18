@@ -34,6 +34,7 @@ namespace Splitio.Services.Cache.Classes
             }
         }
 
+        #region Public Methods
         public bool AddOrUpdate(string splitName, SplitBase split)
         {
             if (split == null) return false;
@@ -118,7 +119,9 @@ namespace Splitio.Services.Cache.Classes
 
             return exists && quantity > 0;
         }
+        #endregion
 
+        #region Private Methods
         private void IncreaseTrafficTypeCount(string trafficType)
         {
             if (string.IsNullOrEmpty(trafficType)) return;
@@ -184,5 +187,6 @@ namespace Splitio.Services.Cache.Classes
         {
             return GetSplitNames().Count;
         }
+        #endregion
     }
 }

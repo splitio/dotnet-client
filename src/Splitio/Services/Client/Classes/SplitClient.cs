@@ -36,6 +36,7 @@ namespace Splitio.Services.Client.Classes
         protected readonly IEventPropertiesValidator _eventPropertiesValidator;
         protected readonly IWrapperAdapter _wrapperAdapter;
         protected readonly IConfigService _configService;
+        protected readonly IFlagSetsValidator _flagSetsValidator;
 
         protected bool LabelsEnabled;
         protected string ApiKey;
@@ -70,8 +71,9 @@ namespace Splitio.Services.Client.Classes
             _splitNameValidator = new SplitNameValidator();
             _eventTypeValidator = new EventTypeValidator();
             _eventPropertiesValidator = new EventPropertiesValidator();
+            _flagSetsValidator = new FlagSetsValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
-            _configService = new ConfigService(_wrapperAdapter);
+            _configService = new ConfigService(_wrapperAdapter, _flagSetsValidator);
             _statusManager = new InMemoryReadinessGatesCache();
             _tasksManager = new TasksManager();
         }

@@ -13,6 +13,7 @@ using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Common;
@@ -48,7 +49,8 @@ namespace Splitio.Services.Client.Classes
         private ITelemetrySyncTask _telemetrySyncTask;        
         private ITelemetryStorageConsumer _telemetryStorageConsumer;
         private ITelemetryRuntimeProducer _telemetryRuntimeProducer;
-        private ITelemetryAPI _telemetryAPI; 
+        private ITelemetryAPI _telemetryAPI;
+        private IFeatureFlagSyncHelper _featureFlagSyncHelper;
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config) : base()
         {
@@ -126,11 +128,13 @@ namespace Splitio.Services.Client.Classes
             var segmentsTask = _tasksManager.NewPeriodicTask(_statusManager, Enums.Task.SegmentsFetcher, segmentRefreshRate * 1000);
             _selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, _segmentCache, segmentTaskQueue, segmentsTask, worker);
 
-            var splitChangeFetcher = new ApiSplitChangeFetcher(_splitSdkApiClient);
             _splitParser = new InMemorySplitParser((SelfRefreshingSegmentFetcher)_selfRefreshingSegmentFetcher, _segmentCache);
+            _featureFlagSyncHelper = new FeatureFlagSyncHelper(_splitParser, _splitCache, _config.FlagSets);
+
+            var splitChangeFetcher = new ApiSplitChangeFetcher(_splitSdkApiClient);
             var splitsRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SplitsRefreshRate) : _config.SplitsRefreshRate;
             var featureFlagsTask = _tasksManager.NewPeriodicTask(_statusManager, Enums.Task.FeatureFlagsFetcher, splitsRefreshRate * 1000);
-            _splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, _splitParser, _statusManager, _splitCache, featureFlagsTask);
+            _splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, _statusManager, _splitCache, featureFlagsTask, _featureFlagSyncHelper);
             _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
         }
 
@@ -185,7 +189,7 @@ namespace Splitio.Services.Client.Classes
             headers.Add(Constants.Http.KeepAlive, "true");
 
             var sdkHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
-            _splitSdkApiClient = new SplitSdkApiClient(sdkHttpClient, _telemetryRuntimeProducer, _config.BaseUrl);
+            _splitSdkApiClient = new SplitSdkApiClient(sdkHttpClient, _telemetryRuntimeProducer, _config.BaseUrl, _config.FlagSets);
 
             var segmentsHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
             _segmentSdkApiClient = new SegmentSdkApiClient(segmentsHttpClient, _telemetryRuntimeProducer, _config.BaseUrl);
@@ -229,7 +233,7 @@ namespace Splitio.Services.Client.Classes
                 // Workers
                 var queue = new BlockingCollection<SplitChangeNotification>(new ConcurrentQueue<SplitChangeNotification>());
                 var featureFlagsWorkerTask = _tasksManager.NewPeriodicTask(_statusManager, Enums.Task.FeatureFlagsWorker, 0);
-                var splitsWorker = new SplitsWorker(synchronizer, _splitCache, _splitParser, queue, _telemetryRuntimeProducer, _selfRefreshingSegmentFetcher, featureFlagsWorkerTask);
+                var splitsWorker = new SplitsWorker(synchronizer, _splitCache, queue, _telemetryRuntimeProducer, _selfRefreshingSegmentFetcher, featureFlagsWorkerTask, _featureFlagSyncHelper);
                 var segmentsWorkerTask = _tasksManager.NewPeriodicTask(_statusManager, Enums.Task.SegmentsWorker, 0);
                 var segmentsWorker = new SegmentsWorker(synchronizer, segmentsWorkerTask);
 

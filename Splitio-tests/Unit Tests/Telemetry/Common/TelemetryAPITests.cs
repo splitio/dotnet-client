@@ -47,7 +47,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
                 }
             };
 
-            var expected = "{\"oM\":1,\"sE\":false,\"rR\":{\"sp\":4,\"se\":3,\"im\":2,\"ev\":1,\"te\":0},\"iQ\":0,\"eQ\":3,\"iM\":0,\"iL\":false,\"hp\":false,\"aF\":1,\"rF\":0,\"tR\":0,\"bT\":2,\"nR\":0}";
+            var expected = "{\"oM\":1,\"sE\":false,\"rR\":{\"sp\":4,\"se\":3,\"im\":2,\"ev\":1,\"te\":0},\"iQ\":0,\"eQ\":3,\"iM\":0,\"iL\":false,\"hp\":false,\"aF\":1,\"rF\":0,\"tR\":0,\"bT\":2,\"nR\":0,\"fS\":0}";
 
             _splitioHttpClient
                 .Setup(mock => mock.PostAsync("www.fake-url.com/metrics/config", expected))

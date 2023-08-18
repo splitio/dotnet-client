@@ -13,10 +13,10 @@ namespace Splitio.Services.Client.Classes
         private readonly IApiKeyValidator _apiKeyValidator;
         private readonly IFactoryInstantiationsService _factoryInstantiationsService;
         private readonly string _apiKey;
+        private readonly ConfigurationOptions _options;
 
         private ISplitClient _client;
         private ISplitManager _manager;
-        private ConfigurationOptions _options;
 
         public SplitFactory(string apiKey, 
             ConfigurationOptions options = null)

@@ -1,5 +1,6 @@
 ﻿using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
+using System.Collections.Generic;
 
 namespace Splitio.Domain
 {
@@ -23,6 +24,7 @@ namespace Splitio.Domain
         public int OnDemandFetchMaxRetries { get; set; }
         public int ImpressionsBulkSize { get; set; }
         public int EventsBulkSize { get; set; }
+        public HashSet<string> FlagSets { get; set; }
 
         // Urls.
         public string BaseUrl { get; set; }
