@@ -18,5 +18,6 @@ namespace Splitio.Services.Cache.Interfaces
         void Kill(long changeNumber, string splitName, string defaultTreatment);
         List<string> GetSplitNames();
         int SplitsCount();
+        HashSet<string> GetNamesByFlagSets(List<string> flagSets);
     }
 }

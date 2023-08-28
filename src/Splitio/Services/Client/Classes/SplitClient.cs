@@ -79,6 +79,18 @@ namespace Splitio.Services.Client.Classes
         }
 
         #region Public Methods
+        public Dictionary<string, string> GetTreatmentsByFlagSet(string key, string flagSet, Dictionary<string, object> attributes = null)
+        {
+            // TODO
+            return new Dictionary<string, string>();
+        }
+
+        public Dictionary<string, string> GetTreatmentsByFlagSets(string key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            // TODO
+            return new Dictionary<string, string>();
+        }
+
         public SplitResult GetTreatmentWithConfig(string key, string feature, Dictionary<string, object> attributes = null)
         {
             return GetTreatmentWithConfig(new Key(key, null), feature, attributes);

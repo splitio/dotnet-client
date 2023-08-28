@@ -138,5 +138,43 @@ namespace Splitio_Tests.Unit_Tests.Cache
             Assert.IsFalse(result2);
             Assert.IsTrue(result3);
         }
+
+        [TestMethod]
+        public void Test()
+        {
+            // Arrange
+            var cache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
+
+            // Act
+            var ff = new ParsedSplit
+            {
+                name = "mauro",
+                Sets = new System.Collections.Generic.HashSet<string>
+                {
+                    "set_a", "set_b", "set_c"
+                }
+            };
+            cache.AddOrUpdateFlagSets(ff);
+
+            ff = new ParsedSplit
+            {
+                name = "mauro",
+                Sets = new System.Collections.Generic.HashSet<string>
+                {
+                    "set_a", "set_b",
+                }
+            };
+            cache.AddOrUpdateFlagSets(ff);
+
+            // Assert
+
+            var names = cache.GetNamesByFlagSets(new System.Collections.Generic.List<string> { "set_a", "set_b", "set_c" });
+
+            names = cache.GetNamesByFlagSets(new System.Collections.Generic.List<string> { "set_a" });
+
+            names = cache.GetNamesByFlagSets(new System.Collections.Generic.List<string> { "set_b" });
+
+            names = cache.GetNamesByFlagSets(new System.Collections.Generic.List<string> { "set_v"});
+        }
     }
 }

@@ -5,7 +5,9 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace Splitio.Services.Evaluator
 {
@@ -49,17 +51,17 @@ namespace Splitio.Services.Evaluator
 
         public MultipleEvaluatorResult EvaluateFeatures(Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
         {
-            var exception = false;
-            var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();            
+            var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
+
             using(var clock = new Util.SplitStopwatch())
             {
                 clock.Start();
 
-                try
-                {
-                    var splits = _splitCache.FetchMany(featureNames);
+                var splits = _splitCache.FetchMany(featureNames);
 
-                    foreach (var feature in featureNames)
+                foreach (var feature in featureNames)
+                {
+                    try
                     {
                         var split = splits.FirstOrDefault(s => feature.Equals(s?.name));
 
@@ -67,27 +69,36 @@ namespace Splitio.Services.Evaluator
 
                         treatmentsForFeatures.Add(feature, result);
                     }
-                }
-                catch (Exception e)
-                {
-                    _log.Error($"Exception caught getting treatments", e);
-
-                    foreach (var name in featureNames)
+                    catch
                     {
-                        treatmentsForFeatures.Add(name, new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds));
+                        treatmentsForFeatures.Add(feature, new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds));
                     }
-
-                    exception = true;
                 }
 
                 return new MultipleEvaluatorResult
                 {
                     TreatmentResults = treatmentsForFeatures,
                     ElapsedMilliseconds = clock.ElapsedMilliseconds,
-                    Exception = exception
                 };
             }
         }
+
+        public MultipleEvaluatorResult EvaluateFeaturesByFlagSets(Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            var clock = new Stopwatch();
+            clock.Start();
+
+            var flagSetsWithNames = _splitCache.GetNamesByFlagSets(flagSets);
+            
+            var result = EvaluateFeatures(key, flagSetsWithNames.ToList(), attributes);
+
+            clock.Stop();
+
+            result.ElapsedMilliseconds = clock.ElapsedMilliseconds;
+
+            return result;
+        }
+
         #endregion
 
         #region Private Methods

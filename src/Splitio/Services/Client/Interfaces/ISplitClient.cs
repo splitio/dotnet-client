@@ -14,6 +14,8 @@ namespace Splitio.Services.Client.Interfaces
         Dictionary<string, string> GetTreatments(Key key, List<string> features, Dictionary<string, object> attributes = null);
         Dictionary<string, SplitResult> GetTreatmentsWithConfig(string key, List<string> features, Dictionary<string, object> attributes = null);
         Dictionary<string, SplitResult> GetTreatmentsWithConfig(Key key, List<string> features, Dictionary<string, object> attributes = null);
+        Dictionary<string, string> GetTreatmentsByFlagSet(string key, string flagSet, Dictionary<string, object> attributes = null);
+        Dictionary<string, string> GetTreatmentsByFlagSets(string key, List<string> flagSets, Dictionary<string, object> attributes = null);
         bool Track(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null);
         void Destroy();
         bool IsDestroyed();
