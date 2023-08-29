@@ -10,6 +10,6 @@ namespace Splitio.Services.Tasks
         ISplitTask NewOnTimeTask(IStatusManager statusManager, Enums.Task taskName);
         ISplitTask NewScheduledTask(IStatusManager statusManager, Enums.Task taskName, int intervalMs);
         ISplitTask NewPeriodicTask(IStatusManager statusManager, Enums.Task taskName, int intervalMs);
-        Task DestroyAsync();
+        void Destroy();
     }
 }

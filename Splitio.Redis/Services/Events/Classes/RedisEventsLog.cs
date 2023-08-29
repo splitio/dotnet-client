@@ -2,7 +2,6 @@
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Events.Classes
 {
@@ -25,7 +24,7 @@ namespace Splitio.Redis.Services.Events.Classes
             throw new System.NotImplementedException();
         }
 
-        public Task StopAsync()
+        public void Stop()
         {
             throw new System.NotImplementedException();
         }

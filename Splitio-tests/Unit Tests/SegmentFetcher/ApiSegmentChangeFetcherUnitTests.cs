@@ -17,7 +17,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             //Arrange
             var apiClient = new Mock<ISegmentSdkApiClient>();
             apiClient
-            .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
+            .Setup(x => x.FetchSegmentChangesAsync(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
             .Returns(Task.FromResult(@"{
                           'name': 'payed',
                           'added': [
@@ -32,7 +32,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             
             //Act
-            var result = await apiFetcher.Fetch("payed", -1, new FetchOptions());
+            var result = await apiFetcher.FetchAsync("payed", -1, new FetchOptions());
 
             //Assert
             Assert.IsNotNull(result);
@@ -48,12 +48,12 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         {
             var apiClient = new Mock<ISegmentSdkApiClient>();
             apiClient
-            .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
+            .Setup(x => x.FetchSegmentChangesAsync(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
             .Throws(new Exception());
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
            
             //Act
-            var result = await apiFetcher.Fetch("payed", -1, new FetchOptions());
+            var result = await apiFetcher.FetchAsync("payed", -1, new FetchOptions());
 
             //Assert
             Assert.IsNull(result);

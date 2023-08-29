@@ -78,7 +78,7 @@ namespace Splitio.Services.EventSource.Workers
                 {
                     _log.Debug($"ChangeNumber dequeue: {scn.ChangeNumber}");
 
-                    var success = await ProcessSplitChangeNotification(scn);
+                    var success = await ProcessSplitChangeNotificationAsync(scn);
 
                     if (!success) await _synchronizer.SynchronizeSplitsAsync(scn.ChangeNumber);
                 }
@@ -91,7 +91,7 @@ namespace Splitio.Services.EventSource.Workers
             }
         }
 
-        private async Task<bool> ProcessSplitChangeNotification(SplitChangeNotification scn)
+        private async Task<bool> ProcessSplitChangeNotificationAsync(SplitChangeNotification scn)
         {
             try
             {
@@ -114,7 +114,7 @@ namespace Splitio.Services.EventSource.Workers
                     var segmentNames = Util.Helper.GetSegmentNamesBySplit(scn.FeatureFlag);
 
                     if (segmentNames.Count > 0)
-                        await _segmentFetcher.FetchSegmentsIfNotExists(segmentNames);
+                        await _segmentFetcher.FetchSegmentsIfNotExistsAsync(segmentNames);
                 }
 
                 _featureFlagCache.SetChangeNumber(scn.ChangeNumber);

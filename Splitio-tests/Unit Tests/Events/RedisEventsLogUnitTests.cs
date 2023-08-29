@@ -5,7 +5,6 @@ using Splitio.Redis.Services.Events.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Events
 {
@@ -51,10 +50,10 @@ namespace Splitio_Tests.Unit_Tests.Events
 
         [TestMethod]
         [ExpectedException(typeof(NotImplementedException))]
-        public async Task Stop_ReturnsException()
+        public void Stop_ReturnsException()
         {
             //Act
-            await _redisEventsLog.StopAsync();
+            _redisEventsLog.Stop();
         }
     }
 }

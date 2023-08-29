@@ -57,15 +57,14 @@ namespace Splitio.Services.EventSource
             _statusManager = statusManager;
             _firstEvent = true;
             _connectTask = connectTask;
-            _connectTask.SetAction(() => ConnectAsync().Wait());
+            _connectTask.SetFunction(async () => await ConnectAsync());
             _log = WrapperAdapter.Instance().GetLogger(typeof(EventSourceClient));
         }
         
         public event EventHandler<EventReceivedEventArgs> EventReceived;
 
         #region Public Methods
-        // TODO: rename this method
-        public bool ConnectAsync(string url)
+        public bool Connect(string url)
         {
             if (_connected)
             {
@@ -88,7 +87,7 @@ namespace Splitio.Services.EventSource
             return _connected;
         }
 
-        public async Task DisconnectAsync()
+        public void Disconnect()
         {
             if (!_connected) return;
 
@@ -98,7 +97,7 @@ namespace Splitio.Services.EventSource
 
             _disconnectSignal.Wait(ReadTimeoutMs);
 
-            await _connectTask.StopAsync();
+            _connectTask.Stop();
 
             _log.Debug($"Streaming Disconnected.");
         }

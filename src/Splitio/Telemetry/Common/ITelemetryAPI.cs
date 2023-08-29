@@ -1,11 +1,12 @@
 ﻿using Splitio.Telemetry.Domain;
+using System.Threading.Tasks;
 
 namespace Splitio.Telemetry.Common
 {
     public interface ITelemetryAPI
     {
-        void RecordConfigInit(Config init);
-        void RecordStats(Stats stats);
-        void RecordUniqueKeys(UniqueKeys uniqueKeys);
+        Task RecordConfigInitAsync(Config init);
+        Task RecordStatsAsync(Stats stats);
+        Task RecordUniqueKeysAsync(UniqueKeys uniqueKeys);
     }
 }

@@ -5,7 +5,6 @@ using Splitio.Services.Common;
 using Splitio.Services.EventSource.Workers;
 using Splitio.Services.Tasks;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 {
@@ -29,7 +28,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         }
 
         [TestMethod]
-        public async Task AddToQueue_WithElements_ShouldTriggerFetch()
+        public void AddToQueue_WithElements_ShouldTriggerFetch()
         {
             // Arrange.
             var changeNumber = 1585956698457;
@@ -49,7 +48,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _segmentsWorker.AddToQueue(changeNumber3, segmentName3);
             Thread.Sleep(1000);
 
-            await _segmentsWorker.StopAsync();
+            _segmentsWorker.Stop();
             _segmentsWorker.AddToQueue(1585956698487, "segment-test-4");
             Thread.Sleep(10);
 

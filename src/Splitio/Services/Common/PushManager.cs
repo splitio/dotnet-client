@@ -37,12 +37,12 @@ namespace Splitio.Services.Common
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _notificationManagerKeeper = notificationManagerKeeper;
             _refreshTokenTask = periodicTask;
-            _refreshTokenTask.SetAction(async () => await RefreshTokenLogic());
+            _refreshTokenTask.SetFunction(async () => await RefreshTokenLogicAsync());
             _statusManager = statusManager;
         }
 
         #region Public Methods
-        public async Task Start()
+        public async Task StartAsync()
         {
             if (_statusManager.IsDestroyed()) return;
 
@@ -54,7 +54,8 @@ namespace Splitio.Services.Common
 
                 if (!_statusManager.IsDestroyed() && response.PushEnabled.Value && _sseHandler.Start(response.Token, response.Channels))
                 {
-                    _intervalToken = response.Expiration.Value;
+                    //_intervalToken = response.Expiration.Value;
+                    _intervalToken = 60;
                     _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.TokenRefresh, CalcularteNextTokenExpiration(_intervalToken)));
                     return;
                 }
@@ -70,12 +71,12 @@ namespace Splitio.Services.Common
             }
         }
 
-        public async Task StopAsync()
+        public void Stop()
         {
             try
             {
-                await _sseHandler.StopAsync();
-                await _refreshTokenTask.StopAsync();
+                _sseHandler.Stop();
+                _refreshTokenTask.Stop();
             }
             catch (Exception ex)
             {
@@ -83,12 +84,12 @@ namespace Splitio.Services.Common
             }
         }
 
-        public async Task ScheduleConnectionResetAsync()
+        public void ScheduleConnectionReset()
         {
             if (_refreshTokenTask.IsRunning())
             {
                 _log.Debug("ScheduleConnectionReset task is running. Stoping and creating a new one.");
-                await _refreshTokenTask.StopAsync();
+                _refreshTokenTask.Stop();
             }
 
             var intervalTime = Convert.ToInt32(_intervalToken) * 1000;
@@ -106,11 +107,11 @@ namespace Splitio.Services.Common
             return CurrentTimeHelper.CurrentTimeMillis() + Convert.ToInt64(time * 1000);
         }
 
-        private async Task RefreshTokenLogic()
+        private async Task RefreshTokenLogicAsync()
         {
             _log.Debug("Starting Streaming Refresh Token...");
-            await _sseHandler.StopAsync();
-            await Start();
+            _sseHandler.Stop();
+            await StartAsync();
         }
         #endregion
     }

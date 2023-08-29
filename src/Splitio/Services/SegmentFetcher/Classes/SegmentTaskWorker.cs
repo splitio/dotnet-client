@@ -47,13 +47,13 @@ namespace Splitio.Services.SegmentFetcher.Classes
             _task.Start();
         }
 
-        public async Task StopAsync()
+        public void Stop()
         {
             if (!_task.IsRunning()) return;
 
             _cts.Cancel();
             _cts.Dispose();
-            await _task.StopAsync();
+            _task.Stop();
         }
 
         private void IncrementCounter()
@@ -69,7 +69,6 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
         private void ExecuteTasks()
         {
-            Console.WriteLine($"##### {Thread.CurrentThread.ManagedThreadId} SegmentTaskWorker Task");
             try
             {
                 if (_counter >= _numberOfParallelTasks)
@@ -80,8 +79,6 @@ namespace Splitio.Services.SegmentFetcher.Classes
                 //Wait indefinitely until a segment is queued
                 if (_segmentTaskQueue.TryTake(out SelfRefreshingSegment segment, -1, _cts.Token))
                 {
-                    Console.WriteLine($"########## {Thread.CurrentThread.ManagedThreadId} SegmentTaskWorker dequeued: {segment.Name}");
-
                     if (_log.IsDebugEnabled)
                     {
                         _log.Debug($"Segment dequeued: {segment.Name}");
@@ -90,7 +87,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
                     if (_cts.IsCancellationRequested) return;
 
                     IncrementCounter();
-                    var task = new Task(async () => await segment.FetchSegment(new FetchOptions
+                    var task = new Task(async () => await segment.FetchSegmentAsync(new FetchOptions
                     {
                         Token = _cts.Token
                     }), _cts.Token);
@@ -104,8 +101,6 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 _log.Debug($"SegmentTaskWorker Exception", ex);
             }
-
-            Console.WriteLine($"\n\n##### {Thread.CurrentThread.ManagedThreadId} FINISHED SegmentTaskWorker Task\n\n");
         }
     }
 }

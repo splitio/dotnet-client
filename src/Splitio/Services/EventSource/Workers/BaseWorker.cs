@@ -19,7 +19,7 @@ namespace Splitio.Services.EventSource.Workers
             _name = name;
             _log = log;
             _task = task;
-            _task.SetAction(async () => await ExecuteAsync());
+            _task.SetFunction(async () => await ExecuteAsync());
         }
 
         public void Start()
@@ -35,12 +35,12 @@ namespace Splitio.Services.EventSource.Workers
             }
         }
 
-        public async Task StopAsync()
+        public void Stop()
         {
             try
             {
                 _cts?.Cancel();
-                await _task.StopAsync();
+                _task.Stop();
                 _cts?.Dispose();
             }
             catch (Exception ex)

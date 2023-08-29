@@ -2,7 +2,6 @@
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource
 {
@@ -42,7 +41,7 @@ namespace Splitio.Services.EventSource
                 _log.Debug($"SSE Handler starting...");
                 var url = $"{_streaminServiceUrl}?channels={channels}&v=1.1&accessToken={token}";
 
-                return _eventSourceClient.ConnectAsync(url);
+                return _eventSourceClient.Connect(url);
             }
             catch (Exception ex)
             {
@@ -52,13 +51,13 @@ namespace Splitio.Services.EventSource
             return false;
         }
 
-        public async Task StopAsync()
+        public void Stop()
         {
             try
             {
                 if (_eventSourceClient != null)
                 {
-                    await _eventSourceClient.DisconnectAsync();
+                    _eventSourceClient.Disconnect();
                     _log.Debug($"SSE Handler stoped...");
                 }
             }
@@ -74,10 +73,10 @@ namespace Splitio.Services.EventSource
             _segmentsWorker.Start();
         }
 
-        public async Task StopWorkersAsync()
+        public void StopWorkers()
         {
-            await _splitsWorker.StopAsync();
-            await _segmentsWorker.StopAsync();
+            _splitsWorker.Stop();
+            _segmentsWorker.Stop();
         }
         #endregion
 

@@ -5,8 +5,8 @@ namespace Splitio.Services.EventSource
     public interface ISSEHandler
     {
         bool Start(string token, string channels);
-        Task StopAsync();
+        void Stop();
         void StartWorkers();
-        Task StopWorkersAsync();
+        void StopWorkers();
     }
 }

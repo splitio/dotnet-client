@@ -7,13 +7,12 @@ using Splitio.Services.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Timers;
 
 namespace Splitio.Services.Impressions.Classes
 {
     public class ImpressionsLog : IImpressionsLog
     {
-        protected static readonly ISplitLogger Logger = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsLog));
+        private readonly ISplitLogger Logger = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsLog));
 
         private readonly IImpressionsSdkApiClient _apiClient;
         private readonly ISimpleProducerCache<KeyImpression> _impressionsCache;
@@ -27,23 +26,21 @@ namespace Splitio.Services.Impressions.Classes
             _apiClient = apiClient;
             _impressionsCache = (impressionsCache as ISimpleProducerCache<KeyImpression>) ?? new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(maximumNumberOfKeysToCache));            
             _task = task;
-            _task.SetAction(SendBulkImpressions);
+            _task.SetFunction(async () => await SendBulkImpressionsAsync());
         }
 
         public void Start()
         {
-            if (_task.IsRunning()) return;
-
             _task.Start();
         }
 
-        public async Task StopAsync()
+        public void Stop()
         {
             if (!_task.IsRunning())
                 return;
 
-            await _task.StopAsync();
-            SendBulkImpressions();
+            _task.Stop();
+            SendBulkImpressionsAsync();
         }
 
         public int Log(IList<KeyImpression> impressions)
@@ -51,7 +48,7 @@ namespace Splitio.Services.Impressions.Classes
             return _impressionsCache.AddItems(impressions);
         }
 
-        private void SendBulkImpressions()
+        private async Task SendBulkImpressionsAsync()
         {
             if (_impressionsCache.HasReachedMaxSize())
             {
@@ -64,7 +61,7 @@ namespace Splitio.Services.Impressions.Classes
             {
                 try
                 {
-                    _apiClient.SendBulkImpressions(impressions);
+                    await _apiClient.SendBulkImpressionsAsync(impressions);
                 }
                 catch (Exception e)
                 {

@@ -1,5 +1,4 @@
 ﻿using Splitio.Services.Tasks;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -28,11 +27,11 @@ namespace Splitio.Services.Impressions.Classes
             StartTask();
         }
 
-        public async Task StopAsync()
+        public void Stop()
         {
             if (!_task.IsRunning()) return;
                 
-            await StopTaskAsync();
+            StopTask();
             SendBulkData();
         }
 
@@ -41,9 +40,9 @@ namespace Splitio.Services.Impressions.Classes
             _task.Start();
         }
 
-        protected virtual async Task StopTaskAsync()
+        protected virtual void StopTask()
         {
-            await _task.StopAsync();
+            _task.Stop();
         }
 
         protected abstract void SendBulkData();

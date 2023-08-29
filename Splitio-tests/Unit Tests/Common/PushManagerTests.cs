@@ -53,7 +53,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(false);
 
             // Act.
-            await _pushManager.Start();
+            await _pushManager.StartAsync();
 
             // Assert.
             _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Once);
@@ -92,7 +92,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(true);
 
             // Act.
-            await _pushManager.Start();
+            await _pushManager.StartAsync();
 
             // Assert.
             _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Once);
@@ -115,7 +115,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .ReturnsAsync(response);
 
             // Act.
-            await _pushManager.Start();
+            await _pushManager.StartAsync();
 
             // Assert.
             _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Once);
@@ -148,7 +148,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .ReturnsAsync(response2);
 
             // Act.
-            await _pushManager.Start();
+            await _pushManager.StartAsync();
 
             // Assert.
             _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Once);

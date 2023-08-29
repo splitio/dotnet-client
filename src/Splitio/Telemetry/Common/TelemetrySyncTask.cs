@@ -26,7 +26,6 @@ namespace Splitio.Telemetry.Common
         private readonly ISplitTask _initTask;
         private readonly SelfRefreshingConfig _configurationOptions;
 
-
         public TelemetrySyncTask(ITelemetryStorageConsumer telemetryStorage,
             ITelemetryAPI telemetryAPI,            
             ISplitCache splitCache,
@@ -44,7 +43,7 @@ namespace Splitio.Telemetry.Common
             _factoryInstantiationsService = factoryInstantiationsService;
             _log = WrapperAdapter.Instance().GetLogger(typeof(TelemetrySyncTask));
             _statsTask = statsTask;
-            _statsTask.SetAction(RecordStats);
+            _statsTask.SetFunction(async () => await RecordStatsAsync());
             _initTask = initTask;
         }
 
@@ -52,38 +51,24 @@ namespace Splitio.Telemetry.Common
         public void Start()
         {
             _statsTask.Start();
-            //lock (_lock)
-            //{
-            //    if (_running) return;
-
-            //    _running = true;
-
-            //    //_tasksManager.Start(() =>
-            //    //{
-            //    //    //Delay first execution until expected time has passed
-            //    //    var intervalInMilliseconds = _configurationOptions.TelemetryRefreshRate * 1000;
-            //    //    _wrapperAdapter.TaskDelay(intervalInMilliseconds).Wait();
-
-            //    //    _tasksManager.StartPeriodic(() => RecordStats(), intervalInMilliseconds, _cancellationTokenSource, "Telemetry Stats.");
-            //    //}, _cancellationTokenSource, "Main Telemetry.");
-            //}
         }
 
-        public async Task StopAsync()
+        public void Stop()
         {
-            await _statsTask.StopAsync();
-            RecordStats();       
+            _statsTask.Stop();
+            RecordStatsAsync();       
         }
 
         public void RecordConfigInit(long timeUntilSDKReady)
         {
-            _initTask.SetAction(() => RecordInit(timeUntilSDKReady));
+            _initTask.SetFunction(async () => await RecordInitAsync(timeUntilSDKReady));
             _initTask.Start();
         }
         #endregion
 
         #region Private Methods
-        private void RecordInit(long timeUntilSDKReady)
+        // TODO: timeUntilSDKReady
+        private async Task RecordInitAsync(long timeUntilSDKReady)
         {
             try
             {
@@ -121,7 +106,7 @@ namespace Splitio.Telemetry.Common
                     HTTPProxyDetected = IsHTTPProxyDetected()
                 };
 
-                _telemetryAPI.RecordConfigInit(config);
+                await _telemetryAPI.RecordConfigInitAsync(config);
             }
             catch (Exception ex)
             {
@@ -129,7 +114,7 @@ namespace Splitio.Telemetry.Common
             }
         }
 
-        private void RecordStats()
+        private async Task RecordStatsAsync()
         {
             try
             {
@@ -156,7 +141,7 @@ namespace Splitio.Telemetry.Common
                     UpdatesFromSSE = _telemetryStorageConsumer.PopUpdatesFromSSE()
                 };
 
-                _telemetryAPI.RecordStats(stats);
+                await _telemetryAPI.RecordStatsAsync(stats);
             }
             catch (Exception ex)
             {
@@ -164,7 +149,7 @@ namespace Splitio.Telemetry.Common
             }
         }
 
-        private bool IsHTTPProxyDetected()
+        private static bool IsHTTPProxyDetected()
         {
             return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HTTP_PROXY")) || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HTTPS_PROXY"));
         }

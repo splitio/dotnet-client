@@ -8,7 +8,6 @@ using Splitio_Tests.Resources;
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Impressions
 {
@@ -64,7 +63,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public async Task Stop_ShouldSendImpressionsCount()
+        public void Stop_ShouldSendImpressionsCount()
         {
             // Arrange.
             var config = new ComponentConfig(5, 5);
@@ -81,14 +80,14 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Act.
             impressionsCounter.Start();
             Thread.Sleep(1000);
-            await impressionsCounter.StopAsync();
+            impressionsCounter.Stop();
 
             // Assert.
             _senderAdapter.Verify(mock => mock.RecordImpressionsCount(It.IsAny<List<ImpressionsCountModel>>()), Times.Once);
         }
 
         [TestMethod]
-        public async Task ShouldSend2BulksOfImpressions()
+        public void ShouldSend2BulksOfImpressions()
         {
             var config = new ComponentConfig(6, 3);
             var taskManager = new TasksManager();
@@ -107,7 +106,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Act.
             impressionsCounter.Start();
             Thread.Sleep(1000);
-            await impressionsCounter.StopAsync();
+            impressionsCounter.Stop();
 
             // Assert.
             _senderAdapter.Verify(mock => mock.RecordImpressionsCount(It.IsAny<List<ImpressionsCountModel>>()), Times.Exactly(2));

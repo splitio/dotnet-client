@@ -5,6 +5,6 @@ namespace Splitio.Services.SplitFetcher.Interfaces
 {
     public interface ISegmentSdkApiClient
     {
-        Task<string> FetchSegmentChanges(string name, long since, FetchOptions fetchOptions);
+        Task<string> FetchSegmentChangesAsync(string name, long since, FetchOptions fetchOptions);
     }
 }

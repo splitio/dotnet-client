@@ -22,10 +22,9 @@ namespace Splitio.Services.Impressions.Classes
             // No op.
         }
 
-        public Task StopAsync()
+        public void Stop()
         {
             // No op.
-            return Task.FromResult(0);
         }
     }
 }

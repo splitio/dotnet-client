@@ -59,9 +59,9 @@ namespace Splitio.Services.Common
             _ctsStreaming = new CancellationTokenSource();
             _backOff = backOff;
             _startupTask = startupTask;
-            _startupTask.SetAction(async () => await StartupLogic());
+            _startupTask.SetFunction(async () => await StartupLogicAsync());
             _onStreamingStatusTask = onStreamingStatusTask;
-            _onStreamingStatusTask.SetAction(async () => await OnStreamingStatusAsync());
+            _onStreamingStatusTask.SetFunction(async () => await OnStreamingStatusAsync());
         }
 
         #region Public Methods
@@ -70,60 +70,21 @@ namespace Splitio.Services.Common
             _startupTask.Start();
         }
 
-        public async Task ShutdownAsync()
+        public void Shutdown()
         {
             _log.Info("Initialitation sdk destroy.");
             
             _ctsStreaming.Cancel();
             _ctsStreaming.Dispose();
 
-            try { await _startupTask.StopAsync(); }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-            
-            try { await _onStreamingStatusTask.StopAsync(); }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-            try { await _sseHandler.StopWorkersAsync(); }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-            try { await _pushManager.StopAsync(); }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-            try { await _synchronizer.StopPeriodicFetchingAsync(); }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-            try { await _synchronizer.ClearFetchersCacheAsync(); }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-            try { await _synchronizer.StopPeriodicDataRecordingAsync(); }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-            try { await _tasksManager.DestroyAsync(); }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
+            _startupTask.Stop();
+            _onStreamingStatusTask.Stop();
+            _sseHandler.StopWorkers();
+            _pushManager.Stop();
+            _synchronizer.StopPeriodicFetching();
+            _synchronizer.ClearFetchersCache();
+            _synchronizer.StopPeriodicDataRecording();
+            _tasksManager.Destroy();
 
             _log.Info("SDK has been destroyed.");
         }
@@ -140,10 +101,10 @@ namespace Splitio.Services.Common
                     {
                         case StreamingStatus.STREAMING_READY:
                             _backOff.Reset();
-                            await _synchronizer.StopPeriodicFetchingAsync();
+                            _synchronizer.StopPeriodicFetching();
                             await _synchronizer.SyncAllAsync();
                             _sseHandler.StartWorkers();
-                            await _pushManager.ScheduleConnectionResetAsync();
+                            _pushManager.ScheduleConnectionReset();
                             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.StreamingStatus, (int)StreamingStatusEnum.Enabled));
 
                             _log.Debug("Streaming up and running.");
@@ -153,20 +114,20 @@ namespace Splitio.Services.Common
                             _log.Info($"Retryable error in streaming subsystem. Switching to polling and retrying in {interval} milliseconds.");
                             _synchronizer.StartPeriodicFetching();
                             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
-                            await _sseHandler.StopWorkersAsync();
-                            await _pushManager.StopAsync();
+                            _sseHandler.StopWorkers();
+                            _pushManager.Stop();
                             await Task.Delay((int)interval);
-                            await _pushManager.Start();
+                            await _pushManager.StartAsync();
                             break;
                         case StreamingStatus.STREAMING_DOWN:
                             _log.Info("Streaming service temporarily unavailable, working in polling mode.");
-                            await _sseHandler.StopWorkersAsync();
+                            _sseHandler.StopWorkers();
                             _synchronizer.StartPeriodicFetching();
                             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
                             break;
                         case StreamingStatus.STREAMING_OFF:
                             _log.Info("Unrecoverable error in streaming subsystem. SDK will work in polling-mode and will not retry an SSE connection.");
-                            await _pushManager.StopAsync();
+                            _pushManager.Stop();
                             _synchronizer.StartPeriodicFetching();
                             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
                             _ctsStreaming.Cancel();
@@ -191,7 +152,7 @@ namespace Splitio.Services.Common
         {
             _log.Debug("Starting streaming mode...");
             _onStreamingStatusTask.Start();
-            await _pushManager.Start();
+            await _pushManager.StartAsync();
             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Streaming));
         }
 
@@ -202,14 +163,14 @@ namespace Splitio.Services.Common
             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
         }
 
-        private async Task StartupLogic()
+        private async Task StartupLogicAsync()
         {
             try
             {
                 var clock = new Stopwatch();
                 clock.Start();
-                Console.WriteLine($"### {Thread.CurrentThread.ManagedThreadId} StartupLogic Starting ....");
-                while (!await _synchronizer.SyncAllAsync())
+
+                while (!await _synchronizer.SyncAllAsync() && !_statusManager.IsDestroyed())
                 {
                     await Task.Delay(500);
                 }
@@ -230,10 +191,6 @@ namespace Splitio.Services.Common
             catch (Exception ex)
             {
                 _log.Debug("Exception initialization SDK.", ex);
-            }
-            finally
-            {
-                Console.WriteLine($"### {Thread.CurrentThread.ManagedThreadId} StartupLogic finally");
             }
         }
         #endregion

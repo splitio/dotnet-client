@@ -19,7 +19,10 @@ namespace Splitio.Services.Tasks
                     if (_interval > 0)
                         await Task.Delay(_interval, _cts.Token);
 
-                    _action.Invoke();
+                    if (_function != null)
+                        await _function.Invoke();
+                    else
+                        _action.Invoke();
                 }
             }
             catch (OperationCanceledException)

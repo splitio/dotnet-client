@@ -87,32 +87,33 @@ namespace Splitio.Services.Common
             _segmentFetcher.Start();
         }
 
-        public async Task StopPeriodicDataRecordingAsync()
+        public void StopPeriodicDataRecording()
         {
-            await _telemetrySyncTask.StopAsync();
-            await _impressionsLog.StopAsync();
-            await _eventsLog.StopAsync();
-            await _impressionsCounter.StopAsync();
-            await _uniqueKeysTracker.StopAsync();
+            _telemetrySyncTask.Stop();
+            _impressionsLog.Stop();
+            _eventsLog.Stop();
+            _impressionsCounter.Stop();
+            _uniqueKeysTracker.Stop();
         }
 
-        public async Task StopPeriodicFetchingAsync()
+        public void StopPeriodicFetching()
         {
-            await _splitFetcher.StopAsync();
-            await _segmentFetcher.StopAsync();
+            _splitFetcher.Stop();
+            _segmentFetcher.Stop();
         }
 
-        public async Task ClearFetchersCacheAsync()
+        public void ClearFetchersCache()
         {
-            await _splitFetcher.ClearAsync();
-            await _segmentFetcher.ClearAsync();
+            _splitFetcher.Clear();
+            _segmentFetcher.Clear();
         }
 
         public async Task<bool> SyncAllAsync()
         {
-            var splitsResult = await _splitFetcher.FetchSplits(_defaultFetchOptions);
+            var splits = await _splitFetcher.FetchSplitsAsync(_defaultFetchOptions);
+            var segments = await _segmentFetcher.FetchAllAsync();
 
-            return splitsResult.Success && _segmentFetcher.FetchAll();
+            return splits.Success && segments;
         }
 
         public async Task SynchronizeSegmentAsync(string segmentName, long targetChangeNumber)
@@ -123,7 +124,7 @@ namespace Splitio.Services.Common
 
                 var fetchOptions = new FetchOptions { CacheControlHeaders = true };
 
-                var result = await AttempSegmentSync(segmentName, targetChangeNumber, fetchOptions, _onDemandFetchMaxRetries, _onDemandFetchRetryDelayMs, false);
+                var result = await AttemptSegmentAsync(segmentName, targetChangeNumber, fetchOptions, _onDemandFetchMaxRetries, _onDemandFetchRetryDelayMs, false);
 
                 if (result.Success)
                 {
@@ -134,7 +135,7 @@ namespace Splitio.Services.Common
 
                 fetchOptions.Till = targetChangeNumber;
 
-                var withCDNBypassed = await AttempSegmentSync(segmentName, targetChangeNumber, fetchOptions, OnDemandFetchBackoffMaxRetries, null, true);
+                var withCDNBypassed = await AttemptSegmentAsync(segmentName, targetChangeNumber, fetchOptions, OnDemandFetchBackoffMaxRetries, null, true);
 
                 if (withCDNBypassed.Success)
                 {
@@ -159,22 +160,22 @@ namespace Splitio.Services.Common
 
                 var fetchOptions = new FetchOptions { CacheControlHeaders = true };
 
-                var result = await AttempSplitsSync(targetChangeNumber, fetchOptions, _onDemandFetchMaxRetries, _onDemandFetchRetryDelayMs, false);
+                var result = await AttemptSplitsAsync(targetChangeNumber, fetchOptions, _onDemandFetchMaxRetries, _onDemandFetchRetryDelayMs, false);
 
                 if (result.Success)
                 {
-                    await _segmentFetcher.FetchSegmentsIfNotExists(result.SegmentNames);
+                    await _segmentFetcher.FetchSegmentsIfNotExistsAsync(result.SegmentNames);
                     _log.Debug($"Refresh completed in {_onDemandFetchMaxRetries - result.RemainingAttempts} attempts.");
 
                     return;
                 }
 
                 fetchOptions.Till = targetChangeNumber;
-                var withCDNBypassed = await AttempSplitsSync(targetChangeNumber, fetchOptions, OnDemandFetchBackoffMaxRetries, null, true);
+                var withCDNBypassed = await AttemptSplitsAsync(targetChangeNumber, fetchOptions, OnDemandFetchBackoffMaxRetries, null, true);
 
                 if (withCDNBypassed.Success)
                 {
-                    await _segmentFetcher.FetchSegmentsIfNotExists(withCDNBypassed.SegmentNames);
+                    await _segmentFetcher.FetchSegmentsIfNotExistsAsync(withCDNBypassed.SegmentNames);
                     _log.Debug($"Refresh completed bypassing the CDN in {OnDemandFetchBackoffMaxRetries - withCDNBypassed.RemainingAttempts} attempts.");
                 }
                 else
@@ -190,7 +191,7 @@ namespace Splitio.Services.Common
         #endregion
 
         #region Private Methods
-        private async Task<SyncResult> AttempSegmentSync(string name, long targetChangeNumber, FetchOptions fetchOptions, int maxRetries, int? retryDelayMs, bool withBackoff)
+        private async Task<SyncResult> AttemptSegmentAsync(string name, long targetChangeNumber, FetchOptions fetchOptions, int maxRetries, int? retryDelayMs, bool withBackoff)
         {
             try
             {
@@ -201,7 +202,7 @@ namespace Splitio.Services.Common
                 while (true)
                 {
                     remainingAttempts--;
-                    await _segmentFetcher.Fetch(name, fetchOptions);
+                    await _segmentFetcher.FetchAsync(name, fetchOptions);
 
                     if (targetChangeNumber <= _segmentCache.GetChangeNumber(name))
                     {
@@ -218,13 +219,13 @@ namespace Splitio.Services.Common
             }
             catch (Exception ex)
             {
-                _log.Debug("Exception while AttempSplitsSync.", ex);
+                _log.Debug("Exception while AttemptSegmentAsync.", ex);
             }
 
             return new SyncResult(false, 0);
         }
 
-        private async Task<SyncResult> AttempSplitsSync(long targetChangeNumber, FetchOptions fetchOptions, int maxRetries, int? retryDelayMs, bool withBackoff)
+        private async Task<SyncResult> AttemptSplitsAsync(long targetChangeNumber, FetchOptions fetchOptions, int maxRetries, int? retryDelayMs, bool withBackoff)
         {
             try
             {
@@ -235,7 +236,7 @@ namespace Splitio.Services.Common
                 while (true)
                 {
                     remainingAttempts--;
-                    var result = await _splitFetcher.FetchSplits(fetchOptions);
+                    var result = await _splitFetcher.FetchSplitsAsync(fetchOptions);
 
                     if (targetChangeNumber <= _splitCache.GetChangeNumber())
                     {
@@ -252,7 +253,7 @@ namespace Splitio.Services.Common
             }
             catch (Exception ex)
             {
-                _log.Debug("Exception while AttempSplitsSync.", ex);
+                _log.Debug("Exception while AttemptSplitsAsync.", ex);
             }
 
             return new SyncResult(false, 0);

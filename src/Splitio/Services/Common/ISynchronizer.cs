@@ -8,9 +8,9 @@ namespace Splitio.Services.Common
         Task SynchronizeSplitsAsync(long targetChangeNumber);
         Task SynchronizeSegmentAsync(string segmentName, long targetChangeNumber);
         void StartPeriodicFetching();
-        Task StopPeriodicFetchingAsync();
+        void StopPeriodicFetching();
         void StartPeriodicDataRecording();
-        Task StopPeriodicDataRecordingAsync();
-        Task ClearFetchersCacheAsync();
+        void StopPeriodicDataRecording();
+        void ClearFetchersCache();
     }
 }

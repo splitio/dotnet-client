@@ -8,7 +8,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -64,10 +63,10 @@ namespace Splitio.Services.Impressions.Classes
             _cacheLongTermCleaningTask.Start();
         }
 
-        protected override async Task StopTaskAsync()
+        protected override void StopTask()
         {
-            await base.StopTaskAsync();
-            await _cacheLongTermCleaningTask.StopAsync();
+            base.StopTask();
+            _cacheLongTermCleaningTask.Stop();
         }
 
         protected override void SendBulkData()

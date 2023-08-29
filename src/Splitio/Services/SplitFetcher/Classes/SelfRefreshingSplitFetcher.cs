@@ -8,7 +8,6 @@ using Splitio.Services.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
@@ -34,7 +33,7 @@ namespace Splitio.Services.SplitFetcher.Classes
             _statusManager = statusManager;
             _splitCache = splitCache;
             _periodicTask = periodicTask;
-            _periodicTask.SetAction(async () => await FetchSplits(new FetchOptions()));
+            _periodicTask.SetFunction(async () => await FetchSplitsAsync(new FetchOptions()));
         }
 
         #region Public Methods
@@ -43,22 +42,20 @@ namespace Splitio.Services.SplitFetcher.Classes
             _periodicTask.Start();
         }
 
-        public async Task StopAsync()
+        public void Stop()
         {
-            await _periodicTask.StopAsync();
+            _periodicTask.Stop();
         }
 
-        public async Task ClearAsync()
+        public void Clear()
         {
             _splitCache.Clear();
-            await _periodicTask.StopAsync();
+            _periodicTask.Stop();
             _log.Debug("FeatureFlags cache disposed ...");
         }
 
-        public async Task<FetchResult> FetchSplits(FetchOptions fetchOptions)
+        public async Task<FetchResult> FetchSplitsAsync(FetchOptions fetchOptions)
         {
-            Console.WriteLine($"\n##### {Thread.CurrentThread.ManagedThreadId} FetchSplits Task");
-
             var segmentNames = new List<string>();
             var success = false;
 
@@ -68,9 +65,9 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                 try
                 {
-                    var result = await _splitChangeFetcher.Fetch(changeNumber, fetchOptions);
+                    var result = await _splitChangeFetcher.FetchAsync(changeNumber, fetchOptions);
 
-                    if (result == null)
+                    if (result == null || _statusManager.IsDestroyed())
                     {
                         break;
                     }
@@ -91,7 +88,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                 catch (Exception e)
                 {
                     _log.Error("Exception caught refreshing splits", e);
-                    await StopAsync();
+                    Stop();
                 }
                 finally
                 {
@@ -101,8 +98,6 @@ namespace Splitio.Services.SplitFetcher.Classes
                     }
                 }
             }
-
-            Console.WriteLine($"\n##### {Thread.CurrentThread.ManagedThreadId} FINISHED FetchSplits Task");
 
             return new FetchResult
             {

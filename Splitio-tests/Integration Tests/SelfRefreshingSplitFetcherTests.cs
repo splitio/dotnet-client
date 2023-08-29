@@ -11,7 +11,6 @@ using Splitio.Telemetry.Storages;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -33,7 +32,7 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         [DeploymentItem(@"Resources\splits_staging.json")]
         [DeploymentItem(@"Resources\segment_payed.json")]
-        public async Task ExecuteGetSuccessfulWithResultsFromJSONFile()
+        public void ExecuteGetSuccessfulWithResultsFromJSONFile()
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
@@ -55,14 +54,14 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(result.name == "Pato_Test_1");
             Assert.IsTrue(result.conditions.Count > 0);
 
-            await selfRefreshingSplitFetcher.StopAsync();
-            await selfRefreshingSplitFetcher.ClearAsync();
+            selfRefreshingSplitFetcher.Stop();
+            selfRefreshingSplitFetcher.Clear();
         }
 
         [TestMethod]
         [DeploymentItem(@"Resources\splits_staging_4.json")]
         [DeploymentItem(@"Resources\segment_payed.json")]
-        public async Task ExecuteGetSuccessfulWithResultsFromJSONFileIncludingTrafficAllocation()
+        public void ExecuteGetSuccessfulWithResultsFromJSONFileIncludingTrafficAllocation()
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
@@ -87,12 +86,12 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(result.conditions.Count > 0);
             Assert.IsNotNull(result.conditions.Find(x => x.conditionType == ConditionType.ROLLOUT));
 
-            await selfRefreshingSplitFetcher.StopAsync();
-            await selfRefreshingSplitFetcher.ClearAsync();
+            selfRefreshingSplitFetcher.Stop();
+            selfRefreshingSplitFetcher.Clear();
         }
 
         [TestMethod]
-        public async Task ExecuteGetWithoutResults()
+        public void ExecuteGetWithoutResults()
         {
             //Arrange
             var baseUrl = "https://sdk-aws-staging.split.io/api/";
@@ -121,7 +120,7 @@ namespace Splitio_Tests.Integration_Tests
             var workerTask = taskManager.NewPeriodicTask(gates, Splitio.Enums.Task.SegmentsWorkerFetcher, 0);
             var worker = new SegmentTaskWorker(4, segmentTaskQueue, gates, workerTask);
             var segmentsTask = taskManager.NewPeriodicTask(gates, Splitio.Enums.Task.SegmentsFetcher, 3000);
-            var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, segmentCache, segmentTaskQueue, segmentsTask, worker);
+            var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, segmentCache, segmentTaskQueue, segmentsTask, worker, gates);
             var splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, segmentCache);
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
             var task = taskManager.NewPeriodicTask(gates, Splitio.Enums.Task.FeatureFlagsFetcher, 3000);
@@ -136,8 +135,8 @@ namespace Splitio_Tests.Integration_Tests
             //Assert
             Assert.IsNull(result);
 
-            await selfRefreshingSplitFetcher.StopAsync();
-            await selfRefreshingSplitFetcher.ClearAsync();
+            selfRefreshingSplitFetcher.Stop();
+            selfRefreshingSplitFetcher.Clear();
         }
     }
 }

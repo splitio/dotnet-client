@@ -51,17 +51,12 @@ namespace Splitio.Services.Shared.Classes
             return data;
         }
 
-        public Task<Task> WhenAny(params Task[] tasks)
+        public Task<Task> WhenAnyAsync(params Task[] tasks)
         {
             return Task.WhenAny(tasks);
         }
 
-        public async Task<T> TaskFromResult<T>(T result)
-        {
-            return await Task.FromResult(result);
-        }
-
-        private string SplitSdkVersion()
+        private static string SplitSdkVersion()
         {
 #if NET_LATEST
             return typeof(Split).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
@@ -126,7 +121,7 @@ namespace Splitio.Services.Shared.Classes
             return string.Empty;
         }
 
-        private string GetSdkMachineIP(ConfigurationOptions config, bool ipAddressesEnabled, ISplitLogger log)
+        private static string GetSdkMachineIP(ConfigurationOptions config, bool ipAddressesEnabled, ISplitLogger log)
         {
             if (ipAddressesEnabled)
             {
@@ -134,7 +129,6 @@ namespace Splitio.Services.Shared.Classes
                 {
 #if NET_LATEST
                     var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
-                    hostAddressesTask.Wait();
                     return config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
 #else
                     return config.SdkMachineIP ?? Dns.GetHostAddresses(Environment.MachineName).Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();

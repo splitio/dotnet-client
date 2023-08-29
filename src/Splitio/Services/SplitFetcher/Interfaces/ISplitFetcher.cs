@@ -7,8 +7,8 @@ namespace Splitio.Services.SplitFetcher.Interfaces
 {
     public interface ISplitFetcher : IPeriodicTask
     {
-        Task<FetchResult> FetchSplits(FetchOptions fetchOptions);
-        Task ClearAsync();
+        Task<FetchResult> FetchSplitsAsync(FetchOptions fetchOptions);
+        void Clear();
     }
 
     public class FetchResult

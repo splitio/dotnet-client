@@ -36,7 +36,7 @@ namespace Splitio.Services.Events.Classes
             _apiClient = apiClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _task = task;
-            _task.SetAction(async () => await SendBulkEventsAsync());
+            _task.SetFunction(async () => await SendBulkEventsAsync());
         }
 
         public void Start()
@@ -44,10 +44,10 @@ namespace Splitio.Services.Events.Classes
             _task.Start();
         }
 
-        public async Task StopAsync()
+        public void Stop()
         {
-            await _task.StopAsync();
-            await SendBulkEventsAsync();
+            _task.Stop();
+            SendBulkEventsAsync();
         }
 
         public void Log(WrappedEvent wrappedEvent)

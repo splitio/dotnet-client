@@ -38,7 +38,7 @@ namespace Splitio.Services.Impressions.Classes
             _maxBulkSize = maxBulkSize;
         }
 
-        public async void SendBulkImpressions(List<KeyImpression> impressions)
+        public async Task SendBulkImpressionsAsync(List<KeyImpression> impressions)
         {
             using (var clock = new Util.SplitStopwatch())
             {
@@ -46,7 +46,7 @@ namespace Splitio.Services.Impressions.Classes
 
                 if (impressions.Count <= _maxBulkSize)
                 {
-                    await BuildJsonAndPost(impressions, clock);
+                    await BuildJsonAndPostAsync(impressions, clock);
                     return;
                 }
 
@@ -54,12 +54,12 @@ namespace Splitio.Services.Impressions.Classes
                 {
                     var bulkToPost = Util.Helper.TakeFromList(impressions, _maxBulkSize);
 
-                    await BuildJsonAndPost(bulkToPost, clock);
+                    await BuildJsonAndPostAsync(bulkToPost, clock);
                 }
             }
         }
 
-        public async void SendBulkImpressionsCount(List<ImpressionsCountModel> impressionsCount)
+        public async Task SendBulkImpressionsCountAsync(List<ImpressionsCountModel> impressionsCount)
         {
             using (var clock = new Util.SplitStopwatch())
             {
@@ -69,7 +69,7 @@ namespace Splitio.Services.Impressions.Classes
 
                 var response = await _httpClient.PostAsync(ImpressionsCountUrl, json);
 
-                Util.Helper.RecordTelemetrySync(nameof(SendBulkImpressionsCount), response, ResourceEnum.ImpressionCountSync, clock, _telemetryRuntimeProducer, _log);
+                Util.Helper.RecordTelemetrySync(nameof(SendBulkImpressionsCountAsync), response, ResourceEnum.ImpressionCountSync, clock, _telemetryRuntimeProducer, _log);
             }
         }
 
@@ -89,7 +89,7 @@ namespace Splitio.Services.Impressions.Classes
             return JsonConvert.SerializeObject(new { pf = impressionsCount });
         }
 
-        private async Task BuildJsonAndPost(List<KeyImpression> impressions, Util.SplitStopwatch clock)
+        private async Task BuildJsonAndPostAsync(List<KeyImpression> impressions, Util.SplitStopwatch clock)
         {
             var impressionsJson = ConvertToJson(impressions);
 
@@ -99,7 +99,7 @@ namespace Splitio.Services.Impressions.Classes
 
                 var response = await _httpClient.PostAsync(TestImpressionsUrl, impressionsJson);
 
-                Util.Helper.RecordTelemetrySync(nameof(SendBulkImpressions), response, ResourceEnum.ImpressionSync, clock, _telemetryRuntimeProducer, _log);
+                Util.Helper.RecordTelemetrySync(nameof(SendBulkImpressionsAsync), response, ResourceEnum.ImpressionSync, clock, _telemetryRuntimeProducer, _log);
 
                 if (response.IsSuccessStatusCode)
                 {

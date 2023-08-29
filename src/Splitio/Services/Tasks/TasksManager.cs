@@ -1,7 +1,6 @@
 ﻿using Splitio.Services.Cache.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Tasks
 {
@@ -45,16 +44,16 @@ namespace Splitio.Services.Tasks
             return task;
         }
 
-        public async Task DestroyAsync()
+        public void Destroy()
         {
             foreach (var task in _tasks)
             {
                 try
                 {
                     if (task.IsRunning())
-                        await task.StopAsync();
+                        task.Stop();
                 }
-                catch (Exception ex) { }
+                catch { }
             }
         }
     }

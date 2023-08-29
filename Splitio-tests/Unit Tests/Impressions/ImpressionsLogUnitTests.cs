@@ -100,7 +100,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             //Assert
             Thread.Sleep(2000);
-            _apiClientMock.Verify(x => x.SendBulkImpressions(It.Is<List<KeyImpression>>(list => list.Count == 1)));
+            _apiClientMock.Verify(x => x.SendBulkImpressionsAsync(It.Is<List<KeyImpression>>(list => list.Count == 1)));
         }
     }
 }

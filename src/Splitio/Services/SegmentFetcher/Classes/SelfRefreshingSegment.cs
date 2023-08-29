@@ -11,25 +11,30 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class SelfRefreshingSegment : ISelfRefreshingSegment
     {
+        public readonly string Name;
+
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingSegment));
 
-        public string Name;
         private readonly ISegmentChangeFetcher _segmentChangeFetcher;
         private readonly ISegmentCache _segmentCache;
+        private readonly IStatusManager _statusManager;
 
-        public SelfRefreshingSegment(string name, ISegmentChangeFetcher segmentChangeFetcher, ISegmentCache segmentCache)
+        public SelfRefreshingSegment(string name,
+            ISegmentChangeFetcher segmentChangeFetcher,
+            ISegmentCache segmentCache,
+            IStatusManager statusManager)
         {
             Name = name;
-
             _segmentChangeFetcher = segmentChangeFetcher;
             _segmentCache = segmentCache;
+            _statusManager = statusManager;
         }
 
-        public async Task<bool> FetchSegment(FetchOptions fetchOptions)
+        public async Task<bool> FetchSegmentAsync(FetchOptions fetchOptions)
         {
             var success = false;
 
-            while (true)
+            while (!_statusManager.IsDestroyed())
             {
                 if (fetchOptions.Token.IsCancellationRequested)
                     break;
@@ -38,9 +43,9 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 try
                 {
-                    var response = await _segmentChangeFetcher.Fetch(Name, changeNumber, fetchOptions);
+                    var response = await _segmentChangeFetcher.FetchAsync(Name, changeNumber, fetchOptions);
 
-                    if (response == null || fetchOptions.Token.IsCancellationRequested)
+                    if (response == null || fetchOptions.Token.IsCancellationRequested || _statusManager.IsDestroyed())
                     {
                         break;
                     }

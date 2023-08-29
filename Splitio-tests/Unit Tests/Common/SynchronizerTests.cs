@@ -76,27 +76,27 @@ namespace Splitio_Tests.Unit_Tests.Common
         }
 
         [TestMethod]
-        public async Task StopPeriodicDataRecording_ShouldStopServices()
+        public void StopPeriodicDataRecording_ShouldStopServices()
         {
             // Act.
-            await _synchronizer.StopPeriodicDataRecordingAsync();
+            _synchronizer.StopPeriodicDataRecording();
 
             // Assert.
-            _impressionsLog.Verify(mock => mock.StopAsync(), Times.Once);
-            _eventsLog.Verify(mock => mock.StopAsync(), Times.Once);
-            _impressionsCounter.Verify(mock => mock.StopAsync(), Times.Once);
-            _telemetrySyncTask.Verify(mock => mock.StopAsync(), Times.Once);
+            _impressionsLog.Verify(mock => mock.Stop(), Times.Once);
+            _eventsLog.Verify(mock => mock.Stop(), Times.Once);
+            _impressionsCounter.Verify(mock => mock.Stop(), Times.Once);
+            _telemetrySyncTask.Verify(mock => mock.Stop(), Times.Once);
         }
 
         [TestMethod]
-        public async Task StopPeriodicFetching_ShouldStopFetchings()
+        public void StopPeriodicFetching_ShouldStopFetchings()
         {
             // Act.
-            await _synchronizer.StopPeriodicFetchingAsync();
+            _synchronizer.StopPeriodicFetching();
 
             // Assert.
-            _splitFetcher.Verify(mock => mock.StopAsync(), Times.Once);
-            _segmentFetcher.Verify(mock => mock.StopAsync(), Times.Once);
+            _splitFetcher.Verify(mock => mock.Stop(), Times.Once);
+            _segmentFetcher.Verify(mock => mock.Stop(), Times.Once);
         }
 
         [TestMethod]
@@ -104,15 +104,15 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Act.
             _splitFetcher
-                .Setup(mock => mock.FetchSplits(It.IsAny<FetchOptions>()))
+                .Setup(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(new FetchResult { Success = true });
 
             await _synchronizer.SyncAllAsync();
 
             // Assert.
             Thread.Sleep(2000);
-            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Once);            
-            _segmentFetcher.Verify(mock => mock.FetchAll(), Times.Once);
+            _splitFetcher.Verify(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()), Times.Once);            
+            _segmentFetcher.Verify(mock => mock.FetchAllAsync(), Times.Once);
         }
 
         [TestMethod]
@@ -130,7 +130,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             await _synchronizer.SynchronizeSegmentAsync(segmentName, 1);
 
             // Assert.
-            _segmentFetcher.Verify(mock => mock.Fetch(segmentName, It.IsAny<FetchOptions>()), Times.Once);
+            _segmentFetcher.Verify(mock => mock.FetchAsync(segmentName, It.IsAny<FetchOptions>()), Times.Once);
         }
 
         [TestMethod]
@@ -147,7 +147,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             await _synchronizer.SynchronizeSegmentAsync(segmentName, 100);
 
             // Assert.
-            _segmentFetcher.Verify(mock => mock.Fetch(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(20));
+            _segmentFetcher.Verify(mock => mock.FetchAsync(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(20));
             _log.Verify(mock => mock.Debug($"No changes fetched for segment {segmentName} after 10 attempts with CDN bypassed."), Times.Once);
             _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
         }
@@ -171,7 +171,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             await _synchronizer.SynchronizeSegmentAsync(segmentName, 100);
 
             // Assert.
-            _segmentFetcher.Verify(mock => mock.Fetch(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(5));
+            _segmentFetcher.Verify(mock => mock.FetchAsync(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(5));
             _log.Verify(mock => mock.Debug($"Segment {segmentName} refresh completed in 5 attempts."), Times.Once);
             _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
         }
@@ -207,7 +207,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             await _synchronizer.SynchronizeSegmentAsync(segmentName, 100);
 
             // Assert.
-            _segmentFetcher.Verify(mock => mock.Fetch(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(17));
+            _segmentFetcher.Verify(mock => mock.FetchAsync(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(17));
             _log.Verify(mock => mock.Debug($"Segment {segmentName} refresh completed bypassing the CDN in 7 attempts."), Times.Once);
             _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
         }
@@ -217,7 +217,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             _splitFetcher
-                .Setup(mock => mock.FetchSplits(It.IsAny<FetchOptions>()))
+                .Setup(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(new FetchResult());
 
             _splitCache
@@ -229,8 +229,8 @@ namespace Splitio_Tests.Unit_Tests.Common
             await _synchronizer.SynchronizeSplitsAsync(1);
 
             // Assert.
-            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Once);
-            _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExists(It.IsAny<IList<string>>()), Times.Once);
+            _splitFetcher.Verify(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()), Times.Once);
+            _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExistsAsync(It.IsAny<IList<string>>()), Times.Once);
         }
 
         [TestMethod]
@@ -245,7 +245,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             await _synchronizer.SynchronizeSplitsAsync(100);
 
             // Assert.
-            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Exactly(20));
+            _splitFetcher.Verify(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()), Times.Exactly(20));
             _log.Verify(mock => mock.Debug($"No changes fetched after 10 attempts with CDN bypassed."), Times.Once);
             _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
         }
@@ -255,7 +255,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             _splitFetcher
-                .Setup(mock => mock.FetchSplits(It.IsAny<FetchOptions>()))
+                .Setup(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(new FetchResult());
 
             _splitCache
@@ -271,7 +271,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             await _synchronizer.SynchronizeSplitsAsync(100);
 
             // Assert.
-            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Exactly(5));
+            _splitFetcher.Verify(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()), Times.Exactly(5));
             _log.Verify(mock => mock.Debug($"Refresh completed in 5 attempts."), Times.Once);
             _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
         }
@@ -281,7 +281,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             _splitFetcher
-                .Setup(mock => mock.FetchSplits(It.IsAny<FetchOptions>()))
+                .Setup(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(new FetchResult());
 
             _splitCache
@@ -309,7 +309,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             await _synchronizer.SynchronizeSplitsAsync(100);
 
             // Assert.
-            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Exactly(17));
+            _splitFetcher.Verify(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()), Times.Exactly(17));
             _log.Verify(mock => mock.Debug($"Refresh completed bypassing the CDN in 7 attempts."), Times.Once);
             _log.Verify(mock => mock.Debug(It.IsAny<string>()), Times.Once);
         }

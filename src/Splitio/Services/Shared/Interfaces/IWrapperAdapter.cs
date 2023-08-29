@@ -9,8 +9,7 @@ namespace Splitio.Services.Shared.Interfaces
     public interface IWrapperAdapter
     {
         ReadConfigData ReadConfig(ConfigurationOptions config, ISplitLogger log);
-        Task<Task> WhenAny(params Task[] tasks);
-        Task<T> TaskFromResult<T>(T result);
+        Task<Task> WhenAnyAsync(params Task[] tasks);
         ISplitLogger GetLogger(string type);
         ISplitLogger GetLogger(Type type);
 

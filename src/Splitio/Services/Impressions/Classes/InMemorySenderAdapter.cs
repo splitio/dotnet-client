@@ -26,7 +26,7 @@ namespace Splitio.Services.Impressions.Classes
         {
             try
             {
-                _telemetryApi.RecordUniqueKeys(new UniqueKeys(uniques));
+                _telemetryApi.RecordUniqueKeysAsync(new UniqueKeys(uniques));
             }
             catch (Exception ex)
             {
@@ -38,7 +38,7 @@ namespace Splitio.Services.Impressions.Classes
         {
             try
             {
-                _impressionsSdkApiClient.SendBulkImpressionsCount(values);
+                _impressionsSdkApiClient.SendBulkImpressionsCountAsync(values);
             }
             catch (Exception ex)
             {

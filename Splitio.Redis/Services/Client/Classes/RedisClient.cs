@@ -52,10 +52,8 @@ namespace Splitio.Redis.Services.Client.Classes
             if (_statusManager.IsDestroyed()) return;
 
             base.Destroy();
-            // TODO: CHECK this
-            _uniqueKeysTracker.StopAsync().Wait();
-            // TODO: CHECK this
-            _impressionsCounter.StopAsync().Wait();
+            _uniqueKeysTracker.Stop();
+            _impressionsCounter.Stop();
             _connectionPoolManager.Dispose();
         }
 

@@ -9,7 +9,6 @@ using Splitio.Telemetry.Domain;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Impressions
 {
@@ -34,7 +33,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public async Task PeriodicTask_ShouldSendBulk()
+        public void PeriodicTask_ShouldSendBulk()
         {
             // Arrange.
             _cache.Clear();
@@ -55,7 +54,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<List<Mtks>>()), Times.Once);
 
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test", "feature-name-test"));
-            await _uniqueKeysTracker.StopAsync();
+            _uniqueKeysTracker.Stop();
 
             _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<List<Mtks>>()), Times.Exactly(2));
 

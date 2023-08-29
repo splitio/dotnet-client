@@ -4,7 +4,6 @@ using Splitio.Services.Common;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
@@ -45,7 +44,7 @@ namespace Splitio.Services.Events.Classes
 
                     if (events.Count <= _maxBulkSize)
                     {
-                        await BuildJsonAndPost(events, clock);
+                        await BuildJsonAndPostAsync(events, clock);
                         return;
                     }
 
@@ -53,7 +52,7 @@ namespace Splitio.Services.Events.Classes
                     {
                         var bulkToPost = Util.Helper.TakeFromList(events, _maxBulkSize);
 
-                        await BuildJsonAndPost(bulkToPost, clock);
+                        await BuildJsonAndPostAsync(bulkToPost, clock);
                     }
                 }
             }
@@ -64,7 +63,7 @@ namespace Splitio.Services.Events.Classes
         }
         
         #region Private Methods
-        private async Task BuildJsonAndPost(List<Event> events, Util.SplitStopwatch clock)
+        private async Task BuildJsonAndPostAsync(List<Event> events, Util.SplitStopwatch clock)
         {
             var eventsJson = JsonConvert.SerializeObject(events, new JsonSerializerSettings
             {

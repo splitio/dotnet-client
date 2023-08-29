@@ -16,6 +16,7 @@ namespace Splitio.Services.Tasks
         
         protected CancellationTokenSource _cts;
         protected Action _action;
+        protected Func<Task> _function;
         protected Task _task;
         protected int _interval;
         protected bool _running;
@@ -41,7 +42,7 @@ namespace Splitio.Services.Tasks
                 return;
             }
 
-            if (_action == null)
+            if (_action == null && _function == null)
             {
                 _log.Warn($"Task {_taskName} has not set the action work to excecute.");
                 return;
@@ -49,17 +50,24 @@ namespace Splitio.Services.Tasks
 
             _running = true;
             _cts = new CancellationTokenSource();
-            _task = Task.Factory.StartNew(DoWorkAsync, _cts.Token);
+            _task = Task.Factory.StartNew(DoWorkAsync, _cts.Token, TaskCreationOptions.None, TaskScheduler.Default);
 
             _log.Debug($"Task {_taskName} running.");
         }
 
-        public async Task StopAsync()
+        public void Stop()
         {
-            if (!IsRunning()) return;
+            if (!IsRunning())
+                return;
 
             _cts.Cancel();
-            if (_task != null) await _task;
+
+            if (_task != null && _task.Status == TaskStatus.Running)
+            {
+                _log.Debug($"Task {_taskName} is still running, forcing to stop.");
+                _ = _task.Exception;
+            }
+
             _running = false;
             _cts.Dispose();
         }
@@ -72,6 +80,11 @@ namespace Splitio.Services.Tasks
         public void SetAction(Action action)
         {
             _action = action;
+        }
+
+        public void SetFunction(Func<Task> function)
+        {
+            _function = function;
         }
 
         public void SetInterval(int interval)

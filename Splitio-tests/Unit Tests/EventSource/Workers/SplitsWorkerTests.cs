@@ -15,7 +15,6 @@ using Splitio.Telemetry.Storages;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 {
@@ -135,7 +134,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Never);
             _featureFlagCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits), Times.Once);
-            _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExists(It.IsAny<List<string>>()), Times.Once);
+            _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExistsAsync(It.IsAny<List<string>>()), Times.Once);
         }
 
         [TestMethod]
@@ -211,7 +210,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         }
 
         [TestMethod]        
-        public async Task AddToQueue_WithElements_ShouldTriggerFetch()
+        public void AddToQueue_WithElements_ShouldTriggerFetch()
         {
             // Act.
             _splitsWorker.Start();
@@ -224,7 +223,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             // Assert
             _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Exactly(4));
 
-            await _splitsWorker.StopAsync();
+            _splitsWorker.Stop();
             _splitsWorker.AddToQueue(new SplitChangeNotification { ChangeNumber = 1585956698486 });
             Thread.Sleep(1000);
             _splitsWorker.AddToQueue(new SplitChangeNotification { ChangeNumber = 1585956698496 });

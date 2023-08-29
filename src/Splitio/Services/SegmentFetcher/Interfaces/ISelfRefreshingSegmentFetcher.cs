@@ -7,9 +7,9 @@ namespace Splitio.Services.SegmentFetcher.Interfaces
 {
     public interface ISelfRefreshingSegmentFetcher : IPeriodicTask
     {
-        bool FetchAll();
-        Task Fetch(string segmentName, FetchOptions fetchOptions);
-        Task FetchSegmentsIfNotExists(IList<string> names);
-        Task ClearAsync();
+        Task<bool> FetchAllAsync();
+        Task FetchAsync(string segmentName, FetchOptions fetchOptions);
+        Task FetchSegmentsIfNotExistsAsync(IList<string> names);
+        void Clear();
     }
 }

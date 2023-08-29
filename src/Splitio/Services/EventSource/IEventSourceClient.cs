@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource
 {
     public interface IEventSourceClient
     {
-        bool ConnectAsync(string url);
-        Task DisconnectAsync();
-
+        bool Connect(string url);
+        void Disconnect();
 
         event EventHandler<EventReceivedEventArgs> EventReceived;
     }

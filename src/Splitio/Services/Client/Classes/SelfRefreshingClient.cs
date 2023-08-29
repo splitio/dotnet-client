@@ -20,7 +20,6 @@ using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
@@ -83,15 +82,12 @@ namespace Splitio.Services.Client.Classes
         #region Public Methods
         public override void Destroy()
         {
-            Console.WriteLine($"#### 1 - {Thread.CurrentThread.ManagedThreadId} DESTROY \n\n\n");
             if (!_statusManager.IsDestroyed())
             {
                 base.Destroy();
                 _telemetryRuntimeProducer.RecordSessionLength(CurrentTimeHelper.CurrentTimeMillis() - _startSessionMs);
-
-                Task.WaitAll(new Task[] { StopAsync() });
+                Stop();
             }
-            Console.WriteLine($"#### 2 - {Thread.CurrentThread.ManagedThreadId} DESTROY \n\n\n");
         }
         #endregion
 
@@ -124,7 +120,7 @@ namespace Splitio.Services.Client.Classes
             var workerTask = _tasksManager.NewPeriodicTask(_statusManager, Enums.Task.SegmentsWorkerFetcher, 0);
             var worker = new SegmentTaskWorker(_config.NumberOfParalellSegmentTasks, segmentTaskQueue, _statusManager, workerTask);
             var segmentsTask = _tasksManager.NewPeriodicTask(_statusManager, Enums.Task.SegmentsFetcher, segmentRefreshRate * 1000);
-            _selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, _segmentCache, segmentTaskQueue, segmentsTask, worker);
+            _selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, _segmentCache, segmentTaskQueue, segmentsTask, worker, _statusManager);
 
             var splitChangeFetcher = new ApiSplitChangeFetcher(_splitSdkApiClient);
             _splitParser = new InMemorySplitParser((SelfRefreshingSegmentFetcher)_selfRefreshingSegmentFetcher, _segmentCache);
@@ -302,9 +298,9 @@ namespace Splitio.Services.Client.Classes
             _syncManager.Start();
         }
 
-        private async Task StopAsync()
+        private void Stop()
         {
-            await _syncManager.ShutdownAsync();
+            _syncManager.Shutdown();
         }
         #endregion
     }

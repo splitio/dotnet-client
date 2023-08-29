@@ -11,7 +11,6 @@ using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 {
@@ -66,8 +65,8 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             Thread.Sleep(2000);
 
             // Assert.
-            _telemetryAPI.Verify(mock => mock.RecordConfigInit(It.IsAny<Config>()), Times.Once);
-            _telemetryAPI.Verify(mock => mock.RecordStats(It.IsAny<Stats>()), Times.AtLeastOnce);
+            _telemetryAPI.Verify(mock => mock.RecordConfigInitAsync(It.IsAny<Config>()), Times.Once);
+            _telemetryAPI.Verify(mock => mock.RecordStatsAsync(It.IsAny<Stats>()), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.PopAuthRejections(), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.GetEventsStats(EventsEnum.EventsDropped), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.GetEventsStats(EventsEnum.EventsQueued), Times.AtLeastOnce);
@@ -90,7 +89,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
         }
 
         [TestMethod]
-        public async Task StopShouldPostStats()
+        public void StopShouldPostStats()
         {
             // Arrange.
             MockRecordStats();
@@ -101,11 +100,11 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 
             // Act.
             _telemetrySyncTask.Start();
-            await _telemetrySyncTask.StopAsync();
+            _telemetrySyncTask.Stop();
             Thread.Sleep(2000);
 
             // Assert.
-            _telemetryAPI.Verify(mock => mock.RecordStats(It.IsAny<Stats>()), Times.AtLeastOnce);
+            _telemetryAPI.Verify(mock => mock.RecordStatsAsync(It.IsAny<Stats>()), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.PopAuthRejections(), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.GetEventsStats(EventsEnum.EventsDropped), Times.AtLeastOnce);
             _telemetryStorage.Verify(mock => mock.GetEventsStats(EventsEnum.EventsQueued), Times.AtLeastOnce);
