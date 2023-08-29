@@ -49,7 +49,7 @@ namespace Splitio.Integration_tests
                 client.Destroy();
 
                 // Validate impressions in listener.
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -116,7 +116,7 @@ namespace Splitio.Integration_tests
                 client.Destroy();
 
                 // Validate impressions in listener.
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -165,7 +165,7 @@ namespace Splitio.Integration_tests
                 Assert.AreEqual("control", result);
 
                 // Validate impressions in listener.
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -216,7 +216,7 @@ namespace Splitio.Integration_tests
                 Assert.AreEqual("{\"version\":\"v1\"}", result4.Config);
 
                 // Validate impressions.
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -288,7 +288,7 @@ namespace Splitio.Integration_tests
                 Assert.AreEqual("{\"version\":\"v2\"}", result4.Config);
 
                 // Validate impressions.
-                Thread.Sleep(3000);
+                Thread.Sleep(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -335,7 +335,7 @@ namespace Splitio.Integration_tests
                 Assert.AreEqual("control", result);
 
                 // Validate impressions in listener.
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -377,7 +377,7 @@ namespace Splitio.Integration_tests
                 client.Destroy();
 
                 // Validate impressions.
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -440,7 +440,7 @@ namespace Splitio.Integration_tests
                 client.Destroy();
 
                 // Validate impressions.
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -505,7 +505,7 @@ namespace Splitio.Integration_tests
                 client.Destroy();
 
                 // Validate impressions.
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -568,7 +568,7 @@ namespace Splitio.Integration_tests
                 Assert.IsNull(result["Test_Save_1"].Config);
 
                 // Validate impressions.
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -639,7 +639,7 @@ namespace Splitio.Integration_tests
                 client.Destroy();
 
                 // Validate impressions.
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -708,7 +708,7 @@ namespace Splitio.Integration_tests
                 client.Destroy();
 
                 // Validate impressions.
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
