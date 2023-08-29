@@ -43,7 +43,7 @@ namespace Splitio.Telemetry.Common
             _factoryInstantiationsService = factoryInstantiationsService;
             _log = WrapperAdapter.Instance().GetLogger(typeof(TelemetrySyncTask));
             _statsTask = statsTask;
-            _statsTask.SetFunction(RecordStatsAsync);
+            _statsTask.SetAction(RecordStats);
             _initTask = initTask;
         }
 
@@ -56,7 +56,7 @@ namespace Splitio.Telemetry.Common
         public void Stop()
         {
             _statsTask.Stop();
-            RecordStatsAsync();       
+            RecordStats();
         }
 
         public void RecordConfigInit(long timeUntilSDKReady)
@@ -113,7 +113,7 @@ namespace Splitio.Telemetry.Common
             }
         }
 
-        private async Task RecordStatsAsync()
+        private void RecordStats()
         {
             try
             {
@@ -140,7 +140,7 @@ namespace Splitio.Telemetry.Common
                     UpdatesFromSSE = _telemetryStorageConsumer.PopUpdatesFromSSE()
                 };
 
-                await _telemetryAPI.RecordStatsAsync(stats);
+                _telemetryAPI.RecordStatsAsync(stats);
             }
             catch (Exception ex)
             {
