@@ -21,8 +21,6 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
     [TestClass]
     public class SplitsWorkerTests
     {
-        private readonly IWrapperAdapter wrapperAdapter = WrapperAdapter.Instance();
-
         private readonly Mock<ISynchronizer> _synchronizer;
         private readonly Mock<ISplitCache> _featureFlagCache;
         private readonly Mock<ISplitParser> _featureFlagParser;
