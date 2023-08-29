@@ -140,7 +140,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _pushManager.Verify(mock => mock.StartAsync(), Times.Once);
 
             _streamingStatusQueue.Add(StreamingStatus.STREAMING_READY);
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             _sseHandler.Verify(mock => mock.StartWorkers(), Times.Once);
             _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
@@ -169,7 +169,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _pushManager.Verify(mock => mock.StartAsync(), Times.Once);
 
             _streamingStatusQueue.Add(StreamingStatus.STREAMING_OFF);
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             _pushManager.Verify(mock => mock.Stop(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
@@ -196,7 +196,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _pushManager.Verify(mock => mock.StartAsync(), Times.Once);
 
             _streamingStatusQueue.Add(StreamingStatus.STREAMING_BACKOFF);
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             _backoff.Verify(mock => mock.GetInterval(true), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
@@ -222,7 +222,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Act & Assert.
             _streamingStatusQueue.Add(StreamingStatus.STREAMING_DOWN);
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
