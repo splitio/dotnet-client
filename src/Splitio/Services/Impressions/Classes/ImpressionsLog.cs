@@ -26,7 +26,7 @@ namespace Splitio.Services.Impressions.Classes
             _apiClient = apiClient;
             _impressionsCache = (impressionsCache as ISimpleProducerCache<KeyImpression>) ?? new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(maximumNumberOfKeysToCache));            
             _task = task;
-            _task.SetFunction(async () => await SendBulkImpressionsAsync());
+            _task.SetFunction(SendBulkImpressionsAsync);
         }
 
         public void Start()

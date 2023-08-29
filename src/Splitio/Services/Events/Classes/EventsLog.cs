@@ -36,7 +36,7 @@ namespace Splitio.Services.Events.Classes
             _apiClient = apiClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _task = task;
-            _task.SetFunction(async () => await SendBulkEventsAsync());
+            _task.SetFunction(SendBulkEventsAsync);
         }
 
         public void Start()
@@ -63,7 +63,6 @@ namespace Splitio.Services.Events.Classes
 
             if (_wrappedEventsCache.HasReachedMaxSize() || _acumulateSize >= MAX_SIZE_BYTES)
             {
-                // TODO
                 SendBulkEventsAsync();
             }
         }

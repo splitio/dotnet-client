@@ -32,10 +32,10 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var segments = new ConcurrentDictionary<string, Segment>();
             var cache = new InMemorySegmentCache(segments);
             var segmentTaskQueue = new BlockingCollection<SelfRefreshingSegment>(new ConcurrentQueue<SelfRefreshingSegment>());
-            var taskManager = new TasksManager();
-            var workerTask = taskManager.NewPeriodicTask(gates, Splitio.Enums.Task.SegmentsWorkerFetcher, 0);
+            var taskManager = new TasksManager(gates);
+            var workerTask = taskManager.NewPeriodicTask(Splitio.Enums.Task.SegmentsWorkerFetcher, 0);
             var worker = new SegmentTaskWorker(5, segmentTaskQueue, gates, workerTask);
-            var segmentsTask = taskManager.NewPeriodicTask(gates, Splitio.Enums.Task.SegmentsFetcher, 10);
+            var segmentsTask = taskManager.NewPeriodicTask(Splitio.Enums.Task.SegmentsFetcher, 10);
             var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, cache, segmentTaskQueue, segmentsTask, worker, gates);
             segmentFetcher.Start();
 

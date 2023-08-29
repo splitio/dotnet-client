@@ -57,19 +57,19 @@ namespace Splitio.Services.Tasks
 
         public void Stop()
         {
-            if (!IsRunning())
-                return;
-
-            _cts.Cancel();
-
-            if (_task != null && _task.Status == TaskStatus.Running)
+            try
             {
-                _log.Debug($"Task {_taskName} is still running, forcing to stop.");
-                _ = _task.Exception;
-            }
+                if (!IsRunning())
+                    return;
 
-            _running = false;
-            _cts.Dispose();
+                _cts.Cancel();
+                _running = false;
+                _cts.Dispose();
+            }
+            catch (Exception ex)
+            {
+                _log.Debug($"Somenthing went wrong stopping {_taskName} Task.", ex);
+            }
         }
 
         public bool IsRunning()

@@ -37,8 +37,8 @@ namespace Splitio_Tests.Unit_Tests.Events
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _statusManager = new Mock<IStatusManager>();
 
-            var tasksManager = new TasksManager();
-            var task = tasksManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.EventsSender, 1);
+            var tasksManager = new TasksManager(_statusManager.Object);
+            var task = tasksManager.NewPeriodicTask(Splitio.Enums.Task.EventsSender, 1);
 
             _eventLog = new EventsLog(_apiClientMock.Object, _eventsCache, _telemetryRuntimeProducer.Object, task, 10);
         }
@@ -231,8 +231,8 @@ namespace Splitio_Tests.Unit_Tests.Events
             // Arrange.
             var eventToLog = new Event { key = "Key1", eventTypeId = "testEventType", trafficTypeName = "testTrafficType", timestamp = 7000 };
             var wrappedEventsCache = new Mock<ISimpleProducerCache<WrappedEvent>>();
-            var tasksManager = new TasksManager();
-            var task = tasksManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.EventsSender, 1);
+            var tasksManager = new TasksManager(_statusManager.Object);
+            var task = tasksManager.NewPeriodicTask(Splitio.Enums.Task.EventsSender, 1);
 
             var eventLog = new EventsLog(_apiClientMock.Object, wrappedEventsCache.Object, _telemetryRuntimeProducer.Object, task, 10);
 

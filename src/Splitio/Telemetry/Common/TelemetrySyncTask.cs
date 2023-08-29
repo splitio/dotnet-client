@@ -43,7 +43,7 @@ namespace Splitio.Telemetry.Common
             _factoryInstantiationsService = factoryInstantiationsService;
             _log = WrapperAdapter.Instance().GetLogger(typeof(TelemetrySyncTask));
             _statsTask = statsTask;
-            _statsTask.SetFunction(async () => await RecordStatsAsync());
+            _statsTask.SetFunction(RecordStatsAsync);
             _initTask = initTask;
         }
 
@@ -67,7 +67,6 @@ namespace Splitio.Telemetry.Common
         #endregion
 
         #region Private Methods
-        // TODO: timeUntilSDKReady
         private async Task RecordInitAsync(long timeUntilSDKReady)
         {
             try
@@ -98,7 +97,7 @@ namespace Splitio.Telemetry.Common
                     OperationMode = (int)_configurationOptions.Mode,
                     ImpressionsQueueSize = _configurationOptions.TreatmentLogSize,
                     Tags = _telemetryStorageConsumer.PopTags().ToList(),
-                    TimeUntilSDKReady = CurrentTimeHelper.CurrentTimeMillis() - _configurationOptions.SdkStartTime, // timeUntilSDKReady
+                    TimeUntilSDKReady = timeUntilSDKReady,
                     ActiveFactories = _factoryInstantiationsService.GetActiveFactories(),
                     RedundantActiveFactories = _factoryInstantiationsService.GetRedundantActiveFactories(),
                     Storage = Constants.StorageType.Memory,

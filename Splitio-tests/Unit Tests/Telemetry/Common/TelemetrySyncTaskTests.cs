@@ -41,9 +41,9 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
         public void StartShouldPostConfigAndStats()
         {
             // Arrange.
-            var tasksManager = new TasksManager();
-            var statsTask = tasksManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.TelemetryStats, 500);
-            var initTask = tasksManager.NewOnTimeTask(_statusManager.Object, Splitio.Enums.Task.TelemetryInit);
+            var tasksManager = new TasksManager(_statusManager.Object);
+            var statsTask = tasksManager.NewPeriodicTask(Splitio.Enums.Task.TelemetryStats, 500);
+            var initTask = tasksManager.NewOnTimeTask(Splitio.Enums.Task.TelemetryInit);
 
             MockRecordStats();
             var config = MockConfigInit();
@@ -93,9 +93,9 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
         {
             // Arrange.
             MockRecordStats();
-            var tasksManager = new TasksManager();
-            var statsTask = tasksManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.TelemetryStats, 500);
-            var initTask = tasksManager.NewOnTimeTask(_statusManager.Object, Splitio.Enums.Task.TelemetryInit);
+            var tasksManager = new TasksManager(_statusManager.Object);
+            var statsTask = tasksManager.NewPeriodicTask(Splitio.Enums.Task.TelemetryStats, 500);
+            var initTask = tasksManager.NewOnTimeTask(Splitio.Enums.Task.TelemetryInit);
             _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, new SelfRefreshingConfig(), _factoryInstantiationsService.Object, statsTask, initTask);
 
             // Act.

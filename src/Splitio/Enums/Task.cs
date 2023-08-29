@@ -19,6 +19,7 @@
         Track,
         SDKInitialization,
         SSEConnect,
-        OnStreamingStatusTask
+        OnStreamingStatusTask,
+        ImpressionListener
     }
 }

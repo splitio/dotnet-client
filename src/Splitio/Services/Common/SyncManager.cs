@@ -59,9 +59,9 @@ namespace Splitio.Services.Common
             _ctsStreaming = new CancellationTokenSource();
             _backOff = backOff;
             _startupTask = startupTask;
-            _startupTask.SetFunction(async () => await StartupLogicAsync());
+            _startupTask.SetFunction(StartupLogicAsync);
             _onStreamingStatusTask = onStreamingStatusTask;
-            _onStreamingStatusTask.SetFunction(async () => await OnStreamingStatusAsync());
+            _onStreamingStatusTask.SetFunction(OnStreamingStatusAsync);
         }
 
         #region Public Methods

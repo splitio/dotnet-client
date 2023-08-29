@@ -2,6 +2,7 @@
 using Moq;
 using Splitio.CommonLibraries;
 using Splitio.Domain;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
@@ -24,6 +25,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         private readonly Mock<IImpressionsCounter> _impressionsCounter;
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private readonly Mock<IUniqueKeysTracker> _uniqueKeysTracker;
+        private readonly Mock<IStatusManager> _statusManager;
         private readonly ITasksManager _tasksManager;
 
         public ImpressionsManagerTests()
@@ -34,8 +36,9 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _impressionsCounter = new Mock<IImpressionsCounter>();
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _uniqueKeysTracker = new Mock<IUniqueKeysTracker>();
+            _statusManager = new Mock<IStatusManager>();
 
-            _tasksManager = new TasksManager();
+            _tasksManager = new TasksManager(_statusManager.Object);
         }
 
         [TestMethod]

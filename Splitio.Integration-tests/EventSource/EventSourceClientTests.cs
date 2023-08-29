@@ -312,8 +312,8 @@ namespace Splitio.Integration_tests.EventSource
             var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
             var notificationManagerKeeper = new NotificationManagerKeeper(telemetryRuntimeProducer, streamingStatusQueue);
             var statusManager = new InMemoryReadinessGatesCache();
-            var tasksManager = new TasksManager();
-            var task = tasksManager.NewOnTimeTask(statusManager, Enums.Task.SSEConnect);
+            var tasksManager = new TasksManager(statusManager);
+            var task = tasksManager.NewOnTimeTask(Enums.Task.SSEConnect);
 
             var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, telemetryRuntimeProducer, notificationManagerKeeper, statusManager, task);
             eventSourceClient.EventReceived += delegate (object sender, EventReceivedEventArgs e)

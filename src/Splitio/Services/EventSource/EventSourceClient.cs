@@ -57,7 +57,7 @@ namespace Splitio.Services.EventSource
             _statusManager = statusManager;
             _firstEvent = true;
             _connectTask = connectTask;
-            _connectTask.SetFunction(async () => await ConnectAsync());
+            _connectTask.SetFunction(ConnectAsync);
             _log = WrapperAdapter.Instance().GetLogger(typeof(EventSourceClient));
         }
         

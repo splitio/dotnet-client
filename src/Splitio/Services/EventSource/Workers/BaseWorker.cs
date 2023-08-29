@@ -19,7 +19,7 @@ namespace Splitio.Services.EventSource.Workers
             _name = name;
             _log = log;
             _task = task;
-            _task.SetFunction(async () => await ExecuteAsync());
+            _task.SetFunction(ExecuteAsync);
         }
 
         public void Start()

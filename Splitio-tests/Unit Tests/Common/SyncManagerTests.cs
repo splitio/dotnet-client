@@ -9,7 +9,6 @@ using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Storages;
 using System.Collections.Concurrent;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Common
 {
@@ -29,14 +28,13 @@ namespace Splitio_Tests.Unit_Tests.Common
 
         public SyncManagerTests()
         {
-            _taskManager = new TasksManager();
-
+            _statusManager = new Mock<IStatusManager>();
+            _taskManager = new TasksManager(_statusManager.Object);
             _synchronizer = new Mock<ISynchronizer>();
             _pushManager = new Mock<IPushManager>();
             _sseHandler = new Mock<ISSEHandler>();
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _telemetrySyncTask = new Mock<ITelemetrySyncTask>();
-            _statusManager = new Mock<IStatusManager>();
             _backoff = new Mock<IBackOff>();
             _streamingStatusQueue = new BlockingCollection<StreamingStatus>(new ConcurrentQueue<StreamingStatus>());
         }
@@ -233,8 +231,8 @@ namespace Splitio_Tests.Unit_Tests.Common
 
         private ISyncManager GetSyncManager(bool streamingEnabled)
         {
-            var startupTask = _taskManager.NewOnTimeTask(_statusManager.Object, Splitio.Enums.Task.SDKInitialization);
-            var streamingStatusTask = _taskManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.OnStreamingStatusTask, 0);
+            var startupTask = _taskManager.NewOnTimeTask(Splitio.Enums.Task.SDKInitialization);
+            var streamingStatusTask = _taskManager.NewPeriodicTask(Splitio.Enums.Task.OnStreamingStatusTask, 0);
 
             return new SyncManager(streamingEnabled,
                 _synchronizer.Object,

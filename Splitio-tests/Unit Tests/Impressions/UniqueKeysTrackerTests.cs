@@ -28,7 +28,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _filterAdapter = new Mock<IFilterAdapter>();
             _senderAdapter = new Mock<IImpressionsSenderAdapter>();
             _statusManager = new Mock<IStatusManager>();
-            _tasksManager = new TasksManager();
+            _tasksManager = new TasksManager(_statusManager.Object);
             _cache = new ConcurrentDictionary<string, HashSet<string>>();
         }
 
@@ -39,8 +39,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _cache.Clear();
 
             var config = new ComponentConfig(5, 5);
-            var task = _tasksManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.MTKsSender, 1);
-            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.CacheLongTermCleaning, 3600);
+            var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 1);
+            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
             _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask);
 
             // Act.
@@ -68,8 +68,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _cache.Clear();
 
             var config = new ComponentConfig(5, 5);
-            var task = _tasksManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.MTKsSender, 1);
-            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.CacheLongTermCleaning, 3600);
+            var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 1);
+            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
             _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask);
 
             _filterAdapter
@@ -111,8 +111,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _cache.Clear();
 
             var config = new ComponentConfig(6, 3);
-            var task = _tasksManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.MTKsSender, 1);
-            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.CacheLongTermCleaning, 3600);
+            var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 1);
+            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
             _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask);
 
             // Act && Assert.

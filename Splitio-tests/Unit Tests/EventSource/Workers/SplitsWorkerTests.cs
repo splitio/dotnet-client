@@ -43,8 +43,8 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _statusManager = new Mock<IStatusManager>();
             _queue = new BlockingCollection<SplitChangeNotification>(new ConcurrentQueue<SplitChangeNotification>());
 
-            var tasksManager = new TasksManager();
-            var task = tasksManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.FeatureFlagsWorker, 0);
+            var tasksManager = new TasksManager(_statusManager.Object);
+            var task = tasksManager.NewPeriodicTask(Splitio.Enums.Task.FeatureFlagsWorker, 0);
 
             _splitsWorker = new SplitsWorker(_synchronizer.Object, _featureFlagCache.Object, _featureFlagParser.Object, _queue, _telemetryRuntimeProducer.Object, _segmentFetcher.Object, task);
         }

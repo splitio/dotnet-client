@@ -21,8 +21,8 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _synchronizer = new Mock<ISynchronizer>();
             _statusManager = new Mock<IStatusManager>();
 
-            var tasksManager = new TasksManager();
-            var task = tasksManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.SegmentsWorker, 0);
+            var tasksManager = new TasksManager(_statusManager.Object);
+            var task = tasksManager.NewPeriodicTask(Splitio.Enums.Task.SegmentsWorker, 0);
             
             _segmentsWorker = new SegmentsWorker(_synchronizer.Object,task);
         }

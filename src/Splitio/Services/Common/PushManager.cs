@@ -37,7 +37,7 @@ namespace Splitio.Services.Common
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _notificationManagerKeeper = notificationManagerKeeper;
             _refreshTokenTask = periodicTask;
-            _refreshTokenTask.SetFunction(async () => await RefreshTokenLogicAsync());
+            _refreshTokenTask.SetFunction(RefreshTokenLogicAsync);
             _statusManager = statusManager;
         }
 
@@ -54,8 +54,7 @@ namespace Splitio.Services.Common
 
                 if (!_statusManager.IsDestroyed() && response.PushEnabled.Value && _sseHandler.Start(response.Token, response.Channels))
                 {
-                    //_intervalToken = response.Expiration.Value;
-                    _intervalToken = 60;
+                    _intervalToken = response.Expiration.Value;
                     _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.TokenRefresh, CalcularteNextTokenExpiration(_intervalToken)));
                     return;
                 }

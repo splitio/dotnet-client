@@ -5,7 +5,6 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.Tasks;
 using System.Collections.Generic;
 using System.Threading;
@@ -29,8 +28,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _queue = new BlockingQueue<KeyImpression>(10);
             _impressionsCache = new InMemorySimpleCache<KeyImpression>(_queue);
 
-            var tasksManager = new TasksManager();
-            var task = tasksManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.ImpressionsSender, 1);
+            var tasksManager = new TasksManager(_statusManager.Object);
+            var task = tasksManager.NewPeriodicTask(Splitio.Enums.Task.ImpressionsSender, 1);
 
             _impressionsLog = new ImpressionsLog(_apiClientMock.Object, _impressionsCache, task, 10);
         }
