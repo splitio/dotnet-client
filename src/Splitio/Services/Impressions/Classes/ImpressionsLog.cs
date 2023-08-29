@@ -6,6 +6,7 @@ using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.Tasks;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -25,7 +26,8 @@ namespace Splitio.Services.Impressions.Classes
             _apiClient = apiClient;
             _impressionsCache = (impressionsCache as ISimpleProducerCache<KeyImpression>) ?? new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(maximumNumberOfKeysToCache));            
             _task = task;
-            _task.SetAction(SendBulkImpressions);
+            _task.SetFunction(SendBulkImpressionsAsync);
+            _task.OnStop(SendBulkImpressionsAsync);
         }
 
         public void Start()
@@ -36,7 +38,6 @@ namespace Splitio.Services.Impressions.Classes
         public void Stop()
         {
             _task.Stop();
-            SendBulkImpressions();
         }
 
         public int Log(IList<KeyImpression> impressions)
@@ -44,7 +45,7 @@ namespace Splitio.Services.Impressions.Classes
             return _impressionsCache.AddItems(impressions);
         }
 
-        private void SendBulkImpressions()
+        private async Task SendBulkImpressionsAsync()
         {
             if (_impressionsCache.HasReachedMaxSize())
             {
@@ -57,7 +58,7 @@ namespace Splitio.Services.Impressions.Classes
             {
                 try
                 {
-                    _apiClient.SendBulkImpressionsAsync(impressions);
+                    await _apiClient.SendBulkImpressionsAsync(impressions);
                 }
                 catch (Exception e)
                 {

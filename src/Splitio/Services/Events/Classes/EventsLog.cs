@@ -36,7 +36,8 @@ namespace Splitio.Services.Events.Classes
             _apiClient = apiClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _task = task;
-            _task.SetAction(SendBulkEvents);
+            _task.SetFunction(SendBulkEventsAsync);
+            _task.OnStop(SendBulkEventsAsync);
         }
 
         public void Start()
@@ -47,7 +48,6 @@ namespace Splitio.Services.Events.Classes
         public void Stop()
         {
             _task.Stop();
-            SendBulkEvents();
         }
 
         public void Log(WrappedEvent wrappedEvent)
@@ -63,11 +63,11 @@ namespace Splitio.Services.Events.Classes
 
             if (_wrappedEventsCache.HasReachedMaxSize() || _acumulateSize >= MAX_SIZE_BYTES)
             {
-                SendBulkEvents();
+                SendBulkEventsAsync();
             }
         }
 
-        private void SendBulkEvents()
+        private async Task SendBulkEventsAsync()
         {
             if (_wrappedEventsCache.IsEmpty()) return;
 
@@ -86,7 +86,7 @@ namespace Splitio.Services.Events.Classes
                     .Select(x => x.Event)
                     .ToList();
 
-                _apiClient.SendBulkEventsAsync(events);
+                await _apiClient.SendBulkEventsAsync(events);
 
                 _acumulateSize = 0;
             }

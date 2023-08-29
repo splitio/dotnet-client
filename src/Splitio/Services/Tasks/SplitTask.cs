@@ -17,6 +17,7 @@ namespace Splitio.Services.Tasks
         protected CancellationTokenSource _cts;
         protected Action _action;
         protected Func<Task> _function;
+        protected Func<Task> _onStop;
         protected Task _task;
         protected int _interval;
         protected bool _running;
@@ -65,6 +66,9 @@ namespace Splitio.Services.Tasks
                 _cts.Cancel();
                 _running = false;
                 _cts.Dispose();
+
+                if (_onStop != null)
+                    Task.Factory.StartNew(_onStop.Invoke);
             }
             catch (Exception ex)
             {
@@ -90,6 +94,11 @@ namespace Splitio.Services.Tasks
         public void SetInterval(int interval)
         {
             _interval = interval;
+        }
+
+        public void OnStop(Func<Task> function)
+        {
+            _onStop = function;
         }
 
         protected abstract Task DoWorkAsync();

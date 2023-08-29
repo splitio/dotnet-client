@@ -9,7 +9,8 @@ namespace Splitio.Services.Tasks
         void Stop();
         void SetAction(Action action);
         void SetFunction(Func<Task> function);
-        bool IsRunning();
         void SetInterval(int interval);
+        void OnStop(Func<Task> function);
+        bool IsRunning();
     }
 }
