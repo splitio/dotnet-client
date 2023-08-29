@@ -272,7 +272,7 @@ namespace Splitio.Integration_tests
                 client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
                 client.Destroy();
-                Thread.Sleep(3000);
+                Thread.Sleep(5000);
 
                 // Assert.
                 var sentImpressions = GetImpressionsSentBackend(httpClientMock);
@@ -317,7 +317,7 @@ namespace Splitio.Integration_tests
                 client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
                 client.Destroy();
-                Thread.Sleep(3000);
+                Thread.Sleep(5000);
 
                 // Assert.
                 var sentImpressions = GetImpressionsSentBackend(httpClientMock);
@@ -359,7 +359,7 @@ namespace Splitio.Integration_tests
                 client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
                 client.Destroy();
-                Thread.Sleep(3000);
+                Thread.Sleep(5000);
 
                 // Assert.
                 var sentImpressions = GetImpressionsSentBackend(httpClientMock);
@@ -402,7 +402,7 @@ namespace Splitio.Integration_tests
                 // Act.
                 var result = client.GetTreatment("nico_test", "FACUNDO_TEST");
 
-                Thread.Sleep(3000);
+                Thread.Sleep(5000);
 
                 // Assert.
                 Assert.AreEqual("on", result);
