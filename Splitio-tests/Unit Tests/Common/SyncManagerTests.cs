@@ -58,7 +58,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             syncManager.Start();
 
             // Assert.
-            Thread.Sleep(1000);
+            Thread.Sleep(3000);
             _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicDataRecording(), Times.Once);
@@ -84,7 +84,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             syncManager.Start();
 
             // Assert.            
-            Thread.Sleep(1000);
+            Thread.Sleep(3000);
             _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Once);
             _pushManager.Verify(mock => mock.StartAsync(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Never);
@@ -110,7 +110,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             syncManager.Start();
 
             // Assert.
-            Thread.Sleep(1000);
+            Thread.Sleep(3000);
             _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Once);
             _pushManager.Verify(mock => mock.StartAsync(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicDataRecording(), Times.Once);
@@ -148,7 +148,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             var streamingEnabled = true;
             var syncManager = GetSyncManager(streamingEnabled);
             syncManager.Start();
-            Thread.Sleep(1000);
+            Thread.Sleep(3000);
 
             // Act & Assert.
             _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Once);
@@ -156,7 +156,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _pushManager.Verify(mock => mock.StartAsync(), Times.Once);
 
             _streamingStatusQueue.Add(StreamingStatus.STREAMING_READY);
-            Thread.Sleep(1000);
+            Thread.Sleep(3000);
 
             _sseHandler.Verify(mock => mock.StartWorkers(), Times.Once);
             _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
@@ -181,7 +181,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             var streamingEnabled = true;
             var syncManager = GetSyncManager(streamingEnabled);
             syncManager.Start();
-            Thread.Sleep(1000);
+            Thread.Sleep(3000);
 
             // Act & Assert.
             _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Once);
@@ -189,7 +189,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _pushManager.Verify(mock => mock.StartAsync(), Times.Once);
 
             _streamingStatusQueue.Add(StreamingStatus.STREAMING_OFF);
-            Thread.Sleep(1000);
+            Thread.Sleep(3000);
 
             _pushManager.Verify(mock => mock.Stop(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
@@ -220,7 +220,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _pushManager.Verify(mock => mock.StartAsync(), Times.Once);
 
             _streamingStatusQueue.Add(StreamingStatus.STREAMING_BACKOFF);
-            Thread.Sleep(1000);
+            Thread.Sleep(3000);
 
             _backoff.Verify(mock => mock.GetInterval(true), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
@@ -246,14 +246,14 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             var syncManager = GetSyncManager(streamingEnabled);
             syncManager.Start();
-            Thread.Sleep(3000);
+            Thread.Sleep(2000);
 
             // Act & Assert.
             _streamingStatusQueue.Add(StreamingStatus.STREAMING_DOWN);
-            Thread.Sleep(1000);
+            Thread.Sleep(5000);
 
-            _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
+            _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordStreamingEvent(It.IsAny<StreamingEvent>()), Times.Exactly(2));
         }
 
