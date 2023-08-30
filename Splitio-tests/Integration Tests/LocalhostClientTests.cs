@@ -72,12 +72,12 @@ namespace Splitio_Tests.Integration_Tests
             var result6 = client.GetTreatment("id", "other_test_feature2");
 
             //Assert
-            Assert.AreEqual("off", result1); //default treatment
-            Assert.AreEqual("off", result2); //default treatment
-            Assert.AreEqual("on", result3); //default treatment
-            Assert.AreEqual("on", result4); //default treatment
-            Assert.AreEqual("off", result5); //default treatment
-            Assert.AreEqual("off", result6); //default treatment
+            Assert.AreEqual("off", result1, "1"); //default treatment
+            Assert.AreEqual("off", result2, "2"); //default treatment
+            Assert.AreEqual("on", result3, "3"); //default treatment
+            Assert.AreEqual("on", result4, "4"); //default treatment
+            Assert.AreEqual("off", result5, "5"); //default treatment
+            Assert.AreEqual("off", result6, "6"); //default treatment
         }
 
         [DeploymentItem(@"Resources\test.splits")]

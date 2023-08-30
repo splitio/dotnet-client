@@ -38,36 +38,34 @@ namespace Splitio.Services.Impressions.Classes
 
         protected override void SendBulkData()
         {
-            lock (_lock)
+            try
             {
                 var impressions = new ConcurrentDictionary<KeyCache, int>(_cache);
+
                 _cache.Clear();
 
                 if (impressions.Count <= 0) return;
 
-                try
+                var values = impressions
+                    .Select(x => new ImpressionsCountModel(x.Key, x.Value))
+                    .ToList();
+
+                if (values.Count <= _maxBulkSize)
                 {
-                    var values = impressions
-                        .Select(x => new ImpressionsCountModel(x.Key, x.Value))
-                        .ToList();
-
-                    if (values.Count <= _maxBulkSize)
-                    {
-                        _senderAdapter.RecordImpressionsCount(values);
-                        return;
-                    }
-
-                    while (values.Count > 0)
-                    {
-                        var bulkToPost = Util.Helper.TakeFromList(values, _maxBulkSize);
-
-                        _senderAdapter.RecordImpressionsCount(bulkToPost);
-                    }
+                    _senderAdapter.RecordImpressionsCount(values);
+                    return;
                 }
-                catch (Exception e)
+
+                while (values.Count > 0)
                 {
-                    Logger.Error("Exception caught sending impressions count.", e);
+                    var bulkToPost = Util.Helper.TakeFromList(values, _maxBulkSize);
+
+                    _senderAdapter.RecordImpressionsCount(bulkToPost);
                 }
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Exception caught sending impressions count.", e);
             }
         }
     }

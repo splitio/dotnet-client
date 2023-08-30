@@ -71,7 +71,7 @@ namespace Splitio.Services.Impressions.Classes
 
         protected override void SendBulkData()
         {
-            lock (_lock)
+            try
             {
                 var uniques = new ConcurrentDictionary<string, HashSet<string>>(_cache);
 
@@ -79,29 +79,26 @@ namespace Splitio.Services.Impressions.Classes
 
                 if (!uniques.Any()) return;
 
-                try
+                var values = uniques
+                    .Select(v => new Mtks(v.Key, v.Value))
+                    .ToList();
+
+                if (values.Count <= _maxBulkSize)
                 {
-                    var values = uniques
-                        .Select(v => new Mtks(v.Key, v.Value))
-                        .ToList();
-
-                    if (values.Count <= _maxBulkSize)
-                    {
-                        _senderAdapter.RecordUniqueKeys(values);
-                        return;
-                    }
-
-                    while (values.Count > 0)
-                    {
-                        var bulkToPost = Util.Helper.TakeFromList(values, _maxBulkSize);
-
-                        _senderAdapter.RecordUniqueKeys(bulkToPost);
-                    }
+                    _senderAdapter.RecordUniqueKeys(values);
+                    return;
                 }
-                catch (Exception e)
+
+                while (values.Count > 0)
                 {
-                    _logger.Error("Exception caught sending Unique Keys.", e);
+                    var bulkToPost = Util.Helper.TakeFromList(values, _maxBulkSize);
+
+                    _senderAdapter.RecordUniqueKeys(bulkToPost);
                 }
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Exception caught sending Unique Keys.", e);
             }
         }
         #endregion

@@ -8,8 +8,6 @@ namespace Splitio.Services.Impressions.Classes
         protected readonly int _cacheMaxSize;
         protected readonly int _maxBulkSize;
 
-        protected readonly object _lock = new object();
-
         public TrackerComponent(ComponentConfig config,
             ISplitTask task)
         {
