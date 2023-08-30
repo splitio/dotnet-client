@@ -68,7 +68,7 @@ namespace Splitio.Services.Tasks
                 _cts.Dispose();
 
                 if (_onStop != null)
-                    Task.Factory.StartNew(_onStop.Invoke);
+                    _onStop.Invoke();
             }
             catch (Exception ex)
             {

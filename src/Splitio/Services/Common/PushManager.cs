@@ -101,16 +101,23 @@ namespace Splitio.Services.Common
         #endregion
 
         #region Private Methods
-        private long CalcularteNextTokenExpiration(double time)
+        private static long CalcularteNextTokenExpiration(double time)
         {
             return CurrentTimeHelper.CurrentTimeMillis() + Convert.ToInt64(time * 1000);
         }
 
         private async Task RefreshTokenLogicAsync()
         {
-            _log.Debug("Starting Streaming Refresh Token...");
-            _sseHandler.Stop();
-            await StartAsync();
+            try
+            {
+                _log.Debug("Starting Streaming Refresh Token...");
+                _sseHandler.Stop();
+                await StartAsync();
+            }
+            catch (Exception ex)
+            {
+                _log.Debug($"Somenthing went wrong refreshing streaming token.", ex);
+            }
         }
         #endregion
     }

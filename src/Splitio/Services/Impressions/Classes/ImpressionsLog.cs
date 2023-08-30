@@ -12,7 +12,7 @@ namespace Splitio.Services.Impressions.Classes
 {
     public class ImpressionsLog : IImpressionsLog
     {
-        private readonly ISplitLogger Logger = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsLog));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsLog));
 
         private readonly IImpressionsSdkApiClient _apiClient;
         private readonly ISimpleProducerCache<KeyImpression> _impressionsCache;
@@ -47,23 +47,30 @@ namespace Splitio.Services.Impressions.Classes
 
         private async Task SendBulkImpressionsAsync()
         {
-            if (_impressionsCache.HasReachedMaxSize())
+            try
             {
-                Logger.Warn("Split SDK impressions queue is full. Impressions may have been dropped. Consider increasing capacity.");
+                if (_impressionsCache.HasReachedMaxSize())
+                {
+                    _log.Warn("Split SDK impressions queue is full. Impressions may have been dropped. Consider increasing capacity.");
+                }
+
+                var impressions = _impressionsCache.FetchAllAndClear();
+
+                if (impressions.Count > 0)
+                {
+                    try
+                    {
+                        await _apiClient.SendBulkImpressionsAsync(impressions);
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Error("Exception caught updating impressions.", e);
+                    }
+                }
             }
-
-            var impressions = _impressionsCache.FetchAllAndClear();
-
-            if (impressions.Count > 0)
+            catch (Exception ex)
             {
-                try
-                {
-                    await _apiClient.SendBulkImpressionsAsync(impressions);
-                }
-                catch (Exception e)
-                {
-                    Logger.Error("Exception caught updating impressions.", e);
-                }
+                _log.Debug($"Somenthing went wrong posting impressions.", ex);
             }
         }
     }
