@@ -179,8 +179,7 @@ namespace Splitio.Services.Common
 
                 _statusManager.SetReady();
                 clock.Stop();
-                var timeUntilSDKReady = clock.ElapsedMilliseconds;
-                _telemetrySyncTask.RecordConfigInit(timeUntilSDKReady);
+                _telemetrySyncTask.RecordConfigInit(clock.ElapsedMilliseconds);
                 _synchronizer.StartPeriodicDataRecording();
 
                 if (_streamingEnabled)

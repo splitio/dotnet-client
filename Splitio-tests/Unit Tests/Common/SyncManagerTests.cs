@@ -48,6 +48,10 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Setup(mock => mock.SyncAllAsync())
                 .ReturnsAsync(true);
 
+            _statusManager
+                .Setup(mock => mock.IsDestroyed())
+                .Returns(false);
+
             var syncManager = GetSyncManager(streamingEnabled);
 
             // Act.
@@ -68,6 +72,10 @@ namespace Splitio_Tests.Unit_Tests.Common
             _synchronizer
                 .Setup(mock => mock.SyncAllAsync())
                 .ReturnsAsync(true);
+
+            _statusManager
+                .Setup(mock => mock.IsDestroyed())
+                .Returns(false);
 
             var streamingEnabled = true;
             var syncManager = GetSyncManager(streamingEnabled);
@@ -90,6 +98,10 @@ namespace Splitio_Tests.Unit_Tests.Common
             _synchronizer
                 .Setup(mock => mock.SyncAllAsync())
                 .ReturnsAsync(true);
+
+            _statusManager
+                .Setup(mock => mock.IsDestroyed())
+                .Returns(false);
 
             var streamingEnabled = true;
             var syncManager = GetSyncManager(streamingEnabled);
@@ -129,6 +141,10 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Setup(mock => mock.SyncAllAsync())
                 .ReturnsAsync(true);
 
+            _statusManager
+                .Setup(mock => mock.IsDestroyed())
+                .Returns(false);
+
             var streamingEnabled = true;
             var syncManager = GetSyncManager(streamingEnabled);
             syncManager.Start();
@@ -158,6 +174,10 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Setup(mock => mock.SyncAllAsync())
                 .ReturnsAsync(true);
 
+            _statusManager
+                .Setup(mock => mock.IsDestroyed())
+                .Returns(false);
+
             var streamingEnabled = true;
             var syncManager = GetSyncManager(streamingEnabled);
             syncManager.Start();
@@ -186,9 +206,13 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Setup(mock => mock.SyncAllAsync())
                 .ReturnsAsync(true);
 
+            _statusManager
+                .Setup(mock => mock.IsDestroyed())
+                .Returns(false);
+
             var syncManager = GetSyncManager(streamingEnabled);
             syncManager.Start();
-            Thread.Sleep(1000);
+            Thread.Sleep(3000);
 
             // Act & Assert.
             _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Once);
@@ -216,9 +240,13 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Setup(mock => mock.SyncAllAsync())
                 .ReturnsAsync(true);
 
+            _statusManager
+                .Setup(mock => mock.IsDestroyed())
+                .Returns(false);
+
             var syncManager = GetSyncManager(streamingEnabled);
             syncManager.Start();
-            Thread.Sleep(1000);
+            Thread.Sleep(3000);
 
             // Act & Assert.
             _streamingStatusQueue.Add(StreamingStatus.STREAMING_DOWN);
