@@ -492,7 +492,7 @@ namespace Splitio.Integration_tests
 
                 Thread.Sleep(time);
 
-                time = time + 100;
+                time += 100;
                 sentImpressions = GetImpressionsSentBackend(httpClientMock);
             }
 

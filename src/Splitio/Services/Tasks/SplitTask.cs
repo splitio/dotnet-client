@@ -101,6 +101,11 @@ namespace Splitio.Services.Tasks
             _onStop = function;
         }
 
+        public void OnStop(Action action)
+        {
+            _onStop = async () => { action.Invoke(); await Task.FromResult(0); };
+        }
+
         protected abstract Task DoWorkAsync();
     }
 }

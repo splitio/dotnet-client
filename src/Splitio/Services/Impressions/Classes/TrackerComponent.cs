@@ -18,21 +18,17 @@ namespace Splitio.Services.Impressions.Classes
 
             _task = task;
             _task.SetAction(SendBulkData);
+            _task.OnStop(SendBulkData);
         }
         
         public void Start()
         {
-            if (_task.IsRunning()) return;
-
             StartTask();
         }
 
         public void Stop()
         {
-            if (!_task.IsRunning()) return;
-                
             StopTask();
-            SendBulkData();
         }
 
         protected virtual void StartTask()

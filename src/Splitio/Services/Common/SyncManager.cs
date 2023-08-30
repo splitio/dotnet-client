@@ -77,14 +77,14 @@ namespace Splitio.Services.Common
             _ctsStreaming.Cancel();
             _ctsStreaming.Dispose();
 
-            _startupTask.Stop();
+            _synchronizer.StopPeriodicDataRecording();
+            _synchronizer.StopPeriodicFetching();
             _onStreamingStatusTask.Stop();
             _sseHandler.StopWorkers();
             _pushManager.Stop();
-            _synchronizer.StopPeriodicFetching();
-            _synchronizer.ClearFetchersCache();
-            _synchronizer.StopPeriodicDataRecording();
+            _startupTask.Stop();
             _tasksManager.Destroy();
+            _synchronizer.ClearFetchersCache();
 
             _log.Info("SDK has been destroyed.");
         }
