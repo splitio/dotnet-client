@@ -35,9 +35,9 @@ namespace Splitio.Services.Impressions.Classes
             _task.Start();
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
-            _task.Stop();
+            await _task.StopAsync();
         }
 
         public int Log(IList<KeyImpression> impressions)

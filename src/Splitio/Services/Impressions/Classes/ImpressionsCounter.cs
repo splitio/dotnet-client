@@ -5,6 +5,7 @@ using Splitio.Services.Tasks;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -32,11 +33,11 @@ namespace Splitio.Services.Impressions.Classes
 
             if (_cache.Count >= _cacheMaxSize)
             {
-                SendBulkData();
+                SendBulkDataAsync();
             }
         }
 
-        protected override void SendBulkData()
+        protected override async Task SendBulkDataAsync()
         {
             try
             {
@@ -52,7 +53,7 @@ namespace Splitio.Services.Impressions.Classes
 
                 if (values.Count <= _maxBulkSize)
                 {
-                    _senderAdapter.RecordImpressionsCount(values);
+                    await _senderAdapter.RecordImpressionsCountAsync(values);
                     return;
                 }
 
@@ -60,7 +61,7 @@ namespace Splitio.Services.Impressions.Classes
                 {
                     var bulkToPost = Util.Helper.TakeFromList(values, _maxBulkSize);
 
-                    _senderAdapter.RecordImpressionsCount(bulkToPost);
+                    await _senderAdapter.RecordImpressionsCountAsync(bulkToPost);
                 }
             }
             catch (Exception e)

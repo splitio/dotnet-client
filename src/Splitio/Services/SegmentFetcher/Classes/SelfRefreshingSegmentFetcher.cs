@@ -47,16 +47,14 @@ namespace Splitio.Services.SegmentFetcher.Classes
             _addSegmentToQueueTask.Start();
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
-            _segmentTaskWorker.Stop();
-            _addSegmentToQueueTask.Stop();
+            await _segmentTaskWorker.StopAsync();
+            await _addSegmentToQueueTask.StopAsync();
         }
 
         public void Clear()
         {
-            _segmentTaskWorker.Stop();
-            _addSegmentToQueueTask.Stop();
             _segments.Clear();
             _segmentCache.Clear();
             _segmentTaskQueue.Dispose();

@@ -35,12 +35,12 @@ namespace Splitio.Services.EventSource.Workers
             }
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
             try
             {
                 _cts?.Cancel();
-                _task.Stop();
+                await _task.StopAsync();
                 _cts?.Dispose();
             }
             catch (Exception ex)

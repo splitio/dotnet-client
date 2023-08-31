@@ -70,12 +70,12 @@ namespace Splitio.Services.Common
             }
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
             try
             {
-                _sseHandler.Stop();
-                _refreshTokenTask.Stop();
+                await _sseHandler.StopAsync();
+                await _refreshTokenTask.StopAsync();
             }
             catch (Exception ex)
             {
@@ -83,12 +83,12 @@ namespace Splitio.Services.Common
             }
         }
 
-        public void ScheduleConnectionReset()
+        public async Task ScheduleConnectionResetAsync()
         {
             if (_refreshTokenTask.IsRunning())
             {
                 _log.Debug("ScheduleConnectionReset task is running. Stoping and creating a new one.");
-                _refreshTokenTask.Stop();
+                await _refreshTokenTask.StopAsync();
             }
 
             var intervalTime = Convert.ToInt32(_intervalToken) * 1000;
@@ -111,7 +111,7 @@ namespace Splitio.Services.Common
             try
             {
                 _log.Debug("Starting Streaming Refresh Token...");
-                _sseHandler.Stop();
+                await _sseHandler.StopAsync();
                 await StartAsync();
             }
             catch (Exception ex)

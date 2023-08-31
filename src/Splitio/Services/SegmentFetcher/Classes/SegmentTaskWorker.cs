@@ -47,13 +47,13 @@ namespace Splitio.Services.SegmentFetcher.Classes
             _task.Start();
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
             if (!_task.IsRunning()) return;
 
             _cts.Cancel();
             _cts.Dispose();
-            _task.Stop();
+            await _task.StopAsync();
         }
 
         private void IncrementCounter()

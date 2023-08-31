@@ -125,12 +125,13 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Act.
             syncManager.Shutdown();
+            Thread.Sleep(2000);
 
             // Assert.
-            _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
-            _synchronizer.Verify(mock => mock.StopPeriodicDataRecording(), Times.Once);
+            _synchronizer.Verify(mock => mock.StopPeriodicFetchingAsync(), Times.Once);
+            _synchronizer.Verify(mock => mock.StopPeriodicDataRecordingAsync(), Times.Once);
             _synchronizer.Verify(mock => mock.ClearFetchersCache(), Times.Once);
-            _pushManager.Verify(mock => mock.Stop(), Times.Once);
+            _pushManager.Verify(mock => mock.StopAsync(), Times.Once);
         }
 
         [TestMethod]
@@ -159,10 +160,10 @@ namespace Splitio_Tests.Unit_Tests.Common
             Thread.Sleep(3000);
 
             _sseHandler.Verify(mock => mock.StartWorkers(), Times.Once);
-            _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
+            _synchronizer.Verify(mock => mock.StopPeriodicFetchingAsync(), Times.Once);
             _backoff.Verify(mock => mock.Reset(), Times.Once);
             _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Exactly(2));
-            _pushManager.Verify(mock => mock.ScheduleConnectionReset(), Times.Once);
+            _pushManager.Verify(mock => mock.ScheduleConnectionResetAsync(), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordStreamingEvent(It.IsAny<StreamingEvent>()), Times.Exactly(2));
         }
 
@@ -191,7 +192,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _streamingStatusQueue.Add(StreamingStatus.STREAMING_OFF);
             Thread.Sleep(3000);
 
-            _pushManager.Verify(mock => mock.Stop(), Times.Once);
+            _pushManager.Verify(mock => mock.StopAsync(), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordStreamingEvent(It.IsAny<StreamingEvent>()), Times.Exactly(2));
         }
@@ -225,8 +226,8 @@ namespace Splitio_Tests.Unit_Tests.Common
             _backoff.Verify(mock => mock.GetInterval(true), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordStreamingEvent(It.IsAny<StreamingEvent>()), Times.Exactly(2));
-            _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
-            _pushManager.Verify(mock => mock.Stop(), Times.Once);
+            _sseHandler.Verify(mock => mock.StopWorkersAsync(), Times.Once);
+            _pushManager.Verify(mock => mock.StopAsync(), Times.Once);
             _pushManager.Verify(mock => mock.StartAsync(), Times.Exactly(2));
         }
 
@@ -253,7 +254,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             Thread.Sleep(5000);
 
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
-            _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
+            _sseHandler.Verify(mock => mock.StopWorkersAsync(), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordStreamingEvent(It.IsAny<StreamingEvent>()), Times.Exactly(2));
         }
 

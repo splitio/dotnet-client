@@ -2,6 +2,7 @@
 using Moq;
 using Splitio.Services.EventSource;
 using Splitio.Services.EventSource.Workers;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.EventSource
 {
@@ -46,7 +47,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         }
 
         [TestMethod]
-        public void Stop_ShouldDisconnect()
+        public async Task Stop_ShouldDisconnect()
         {
             // Arrange.
             var token = "fake-test";
@@ -58,11 +59,11 @@ namespace Splitio_Tests.Unit_Tests.EventSource
 
             // Act.
             var result = _sseHandler.Start(token, channels);
-            _sseHandler.Stop();
+            await _sseHandler.StopAsync();
 
             // Assert.
             Assert.IsTrue(result);
-            _eventSourceClient.Verify(mock => mock.Disconnect(), Times.Once);
+            _eventSourceClient.Verify(mock => mock.DisconnectAsync(), Times.Once);
         }
     }
 }

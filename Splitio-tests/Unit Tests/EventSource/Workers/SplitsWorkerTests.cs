@@ -15,6 +15,7 @@ using Splitio.Telemetry.Storages;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 {
@@ -208,7 +209,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         }
 
         [TestMethod]        
-        public void AddToQueue_WithElements_ShouldTriggerFetch()
+        public async Task AddToQueue_WithElements_ShouldTriggerFetch()
         {
             // Act.
             _splitsWorker.Start();
@@ -221,7 +222,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             // Assert
             _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Exactly(4));
 
-            _splitsWorker.Stop();
+            await _splitsWorker.StopAsync();
             _splitsWorker.AddToQueue(new SplitChangeNotification { ChangeNumber = 1585956698486 });
             Thread.Sleep(1000);
             _splitsWorker.AddToQueue(new SplitChangeNotification { ChangeNumber = 1585956698496 });

@@ -42,15 +42,14 @@ namespace Splitio.Services.SplitFetcher.Classes
             _periodicTask.Start();
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
-            _periodicTask.Stop();
+            await _periodicTask.StopAsync();
         }
 
         public void Clear()
         {
             _splitCache.Clear();
-            _periodicTask.Stop();
             _log.Debug("FeatureFlags cache disposed ...");
         }
 
@@ -88,7 +87,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                 catch (Exception e)
                 {
                     _log.Error("Exception caught refreshing splits", e);
-                    Stop();
+                    await StopAsync();
                 }
                 finally
                 {

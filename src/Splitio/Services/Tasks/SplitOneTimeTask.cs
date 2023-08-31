@@ -25,7 +25,7 @@ namespace Splitio.Services.Tasks
                 else
                     _action.Invoke();
 
-                Stop();
+                await StopAsync();
             }
             catch (OperationCanceledException)
             {

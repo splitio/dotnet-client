@@ -45,9 +45,9 @@ namespace Splitio.Services.Events.Classes
             _task.Start();
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
-            _task.Stop();
+            await _task.StopAsync();
         }
 
         public void Log(WrappedEvent wrappedEvent)
@@ -63,6 +63,7 @@ namespace Splitio.Services.Events.Classes
 
             if (_wrappedEventsCache.HasReachedMaxSize() || _acumulateSize >= MAX_SIZE_BYTES)
             {
+                // TODO
                 SendBulkEventsAsync();
             }
         }

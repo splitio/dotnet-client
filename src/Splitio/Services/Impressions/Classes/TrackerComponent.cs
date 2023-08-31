@@ -1,4 +1,5 @@
 ﻿using Splitio.Services.Tasks;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -15,8 +16,8 @@ namespace Splitio.Services.Impressions.Classes
             _maxBulkSize = config.MaxBulkSize;
 
             _task = task;
-            _task.SetAction(SendBulkData);
-            _task.OnStop(SendBulkData);
+            _task.SetFunction(SendBulkDataAsync);
+            _task.OnStop(SendBulkDataAsync);
         }
         
         public void Start()
@@ -24,9 +25,9 @@ namespace Splitio.Services.Impressions.Classes
             StartTask();
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
-            StopTask();
+            await StopTaskAsync();
         }
 
         protected virtual void StartTask()
@@ -34,12 +35,12 @@ namespace Splitio.Services.Impressions.Classes
             _task.Start();
         }
 
-        protected virtual void StopTask()
+        protected virtual async Task StopTaskAsync()
         {
-            _task.Stop();
+            await _task.StopAsync();
         }
 
-        protected abstract void SendBulkData();
+        protected abstract Task SendBulkDataAsync();
     }
 
     public class ComponentConfig

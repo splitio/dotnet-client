@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests
 {
@@ -48,7 +49,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void CheckingMachineIpAndMachineName_WithIPAddressesEnabled_ReturnsIpAndName()
+        public async Task CheckingMachineIpAndMachineName_WithIPAddressesEnabled_ReturnsIpAndName()
         {
             // Arrange.
             LoadSplits();
@@ -71,7 +72,7 @@ namespace Splitio.Integration_tests
             client.Track("redo", "user_3", "event_type_3");
 
             // Assert.
-            Thread.Sleep(1500);
+            await Task.Delay(1500);
 
             // Impressions
             var redisImpressions = _redisAdapter.ListRange("SPLITIO.impressions");
@@ -110,7 +111,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void CheckingMachineIpAndMachineName_WithIPAddressesDisabled_ReturnsNA()
+        public async Task CheckingMachineIpAndMachineName_WithIPAddressesDisabled_ReturnsNA()
         {
             // Arrange.
             
@@ -134,7 +135,7 @@ namespace Splitio.Integration_tests
             client.Track("redo", "user_3", "event_type_3");
 
             // Assert.
-            Thread.Sleep(1500);
+            await Task.Delay(1500);
 
             // Impressions
             var redisImpressions = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.impressions");
@@ -175,7 +176,7 @@ namespace Splitio.Integration_tests
         // TODO: None mode is not supported yet.
         [Ignore]
         [TestMethod]
-        public void GetTreatment_WithImpressionModeInNone_ShouldGetUniqueKeys()
+        public async Task GetTreatment_WithImpressionModeInNone_ShouldGetUniqueKeys()
         {
             // Arrange.
             
@@ -199,7 +200,7 @@ namespace Splitio.Integration_tests
             client.GetTreatment("redo_test", "MAURO_TEST");
 
             client.Destroy();
-            Thread.Sleep(500);
+            await Task.Delay(500);
             var result = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.uniquekeys");
 
             // Assert.
@@ -216,7 +217,7 @@ namespace Splitio.Integration_tests
         // TODO: Optimized mode is not supported yet.
         [Ignore]
         [TestMethod]
-        public void GetTreatment_WithImpressionModeOptimized_ShouldGetImpressionCount()
+        public async Task GetTreatment_WithImpressionModeOptimized_ShouldGetImpressionCount()
         {
             // Arrange.
             
@@ -243,7 +244,7 @@ namespace Splitio.Integration_tests
             client.GetTreatment("redo_test", "MAURO_TEST");
 
             client.Destroy();
-            Thread.Sleep(500);
+            await Task.Delay(500);
             var result = _redisAdapter.HashGetAll($"{UserPrefix}.SPLITIO.impressions.count");
             var redisImpressions = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.impressions");
 
@@ -293,9 +294,9 @@ namespace Splitio.Integration_tests
             return null;
         }
 
-        protected override void AssertSentImpressions(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
+        protected override async Task AssertSentImpressionsAsync(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
         {
-            Thread.Sleep(1500);
+            await Task.Delay(1500);
 
             var redisImpressions = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.impressions");
 
@@ -309,9 +310,9 @@ namespace Splitio.Integration_tests
             }
         }
 
-        protected override void AssertSentEvents(List<EventBackend> eventsExcpected, HttpClientMock httpClientMock = null, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true)
+        protected override async Task AssertSentEventsAsync(List<EventBackend> eventsExcpected, HttpClientMock httpClientMock = null, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true)
         {
-            Thread.Sleep(sleepTime);
+            await Task.Delay(sleepTime);
 
             var redisEvents = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.events");
 

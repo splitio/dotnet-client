@@ -7,7 +7,7 @@ using Splitio.Services.Impressions.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests
 {
@@ -172,7 +172,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void CheckingHeaders_WithIPAddressesEnabled_ReturnsWithIpAndName()
+        public async Task CheckingHeaders_WithIPAddressesEnabled_ReturnsWithIpAndName()
         {
             // Arrange.
             using (var httpClientMock = GetHttpClientMock())
@@ -192,7 +192,7 @@ namespace Splitio.Integration_tests
                 // Assert.
                 Assert.AreEqual("on", treatmentResult);
 
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
 
                 var requests = httpClientMock.GetLogs();
 
@@ -209,7 +209,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void CheckingHeaders_WithIPAddressesDisabled_ReturnsWithoutIpAndName()
+        public async Task CheckingHeaders_WithIPAddressesDisabled_ReturnsWithoutIpAndName()
         {
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
@@ -229,7 +229,7 @@ namespace Splitio.Integration_tests
                 // Assert.
                 Assert.AreEqual("on", treatmentResult);
 
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
 
                 var requests = httpClientMock.GetLogs();
 
@@ -246,7 +246,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void GetTreatments_ValidateDedupeImpressions_Optimized()
+        public async Task GetTreatments_ValidateDedupeImpressions_Optimized()
         {
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
@@ -272,7 +272,7 @@ namespace Splitio.Integration_tests
                 client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
                 client.Destroy();
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
 
                 // Assert.
                 var sentImpressions = GetImpressionsSentBackend(httpClientMock);
@@ -292,7 +292,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void GetTreatments_ValidateDedupeImpressions_Debug()
+        public async Task GetTreatments_ValidateDedupeImpressions_Debug()
         {
             // Arrange.
             using (var httpClientMock = GetHttpClientMock())
@@ -317,7 +317,7 @@ namespace Splitio.Integration_tests
                 client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
                 client.Destroy();
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
 
                 // Assert.
                 var sentImpressions = GetImpressionsSentBackend(httpClientMock);
@@ -334,7 +334,7 @@ namespace Splitio.Integration_tests
         // TODO: None mode is not supported yet.
         [Ignore]
         [TestMethod]
-        public void GetTreatments_WithImpressionsInNoneMode()
+        public async Task GetTreatments_WithImpressionsInNoneMode()
         {
             // Arrange.
             using (var httpClientMock = GetHttpClientMock())
@@ -359,7 +359,7 @@ namespace Splitio.Integration_tests
                 client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
                 client.Destroy();
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
 
                 // Assert.
                 var sentImpressions = GetImpressionsSentBackend(httpClientMock);
@@ -376,7 +376,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void Telemetry_ValidatesConfigInitAndStats()
+        public async Task Telemetry_ValidatesConfigInitAndStats()
         {
             // Arrange.
             using (var httpClientMock = GetHttpClientMock())
@@ -402,7 +402,7 @@ namespace Splitio.Integration_tests
                 // Act.
                 var result = client.GetTreatment("nico_test", "FACUNDO_TEST");
 
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
 
                 // Assert.
                 Assert.AreEqual("on", result);
@@ -476,7 +476,7 @@ namespace Splitio.Integration_tests
             return httpClientMock;
         }
 
-        protected override void AssertSentImpressions(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
+        protected override async Task AssertSentImpressionsAsync(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
         {
             if (sentImpressionsCount <= 0) return;
 
@@ -490,7 +490,7 @@ namespace Splitio.Integration_tests
                     break;
                 }
 
-                Thread.Sleep(time);
+                await Task.Delay(time);
 
                 time += 100;
                 sentImpressions = GetImpressionsSentBackend(httpClientMock);
@@ -522,9 +522,9 @@ namespace Splitio.Integration_tests
                 .Any());
         }
 
-        protected override void AssertSentEvents(List<EventBackend> eventsExpected, HttpClientMock httpClientMock = null, int sleepTime = 5000, int? eventsCount = null, bool validateEvents = true)
+        protected override async Task AssertSentEventsAsync(List<EventBackend> eventsExpected, HttpClientMock httpClientMock = null, int sleepTime = 5000, int? eventsCount = null, bool validateEvents = true)
         {
-            Thread.Sleep(sleepTime);
+            await Task.Delay(sleepTime);
 
             var sentEvents = GetEventsSentBackend(httpClientMock);
 

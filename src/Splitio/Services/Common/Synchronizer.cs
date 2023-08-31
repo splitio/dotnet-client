@@ -87,19 +87,19 @@ namespace Splitio.Services.Common
             _segmentFetcher.Start();
         }
 
-        public void StopPeriodicDataRecording()
+        public async Task StopPeriodicDataRecordingAsync()
         {
-            _telemetrySyncTask.Stop();
-            _impressionsLog.Stop();
-            _eventsLog.Stop();
-            _impressionsCounter.Stop();
-            _uniqueKeysTracker.Stop();
+            await _telemetrySyncTask.StopAsync();
+            await _impressionsLog.StopAsync();
+            await _eventsLog.StopAsync();
+            await _impressionsCounter.StopAsync();
+            await _uniqueKeysTracker.StopAsync();
         }
 
-        public void StopPeriodicFetching()
+        public async Task StopPeriodicFetchingAsync()
         {
-            _splitFetcher.Stop();
-            _segmentFetcher.Stop();
+            await _splitFetcher.StopAsync();
+            await _segmentFetcher.StopAsync();
         }
 
         public void ClearFetchersCache()

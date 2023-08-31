@@ -56,7 +56,7 @@ namespace Splitio.Services.Tasks
             _log.Debug($"Task {_taskName} running.");
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
             try
             {
@@ -68,7 +68,7 @@ namespace Splitio.Services.Tasks
                 _cts.Dispose();
 
                 if (_onStop != null)
-                    _onStop.Invoke();
+                    await _onStop.Invoke();
             }
             catch (Exception ex)
             {

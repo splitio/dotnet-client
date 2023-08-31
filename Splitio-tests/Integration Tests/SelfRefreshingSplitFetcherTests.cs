@@ -11,6 +11,7 @@ using Splitio.Telemetry.Storages;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -32,7 +33,7 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         [DeploymentItem(@"Resources\splits_staging.json")]
         [DeploymentItem(@"Resources\segment_payed.json")]
-        public void ExecuteGetSuccessfulWithResultsFromJSONFile()
+        public async Task ExecuteGetSuccessfulWithResultsFromJSONFile()
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
@@ -54,14 +55,14 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(result.name == "Pato_Test_1");
             Assert.IsTrue(result.conditions.Count > 0);
 
-            selfRefreshingSplitFetcher.Stop();
+            await selfRefreshingSplitFetcher.StopAsync();
             selfRefreshingSplitFetcher.Clear();
         }
 
         [TestMethod]
         [DeploymentItem(@"Resources\splits_staging_4.json")]
         [DeploymentItem(@"Resources\segment_payed.json")]
-        public void ExecuteGetSuccessfulWithResultsFromJSONFileIncludingTrafficAllocation()
+        public async Task ExecuteGetSuccessfulWithResultsFromJSONFileIncludingTrafficAllocation()
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
@@ -86,12 +87,12 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(result.conditions.Count > 0);
             Assert.IsNotNull(result.conditions.Find(x => x.conditionType == ConditionType.ROLLOUT));
 
-            selfRefreshingSplitFetcher.Stop();
+            await selfRefreshingSplitFetcher.StopAsync();
             selfRefreshingSplitFetcher.Clear();
         }
 
         [TestMethod]
-        public void ExecuteGetWithoutResults()
+        public async Task ExecuteGetWithoutResults()
         {
             //Arrange
             var baseUrl = "https://sdk-aws-staging.split.io/api/";
@@ -135,7 +136,7 @@ namespace Splitio_Tests.Integration_Tests
             //Assert
             Assert.IsNull(result);
 
-            selfRefreshingSplitFetcher.Stop();
+            await selfRefreshingSplitFetcher.StopAsync();
             selfRefreshingSplitFetcher.Clear();
         }
     }

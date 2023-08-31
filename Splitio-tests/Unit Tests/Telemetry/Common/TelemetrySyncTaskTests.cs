@@ -11,6 +11,7 @@ using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 {
@@ -89,7 +90,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
         }
 
         [TestMethod]
-        public void StopShouldPostStats()
+        public async Task StopShouldPostStats()
         {
             // Arrange.
             MockRecordStats();
@@ -100,7 +101,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 
             // Act.
             _telemetrySyncTask.Start();
-            _telemetrySyncTask.Stop();
+            await _telemetrySyncTask.StopAsync();
             Thread.Sleep(2000);
 
             // Assert.

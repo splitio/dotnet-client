@@ -6,7 +6,7 @@ namespace Splitio.Services.Tasks
     public interface ISplitTask
     {
         void Start();
-        void Stop();
+        Task StopAsync();
         void SetAction(Action action);
         void SetFunction(Func<Task> function);
         void SetInterval(int interval);

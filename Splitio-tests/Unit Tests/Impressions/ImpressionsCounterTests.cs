@@ -8,6 +8,7 @@ using Splitio_Tests.Resources;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Impressions
 {
@@ -41,7 +42,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             // Assert.
             Thread.Sleep(1500);
-            _senderAdapter.Verify(mock => mock.RecordImpressionsCount(It.IsAny<List<ImpressionsCountModel>>()), Times.Once);
+            _senderAdapter.Verify(mock => mock.RecordImpressionsCountAsync(It.IsAny<List<ImpressionsCountModel>>()), Times.Once);
         }
 
         [TestMethod]
@@ -59,11 +60,11 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             // Assert.
             Thread.Sleep(1500);
-            _senderAdapter.Verify(mock => mock.RecordImpressionsCount(It.IsAny<List<ImpressionsCountModel>>()), Times.Never);
+            _senderAdapter.Verify(mock => mock.RecordImpressionsCountAsync(It.IsAny<List<ImpressionsCountModel>>()), Times.Never);
         }
 
         [TestMethod]
-        public void Stop_ShouldSendImpressionsCount()
+        public async Task Stop_ShouldSendImpressionsCount()
         {
             // Arrange.
             var config = new ComponentConfig(5, 5);
@@ -80,14 +81,14 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Act.
             impressionsCounter.Start();
             Thread.Sleep(1000);
-            impressionsCounter.Stop();
+            await impressionsCounter.StopAsync();
 
             // Assert.
-            _senderAdapter.Verify(mock => mock.RecordImpressionsCount(It.IsAny<List<ImpressionsCountModel>>()), Times.Once);
+            _senderAdapter.Verify(mock => mock.RecordImpressionsCountAsync(It.IsAny<List<ImpressionsCountModel>>()), Times.Once);
         }
 
         [TestMethod]
-        public void ShouldSend2BulksOfImpressions()
+        public async Task ShouldSend2BulksOfImpressions()
         {
             var config = new ComponentConfig(6, 3);
             var statusManager = new InMemoryReadinessGatesCache();
@@ -106,10 +107,10 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Act.
             impressionsCounter.Start();
             Thread.Sleep(1000);
-            impressionsCounter.Stop();
+            await impressionsCounter.StopAsync();
 
             // Assert.
-            _senderAdapter.Verify(mock => mock.RecordImpressionsCount(It.IsAny<List<ImpressionsCountModel>>()), Times.Exactly(2));
+            _senderAdapter.Verify(mock => mock.RecordImpressionsCountAsync(It.IsAny<List<ImpressionsCountModel>>()), Times.Exactly(2));
         }
     }
 }

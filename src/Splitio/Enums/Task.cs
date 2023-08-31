@@ -20,6 +20,7 @@
         SDKInitialization,
         SSEConnect,
         OnStreamingStatusTask,
-        ImpressionListener
+        ImpressionListener,
+        Destroy
     }
 }

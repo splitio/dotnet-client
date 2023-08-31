@@ -76,27 +76,27 @@ namespace Splitio_Tests.Unit_Tests.Common
         }
 
         [TestMethod]
-        public void StopPeriodicDataRecording_ShouldStopServices()
+        public async Task StopPeriodicDataRecording_ShouldStopServices()
         {
             // Act.
-            _synchronizer.StopPeriodicDataRecording();
+            await _synchronizer.StopPeriodicDataRecordingAsync();
 
             // Assert.
-            _impressionsLog.Verify(mock => mock.Stop(), Times.Once);
-            _eventsLog.Verify(mock => mock.Stop(), Times.Once);
-            _impressionsCounter.Verify(mock => mock.Stop(), Times.Once);
-            _telemetrySyncTask.Verify(mock => mock.Stop(), Times.Once);
+            _impressionsLog.Verify(mock => mock.StopAsync(), Times.Once);
+            _eventsLog.Verify(mock => mock.StopAsync(), Times.Once);
+            _impressionsCounter.Verify(mock => mock.StopAsync(), Times.Once);
+            _telemetrySyncTask.Verify(mock => mock.StopAsync(), Times.Once);
         }
 
         [TestMethod]
-        public void StopPeriodicFetching_ShouldStopFetchings()
+        public async Task StopPeriodicFetching_ShouldStopFetchings()
         {
             // Act.
-            _synchronizer.StopPeriodicFetching();
+            await _synchronizer.StopPeriodicFetchingAsync();
 
             // Assert.
-            _splitFetcher.Verify(mock => mock.Stop(), Times.Once);
-            _segmentFetcher.Verify(mock => mock.Stop(), Times.Once);
+            _splitFetcher.Verify(mock => mock.StopAsync(), Times.Once);
+            _segmentFetcher.Verify(mock => mock.StopAsync(), Times.Once);
         }
 
         [TestMethod]

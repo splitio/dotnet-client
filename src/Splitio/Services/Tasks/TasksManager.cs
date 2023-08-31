@@ -1,6 +1,7 @@
 ﻿using Splitio.Services.Cache.Interfaces;
 using System;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Tasks
 {
@@ -13,6 +14,16 @@ namespace Splitio.Services.Tasks
         public TasksManager(IStatusManager statusManager)
         {
             _statusManager = statusManager;
+        }
+
+        public ISplitTask NewOnTimeTaskAndStart(Enums.Task taskName, Func<Task> function)
+        {
+            var task = new SplitOneTimeTask(_statusManager, taskName);
+            task.SetFunction(function);
+
+            task.Start();
+
+            return task;
         }
 
         public ISplitTask NewOnTimeTaskAndStart(Enums.Task taskName, Action action)
@@ -49,22 +60,22 @@ namespace Splitio.Services.Tasks
             return task;
         }
 
-        public void Destroy()
+        public async Task DestroyAsync()
         {
             foreach (var task in _tasks.Values)
             {
                 if (task.IsRunning())
-                    task.Stop();
+                    await task.StopAsync();
             }
         }
 
         private void AddOrUpdate(Enums.Task name, ISplitTask task)
         {
-            if (_tasks.TryGetValue(name, out ISplitTask oldTask))
-            {
-                oldTask.Stop();
-                _tasks.TryRemove(name, out _);
-            }
+            //if (_tasks.TryGetValue(name, out ISplitTask oldTask))
+            //{
+            //    await oldTask.StopAsync();
+            //    _tasks.TryRemove(name, out _);
+            //}
 
             _tasks.TryAdd(name, task);
         }

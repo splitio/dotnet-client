@@ -1,11 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
+using Splitio.Integration_tests.Resources;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
-using Splitio.Integration_tests.Resources;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests
 {
@@ -19,7 +19,7 @@ namespace Splitio.Integration_tests
     {
         #region GetTreatment
         [TestMethod]
-        public void GetTreatment_WithtBUR_WithMultipleCalls_ReturnsTreatments()
+        public async Task GetTreatment_WithtBUR_WithMultipleCalls_ReturnsTreatments()
         {
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
@@ -49,7 +49,7 @@ namespace Splitio.Integration_tests
                 client.Destroy();
 
                 // Validate impressions in listener.
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -81,12 +81,12 @@ namespace Splitio.Integration_tests
                 AssertImpression(impression4, 1503956389520, "Test_Save_1", "24", "in segment all", "off");
 
                 //Validate impressions sent to the be.
-                AssertSentImpressions(4, httpClientMock, impression1, impression2, impression3, impression4);
+                await AssertSentImpressionsAsync(4, httpClientMock, impression1, impression2, impression3, impression4);
             }
         }
 
         [TestMethod]
-        public void GetTreatment_WithtInputValidation_ReturnsTreatments()
+        public async Task GetTreatment_WithtInputValidation_ReturnsTreatments()
         {
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
@@ -116,7 +116,7 @@ namespace Splitio.Integration_tests
                 client.Destroy();
 
                 // Validate impressions in listener.
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -136,14 +136,14 @@ namespace Splitio.Integration_tests
                 AssertImpression(impression2, 1503956389520, "Test_Save_1", "24", "in segment all", "off");
 
                 //Validate impressions sent to the be.
-                AssertSentImpressions(2, httpClientMock, impression1, impression2);
+                await AssertSentImpressionsAsync(2, httpClientMock, impression1, impression2);
 
                 client.Destroy();
             }
         }
 
         [TestMethod]
-        public void GetTreatment_WithtBUR_WhenTreatmentDoesntExist_ReturnsControl()
+        public async Task GetTreatment_WithtBUR_WhenTreatmentDoesntExist_ReturnsControl()
         {
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
@@ -165,14 +165,14 @@ namespace Splitio.Integration_tests
                 Assert.AreEqual("control", result);
 
                 // Validate impressions in listener.
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
                 Assert.AreEqual(0, keyImpressions.Count);
 
                 //Validate impressions sent to the be.
-                AssertSentImpressions(0, httpClientMock);
+                await AssertSentImpressionsAsync(0, httpClientMock);
 
                 client.Destroy();
             }
@@ -181,7 +181,7 @@ namespace Splitio.Integration_tests
 
         #region GetTreatmentWithConfig        
         [TestMethod]
-        public void GetTreatmentWithConfig_WithtBUR_WithMultipleCalls_ReturnsTreatments()
+        public async Task GetTreatmentWithConfig_WithtBUR_WithMultipleCalls_ReturnsTreatments()
         {
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
@@ -216,7 +216,7 @@ namespace Splitio.Integration_tests
                 Assert.AreEqual("{\"version\":\"v1\"}", result4.Config);
 
                 // Validate impressions.
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -248,12 +248,12 @@ namespace Splitio.Integration_tests
                 AssertImpression(impression4, 1506703262966, "MAURO_TEST", "test", "not in split", "off");
 
                 //Validate impressions sent to the be.
-                AssertSentImpressions(4, httpClientMock, impression1, impression2, impression3, impression4);
+                await AssertSentImpressionsAsync(4, httpClientMock, impression1, impression2, impression3, impression4);
             }
         }
 
         [TestMethod]
-        public void GetTreatmentWithConfig_WithtInputValidation_ReturnsTreatments()
+        public async Task GetTreatmentWithConfig_WithtInputValidation_ReturnsTreatments()
         {
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
@@ -288,7 +288,7 @@ namespace Splitio.Integration_tests
                 Assert.AreEqual("{\"version\":\"v2\"}", result4.Config);
 
                 // Validate impressions.
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -308,12 +308,12 @@ namespace Splitio.Integration_tests
                 AssertImpression(impression2, 1506703262966, "MAURO_TEST", "mauro", "whitelisted", "on");
 
                 //Validate impressions sent to the be.
-                AssertSentImpressions(2, httpClientMock, impression1, impression2);
+                await AssertSentImpressionsAsync(2, httpClientMock, impression1, impression2);
             }
         }
 
         [TestMethod]
-        public void GetTreatmentWithConfig_WithtBUR_WhenTreatmentDoesntExist_ReturnsControl()
+        public async Task GetTreatmentWithConfig_WithtBUR_WhenTreatmentDoesntExist_ReturnsControl()
         {
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
@@ -335,14 +335,14 @@ namespace Splitio.Integration_tests
                 Assert.AreEqual("control", result);
 
                 // Validate impressions in listener.
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
                 Assert.AreEqual(0, keyImpressions.Count);
 
                 //Validate impressions sent to the be.
-                AssertSentImpressions(0, httpClientMock);
+                await AssertSentImpressionsAsync(0, httpClientMock);
 
                 client.Destroy();
             }
@@ -351,7 +351,7 @@ namespace Splitio.Integration_tests
 
         #region GetTreatments
         [TestMethod]
-        public void GetTreatments_WithtBUR_ReturnsTreatments()
+        public async Task GetTreatments_WithtBUR_ReturnsTreatments()
         {
             // Arrange.
             using (var httpClientMock = GetHttpClientMock())
@@ -377,7 +377,7 @@ namespace Splitio.Integration_tests
                 client.Destroy();
 
                 // Validate impressions.
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -403,12 +403,12 @@ namespace Splitio.Integration_tests
                 AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
 
                 //Validate impressions sent to the be.
-                AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
+                await AssertSentImpressionsAsync(3, httpClientMock, impression1, impression2, impression3);
             }
         }
 
         [TestMethod]
-        public void GetTreatments_WithtInputValidation_ReturnsTreatments()
+        public async Task GetTreatments_WithtInputValidation_ReturnsTreatments()
         {
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
@@ -440,7 +440,7 @@ namespace Splitio.Integration_tests
                 client.Destroy();
 
                 // Validate impressions.
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -472,12 +472,12 @@ namespace Splitio.Integration_tests
                 AssertImpression(impression4, 1503956389520, "Test_Save_1", "mauro", "in segment all", "off");
 
                 //Validate impressions sent to the be.
-                AssertSentImpressions(4, httpClientMock, impression1, impression2, impression3, impression4);
+                await AssertSentImpressionsAsync(4, httpClientMock, impression1, impression2, impression3, impression4);
             }
         }
 
         [TestMethod]
-        public void GetTreatments_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
+        public async Task GetTreatments_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
         {
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
@@ -505,7 +505,7 @@ namespace Splitio.Integration_tests
                 client.Destroy();
 
                 // Validate impressions.
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -531,14 +531,14 @@ namespace Splitio.Integration_tests
                 Assert.AreEqual(3, keyImpressions.Count);
 
                 //Validate impressions sent to the be.            
-                AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
+                await AssertSentImpressionsAsync(3, httpClientMock, impression1, impression2, impression3);
             }
         }
         #endregion
 
         #region GetTreatmentsWithConfig
         [TestMethod]
-        public void GetTreatmentsWithConfig_WithtBUR_ReturnsTreatments()
+        public async Task GetTreatmentsWithConfig_WithtBUR_ReturnsTreatments()
         {
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
@@ -568,7 +568,7 @@ namespace Splitio.Integration_tests
                 Assert.IsNull(result["Test_Save_1"].Config);
 
                 // Validate impressions.
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -594,12 +594,12 @@ namespace Splitio.Integration_tests
                 Assert.AreEqual(3, keyImpressions.Count);
 
                 //Validate impressions sent to the be.
-                AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
+                await AssertSentImpressionsAsync(3, httpClientMock, impression1, impression2, impression3);
             }
         }
 
         [TestMethod]
-        public void GetTreatmentsWithConfig_WithtInputValidation_ReturnsTreatments()
+        public async Task GetTreatmentsWithConfig_WithtInputValidation_ReturnsTreatments()
         {
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
@@ -639,7 +639,7 @@ namespace Splitio.Integration_tests
                 client.Destroy();
 
                 // Validate impressions.
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -671,12 +671,12 @@ namespace Splitio.Integration_tests
                 AssertImpression(impression4, 1503956389520, "Test_Save_1", "mauro", "in segment all", "off");
 
                 //Validate impressions sent to the be.
-                AssertSentImpressions(4, httpClientMock, impression1, impression2, impression3, impression4);
+                await AssertSentImpressionsAsync(4, httpClientMock, impression1, impression2, impression3, impression4);
             }
         }
 
         [TestMethod]
-        public void GetTreatmentsWithConfig_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
+        public async Task GetTreatmentsWithConfig_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
         {
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
@@ -708,7 +708,7 @@ namespace Splitio.Integration_tests
                 client.Destroy();
 
                 // Validate impressions.
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
                 var impressionQueue = impressionListener.GetQueue();
                 var keyImpressions = impressionQueue.FetchAll();
 
@@ -734,7 +734,7 @@ namespace Splitio.Integration_tests
                 AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
 
                 //Validate impressions sent to the be.
-                AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
+                await AssertSentImpressionsAsync(3, httpClientMock, impression1, impression2, impression3);
             }
         }
         #endregion
@@ -850,7 +850,7 @@ namespace Splitio.Integration_tests
 
         #region Track
         [TestMethod]
-        public void Track_WithValidData_ReturnsTrue()
+        public async Task Track_WithValidData_ReturnsTrue()
         {
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
@@ -885,17 +885,17 @@ namespace Splitio.Integration_tests
 
                     // Assert. 
                     Assert.IsTrue(result);
-                    Thread.Sleep(1000);
+                    await Task.Delay(1000);
                 }
 
                 //Validate Events sent to the be.
-                AssertSentEvents(events, httpClientMock);
+                await AssertSentEventsAsync(events, httpClientMock);
                 client.Destroy();
             }
         }
 
         [TestMethod]
-        public void Track_WithBUR_ReturnsTrue()
+        public async Task Track_WithBUR_ReturnsTrue()
         {
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
@@ -933,13 +933,13 @@ namespace Splitio.Integration_tests
                 }
 
                 //Validate Events sent to the be.
-                AssertSentEvents(events, httpClientMock);
+                await AssertSentEventsAsync(events, httpClientMock);
                 client.Destroy();
             }
         }
 
         [TestMethod]
-        public void Track_WithInvalidData_ReturnsFalse()
+        public async Task Track_WithInvalidData_ReturnsFalse()
         {
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
@@ -979,7 +979,7 @@ namespace Splitio.Integration_tests
                     else
                         Assert.IsTrue(result);
 
-                    Thread.Sleep(1000);
+                    await Task.Delay(1000);
                 }
 
                 events = events
@@ -987,14 +987,14 @@ namespace Splitio.Integration_tests
                     .ToList();
 
                 //Validate Events sent to the be.
-                AssertSentEvents(events, httpClientMock);
+                await AssertSentEventsAsync(events, httpClientMock);
                 client.Destroy();
             }
         }
 
         [TestMethod]
         [Ignore]
-        public void Track_WithLowQueue_ReturnsTrue()
+        public async Task Track_WithLowQueue_ReturnsTrue()
         {
             // Arrange.           
             using (var httpClientMock = GetHttpClientMock())
@@ -1033,7 +1033,7 @@ namespace Splitio.Integration_tests
                 }
 
                 //Validate Events sent to the be.
-                AssertSentEvents(events, httpClientMock, sleepTime: 1000, eventsCount: 3, validateEvents: false);
+                await AssertSentEventsAsync(events, httpClientMock, sleepTime: 1000, eventsCount: 3, validateEvents: false);
                 client.Destroy();
             }
         }
@@ -1091,9 +1091,9 @@ namespace Splitio.Integration_tests
         
         protected abstract ConfigurationOptions GetConfigurationOptions(string url = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null);
 
-        protected abstract void AssertSentImpressions(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions);
+        protected abstract Task AssertSentImpressionsAsync(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions);
 
-        protected abstract void AssertSentEvents(List<EventBackend> eventsExcpected, HttpClientMock httpClientMock = null, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true);
+        protected abstract Task AssertSentEventsAsync(List<EventBackend> eventsExcpected, HttpClientMock httpClientMock = null, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true);
 
         protected abstract HttpClientMock GetHttpClientMock();
         #endregion

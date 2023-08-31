@@ -9,6 +9,7 @@ using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -73,17 +74,23 @@ namespace Splitio.Services.Common
         public void Shutdown()
         {
             _log.Info("Initialitation sdk destroy.");
-            
+
             _ctsStreaming.Cancel();
             _ctsStreaming.Dispose();
 
-            _synchronizer.StopPeriodicDataRecording();
-            _synchronizer.StopPeriodicFetching();
-            _onStreamingStatusTask.Stop();
-            _sseHandler.StopWorkers();
-            _pushManager.Stop();
-            _startupTask.Stop();
-            _tasksManager.Destroy();
+            var task = new List<Task>
+            {
+                _synchronizer.StopPeriodicDataRecordingAsync(),
+                _synchronizer.StopPeriodicFetchingAsync(),
+                _onStreamingStatusTask.StopAsync(),
+                _sseHandler.StopWorkersAsync(),
+                _pushManager.StopAsync(),
+                _startupTask.StopAsync(),
+                _tasksManager.DestroyAsync()
+            };
+
+            Task.WaitAll(task.ToArray());
+
             _synchronizer.ClearFetchersCache();
 
             _log.Info("SDK has been destroyed.");
@@ -101,10 +108,10 @@ namespace Splitio.Services.Common
                     {
                         case StreamingStatus.STREAMING_READY:
                             _backOff.Reset();
-                            _synchronizer.StopPeriodicFetching();
+                            await _synchronizer.StopPeriodicFetchingAsync();
                             await _synchronizer.SyncAllAsync();
                             _sseHandler.StartWorkers();
-                            _pushManager.ScheduleConnectionReset();
+                            await _pushManager.ScheduleConnectionResetAsync();
                             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.StreamingStatus, (int)StreamingStatusEnum.Enabled));
 
                             _log.Debug("Streaming up and running.");
@@ -114,20 +121,20 @@ namespace Splitio.Services.Common
                             _log.Info($"Retryable error in streaming subsystem. Switching to polling and retrying in {interval} milliseconds.");
                             _synchronizer.StartPeriodicFetching();
                             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
-                            _sseHandler.StopWorkers();
-                            _pushManager.Stop();
+                            await _sseHandler.StopWorkersAsync();
+                            await _pushManager.StopAsync();
                             await Task.Delay((int)interval);
                             await _pushManager.StartAsync();
                             break;
                         case StreamingStatus.STREAMING_DOWN:
                             _log.Info("Streaming service temporarily unavailable, working in polling mode.");
-                            _sseHandler.StopWorkers();
+                            await _sseHandler.StopWorkersAsync();
                             _synchronizer.StartPeriodicFetching();
                             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
                             break;
                         case StreamingStatus.STREAMING_OFF:
                             _log.Info("Unrecoverable error in streaming subsystem. SDK will work in polling-mode and will not retry an SSE connection.");
-                            _pushManager.Stop();
+                            await _pushManager.StopAsync();
                             _synchronizer.StartPeriodicFetching();
                             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
                             _ctsStreaming.Cancel();

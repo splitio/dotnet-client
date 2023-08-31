@@ -87,7 +87,7 @@ namespace Splitio.Services.EventSource
             return _connected;
         }
 
-        public void Disconnect()
+        public async Task DisconnectAsync()
         {
             if (!_connected) return;
 
@@ -97,7 +97,7 @@ namespace Splitio.Services.EventSource
 
             _disconnectSignal.Wait(ReadTimeoutMs);
 
-            _connectTask.Stop();
+            await _connectTask.StopAsync();
 
             _log.Debug($"Streaming Disconnected.");
         }

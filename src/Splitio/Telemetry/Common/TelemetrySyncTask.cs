@@ -53,9 +53,9 @@ namespace Splitio.Telemetry.Common
             _statsTask.Start();
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
-            _statsTask.Stop();
+            await _statsTask.StopAsync();
         }
 
         public void RecordConfigInit(long timeUntilSDKReady)
