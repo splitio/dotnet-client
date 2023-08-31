@@ -73,27 +73,34 @@ namespace Splitio.Services.Common
 
         public void Shutdown()
         {
-            _log.Info("Initialitation sdk destroy.");
-
-            _ctsStreaming.Cancel();
-            _ctsStreaming.Dispose();
-
-            var task = new List<Task>
+            try
             {
-                _synchronizer.StopPeriodicDataRecordingAsync(),
-                _synchronizer.StopPeriodicFetchingAsync(),
-                _onStreamingStatusTask.StopAsync(),
-                _sseHandler.StopWorkersAsync(),
-                _pushManager.StopAsync(),
-                _startupTask.StopAsync(),
-                _tasksManager.DestroyAsync()
-            };
+                _log.Info("Initialitation sdk destroy.");
 
-            Task.WaitAll(task.ToArray());
+                _ctsStreaming.Cancel();
+                _ctsStreaming.Dispose();
 
-            _synchronizer.ClearFetchersCache();
+                var task = new List<Task>
+                {
+                    _synchronizer.StopPeriodicDataRecordingAsync(),
+                    _synchronizer.StopPeriodicFetchingAsync(),
+                    _onStreamingStatusTask.StopAsync(),
+                    _sseHandler.StopWorkersAsync(),
+                    _pushManager.StopAsync(),
+                    _startupTask.StopAsync(),
+                    _tasksManager.DestroyAsync()
+                };
 
-            _log.Info("SDK has been destroyed.");
+                Task.WaitAll(task.ToArray(), 30000);
+
+                _synchronizer.ClearFetchersCache();
+
+                _log.Info("SDK has been destroyed.");
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Somenthing went wrong destroying the SDK.", ex);
+            }
         }
 
         public async Task OnStreamingStatusAsync()

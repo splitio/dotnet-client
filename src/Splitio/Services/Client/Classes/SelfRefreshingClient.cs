@@ -117,7 +117,7 @@ namespace Splitio.Services.Client.Classes
             var segmentTaskQueue = new BlockingCollection<SelfRefreshingSegment>(new ConcurrentQueue<SelfRefreshingSegment>());
             var segmentRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SegmentRefreshRate) : _config.SegmentRefreshRate;
             var workerTask = _tasksManager.NewPeriodicTask(Enums.Task.SegmentsWorkerFetcher, 0);
-            var worker = new SegmentTaskWorker(_config.NumberOfParalellSegmentTasks, segmentTaskQueue, _statusManager, workerTask);
+            var worker = new SegmentTaskWorker(_config.NumberOfParalellSegmentTasks, segmentTaskQueue, _statusManager, workerTask, _tasksManager);
             var segmentsTask = _tasksManager.NewPeriodicTask(Enums.Task.SegmentsFetcher, segmentRefreshRate * 1000);
             _selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, _segmentCache, segmentTaskQueue, segmentsTask, worker, _statusManager);
 

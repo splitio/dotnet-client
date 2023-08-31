@@ -16,16 +16,6 @@ namespace Splitio.Services.Tasks
             _statusManager = statusManager;
         }
 
-        public ISplitTask NewOnTimeTaskAndStart(Enums.Task taskName, Func<Task> function)
-        {
-            var task = new SplitOneTimeTask(_statusManager, taskName);
-            task.SetFunction(function);
-
-            task.Start();
-
-            return task;
-        }
-
         public ISplitTask NewOnTimeTaskAndStart(Enums.Task taskName, Action action)
         {
             var task = new SplitOneTimeTask(_statusManager, taskName);
@@ -71,12 +61,7 @@ namespace Splitio.Services.Tasks
 
         private void AddOrUpdate(Enums.Task name, ISplitTask task)
         {
-            //if (_tasks.TryGetValue(name, out ISplitTask oldTask))
-            //{
-            //    await oldTask.StopAsync();
-            //    _tasks.TryRemove(name, out _);
-            //}
-
+            _tasks.TryRemove(name, out _);
             _tasks.TryAdd(name, task);
         }
     }

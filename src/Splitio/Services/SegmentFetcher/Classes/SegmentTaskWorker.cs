@@ -22,6 +22,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
         private readonly BlockingCollection<SelfRefreshingSegment> _segmentTaskQueue;
         private readonly IStatusManager _statusManager;
         private readonly ISplitTask _task;
+        private readonly ITasksManager _tasksManager;
 
         private int _counter;
         private CancellationTokenSource _cts;
@@ -29,12 +30,14 @@ namespace Splitio.Services.SegmentFetcher.Classes
         public SegmentTaskWorker(int numberOfParallelTasks,
             BlockingCollection<SelfRefreshingSegment> segmentTaskQueue,
             IStatusManager statusManager,
-            ISplitTask task)
+            ISplitTask task,
+            ITasksManager tasksManager)
         {
             _numberOfParallelTasks = numberOfParallelTasks;            
             _segmentTaskQueue = segmentTaskQueue;
             _counter = 0;
             _statusManager = statusManager;
+            _tasksManager = tasksManager;
             _task = task;
             _task.SetAction(ExecuteTasks);
         }
@@ -87,12 +90,11 @@ namespace Splitio.Services.SegmentFetcher.Classes
                     if (_cts.IsCancellationRequested) return;
 
                     IncrementCounter();
-                    var task = new Task(async () => await segment.FetchSegmentAsync(new FetchOptions
+                    _tasksManager.NewOnTimeTaskAndStart(Enums.Task.SegmentsFetcher, async () =>
                     {
-                        Token = _cts.Token
-                    }), _cts.Token);
-                    task.ContinueWith((x) => DecrementCounter(), _cts.Token);
-                    task.Start();
+                        await segment.FetchSegmentAsync(new FetchOptions { Token = _cts.Token });
+                        DecrementCounter();
+                    });
                 }
             }
             catch (Exception ex)

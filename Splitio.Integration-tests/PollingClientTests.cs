@@ -476,25 +476,15 @@ namespace Splitio.Integration_tests
             return httpClientMock;
         }
 
-        protected override async Task AssertSentImpressionsAsync(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
+        protected override Task AssertSentImpressionsAsync(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
         {
-            if (sentImpressionsCount <= 0) return;
+            if (sentImpressionsCount <= 0) return Task.FromResult(0);
 
             var sentImpressions = GetImpressionsSentBackend(httpClientMock);
 
-            var time = 1000;
-            while (sentImpressionsCount != sentImpressions.Sum(si => si.I.Count))
-            {
-                if (time >= 10000)
-                {
-                    break;
-                }
-
-                await Task.Delay(time);
-
-                time += 100;
-                sentImpressions = GetImpressionsSentBackend(httpClientMock);
-            }
+            Console.WriteLine("#### AssertSentImpressionsAsync");
+            Console.WriteLine(sentImpressions.Count);
+            Console.WriteLine(sentImpressions);
 
             Assert.AreEqual(sentImpressionsCount, sentImpressions.Sum(si => si.I.Count));
 
@@ -509,6 +499,8 @@ namespace Splitio.Integration_tests
 
                 AssertImpression(expectedImp, impressions);
             }
+
+            return Task.FromResult(0);
         }
 
         protected void AssertImpression(KeyImpression impressionExpected, List<ImpressionData> sentImpressions)

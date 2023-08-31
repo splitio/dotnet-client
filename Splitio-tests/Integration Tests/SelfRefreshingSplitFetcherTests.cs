@@ -119,7 +119,7 @@ namespace Splitio_Tests.Integration_Tests
             var segmentTaskQueue = new BlockingCollection<SelfRefreshingSegment>(new ConcurrentQueue<SelfRefreshingSegment>());
             var taskManager = new TasksManager(gates);
             var workerTask = taskManager.NewPeriodicTask(Splitio.Enums.Task.SegmentsWorkerFetcher, 0);
-            var worker = new SegmentTaskWorker(4, segmentTaskQueue, gates, workerTask);
+            var worker = new SegmentTaskWorker(4, segmentTaskQueue, gates, workerTask, taskManager);
             var segmentsTask = taskManager.NewPeriodicTask(Splitio.Enums.Task.SegmentsFetcher, 3000);
             var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, segmentCache, segmentTaskQueue, segmentsTask, worker, gates);
             var splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, segmentCache);
