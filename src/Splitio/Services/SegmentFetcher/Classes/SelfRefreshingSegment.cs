@@ -36,16 +36,13 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
             while (!_statusManager.IsDestroyed())
             {
-                if (fetchOptions.Token.IsCancellationRequested)
-                    break;
-
                 var changeNumber = _segmentCache.GetChangeNumber(Name);
 
                 try
                 {
                     var response = await _segmentChangeFetcher.FetchAsync(Name, changeNumber, fetchOptions);
 
-                    if (response == null || fetchOptions.Token.IsCancellationRequested || _statusManager.IsDestroyed())
+                    if (response == null || _statusManager.IsDestroyed())
                     {
                         break;
                     }

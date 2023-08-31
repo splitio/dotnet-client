@@ -51,7 +51,7 @@ namespace Splitio.Services.Tasks
 
             _running = true;
             _cts = new CancellationTokenSource();
-            _task = Task.Factory.StartNew(DoWorkAsync, _cts.Token, TaskCreationOptions.None, TaskScheduler.Default);
+            _task = Task.Factory.StartNew(DoWorkAsync, _cts.Token);
 
             _log.Debug($"Task {_taskName} running.");
         }

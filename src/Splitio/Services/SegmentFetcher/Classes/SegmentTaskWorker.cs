@@ -92,8 +92,15 @@ namespace Splitio.Services.SegmentFetcher.Classes
                     IncrementCounter();
                     _tasksManager.NewOnTimeTaskAndStart(Enums.Task.SegmentsFetcher, async () =>
                     {
-                        await segment.FetchSegmentAsync(new FetchOptions { Token = _cts.Token });
-                        DecrementCounter();
+                        try
+                        {
+                            await segment.FetchSegmentAsync(new FetchOptions());
+                            DecrementCounter();
+                        }
+                        catch (Exception ex)
+                        {
+                            _log.Debug("SegmentTaskWorker Fetch Exception.", ex);
+                        }
                     });
                 }
             }

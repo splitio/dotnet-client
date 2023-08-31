@@ -6,6 +6,5 @@ namespace Splitio.Domain
     {
         public long? Till { get; set; }
         public bool CacheControlHeaders { get; set; }
-        public CancellationToken Token { get; set; }
     }
 }
