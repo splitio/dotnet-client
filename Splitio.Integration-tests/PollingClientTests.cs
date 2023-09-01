@@ -503,7 +503,7 @@ namespace Splitio.Integration_tests
             return Task.FromResult(0);
         }
 
-        protected void AssertImpression(KeyImpression impressionExpected, List<ImpressionData> sentImpressions)
+        protected static void AssertImpression(KeyImpression impressionExpected, List<ImpressionData> sentImpressions)
         {
             Assert.IsTrue(sentImpressions
                 .Where(si => impressionExpected.bucketingKey == si.B)

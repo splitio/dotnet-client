@@ -7,6 +7,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -98,6 +99,8 @@ namespace Splitio.Services.Impressions.Classes
                 if (i > 0) await Task.Delay(500);
 
                 var response = await _httpClient.PostAsync(TestImpressionsUrl, impressionsJson);
+
+                Console.WriteLine($"#### POST SendBulkImpressionsAsync. {response.StatusCode}");
 
                 Util.Helper.RecordTelemetrySync(nameof(SendBulkImpressionsAsync), response, ResourceEnum.ImpressionSync, clock, _telemetryRuntimeProducer, _log);
 
