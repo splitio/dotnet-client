@@ -11,7 +11,6 @@ using Splitio.Telemetry.Domain;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests
@@ -48,12 +47,16 @@ namespace Splitio.Integration_tests
 #endif
         }
 
+        [TestInitialize]
+        public void Init()
+        {
+            LoadSplits();
+        }
+
         [TestMethod]
         public async Task CheckingMachineIpAndMachineName_WithIPAddressesEnabled_ReturnsIpAndName()
         {
             // Arrange.
-            LoadSplits();
-
             var configurations = GetConfigurationOptions();
 
             var apikey = "apikey1";
@@ -114,9 +117,6 @@ namespace Splitio.Integration_tests
         public async Task CheckingMachineIpAndMachineName_WithIPAddressesDisabled_ReturnsNA()
         {
             // Arrange.
-            
-            LoadSplits();
-
             var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
 
             var apikey = "apikey1";
@@ -179,9 +179,6 @@ namespace Splitio.Integration_tests
         public async Task GetTreatment_WithImpressionModeInNone_ShouldGetUniqueKeys()
         {
             // Arrange.
-            
-            LoadSplits();
-
             var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
             configurations.ImpressionsMode = ImpressionsMode.None;
 
@@ -220,9 +217,6 @@ namespace Splitio.Integration_tests
         public async Task GetTreatment_WithImpressionModeOptimized_ShouldGetImpressionCount()
         {
             // Arrange.
-            
-            LoadSplits();
-
             var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
             configurations.ImpressionsMode = ImpressionsMode.Optimized;
 
@@ -289,7 +283,7 @@ namespace Splitio.Integration_tests
 
         protected override HttpClientMock GetHttpClientMock()
         {
-            LoadSplits();
+            // No-op
 
             return null;
         }
@@ -325,6 +319,11 @@ namespace Splitio.Integration_tests
                 AssertEvent(actualEvent, eventsExcpected);
             }
         }
+
+        protected override void ResetLogs()
+        {
+            // No-op
+        }
         #endregion
 
         #region Private Methods
@@ -338,7 +337,7 @@ namespace Splitio.Integration_tests
             }
         }
 
-        private void AssertImpression(KeyImpressionRedis impressionActual, List<KeyImpression> sentImpressions)
+        private static void AssertImpression(KeyImpressionRedis impressionActual, List<KeyImpression> sentImpressions)
         {
             Assert.IsFalse(string.IsNullOrEmpty(impressionActual.M.I));
             Assert.IsFalse(string.IsNullOrEmpty(impressionActual.M.N));
@@ -353,7 +352,7 @@ namespace Splitio.Integration_tests
                 .Any());
         }
 
-        private void AssertEvent(EventRedis eventActual, List<EventBackend> eventsExcpected)
+        private static void AssertEvent(EventRedis eventActual, List<EventBackend> eventsExcpected)
         {
             Assert.IsFalse(string.IsNullOrEmpty(eventActual.M.I));
             Assert.IsFalse(string.IsNullOrEmpty(eventActual.M.N));

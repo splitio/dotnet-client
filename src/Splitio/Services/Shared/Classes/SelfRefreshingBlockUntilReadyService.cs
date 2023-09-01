@@ -31,7 +31,7 @@ namespace Splitio.Services.Shared.Classes
                 if (!_statusManager.WaitUntilReady(blockMilisecondsUntilReady))
                 {
                     _telemetryInitProducer.RecordBURTimeout();
-                    throw new TimeoutException($"SDK was not ready in {blockMilisecondsUntilReady} miliseconds");
+                    throw new TimeoutException($"SDK was not ready in {blockMilisecondsUntilReady} milliseconds");
                 }
             }
         }
