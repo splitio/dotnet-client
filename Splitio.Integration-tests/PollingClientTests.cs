@@ -392,7 +392,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual(ImpressionsMode.Optimized, sentConfig.ImpressionsMode);
             Assert.IsTrue(sentConfig.ImpressionListenerEnabled);
             Assert.IsTrue(1 <= sentConfig.ActiveFactories);
-            // TODO check this
+            // TODO: after refactor the sdk is ready in 0 seconds 
             //Assert.AreEqual(1, sentConfig.BURTimeouts);
 
             var sentStats = GetMetricsStatsSentBackend(httpClientMock);
