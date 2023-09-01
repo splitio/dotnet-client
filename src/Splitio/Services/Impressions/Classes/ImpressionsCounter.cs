@@ -11,7 +11,7 @@ namespace Splitio.Services.Impressions.Classes
 {
     public class ImpressionsCounter : TrackerComponent, IImpressionsCounter
     {
-        private static readonly ISplitLogger Logger = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsCounter));
+        private readonly ISplitLogger Logger = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsCounter));
         private const int DefaultAmount = 1;
 
         private readonly IImpressionsSenderAdapter _senderAdapter;
@@ -19,7 +19,8 @@ namespace Splitio.Services.Impressions.Classes
 
         public ImpressionsCounter(ComponentConfig config,
             IImpressionsSenderAdapter senderAdapter,
-            ISplitTask task) : base(config, task)
+            ISplitTask task,
+            ISplitTask sendBulkDataTask) : base(config, task, sendBulkDataTask)
         {
             _cache = new ConcurrentDictionary<KeyCache, int>();
             _senderAdapter = senderAdapter;
@@ -33,7 +34,7 @@ namespace Splitio.Services.Impressions.Classes
 
             if (_cache.Count >= _cacheMaxSize)
             {
-                SendBulkDataAsync();
+                _taskBulkData.Start();
             }
         }
 

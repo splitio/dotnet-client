@@ -30,7 +30,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var statusManager = new InMemoryReadinessGatesCache();
             var taskManager = new TasksManager(statusManager);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.ImpressionsCountSender, 1);
-            var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, task);
+            var sendBulkDataTask = taskManager.NewOnTimeTask(Splitio.Enums.Task.ImpressionCounterSendBulkData);
+            var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, task, sendBulkDataTask);
 
 
             // Act.
@@ -53,7 +54,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var statusManager = new InMemoryReadinessGatesCache();
             var taskManager = new TasksManager(statusManager);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.ImpressionsCountSender, 1);
-            var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, task);
+            var sendBulkDataTask = taskManager.NewOnTimeTask(Splitio.Enums.Task.ImpressionCounterSendBulkData);
+            var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, task, sendBulkDataTask);
 
             // Act.
             impressionsCounter.Start();
@@ -71,7 +73,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var statusManager = new InMemoryReadinessGatesCache();
             var taskManager = new TasksManager(statusManager);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.ImpressionsCountSender, 100);
-            var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, task);
+            var sendBulkDataTask = taskManager.NewOnTimeTask(Splitio.Enums.Task.ImpressionCounterSendBulkData);
+            var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, task, sendBulkDataTask);
 
             impressionsCounter.Inc("feature1", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 15, 11, DateTimeKind.Utc)));
             impressionsCounter.Inc("feature1", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 50, 11, DateTimeKind.Utc)));
@@ -94,7 +97,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var statusManager = new InMemoryReadinessGatesCache();
             var taskManager = new TasksManager(statusManager);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.ImpressionsCountSender, 100);
-            var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, task);
+            var sendBulkDataTask = taskManager.NewOnTimeTask(Splitio.Enums.Task.ImpressionCounterSendBulkData);
+            var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, task, sendBulkDataTask);
 
             impressionsCounter.Inc("feature1", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 15, 11, DateTimeKind.Utc)));
             impressionsCounter.Inc("feature1", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 50, 11, DateTimeKind.Utc)));

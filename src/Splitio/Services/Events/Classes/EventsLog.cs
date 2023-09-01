@@ -23,6 +23,7 @@ namespace Splitio.Services.Events.Classes
         private readonly ISimpleProducerCache<WrappedEvent> _wrappedEventsCache;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly ISplitTask _task;
+        private readonly ISplitTask _sendBulkDataTask;
 
         private long _acumulateSize;
         
@@ -30,6 +31,7 @@ namespace Splitio.Services.Events.Classes
             ISimpleCache<WrappedEvent> eventsCache,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
             ISplitTask task,
+            ISplitTask sendBulkDataTask,
             int maximumNumberOfKeysToCache = -1)
         {
             _wrappedEventsCache = (eventsCache as ISimpleProducerCache<WrappedEvent>) ?? new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(maximumNumberOfKeysToCache));
@@ -38,6 +40,9 @@ namespace Splitio.Services.Events.Classes
             _task = task;
             _task.SetFunction(SendBulkEventsAsync);
             _task.OnStop(SendBulkEventsAsync);
+
+            _sendBulkDataTask = sendBulkDataTask;
+            _sendBulkDataTask.SetFunction(SendBulkEventsAsync);
         }
 
         public void Start()
@@ -63,8 +68,7 @@ namespace Splitio.Services.Events.Classes
 
             if (_wrappedEventsCache.HasReachedMaxSize() || _acumulateSize >= MAX_SIZE_BYTES)
             {
-                // TODO
-                SendBulkEventsAsync();
+                _sendBulkDataTask.Start();
             }
         }
 

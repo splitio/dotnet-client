@@ -16,6 +16,16 @@ namespace Splitio.Services.Tasks
             _statusManager = statusManager;
         }
 
+        public ISplitTask NewOnTimeTaskAndStart(Enums.Task taskName, Func<Task> function)
+        {
+            var task = new SplitOneTimeTask(_statusManager, taskName);
+            task.SetFunction(function);
+
+            task.Start();
+
+            return task;
+        }
+
         public ISplitTask NewOnTimeTaskAndStart(Enums.Task taskName, Action action)
         {
             var task = new SplitOneTimeTask(_statusManager, taskName);

@@ -21,6 +21,9 @@
         SSEConnect,
         OnStreamingStatusTask,
         ImpressionListener,
-        Destroy
+        Destroy,
+        ImpressionCounterSendBulkData,
+        MtkSendBulkData,
+        EventsSendBulkData
     }
 }

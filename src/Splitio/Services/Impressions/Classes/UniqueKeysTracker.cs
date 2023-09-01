@@ -26,13 +26,14 @@ namespace Splitio.Services.Impressions.Classes
             ConcurrentDictionary<string, HashSet<string>> cache,
             IImpressionsSenderAdapter senderAdapter,
             ISplitTask mtksTask,
-            ISplitTask cacheLongTermCleaningTask) : base(config, mtksTask)
+            ISplitTask cacheLongTermCleaningTask,
+            ISplitTask sendBulkDataTask) : base(config, mtksTask, sendBulkDataTask)
         {
             _filterAdapter = filterAdapter;
             _cache = cache;
             _senderAdapter = senderAdapter;
             _cacheLongTermCleaningTask = cacheLongTermCleaningTask;
-            _cacheLongTermCleaningTask.SetAction(() => _filterAdapter.Clear());
+            _cacheLongTermCleaningTask.SetAction(_filterAdapter.Clear);
         }
 
         #region Public Methods
@@ -50,8 +51,7 @@ namespace Splitio.Services.Impressions.Classes
 
             if (_cache.Count >= _cacheMaxSize)
             {
-                // TODO
-                SendBulkDataAsync();
+                _taskBulkData.Start();
             }
 
             return true;

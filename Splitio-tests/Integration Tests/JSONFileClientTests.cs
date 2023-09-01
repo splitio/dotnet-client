@@ -883,7 +883,8 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var trafficTypeValidator = new Mock<ITrafficTypeValidator>();
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", trafficTypeValidator: trafficTypeValidator.Object);
+            var eventLog = new Mock<IEventsLog>();
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", trafficTypeValidator: trafficTypeValidator.Object, eventsLog: eventLog.Object);
 
             trafficTypeValidator
                 .Setup(mock => mock.IsValid(It.IsAny<string>(), It.IsAny<string>()))

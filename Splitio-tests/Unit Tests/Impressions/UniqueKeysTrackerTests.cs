@@ -6,6 +6,7 @@ using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -42,7 +43,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var config = new ComponentConfig(5, 5);
             var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 1);
             var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
-            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask);
+            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Enums.Task.MtkSendBulkData);
+            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask, sendBulkDataTask);
 
             // Act.
             _uniqueKeysTracker.Start();
@@ -71,7 +73,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var config = new ComponentConfig(5, 5);
             var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 1);
             var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
-            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask);
+            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Enums.Task.MtkSendBulkData);
+            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask, sendBulkDataTask);
 
             _filterAdapter
                 .SetupSequence(mock => mock.Contains("feature-name-test", "key-test"))
@@ -114,7 +117,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var config = new ComponentConfig(6, 3);
             var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 1);
             var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
-            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask);
+            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Enums.Task.MtkSendBulkData);
+            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask, sendBulkDataTask);
 
             // Act && Assert.
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test"));

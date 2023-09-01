@@ -166,13 +166,10 @@ namespace Splitio.Services.Client.Classes
                         properties = (Dictionary<string, object>)eventPropertiesResult.Value
                     };
 
-                    _tasksManager.NewOnTimeTaskAndStart(Enums.Task.Track, () =>
+                    _eventsLog.Log(new WrappedEvent
                     {
-                        _eventsLog.Log(new WrappedEvent
-                        {
-                            Event = eventToLog,
-                            Size = eventPropertiesResult.EventSize
-                        });
+                        Event = eventToLog,
+                        Size = eventPropertiesResult.EventSize
                     });
 
                     RecordLatency(nameof(Track), clock.ElapsedMilliseconds);
@@ -235,8 +232,9 @@ namespace Splitio.Services.Client.Classes
 
             var mtksTask = _tasksManager.NewPeriodicTask(Enums.Task.MTKsSender, config.UniqueKeysRefreshRate * 1000);
             var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Enums.Task.CacheLongTermCleaning, IntervalToClearLongTermCache);
+            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Enums.Task.MtkSendBulkData);
 
-            _uniqueKeysTracker = new UniqueKeysTracker(trackerConfig, filterAdapter, trackerCache, _impressionsSenderAdapter, mtksTask, cacheLongTermCleaningTask);
+            _uniqueKeysTracker = new UniqueKeysTracker(trackerConfig, filterAdapter, trackerCache, _impressionsSenderAdapter, mtksTask, cacheLongTermCleaningTask, sendBulkDataTask);
         }
 
         protected void BuildImpressionsCounter(BaseConfig config)
@@ -249,8 +247,9 @@ namespace Splitio.Services.Client.Classes
 
             var trackerConfig = new ComponentConfig(config.ImpressionsCounterCacheMaxSize, config.ImpressionsCountBulkSize);
             var task = _tasksManager.NewPeriodicTask(Enums.Task.ImpressionsCountSender, config.ImpressionsCounterRefreshRate * 1000);
+            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Enums.Task.ImpressionCounterSendBulkData);
 
-            _impressionsCounter = new ImpressionsCounter(trackerConfig, _impressionsSenderAdapter, task);
+            _impressionsCounter = new ImpressionsCounter(trackerConfig, _impressionsSenderAdapter, task, sendBulkDataTask);
         }
         #endregion
 

@@ -164,10 +164,12 @@ namespace Splitio.Services.Client.Classes
         {
             var eventsCache = new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(_config.EventLogSize));
             var eventsTask = _tasksManager.NewPeriodicTask(Enums.Task.EventsSender, _config.EventLogRefreshRate * 1000);
-            _eventsLog = new EventsLog(_eventSdkApiClient, eventsCache, _telemetryRuntimeProducer, eventsTask);
+            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Enums.Task.EventsSendBulkData);
+
+            _eventsLog = new EventsLog(_eventSdkApiClient, eventsCache, _telemetryRuntimeProducer, eventsTask, sendBulkDataTask);
         }
 
-        private int Random(int refreshRate)
+        private static int Random(int refreshRate)
         {
             Random random = new Random();
             return Math.Max(5, random.Next(refreshRate / 2, refreshRate));

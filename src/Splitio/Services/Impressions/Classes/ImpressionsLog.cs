@@ -49,18 +49,15 @@ namespace Splitio.Services.Impressions.Classes
         {
             try
             {
-                Console.WriteLine("### 1 - SendBulkImpressionsAsync");
                 if (_impressionsCache.HasReachedMaxSize())
                 {
                     _log.Warn("Split SDK impressions queue is full. Impressions may have been dropped. Consider increasing capacity.");
                 }
 
-                Console.WriteLine("### 2 - SendBulkImpressionsAsync");
                 var impressions = _impressionsCache.FetchAllAndClear();
 
                 if (impressions.Count <= 0) return;
-                
-                Console.WriteLine($"### 3 - SendBulkImpressionsAsync: {impressions.Count}");
+
                 await _apiClient.SendBulkImpressionsAsync(impressions);                
             }
             catch (Exception ex)

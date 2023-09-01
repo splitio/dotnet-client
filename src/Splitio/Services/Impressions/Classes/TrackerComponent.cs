@@ -9,8 +9,11 @@ namespace Splitio.Services.Impressions.Classes
         protected readonly int _cacheMaxSize;
         protected readonly int _maxBulkSize;
 
+        protected readonly ISplitTask _taskBulkData;
+
         public TrackerComponent(ComponentConfig config,
-            ISplitTask task)
+            ISplitTask task,
+            ISplitTask taskBulkData)
         {
             _cacheMaxSize = config.CacheMaxSize;
             _maxBulkSize = config.MaxBulkSize;
@@ -18,6 +21,9 @@ namespace Splitio.Services.Impressions.Classes
             _task = task;
             _task.SetFunction(SendBulkDataAsync);
             _task.OnStop(SendBulkDataAsync);
+
+            _taskBulkData = taskBulkData;
+            _taskBulkData.SetFunction(SendBulkDataAsync);
         }
         
         public void Start()

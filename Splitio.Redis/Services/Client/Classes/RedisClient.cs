@@ -143,7 +143,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private void BuildEventLog()
         {
             var eventsCache = new RedisEventsCache(_redisAdapter, _config.SdkMachineName, _config.SdkMachineIP, _config.SdkVersion, _config.RedisUserPrefix);
-            _eventsLog = new RedisEvenstLog(eventsCache);
+            _eventsLog = new RedisEvenstLog(eventsCache, _tasksManager);
         }
         
         private void BuildManager()
