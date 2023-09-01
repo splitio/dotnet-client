@@ -12,7 +12,7 @@ namespace Splitio.Integration_tests
 {
     public class HttpClientMock : IDisposable
     {
-        private readonly FluentMockServer _mockServer;
+        private readonly WireMockServer _mockServer;
         private readonly string rootFilePath;
 
         public HttpClientMock()
@@ -23,7 +23,7 @@ namespace Splitio.Integration_tests
             rootFilePath = @"Resources\";
 #endif
 
-            _mockServer = FluentMockServer.Start();
+            _mockServer = WireMockServer.Start();
         }
 
         #region SplitChanges
@@ -322,12 +322,12 @@ namespace Splitio.Integration_tests
             return _mockServer.Urls.FirstOrDefault();
         }
 
-        public List<LogEntry> GetLogs()
+        public List<ILogEntry> GetLogs()
         {
             return _mockServer.LogEntries.ToList();
         }
 
-        public List<LogEntry> GetImpressionLogs()
+        public List<ILogEntry> GetImpressionLogs()
         {
             return _mockServer
                 .LogEntries
@@ -335,7 +335,7 @@ namespace Splitio.Integration_tests
                 .ToList();
         }
 
-        public List<LogEntry> GetImpressionCountsLogs()
+        public List<ILogEntry> GetImpressionCountsLogs()
         {
             return _mockServer
                 .LogEntries
@@ -343,7 +343,7 @@ namespace Splitio.Integration_tests
                 .ToList();
         }
 
-        public List<LogEntry> GetEventsLog()
+        public List<ILogEntry> GetEventsLog()
         {
             return _mockServer
                 .LogEntries
@@ -351,7 +351,7 @@ namespace Splitio.Integration_tests
                 .ToList();
         }
 
-        public List<LogEntry> GetMetricsConfigLog()
+        public List<ILogEntry> GetMetricsConfigLog()
         {
             return _mockServer
                 .LogEntries
@@ -359,7 +359,7 @@ namespace Splitio.Integration_tests
                 .ToList();
         }
 
-        public List<LogEntry> GetMetricsUsageLog()
+        public List<ILogEntry> GetMetricsUsageLog()
         {
             return _mockServer
                 .LogEntries
