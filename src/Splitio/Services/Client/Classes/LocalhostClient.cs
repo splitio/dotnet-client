@@ -1,5 +1,6 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
+using Splitio.Services.Filters;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Shared.Classes;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -17,8 +19,7 @@ namespace Splitio.Services.Client.Classes
         private const string SplitFileYml = ".yml";
         private const string SplitFileYaml = ".yaml";
         
-        private ILocalhostFileService _localhostFileService;
-
+        private readonly ILocalhostFileService _localhostFileService;
         private readonly FileSystemWatcher _watcher;
         private readonly string _fullPath;
 
@@ -47,8 +48,9 @@ namespace Splitio.Services.Client.Classes
             _watcher.Changed += new FileSystemEventHandler(OnFileChanged);
             _watcher.EnableRaisingEvents = true;
 
+            _flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
             var splits = ParseSplitFile(_fullPath);
-            _splitCache = new InMemorySplitCache(splits);
+            _splitCache = new InMemorySplitCache(splits, _flagSetsFilter);
 
             _blockUntilReadyService = new NoopBlockUntilReadyService();
             _manager = new SplitManager(_splitCache, _blockUntilReadyService);
@@ -89,16 +91,10 @@ namespace Splitio.Services.Client.Classes
 
             _splitCache.Clear();
 
-            foreach (var split in splits)
-            {
-                if (split.Value != null)
-                {
-                    _splitCache.AddSplit(split.Key, split.Value);
-                }
-            }
+            _splitCache.Update(splits.Values.ToList(), new List<ParsedSplit>(), -1);
         }
 
-        private string LookupFilePath(string filePath)
+        private static string LookupFilePath(string filePath)
         {
             filePath = filePath ?? DefaultSplitFileName;
 

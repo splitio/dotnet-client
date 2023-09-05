@@ -139,9 +139,9 @@ namespace Splitio.Services.Shared.Classes
         {
             if (flagSets == null) return new HashSet<string>();
 
-            var toReturn = _flagSetsValidator.Cleanup(flagSets);
+            var toReturn = _flagSetsValidator.Cleanup("SDK Config", flagSets);
 
-            return _flagSetsValidator.Items(toReturn);
+            return _flagSetsValidator.Items("SDK Config", toReturn);
         }
 
         private static int GetImpressionRefreshRate(ImpressionsMode impressionsMode, int? impressionsRefreshRate)

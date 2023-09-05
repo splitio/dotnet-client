@@ -5,7 +5,7 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource;
 using Splitio.Services.EventSource.Workers;
-using Splitio.Services.Parsing;
+using Splitio.Services.Filters;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
@@ -23,14 +23,13 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
     [TestClass]
     public class SplitsWorkerTests
     {
-        private readonly IWrapperAdapter wrapperAdapter = WrapperAdapter.Instance();
-
         private readonly Mock<ISynchronizer> _synchronizer;
         private readonly Mock<ISplitCache> _featureFlagCache;
         private readonly Mock<ISplitParser> _featureFlagParser;
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private readonly Mock<ISelfRefreshingSegmentFetcher> _segmentFetcher;
         private readonly Mock<IStatusManager> _statusManager;
+        private readonly Mock<IFlagSetsFilter> _flagSetsFilter;
         private readonly BlockingCollection<SplitChangeNotification> _queue;
 
         private readonly IFeatureFlagSyncHelper _featureFlagSyncHelper;
@@ -44,9 +43,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _segmentFetcher = new Mock<ISelfRefreshingSegmentFetcher>();
             _statusManager = new Mock<IStatusManager>();
+            _flagSetsFilter = new Mock<IFlagSetsFilter>();
             _queue = new BlockingCollection<SplitChangeNotification>(new ConcurrentQueue<SplitChangeNotification>());
 
-            _featureFlagSyncHelper = new FeatureFlagSyncHelper(_featureFlagParser.Object, _featureFlagCache.Object, new HashSet<string>());
+            _featureFlagSyncHelper = new FeatureFlagSyncHelper(_featureFlagParser.Object, _featureFlagCache.Object, _flagSetsFilter.Object);
 
             var tasksManager = new TasksManager();
             var task = tasksManager.NewPeriodicTask(_statusManager.Object, Splitio.Enums.Task.FeatureFlagsWorker, 0);
@@ -79,8 +79,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             Thread.Sleep(1000);
 
             // Assert.
-            _featureFlagCache.Verify(mock => mock.RemoveSplit(It.IsAny<string>()), Times.Never);
-            _featureFlagCache.Verify(mock => mock.AddOrUpdate(It.IsAny<string>(), It.IsAny<SplitBase>()), Times.Never);
+            _featureFlagCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<ParsedSplit>>(), It.IsAny<long>()), Times.Never);
             _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Never);
             _featureFlagCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Never);
         }
@@ -96,6 +95,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _featureFlagParser
                 .Setup(mock => mock.Parse(It.IsAny<Split>()))
                 .Returns(new ParsedSplit());
+
+            _flagSetsFilter
+                .Setup(mock => mock.Match(It.IsAny<HashSet<string>>()))
+                .Returns(true);
 
             _splitsWorker.AddToQueue(new SplitChangeNotification
             {
@@ -134,10 +137,8 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             Thread.Sleep(1000);
 
             // Assert.
-            _featureFlagCache.Verify(mock => mock.RemoveSplit(It.IsAny<string>()), Times.Never);
-            _featureFlagCache.Verify(mock => mock.AddOrUpdate(It.IsAny<string>(), It.IsAny<SplitBase>()), Times.Once);
+            _featureFlagCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<ParsedSplit>>(), It.IsAny<long>()), Times.Once);
             _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Never);
-            _featureFlagCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits), Times.Once);
             _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExists(It.IsAny<List<string>>()), Times.Once);
         }
@@ -172,10 +173,8 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             Thread.Sleep(1000);
 
             // Assert.
-            _featureFlagCache.Verify(mock => mock.RemoveSplit(It.IsAny<string>()), Times.Never);
-            _featureFlagCache.Verify(mock => mock.AddOrUpdate(It.IsAny<string>(), It.IsAny<SplitBase>()), Times.Once);
+            _featureFlagCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<ParsedSplit>>(), It.IsAny<long>()), Times.Once);
             _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Never);
-            _featureFlagCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits), Times.Once);
         }
 
@@ -208,10 +207,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             Thread.Sleep(1000);
 
             // Assert.
-            _featureFlagCache.Verify(mock => mock.RemoveSplit("mauro_ff"), Times.Once);
-            _featureFlagCache.Verify(mock => mock.SetChangeNumber(2), Times.Once);
-            _featureFlagCache.Verify(mock => mock.AddOrUpdate(It.IsAny<string>(), It.IsAny<SplitBase>()), Times.Never);
-
+            _featureFlagCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<ParsedSplit>>(), It.IsAny<long>()), Times.Once);
         }
 
         [TestMethod]        

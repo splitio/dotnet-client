@@ -1,5 +1,6 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Filters;
 using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Interfaces;
@@ -14,64 +15,48 @@ namespace Splitio.Services.Shared.Classes
 
         private readonly ISplitParser _featureFlagParser;
         private readonly ISplitCache _featureFlagsCache;
-        private readonly HashSet<string> _flagSets;
-        private readonly bool _filterFlagSets;
+        private readonly IFlagSetsFilter _flagSetsFilter;
 
-        public FeatureFlagSyncHelper(ISplitParser featureFlagParser, ISplitCache featureFlagsCache, HashSet<string> flagSets)
+        public FeatureFlagSyncHelper(ISplitParser featureFlagParser, ISplitCache featureFlagsCache, IFlagSetsFilter flagSetsFilter)
         {
             _featureFlagParser = featureFlagParser;
             _featureFlagsCache = featureFlagsCache;
-            _flagSets = flagSets;
-            _filterFlagSets = _flagSets.Any();
+            _flagSetsFilter = flagSetsFilter;
         }
 
         public List<string> UpdateFeatureFlagsFromChanges(List<Split> changes, long till)
         {
-            var added = new List<string>();
-            var removed = new List<string>();
+            var toAdd = new List<ParsedSplit>();
+            var toRemove = new List<ParsedSplit>();
             var segmentNames = new List<string>();
 
             foreach (var featureFlag in changes)
             {
                 var pFeatureFlag = _featureFlagParser.Parse(featureFlag);
 
-                if (pFeatureFlag == null || !FlagSetsMatch(featureFlag.Sets))
+                if (pFeatureFlag == null || !_flagSetsFilter.Match(featureFlag.Sets))
                 {
-                    _featureFlagsCache.RemoveSplit(featureFlag.name);
-                    removed.Add(featureFlag.name);
+                    toRemove.Add(pFeatureFlag);
                     continue;
                 }
 
+                toAdd.Add(pFeatureFlag);
                 segmentNames.AddRange(featureFlag.GetSegmentNames());
-
-                if (_featureFlagsCache.AddOrUpdate(featureFlag.name, pFeatureFlag))
-                {
-                    added.Add(featureFlag.name);
-                }
             }
 
-            _featureFlagsCache.SetChangeNumber(till);
+            _featureFlagsCache.Update(toAdd, toRemove, till);
 
-            if (_log.IsDebugEnabled && added.Count > 0)
+            if (_log.IsDebugEnabled && toAdd.Count > 0)
             {
-                _log.Debug($"Added feature flags: {string.Join(" - ", added)}");
+                _log.Debug($"Added feature flags: {string.Join(" - ", toAdd.Select(s => s.name).ToList())}");
             }
 
-            if (_log.IsDebugEnabled && removed.Count > 0)
+            if (_log.IsDebugEnabled && toRemove.Count > 0)
             {
-                _log.Debug($"Deleted feature flags: {string.Join(" - ", removed)}");
+                _log.Debug($"Deleted feature flags: {string.Join(" - ", toRemove.Select(s => s.name).ToList())}");
             }
 
             return segmentNames;
-        }
-
-        private bool FlagSetsMatch(HashSet<string> sets)
-        {
-            if (!_filterFlagSets) return true;
-
-            if (sets == null) return false;
-
-            return _flagSets.Intersect(sets).Any();
         }
     }
 }

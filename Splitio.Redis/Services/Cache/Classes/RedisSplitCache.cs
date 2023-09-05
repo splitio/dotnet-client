@@ -98,29 +98,9 @@ namespace Splitio.Redis.Services.Cache.Classes
             return $"{RedisKeyPrefix}trafficType.{type}";
         }
 
-        public void AddSplit(string splitName, SplitBase split)
-        {
-            // No-op
-        }
-
-        public bool RemoveSplit(string splitName)
-        {
-            return false; // No-op
-        }
-
         public void SetChangeNumber(long changeNumber)
         {
             // No-op
-        }
-
-        public bool AddOrUpdate(string splitName, SplitBase split)
-        {
-            return false; // No-op
-        }
-
-        public long RemoveSplits(List<string> splitNames)
-        {
-            return 0;// No-op
         }
 
         public void Flush()
@@ -167,6 +147,17 @@ namespace Splitio.Redis.Services.Cache.Classes
         public int SplitsCount()
         {
             return 0; // No-op
+        }
+
+        public void Update(List<ParsedSplit> toAdd, List<ParsedSplit> toRemove, long till)
+        {
+            // No-op
+        }
+
+        public Dictionary<string, HashSet<string>> GetNamesByFlagSets(List<string> flagSets)
+        {
+            // TODO: to implement
+            throw new System.NotImplementedException();
         }
     }
 }

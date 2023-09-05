@@ -72,8 +72,7 @@ namespace Splitio_Tests.Integration_Tests
 
             //Act           
             var result = client.GetTreatment("test", "asd", null);
-            client.RemoveSplitFromCache("asd");
-            var result2 = client.GetTreatment("test", "asd", null);
+            var result2 = client.GetTreatment("test", "asd2", null);
 
             //Assert
             Assert.IsNotNull(result);
@@ -290,12 +289,12 @@ namespace Splitio_Tests.Integration_Tests
             //Assert
             Thread.Sleep(10000);
             impressionsLogMock.Verify(x => x.Log(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "test" &&
-                                                                                       p.FirstOrDefault().feature == "whitelisting_elements" &&
-                                                                                       p.FirstOrDefault().treatment == "off" &&
-                                                                                       p.FirstOrDefault().time > 0 &&
-                                                                                       p.FirstOrDefault().changeNumber == 1471368078203 &&
-                                                                                       p.FirstOrDefault().label == "default rule" &&
-                                                                                       p.FirstOrDefault().bucketingKey == null)));
+                                                                                  p.FirstOrDefault().feature == "whitelisting_elements" &&
+                                                                                  p.FirstOrDefault().treatment == "off" &&
+                                                                                  p.FirstOrDefault().time > 0 &&
+                                                                                  p.FirstOrDefault().changeNumber == 1471368078203 &&
+                                                                                  p.FirstOrDefault().label == "default rule" &&
+                                                                                  p.FirstOrDefault().bucketingKey == null)));
         }
 
         [TestMethod]
@@ -307,18 +306,17 @@ namespace Splitio_Tests.Integration_Tests
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", impressionsLog: impressionsLogMock.Object);
 
             //Act           
-            client.RemoveSplitFromCache("asd");
-            var result = client.GetTreatment("test", "asd", null);
+            var result = client.GetTreatment("test", "asd2", null);
 
             //Assert
             Assert.AreEqual("control", result);
             impressionsLogMock.Verify(x => x.Log(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "test" &&
-                                                                                       p.FirstOrDefault().feature == "asd" &&
-                                                                                       p.FirstOrDefault().treatment == "control" &&
-                                                                                       p.FirstOrDefault().time > 0 &&
-                                                                                       p.FirstOrDefault().changeNumber == null &&
-                                                                                       p.FirstOrDefault().label == "definition not found" &&
-                                                                                       p.FirstOrDefault().bucketingKey == null)), Times.Never);
+                                                                                  p.FirstOrDefault().feature == "asd2" &&
+                                                                                  p.FirstOrDefault().treatment == "control" &&
+                                                                                  p.FirstOrDefault().time > 0 &&
+                                                                                  p.FirstOrDefault().changeNumber == null &&
+                                                                                  p.FirstOrDefault().label == "definition not found" &&
+                                                                                  p.FirstOrDefault().bucketingKey == null)), Times.Never);
         }
 
         [TestMethod]

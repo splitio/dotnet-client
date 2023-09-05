@@ -2,6 +2,7 @@
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Filters;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
@@ -26,6 +27,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
         public void UpdateFeatureFlagsFromChanges_WithFlagSetsConfig_ShouldAddOrUpdate()
         {
             // Arrange.
+            var filter = new FlagSetsFilter(new HashSet<string> { "set_b" });
             var featureFlags = new List<Split>();
             for (int i = 0; i < 5; i++)
             {
@@ -41,7 +43,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Setup(mock => mock.Parse(It.IsAny<Split>()))
                 .Returns(new ParsedSplit());
 
-            var helper = new FeatureFlagSyncHelper(_featureFlagParser.Object, _featureFlagsCache.Object, new HashSet<string> { "set_b" });
+            var helper = new FeatureFlagSyncHelper(_featureFlagParser.Object, _featureFlagsCache.Object, filter);
 
             // Act.
             var result = helper.UpdateFeatureFlagsFromChanges(featureFlags, 100);
@@ -49,15 +51,14 @@ namespace Splitio_Tests.Unit_Tests.Shared
             // Assert.
             Assert.IsFalse(result.Any());
             _featureFlagParser.Verify(mock => mock.Parse(It.IsAny<Split>()), Times.Exactly(5));
-            _featureFlagsCache.Verify(mock => mock.RemoveSplit(It.IsAny<string>()), Times.Never);
-            _featureFlagsCache.Verify(mock => mock.AddOrUpdate(It.IsAny<string>(), It.IsAny<SplitBase>()), Times.Exactly(5));
-            _featureFlagsCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Once);
+            _featureFlagsCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<ParsedSplit>>(), It.IsAny<long>()), Times.Once);
         }
 
         [TestMethod]
         public void UpdateFeatureFlagsFromChanges_WithFlagSetsConfig_ShouldRemove()
         {
             // Arrange.
+            var filter = new FlagSetsFilter(new HashSet<string> { "set_x" });
             var featureFlags = new List<Split>();
             for (int i = 0; i < 5; i++)
             {
@@ -73,7 +74,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Setup(mock => mock.Parse(It.IsAny<Split>()))
                 .Returns(new ParsedSplit());
 
-            var helper = new FeatureFlagSyncHelper(_featureFlagParser.Object, _featureFlagsCache.Object, new HashSet<string> { "set_x" });
+            var helper = new FeatureFlagSyncHelper(_featureFlagParser.Object, _featureFlagsCache.Object, filter);
 
             // Act.
             var result = helper.UpdateFeatureFlagsFromChanges(featureFlags, 100);
@@ -81,15 +82,14 @@ namespace Splitio_Tests.Unit_Tests.Shared
             // Assert.
             Assert.IsFalse(result.Any());
             _featureFlagParser.Verify(mock => mock.Parse(It.IsAny<Split>()), Times.Exactly(5));
-            _featureFlagsCache.Verify(mock => mock.RemoveSplit(It.IsAny<string>()), Times.Exactly(5));
-            _featureFlagsCache.Verify(mock => mock.AddOrUpdate(It.IsAny<string>(), It.IsAny<SplitBase>()), Times.Never);
-            _featureFlagsCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Once);
+            _featureFlagsCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<ParsedSplit>>(), It.IsAny<long>()), Times.Once);
         }
 
         [TestMethod]
         public void UpdateFeatureFlagsFromChanges_WithoutFlagSetsConfig_ShouldRemove()
         {
             // Arrange.
+            var filter = new FlagSetsFilter(new HashSet<string> { "set_x" });
             var featureFlags = new List<Split>();
             for (int i = 0; i < 5; i++)
             {
@@ -104,7 +104,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Setup(mock => mock.Parse(It.IsAny<Split>()))
                 .Returns(new ParsedSplit());
 
-            var helper = new FeatureFlagSyncHelper(_featureFlagParser.Object, _featureFlagsCache.Object, new HashSet<string> { "set_x" });
+            var helper = new FeatureFlagSyncHelper(_featureFlagParser.Object, _featureFlagsCache.Object, filter);
 
             // Act.
             var result = helper.UpdateFeatureFlagsFromChanges(featureFlags, 100);
@@ -112,15 +112,14 @@ namespace Splitio_Tests.Unit_Tests.Shared
             // Assert.
             Assert.IsFalse(result.Any());
             _featureFlagParser.Verify(mock => mock.Parse(It.IsAny<Split>()), Times.Exactly(5));
-            _featureFlagsCache.Verify(mock => mock.RemoveSplit(It.IsAny<string>()), Times.Exactly(5));
-            _featureFlagsCache.Verify(mock => mock.AddOrUpdate(It.IsAny<string>(), It.IsAny<SplitBase>()), Times.Never);
-            _featureFlagsCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Once);
+            _featureFlagsCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<ParsedSplit>>(), It.IsAny<long>()), Times.Once);
         }
 
         [TestMethod]
         public void UpdateFeatureFlagsFromChanges_WithFlagSetsConfig_ShouldAddOrUpdateAndRemove()
         {
             // Arrange.
+            var filter = new FlagSetsFilter(new HashSet<string> { "set_x", "set_b", "set_c" });
             var featureFlags = new List<Split>();
             for (int i = 0; i < 5; i++)
             {
@@ -136,7 +135,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Setup(mock => mock.Parse(It.IsAny<Split>()))
                 .Returns(new ParsedSplit());
 
-            var helper = new FeatureFlagSyncHelper(_featureFlagParser.Object, _featureFlagsCache.Object, new HashSet<string> { "set_x", "set_b", "set_c" });
+            var helper = new FeatureFlagSyncHelper(_featureFlagParser.Object, _featureFlagsCache.Object, filter);
 
             // Act.
             var result = helper.UpdateFeatureFlagsFromChanges(featureFlags, 100);
@@ -144,15 +143,14 @@ namespace Splitio_Tests.Unit_Tests.Shared
             // Assert.
             Assert.IsFalse(result.Any());
             _featureFlagParser.Verify(mock => mock.Parse(It.IsAny<Split>()), Times.Exactly(5));
-            _featureFlagsCache.Verify(mock => mock.RemoveSplit(It.IsAny<string>()), Times.Exactly(2));
-            _featureFlagsCache.Verify(mock => mock.AddOrUpdate(It.IsAny<string>(), It.IsAny<SplitBase>()), Times.Exactly(3));
-            _featureFlagsCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Once);
+            _featureFlagsCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<ParsedSplit>>(), It.IsAny<long>()), Times.Once);
         }
 
         [TestMethod]
         public void UpdateFeatureFlagsFromChanges_WithoutFlagSetsConfig_ShouldAddOrUpdate()
         {
             // Arrange.
+            var filter = new FlagSetsFilter(new HashSet<string>());
             var featureFlags = new List<Split>();
             for (int i = 0; i < 5; i++)
             {
@@ -167,7 +165,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Setup(mock => mock.Parse(It.IsAny<Split>()))
                 .Returns(new ParsedSplit());
 
-            var helper = new FeatureFlagSyncHelper(_featureFlagParser.Object, _featureFlagsCache.Object, new HashSet<string>());
+            var helper = new FeatureFlagSyncHelper(_featureFlagParser.Object, _featureFlagsCache.Object, filter);
 
             // Act.
             var result = helper.UpdateFeatureFlagsFromChanges(featureFlags, 100);
@@ -175,15 +173,14 @@ namespace Splitio_Tests.Unit_Tests.Shared
             // Assert.
             Assert.IsFalse(result.Any());
             _featureFlagParser.Verify(mock => mock.Parse(It.IsAny<Split>()), Times.Exactly(5));
-            _featureFlagsCache.Verify(mock => mock.RemoveSplit(It.IsAny<string>()), Times.Exactly(0));
-            _featureFlagsCache.Verify(mock => mock.AddOrUpdate(It.IsAny<string>(), It.IsAny<SplitBase>()), Times.Exactly(5));
-            _featureFlagsCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Once);
+            _featureFlagsCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<ParsedSplit>>(), It.IsAny<long>()), Times.Once);
         }
 
         [TestMethod]
         public void UpdateFeatureFlagsFromChanges_WithoutFlagSets_ShouldAddOrUpdate()
         {
             // Arrange.
+            var filter = new FlagSetsFilter(new HashSet<string>());
             var featureFlags = new List<Split>();
             for (int i = 0; i < 5; i++)
             {
@@ -199,7 +196,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Setup(mock => mock.Parse(It.IsAny<Split>()))
                 .Returns(new ParsedSplit());
 
-            var helper = new FeatureFlagSyncHelper(_featureFlagParser.Object, _featureFlagsCache.Object, new HashSet<string>());
+            var helper = new FeatureFlagSyncHelper(_featureFlagParser.Object, _featureFlagsCache.Object, filter);
 
             // Act.
             var result = helper.UpdateFeatureFlagsFromChanges(featureFlags, 100);
@@ -207,9 +204,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             // Assert.
             Assert.IsFalse(result.Any());
             _featureFlagParser.Verify(mock => mock.Parse(It.IsAny<Split>()), Times.Exactly(5));
-            _featureFlagsCache.Verify(mock => mock.RemoveSplit(It.IsAny<string>()), Times.Exactly(0));
-            _featureFlagsCache.Verify(mock => mock.AddOrUpdate(It.IsAny<string>(), It.IsAny<SplitBase>()), Times.Exactly(5));
-            _featureFlagsCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Once);
+            _featureFlagsCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<ParsedSplit>>(), It.IsAny<long>()), Times.Once);
         }
     }
 }

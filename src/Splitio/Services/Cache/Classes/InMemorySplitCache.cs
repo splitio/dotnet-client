@@ -1,5 +1,6 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Filters;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
@@ -12,14 +13,17 @@ namespace Splitio.Services.Cache.Classes
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemorySplitCache));
 
+        private readonly IFlagSetsFilter _flagSetsFilter;
         private readonly ConcurrentDictionary<string, ParsedSplit> _splits;
         private readonly ConcurrentDictionary<string, int> _trafficTypes;
         private readonly ConcurrentDictionary<string, HashSet<string>> _flagSets;
+
         private long _changeNumber;
 
-        public InMemorySplitCache(ConcurrentDictionary<string, ParsedSplit> splits, long changeNumber = -1)
+        public InMemorySplitCache(ConcurrentDictionary<string, ParsedSplit> splits, IFlagSetsFilter flagSetsFilter, long changeNumber = -1)
         {
             _splits = splits;
+            _flagSetsFilter = flagSetsFilter;
             _changeNumber = changeNumber;
             _trafficTypes = new ConcurrentDictionary<string, int>();
             _flagSets = new ConcurrentDictionary<string, HashSet<string>>();
@@ -28,61 +32,44 @@ namespace Splitio.Services.Cache.Classes
             {
                 foreach (var split in splits)
                 {
-                    if (split.Value != null)
-                    {
-                        IncreaseTrafficTypeCount(split.Value.trafficTypeName);
-                    }
+                    if (split.Value == null)
+                        continue;
+
+                    IncreaseTrafficTypeCount(split.Value.trafficTypeName);
+                    AddToFlagSets(split.Value);
                 }
             }
         }
 
-        #region Public Methods
-        public bool AddOrUpdate(string splitName, SplitBase split)
+        #region Public Producer Methods
+        public void Update(List<ParsedSplit> toAdd, List<ParsedSplit> toRemove, long till)
         {
-            if (split == null) return false;
-
-            var parsedSplit = (ParsedSplit)split;
-
-            var exists = _splits.TryGetValue(splitName, out ParsedSplit oldSplit);
-
-            if (exists)
+            foreach (var featureFlag in toAdd)
             {
-                DecreaseTrafficTypeCount(oldSplit);
+                if (_splits.TryGetValue(featureFlag.name, out ParsedSplit existing))
+                {
+                    DecreaseTrafficTypeCount(existing);
+                    DeleteFromFlagSets(existing);
+                }
+
+                _splits.AddOrUpdate(featureFlag.name, featureFlag, (key, oldValue) => featureFlag);
+
+                IncreaseTrafficTypeCount(featureFlag.trafficTypeName);
+                AddToFlagSets(featureFlag);
             }
 
-            _splits.AddOrUpdate(splitName, parsedSplit, (key, oldValue) => parsedSplit);
-            
-            IncreaseTrafficTypeCount(parsedSplit?.trafficTypeName);
-
-            AddOrUpdateFlagSets(parsedSplit);
-
-            return exists;
-        }
-
-        public void AddSplit(string splitName, SplitBase split)
-        {
-            var parsedSplit = (ParsedSplit)split;
-
-            if (_splits.TryAdd(splitName, parsedSplit))
+            foreach (var featureFlag in toRemove)
             {
-                IncreaseTrafficTypeCount(parsedSplit.trafficTypeName);
-
-                AddOrUpdateFlagSets(parsedSplit);
-            }
-        }
-
-        public bool RemoveSplit(string splitName)
-        {            
-            var removed = _splits.TryRemove(splitName, out ParsedSplit removedSplit);
-
-            if (removed)
-            {
-                DecreaseTrafficTypeCount(removedSplit);
+                if (_splits.TryGetValue(featureFlag.name, out ParsedSplit cached))
+                {
+                    _splits.TryRemove(featureFlag.name, out ParsedSplit removedSplit);
+                    
+                    DecreaseTrafficTypeCount(removedSplit);
+                    DeleteFromFlagSets(removedSplit);
+                }
             }
 
-            DeleteFromFlagSets(removedSplit);
-
-            return removed;
+            SetChangeNumber(till);
         }
 
         public void SetChangeNumber(long changeNumber)
@@ -94,6 +81,27 @@ namespace Splitio.Services.Cache.Classes
 
             _changeNumber = changeNumber;
         }
+        public void Clear()
+        {
+            _splits.Clear();
+            _trafficTypes.Clear();
+        }
+
+        public void Kill(long changeNumber, string splitName, string defaultTreatment)
+        {
+            var featureFlag = GetSplit(splitName);
+
+            if (featureFlag == null) return;
+
+            featureFlag.defaultTreatment = defaultTreatment;
+            featureFlag.killed = true;
+            featureFlag.changeNumber = changeNumber;
+
+            _splits.AddOrUpdate(featureFlag.name, featureFlag, (key, oldValue) => featureFlag);
+        }
+        #endregion
+
+        #region Public Consumer Methods
 
         public long GetChangeNumber()
         {
@@ -113,12 +121,6 @@ namespace Splitio.Services.Cache.Classes
                 .Values
                 .Where(s => s != null)
                 .ToList();
-        }
-
-        public void Clear()
-        {
-            _splits.Clear();            
-            _trafficTypes.Clear();
         }
 
         public bool TrafficTypeExists(string trafficType)
@@ -142,19 +144,6 @@ namespace Splitio.Services.Cache.Classes
                 .ToList();
         }
 
-        public void Kill(long changeNumber, string splitName, string defaultTreatment)
-        {
-            var split = GetSplit(splitName);
-
-            if (split == null) return;
-
-            split.defaultTreatment = defaultTreatment;
-            split.killed = true;
-            split.changeNumber = changeNumber;
-
-            AddOrUpdate(splitName, split);
-        }
-
         public List<string> GetSplitNames()
         {
             return _splits
@@ -168,19 +157,17 @@ namespace Splitio.Services.Cache.Classes
             return GetSplitNames().Count;
         }
 
-        public HashSet<string> GetNamesByFlagSets(List<string> flagSets)
+        public Dictionary<string, HashSet<string>> GetNamesByFlagSets(List<string> flagSets)
         {
-            var namesToReturn = new HashSet<string>();
+            var toReturn = new Dictionary<string, HashSet<string>>();
 
             foreach (var fSet in flagSets)
             {
-                if (_flagSets.TryGetValue(fSet, out HashSet<string> ffNames))
-                    namesToReturn.UnionWith(ffNames);
-                else
-                    _log.Warn();
+                _flagSets.TryGetValue(fSet, out HashSet<string> ffNames);
+                toReturn.Add(fSet, ffNames);
             }
 
-            return namesToReturn;
+            return toReturn;
         }
         #endregion
 
@@ -211,33 +198,23 @@ namespace Splitio.Services.Cache.Classes
             }
         }
 
-        private void AddOrUpdateFlagSets(ParsedSplit featureFlag)
+        private void AddToFlagSets(ParsedSplit featureFlag)
         {
+            if (featureFlag.Sets == null) return;
+
             foreach (var fSet in featureFlag.Sets)
             {
+                if (!_flagSetsFilter.Match(fSet))
+                    continue;
+
                 _flagSets.AddOrUpdate(fSet, new HashSet<string>() { featureFlag.name }, (_, ffNames) =>
                 {
                     ffNames.Add(featureFlag.name);
                     return ffNames;
                 });
             }
-
-            DeleteFromFlagSetsIfNecessary(featureFlag);
         }
 
-        private void DeleteFromFlagSetsIfNecessary(ParsedSplit featureFlag)
-        {
-            var keys = _flagSets.Keys;
-
-            foreach (var key in keys)
-            {
-                // if featureFlag.Sets is empty or Contains return true that means that should not remove from Flag Sets cache.
-                if (featureFlag.Sets.Contains(key))
-                    continue;
-
-                RemoveNames(key, featureFlag.name);
-            }
-        }
         private void DeleteFromFlagSets(ParsedSplit featureFlag)
         {
             var keys = _flagSets.Keys;
@@ -250,14 +227,13 @@ namespace Splitio.Services.Cache.Classes
 
         private void RemoveNames(string key, string name)
         {
-            var ffNames = _flagSets.AddOrUpdate(key, new HashSet<string>() { name }, (_, ffNames) =>
+            var names = _flagSets.AddOrUpdate(key, new HashSet<string>() { name }, (_, ffNames) =>
             {
                 ffNames.Remove(name);
                 return ffNames;
             });
 
-            if (ffNames.Count == 0)
-                _flagSets.TryRemove(key, out HashSet<string> _);
+            if (names.Count == 0) _flagSets.TryRemove(key, out HashSet<string> _);
         }
         #endregion
     }

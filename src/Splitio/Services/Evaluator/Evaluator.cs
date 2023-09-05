@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Xml.Linq;
 
 namespace Splitio.Services.Evaluator
 {
@@ -28,7 +27,7 @@ namespace Splitio.Services.Evaluator
         }
 
         #region Public Method
-        public TreatmentResult EvaluateFeature(Key key, string featureName, Dictionary<string, object> attributes = null)
+        public TreatmentResult EvaluateFeature(string method, Key key, string featureName, Dictionary<string, object> attributes = null)
         {
             using (var clock = new Util.SplitStopwatch())
             {
@@ -38,7 +37,7 @@ namespace Splitio.Services.Evaluator
                 {
                     var parsedSplit = _splitCache.GetSplit(featureName);
 
-                    return EvaluateTreatment(key, parsedSplit, featureName, clock, attributes);
+                    return EvaluateTreatment(method, key, parsedSplit, featureName, clock, attributes);
                 }
                 catch (Exception e)
                 {
@@ -49,7 +48,7 @@ namespace Splitio.Services.Evaluator
             }
         }
 
-        public MultipleEvaluatorResult EvaluateFeatures(Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
+        public MultipleEvaluatorResult EvaluateFeatures(string method, Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
         {
             var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
 
@@ -65,7 +64,7 @@ namespace Splitio.Services.Evaluator
                     {
                         var split = splits.FirstOrDefault(s => feature.Equals(s?.name));
 
-                        var result = EvaluateTreatment(key, split, feature, attributes: attributes);
+                        var result = EvaluateTreatment(method, key, split, feature, attributes: attributes);
 
                         treatmentsForFeatures.Add(feature, result);
                     }
@@ -83,14 +82,13 @@ namespace Splitio.Services.Evaluator
             }
         }
 
-        public MultipleEvaluatorResult EvaluateFeaturesByFlagSets(Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        public MultipleEvaluatorResult EvaluateFeaturesByFlagSets(string method, Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
         {
             var clock = new Stopwatch();
             clock.Start();
 
-            var flagSetsWithNames = _splitCache.GetNamesByFlagSets(flagSets);
-            
-            var result = EvaluateFeatures(key, flagSetsWithNames.ToList(), attributes);
+            var ffNames = GetFeatureFlagNamesByFlagSets(method, flagSets);
+            var result = EvaluateFeatures(method, key, ffNames, attributes);
 
             clock.Stop();
 
@@ -102,7 +100,28 @@ namespace Splitio.Services.Evaluator
         #endregion
 
         #region Private Methods
-        private TreatmentResult EvaluateTreatment(Key key, ParsedSplit parsedSplit, string featureFlagName, Util.SplitStopwatch clock = null, Dictionary<string, object> attributes = null)
+
+        private List<string> GetFeatureFlagNamesByFlagSets(string method, List<string> flagSets)
+        {
+            var ffNamesToReturn = new HashSet<string>();
+            var sets = _splitCache.GetNamesByFlagSets(flagSets);
+
+            foreach (var set in sets)
+            {
+                if (set.Value.Count == 0)
+                {
+                    _log.Warn($"{method}: you passed {set.Key} Flag Set that does not contain cached feature flags, please double check what Flag Sets are in use in the Split user interface.");
+                    continue;
+                }
+
+                ffNamesToReturn.UnionWith(set.Value);
+            }
+
+
+            return ffNamesToReturn.ToList();
+        }
+
+        private TreatmentResult EvaluateTreatment(string method, Key key, ParsedSplit parsedSplit, string featureFlagName, Util.SplitStopwatch clock = null, Dictionary<string, object> attributes = null)
         {
             try
             {
@@ -114,7 +133,7 @@ namespace Splitio.Services.Evaluator
 
                 if (parsedSplit == null)
                 {
-                    _log.Warn($"GetTreatment: you passed {featureFlagName} that does not exist in this environment, please double check what feature flags exist in the Split user interface.");
+                    _log.Warn($"{method}: you passed {featureFlagName} that does not exist in this environment, please double check what feature flags exist in the Split user interface.");
 
                     return new TreatmentResult(Labels.SplitNotFound, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
                 }

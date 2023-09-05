@@ -2,6 +2,7 @@
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Events.Interfaces;
+using Splitio.Services.Filters;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
@@ -43,8 +44,8 @@ namespace Splitio.Services.Client.Classes
                 parsedSplits.TryAdd(split.name, _splitParser.Parse(split));
             }
 
-            _splitCache = splitCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits));
-
+            _flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
+            _splitCache = splitCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits), _flagSetsFilter);
             _impressionsLog = impressionsLog;
 
             LabelsEnabled = isLabelsEnabled;
@@ -66,11 +67,6 @@ namespace Splitio.Services.Client.Classes
         }
 
         #region Public Methods
-        public void RemoveSplitFromCache(string splitName)
-        {
-            _splitCache.RemoveSplit(splitName);
-        }
-
         public void RemoveKeyFromSegmentCache(string segmentName, List<string> keys)
         {
             _segmentCache.RemoveFromSegment(segmentName, keys);

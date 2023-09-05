@@ -6,6 +6,7 @@ using Splitio.Services.Client.Interfaces;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
+using Splitio.Services.Filters;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
@@ -54,7 +55,6 @@ namespace Splitio.Services.Client.Classes
         protected ITelemetryInitProducer _telemetryInitProducer;
         protected ITasksManager _tasksManager;
         protected IStatusManager _statusManager;
-
         protected IImpressionsLog _impressionsLog;
         protected IUniqueKeysTracker _uniqueKeysTracker;
         protected IImpressionListener _customerImpressionListener;
@@ -62,6 +62,7 @@ namespace Splitio.Services.Client.Classes
         protected IImpressionsSenderAdapter _impressionsSenderAdapter;
         protected IImpressionsCounter _impressionsCounter;
         protected IImpressionsObserver _impressionsObserver;
+        protected IFlagSetsFilter _flagSetsFilter;
 
         public SplitClient()
         {
@@ -275,11 +276,10 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Private Methods
-        private TreatmentResult GetTreatmentResult(Key key, string feature, string method, Dictionary<string, object> attributes = null)
+        private TreatmentResult GetTreatmentResult(Key key, string feature, string method, Dictionary<string, object> attributes = null, List<string> flagSets = null)
         {
-            if (!IsClientReady(method)) return new TreatmentResult(string.Empty, Control, null);
-
-            if (!_keyValidator.IsValid(key, method)) return new TreatmentResult(string.Empty, Control, null);
+            if (!IsClientReady(method) || !_keyValidator.IsValid(key, method))
+                return new TreatmentResult(string.Empty, Control, null);
 
             var splitNameResult = _splitNameValidator.SplitNameIsValid(feature, method);
 
@@ -287,7 +287,7 @@ namespace Splitio.Services.Client.Classes
 
             feature = splitNameResult.Value;
 
-            var result = _evaluator.EvaluateFeature(key, feature, attributes);
+            var result = _evaluator.EvaluateFeature(method, key, feature, attributes);
 
             if (result.Exception)
             {
@@ -308,7 +308,7 @@ namespace Splitio.Services.Client.Classes
         {
             var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
 
-            if (!IsClientReady(method))
+            if (!IsClientReady(method) || !_keyValidator.IsValid(key, method))
             {
                 foreach (var feature in features)
                 {
@@ -320,38 +320,28 @@ namespace Splitio.Services.Client.Classes
             
             var ImpressionsQueue = new List<KeyImpression>();
 
-            if (_keyValidator.IsValid(key, method))
-            {
-                features = _splitNameValidator.SplitNamesAreValid(features, method);
+            features = _splitNameValidator.SplitNamesAreValid(features, method);
                 
-                var results = _evaluator.EvaluateFeatures(key, features, attributes);
+            var results = _evaluator.EvaluateFeatures(method, key, features, attributes);
 
-                foreach (var treatmentResult in results.TreatmentResults)
-                {
-                    treatmentsForFeatures.Add(treatmentResult.Key, treatmentResult.Value);                    
-
-                    if (!Labels.SplitNotFound.Equals(treatmentResult.Value.Label))
-                    {
-                        ImpressionsQueue.Add(_impressionsManager.BuildImpression(key.matchingKey, treatmentResult.Key, treatmentResult.Value.Treatment, CurrentTimeHelper.CurrentTimeMillis(), treatmentResult.Value.ChangeNumber, LabelsEnabled ? treatmentResult.Value.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null));                        
-                    }                    
-                }
-
-                if (results.Exception)
-                {
-                    RecordException(method);
-                }
-
-                RecordLatency(method, results.ElapsedMilliseconds);
-
-                _impressionsManager.Track(ImpressionsQueue);
-            }
-            else
+            foreach (var treatmentResult in results.TreatmentResults)
             {
-                foreach (var feature in features)
+                treatmentsForFeatures.Add(treatmentResult.Key, treatmentResult.Value);                    
+
+                if (!Labels.SplitNotFound.Equals(treatmentResult.Value.Label))
                 {
-                    treatmentsForFeatures.Add(feature, new TreatmentResult(string.Empty, Control, null));
+                    ImpressionsQueue.Add(_impressionsManager.BuildImpression(key.matchingKey, treatmentResult.Key, treatmentResult.Value.Treatment, CurrentTimeHelper.CurrentTimeMillis(), treatmentResult.Value.ChangeNumber, LabelsEnabled ? treatmentResult.Value.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null));                        
                 }                    
             }
+
+            if (results.TreatmentResults.Any(tr => tr.Value.Exception))
+            {
+                RecordException(method);
+            }
+
+            RecordLatency(method, results.ElapsedMilliseconds);
+
+            _impressionsManager.Track(ImpressionsQueue);
 
             return treatmentsForFeatures;
         }

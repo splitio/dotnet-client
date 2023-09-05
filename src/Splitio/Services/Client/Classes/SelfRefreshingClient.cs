@@ -6,6 +6,7 @@ using Splitio.Services.Events.Classes;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.EventSource;
 using Splitio.Services.EventSource.Workers;
+using Splitio.Services.Filters;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
@@ -58,6 +59,7 @@ namespace Splitio.Services.Client.Classes
             LabelsEnabled = _config.LabelsEnabled;
             
             ApiKey = apiKey;
+            BuildFlagSetsFilter();
             BuildSplitCache();
             BuildSegmentCache();
             BuildTelemetryStorage();
@@ -98,9 +100,14 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Private Methods
+        private void BuildFlagSetsFilter()
+        {
+            _flagSetsFilter = new FlagSetsFilter(_config.FlagSets);
+        }
+
         private void BuildSplitCache()
         {
-            _splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(_config.ConcurrencyLevel, InitialCapacity));
+            _splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(_config.ConcurrencyLevel, InitialCapacity), _flagSetsFilter);
         }
 
         private void BuildSegmentCache()
@@ -129,7 +136,7 @@ namespace Splitio.Services.Client.Classes
             _selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, _segmentCache, segmentTaskQueue, segmentsTask, worker);
 
             _splitParser = new InMemorySplitParser((SelfRefreshingSegmentFetcher)_selfRefreshingSegmentFetcher, _segmentCache);
-            _featureFlagSyncHelper = new FeatureFlagSyncHelper(_splitParser, _splitCache, _config.FlagSets);
+            _featureFlagSyncHelper = new FeatureFlagSyncHelper(_splitParser, _splitCache, _flagSetsFilter);
 
             var splitChangeFetcher = new ApiSplitChangeFetcher(_splitSdkApiClient);
             var splitsRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SplitsRefreshRate) : _config.SplitsRefreshRate;
