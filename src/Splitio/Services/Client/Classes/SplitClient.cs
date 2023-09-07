@@ -26,8 +26,9 @@ namespace Splitio.Services.Client.Classes
 {
     public abstract class SplitClient : ISplitClient
     {
-        protected const string Control = "control";
         private static readonly int IntervalToClearLongTermCache = 3600000;
+
+        protected const string Control = "control";        
 
         protected readonly ISplitLogger _log;
         protected readonly IKeyValidator _keyValidator;

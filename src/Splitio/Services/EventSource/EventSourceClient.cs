@@ -170,7 +170,7 @@ namespace Splitio.Services.EventSource
                             }
                             catch (Exception ex)
                             {
-                                if (ex is IOException)
+                                if (!timeoutToken.IsCancellationRequested && (ex is IOException || ex is ObjectDisposedException))
                                 {
                                     _log.Debug($"Streaming read was forced to stop.");
                                     _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.FORCED_STOP);
@@ -180,10 +180,12 @@ namespace Splitio.Services.EventSource
                                 if (timeoutToken.IsCancellationRequested)
                                 {
                                     _log.Debug($"Streaming read time out after {ReadTimeoutMs / 1000} seconds.");
-                                    
+                                }
+                                else
+                                {
+                                    _log.Debug($"Streaming IOException", ex);
                                 }
 
-                                _log.Debug($"Streaming IOException", ex);
                                 _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
                                 return;
                             }

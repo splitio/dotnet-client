@@ -81,12 +81,11 @@ namespace Splitio.Services.Client.Classes
         #region Public Methods
         public override void Destroy()
         {
-            if (!_statusManager.IsDestroyed())
-            {
-                base.Destroy();
-                _telemetryRuntimeProducer.RecordSessionLength(CurrentTimeHelper.CurrentTimeMillis() - _startSessionMs);
-                Stop();
-            }
+            if (_statusManager.IsDestroyed()) return;
+
+            base.Destroy();
+            _telemetryRuntimeProducer.RecordSessionLength(CurrentTimeHelper.CurrentTimeMillis() - _startSessionMs);
+            Stop();
         }
         #endregion
 

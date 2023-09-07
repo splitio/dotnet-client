@@ -29,6 +29,7 @@
     {
         public static string Unknown => "unknown";
         public static string NA => "NA";
+        public static int DestroyTimeount = 30000;
     }
 
     public static class Urls

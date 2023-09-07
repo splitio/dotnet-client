@@ -91,7 +91,7 @@ namespace Splitio.Services.Common
                     _tasksManager.DestroyAsync()
                 };
 
-                Task.WaitAll(task.ToArray(), 30000);
+                Task.WaitAll(task.ToArray(), Constants.Gral.DestroyTimeount);
 
                 _synchronizer.ClearFetchersCache();
 

@@ -63,7 +63,7 @@ namespace Splitio.Redis.Services.Client.Classes
                 _impressionsCounter.StopAsync()
             };
 
-            Task.WaitAll(task.ToArray());
+            Task.WaitAll(task.ToArray(), Constants.Gral.DestroyTimeount);
 
             _connectionPoolManager.Dispose();
 
