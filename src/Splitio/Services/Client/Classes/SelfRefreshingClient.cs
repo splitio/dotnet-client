@@ -116,9 +116,9 @@ namespace Splitio.Services.Client.Classes
             var segmentTaskQueue = new BlockingCollection<SelfRefreshingSegment>(new ConcurrentQueue<SelfRefreshingSegment>());
             var segmentRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SegmentRefreshRate) : _config.SegmentRefreshRate;
             var workerTask = _tasksManager.NewPeriodicTask(Enums.Task.SegmentsWorkerFetcher, 0);
-            var worker = new SegmentTaskWorker(_config.NumberOfParalellSegmentTasks, segmentTaskQueue, _statusManager, workerTask, _tasksManager);
-            var segmentsTask = _tasksManager.NewPeriodicTask(Enums.Task.SegmentsFetcher, segmentRefreshRate * 1000);
-            _selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, _segmentCache, segmentTaskQueue, segmentsTask, worker, _statusManager);
+            var segmentFetcherWorkerPool = new SegmentTaskWorker(_config.NumberOfParalellSegmentTasks, segmentTaskQueue, _statusManager, workerTask, _tasksManager);
+            var segmentsFetcherTask = _tasksManager.NewPeriodicTask(Enums.Task.SegmentsFetcher, segmentRefreshRate * 1000);
+            _selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, _segmentCache, segmentTaskQueue, segmentsFetcherTask, segmentFetcherWorkerPool, _statusManager);
 
             var splitChangeFetcher = new ApiSplitChangeFetcher(_splitSdkApiClient);
             _splitParser = new InMemorySplitParser((SelfRefreshingSegmentFetcher)_selfRefreshingSegmentFetcher, _segmentCache);
@@ -131,8 +131,8 @@ namespace Splitio.Services.Client.Classes
         private void BuildTreatmentLog(ConfigurationOptions config)
         {
             var impressionsCache = new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(_config.TreatmentLogSize));
-            var task = _tasksManager.NewPeriodicTask(Enums.Task.ImpressionsSender, _config.TreatmentLogRefreshRate * 1000);
-            _impressionsLog = new ImpressionsLog(_impressionsSdkApiClient, impressionsCache, task);
+            var impressionsSenderTask = _tasksManager.NewPeriodicTask(Enums.Task.ImpressionsSender, _config.TreatmentLogRefreshRate * 1000);
+            _impressionsLog = new ImpressionsLog(_impressionsSdkApiClient, impressionsCache, impressionsSenderTask);
 
             _customerImpressionListener = config.ImpressionListener;
         }
@@ -163,9 +163,9 @@ namespace Splitio.Services.Client.Classes
         {
             var eventsCache = new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(_config.EventLogSize));
             var eventsTask = _tasksManager.NewPeriodicTask(Enums.Task.EventsSender, _config.EventLogRefreshRate * 1000);
-            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Enums.Task.EventsSendBulkData);
+            var eventsSubmitterTask = _tasksManager.NewOnTimeTask(Enums.Task.EventsSendBulkData);
 
-            _eventsLog = new EventsLog(_eventSdkApiClient, eventsCache, _telemetryRuntimeProducer, eventsTask, sendBulkDataTask);
+            _eventsLog = new EventsLog(_eventSdkApiClient, eventsCache, _telemetryRuntimeProducer, eventsTask, eventsSubmitterTask);
         }
 
         private static int Random(int refreshRate)

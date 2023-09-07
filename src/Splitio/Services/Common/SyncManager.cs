@@ -193,6 +193,8 @@ namespace Splitio.Services.Common
 
                 _statusManager.SetReady();
                 clock.Stop();
+                _log.Debug($"Time until SDK ready: {clock.ElapsedMilliseconds} ms.");
+                Console.WriteLine($"Time until SDK ready: {clock.ElapsedMilliseconds} ms.");
                 _telemetrySyncTask.RecordConfigInit(clock.ElapsedMilliseconds);
                 _synchronizer.StartPeriodicDataRecording();
 

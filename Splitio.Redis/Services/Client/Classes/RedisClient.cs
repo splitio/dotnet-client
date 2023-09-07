@@ -67,7 +67,7 @@ namespace Splitio.Redis.Services.Client.Classes
 
             _connectionPoolManager.Dispose();
 
-            _log.Info("SDK has been destroyed.");
+            _log.Info("Stopped Redis submitter tasks");
         }
 
         #region Private Methods
