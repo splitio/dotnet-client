@@ -28,7 +28,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
 
             // Act.
             var task = _taskManager.NewOnTimeTaskAndStart(Splitio.Enums.Task.Track, () => count++);
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             // Assert.
             Assert.AreEqual(1, count);
@@ -47,7 +47,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
                 await Task.Delay(1);
                 count++;
             });
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             // Assert.
             Assert.AreEqual(1, count);
@@ -66,7 +66,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
 
             // Act.
             var task = _taskManager.NewOnTimeTaskAndStart(Splitio.Enums.Task.Track, () => count++);
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             // Assert.
             Assert.AreEqual(0, count);
@@ -89,7 +89,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
                 await Task.Delay(1);
                 count++;
             });
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             // Assert.
             Assert.AreEqual(0, count);
@@ -108,7 +108,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
             Assert.IsFalse(task.IsRunning());
 
             task.Start();
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             Assert.IsFalse(task.IsRunning());
             Assert.AreEqual(1, count);
@@ -125,7 +125,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
             Assert.IsFalse(task.IsRunning());
             
             task.Start();
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             Assert.IsFalse(task.IsRunning());
             Assert.AreEqual(0, count);
@@ -146,7 +146,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
             Assert.IsFalse(task.IsRunning());
 
             task.Start();
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             Assert.IsFalse(task.IsRunning());
             Assert.AreEqual(0, count);
@@ -164,7 +164,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
             Assert.IsFalse(task.IsRunning());
 
             task.Start();
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             Assert.IsFalse(task.IsRunning());
             Assert.AreEqual(1, count);
@@ -181,7 +181,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
             Assert.IsFalse(task.IsRunning());
 
             task.Start();
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             Assert.IsFalse(task.IsRunning());
             Assert.AreEqual(0, count);
@@ -203,7 +203,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
             Assert.IsFalse(task.IsRunning());
 
             task.Start();
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             Assert.IsFalse(task.IsRunning());
             Assert.AreEqual(0, count);
@@ -224,7 +224,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
             Assert.IsFalse(task.IsRunning());
 
             task.Start();
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             Assert.IsTrue(task.IsRunning());
             Assert.IsTrue(count > 0);
@@ -246,7 +246,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
             Assert.IsFalse(task.IsRunning());
 
             task.Start();
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             Assert.IsFalse(task.IsRunning());
             Assert.AreEqual(0, count);
@@ -269,7 +269,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
             Assert.IsFalse(task.IsRunning());
 
             task.Start();
-            Thread.Sleep(100);
+            Thread.Sleep(500);
 
             Assert.IsFalse(task.IsRunning());
             Assert.AreEqual(0, count);
