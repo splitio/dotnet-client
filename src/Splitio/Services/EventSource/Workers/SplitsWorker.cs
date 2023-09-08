@@ -120,6 +120,9 @@ namespace Splitio.Services.EventSource.Workers
                 _featureFlagCache.SetChangeNumber(scn.ChangeNumber);
                 _telemetryRuntimeProducer.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits);
 
+                _log.Debug($"IFFU, Feature Flag updated successfully: {scn.FeatureFlag.name}");
+                 
+
                 return true;
 
             }

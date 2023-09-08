@@ -50,9 +50,11 @@ namespace Splitio.Services.Common
             {
                 var response = await _authApiClient.AuthenticateAsync();
 
+                if (_statusManager.IsDestroyed()) return;
+
                 _log.Debug($"Auth service response pushEnabled: {response.PushEnabled}.");
 
-                if (!_statusManager.IsDestroyed() && response.PushEnabled.Value && _sseHandler.Start(response.Token, response.Channels))
+                if (response.PushEnabled.Value && _sseHandler.Start(response.Token, response.Channels))
                 {
                     _intervalToken = response.Expiration.Value;
                     _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.TokenRefresh, CalcularteNextTokenExpiration(_intervalToken)));
@@ -66,7 +68,7 @@ namespace Splitio.Services.Common
             }
             catch (Exception ex)
             {
-                _log.Error($"StartSse: {ex.Message}", ex);
+                _log.Error("Somenthing went wrong connecting event source client.", ex);
             }
         }
 

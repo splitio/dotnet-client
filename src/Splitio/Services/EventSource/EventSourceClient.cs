@@ -66,6 +66,8 @@ namespace Splitio.Services.EventSource
         #region Public Methods
         public bool Connect(string url)
         {
+            if (_statusManager.IsDestroyed()) return false;
+
             if (_connected)
             {
                 _log.Debug("Event source Client already connected.");

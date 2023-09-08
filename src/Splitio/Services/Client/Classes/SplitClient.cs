@@ -26,10 +26,6 @@ namespace Splitio.Services.Client.Classes
 {
     public abstract class SplitClient : ISplitClient
     {
-        private static readonly int IntervalToClearLongTermCache = 3600000;
-
-        protected const string Control = "control";        
-
         protected readonly ISplitLogger _log;
         protected readonly IKeyValidator _keyValidator;
         protected readonly ISplitNameValidator _splitNameValidator;
@@ -232,7 +228,7 @@ namespace Splitio.Services.Client.Classes
             var trackerConfig = new ComponentConfig(config.UniqueKeysCacheMaxSize, config.UniqueKeysBulkSize);
 
             var mtksTask = _tasksManager.NewPeriodicTask(Enums.Task.MTKsSender, config.UniqueKeysRefreshRate * 1000);
-            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Enums.Task.CacheLongTermCleaning, IntervalToClearLongTermCache);
+            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Enums.Task.CacheLongTermCleaning, Constants.Gral.IntervalToClearLongTermCache);
             var sendBulkDataTask = _tasksManager.NewOnTimeTask(Enums.Task.MtkSendBulkData);
 
             _uniqueKeysTracker = new UniqueKeysTracker(trackerConfig, filterAdapter, trackerCache, _impressionsSenderAdapter, mtksTask, cacheLongTermCleaningTask, sendBulkDataTask);
@@ -257,13 +253,13 @@ namespace Splitio.Services.Client.Classes
         #region Private Methods
         private TreatmentResult GetTreatmentResult(Key key, string feature, string method, Dictionary<string, object> attributes = null)
         {
-            if (!IsClientReady(method)) return new TreatmentResult(string.Empty, Control, null);
+            if (!IsClientReady(method)) return new TreatmentResult(string.Empty, Constants.Gral.Control, null);
 
-            if (!_keyValidator.IsValid(key, method)) return new TreatmentResult(string.Empty, Control, null);
+            if (!_keyValidator.IsValid(key, method)) return new TreatmentResult(string.Empty, Constants.Gral.Control, null);
 
             var splitNameResult = _splitNameValidator.SplitNameIsValid(feature, method);
 
-            if (!splitNameResult.Success) return new TreatmentResult(string.Empty, Control, null);
+            if (!splitNameResult.Success) return new TreatmentResult(string.Empty, Constants.Gral.Control, null);
 
             feature = splitNameResult.Value;
 
@@ -292,7 +288,7 @@ namespace Splitio.Services.Client.Classes
             {
                 foreach (var feature in features)
                 {
-                    treatmentsForFeatures.Add(feature, new TreatmentResult(string.Empty, Control, null));
+                    treatmentsForFeatures.Add(feature, new TreatmentResult(string.Empty, Constants.Gral.Control, null));
                 }
 
                 return treatmentsForFeatures;
@@ -329,7 +325,7 @@ namespace Splitio.Services.Client.Classes
             {
                 foreach (var feature in features)
                 {
-                    treatmentsForFeatures.Add(feature, new TreatmentResult(string.Empty, Control, null));
+                    treatmentsForFeatures.Add(feature, new TreatmentResult(string.Empty, Constants.Gral.Control, null));
                 }                    
             }
 

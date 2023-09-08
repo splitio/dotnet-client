@@ -186,7 +186,7 @@ namespace Splitio_Tests.Unit_Tests.Events
                                                                                               && l.trafficTypeName.Equals(eventToLog3.trafficTypeName)
                                                                                               && l.value == eventToLog3.value))), Times.Once);
 
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
             _apiClientMock.Verify(x => x.SendBulkEventsAsync(It.Is<List<Event>>(list => list.Count == 1
                                                                                 && list.Any(l => l.key.Equals(eventToLog4.key)
                                                                                               && l.eventTypeId.Equals(eventToLog4.eventTypeId)
