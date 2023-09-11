@@ -1,6 +1,7 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Evaluator;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Parsing.Classes
 {
@@ -23,6 +24,18 @@ namespace Splitio.Services.Parsing.Classes
             }
 
             var result = evaluator.EvaluateFeature(key, _split, attributes);
+
+            return _treatments.Contains(result.Treatment);
+        }
+
+        public override async Task<bool> MatchAsync(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            if (evaluator == null)
+            {
+                return false;
+            }
+
+            var result = await evaluator.EvaluateFeatureAsync(key, _split, attributes);
 
             return _treatments.Contains(result.Treatment);
         }
