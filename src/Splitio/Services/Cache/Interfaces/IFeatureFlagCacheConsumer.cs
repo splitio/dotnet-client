@@ -4,17 +4,17 @@ using System.Threading.Tasks;
 
 namespace Splitio.Services.Cache.Interfaces
 {
-    public  interface ISplitCacheAsync
+    public interface IFeatureFlagCacheConsumer
     {
-        // Producer
-        Task AddSplitAsync(string splitName, SplitBase split);
-        Task<bool> RemoveSplitAsync(string splitName);
-        Task<bool> AddOrUpdateAsync(string splitName, SplitBase split);
-        Task SetChangeNumberAsync(long changeNumber);
-        Task ClearAsync();
-        Task KillAsync(long changeNumber, string splitName, string defaultTreatment);
+        long GetChangeNumber();
+        ParsedSplit GetSplit(string splitName);
+        List<ParsedSplit> GetAllSplits();
+        bool TrafficTypeExists(string trafficType);
+        List<ParsedSplit> FetchMany(List<string> splitNames);
+        List<string> GetSplitNames();
+        int SplitsCount();
 
-        // Consumer
+        #region Async
         Task<long> GetChangeNumberAsync();
         Task<ParsedSplit> GetSplitAsync(string splitName);
         Task<List<ParsedSplit>> GetAllSplitsAsync();
@@ -22,5 +22,6 @@ namespace Splitio.Services.Cache.Interfaces
         Task<List<ParsedSplit>> FetchManyAsync(List<string> splitNames);
         Task<List<string>> GetSplitNamesAsync();
         Task<int> SplitsCountAsync();
+        #endregion
     }
 }

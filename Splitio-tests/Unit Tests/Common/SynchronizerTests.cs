@@ -5,7 +5,6 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
@@ -25,7 +24,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<IImpressionsCounter> _impressionsCounter;
         private readonly Mock<IWrapperAdapter> _wrapperAdapter;
         private readonly Mock<ITelemetrySyncTask> _telemetrySyncTask;
-        private readonly Mock<ISplitCache> _splitCache;
+        private readonly Mock<IFeatureFlagCache> _splitCache;
         private readonly Mock<ISegmentCache> _segmentCache;
         private readonly Mock<IBackOff> _backOff;
         private readonly Mock<IUniqueKeysTracker> _uniqueKeysTracker;
@@ -40,7 +39,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _impressionsCounter = new Mock<IImpressionsCounter>();
             _wrapperAdapter = new Mock<IWrapperAdapter>();
             _telemetrySyncTask = new Mock<ITelemetrySyncTask>();
-            _splitCache = new Mock<ISplitCache>();
+            _splitCache = new Mock<IFeatureFlagCache>();
             _backOff = new Mock<IBackOff>();
             _segmentCache = new Mock<ISegmentCache>();
             _uniqueKeysTracker = new Mock<IUniqueKeysTracker>();

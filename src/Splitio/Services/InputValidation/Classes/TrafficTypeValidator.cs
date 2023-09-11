@@ -10,12 +10,12 @@ namespace Splitio.Services.InputValidation.Classes
     public class TrafficTypeValidator : ITrafficTypeValidator
     {
         private readonly ISplitLogger _log;
-        private readonly ISplitCache _splitCache;
+        private readonly IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
 
-        public TrafficTypeValidator(ISplitCache splitCache, ISplitLogger log = null)
+        public TrafficTypeValidator(IFeatureFlagCacheConsumer featureFlagCacheConsumer, ISplitLogger log = null)
         {
             _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(TrafficTypeValidator));
-            _splitCache = splitCache;
+            _featureFlagCacheConsumer = featureFlagCacheConsumer;
         }
 
         public ValidatorResult IsValid(string trafficType, string method)
@@ -39,7 +39,7 @@ namespace Splitio.Services.InputValidation.Classes
                 trafficType = trafficType.ToLower();
             }
 
-            if (!_splitCache.TrafficTypeExists(trafficType))
+            if (!_featureFlagCacheConsumer.TrafficTypeExists(trafficType))
             {
                 _log.Warn($"Track: Traffic Type {trafficType} does not have any corresponding feature flags in this environment, make sure you’re tracking your events to a valid traffic type defined in the Split user interface.");
             }

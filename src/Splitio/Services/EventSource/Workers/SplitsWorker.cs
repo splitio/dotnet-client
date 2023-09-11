@@ -19,7 +19,7 @@ namespace Splitio.Services.EventSource.Workers
 
         private readonly ISynchronizer _synchronizer;
         private readonly ITasksManager _tasksManager;
-        private readonly ISplitCache _featureFlagCache;
+        private readonly IFeatureFlagCache _featureFlagCache;
         private readonly ISplitParser _featureFlagParser;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly ISelfRefreshingSegmentFetcher _segmentFetcher;
@@ -31,7 +31,7 @@ namespace Splitio.Services.EventSource.Workers
 
         public SplitsWorker(ISynchronizer synchronizer,
             ITasksManager tasksManager,
-            ISplitCache featureFlagCache,
+            IFeatureFlagCache featureFlagCache,
             ISplitParser featureFlagParser,
             BlockingCollection<SplitChangeNotification>  queue,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,

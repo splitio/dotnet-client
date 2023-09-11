@@ -49,16 +49,6 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
-        public void RemoveSplit_ReturnsNotImplementedException()
-        {
-            //Act
-            var result = _redisSplitCache.RemoveSplit("splitName");
-
-            // Assert.
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
         public void GetChangeNumberWhenNotSetOrRedisThrowsException()
         {
             //Arrange

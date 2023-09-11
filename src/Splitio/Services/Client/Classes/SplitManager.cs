@@ -15,25 +15,25 @@ namespace Splitio.Services.Client.Classes
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitManager));
 
-        private readonly ISplitCache _featureFlagCache;
+        private readonly IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
         private readonly ISplitNameValidator _splitNameValidator;
         private readonly IBlockUntilReadyService _blockUntilReadyService;
 
-        public SplitManager(ISplitCache featureFlagCache, IBlockUntilReadyService blockUntilReadyService)
+        public SplitManager(IFeatureFlagCacheConsumer featureFlagCacheConsumer, IBlockUntilReadyService blockUntilReadyService)
         {
-            _featureFlagCache = featureFlagCache;
+            _featureFlagCacheConsumer = featureFlagCacheConsumer;
             _splitNameValidator = new SplitNameValidator(_log);
             _blockUntilReadyService = blockUntilReadyService;
         }
 
         public List<SplitView> Splits()
         {
-            if (!IsSdkReady(nameof(Splits)) || _featureFlagCache == null)
+            if (!IsSdkReady(nameof(Splits)) || _featureFlagCacheConsumer == null)
             {
                 return null;
             }
 
-            var currentFeatureFlags = _featureFlagCache.GetAllSplits();
+            var currentFeatureFlags = _featureFlagCacheConsumer.GetAllSplits();
 
             var lightFeatureFlags = currentFeatureFlags
                 .Select(x =>
@@ -52,7 +52,7 @@ namespace Splitio.Services.Client.Classes
 
         public SplitView Split(string featureName)
         {
-            if (!IsSdkReady(nameof(Split)) || _featureFlagCache == null)
+            if (!IsSdkReady(nameof(Split)) || _featureFlagCacheConsumer == null)
             {
                 return null;
             }
@@ -66,7 +66,7 @@ namespace Splitio.Services.Client.Classes
 
             featureName = result.Value;
 
-            var featureFlag = _featureFlagCache.GetSplit(featureName);
+            var featureFlag = _featureFlagCacheConsumer.GetSplit(featureName);
 
             if (featureFlag == null)
             {
@@ -94,12 +94,12 @@ namespace Splitio.Services.Client.Classes
         
         public List<string> SplitNames()
         {
-            if (!IsSdkReady(nameof(SplitNames)) || _featureFlagCache == null)
+            if (!IsSdkReady(nameof(SplitNames)) || _featureFlagCacheConsumer == null)
             {
                 return null;
             }
 
-            return _featureFlagCache.GetSplitNames();
+            return _featureFlagCacheConsumer.GetSplitNames();
         }
 
         private bool IsSdkReady(string methodName)

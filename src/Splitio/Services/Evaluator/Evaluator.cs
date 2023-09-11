@@ -16,12 +16,12 @@ namespace Splitio.Services.Evaluator
         protected const string Control = "control";
         
         private readonly ISplitter _splitter;
-        private readonly ISplitCache _splitCache;
+        private readonly IFeatureFlagCacheConsumer _featureFlagCache;
 
-        public Evaluator(ISplitCache splitCache,
+        public Evaluator(IFeatureFlagCacheConsumer featureFlagCache,
             ISplitter splitter)
         {
-            _splitCache = splitCache;
+            _featureFlagCache = featureFlagCache;
             _splitter = splitter;
         }
 
@@ -34,7 +34,7 @@ namespace Splitio.Services.Evaluator
 
                 try
                 {
-                    var parsedSplit = _splitCache.GetSplit(featureName);
+                    var parsedSplit = _featureFlagCache.GetSplit(featureName);
 
                     return EvaluateTreatment(key, parsedSplit, featureName, clock, attributes);
                 }
@@ -57,7 +57,7 @@ namespace Splitio.Services.Evaluator
 
                 try
                 {
-                    var splits = _splitCache.FetchMany(featureNames);
+                    var splits = _featureFlagCache.FetchMany(featureNames);
 
                     foreach (var feature in featureNames)
                     {
