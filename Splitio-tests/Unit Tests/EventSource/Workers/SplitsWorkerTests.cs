@@ -23,7 +23,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         private readonly IWrapperAdapter wrapperAdapter = WrapperAdapter.Instance();
 
         private readonly Mock<ISynchronizer> _synchronizer;
-        private readonly Mock<ISplitCache> _featureFlagCache;
+        private readonly Mock<IFeatureFlagCache> _featureFlagCache;
         private readonly Mock<ISplitParser> _featureFlagParser;
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private readonly Mock<ISelfRefreshingSegmentFetcher> _segmentFetcher;
@@ -34,7 +34,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         public SplitsWorkerTests()
         {
             _synchronizer = new Mock<ISynchronizer>();
-            _featureFlagCache = new Mock<ISplitCache>();
+            _featureFlagCache = new Mock<IFeatureFlagCache>();
             _featureFlagParser = new Mock<ISplitParser>();
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _segmentFetcher = new Mock<ISelfRefreshingSegmentFetcher>();

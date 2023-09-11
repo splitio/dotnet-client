@@ -10,14 +10,14 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
     public class TrafficTypeValidatorTests
     {
         private Mock<ISplitLogger> _log;
-        private Mock<ISplitCache> _splitCache;
+        private Mock<IFeatureFlagCache> _splitCache;
         private TrafficTypeValidator trafficTypeValidator;
 
         [TestInitialize]
         public void Initialize()
         {
             _log = new Mock<ISplitLogger>();
-            _splitCache = new Mock<ISplitCache>();
+            _splitCache = new Mock<IFeatureFlagCache>();
 
             trafficTypeValidator = new TrafficTypeValidator(_splitCache.Object, _log.Object);
         }

@@ -5,7 +5,6 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Threading;
@@ -16,7 +15,7 @@ namespace Splitio_Tests.Unit_Tests.Client
     public class SplitClientUnitTests
     {
         private Mock<IEventsLog> _eventsLogMock;
-        private Mock<ISplitCache> _splitCacheMock;
+        private Mock<IFeatureFlagCache> _splitCacheMock;
         private Mock<IImpressionsLog> _impressionsLogMock;
         private Mock<CombiningMatcher> _combiningMatcher;
         private Mock<IBlockUntilReadyService> _blockUntilReadyService;
@@ -28,7 +27,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestInitialize]
         public void TestInitialize()
         {
-            _splitCacheMock = new Mock<ISplitCache>();
+            _splitCacheMock = new Mock<IFeatureFlagCache>();
             _combiningMatcher = new Mock<CombiningMatcher>();
             _eventsLogMock = new Mock<IEventsLog>();
             _impressionsLogMock = new Mock<IImpressionsLog>();

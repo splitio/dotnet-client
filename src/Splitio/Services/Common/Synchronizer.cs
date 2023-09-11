@@ -25,7 +25,7 @@ namespace Splitio.Services.Common
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly IImpressionsCounter _impressionsCounter;
         private readonly ITelemetrySyncTask _telemetrySyncTask;
-        private readonly ISplitCache _splitCache;
+        private readonly IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
         private readonly ISegmentCache _segmentCache;
         private readonly IBackOff _splitsBackOff;
         private readonly IBackOff _segmentsBackOff;
@@ -41,7 +41,7 @@ namespace Splitio.Services.Common
             IImpressionsCounter impressionsCounter,
             IWrapperAdapter wrapperAdapter,
             ITelemetrySyncTask telemetrySyncTask,
-            ISplitCache splitCache,
+            IFeatureFlagCacheConsumer featureFlagCacheConsumer,
             IBackOff splitsBackOff,
             IBackOff segmentsBackOff,
             int onDemandFetchMaxRetries,
@@ -56,7 +56,7 @@ namespace Splitio.Services.Common
             _impressionsCounter = impressionsCounter;            
             _wrapperAdapter = wrapperAdapter;
             _telemetrySyncTask = telemetrySyncTask;
-            _splitCache = splitCache;
+            _featureFlagCacheConsumer = featureFlagCacheConsumer;
             _splitsBackOff = splitsBackOff;
             _segmentsBackOff = segmentsBackOff;
             _onDemandFetchMaxRetries = onDemandFetchMaxRetries;
@@ -155,7 +155,7 @@ namespace Splitio.Services.Common
         {
             try
             {
-                if (targetChangeNumber <= _splitCache.GetChangeNumber()) return;
+                if (targetChangeNumber <= _featureFlagCacheConsumer.GetChangeNumber()) return;
 
                 var fetchOptions = new FetchOptions { CacheControlHeaders = true };
 
@@ -237,7 +237,7 @@ namespace Splitio.Services.Common
                     remainingAttempts--;
                     var result = await _splitFetcher.FetchSplits(fetchOptions);
 
-                    if (targetChangeNumber <= _splitCache.GetChangeNumber())
+                    if (targetChangeNumber <= _featureFlagCacheConsumer.GetChangeNumber())
                     {
                         return new SyncResult(true, remainingAttempts, result.SegmentNames);
                     }

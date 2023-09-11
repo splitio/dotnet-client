@@ -6,36 +6,35 @@ using Splitio.Services.Parsing.Interfaces;
 using StackExchange.Redis;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
-    public class RedisSplitCache : RedisCacheBase, ISplitCache
+    public class RedisSplitCache : RedisCacheBase, IFeatureFlagCacheConsumer
     {
-        private const string splitKeyPrefix = "split.";
-        private const string splitsKeyPrefix = "splits.";
+        protected const string SplitKeyPrefix = "split.";
+        protected const string SplitsKeyPrefix = "splits.";
 
         private readonly ISplitParser _splitParser;
 
-        public RedisSplitCache(IRedisAdapter redisAdapter,
-            ISplitParser splitParser,
-            string userPrefix = null) 
-            : base(redisAdapter, userPrefix)
+        public RedisSplitCache(IRedisAdapter redisAdapter, ISplitParser splitParser, string userPrefix = null) : base(redisAdapter, userPrefix)
         {
             _splitParser = splitParser;
         }
 
+        #region Sync Methods
         public long GetChangeNumber()
         {
-            var key = $"{RedisKeyPrefix}{splitsKeyPrefix}till";
+            var key = $"{RedisKeyPrefix}{SplitsKeyPrefix}till";
             var changeNumberString = _redisAdapter.Get(key);
             var result = long.TryParse(changeNumberString, out long changeNumberParsed);
-            
+
             return result ? changeNumberParsed : -1;
         }
 
         public ParsedSplit GetSplit(string splitName)
         {
-            var key = $"{RedisKeyPrefix}{splitKeyPrefix}{splitName}";
+            var key = $"{RedisKeyPrefix}{SplitKeyPrefix}{splitName}";
             var splitJson = _redisAdapter.Get(key);
 
             if (string.IsNullOrEmpty(splitJson))
@@ -48,7 +47,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public List<ParsedSplit> GetAllSplits()
         {
-            var pattern = $"{RedisKeyPrefix}{splitKeyPrefix}*";
+            var pattern = $"{RedisKeyPrefix}{SplitKeyPrefix}*";
             var splitKeys = _redisAdapter.Keys(pattern);
             var splitValues = _redisAdapter.MGet(splitKeys);
 
@@ -62,22 +61,17 @@ namespace Splitio.Redis.Services.Cache.Classes
                     .Where(s => s != null)
                     .ToList();
             }
-            
+
             return new List<ParsedSplit>();
         }
 
         public List<string> GetKeys()
         {
-            var pattern = $"{RedisKeyPrefix}{splitKeyPrefix}*";
+            var pattern = $"{RedisKeyPrefix}{SplitKeyPrefix}*";
             var splitKeys = _redisAdapter.Keys(pattern);
             var result = splitKeys.Select(x => x.ToString()).ToList();
 
             return result;
-        }
-
-        public void Clear()
-        {
-            return;
         }
 
         public bool TrafficTypeExists(string trafficType)
@@ -93,41 +87,6 @@ namespace Splitio.Redis.Services.Cache.Classes
             return quantityInt > 0;
         }
 
-        private string GetTrafficTypeKey(string type)
-        {
-            return $"{RedisKeyPrefix}trafficType.{type}";
-        }
-
-        public void AddSplit(string splitName, SplitBase split)
-        {
-            // No-op
-        }
-
-        public bool RemoveSplit(string splitName)
-        {
-            return false; // No-op
-        }
-
-        public void SetChangeNumber(long changeNumber)
-        {
-            // No-op
-        }
-
-        public bool AddOrUpdate(string splitName, SplitBase split)
-        {
-            return false; // No-op
-        }
-
-        public long RemoveSplits(List<string> splitNames)
-        {
-            return 0;// No-op
-        }
-
-        public void Flush()
-        {
-            // No-op
-        }
-
         public List<ParsedSplit> FetchMany(List<string> splitNames)
         {
             if (!splitNames.Any()) return new List<ParsedSplit>();
@@ -136,9 +95,9 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             foreach (var name in splitNames)
             {
-                redisKey.Add($"{RedisKeyPrefix}{splitKeyPrefix}{name}");
+                redisKey.Add($"{RedisKeyPrefix}{SplitKeyPrefix}{name}");
             }
-                        
+
             var splitValues = _redisAdapter.MGet(redisKey.ToArray());
 
             if (splitValues == null || !splitValues.Any()) return new List<ParsedSplit>();
@@ -152,11 +111,6 @@ namespace Splitio.Redis.Services.Cache.Classes
                 .ToList();
         }
 
-        public void Kill(long changeNumber, string splitName, string defaultTreatment)
-        {
-            throw new System.NotImplementedException();
-        }
-
         public List<string> GetSplitNames()
         {
             return GetAllSplits()
@@ -167,6 +121,103 @@ namespace Splitio.Redis.Services.Cache.Classes
         public int SplitsCount()
         {
             return 0; // No-op
+        }
+        #endregion
+
+        #region Async Methods
+        public async Task<List<ParsedSplit>> FetchManyAsync(List<string> splitNames)
+        {
+            if (!splitNames.Any()) return new List<ParsedSplit>();
+
+            var redisKey = new List<RedisKey>();
+
+            foreach (var name in splitNames)
+            {
+                redisKey.Add($"{RedisKeyPrefix}{SplitKeyPrefix}{name}");
+            }
+
+            var splitValues = await _redisAdapter.MGetAsync(redisKey.ToArray());
+
+            if (splitValues == null || !splitValues.Any()) return new List<ParsedSplit>();
+
+            var splits = splitValues
+                .Where(s => !s.IsNull)
+                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s)));
+
+            return splits
+                .Where(s => s != null)
+                .ToList();
+        }
+
+        public async Task<List<ParsedSplit>> GetAllSplitsAsync()
+        {
+            var pattern = $"{RedisKeyPrefix}{SplitKeyPrefix}*";
+            var splitKeys = _redisAdapter.Keys(pattern);
+            var splitValues = await _redisAdapter.MGetAsync(splitKeys);
+
+            if (splitValues == null || !splitValues.Any()) return new List<ParsedSplit>();
+
+            var splits = splitValues
+                .Where(x => !x.IsNull)
+                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s)));
+
+            return splits
+                .Where(s => s != null)
+                .ToList();
+        }
+
+        public async Task<long> GetChangeNumberAsync()
+        {
+            var key = $"{RedisKeyPrefix}{SplitsKeyPrefix}till";
+            var changeNumberString = await _redisAdapter.GetAsync(key);
+            var result = long.TryParse(changeNumberString, out long changeNumberParsed);
+
+            return result ? changeNumberParsed : -1;
+        }
+
+        public async Task<ParsedSplit> GetSplitAsync(string splitName)
+        {
+            var key = $"{RedisKeyPrefix}{SplitKeyPrefix}{splitName}";
+            var splitJson = await _redisAdapter.GetAsync(key);
+
+            if (string.IsNullOrEmpty(splitJson)) return null;
+
+            var split = JsonConvert.DeserializeObject<Split>(splitJson);
+
+            return _splitParser.Parse(split);
+        }
+
+        public async Task<List<string>> GetSplitNamesAsync()
+        {
+            var splits = await GetAllSplitsAsync();
+
+            return splits
+                .Select(s => s.name)
+                .ToList();
+        }
+
+        public Task<int> SplitsCountAsync()
+        {
+            return Task.FromResult(0);
+        }
+
+        public async Task<bool> TrafficTypeExistsAsync(string trafficType)
+        {
+            if (string.IsNullOrEmpty(trafficType)) return false;
+
+            var value = await _redisAdapter.GetAsync(GetTrafficTypeKey(trafficType));
+
+            var quantity = value ?? "0";
+
+            int.TryParse(quantity, out int quantityInt);
+
+            return quantityInt > 0;
+        }
+        #endregion
+
+        private string GetTrafficTypeKey(string type)
+        {
+            return $"{RedisKeyPrefix}trafficType.{type}";
         }
     }
 }
