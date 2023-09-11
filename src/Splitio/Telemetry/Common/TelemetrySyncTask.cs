@@ -20,7 +20,7 @@ namespace Splitio.Telemetry.Common
         private readonly ITelemetryStorageConsumer _telemetryStorageConsumer;
         private readonly ITelemetryAPI _telemetryAPI;
         private readonly IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
-        private readonly ISegmentCache _segmentCache;        
+        private readonly ISegmentCacheConsumer _segmentCache;        
         private readonly IFactoryInstantiationsService _factoryInstantiationsService;
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ITasksManager _tasksManager;
@@ -33,7 +33,7 @@ namespace Splitio.Telemetry.Common
         public TelemetrySyncTask(ITelemetryStorageConsumer telemetryStorage,
             ITelemetryAPI telemetryAPI,
             IFeatureFlagCacheConsumer featureFlagCacheConsumer,
-            ISegmentCache segmentCache,
+            ISegmentCacheConsumer segmentCache,
             SelfRefreshingConfig configurationOptions,
             IFactoryInstantiationsService factoryInstantiationsService,
             IWrapperAdapter wrapperAdapter,

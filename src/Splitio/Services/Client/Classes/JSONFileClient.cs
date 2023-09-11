@@ -18,6 +18,8 @@ namespace Splitio.Services.Client.Classes
     public class JSONFileClient : SplitClient
     {
         private readonly IFeatureFlagCache _featureFlagCache;
+        private readonly ISegmentCache _segmentCache;
+
         public JSONFileClient(string splitsFilePath,
             string segmentsFilePath,
             ISegmentCache segmentCacheInstance = null,

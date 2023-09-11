@@ -50,6 +50,7 @@ namespace Splitio.Services.Client.Classes
         private ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private ITelemetryAPI _telemetryAPI;
         private IFeatureFlagCache _featureFlagCache;
+        private ISegmentCache _segmentCache;
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config) : base()
         {

@@ -9,9 +9,9 @@ namespace Splitio.Services.Parsing
     public class UserDefinedSegmentMatcher : BaseMatcher
     {
         private readonly string _segmentName;
-        private readonly ISegmentCache _segmentsCache;
+        private readonly ISegmentCacheConsumer _segmentsCache;
 
-        public UserDefinedSegmentMatcher(string segmentName, ISegmentCache segmentsCache)
+        public UserDefinedSegmentMatcher(string segmentName, ISegmentCacheConsumer segmentsCache)
         {
             _segmentName = segmentName;
             _segmentsCache = segmentsCache;
