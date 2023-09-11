@@ -16,8 +16,6 @@ namespace Splitio_Tests.Unit_Tests.Client
     {
         private Mock<IEventsLog> _eventsLogMock;
         private Mock<IFeatureFlagCache> _splitCacheMock;
-        private Mock<IImpressionsLog> _impressionsLogMock;
-        private Mock<CombiningMatcher> _combiningMatcher;
         private Mock<IBlockUntilReadyService> _blockUntilReadyService;
         private Mock<IEvaluator> _evaluatorMock;
         private Mock<IImpressionsManager> _impressionsManager;
@@ -28,7 +26,6 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void TestInitialize()
         {
             _splitCacheMock = new Mock<IFeatureFlagCache>();
-            _combiningMatcher = new Mock<CombiningMatcher>();
             _eventsLogMock = new Mock<IEventsLog>();
             _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
             _evaluatorMock = new Mock<IEvaluator>();
@@ -171,7 +168,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
 
             // Assert
-            Assert.AreEqual(treatmentExpected, result.Treatment);            
+            Assert.AreEqual(treatmentExpected, result.Treatment);
             Assert.AreEqual(configExpected, result.Config);
         }
 
@@ -206,7 +203,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
 
             // Assert
-            Assert.AreEqual(defaultTreatment, result.Treatment);            
+            Assert.AreEqual(defaultTreatment, result.Treatment);
             Assert.AreEqual(configExpected, result.Config);
         }
 
@@ -271,7 +268,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
 
             // Assert
-            Assert.AreEqual(defaultTreatment, result.Treatment);            
+            Assert.AreEqual(defaultTreatment, result.Treatment);
             Assert.AreEqual(configExpected, result.Config);
         }
 
@@ -306,7 +303,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
 
             // Assert
-            Assert.AreEqual(defaultTreatment, result.Treatment);            
+            Assert.AreEqual(defaultTreatment, result.Treatment);
             Assert.AreEqual(configExpected, result.Config);
         }
 
@@ -399,7 +396,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
 
             // Assert
-            Assert.AreEqual(defaultTreatment, result.Treatment);            
+            Assert.AreEqual(defaultTreatment, result.Treatment);
             Assert.AreEqual(configExpected, result.Config);
         }
 
@@ -524,7 +521,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                         { treatmenOn, new TreatmentResult("label", "on", null, configExpectedOn)}
                     }
                 });
-                                        
+
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
@@ -534,11 +531,11 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert
             var resultOn = result[parsedSplitOn.name];
-            Assert.AreEqual("on", resultOn.Treatment);            
+            Assert.AreEqual("on", resultOn.Treatment);
             Assert.AreEqual(configExpectedOn, resultOn.Config);
 
             var resultOff = result[parsedSplitOff.name];
-            Assert.AreEqual("off", resultOff.Treatment);            
+            Assert.AreEqual("off", resultOff.Treatment);
             Assert.AreEqual(configExpectedOff, resultOff.Config);
         }
 
@@ -546,7 +543,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void GetTreatmentsWithConfig_WhenNameDoesntExist_ReturnsControl()
         {
             // Arrange 
-            var splitNames = new List<string> { "not_exist" , "not_exist2" };
+            var splitNames = new List<string> { "not_exist", "not_exist2" };
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())

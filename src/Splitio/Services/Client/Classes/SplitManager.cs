@@ -34,7 +34,7 @@ namespace Splitio.Services.Client.Classes
 
             var currentFeatureFlags = await _featureFlagCacheConsumer.GetAllSplitsAsync();
 
-            return SplitManager.GetFeatureFlagViewList(currentFeatureFlags);
+            return GetFeatureFlagViewList(currentFeatureFlags);
         }
 
         public async Task<SplitView> SplitAsync(string featureName)
@@ -45,7 +45,7 @@ namespace Splitio.Services.Client.Classes
 
             var featureFlag = await _featureFlagCacheConsumer.GetSplitAsync(featureName);
 
-            return SplitManager.GetFeatureFlagView(featureFlag, featureName);
+            return GetFeatureFlagView(featureFlag, featureName);
         }
 
         public async Task<List<string>> SplitNamesAsync()
@@ -63,7 +63,7 @@ namespace Splitio.Services.Client.Classes
 
             var currentFeatureFlags = _featureFlagCacheConsumer.GetAllSplits();
 
-            return SplitManager.GetFeatureFlagViewList(currentFeatureFlags);
+            return GetFeatureFlagViewList(currentFeatureFlags);
         }
 
         public SplitView Split(string featureName)
@@ -74,9 +74,9 @@ namespace Splitio.Services.Client.Classes
 
             var featureFlag = _featureFlagCacheConsumer.GetSplit(featureName);
 
-            return SplitManager.GetFeatureFlagView(featureFlag, featureName);
+            return GetFeatureFlagView(featureFlag, featureName);
         }
-        
+
         public List<string> SplitNames()
         {
             if (!IsSdkReady(nameof(SplitNames))) return null;
