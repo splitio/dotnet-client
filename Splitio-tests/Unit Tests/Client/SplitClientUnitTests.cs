@@ -15,7 +15,9 @@ namespace Splitio_Tests.Unit_Tests.Client
     public class SplitClientUnitTests
     {
         private Mock<IEventsLog> _eventsLogMock;
-        private Mock<ISplitCache> _splitCacheMock;
+        private Mock<IFeatureFlagCache> _splitCacheMock;
+        private Mock<IImpressionsLog> _impressionsLogMock;
+        private Mock<CombiningMatcher> _combiningMatcher;
         private Mock<IBlockUntilReadyService> _blockUntilReadyService;
         private Mock<IEvaluator> _evaluatorMock;
         private Mock<IImpressionsManager> _impressionsManager;
@@ -25,7 +27,8 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestInitialize]
         public void TestInitialize()
         {
-            _splitCacheMock = new Mock<ISplitCache>();
+            _splitCacheMock = new Mock<IFeatureFlagCache>();
+            _combiningMatcher = new Mock<CombiningMatcher>();
             _eventsLogMock = new Mock<IEventsLog>();
             _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
             _evaluatorMock = new Mock<IEvaluator>();

@@ -1,5 +1,7 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
+using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Shared.Classes;
@@ -17,7 +19,8 @@ namespace Splitio.Services.Client.Classes
         private const string SplitFileYml = ".yml";
         private const string SplitFileYaml = ".yaml";
         
-        private ILocalhostFileService _localhostFileService;
+        private readonly ILocalhostFileService _localhostFileService;
+        private readonly IFeatureFlagCache _featureFlagCache;
 
         private readonly FileSystemWatcher _watcher;
         private readonly string _fullPath;
@@ -48,16 +51,17 @@ namespace Splitio.Services.Client.Classes
             _watcher.EnableRaisingEvents = true;
 
             var splits = ParseSplitFile(_fullPath);
-            _splitCache = new InMemorySplitCache(splits);
+            _featureFlagCache = new InMemorySplitCache(splits);
 
             _blockUntilReadyService = new NoopBlockUntilReadyService();
-            _manager = new SplitManager(_splitCache, _blockUntilReadyService);
+            _manager = new SplitManager(_featureFlagCache, _blockUntilReadyService);
 
             ApiKey = "localhost";
 
-            _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
+            _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCache);
 
-            BuildEvaluator();
+            var splitter = new Splitter();
+            _evaluator = new Evaluator.Evaluator(_featureFlagCache, splitter);
 
             _uniqueKeysTracker = new NoopUniqueKeysTracker();
             _impressionsCounter = new NoopImpressionsCounter();
@@ -76,7 +80,7 @@ namespace Splitio.Services.Client.Classes
             if (!_statusManager.IsDestroyed())
             {
                 _watcher.Dispose();
-                _splitCache.Clear();
+                _featureFlagCache.Clear();
                 base.Destroy();
             }
         }
@@ -87,13 +91,13 @@ namespace Splitio.Services.Client.Classes
         {
             var splits = ParseSplitFile(_fullPath);
 
-            _splitCache.Clear();
+            _featureFlagCache.Clear();
 
             foreach (var split in splits)
             {
                 if (split.Value != null)
                 {
-                    _splitCache.AddSplit(split.Key, split.Value);
+                    _featureFlagCache.AddSplit(split.Key, split.Value);
                 }
             }
         }

@@ -25,8 +25,8 @@ namespace Splitio.Services.Common
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly IImpressionsCounter _impressionsCounter;
         private readonly ITelemetrySyncTask _telemetrySyncTask;
-        private readonly ISplitCache _splitCache;
-        private readonly ISegmentCache _segmentCache;
+        private readonly IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
+        private readonly ISegmentCacheConsumer _segmentCacheConsumer;
         private readonly IBackOff _splitsBackOff;
         private readonly IBackOff _segmentsBackOff;
         private readonly IUniqueKeysTracker _uniqueKeysTracker;
@@ -41,12 +41,12 @@ namespace Splitio.Services.Common
             IImpressionsCounter impressionsCounter,
             IWrapperAdapter wrapperAdapter,
             ITelemetrySyncTask telemetrySyncTask,
-            ISplitCache splitCache,
+            IFeatureFlagCacheConsumer featureFlagCacheConsumer,
             IBackOff splitsBackOff,
             IBackOff segmentsBackOff,
             int onDemandFetchMaxRetries,
             int onDemandFetchRetryDelayMs,
-            ISegmentCache segmentCache,
+            ISegmentCacheConsumer segmentCache,
             IUniqueKeysTracker uniqueKeysTracker)
         {
             _splitFetcher = splitFetcher;
@@ -56,12 +56,12 @@ namespace Splitio.Services.Common
             _impressionsCounter = impressionsCounter;            
             _wrapperAdapter = wrapperAdapter;
             _telemetrySyncTask = telemetrySyncTask;
-            _splitCache = splitCache;
+            _featureFlagCacheConsumer = featureFlagCacheConsumer;
             _splitsBackOff = splitsBackOff;
             _segmentsBackOff = segmentsBackOff;
             _onDemandFetchMaxRetries = onDemandFetchMaxRetries;
             _onDemandFetchRetryDelayMs = onDemandFetchRetryDelayMs;
-            _segmentCache = segmentCache;
+            _segmentCacheConsumer = segmentCache;
             _uniqueKeysTracker = uniqueKeysTracker;
             _defaultFetchOptions = new FetchOptions();
         }
@@ -119,7 +119,7 @@ namespace Splitio.Services.Common
         {
             try
             {
-                if (targetChangeNumber <= _segmentCache.GetChangeNumber(segmentName)) return;
+                if (targetChangeNumber <= _segmentCacheConsumer.GetChangeNumber(segmentName)) return;
 
                 var fetchOptions = new FetchOptions { CacheControlHeaders = true };
 
@@ -155,7 +155,7 @@ namespace Splitio.Services.Common
         {
             try
             {
-                if (targetChangeNumber <= _splitCache.GetChangeNumber()) return;
+                if (targetChangeNumber <= _featureFlagCacheConsumer.GetChangeNumber()) return;
 
                 var fetchOptions = new FetchOptions { CacheControlHeaders = true };
 
@@ -203,7 +203,7 @@ namespace Splitio.Services.Common
                     remainingAttempts--;
                     await _segmentFetcher.Fetch(name, fetchOptions);
 
-                    if (targetChangeNumber <= _segmentCache.GetChangeNumber(name))
+                    if (targetChangeNumber <= _segmentCacheConsumer.GetChangeNumber(name))
                     {
                         return new SyncResult(true, remainingAttempts);
                     }
@@ -237,7 +237,7 @@ namespace Splitio.Services.Common
                     remainingAttempts--;
                     var result = await _splitFetcher.FetchSplits(fetchOptions);
 
-                    if (targetChangeNumber <= _splitCache.GetChangeNumber())
+                    if (targetChangeNumber <= _featureFlagCacheConsumer.GetChangeNumber())
                     {
                         return new SyncResult(true, remainingAttempts, result.SegmentNames);
                     }

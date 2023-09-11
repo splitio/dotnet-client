@@ -9,7 +9,8 @@ namespace Splitio.Services.Evaluator
 {
     public class Evaluator : EvaluatorAsync, IEvaluator
     {
-        public Evaluator(ISplitCache splitCache, ISplitter splitter) : base(splitCache, splitter)
+        public Evaluator(IFeatureFlagCacheConsumer featureFlagCacheConsumer, ISplitter splitter)
+            : base(featureFlagCacheConsumer, splitter)
         {
         }
 
@@ -22,7 +23,7 @@ namespace Splitio.Services.Evaluator
 
                 try
                 {
-                    var parsedSplit = _splitCache.GetSplit(featureName);
+                    var parsedSplit = _featureFlagCacheConsumer.GetSplit(featureName);
 
                     return EvaluateTreatment(key, parsedSplit, featureName, clock, attributes);
                 }
@@ -44,7 +45,7 @@ namespace Splitio.Services.Evaluator
 
                 try
                 {
-                    var splits = _splitCache.FetchMany(featureNames);
+                    var splits = _featureFlagCacheConsumer.FetchMany(featureNames);
 
                     foreach (var feature in featureNames)
                     {

@@ -87,7 +87,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var impressionsLogMock = new Mock<IImpressionsLog>();
-            var splitCacheMock = new Mock<ISplitCache>();
+            var splitCacheMock = new Mock<IFeatureFlagCache>();
 
             splitCacheMock
                 .Setup(x => x.GetSplit(It.IsAny<string>()))
@@ -326,13 +326,13 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var impressionsLogMock = new Mock<IImpressionsLog>();
-            var splitCacheMock = new Mock<ISplitCache>();
+            var splitCacheMock = new Mock<IFeatureFlagCache>();
 
             splitCacheMock
                 .Setup(x => x.GetSplit(It.IsAny<string>()))
                 .Throws<Exception>();
 
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", splitCacheInstance: splitCacheMock.Object, impressionsLog: impressionsLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", featureFlagCacheInstance: splitCacheMock.Object, impressionsLog: impressionsLogMock.Object);
 
             client.BlockUntilReady(1000);
 

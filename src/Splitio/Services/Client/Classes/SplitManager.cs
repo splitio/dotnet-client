@@ -16,13 +16,13 @@ namespace Splitio.Services.Client.Classes
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitManager));
 
-        private readonly ISplitCache _featureFlagCache;
+        private readonly IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
         private readonly ISplitNameValidator _splitNameValidator;
         private readonly IBlockUntilReadyService _blockUntilReadyService;
 
-        public SplitManager(ISplitCache featureFlagCache, IBlockUntilReadyService blockUntilReadyService)
+        public SplitManager(IFeatureFlagCacheConsumer featureFlagCacheConsumer, IBlockUntilReadyService blockUntilReadyService)
         {
-            _featureFlagCache = featureFlagCache;
+            _featureFlagCacheConsumer = featureFlagCacheConsumer;
             _splitNameValidator = new SplitNameValidator(_log);
             _blockUntilReadyService = blockUntilReadyService;
         }
@@ -32,9 +32,9 @@ namespace Splitio.Services.Client.Classes
         {
             if (!IsSdkReady(nameof(SplitsAsync))) return null;
 
-            var currentFeatureFlags = await _featureFlagCache.GetAllSplitsAsync();
+            var currentFeatureFlags = await _featureFlagCacheConsumer.GetAllSplitsAsync();
 
-            return GetFeatureFlagViewList(currentFeatureFlags);
+            return SplitManager.GetFeatureFlagViewList(currentFeatureFlags);
         }
 
         public async Task<SplitView> SplitAsync(string featureName)
@@ -43,16 +43,16 @@ namespace Splitio.Services.Client.Classes
 
             if (!IsFeatureFlagNameValid(nameof(SplitAsync), featureName, out featureName)) return null;
 
-            var featureFlag = await _featureFlagCache.GetSplitAsync(featureName);
+            var featureFlag = await _featureFlagCacheConsumer.GetSplitAsync(featureName);
 
-            return GetFeatureFlagView(featureFlag, featureName);
+            return SplitManager.GetFeatureFlagView(featureFlag, featureName);
         }
 
         public async Task<List<string>> SplitNamesAsync()
         {
             if (!IsSdkReady(nameof(SplitNamesAsync))) return null;
 
-            return await _featureFlagCache.GetSplitNamesAsync();
+            return await _featureFlagCacheConsumer.GetSplitNamesAsync();
         }
         #endregion
 
@@ -61,9 +61,9 @@ namespace Splitio.Services.Client.Classes
         {
             if (!IsSdkReady(nameof(Splits))) return null;
 
-            var currentFeatureFlags = _featureFlagCache.GetAllSplits();
+            var currentFeatureFlags = _featureFlagCacheConsumer.GetAllSplits();
 
-            return GetFeatureFlagViewList(currentFeatureFlags);
+            return SplitManager.GetFeatureFlagViewList(currentFeatureFlags);
         }
 
         public SplitView Split(string featureName)
@@ -72,16 +72,16 @@ namespace Splitio.Services.Client.Classes
 
             if (!IsFeatureFlagNameValid(nameof(Split), featureName, out featureName)) return null;
 
-            var featureFlag = _featureFlagCache.GetSplit(featureName);
+            var featureFlag = _featureFlagCacheConsumer.GetSplit(featureName);
 
-            return GetFeatureFlagView(featureFlag, featureName);
+            return SplitManager.GetFeatureFlagView(featureFlag, featureName);
         }
         
         public List<string> SplitNames()
         {
             if (!IsSdkReady(nameof(SplitNames))) return null;
 
-            return _featureFlagCache.GetSplitNames();
+            return _featureFlagCacheConsumer.GetSplitNames();
         }
 
         public void BlockUntilReady(int blockMilisecondsUntilReady)
@@ -99,7 +99,7 @@ namespace Splitio.Services.Client.Classes
                 return false;
             }
 
-            if (_featureFlagCache == null) return false;
+            if (_featureFlagCacheConsumer == null) return false;
 
             return true;
         }
@@ -113,7 +113,7 @@ namespace Splitio.Services.Client.Classes
             return result.Success;
         }
 
-        private List<SplitView> GetFeatureFlagViewList(List<ParsedSplit> featureFlags)
+        private static List<SplitView> GetFeatureFlagViewList(List<ParsedSplit> featureFlags)
         {
             return featureFlags
                 .Select(x =>
@@ -129,7 +129,7 @@ namespace Splitio.Services.Client.Classes
                 .ToList();
         }
 
-        private SplitView GetFeatureFlagView(ParsedSplit featureFlag, string featureName)
+        private static SplitView GetFeatureFlagView(ParsedSplit featureFlag, string featureName)
         {
             if (featureFlag == null)
             {

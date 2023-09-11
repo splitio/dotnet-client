@@ -11,7 +11,8 @@ namespace Splitio.Services.Evaluator
 {
     public class EvaluatorAsync : BaseEvaluator, IEvaluatorAsync
     {
-        public EvaluatorAsync(ISplitCache splitCache, ISplitter splitter) : base(splitCache, splitter)
+        public EvaluatorAsync(IFeatureFlagCacheConsumer featureFlagCacheConsumer, ISplitter splitter)
+            : base(featureFlagCacheConsumer, splitter)
         {
         }
 
@@ -23,7 +24,7 @@ namespace Splitio.Services.Evaluator
 
                 try
                 {
-                    var parsedSplit = await _splitCache.GetSplitAsync(featureName);
+                    var parsedSplit = await _featureFlagCacheConsumer.GetSplitAsync(featureName);
 
                     return await EvaluateTreatmentAsync(key, parsedSplit, featureName, clock, attributes);
                 }
@@ -45,7 +46,7 @@ namespace Splitio.Services.Evaluator
 
                 try
                 {
-                    var splits = await _splitCache.FetchManyAsync(featureNames);
+                    var splits = await _featureFlagCacheConsumer.FetchManyAsync(featureNames);
 
                     foreach (var feature in featureNames)
                     {

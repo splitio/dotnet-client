@@ -7,7 +7,10 @@ using Splitio.Redis.Services.Impressions.Classes;
 using Splitio.Redis.Services.Parsing.Classes;
 using Splitio.Redis.Services.Shared;
 using Splitio.Redis.Telemetry.Storages;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.EngineEvaluator;
+using Splitio.Services.Evaluator;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
@@ -23,6 +26,8 @@ namespace Splitio.Redis.Services.Client.Classes
         private IRedisAdapter _redisAdapter;
         private IImpressionsCache _impressionsCache;
         private IConnectionPoolManager _connectionPoolManager;
+        private IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
+        private ISegmentCacheConsumer _segmentCacheConsumer;
 
         public RedisClient(ConfigurationOptions config, string apiKey) : base()
         {
@@ -90,10 +95,10 @@ namespace Splitio.Redis.Services.Client.Classes
             BuildTelemetryStorage();
             RecordConfigInit();
 
-            _segmentCache = new RedisSegmentCache(_redisAdapter, _config.RedisUserPrefix);
-            _splitParser = new RedisSplitParser(_segmentCache);
-            _splitCache = new RedisSplitCache(_redisAdapter, _splitParser, _config.RedisUserPrefix);            
-            _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
+            _segmentCacheConsumer = new RedisSegmentCache(_redisAdapter, _config.RedisUserPrefix);
+            _splitParser = new RedisSplitParser(_segmentCacheConsumer);
+            _featureFlagCacheConsumer = new RedisSplitCache(_redisAdapter, _splitParser, _config.RedisUserPrefix);            
+            _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCacheConsumer);
         }
 
         private void BuildTreatmentLog(IImpressionListener impressionListener)
@@ -135,7 +140,13 @@ namespace Splitio.Redis.Services.Client.Classes
         
         private void BuildManager()
         {
-            _manager = new SplitManager(_splitCache, _blockUntilReadyService);
+            _manager = new SplitManager(_featureFlagCacheConsumer, _blockUntilReadyService);
+        }
+
+        private void BuildEvaluator()
+        {
+            var splitter = new Splitter();
+            _evaluator = new Evaluator(_featureFlagCacheConsumer, splitter);
         }
 
         private void BuildBlockUntilReadyService()

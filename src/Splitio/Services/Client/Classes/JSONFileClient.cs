@@ -1,6 +1,7 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
@@ -16,10 +17,13 @@ namespace Splitio.Services.Client.Classes
 {
     public class JSONFileClient : SplitClient
     {
+        private readonly IFeatureFlagCache _featureFlagCache;
+        private readonly ISegmentCache _segmentCache;
+
         public JSONFileClient(string splitsFilePath,
             string segmentsFilePath,
             ISegmentCache segmentCacheInstance = null,
-            ISplitCache splitCacheInstance = null,
+            IFeatureFlagCache featureFlagCacheInstance = null,
             IImpressionsLog impressionsLog = null,
             bool isLabelsEnabled = true,
             IEventsLog eventsLog = null,
@@ -43,7 +47,7 @@ namespace Splitio.Services.Client.Classes
                 parsedSplits.TryAdd(split.name, _splitParser.Parse(split));
             }
 
-            _splitCache = splitCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits));
+            _featureFlagCache = featureFlagCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits));
 
             _impressionsLog = impressionsLog;
 
@@ -53,11 +57,12 @@ namespace Splitio.Services.Client.Classes
             _trafficTypeValidator = trafficTypeValidator;
             
             _blockUntilReadyService = new NoopBlockUntilReadyService();
-            _manager = new SplitManager(_splitCache, _blockUntilReadyService);
+            _manager = new SplitManager(_featureFlagCache, _blockUntilReadyService);
 
             ApiKey = "localhost";
 
-            BuildEvaluator();
+            var splitter = new Splitter();
+            _evaluator = new Evaluator.Evaluator(_featureFlagCache, splitter);
 
             _uniqueKeysTracker = new NoopUniqueKeysTracker();
             _impressionsCounter = new NoopImpressionsCounter();
@@ -68,7 +73,7 @@ namespace Splitio.Services.Client.Classes
         #region Public Methods
         public void RemoveSplitFromCache(string splitName)
         {
-            _splitCache.RemoveSplit(splitName);
+            _featureFlagCache.RemoveSplit(splitName);
         }
 
         public void RemoveKeyFromSegmentCache(string segmentName, List<string> keys)
@@ -80,7 +85,7 @@ namespace Splitio.Services.Client.Classes
         {
             if (!_statusManager.IsDestroyed())
             {
-                _splitCache.Clear();
+                _featureFlagCache.Clear();
                 _segmentCache.Clear();
                 base.Destroy();
             }

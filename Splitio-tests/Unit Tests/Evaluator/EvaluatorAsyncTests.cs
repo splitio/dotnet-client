@@ -16,14 +16,14 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
     public class EvaluatorAsyncTests
     {
         private readonly Mock<ISplitter> _splitter;
-        private readonly Mock<ISplitCache> _splitCache;
+        private readonly Mock<IFeatureFlagCacheConsumer> _splitCache;
 
         private readonly IEvaluator _evaluator;
 
         public EvaluatorAsyncTests()
         {
             _splitter = new Mock<ISplitter>();
-            _splitCache = new Mock<ISplitCache>();
+            _splitCache = new Mock<IFeatureFlagCacheConsumer>();
 
             _evaluator = new Splitio.Services.Evaluator.Evaluator(_splitCache.Object, _splitter.Object);
         }

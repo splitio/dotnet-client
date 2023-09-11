@@ -16,7 +16,7 @@ namespace Splitio_Tests.Unit_Tests.Client
     public class SplitClientAsyncTests
     {
         private readonly Mock<IEventsLog> _eventsLog;
-        private readonly Mock<ISplitCache> _splitCache;
+        private readonly Mock<IFeatureFlagCache> _splitCache;
         private readonly Mock<IImpressionsLog> _impressionsLog;
         private readonly Mock<IBlockUntilReadyService> _blockUntilReadyService;
         private readonly Mock<IEvaluator> _evaluator;
@@ -26,7 +26,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public SplitClientAsyncTests()
         {
             _eventsLog = new Mock<IEventsLog>();
-            _splitCache = new Mock<ISplitCache>();
+            _splitCache = new Mock<IFeatureFlagCache>();
             _impressionsLog = new Mock<IImpressionsLog>();
             _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
             _evaluator = new Mock<IEvaluator>();

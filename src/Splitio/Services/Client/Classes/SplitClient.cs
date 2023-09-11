@@ -43,9 +43,7 @@ namespace Splitio.Services.Client.Classes
 
         protected ISplitManager _manager;
         protected IEventsLog _eventsLog;
-        protected ISplitCache _splitCache;
         protected ITrafficTypeValidator _trafficTypeValidator;
-        protected ISegmentCache _segmentCache;
         protected IBlockUntilReadyService _blockUntilReadyService;
         protected IFactoryInstantiationsService _factoryInstantiationsService;
         protected ISplitParser _splitParser;
@@ -242,12 +240,6 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Protected Methods
-        protected void BuildEvaluator()
-        {
-            var splitter = new Splitter();
-            _evaluator = new Evaluator.Evaluator(_splitCache, splitter);
-        }
-
         protected void BuildUniqueKeysTracker(BaseConfig config)
         {
             if (config.ImpressionsMode != ImpressionsMode.None)

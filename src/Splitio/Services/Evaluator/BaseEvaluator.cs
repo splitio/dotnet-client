@@ -16,12 +16,12 @@ namespace Splitio.Services.Evaluator
         protected const string Control = "control";
 
         protected readonly ISplitter _splitter;
-        protected readonly ISplitCache _splitCache;
+        protected readonly IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
 
-        public BaseEvaluator(ISplitCache splitCache,
+        public BaseEvaluator(IFeatureFlagCacheConsumer featureFlagCacheConsumer,
             ISplitter splitter)
         {
-            _splitCache = splitCache;
+            _featureFlagCacheConsumer = featureFlagCacheConsumer;
             _splitter = splitter;
         }
 

@@ -22,7 +22,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
         private readonly Mock<IRedisAdapter> _redisAdapterMock;
         private readonly Mock<ISplitParser> _splitParserMock;
-        private readonly ISplitCache _redisSplitCache;
+        private readonly IFeatureFlagCacheConsumer _redisSplitCache;
 
         public RedisSplitCacheAsyncTests()
         {
@@ -48,16 +48,6 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             //Assert
             Assert.IsNull(result);
-        }
-
-        [TestMethod]
-        public async Task RemoveSplit_ReturnsFalse()
-        {
-            //Act
-            var result = await _redisSplitCache.RemoveSplitAsync("splitName");
-
-            // Assert.
-            Assert.IsFalse(result);
         }
 
         [TestMethod]

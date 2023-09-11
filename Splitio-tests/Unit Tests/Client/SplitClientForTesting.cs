@@ -10,7 +10,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 {
     public class SplitClientForTesting : SplitClient
     {
-        public SplitClientForTesting(ISplitCache splitCache,
+        public SplitClientForTesting(IFeatureFlagCacheConsumer featureFlagCacheConsumer,
             IEventsLog eventsLog,
             IImpressionsLog impressionsLog,
             IBlockUntilReadyService blockUntilReadyService,
@@ -19,11 +19,10 @@ namespace Splitio_Tests.Unit_Tests.Client
             bool labelsEnabled = false)
             : base()
         {
-            _splitCache = splitCache;
             _eventsLog = eventsLog;
             _impressionsLog = impressionsLog;
             _blockUntilReadyService = blockUntilReadyService;
-            _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
+            _trafficTypeValidator = new TrafficTypeValidator(featureFlagCacheConsumer);
             _evaluator = evaluator;
             _impressionsManager = impressionsManager;
             LabelsEnabled = labelsEnabled;
