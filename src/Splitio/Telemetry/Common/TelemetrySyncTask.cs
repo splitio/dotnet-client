@@ -19,7 +19,7 @@ namespace Splitio.Telemetry.Common
 
         private readonly ITelemetryStorageConsumer _telemetryStorageConsumer;
         private readonly ITelemetryAPI _telemetryAPI;
-        private readonly ISplitCache _splitCache;
+        private readonly IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
         private readonly ISegmentCache _segmentCache;        
         private readonly IFactoryInstantiationsService _factoryInstantiationsService;
         private readonly IWrapperAdapter _wrapperAdapter;
@@ -31,8 +31,8 @@ namespace Splitio.Telemetry.Common
         private bool _running;
 
         public TelemetrySyncTask(ITelemetryStorageConsumer telemetryStorage,
-            ITelemetryAPI telemetryAPI,            
-            ISplitCache splitCache,
+            ITelemetryAPI telemetryAPI,
+            IFeatureFlagCacheConsumer featureFlagCacheConsumer,
             ISegmentCache segmentCache,
             SelfRefreshingConfig configurationOptions,
             IFactoryInstantiationsService factoryInstantiationsService,
@@ -41,7 +41,7 @@ namespace Splitio.Telemetry.Common
         {
             _telemetryStorageConsumer = telemetryStorage;
             _telemetryAPI = telemetryAPI;            
-            _splitCache = splitCache;
+            _featureFlagCacheConsumer = featureFlagCacheConsumer;
             _segmentCache = segmentCache;
             _configurationOptions = configurationOptions;
             _factoryInstantiationsService = factoryInstantiationsService;
@@ -157,7 +157,7 @@ namespace Splitio.Telemetry.Common
                     StreamingEvents = _telemetryStorageConsumer.PopStreamingEvents().ToList(),
                     Tags = _telemetryStorageConsumer.PopTags().ToList(),
                     TokenRefreshes = _telemetryStorageConsumer.PopTokenRefreshes(),
-                    SplitCount = _splitCache.SplitsCount(),
+                    SplitCount = _featureFlagCacheConsumer.SplitsCount(),
                     SegmentCount = _segmentCache.SegmentsCount(),
                     SegmentKeyCount = _segmentCache.SegmentKeysCount(),
                     UpdatesFromSSE = _telemetryStorageConsumer.PopUpdatesFromSSE()

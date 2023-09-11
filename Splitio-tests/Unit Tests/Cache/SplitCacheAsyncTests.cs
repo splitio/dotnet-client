@@ -12,7 +12,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
     [TestClass]
     public class SplitCacheAsyncTests
     {
-        private readonly ISplitCache _cache;
+        private readonly IFeatureFlagCache _cache;
 
         public SplitCacheAsyncTests()
         {

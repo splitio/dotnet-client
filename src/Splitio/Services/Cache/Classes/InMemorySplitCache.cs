@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Splitio.Services.Cache.Classes
 {
-    public class InMemorySplitCache : ISplitCache
+    public class InMemorySplitCache : IFeatureFlagCache
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemorySplitCache));
 
