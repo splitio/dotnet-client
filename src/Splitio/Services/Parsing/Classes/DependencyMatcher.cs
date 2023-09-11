@@ -28,7 +28,7 @@ namespace Splitio.Services.Parsing.Classes
             return _treatments.Contains(result.Treatment);
         }
 
-        public override async Task<bool> MatchAsync(Key key, Dictionary<string, object> attributes = null, IEvaluatorAsync evaluator = null)
+        public override async Task<bool> MatchAsync(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             if (evaluator == null)
             {

@@ -33,7 +33,7 @@ namespace Splitio.Domain
             return (negate ^ matcher.Match(value, attributes, evaluator));
         }
 
-        public virtual async Task<bool> MatchAsync(Key key, Dictionary<string, object> attributes, IEvaluatorAsync evaluator = null)
+        public virtual async Task<bool> MatchAsync(Key key, Dictionary<string, object> attributes, IEvaluator evaluator = null)
         {
             if (attribute == null)
             {

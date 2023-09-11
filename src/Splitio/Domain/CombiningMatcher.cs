@@ -25,7 +25,7 @@ namespace Splitio.Domain
             }
         }
 
-        public virtual async Task<bool> MatchAsync(Key key, Dictionary<string, object> attributes, IEvaluatorAsync evaluator = null)
+        public virtual async Task<bool> MatchAsync(Key key, Dictionary<string, object> attributes, IEvaluator evaluator = null)
         {
             if (delegates == null || delegates.Count() == 0)
             {

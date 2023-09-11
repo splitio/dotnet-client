@@ -75,7 +75,7 @@ namespace Splitio.Services.Parsing.Classes
         #endregion
 
         #region Async Methods
-        public Task<bool> MatchAsync(object value, Dictionary<string, object> attributes = null, IEvaluatorAsync evaluator = null)
+        public Task<bool> MatchAsync(object value, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             if (value is bool bValue)
             {
@@ -85,27 +85,27 @@ namespace Splitio.Services.Parsing.Classes
             {
                 return MatchAsync(sValue, attributes, evaluator);
             }
-            
+
             if (value is DateTime dValue)
             {
                 return MatchAsync(dValue, attributes, evaluator);
             }
-            
+
             if (value is long lValue)
             {
                 return MatchAsync(lValue, attributes, evaluator);
             }
-            
+
             if (value is int iValue)
             {
                 return MatchAsync(iValue, attributes, evaluator);
             }
-            
+
             if (value is List<string> listValue)
             {
                 return MatchAsync(listValue, attributes, evaluator);
             }
-            
+
             if (value is Key kValue)
             {
                 return MatchAsync(kValue, attributes, evaluator);
@@ -114,32 +114,32 @@ namespace Splitio.Services.Parsing.Classes
             return Task.FromResult(false);
         }
 
-        public virtual Task<bool> MatchAsync(string key, Dictionary<string, object> attributes = null, IEvaluatorAsync evaluator = null)
+        public virtual Task<bool> MatchAsync(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             return Task.FromResult(Match(key, attributes));
         }
 
-        public virtual Task<bool> MatchAsync(Key key, Dictionary<string, object> attributes = null, IEvaluatorAsync evaluator = null)
+        public virtual Task<bool> MatchAsync(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             return Task.FromResult(Match(key, attributes));
         }
 
-        public virtual Task<bool> MatchAsync(DateTime key, Dictionary<string, object> attributes = null, IEvaluatorAsync evaluator = null)
+        public virtual Task<bool> MatchAsync(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             return Task.FromResult(Match(key, attributes));
         }
 
-        public virtual Task<bool> MatchAsync(long key, Dictionary<string, object> attributes = null, IEvaluatorAsync evaluator = null)
+        public virtual Task<bool> MatchAsync(long key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             return Task.FromResult(Match(key, attributes));
         }
 
-        public virtual Task<bool> MatchAsync(List<string> key, Dictionary<string, object> attributes = null, IEvaluatorAsync evaluator = null)
+        public virtual Task<bool> MatchAsync(List<string> key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             return Task.FromResult(Match(key, attributes));
         }
 
-        public virtual Task<bool> MatchAsync(bool key, Dictionary<string, object> attributes = null, IEvaluatorAsync evaluator = null)
+        public virtual Task<bool> MatchAsync(bool key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             return Task.FromResult(Match(key, attributes));
         }

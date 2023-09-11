@@ -28,12 +28,12 @@ namespace Splitio.Services.Parsing
             return Match(key.matchingKey, attributes, evaluator);
         }
 
-        public override async Task<bool> MatchAsync(string key, Dictionary<string, object> attributes = null, IEvaluatorAsync evaluator = null)
+        public override async Task<bool> MatchAsync(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             return await _segmentsCache.IsInSegmentAsync(_segmentName, key);
         }
 
-        public override async Task<bool> MatchAsync(Key key, Dictionary<string, object> attributes = null, IEvaluatorAsync evaluator = null)
+        public override async Task<bool> MatchAsync(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             return await MatchAsync(key.matchingKey, attributes, evaluator);
         }
