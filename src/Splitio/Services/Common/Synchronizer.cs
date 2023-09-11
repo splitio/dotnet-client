@@ -26,7 +26,7 @@ namespace Splitio.Services.Common
         private readonly IImpressionsCounter _impressionsCounter;
         private readonly ITelemetrySyncTask _telemetrySyncTask;
         private readonly IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
-        private readonly ISegmentCache _segmentCache;
+        private readonly ISegmentCacheConsumer _segmentCacheConsumer;
         private readonly IBackOff _splitsBackOff;
         private readonly IBackOff _segmentsBackOff;
         private readonly IUniqueKeysTracker _uniqueKeysTracker;
@@ -46,7 +46,7 @@ namespace Splitio.Services.Common
             IBackOff segmentsBackOff,
             int onDemandFetchMaxRetries,
             int onDemandFetchRetryDelayMs,
-            ISegmentCache segmentCache,
+            ISegmentCacheConsumer segmentCache,
             IUniqueKeysTracker uniqueKeysTracker)
         {
             _splitFetcher = splitFetcher;
@@ -61,7 +61,7 @@ namespace Splitio.Services.Common
             _segmentsBackOff = segmentsBackOff;
             _onDemandFetchMaxRetries = onDemandFetchMaxRetries;
             _onDemandFetchRetryDelayMs = onDemandFetchRetryDelayMs;
-            _segmentCache = segmentCache;
+            _segmentCacheConsumer = segmentCache;
             _uniqueKeysTracker = uniqueKeysTracker;
             _defaultFetchOptions = new FetchOptions();
         }
@@ -119,7 +119,7 @@ namespace Splitio.Services.Common
         {
             try
             {
-                if (targetChangeNumber <= _segmentCache.GetChangeNumber(segmentName)) return;
+                if (targetChangeNumber <= _segmentCacheConsumer.GetChangeNumber(segmentName)) return;
 
                 var fetchOptions = new FetchOptions { CacheControlHeaders = true };
 
@@ -203,7 +203,7 @@ namespace Splitio.Services.Common
                     remainingAttempts--;
                     await _segmentFetcher.Fetch(name, fetchOptions);
 
-                    if (targetChangeNumber <= _segmentCache.GetChangeNumber(name))
+                    if (targetChangeNumber <= _segmentCacheConsumer.GetChangeNumber(name))
                     {
                         return new SyncResult(true, remainingAttempts);
                     }

@@ -18,30 +18,13 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
         private readonly Mock<IRedisAdapter> _redisAdapter;
 
-        private readonly ISegmentCache _cache;
+        private readonly ISegmentCacheConsumer _cache;
 
         public RedisSegmentCacheAsyncTests()
         {
             _redisAdapter = new Mock<IRedisAdapter>();
 
             _cache = new RedisSegmentCache(_redisAdapter.Object);
-        }
-
-        [TestMethod]
-        public async Task AddToSegmentAsyncTest()
-        {
-            // Arrange
-            var segmentName = "test";
-
-            _redisAdapter
-                .Setup(x => x.SAddAsync(It.IsAny<string>(), It.IsAny<RedisValue[]>()))
-                .ReturnsAsync(1);
-
-            // Act
-            await _cache.AddToSegmentAsync(segmentName, new List<string>() { "test" });
-
-            // Assert
-            _redisAdapter.Verify(mock => mock.SAddAsync(SegmentKeyPrefix + segmentName, It.IsAny<RedisValue[]>()));
         }
 
         [TestMethod]
@@ -76,41 +59,6 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             //Assert
             Assert.IsFalse(result);
-        }
-
-        [TestMethod]
-        public async Task RemoveKeyFromSegmentTest()
-        {
-            //Arrange
-            var segmentName = "segment_test";
-            var keys = new List<string> { "abcd" };
-
-            //Act
-            await _cache.RemoveFromSegmentAsync(segmentName, keys);
-
-            //Assert
-            _redisAdapter.Verify(mock => mock.SRemAsync(It.IsAny<string>(), It.IsAny<RedisValue[]>()), Times.Once);
-        }
-
-        [TestMethod]
-        public async Task SetAndGetChangeNumberTest()
-        {
-            //Arrange
-            var changeNumber = 1234;
-            var segmentName = "segment_test";
-
-            _redisAdapter
-                .Setup(x => x.GetAsync(SegmentNameKeyPrefix.Replace("{segmentname}", segmentName) + "till"))
-                .ReturnsAsync(changeNumber.ToString());
-
-
-            //Act
-            await _cache.SetChangeNumberAsync(segmentName, changeNumber);
-            var result = await _cache.GetChangeNumberAsync(segmentName);
-
-            //Assert
-            Assert.AreEqual(1234, result);
-            _redisAdapter.Verify(x => x.SetAsync(SegmentNameKeyPrefix.Replace("{segmentname}", segmentName) + "till", changeNumber.ToString()), Times.Once);
         }
 
         [TestMethod]

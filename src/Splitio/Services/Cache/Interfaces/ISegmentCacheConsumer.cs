@@ -3,14 +3,17 @@ using System.Threading.Tasks;
 
 namespace Splitio.Services.Cache.Interfaces
 {
-    public interface ISegmentCacheAsync
+    public interface ISegmentCacheConsumer
     {
-        Task AddToSegmentAsync(string segmentName, List<string> segmentKeys);
-        Task RemoveFromSegmentAsync(string segmentName, List<string> segmentKeys);
+        bool IsInSegment(string segmentName, string key);
+        long GetChangeNumber(string segmentName);
+        List<string> GetSegmentNames();
+        List<string> GetSegmentKeys(string segmentName);
+        int SegmentsCount();
+        int SegmentKeysCount();
+
         Task<bool> IsInSegmentAsync(string segmentName, string key);
-        Task SetChangeNumberAsync(string segmentName, long changeNumber);
         Task<long> GetChangeNumberAsync(string segmentName);
-        Task ClearAsync();
         Task<List<string>> GetSegmentNamesAsync();
         Task<List<string>> GetSegmentKeysAsync(string segmentName);
         Task<int> SegmentsCountAsync();

@@ -14,7 +14,7 @@ namespace Splitio.Services.Parsing
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitParser));
 
-        protected ISegmentCache _segmentsCache;
+        protected ISegmentCacheConsumer _segmentsCache;
 
         public ParsedSplit Parse(Split split)
         {
