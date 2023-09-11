@@ -1,5 +1,6 @@
 ﻿using Splitio.Domain;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Interfaces
 {
@@ -18,5 +19,10 @@ namespace Splitio.Services.Client.Interfaces
         void Destroy();
         bool IsDestroyed();
         void BlockUntilReady(int blockMilisecondsUntilReady);
+
+        Task<string> GetTreatmentAsync(string key, string feature, Dictionary<string, object> attributes = null);
+        Task<Dictionary<string, string>> GetTreatmentsAsync(string key, List<string> features, Dictionary<string, object> attributes = null);
+        Task<SplitResult> GetTreatmentWithConfigAsync(string key, string feature, Dictionary<string, object> attributes = null);
+        Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigAsync(string key, List<string> features, Dictionary<string, object> attributes = null);
     }
 }
