@@ -3,7 +3,6 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Filter;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
-using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
@@ -21,6 +20,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -73,21 +73,46 @@ namespace Splitio.Services.Client.Classes
             _statusManager = new InMemoryReadinessGatesCache();
         }
 
-        #region Public Methods
-        public SplitResult GetTreatmentWithConfig(string key, string feature, Dictionary<string, object> attributes = null)
+        #region Public Async Methods
+        public async Task<string> GetTreatmentAsync(string key, string feature, Dictionary<string, object> attributes = null)
         {
-            return GetTreatmentWithConfig(new Key(key, null), feature, attributes);
+            var result = await GetTreatmentAsync(nameof(GetTreatmentAsync), new Key(key, null), feature, attributes);
+
+            return result.Treatment;
         }
 
-        public SplitResult GetTreatmentWithConfig(Key key, string feature, Dictionary<string, object> attributes = null)
+        public async Task<Dictionary<string, string>> GetTreatmentsAsync(string key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            var result = GetTreatmentResult(key, feature, nameof(GetTreatmentWithConfig), attributes);
+            var results = await GetTreatmentsAsync(nameof(GetTreatmentsAsync), new Key(key, null), features, attributes);
 
-            return new SplitResult
-            {
-                Treatment = result.Treatment,
-                Config = result.Config
-            };
+            return results
+                .ToDictionary(r => r.Key, r => r.Value.Treatment);
+        }
+
+        public async Task<SplitResult> GetTreatmentWithConfigAsync(string key, string feature, Dictionary<string, object> attributes = null)
+        {
+            return await GetTreatmentAsync(nameof(GetTreatmentWithConfigAsync), new Key(key, null), feature, attributes);
+        }
+
+        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigAsync(string key, List<string> features, Dictionary<string, object> attributes = null)
+        {
+            var results = await GetTreatmentsAsync(nameof(GetTreatmentsWithConfigAsync), new Key(key, null), features, attributes);
+
+            return results
+                .ToDictionary(r => r.Key, r => new SplitResult
+                {
+                    Treatment = r.Value.Treatment,
+                    Config = r.Value.Config
+                });
+        }
+        #endregion
+
+        #region Public Sync Methods
+        public virtual string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null)
+        {
+            var result = GetTreatmentSync(nameof(GetTreatment), key, feature, attributes);
+
+            return result.Treatment;
         }
 
         public virtual string GetTreatment(string key, string feature, Dictionary<string, object> attributes = null)
@@ -95,11 +120,14 @@ namespace Splitio.Services.Client.Classes
             return GetTreatment(new Key(key, null), feature, attributes);
         }
 
-        public virtual string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null)
+        public SplitResult GetTreatmentWithConfig(string key, string feature, Dictionary<string, object> attributes = null)
         {
-            var result = GetTreatmentResult(key, feature, nameof(GetTreatment), attributes);
+            return GetTreatmentWithConfig(new Key(key, null), feature, attributes);
+        }
 
-            return result.Treatment;
+        public SplitResult GetTreatmentWithConfig(Key key, string feature, Dictionary<string, object> attributes = null)
+        {
+            return GetTreatmentSync(nameof(GetTreatmentWithConfig), key, feature, attributes);
         }
 
         public Dictionary<string, SplitResult> GetTreatmentsWithConfig(string key, List<string> features, Dictionary<string, object> attributes = null)
@@ -109,7 +137,7 @@ namespace Splitio.Services.Client.Classes
 
         public Dictionary<string, SplitResult> GetTreatmentsWithConfig(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            var results = GetTreatmentsResult(key, features, nameof(GetTreatmentsWithConfig), attributes);
+            var results = GetTreatmentsSync(nameof(GetTreatmentsWithConfig), key, features, attributes);
 
             return results
                 .ToDictionary(r => r.Key, r => new SplitResult
@@ -126,7 +154,7 @@ namespace Splitio.Services.Client.Classes
 
         public Dictionary<string, string> GetTreatments(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            var results = GetTreatmentsResult(key, features, nameof(GetTreatments), attributes);
+            var results = GetTreatmentsSync(nameof(GetTreatments), key, features, attributes);
 
             return results
                 .ToDictionary(r => r.Key, r => r.Value.Treatment);
@@ -242,85 +270,52 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Private Methods
-        private TreatmentResult GetTreatmentResult(Key key, string feature, string method, Dictionary<string, object> attributes = null)
+        private SplitResult GetTreatmentSync(string method, Key key, string featureFlagName, Dictionary<string, object> attributes = null)
         {
-            if (!IsClientReady(method)) return new TreatmentResult(string.Empty, Control, null);
+            featureFlagName = ProcessGetTreatmentValidation(method, key, featureFlagName, out TreatmentResult controlTreatment);
 
-            if (!_keyValidator.IsValid(key, method)) return new TreatmentResult(string.Empty, Control, null);
+            if (controlTreatment != null) return new SplitResult(controlTreatment.Treatment, controlTreatment.Config);
 
-            var splitNameResult = _splitNameValidator.SplitNameIsValid(feature, method);
+            var evaluatorResult = _evaluator.EvaluateFeature(key, featureFlagName, attributes);
 
-            if (!splitNameResult.Success) return new TreatmentResult(string.Empty, Control, null);
+            RecordImpressionAndTelemetry(evaluatorResult, key, featureFlagName, method);
 
-            feature = splitNameResult.Value;
-
-            var result = _evaluator.EvaluateFeature(key, feature, attributes);
-
-            if (result.Exception)
-            {
-                RecordException(method);
-            }
-
-            RecordLatency(method, result.ElapsedMilliseconds);
-
-            if (!Labels.SplitNotFound.Equals(result.Label))
-            {
-                _impressionsManager.BuildAndTrack(key.matchingKey, feature, result.Treatment, CurrentTimeHelper.CurrentTimeMillis(), result.ChangeNumber, LabelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null);
-            }
-
-            return result;
+            return new SplitResult(evaluatorResult.Treatment, evaluatorResult.Config);
         }
 
-        private Dictionary<string, TreatmentResult> GetTreatmentsResult(Key key, List<string> features, string method, Dictionary<string, object> attributes = null)
+        private Dictionary<string, TreatmentResult> GetTreatmentsSync(string method, Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
+            features = ProcessGetTreatmentsValidation(method, key, features, out Dictionary<string, TreatmentResult> controlTreatments);
 
-            if (!IsClientReady(method))
-            {
-                foreach (var feature in features)
-                {
-                    treatmentsForFeatures.Add(feature, new TreatmentResult(string.Empty, Control, null));
-                }
+            if (controlTreatments != null) return controlTreatments;
 
-                return treatmentsForFeatures;
-            }
-            
-            var ImpressionsQueue = new List<KeyImpression>();
+            var results = _evaluator.EvaluateFeatures(key, features, attributes);
 
-            if (_keyValidator.IsValid(key, method))
-            {
-                features = _splitNameValidator.SplitNamesAreValid(features, method);
-                
-                var results = _evaluator.EvaluateFeatures(key, features, attributes);
+            return ParseTreatmentsAndRecordImpressionsAndTelemetry(method, results, key);
+        }
 
-                foreach (var treatmentResult in results.TreatmentResults)
-                {
-                    treatmentsForFeatures.Add(treatmentResult.Key, treatmentResult.Value);                    
+        private async Task<SplitResult> GetTreatmentAsync(string method, Key key, string featureFlagName, Dictionary<string, object> attributes = null)
+        {
+            featureFlagName = ProcessGetTreatmentValidation(method, key, featureFlagName, out TreatmentResult controlTreatment);
 
-                    if (!Labels.SplitNotFound.Equals(treatmentResult.Value.Label))
-                    {
-                        ImpressionsQueue.Add(_impressionsManager.BuildImpression(key.matchingKey, treatmentResult.Key, treatmentResult.Value.Treatment, CurrentTimeHelper.CurrentTimeMillis(), treatmentResult.Value.ChangeNumber, LabelsEnabled ? treatmentResult.Value.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null));                        
-                    }                    
-                }
+            if (controlTreatment != null) return new SplitResult(controlTreatment.Treatment, controlTreatment.Config);
 
-                if (results.Exception)
-                {
-                    RecordException(method);
-                }
+            var evaluatorResult = await _evaluator.EvaluateFeatureAsync(key, featureFlagName, attributes);
 
-                RecordLatency(method, results.ElapsedMilliseconds);
+            RecordImpressionAndTelemetry(evaluatorResult, key, featureFlagName, method);
 
-                _impressionsManager.Track(ImpressionsQueue);
-            }
-            else
-            {
-                foreach (var feature in features)
-                {
-                    treatmentsForFeatures.Add(feature, new TreatmentResult(string.Empty, Control, null));
-                }                    
-            }
+            return new SplitResult(evaluatorResult.Treatment, evaluatorResult.Config);
+        }
 
-            return treatmentsForFeatures;
+        private async Task<Dictionary<string, TreatmentResult>> GetTreatmentsAsync(string method, Key key, List<string> features, Dictionary<string, object> attributes = null)
+        {
+            features = ProcessGetTreatmentsValidation(method, key, features, out Dictionary<string, TreatmentResult> controlTreatments);
+
+            if (controlTreatments != null) return controlTreatments;
+
+            var results = await _evaluator.EvaluateFeaturesAsync(key, features, attributes);
+
+            return ParseTreatmentsAndRecordImpressionsAndTelemetry(method, results, key);
         }
 
         private bool IsClientReady(string methodName)
@@ -338,6 +333,82 @@ namespace Splitio.Services.Client.Classes
             }
 
             return true;
+        }
+
+        private Dictionary<string, TreatmentResult> ParseTreatmentsAndRecordImpressionsAndTelemetry(string method, MultipleEvaluatorResult results, Key key)
+        {
+            var impressionsQueue = new List<KeyImpression>();
+            var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
+
+            RecordTelemetry(results.Exception, method, results.ElapsedMilliseconds);
+
+            foreach (var treatmentResult in results.TreatmentResults)
+            {
+                treatmentsForFeatures.Add(treatmentResult.Key, treatmentResult.Value);
+
+                var impression = BuildImpression(treatmentResult.Value, key, treatmentResult.Key);
+
+                if (impression != null) impressionsQueue.Add(impression);
+            }
+
+            if (impressionsQueue.Any()) _impressionsManager.Track(impressionsQueue);
+
+            return treatmentsForFeatures;
+        }
+
+        private string ProcessGetTreatmentValidation(string method, Key key, string featureFlagName, out TreatmentResult result)
+        {
+            result = null;
+
+            if (!IsClientReady(method) || !_keyValidator.IsValid(key, method))
+            {
+                result = new TreatmentResult(string.Empty, Control, null);
+                return string.Empty;
+            }
+
+            var splitNameResult = _splitNameValidator.SplitNameIsValid(featureFlagName, method);
+
+            if (!splitNameResult.Success)
+            {
+                result = new TreatmentResult(string.Empty, Control, null);
+                return string.Empty;
+            }
+
+            return splitNameResult.Value;
+        }
+
+        private List<string> ProcessGetTreatmentsValidation(string method, Key key, List<string> features, out Dictionary<string, TreatmentResult> result)
+        {
+            result = null;
+
+            if (!IsClientReady(method) || !_keyValidator.IsValid(key, method))
+            {
+                result = new Dictionary<string, TreatmentResult>();
+                foreach (var feature in features)
+                {
+                    result.Add(feature, new TreatmentResult(string.Empty, Control, null));
+                }
+
+                return new List<string>();
+            }
+
+            return _splitNameValidator.SplitNamesAreValid(features, method);
+        }
+
+        private void RecordImpressionAndTelemetry(TreatmentResult evaluationResult, Key key, string feature, string method)
+        {
+            RecordTelemetry(evaluationResult.Exception, method, evaluationResult.ElapsedMilliseconds);
+
+            var impression = BuildImpression(evaluationResult, key, feature);
+
+            if (impression != null) _impressionsManager.Track(new List<KeyImpression> { impression });
+        }
+
+        private void RecordTelemetry(bool exception, string method, long latency)
+        {
+            if (exception) RecordException(method);
+
+            RecordLatency(method, latency);
         }
 
         private void RecordLatency(string method, long latency)
@@ -386,6 +457,13 @@ namespace Splitio.Services.Client.Classes
                     _telemetryEvaluationProducer.RecordException(MethodEnum.Track);
                     break;
             }
+        }
+
+        private KeyImpression BuildImpression(TreatmentResult treatmentResult, Key key, string featureName)
+        {
+            if (Labels.SplitNotFound.Equals(treatmentResult.Label)) return null;
+
+            return _impressionsManager.BuildImpression(key.matchingKey, featureName, treatmentResult.Treatment, CurrentTimeHelper.CurrentTimeMillis(), treatmentResult.ChangeNumber, LabelsEnabled ? treatmentResult.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null);
         }
         #endregion
     }
