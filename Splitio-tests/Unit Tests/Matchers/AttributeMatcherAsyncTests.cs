@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 namespace Splitio_Tests.Unit_Tests
 {
     [TestClass]
-    public class AttributeMatcherTests
+    public class AttributeMatcherAsyncTests
     {
         [TestMethod]
-        public void MatchShouldReturnTrueIfAttributeInAttributesIsMatching()
+        public async Task MatchAsyncShouldReturnTrueIfAttributeInAttributesIsMatching()
         {
             //Arrange
             var matcher = new AttributeMatcher()
@@ -28,14 +28,14 @@ namespace Splitio_Tests.Unit_Tests
             };
 
             //Act
-            var result = matcher.Match(null, attributes);
+            var result = await matcher.MatchAsync(null, attributes);
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfAttributeInAttributesIsMatchingButResultIsNegated()
+        public async Task MatchAsyncShouldReturnFalseIfAttributeInAttributesIsMatchingButResultIsNegated()
         {
             //Arrange
             var matcher = new AttributeMatcher()
@@ -52,7 +52,7 @@ namespace Splitio_Tests.Unit_Tests
             };
 
             //Act
-            var result = matcher.Match(null, attributes);
+            var result = await matcher.MatchAsync(null, attributes);
 
             //Assert
             Assert.IsFalse(result);
@@ -60,7 +60,7 @@ namespace Splitio_Tests.Unit_Tests
 
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfAttributesDictionaryIsNull()
+        public async Task MatchAsyncShouldReturnFalseIfAttributesDictionaryIsNull()
         {
             //Arrange
             var matcher = new AttributeMatcher()
@@ -71,14 +71,14 @@ namespace Splitio_Tests.Unit_Tests
             };
 
             //Act
-            var result = matcher.Match(null, null);
+            var result = await matcher.MatchAsync(null, null);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfValueForAttributeIsNullAndKeyIsNull()
+        public async Task MatchAsyncShouldReturnFalseIfValueForAttributeIsNullAndKeyIsNull()
         {
             //Arrange
             var matcher = new AttributeMatcher()
@@ -95,14 +95,14 @@ namespace Splitio_Tests.Unit_Tests
             };
 
             //Act
-            var result = matcher.Match(new Key(null, null), attributes);
+            var result = await matcher.MatchAsync(new Key(null, null), attributes);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfValueForAttributeIsNullAndKeyNotMatching()
+        public async Task MatchAsyncShouldReturnFalseIfValueForAttributeIsNullAndKeyNotMatching()
         {
             //Arrange
             var matcher = new AttributeMatcher()
@@ -119,14 +119,14 @@ namespace Splitio_Tests.Unit_Tests
             };
 
             //Act
-            var result = matcher.Match(new Key("1", "1"), attributes);
+            var result = await matcher.MatchAsync(new Key("1", "1"), attributes);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueIfValueForAttributeIsNullAndKeyMatching()
+        public async Task MatchAsyncShouldReturnTrueIfValueForAttributeIsNullAndKeyMatching()
         {
             //Arrange
             var matcher = new AttributeMatcher()
@@ -143,14 +143,14 @@ namespace Splitio_Tests.Unit_Tests
             };
 
             //Act
-            var result = matcher.Match(new Key ("12012", "12012"), attributes);
+            var result = await matcher.MatchAsync(new Key("12012", "12012"), attributes);
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueIfValueBooleanOrStringBooleanMatching()
+        public async Task MatchAsyncShouldReturnTrueIfValueBooleanOrStringBooleanMatching()
         {
             //Arrange
             var possibleValues = new List<object>
@@ -178,7 +178,7 @@ namespace Splitio_Tests.Unit_Tests
                 };
 
                 //Act
-                var result = matcher.Match(new Key("12012", "12012"), attributes);
+                var result = await matcher.MatchAsync(new Key("12012", "12012"), attributes);
 
                 //Assert
                 Assert.IsTrue(result);
@@ -186,7 +186,7 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfValueBooleanOrStringBooleanNotMatching()
+        public async Task MatchAsyncShouldReturnFalseIfValueBooleanOrStringBooleanNotMatching()
         {
             //Arrange
             var possibleValues = new List<object>
@@ -211,7 +211,7 @@ namespace Splitio_Tests.Unit_Tests
                 };
 
                 //Act
-                var result = matcher.Match(new Key("12012", "12012"), attributes);
+                var result = await matcher.MatchAsync(new Key("12012", "12012"), attributes);
 
                 //Assert
                 Assert.IsFalse(result);

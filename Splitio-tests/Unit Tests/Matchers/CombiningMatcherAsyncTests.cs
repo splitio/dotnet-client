@@ -1,15 +1,16 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using Splitio.Domain;
 using System.Collections.Generic;
-using Moq;
+using System.Threading.Tasks;
 
-namespace Splitio_Tests.Unit_Tests
+namespace Splitio_Tests.Unit_Tests.Matchers
 {
     [TestClass]
-    public class CombiningMatcherTests
+    public class CombiningMatcherAsyncTests
     {
         [TestMethod]
-        public void MatchShouldReturnFalseWithNoDelegates()
+        public async Task MatchAsyncShouldReturnFalseWithNoDelegates()
         {
             //Arrange
             var matcher = new CombiningMatcher()
@@ -26,14 +27,14 @@ namespace Splitio_Tests.Unit_Tests
 
             //Act
             var key = new Key("test", "test");
-            var result = matcher.Match(key, attributes);
+            var result = await matcher.MatchAsync(key, attributes);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueIfAllMatchersMatch()
+        public async Task MatchAsyncShouldReturnTrueIfAllMatchersMatch()
         {
             //Arrange
             var attributeMatcher1 = new Mock<AttributeMatcher>();
@@ -49,16 +50,16 @@ namespace Splitio_Tests.Unit_Tests
             var key = new Key("test", "test");
 
             attributeMatcher1
-                .Setup(x=>x.Match(key, attributes, null))
-                .Returns(true);
+                .Setup(x => x.MatchAsync(key, attributes, null))
+                .ReturnsAsync(true);
 
             attributeMatcher2
-                .Setup(x=>x.Match(key, attributes, null))
-                .Returns(true);
+                .Setup(x => x.MatchAsync(key, attributes, null))
+                .ReturnsAsync(true);
 
             attributeMatcher3
-                .Setup(x=>x.Match(key, attributes, null))
-                .Returns(true);
+                .Setup(x => x.MatchAsync(key, attributes, null))
+                .ReturnsAsync(true);
 
             delegates.Add(attributeMatcher1.Object);
             delegates.Add(attributeMatcher2.Object);
@@ -71,34 +72,43 @@ namespace Splitio_Tests.Unit_Tests
             };
 
             //Act
-            var result = matcher.Match(key, attributes);
+            var result = await matcher.MatchAsync(key, attributes);
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfAnyMatchersNoMatch()
+        public async Task MatchAsyncShouldReturnFalseIfAnyMatchersNoMatch()
         {
             //Arrange
+            var attributeMatcher1 = new Mock<AttributeMatcher>();
+            var attributeMatcher2 = new Mock<AttributeMatcher>();
+            var attributeMatcher3 = new Mock<AttributeMatcher>();
+
             var attributes = new Dictionary<string, object>
             {
                 { "card_number", 12012 },
                 { "card_type", "ABC" }
             };
-
             var delegates = new List<AttributeMatcher>();
-            var mock1 = new Mock<AttributeMatcher>();
             var key = new Key("test", "test");
-            mock1.Setup(x => x.Match(key, attributes, null)).Returns(true);
-            var mock2 = new Mock<AttributeMatcher>();
-            mock2.Setup(x => x.Match(key, attributes, null)).Returns(false);
-            var mock3 = new Mock<AttributeMatcher>();
-            mock3.Setup(x => x.Match(key, attributes, null)).Returns(true);
 
-            delegates.Add(mock1.Object);
-            delegates.Add(mock2.Object);
-            delegates.Add(mock3.Object);
+            attributeMatcher1
+                .Setup(x => x.MatchAsync(key, attributes, null))
+                .ReturnsAsync(true);
+
+            attributeMatcher2
+                .Setup(x => x.MatchAsync(key, attributes, null))
+                .ReturnsAsync(false);
+
+            attributeMatcher3
+                .Setup(x => x.MatchAsync(key, attributes, null))
+                .ReturnsAsync(true);
+
+            delegates.Add(attributeMatcher1.Object);
+            delegates.Add(attributeMatcher2.Object);
+            delegates.Add(attributeMatcher3.Object);
 
             var matcher = new CombiningMatcher()
             {
@@ -107,7 +117,7 @@ namespace Splitio_Tests.Unit_Tests
             };
 
             //Act
-            var result = matcher.Match(key, attributes);
+            var result = await matcher.MatchAsync(key, attributes);
 
             //Assert
             Assert.IsFalse(result);

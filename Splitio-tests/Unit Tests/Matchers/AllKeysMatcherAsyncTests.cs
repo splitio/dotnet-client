@@ -6,55 +6,55 @@ using System.Threading.Tasks;
 namespace Splitio_Tests.Unit_Tests
 {
     [TestClass]
-    public class AllKeysMatcherTests
+    public class AllKeysMatcherAsyncTests
     {
         [TestMethod]
-        public void MatchShouldReturnTrueForAnyKey()
+        public async Task MatchAsyncShouldReturnTrueForAnyKey()
         {
             //Arrange
             var matcher = new AllKeysMatcher();
 
             //Act
-            var result = matcher.Match(new Key("test", "test"));
+            var result = await matcher.MatchAsync(new Key("test", "test"));
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfNull()
+        public async Task MatchAsyncShouldReturnFalseIfNull()
         {
             //Arrange
             var matcher = new AllKeysMatcher();
 
             //Act
-            var result2 = matcher.Match(new Key((string)null, null));
+            var result2 = await matcher.MatchAsync(new Key(null, null));
 
             //Assert
             Assert.IsFalse(result2);
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueForAnyStringKey()
+        public async Task MatchAsyncShouldReturnTrueForAnyStringKey()
         {
             //Arrange
             var matcher = new AllKeysMatcher();
 
             //Act
-            var result = matcher.Match("test");
+            var result = await matcher.MatchAsync("test");
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfNullString()
+        public async Task MatchAsyncShouldReturnFalseIfNullString()
         {
             //Arrange
             var matcher = new AllKeysMatcher();
 
             //Act
-            var result2 = matcher.Match((string)null);
+            var result2 = await matcher.MatchAsync((string)null);
 
             //Assert
             Assert.IsFalse(result2);

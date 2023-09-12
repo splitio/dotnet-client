@@ -17,7 +17,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         private readonly Mock<IFeatureFlagCache> _splitCache;
         private readonly string rootFilePath;
 
-        private ISplitManager _splitManager;
+        private readonly ISplitManager _splitManager;
 
         public SplitManagerUnitTests()
         {

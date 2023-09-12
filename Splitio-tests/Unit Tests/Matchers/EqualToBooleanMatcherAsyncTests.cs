@@ -3,22 +3,23 @@ using Splitio.Domain;
 using Splitio.Services.Parsing.Classes;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace Splitio_Tests.Unit_Tests
+namespace Splitio_Tests.Unit_Tests.Matchers
 {
     [TestClass]
-    public class EqualToBooleanMatcherTests
+    public class EqualToBooleanMatcherAsyncTests
     {
         [TestMethod]
-        public void MatchShouldReturnTrueOnMatchingKey()
+        public async Task MatchAsyncShouldReturnTrueOnMatchingKey()
         {
             //Arrange
             var matcher = new EqualToBooleanMatcher(true);
             var matcher2 = new EqualToBooleanMatcher(false);
 
             //Act
-            var result = matcher.Match(true);
-            var result2 = matcher2.Match(false);
+            var result = await matcher.MatchAsync(true);
+            var result2 = await matcher2.MatchAsync(false);
 
             //Assert
             Assert.IsTrue(result);
@@ -26,15 +27,15 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseOnNonMatchingKey()
+        public async Task MatchAsyncShouldReturnFalseOnNonMatchingKey()
         {
             //Arrange
             var matcher = new EqualToBooleanMatcher(true);
             var matcher2 = new EqualToBooleanMatcher(false);
 
             //Act
-            var result = matcher.Match(false);
-            var result2 = matcher2.Match(true);
+            var result = await matcher.MatchAsync(false);
+            var result2 = await matcher2.MatchAsync(true);
 
             //Assert
             Assert.IsFalse(result);
@@ -44,72 +45,72 @@ namespace Splitio_Tests.Unit_Tests
 
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingLong()
+        public async Task MatchAsyncShouldReturnFalseIfMatchingLong()
         {
             //Arrange
             var matcher = new EqualToBooleanMatcher(true);
 
             //Act
-            var result = matcher.Match(123);
+            var result = await matcher.MatchAsync(123);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingDate()
+        public async Task MatchAsyncShouldReturnFalseIfMatchingDate()
         {
             //Arrange
             var matcher = new EqualToBooleanMatcher(true);
 
             //Act
-            var result = matcher.Match(DateTime.UtcNow);
+            var result = await matcher.MatchAsync(DateTime.UtcNow);
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingKey()
+        public async Task MatchAsyncShouldReturnFalseIfMatchingKey()
         {
             //Arrange
             var matcher = new EqualToBooleanMatcher(true);
 
             //Act
-            var result = matcher.Match(new Key("test", "test"));
+            var result = await matcher.MatchAsync(new Key("test", "test"));
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingStringNotBoolean()
+        public async Task MatchAsyncShouldReturnFalseIfMatchingStringNotBoolean()
         {
             //Arrange
             var matcher = new EqualToBooleanMatcher(true);
 
             //Act
-            var result = matcher.Match("testring");
+            var result = await matcher.MatchAsync("testring");
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnTrueIfMatchingStringBoolean()
+        public async Task MatchAsyncShouldReturnTrueIfMatchingStringBoolean()
         {
             //Arrange
             var matcher = new EqualToBooleanMatcher(true);
 
             //Act
-            var result = matcher.Match("true");
+            var result = await matcher.MatchAsync("true");
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingSet()
+        public async Task MatchAsyncShouldReturnFalseIfMatchingSet()
         {
             //Arrange
             var matcher = new EqualToBooleanMatcher(true);
@@ -121,7 +122,7 @@ namespace Splitio_Tests.Unit_Tests
                 "test3"
             };
 
-            var result = matcher.Match(keys);
+            var result = await matcher.MatchAsync(keys);
 
             //Assert
             Assert.IsFalse(result);

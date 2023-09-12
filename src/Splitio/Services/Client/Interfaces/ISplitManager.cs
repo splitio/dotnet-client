@@ -12,7 +12,7 @@ namespace Splitio.Services.Client.Interfaces
         void BlockUntilReady(int blockMilisecondsUntilReady);
 
         Task<List<SplitView>> SplitsAsync();
-        Task<SplitView> SplitAsync(string featureName);
         Task<List<string>> SplitNamesAsync();
+        Task<SplitView> SplitAsync(string featureName);
     }
 }

@@ -1,12 +1,6 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
-using Splitio.Services.Parsing;
 using Splitio.Services.Parsing.Classes;
-using Splitio.Services.Cache.Classes;
-using System.Collections.Concurrent;
-using Splitio.Services.SegmentFetcher.Classes;
-using Splitio.Services.Client.Classes;
 using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests
@@ -18,15 +12,17 @@ namespace Splitio_Tests.Unit_Tests
         public void ParseSuccessfullyWhenNonSpecifiedAlgorithm()
         {
             //Arrange
-            Split split = new Split();
-            split.name = "test1";
-            split.seed = 2323;
-            split.status = "ACTIVE";
-            split.killed = false;
-            split.defaultTreatment = "off";
-            split.changeNumber = 232323;
-            split.trafficTypeName = "user";
-            split.conditions = new List<ConditionDefinition>();
+            Split split = new Split
+            {
+                name = "test1",
+                seed = 2323,
+                status = "ACTIVE",
+                killed = false,
+                defaultTreatment = "off",
+                changeNumber = 232323,
+                trafficTypeName = "user",
+                conditions = new List<ConditionDefinition>()
+            };
 
             var parser = new InMemorySplitParser(null, null);
 
@@ -48,16 +44,18 @@ namespace Splitio_Tests.Unit_Tests
         public void ParseSuccessfullyWhenLegacyAlgorithm()
         {
             //Arrange
-            Split split = new Split();
-            split.name = "test1";
-            split.seed = 2323;
-            split.status = "ACTIVE";
-            split.killed = false;
-            split.defaultTreatment = "off";
-            split.changeNumber = 232323;
-            split.algo = 1;
-            split.trafficTypeName = "user";
-            split.conditions = new List<ConditionDefinition>();
+            Split split = new Split
+            {
+                name = "test1",
+                seed = 2323,
+                status = "ACTIVE",
+                killed = false,
+                defaultTreatment = "off",
+                changeNumber = 232323,
+                algo = 1,
+                trafficTypeName = "user",
+                conditions = new List<ConditionDefinition>()
+            };
 
             var parser = new InMemorySplitParser(null, null);
 
@@ -79,16 +77,18 @@ namespace Splitio_Tests.Unit_Tests
         public void ParseSuccessfullyWhenMurmurAlgorithm()
         {
             //Arrange
-            Split split = new Split();
-            split.name = "test1";
-            split.seed = 2323;
-            split.status = "ACTIVE";
-            split.killed = false;
-            split.defaultTreatment = "off";
-            split.changeNumber = 232323;
-            split.algo = 2;
-            split.trafficTypeName = "user";
-            split.conditions = new List<ConditionDefinition>();
+            Split split = new Split
+            {
+                name = "test1",
+                seed = 2323,
+                status = "ACTIVE",
+                killed = false,
+                defaultTreatment = "off",
+                changeNumber = 232323,
+                algo = 2,
+                trafficTypeName = "user",
+                conditions = new List<ConditionDefinition>()
+            };
 
             var parser = new InMemorySplitParser(null, null);
 
