@@ -12,8 +12,34 @@ namespace Splitio.Integration_tests
 {
     public class HttpClientMock : IDisposable
     {
-        private readonly FluentMockServer _mockServer;
+        private readonly WireMockServer _mockServer;
         private readonly string rootFilePath;
+
+        public HttpClientMock(string url)
+        {
+            rootFilePath = string.Empty;
+
+#if NET_LATEST
+            rootFilePath = @"Resources\";
+#endif
+
+            _mockServer = WireMockServer.Start();
+
+            SplitChangesOk("split_changes.json", "-1");
+            SplitChangesOk("split_changes_1.json", "1506703262916");
+
+            SegmentChangesOk("-1", "segment1");
+            SegmentChangesOk("1470947453877", "segment1");
+
+            SegmentChangesOk("-1", "segment2");
+            SegmentChangesOk("1470947453878", "segment2");
+
+            SegmentChangesOk("-1", "segment3");
+            SegmentChangesOk("1470947453879", "segment3");
+
+            Post_Response("/api/testImpressions/bulk", 200, "ok");
+            Post_Response("/api/events/bulk", 200, "ok");
+        }
 
         public HttpClientMock()
         {
@@ -23,7 +49,7 @@ namespace Splitio.Integration_tests
             rootFilePath = @"Resources\";
 #endif
 
-            _mockServer = FluentMockServer.Start();
+            _mockServer = WireMockServer.Start();
         }
 
         #region SplitChanges
@@ -322,55 +348,53 @@ namespace Splitio.Integration_tests
             return _mockServer.Urls.FirstOrDefault();
         }
 
-        public List<LogEntry> GetLogs()
+        public List<ILogEntry> GetLogs()
         {
             return _mockServer.LogEntries.ToList();
         }
 
-        public List<LogEntry> GetImpressionLogs()
+        public List<ILogEntry> GetImpressionLogs()
         {
-            return _mockServer
-                .LogEntries
-                .Where(l => l.RequestMessage.AbsolutePath.Contains("api/testImpressions/bulk"))
-                .ToList();
+            return FindLogs("api/testImpressions/bulk");
         }
 
-        public List<LogEntry> GetImpressionCountsLogs()
+        public List<ILogEntry> GetImpressionCountsLogs()
         {
-            return _mockServer
-                .LogEntries
-                .Where(l => l.RequestMessage.AbsolutePath.Contains("api/testImpressions/count"))
-                .ToList();
+            return FindLogs("api/testImpressions/count");
         }
 
-        public List<LogEntry> GetEventsLog()
+        public List<ILogEntry> GetEventsLog()
         {
-            return _mockServer
-                .LogEntries
-                .Where(l => l.RequestMessage.AbsolutePath.Contains("api/events/bulk"))
-                .ToList();
+            return FindLogs("api/events/bulk");
         }
 
-        public List<LogEntry> GetMetricsConfigLog()
+        public List<ILogEntry> GetMetricsConfigLog()
         {
-            return _mockServer
-                .LogEntries
-                .Where(l => l.RequestMessage.AbsolutePath.Contains("metrics/config"))
-                .ToList();
+            return FindLogs("metrics/config");
         }
 
-        public List<LogEntry> GetMetricsUsageLog()
+        public List<ILogEntry> GetMetricsUsageLog()
         {
-            return _mockServer
-                .LogEntries
-                .Where(l => l.RequestMessage.AbsolutePath.Contains("metrics/usage"))
-                .ToList();
+            return FindLogs("metrics/usage");
+        }
+
+        public void ResetLogEntries()
+        {
+            _mockServer.ResetLogEntries();
         }
 
         public void Dispose()
         {
             _mockServer.Stop();
             _mockServer.Dispose();
+        }
+
+        private List<ILogEntry> FindLogs(string url)
+        {
+            return _mockServer
+                .LogEntries
+                .Where(l => l.RequestMessage.AbsolutePath.Contains(url))
+                .ToList();
         }
     }
 }

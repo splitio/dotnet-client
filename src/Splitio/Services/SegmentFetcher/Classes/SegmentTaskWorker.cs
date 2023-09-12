@@ -1,31 +1,62 @@
 ﻿using Splitio.Domain;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
-using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
-    public class SegmentTaskWorker
+    public class SegmentTaskWorker : IPeriodicTask
     {
-        private static readonly ISplitLogger Log = WrapperAdapter.Instance().GetLogger(typeof(SegmentTaskWorker));
-
-        private readonly int _numberOfParallelTasks;
-        private readonly ISegmentTaskQueue _segmentTaskQueue;
-        private int _counter;
-
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SegmentTaskWorker));
+        
         //Worker is always one task, so when it is signaled, after the
         //task stops its wait, this variable is auto-reseted
-        private AutoResetEvent waitForExecution = new AutoResetEvent(false);
+        private readonly AutoResetEvent _waitForExecution = new AutoResetEvent(false);
+        private readonly int _numberOfParallelTasks;
+        private readonly BlockingCollection<SelfRefreshingSegment> _segmentTaskQueue;
+        private readonly IStatusManager _statusManager;
+        private readonly ISplitTask _task;
+        private readonly ITasksManager _tasksManager;
+
+        private int _counter;
+        private CancellationTokenSource _cts;
 
         public SegmentTaskWorker(int numberOfParallelTasks,
-            ISegmentTaskQueue segmentTaskQueue)
+            BlockingCollection<SelfRefreshingSegment> segmentTaskQueue,
+            IStatusManager statusManager,
+            ISplitTask task,
+            ITasksManager tasksManager)
         {
             _numberOfParallelTasks = numberOfParallelTasks;            
             _segmentTaskQueue = segmentTaskQueue;
             _counter = 0;
+            _statusManager = statusManager;
+            _tasksManager = tasksManager;
+            _task = task;
+            _task.SetAction(ExecuteTasks);
+        }
+
+        public void Start()
+        {
+            if (_task.IsRunning() || _statusManager.IsDestroyed()) return;
+
+            _cts = new CancellationTokenSource();
+            _task.Start();
+        }
+
+        public async Task StopAsync()
+        {
+            if (!_task.IsRunning()) return;
+
+            _cts.Cancel();
+            _cts.Dispose();
+            await _task.StopAsync();
         }
 
         private void IncrementCounter()
@@ -36,43 +67,48 @@ namespace Splitio.Services.SegmentFetcher.Classes
         private void DecrementCounter()
         {
             Interlocked.Decrement(ref _counter);
-            waitForExecution.Set();
+            _waitForExecution.Set();
         }
 
-        public void ExecuteTasks(CancellationToken token)
+        private void ExecuteTasks()
         {
-            while (!token.IsCancellationRequested)
+            try
             {
-                if (_counter < _numberOfParallelTasks)
+                if (_counter >= _numberOfParallelTasks)
                 {
-                    try
-                    {
-                        //Wait indefinitely until a segment is queued
-                        if (_segmentTaskQueue.GetQueue().TryTake(out SelfRefreshingSegment segment, -1, token))
-                        {
-                            if (Log.IsDebugEnabled)
-                            {
-                                Log.Debug(string.Format("Segment dequeued: {0}", segment.Name));
-                            }
+                    _waitForExecution.WaitOne();
+                }
 
-                            if (!token.IsCancellationRequested)
-                            {
-                                IncrementCounter();
-                                Task task = new Task(async () => await segment.FetchSegment(new FetchOptions()), token);
-                                task.ContinueWith((x) => { DecrementCounter(); }, token);
-                                task.Start();
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Debug(ex.Message);
-                    }
-                }
-                else
+                //Wait indefinitely until a segment is queued
+                if (_segmentTaskQueue.TryTake(out SelfRefreshingSegment segment, -1, _cts.Token))
                 {
-                    waitForExecution.WaitOne();
+                    if (_log.IsDebugEnabled)
+                    {
+                        _log.Debug($"Segment dequeued: {segment.Name}");
+                    }
+
+                    if (_cts.IsCancellationRequested) return;
+
+                    IncrementCounter();
+                    _tasksManager.NewOnTimeTaskAndStart(Enums.Task.SegmentsFetcher, async () =>
+                    {
+                        try
+                        {
+                            await segment.FetchSegmentAsync(new FetchOptions());
+                            DecrementCounter();
+                        }
+                        catch (Exception ex)
+                        {
+                            _log.Debug("SegmentTaskWorker Fetch Exception.", ex);
+                        }
+                    });
                 }
+            }
+            catch (Exception ex)
+            {
+                if (ex is ObjectDisposedException || ex is OperationCanceledException) return;
+
+                _log.Debug($"SegmentTaskWorker Exception", ex);
             }
         }
     }

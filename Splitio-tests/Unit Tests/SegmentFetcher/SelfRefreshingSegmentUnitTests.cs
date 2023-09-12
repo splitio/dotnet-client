@@ -1,12 +1,12 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using Splitio.Domain;
+using Splitio.Services.Cache.Classes;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
-using Moq;
-using Splitio.Services.Client.Classes;
-using Splitio.Services.Cache.Classes;
+using System;
 using System.Collections.Concurrent;
-using Splitio.Domain;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.SegmentFetcher
@@ -15,33 +15,41 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
     public class SelfRefreshingSegmentUnitTests
     {
         [TestMethod]
-        public void FetchSegmentNullChangesFetcherResponseShouldNotUpdateCache()
+        public async Task FetchSegmentNullChangesFetcherResponseShouldNotUpdateCache()
         {
             //Arrange
             var apiClient = new Mock<ISegmentSdkApiClient>();
-            apiClient
-            .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
-            .Throws(new Exception());
+            var statusManager = new Mock<IStatusManager>();
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments  = new ConcurrentDictionary<string, Segment>();
             var cache = new InMemorySegmentCache(segments);
-            var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, cache);
-            
+            var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, cache, statusManager.Object);
+
+            apiClient
+                .Setup(x => x.FetchSegmentChangesAsync(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
+                .Throws(new Exception());
+
             //Act
-            segmentFetcher.FetchSegment(new FetchOptions());
+            await segmentFetcher.FetchSegmentAsync(new FetchOptions());
 
             //Assert
             Assert.AreEqual(0, segments.Count);
         }
 
         [TestMethod]
-        public void FetchSegmentShouldUpdateSegmentsCache()
+        public async Task FetchSegmentShouldUpdateSegmentsCache()
         {
             //Arrange
             var apiClient = new Mock<ISegmentSdkApiClient>();
+            var statusManager = new Mock<IStatusManager>();
+            var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
+            var segments = new ConcurrentDictionary<string, Segment>();
+            var cache = new InMemorySegmentCache(segments);
+            var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, cache, statusManager.Object);
+
             apiClient
-            .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
-            .Returns(Task.FromResult(@"{
+                .Setup(x => x.FetchSegmentChangesAsync(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
+                .ReturnsAsync(@"{
                           'name': 'payed',
                           'added': [
                             'abcdz',
@@ -51,14 +59,10 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
                           'removed': [],
                           'since': -1,
                           'till': 10001
-                        }"));
-            var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
-            var segments = new ConcurrentDictionary<string, Segment>();
-            var cache = new InMemorySegmentCache(segments);
-            var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, cache);
+                        }");
 
             //Act
-            segmentFetcher.FetchSegment(new FetchOptions());
+            await segmentFetcher.FetchSegmentAsync(new FetchOptions());
 
             //Assert
             Assert.AreEqual(1, segments.Count);

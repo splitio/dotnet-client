@@ -1,8 +1,10 @@
-﻿namespace Splitio.Services.EventSource.Workers
+﻿using System.Threading.Tasks;
+
+namespace Splitio.Services.EventSource.Workers
 {
     public interface IWorker
     {
         void Start();
-        void Stop();
+        Task StopAsync();
     }
 }

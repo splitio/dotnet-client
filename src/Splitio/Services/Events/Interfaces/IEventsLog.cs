@@ -1,11 +1,10 @@
 ﻿using Splitio.Domain;
+using Splitio.Services.Shared.Interfaces;
 
 namespace Splitio.Services.Events.Interfaces
 {
-    public interface IEventsLog
+    public interface IEventsLog : IPeriodicTask
     {
-        void Start();
-        void Stop();
         void Log(WrappedEvent wrappedEvent);
     }
 }

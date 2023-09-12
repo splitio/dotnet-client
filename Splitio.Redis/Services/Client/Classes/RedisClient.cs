@@ -13,6 +13,8 @@ using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Client.Classes
 {
@@ -51,10 +53,21 @@ namespace Splitio.Redis.Services.Client.Classes
         {
             if (_statusManager.IsDestroyed()) return;
 
-            _uniqueKeysTracker.Stop();
-            _impressionsCounter.Stop();
-            _connectionPoolManager.Dispose();
             base.Destroy();
+
+            _log.Info("Initialitation sdk destroy.");
+
+            var task = new List<Task>
+            {
+                _uniqueKeysTracker.StopAsync(),
+                _impressionsCounter.StopAsync()
+            };
+
+            Task.WaitAll(task.ToArray(), Constants.Gral.DestroyTimeount);
+
+            _connectionPoolManager.Dispose();
+
+            _log.Info("Stopped Redis submitter tasks");
         }
 
         #region Private Methods
@@ -130,7 +143,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private void BuildEventLog()
         {
             var eventsCache = new RedisEventsCache(_redisAdapter, _config.SdkMachineName, _config.SdkMachineIP, _config.SdkVersion, _config.RedisUserPrefix);
-            _eventsLog = new RedisEvenstLog(eventsCache);
+            _eventsLog = new RedisEvenstLog(eventsCache, _tasksManager);
         }
         
         private void BuildManager()

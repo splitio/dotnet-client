@@ -2,7 +2,7 @@
 using Moq;
 using Splitio.Services.EventSource;
 using Splitio.Services.EventSource.Workers;
-using Splitio.Services.Logger;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.EventSource
 {
@@ -35,7 +35,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             var channels = "channel-test";
 
             _eventSourceClient
-                .Setup(mock => mock.ConnectAsync(It.IsAny<string>()))
+                .Setup(mock => mock.Connect(It.IsAny<string>()))
                 .Returns(true);
 
             // Act.
@@ -43,27 +43,27 @@ namespace Splitio_Tests.Unit_Tests.EventSource
 
             // Assert.
             Assert.IsTrue(result);
-            _eventSourceClient.Verify(mock => mock.ConnectAsync(It.IsAny<string>()), Times.Once);
+            _eventSourceClient.Verify(mock => mock.Connect(It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
-        public void Stop_ShouldDisconnect()
+        public async Task Stop_ShouldDisconnect()
         {
             // Arrange.
             var token = "fake-test";
             var channels = "channel-test";
 
             _eventSourceClient
-                .Setup(mock => mock.ConnectAsync(It.IsAny<string>()))
+                .Setup(mock => mock.Connect(It.IsAny<string>()))
                 .Returns(true);
 
             // Act.
             var result = _sseHandler.Start(token, channels);
-            _sseHandler.Stop();
+            await _sseHandler.StopAsync();
 
             // Assert.
             Assert.IsTrue(result);
-            _eventSourceClient.Verify(mock => mock.Disconnect(It.IsAny<SSEClientActions>()), Times.Once);
+            _eventSourceClient.Verify(mock => mock.DisconnectAsync(), Times.Once);
         }
     }
 }

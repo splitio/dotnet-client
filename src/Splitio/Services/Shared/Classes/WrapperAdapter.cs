@@ -8,7 +8,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Shared.Classes
@@ -18,10 +17,9 @@ namespace Splitio.Services.Shared.Classes
         private static readonly object _instanceLock = new object();
 
         private static IWrapperAdapter _instance;
-        private static ISplitLogger _log;
-        private static ISplitLogger _customLogger;
+        private ISplitLogger _customLogger;
 
-        public static IWrapperAdapter Instance(ISplitLogger customLogger = null)
+        public static IWrapperAdapter Instance()
         {
             if (_instance == null)
             {
@@ -29,18 +27,12 @@ namespace Splitio.Services.Shared.Classes
                 {
                     if (_instance == null)
                     {
-                        _instance = new WrapperAdapter(customLogger);
+                        _instance = new WrapperAdapter();
                     }
                 }
             }
 
             return _instance;
-        }
-
-        private WrapperAdapter(ISplitLogger customLogger)
-        {
-            _customLogger = customLogger;
-            _log = GetLogger(typeof(IWrapperAdapter));
         }
 
         public ReadConfigData ReadConfig(ConfigurationOptions config, ISplitLogger log)
@@ -59,33 +51,23 @@ namespace Splitio.Services.Shared.Classes
             return data;
         }
 
-        public Task TaskDelay(int millisecondsDelay, CancellationToken cancellationToken)
-        {
-            return Task.Delay(millisecondsDelay, cancellationToken);
-        }
-
-        public Task TaskDelay(int millisecondsDelay)
-        {
-            return Task.Delay(millisecondsDelay);
-        }
-
-        public Task<Task> WhenAny(params Task[] tasks)
+        public Task<Task> WhenAnyAsync(params Task[] tasks)
         {
             return Task.WhenAny(tasks);
         }
 
-        public async Task<T> TaskFromResult<T>(T result)
-        {
-            return await Task.FromResult(result);
-        }
-
-        private string SplitSdkVersion()
+        private static string SplitSdkVersion()
         {
 #if NET_LATEST
             return typeof(Split).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 #else
             return FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
 #endif
+        }
+
+        public void SetCustomerLogger(ISplitLogger splitLogger)
+        {
+            _customLogger = splitLogger;
         }
 
         public ISplitLogger GetLogger(Type type)
@@ -139,7 +121,7 @@ namespace Splitio.Services.Shared.Classes
             return string.Empty;
         }
 
-        private string GetSdkMachineIP(ConfigurationOptions config, bool ipAddressesEnabled, ISplitLogger log)
+        private static string GetSdkMachineIP(ConfigurationOptions config, bool ipAddressesEnabled, ISplitLogger log)
         {
             if (ipAddressesEnabled)
             {
@@ -147,7 +129,6 @@ namespace Splitio.Services.Shared.Classes
                 {
 #if NET_LATEST
                     var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
-                    hostAddressesTask.Wait();
                     return config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
 #else
                     return config.SdkMachineIP ?? Dns.GetHostAddresses(Environment.MachineName).Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();

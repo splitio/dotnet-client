@@ -14,20 +14,18 @@ using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace Splitio.Services.Client.Classes
 {
     public abstract class SplitClient : ISplitClient
     {
-        protected const string Control = "control";
-        
         protected readonly ISplitLogger _log;
         protected readonly IKeyValidator _keyValidator;
         protected readonly ISplitNameValidator _splitNameValidator;
@@ -71,8 +69,8 @@ namespace Splitio.Services.Client.Classes
             _eventPropertiesValidator = new EventPropertiesValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
             _configService = new ConfigService(_wrapperAdapter);
-            _tasksManager = new TasksManager(_wrapperAdapter);
             _statusManager = new InMemoryReadinessGatesCache();
+            _tasksManager = new TasksManager(_statusManager);
         }
 
         #region Public Methods
@@ -165,14 +163,11 @@ namespace Splitio.Services.Client.Classes
                         properties = (Dictionary<string, object>)eventPropertiesResult.Value
                     };
 
-                    _tasksManager.Start(() =>
+                    _eventsLog.Log(new WrappedEvent
                     {
-                        _eventsLog.Log(new WrappedEvent
-                        {
-                            Event = eventToLog,
-                            Size = eventPropertiesResult.EventSize
-                        });
-                    }, new CancellationTokenSource(), "Track");
+                        Event = eventToLog,
+                        Size = eventPropertiesResult.EventSize
+                    });
 
                     RecordLatency(nameof(Track), clock.ElapsedMilliseconds);
 
@@ -230,9 +225,13 @@ namespace Splitio.Services.Client.Classes
             var bloomFilter = new BloomFilter(config.BfExpectedElements, config.BfErrorRate);
             var filterAdapter = new FilterAdapter(bloomFilter);
             var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
-            var trackerConfig = new ComponentConfig(config.UniqueKeysRefreshRate, config.UniqueKeysCacheMaxSize, config.UniqueKeysBulkSize);
+            var trackerConfig = new ComponentConfig(config.UniqueKeysCacheMaxSize, config.UniqueKeysBulkSize);
 
-            _uniqueKeysTracker = new UniqueKeysTracker(trackerConfig, filterAdapter, trackerCache, _impressionsSenderAdapter, _tasksManager);
+            var mtksTask = _tasksManager.NewPeriodicTask(Enums.Task.MTKsSender, config.UniqueKeysRefreshRate * 1000);
+            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Enums.Task.CacheLongTermCleaning, Constants.Gral.IntervalToClearLongTermCache);
+            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Enums.Task.MtkSendBulkData);
+
+            _uniqueKeysTracker = new UniqueKeysTracker(trackerConfig, filterAdapter, trackerCache, _impressionsSenderAdapter, mtksTask, cacheLongTermCleaningTask, sendBulkDataTask);
         }
 
         protected void BuildImpressionsCounter(BaseConfig config)
@@ -243,22 +242,24 @@ namespace Splitio.Services.Client.Classes
                 return;
             }
 
-            var trackerConfig = new ComponentConfig(config.ImpressionsCounterRefreshRate, config.ImpressionsCounterCacheMaxSize, config.ImpressionsCountBulkSize);
+            var trackerConfig = new ComponentConfig(config.ImpressionsCounterCacheMaxSize, config.ImpressionsCountBulkSize);
+            var task = _tasksManager.NewPeriodicTask(Enums.Task.ImpressionsCountSender, config.ImpressionsCounterRefreshRate * 1000);
+            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Enums.Task.ImpressionCounterSendBulkData);
 
-            _impressionsCounter = new ImpressionsCounter(trackerConfig, _impressionsSenderAdapter, _tasksManager);
+            _impressionsCounter = new ImpressionsCounter(trackerConfig, _impressionsSenderAdapter, task, sendBulkDataTask);
         }
         #endregion
 
         #region Private Methods
         private TreatmentResult GetTreatmentResult(Key key, string feature, string method, Dictionary<string, object> attributes = null)
         {
-            if (!IsClientReady(method)) return new TreatmentResult(string.Empty, Control, null);
+            if (!IsClientReady(method)) return new TreatmentResult(string.Empty, Constants.Gral.Control, null);
 
-            if (!_keyValidator.IsValid(key, method)) return new TreatmentResult(string.Empty, Control, null);
+            if (!_keyValidator.IsValid(key, method)) return new TreatmentResult(string.Empty, Constants.Gral.Control, null);
 
             var splitNameResult = _splitNameValidator.SplitNameIsValid(feature, method);
 
-            if (!splitNameResult.Success) return new TreatmentResult(string.Empty, Control, null);
+            if (!splitNameResult.Success) return new TreatmentResult(string.Empty, Constants.Gral.Control, null);
 
             feature = splitNameResult.Value;
 
@@ -287,7 +288,7 @@ namespace Splitio.Services.Client.Classes
             {
                 foreach (var feature in features)
                 {
-                    treatmentsForFeatures.Add(feature, new TreatmentResult(string.Empty, Control, null));
+                    treatmentsForFeatures.Add(feature, new TreatmentResult(string.Empty, Constants.Gral.Control, null));
                 }
 
                 return treatmentsForFeatures;
@@ -324,7 +325,7 @@ namespace Splitio.Services.Client.Classes
             {
                 foreach (var feature in features)
                 {
-                    treatmentsForFeatures.Add(feature, new TreatmentResult(string.Empty, Control, null));
+                    treatmentsForFeatures.Add(feature, new TreatmentResult(string.Empty, Constants.Gral.Control, null));
                 }                    
             }
 

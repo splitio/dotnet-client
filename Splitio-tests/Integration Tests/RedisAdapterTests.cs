@@ -11,7 +11,7 @@ namespace Splitio_Tests.Integration_Tests
     [TestClass]
     public class RedisAdapterTests
     {
-        IRedisAdapter adapter;
+        IRedisAdapter _adapter;
 
         [TestInitialize]
         public void Initialization()
@@ -29,18 +29,18 @@ namespace Splitio_Tests.Integration_Tests
             };
 
             var pool = new ConnectionPoolManager(config);
-            adapter = new RedisAdapter(config, pool);
-            adapter.Flush();
+            _adapter = new RedisAdapter(config, pool);
+            _adapter.Flush();
         }
 
         [TestMethod]
         public void ExecuteSetAndGetSuccessful()
         {
             //Arrange
-            var isSet = adapter.Set("test_key", "test_value");
+            var isSet = _adapter.Set("test_key", "test_value");
 
             //Act
-            var result = adapter.Get("test_key");
+            var result = _adapter.Get("test_key");
 
             //Assert
             Assert.IsTrue(isSet);
@@ -83,12 +83,12 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteMultipleSetAndMultipleGetSuccessful()
         {
             //Arrange
-            var isSet1 = adapter.Set("test_key", "test_value");
-            var isSet2 = adapter.Set("test_key2", "test_value2");
-            var isSet3 = adapter.Set("test_key3", "test_value3");
+            var isSet1 = _adapter.Set("test_key", "test_value");
+            var isSet2 = _adapter.Set("test_key2", "test_value2");
+            var isSet3 = _adapter.Set("test_key3", "test_value3");
 
             //Act
-            var result = adapter.MGet(new RedisKey[]{"test_key", "test_key2", "test_key3"});
+            var result = _adapter.MGet(new RedisKey[]{"test_key", "test_key2", "test_key3"});
 
             //Assert
             Assert.IsNotNull(result);
@@ -119,12 +119,12 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteMultipleSetAndGetAllKeysWithFilterSuccessful()
         {
             //Arrange
-            var isSet1 = adapter.Set("test.test_key", "test_value");
-            var isSet2 = adapter.Set("test.test_key2", "test_value2");
-            var isSet3 = adapter.Set("test.test_key3", "test_value3");
+            var isSet1 = _adapter.Set("test.test_key", "test_value");
+            var isSet2 = _adapter.Set("test.test_key2", "test_value2");
+            var isSet3 = _adapter.Set("test.test_key3", "test_value3");
 
             //Act
-            var result = adapter.Keys("test.*");
+            var result = _adapter.Keys("test.*");
 
             //Assert
             Assert.IsNotNull(result);
@@ -156,11 +156,11 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteSetAndDelSuccessful()
         {
             //Arrange
-            var isSet1 = adapter.Set("testdel.test_key", "test_value");
+            var isSet1 = _adapter.Set("testdel.test_key", "test_value");
 
             //Act
-            var isDel = adapter.Del("testdel.test_key");
-            var result = adapter.Get("testdel.test_key");
+            var isDel = _adapter.Del("testdel.test_key");
+            var result = _adapter.Get("testdel.test_key");
 
             //Assert
             Assert.IsTrue(isSet1);
@@ -188,11 +188,11 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteSetAndFlushSuccessful()
         {
             //Arrange
-            var isSet1 = adapter.Set("testflush.test_key", "test_value");
+            var isSet1 = _adapter.Set("testflush.test_key", "test_value");
 
             //Act
-            adapter.Flush();
-            var result = adapter.Keys("test.*");
+            _adapter.Flush();
+            var result = _adapter.Keys("test.*");
 
             //Assert
             Assert.IsTrue(isSet1);
@@ -203,10 +203,10 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteSAddAndSMemberSuccessful()
         {
             //Arrange
-            var setCount = adapter.SAdd("test_key_set", "test_value_1");
+            var setCount = _adapter.SAdd("test_key_set", "test_value_1");
 
             //Act
-            var result = adapter.SMembers("test_key_set");
+            var result = _adapter.SMembers("test_key_set");
 
             //Assert
             Assert.AreEqual(true, setCount);
@@ -250,10 +250,10 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteSAddAndSMembersSuccessful()
         {
             //Arrange
-            var setCount = adapter.SAdd("test_key_set_multiple", new RedisValue[]{ "test_value", "test_value2"});
+            var setCount = _adapter.SAdd("test_key_set_multiple", new RedisValue[]{ "test_value", "test_value2"});
 
             //Act
-            var result = adapter.SMembers("test_key_set_multiple");
+            var result = _adapter.SMembers("test_key_set_multiple");
 
             //Assert
             Assert.AreEqual(2, setCount);
@@ -282,13 +282,13 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteSAddAndSRemSuccessful()
         {
             //Arrange
-            var setCount = adapter.SAdd("test_key_set", new RedisValue[] { "test_value", "test_value2" });
+            var setCount = _adapter.SAdd("test_key_set", new RedisValue[] { "test_value", "test_value2" });
 
             //Act
-            var remCount = adapter.SRem("test_key_set", new RedisValue[] { "test_value2" });
-            var result = adapter.SIsMember("test_key_set", "test_value");
-            var result2 = adapter.SIsMember("test_key_set", "test_value2");
-            var result3 = adapter.SIsMember("test_key_set", "test_value3");
+            var remCount = _adapter.SRem("test_key_set", new RedisValue[] { "test_value2" });
+            var result = _adapter.SIsMember("test_key_set", "test_value");
+            var result2 = _adapter.SIsMember("test_key_set", "test_value2");
+            var result3 = _adapter.SIsMember("test_key_set", "test_value3");
             
             //Assert
             Assert.IsTrue(result);
@@ -316,10 +316,10 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteIncrBySuccessful()
         {
             //Arrange
-            adapter.IcrBy("test_count", 1);
+            _adapter.IcrBy("test_count", 1);
 
             //Act
-            var result = adapter.IcrBy("test_count", 2);
+            var result = _adapter.IcrBy("test_count", 2);
 
             //Assert
             Assert.AreEqual(3, result);
@@ -345,16 +345,16 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteHashIncrementShouldReturnValue()
         {
             //Act & Assert
-            var result = adapter.HashIncrement("test_count", "hashField", 2);
+            var result = _adapter.HashIncrement("test_count", "hashField", 2);
             Assert.AreEqual(2, result);
 
-            result = adapter.HashIncrement("test_count", "hashField", 2);
+            result = _adapter.HashIncrement("test_count", "hashField", 2);
             Assert.AreEqual(4, result);
 
-            result = adapter.HashIncrement("test_count", "hashField", 3);
+            result = _adapter.HashIncrement("test_count", "hashField", 3);
             Assert.AreEqual(7, result);
 
-            result = adapter.HashIncrement("test", "hashField", 1);
+            result = _adapter.HashIncrement("test", "hashField", 1);
             Assert.AreEqual(1, result);
         }
     }

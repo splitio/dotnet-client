@@ -1,13 +1,10 @@
 ﻿namespace Splitio.Services.EventSource
 {
-    public enum SSEClientActions
+    public enum StreamingStatus
     {
-        CONNECTED,
-        DISCONNECT,
-        RETRYABLE_ERROR,
-        NONRETRYABLE_ERROR,
-        SUBSYSTEM_DOWN,
-        SUBSYSTEM_READY,
-        SUBSYSTEM_OFF
+        STREAMING_READY,
+        STREAMING_BACKOFF,
+        STREAMING_DOWN,
+        STREAMING_OFF
     }
 }

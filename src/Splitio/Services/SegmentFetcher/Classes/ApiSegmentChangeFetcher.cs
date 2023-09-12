@@ -15,9 +15,9 @@ namespace Splitio.Services.SegmentFetcher.Classes
             _apiClient = apiClient;
         }
 
-        protected override async Task<SegmentChange> FetchFromBackend(string name, long since, FetchOptions fetchOptions)
+        protected override async Task<SegmentChange> FetchFromBackendAsync(string name, long since, FetchOptions fetchOptions)
         {
-            var fetchResult = await _apiClient.FetchSegmentChanges(name, since, fetchOptions);
+            var fetchResult = await _apiClient.FetchSegmentChangesAsync(name, since, fetchOptions);
 
             return JsonConvert.DeserializeObject<SegmentChange>(fetchResult);
         }

@@ -1,143 +1,106 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class SelfRefreshingSegmentFetcher : SegmentFetcher, ISelfRefreshingSegmentFetcher
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingSegmentFetcher));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingSegmentFetcher));
 
         private readonly ISegmentChangeFetcher _segmentChangeFetcher;
-        private readonly IStatusManager _statusManager;
-        private readonly IWrapperAdapter _wrappedAdapter;
-        private readonly ISegmentTaskQueue _segmentTaskQueue;
-        private readonly ITasksManager _tasksManager;
+        private readonly BlockingCollection<SelfRefreshingSegment> _segmentTaskQueue;
+        private readonly ISplitTask _addSegmentToQueueTask;
         private readonly ConcurrentDictionary<string, SelfRefreshingSegment> _segments;
-        private readonly SegmentTaskWorker _worker;
-        private readonly int _interval;
-        private readonly object _lock = new object();
+        private readonly IPeriodicTask _segmentTaskWorker;
+        private readonly IStatusManager _statusManager;
 
-        private CancellationTokenSource _cancelTokenSource;
-        private bool _running;
-
-        public SelfRefreshingSegmentFetcher(ISegmentChangeFetcher segmentChangeFetcher, 
-            IStatusManager statusManager, 
-            int interval, 
-            ISegmentCache segmentsCache, 
-            int numberOfParallelSegments,
-            ISegmentTaskQueue segmentTaskQueue,
-            ITasksManager tasksManager,
-            IWrapperAdapter wrapperAdapter) : base(segmentsCache)
+        public SelfRefreshingSegmentFetcher(ISegmentChangeFetcher segmentChangeFetcher,
+            ISegmentCache segmentsCache,
+            BlockingCollection<SelfRefreshingSegment> segmentTaskQueue,
+            ISplitTask addSegmentToQueueTask,
+            IPeriodicTask segmentTaskWorker,
+            IStatusManager statusManager) : base(segmentsCache)
         {
             _segmentChangeFetcher = segmentChangeFetcher;
             _segments = new ConcurrentDictionary<string, SelfRefreshingSegment>();
-            _worker = new SegmentTaskWorker(numberOfParallelSegments, segmentTaskQueue);
-            _interval = interval;
-            _statusManager = statusManager;
-            _wrappedAdapter = wrapperAdapter;
             _segmentTaskQueue = segmentTaskQueue;
-            _tasksManager = tasksManager;
+            _segmentTaskWorker = segmentTaskWorker;
+            _statusManager = statusManager;
+            _addSegmentToQueueTask = addSegmentToQueueTask;
+            _addSegmentToQueueTask.SetAction(AddSegmentsToQueue);
         }
 
         #region Public Methods
         public void Start()
         {
-            lock (_lock)
-            {
-                if (_running || _statusManager.IsDestroyed()) return;
-
-                _running = true;
-                _cancelTokenSource = new CancellationTokenSource();
-
-                _tasksManager.Start(() =>
-                {
-                    //Delay first execution until expected time has passed
-                    var intervalInMilliseconds = _interval * 1000;
-                    _wrappedAdapter.TaskDelay(intervalInMilliseconds).Wait();
-
-                    if (_running)
-                    {
-                        _tasksManager.Start(() => _worker.ExecuteTasks(_cancelTokenSource.Token), _cancelTokenSource, "Segments Fetcher Worker.");
-                        _tasksManager.StartPeriodic(() => AddSegmentsToQueue(), intervalInMilliseconds, _cancelTokenSource, "Segmennnnts Fetcher Add to Queue.");
-                    }
-                }, _cancelTokenSource, "Main Segments Fetcher.");
-            }
+            _segmentTaskWorker.Start();
+            _addSegmentToQueueTask.Start();
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
-            lock (_lock)
-            {
-                if (!_running) return;
-
-                _running = false;
-                _cancelTokenSource.Cancel();
-                _cancelTokenSource.Dispose();
-            }
+            await _segmentTaskWorker.StopAsync();
+            await _addSegmentToQueueTask.StopAsync();
         }
 
         public void Clear()
         {
-            _segmentTaskQueue.Dispose();
             _segments.Clear();
             _segmentCache.Clear();
+            _segmentTaskQueue.Dispose();
+            _log.Debug("Segments cache disposed ...");
         }
 
         public override void InitializeSegment(string name)
         {
-            _segments.TryGetValue(name, out SelfRefreshingSegment segment);
+            if (_statusManager.IsDestroyed() || _segments.TryGetValue(name, out _)) return;
 
-            if (segment == null)
+            var segment = new SelfRefreshingSegment(name, _segmentChangeFetcher, _segmentCache, _statusManager);
+
+            if (!_segments.TryAdd(name, segment)) return;
+            
+            _segmentTaskQueue.Add(segment);
+
+            if (_log.IsDebugEnabled)
             {
-                segment = new SelfRefreshingSegment(name, _segmentChangeFetcher, _segmentCache);
-
-                if (_segments.TryAdd(name, segment))
-                {
-                    _segmentTaskQueue.Add(segment);
-
-                    if (_log.IsDebugEnabled)
-                    {
-                        _log.Debug($"Segment queued: {segment.Name}");
-                    }
-                }                
+                _log.Debug($"Segment queued: {segment.Name}");
             }
         }
 
-        public bool FetchAll()
+        public async Task<bool> FetchAllAsync()
         {
-            if (_segments.Count == 0) return true;
+            if (_segments.IsEmpty) return true;
 
             var fetchOptions = new FetchOptions();
             var tasks = new List<Task<bool>>();
 
             foreach (var segment in _segments.Values)
             {
-                tasks.Add(segment.FetchSegment(fetchOptions));
+                tasks.Add(segment.FetchSegmentAsync(fetchOptions));
             }
 
-            Task.WaitAll(tasks.ToArray());
+            var result = await Task.WhenAll(tasks.ToArray());
 
-            return tasks.All(t => t.Result == true);
+            return !result.Contains(false);
         }
 
-        public async Task Fetch(string segmentName, FetchOptions fetchOptions)
+        public async Task FetchAsync(string segmentName, FetchOptions fetchOptions)
         {
             try
             {
                 InitializeSegment(segmentName);
                 _segments.TryGetValue(segmentName, out SelfRefreshingSegment fetcher);
-                await fetcher.FetchSegment(fetchOptions);
+                await fetcher.FetchSegmentAsync(fetchOptions);
             }
             catch (Exception ex)
             {
@@ -146,7 +109,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
         }
 
 
-        public async Task FetchSegmentsIfNotExists(IList<string> names)
+        public async Task FetchSegmentsIfNotExistsAsync(IList<string> names)
         {
             if (names.Count == 0) return;
 
@@ -156,7 +119,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             {
                 var changeNumber = _segmentCache.GetChangeNumber(name);
 
-                if (changeNumber == -1) await Fetch(name, new FetchOptions());
+                if (changeNumber == -1) await FetchAsync(name, new FetchOptions());
             }
         }
         #endregion
@@ -166,7 +129,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
         {
             foreach (var segment in _segments.Values)
             {
-                _segmentTaskQueue.Add(segment);
+                _segmentTaskQueue.TryAdd(segment);
 
                 if (_log.IsDebugEnabled)
                 {

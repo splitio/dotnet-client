@@ -29,7 +29,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             _baseUrl = baseUrl;
         }
 
-        public async Task<string> FetchSegmentChanges(string name, long since, FetchOptions fetchOptions)
+        public async Task<string> FetchSegmentChangesAsync(string name, long since, FetchOptions fetchOptions)
         {
             using (var clock = new Util.SplitStopwatch())
             {
@@ -40,7 +40,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
                     var requestUri = GetRequestUri(name, since, fetchOptions.Till);
                     var response = await _httpClient.GetAsync(requestUri, fetchOptions.CacheControlHeaders);
 
-                    Util.Helper.RecordTelemetrySync(nameof(FetchSegmentChanges), response, ResourceEnum.SegmentSync, clock, _telemetryRuntimeProducer, _log);
+                    Util.Helper.RecordTelemetrySync(nameof(FetchSegmentChangesAsync), response, ResourceEnum.SegmentSync, clock, _telemetryRuntimeProducer, _log);
 
                     if (response.IsSuccessStatusCode)
                     {
