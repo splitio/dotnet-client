@@ -1,10 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -13,9 +14,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     [TestClass]
     public class ImpressionsLogUnitTests
     {
-        private readonly IWrapperAdapter wrapperAdapter = WrapperAdapter.Instance();
-
         private Mock<IImpressionsSdkApiClient> _apiClientMock;
+        private Mock<IStatusManager> _statusManager;
         private BlockingQueue<KeyImpression> _queue;
         private InMemorySimpleCache<KeyImpression> _impressionsCache;
         private ImpressionsLog _impressionsLog;
@@ -24,10 +24,14 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void Initialize()
         {
             _apiClientMock = new Mock<IImpressionsSdkApiClient>();
+            _statusManager = new Mock<IStatusManager>();
             _queue = new BlockingQueue<KeyImpression>(10);
             _impressionsCache = new InMemorySimpleCache<KeyImpression>(_queue);
 
-            _impressionsLog = new ImpressionsLog(_apiClientMock.Object, 1, _impressionsCache, new TasksManager(wrapperAdapter), 10);
+            var tasksManager = new TasksManager(_statusManager.Object);
+            var task = tasksManager.NewPeriodicTask(Splitio.Enums.Task.ImpressionsSender, 1);
+
+            _impressionsLog = new ImpressionsLog(_apiClientMock.Object, _impressionsCache, task, 10);
         }
 
         [TestMethod]
@@ -95,7 +99,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             //Assert
             Thread.Sleep(2000);
-            _apiClientMock.Verify(x => x.SendBulkImpressions(It.Is<List<KeyImpression>>(list => list.Count == 1)));
+            _apiClientMock.Verify(x => x.SendBulkImpressionsAsync(It.Is<List<KeyImpression>>(list => list.Count == 1)));
         }
     }
 }

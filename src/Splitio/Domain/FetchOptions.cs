@@ -1,4 +1,6 @@
-﻿namespace Splitio.Domain
+﻿using System.Threading;
+
+namespace Splitio.Domain
 {
     public class FetchOptions
     {

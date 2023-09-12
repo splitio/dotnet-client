@@ -1,10 +1,11 @@
 ﻿using Splitio.Domain;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Events.Interfaces
 {
     public interface IEventSdkApiClient
     {
-        void SendBulkEventsTask(List<Event> events);
+        Task SendBulkEventsAsync(List<Event> events);
     }
 }

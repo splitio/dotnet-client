@@ -2,9 +2,13 @@
 using Moq;
 using Splitio.Domain;
 using Splitio.Redis.Services.Events.Classes;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Events
 {
@@ -16,9 +20,10 @@ namespace Splitio_Tests.Unit_Tests.Events
 
         public RedisEventsLogUnitTests()
         {
+            var statusManager = new Mock<IStatusManager>();
             _eventsCacheMock = new Mock<ISimpleCache<WrappedEvent>>();
 
-            _redisEventsLog = new RedisEvenstLog(_eventsCacheMock.Object);
+            _redisEventsLog = new RedisEvenstLog(_eventsCacheMock.Object, new TasksManager(statusManager.Object));
         }
 
         [TestMethod]
@@ -35,6 +40,7 @@ namespace Splitio_Tests.Unit_Tests.Events
 
             //Act
             _redisEventsLog.Log(wrappedEvent);
+            Thread.Sleep(1000);
 
             //Assert
             _eventsCacheMock.Verify(mock => mock.AddItems(It.IsAny<IList<WrappedEvent>>()), Times.Once());
@@ -50,10 +56,10 @@ namespace Splitio_Tests.Unit_Tests.Events
 
         [TestMethod]
         [ExpectedException(typeof(NotImplementedException))]
-        public void Stop_ReturnsException()
+        public async Task Stop_ReturnsException()
         {
             //Act
-            _redisEventsLog.Stop();
+            await _redisEventsLog.StopAsync();
         }
     }
 }

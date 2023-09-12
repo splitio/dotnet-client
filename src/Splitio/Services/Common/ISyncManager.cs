@@ -1,4 +1,6 @@
-﻿namespace Splitio.Services.Common
+﻿using System.Threading.Tasks;
+
+namespace Splitio.Services.Common
 {
     public interface ISyncManager
     {

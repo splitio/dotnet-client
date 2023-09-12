@@ -11,13 +11,13 @@ namespace Splitio.Services.SegmentFetcher.Classes
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SegmentChangeFetcher));
 
-        protected abstract Task<SegmentChange> FetchFromBackend(string name, long since, FetchOptions fetchOptions);
+        protected abstract Task<SegmentChange> FetchFromBackendAsync(string name, long since, FetchOptions fetchOptions);
 
-        public async Task<SegmentChange> Fetch(string name, long since, FetchOptions fetchOptions)
+        public async Task<SegmentChange> FetchAsync(string name, long since, FetchOptions fetchOptions)
         {
             try
             {
-                return await FetchFromBackend(name, since, fetchOptions);
+                return await FetchFromBackendAsync(name, since, fetchOptions);
             }
             catch(Exception e)
             {

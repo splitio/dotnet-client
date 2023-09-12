@@ -1,28 +1,20 @@
 ﻿using Splitio.Services.Common;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Tasks;
 using System;
 using System.Collections.Concurrent;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource.Workers
 {
-    public class SegmentsWorker : ISegmentsWorker
+    public class SegmentsWorker : BaseWorker, ISegmentsWorker
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SegmentsWorker));
         private readonly ISynchronizer _synchronizer;
-        private readonly ITasksManager _tasksManager;
         private readonly BlockingCollection<SegmentQueueDto> _queue;
-        private readonly object _lock = new object();
 
-        private CancellationTokenSource _cancellationTokenSource;
-        private bool _running;
-
-        public SegmentsWorker(ISynchronizer synchronizer, ITasksManager tasksManager)
+        public SegmentsWorker(ISynchronizer synchronizer, ISplitTask task) : base("SegmentsWorker", WrapperAdapter.Instance().GetLogger(typeof(SegmentsWorker)), task)
         {
             _synchronizer = synchronizer;
-            _tasksManager = tasksManager;
             _queue = new BlockingCollection<SegmentQueueDto>(new ConcurrentQueue<SegmentQueueDto>());
         }
 
@@ -31,7 +23,7 @@ namespace Splitio.Services.EventSource.Workers
         {
             try
             {
-                if (!_running)
+                if (!_task.IsRunning())
                 {
                     _log.Error("Segments Worker not running.");
                     return;
@@ -45,80 +37,24 @@ namespace Splitio.Services.EventSource.Workers
                 _log.Error($"AddToQueue: {ex.Message}");
             }
         }
-
-        public void Start()
-        {
-            lock (_lock)
-            {
-                try
-                {
-                    if (_running)
-                    {
-                        _log.Error("Segments Worker already running.");
-                        return;
-                    }
-
-                    _log.Debug($"Segments worker starting ...");
-                    _cancellationTokenSource = new CancellationTokenSource();
-                    _running = true;
-                    _tasksManager.Start(async () => await ExecuteAsync(), _cancellationTokenSource, "Segments Workers.");
-                }
-                catch (Exception ex)
-                {
-                    _log.Debug($"Start: {ex.Message}");
-                }
-            }
-        }
-
-        public void Stop()
-        {
-            lock (_lock)
-            {
-                try
-                {
-                    if (!_running)
-                    {
-                        _log.Error("Segments Worker not running.");
-                        return;
-                    }
-
-                    _cancellationTokenSource?.Cancel();
-                    _cancellationTokenSource?.Dispose();
-
-                    _log.Debug($"Segments worker stoped ...");
-                    _running = false;
-                }
-                catch (Exception ex)
-                {
-                    _log.Debug($"Stop: {ex.Message}");
-                }
-            }
-        }
         #endregion
 
-        #region Private Methods
-        public async Task ExecuteAsync()
+        #region Protected Methods
+        protected override async Task ExecuteAsync()
         {
             try
             {
-                _log.Debug($"Segments Worker, Token: {_cancellationTokenSource.IsCancellationRequested}; Running: {_running}.");
-                while (!_cancellationTokenSource.IsCancellationRequested && _running)
+                if (_queue.TryTake(out SegmentQueueDto segment, -1, _cts.Token))
                 {
-                    // Wait indefinitely until a segment is queued
-                    if (_queue.TryTake(out SegmentQueueDto segment, -1, _cancellationTokenSource.Token))
-                    {
-                        _log.Debug($"Segment dequeue: {segment.SegmentName}");
-                        await _synchronizer.SynchronizeSegment(segment.SegmentName, segment.ChangeNumber);
-                    }
+                    _log.Debug($"Segment dequeue: {segment.SegmentName}");
+                    await _synchronizer.SynchronizeSegmentAsync(segment.SegmentName, segment.ChangeNumber);
                 }
             }
             catch (Exception ex)
             {
-                _log.Debug($"Execute: {ex.Message}");
-            }
-            finally
-            {
-                _log.Debug("Segment Worker execution finished.");
+                if (ex is OperationCanceledException) return;
+
+                _log.Debug($"Segments worker Execute exception", ex);
             }
         }
         #endregion

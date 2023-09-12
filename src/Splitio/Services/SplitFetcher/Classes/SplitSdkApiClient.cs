@@ -1,5 +1,4 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
@@ -7,7 +6,6 @@ using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
@@ -29,7 +27,7 @@ namespace Splitio.Services.SplitFetcher.Classes
             _baseUrl = baseUrl;
         }
 
-        public async Task<string> FetchSplitChanges(long since, FetchOptions fetchOptions)
+        public async Task<string> FetchSplitChangesAsync(long since, FetchOptions fetchOptions)
         {
             using (var clock = new Util.SplitStopwatch())
             {
@@ -40,7 +38,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                     var requestUri = GetRequestUri(since, fetchOptions.Till);                    
                     var response = await _httpClient.GetAsync(requestUri, fetchOptions.CacheControlHeaders);
 
-                    Util.Helper.RecordTelemetrySync(nameof(FetchSplitChanges), response, ResourceEnum.SplitSync, clock, _telemetryRuntimeProducer, _log);
+                    Util.Helper.RecordTelemetrySync(nameof(FetchSplitChangesAsync), response, ResourceEnum.SplitSync, clock, _telemetryRuntimeProducer, _log);
 
                     if (response.IsSuccessStatusCode)
                     {

@@ -6,6 +6,7 @@ using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Impressions
 {
@@ -74,10 +75,10 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
         [TestMethod]
         [ExpectedException(typeof(NotImplementedException))]
-        public void Stop_ReturnsException()
+        public async Task Stop_ReturnsException()
         {
             //Act
-            _redisImpressionLog.Stop();
+            await _redisImpressionLog.StopAsync();
         }
     }
 }

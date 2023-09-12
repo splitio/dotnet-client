@@ -24,7 +24,8 @@ namespace Splitio.Services.Client.Classes
             _apiKey = apiKey;
             _options = options ?? new ConfigurationOptions();
 
-            WrapperAdapter.Instance(_options.Logger);
+            var wrapperAdapter = WrapperAdapter.Instance();
+            wrapperAdapter.SetCustomerLogger(_options.Logger);
             _apiKeyValidator = new ApiKeyValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
 

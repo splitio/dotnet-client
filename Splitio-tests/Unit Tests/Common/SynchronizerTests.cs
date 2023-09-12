@@ -6,11 +6,11 @@ using Splitio.Services.Common;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
-using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Common;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Common
 {
@@ -22,7 +22,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<IImpressionsLog> _impressionsLog;
         private readonly Mock<IEventsLog> _eventsLog;
         private readonly Mock<IImpressionsCounter> _impressionsCounter;
-        private readonly Mock<IWrapperAdapter> _wrapperAdapter;
+        private readonly Mock<IStatusManager> _statusManager;
         private readonly Mock<ITelemetrySyncTask> _telemetrySyncTask;
         private readonly Mock<IFeatureFlagCache> _splitCache;
         private readonly Mock<ISegmentCache> _segmentCache;
@@ -37,14 +37,14 @@ namespace Splitio_Tests.Unit_Tests.Common
             _impressionsLog = new Mock<IImpressionsLog>();
             _eventsLog = new Mock<IEventsLog>();
             _impressionsCounter = new Mock<IImpressionsCounter>();
-            _wrapperAdapter = new Mock<IWrapperAdapter>();
+            _statusManager = new Mock<IStatusManager>();
             _telemetrySyncTask = new Mock<ITelemetrySyncTask>();
             _splitCache = new Mock<IFeatureFlagCache>();
             _backOff = new Mock<IBackOff>();
             _segmentCache = new Mock<ISegmentCache>();
             _uniqueKeysTracker = new Mock<IUniqueKeysTracker>();
-
-            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCounter.Object, _wrapperAdapter.Object, _telemetrySyncTask.Object, _splitCache.Object, _backOff.Object, _backOff.Object, 10, 5, _segmentCache.Object, _uniqueKeysTracker.Object);
+            
+            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _impressionsCounter.Object, _statusManager.Object, _telemetrySyncTask.Object, _splitCache.Object, _backOff.Object, _backOff.Object, 10, 5, _segmentCache.Object, _uniqueKeysTracker.Object);
         }
 
         [TestMethod]
@@ -73,47 +73,46 @@ namespace Splitio_Tests.Unit_Tests.Common
         }
 
         [TestMethod]
-        public void StopPeriodicDataRecording_ShouldStopServices()
+        public async Task StopPeriodicDataRecording_ShouldStopServices()
         {
             // Act.
-            _synchronizer.StopPeriodicDataRecording();
+            await _synchronizer.StopPeriodicDataRecordingAsync();
 
             // Assert.
-            _impressionsLog.Verify(mock => mock.Stop(), Times.Once);
-            _eventsLog.Verify(mock => mock.Stop(), Times.Once);
-            _impressionsCounter.Verify(mock => mock.Stop(), Times.Once);
-            _telemetrySyncTask.Verify(mock => mock.Stop(), Times.Once);
+            _impressionsLog.Verify(mock => mock.StopAsync(), Times.Once);
+            _eventsLog.Verify(mock => mock.StopAsync(), Times.Once);
+            _impressionsCounter.Verify(mock => mock.StopAsync(), Times.Once);
+            _telemetrySyncTask.Verify(mock => mock.StopAsync(), Times.Once);
         }
 
         [TestMethod]
-        public void StopPeriodicFetching_ShouldStopFetchings()
+        public async Task StopPeriodicFetching_ShouldStopFetchings()
         {
             // Act.
-            _synchronizer.StopPeriodicFetching();
+            await _synchronizer.StopPeriodicFetchingAsync();
 
             // Assert.
-            _splitFetcher.Verify(mock => mock.Stop(), Times.Once);
-            _segmentFetcher.Verify(mock => mock.Stop(), Times.Once);
+            _splitFetcher.Verify(mock => mock.StopAsync(), Times.Once);
+            _segmentFetcher.Verify(mock => mock.StopAsync(), Times.Once);
         }
 
         [TestMethod]
-        public void SyncAll_ShouldStartFetchSplitsAndSegments()
+        public async Task SyncAll_ShouldStartFetchSplitsAndSegments()
         {
             // Act.
             _splitFetcher
-                .Setup(mock => mock.FetchSplits(It.IsAny<FetchOptions>()))
+                .Setup(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(new FetchResult { Success = true });
-
-            _synchronizer.SyncAllAsync();
+            await _synchronizer.SyncAllAsync();
 
             // Assert.
             Thread.Sleep(2000);
-            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Once);            
-            _segmentFetcher.Verify(mock => mock.FetchAll(), Times.Once);
+            _splitFetcher.Verify(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()), Times.Once);            
+            _segmentFetcher.Verify(mock => mock.FetchAllAsync(), Times.Once);
         }
 
         [TestMethod]
-        public void SynchronizeSegment_ShouldFetchSegmentByName()
+        public async Task SynchronizeSegment_ShouldFetchSegmentByName()
         {
             // Arrange.
             var segmentName = "segment-test";
@@ -124,14 +123,14 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(2);
 
             // Act.
-            _synchronizer.SynchronizeSegment(segmentName, 1);
+            await _synchronizer.SynchronizeSegmentAsync(segmentName, 1);
 
             // Assert.
-            _segmentFetcher.Verify(mock => mock.Fetch(segmentName, It.IsAny<FetchOptions>()), Times.Once);
+            _segmentFetcher.Verify(mock => mock.FetchAsync(segmentName, It.IsAny<FetchOptions>()), Times.Once);
         }
 
         [TestMethod]
-        public void SynchronizeSegment_NoChangesFetched()
+        public async Task SynchronizeSegment_NoChangesFetched()
         {
             // Arrange.
             var segmentName = "segment-test";
@@ -141,14 +140,13 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(2);
 
             // Act.
-            _synchronizer.SynchronizeSegment(segmentName, 100);
+            await _synchronizer.SynchronizeSegmentAsync(segmentName, 100);
 
-            // Assert.
-            _segmentFetcher.Verify(mock => mock.Fetch(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(20));
+            _segmentFetcher.Verify(mock => mock.FetchAsync(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(20));
         }
 
         [TestMethod]
-        public void SynchronizeSegment_With5Attempts()
+        public async Task SynchronizeSegment_With5Attempts()
         {
             // Arrange.
             var segmentName = "segment-test";
@@ -163,14 +161,13 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(110);
 
             // Act.
-            _synchronizer.SynchronizeSegment(segmentName, 100);
+            await _synchronizer.SynchronizeSegmentAsync(segmentName, 100);
 
-            // Assert.
-            _segmentFetcher.Verify(mock => mock.Fetch(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(5));
+            _segmentFetcher.Verify(mock => mock.FetchAsync(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(5));
         }
 
         [TestMethod]
-        public void SynchronizeSegment_WithCDNBypassed()
+        public async Task SynchronizeSegment_WithCDNBypassed()
         {
             // Arrange.
             var segmentName = "segment-test";
@@ -197,18 +194,17 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(110);
 
             // Act.
-            _synchronizer.SynchronizeSegment(segmentName, 100);
+            await _synchronizer.SynchronizeSegmentAsync(segmentName, 100);
 
-            // Assert.
-            _segmentFetcher.Verify(mock => mock.Fetch(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(17));
+            _segmentFetcher.Verify(mock => mock.FetchAsync(segmentName, It.IsAny<FetchOptions>()), Times.Exactly(17));
         }
 
         [TestMethod]
-        public void SynchronizeSplits_ShouldFetchSplits()
+        public async Task SynchronizeSplits_ShouldFetchSplits()
         {
             // Arrange.
             _splitFetcher
-                .Setup(mock => mock.FetchSplits(It.IsAny<FetchOptions>()))
+                .Setup(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(new FetchResult());
 
             _splitCache
@@ -217,15 +213,15 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(2);
 
             // Act.
-            _synchronizer.SynchronizeSplits(1);
+            await _synchronizer.SynchronizeSplitsAsync(1);
 
             // Assert.
-            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Once);
-            _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExists(It.IsAny<IList<string>>()), Times.Once);
+            _splitFetcher.Verify(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()), Times.Once);
+            _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExistsAsync(It.IsAny<IList<string>>()), Times.Once);
         }
 
         [TestMethod]
-        public void SynchronizeSplits_NoChangesFetched()
+        public async Task SynchronizeSplits_NoChangesFetched()
         {
             // Arrange.
             _splitCache
@@ -233,18 +229,17 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(2);
 
             // Act.
-            _synchronizer.SynchronizeSplits(100);
+            await _synchronizer.SynchronizeSplitsAsync(100);
 
-            // Assert.
-            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Exactly(20));
+            _splitFetcher.Verify(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()), Times.Exactly(20));
         }
 
         [TestMethod]
-        public void SynchronizeSplits_With5Attempts()
+        public async Task SynchronizeSplits_With5Attempts()
         {
             // Arrange.
             _splitFetcher
-                .Setup(mock => mock.FetchSplits(It.IsAny<FetchOptions>()))
+                .Setup(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(new FetchResult());
 
             _splitCache
@@ -257,18 +252,17 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(110);
 
             // Act.
-            _synchronizer.SynchronizeSplits(100);
+            await _synchronizer.SynchronizeSplitsAsync(100);
 
-            // Assert.
-            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Exactly(5));
+            _splitFetcher.Verify(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()), Times.Exactly(5));
         }
 
         [TestMethod]
-        public void SynchronizeSplits_WithCDNBypassed()
+        public async Task SynchronizeSplits_WithCDNBypassed()
         {
             // Arrange.
             _splitFetcher
-                .Setup(mock => mock.FetchSplits(It.IsAny<FetchOptions>()))
+                .Setup(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(new FetchResult());
 
             _splitCache
@@ -293,10 +287,9 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .Returns(110);
 
             // Act.
-            _synchronizer.SynchronizeSplits(100);
+            await _synchronizer.SynchronizeSplitsAsync(100);
 
-            // Assert.
-            _splitFetcher.Verify(mock => mock.FetchSplits(It.IsAny<FetchOptions>()), Times.Exactly(17));
+            _splitFetcher.Verify(mock => mock.FetchSplitsAsync(It.IsAny<FetchOptions>()), Times.Exactly(17));
         }
     }
 }

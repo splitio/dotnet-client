@@ -33,7 +33,7 @@ namespace Splitio.Services.InputValidation.Classes
                 return featureFlagNames;
             }
 
-            var dicSplits = new Dictionary<string, string>();
+            var ffNames = new HashSet<string>();
 
             foreach (var name in featureFlagNames)
             {
@@ -41,18 +41,11 @@ namespace Splitio.Services.InputValidation.Classes
 
                 if (splitNameResult.Success)
                 {
-                    try
-                    {
-                        dicSplits.Add(splitNameResult.Value, splitNameResult.Value);
-                    }
-                    catch (Exception ex)
-                    {
-                        _log.Warn($"{method}: error adding feature flag name: {splitNameResult.Value} into list.", ex);
-                    }
+                    ffNames.Add(splitNameResult.Value);
                 }
             }
 
-            return dicSplits.Keys.ToList();
+            return ffNames.ToList();
         }
 
         public ValidatorResult SplitNameIsValid(string featureFlagName, string method)

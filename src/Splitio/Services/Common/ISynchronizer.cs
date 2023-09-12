@@ -5,12 +5,12 @@ namespace Splitio.Services.Common
     public interface ISynchronizer
     {
         Task<bool> SyncAllAsync();
-        Task SynchronizeSplits(long targetChangeNumber);
-        Task SynchronizeSegment(string segmentName, long targetChangeNumber);
+        Task SynchronizeSplitsAsync(long targetChangeNumber);
+        Task SynchronizeSegmentAsync(string segmentName, long targetChangeNumber);
         void StartPeriodicFetching();
-        void StopPeriodicFetching();
+        Task StopPeriodicFetchingAsync();
         void StartPeriodicDataRecording();
-        void StopPeriodicDataRecording();
+        Task StopPeriodicDataRecordingAsync();
         void ClearFetchersCache();
     }
 }

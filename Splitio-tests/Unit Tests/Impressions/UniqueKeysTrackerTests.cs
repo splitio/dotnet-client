@@ -1,13 +1,16 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Services.Cache.Filter;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Shared.Classes;
+using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Impressions
 {
@@ -16,6 +19,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     {
         private readonly Mock<IFilterAdapter> _filterAdapter;
         private readonly Mock<IImpressionsSenderAdapter> _senderAdapter;
+        private readonly Mock<IStatusManager> _statusManager;
         private readonly ITasksManager _tasksManager;
         private readonly ConcurrentDictionary<string, HashSet<string>> _cache;
 
@@ -25,18 +29,22 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         {
             _filterAdapter = new Mock<IFilterAdapter>();
             _senderAdapter = new Mock<IImpressionsSenderAdapter>();
-            _tasksManager = new TasksManager(WrapperAdapter.Instance());
+            _statusManager = new Mock<IStatusManager>();
+            _tasksManager = new TasksManager(_statusManager.Object);
             _cache = new ConcurrentDictionary<string, HashSet<string>>();
         }
 
         [TestMethod]
-        public void PeriodicTask_ShouldSendBulk()
+        public async Task PeriodicTask_ShouldSendBulk()
         {
             // Arrange.
             _cache.Clear();
 
-            var config = new ComponentConfig(1, 5, 5);
-            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, _tasksManager);
+            var config = new ComponentConfig(5, 5);
+            var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 1);
+            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
+            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Enums.Task.MtkSendBulkData);
+            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask, sendBulkDataTask);
 
             // Act.
             _uniqueKeysTracker.Start();
@@ -46,12 +54,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             Thread.Sleep(1500);
 
-            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<List<Mtks>>()), Times.Once);
+            _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Once);
 
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test", "feature-name-test"));
-            _uniqueKeysTracker.Stop();
+            await _uniqueKeysTracker.StopAsync();
 
-            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<List<Mtks>>()), Times.Exactly(2));
+            _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Exactly(2));
 
             _cache.Clear();
         }
@@ -62,8 +70,11 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Arrange.
             _cache.Clear();
 
-            var config = new ComponentConfig(1, 5, 5);
-            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, _tasksManager);
+            var config = new ComponentConfig(5, 5);
+            var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 1);
+            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
+            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Enums.Task.MtkSendBulkData);
+            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask, sendBulkDataTask);
 
             _filterAdapter
                 .SetupSequence(mock => mock.Contains("feature-name-test", "key-test"))
@@ -92,7 +103,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Assert.AreEqual(1, values3.Count);
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-5"));
 
-            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<List<Mtks>>()), Times.Once);
+            Thread.Sleep(500);
+            _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Once);
 
             _cache.Clear();
         }
@@ -103,8 +115,11 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Arrange.
             _cache.Clear();
 
-            var config = new ComponentConfig(1, 6, 3);
-            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, _tasksManager);
+            var config = new ComponentConfig(6, 3);
+            var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 1);
+            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
+            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Enums.Task.MtkSendBulkData);
+            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask, sendBulkDataTask);
 
             // Act && Assert.
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test"));
@@ -113,8 +128,9 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-4"));
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-5"));
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-6"));
-            
-            _senderAdapter.Verify(mock => mock.RecordUniqueKeys(It.IsAny<List<Mtks>>()), Times.Exactly(2));
+
+            Thread.Sleep(500);
+            _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Exactly(2));
 
             _cache.Clear();
         }
