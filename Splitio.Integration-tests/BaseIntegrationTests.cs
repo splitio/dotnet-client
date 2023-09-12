@@ -1071,14 +1071,12 @@ namespace Splitio.Integration_tests
         protected abstract Task AssertSentEventsAsync(List<EventBackend> eventsExcpected, HttpClientMock httpClientMock = null, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true);
 
         protected abstract HttpClientMock GetHttpClientMock();
-
-        protected abstract void ResetLogs();
         #endregion
 
         [TestCleanup]
         public void Cleanup()
         {
-            ResetLogs();
+            httpClientMock.ResetLogEntries();
         }
     }
 }

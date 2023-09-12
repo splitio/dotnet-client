@@ -499,11 +499,6 @@ namespace Splitio.Integration_tests
                 }
             }
         }
-
-        protected override void ResetLogs()
-        {
-            httpClientMock.ResetLogEntries();
-        }
         #endregion
 
         #region Private Methods

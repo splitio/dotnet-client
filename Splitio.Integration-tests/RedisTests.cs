@@ -319,11 +319,6 @@ namespace Splitio.Integration_tests
                 AssertEvent(actualEvent, eventsExcpected);
             }
         }
-
-        protected override void ResetLogs()
-        {
-            // No-op
-        }
         #endregion
 
         #region Private Methods
