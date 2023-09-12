@@ -1,6 +1,7 @@
 ﻿using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Common;
 using Splitio.Redis.Services.Domain;
 using Splitio.Redis.Services.Events.Classes;
 using Splitio.Redis.Services.Impressions.Classes;
@@ -9,6 +10,7 @@ using Splitio.Redis.Services.Shared;
 using Splitio.Redis.Telemetry.Storages;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Common;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Impressions.Classes;
@@ -16,7 +18,6 @@ using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Client.Classes
@@ -50,29 +51,9 @@ namespace Splitio.Redis.Services.Client.Classes
             BuildBlockUntilReadyService();
             BuildManager();
             BuildEvaluator();
+            BuildSyncManager();
 
-            Start();
-        }
-
-        public override void Destroy()
-        {
-            if (_statusManager.IsDestroyed()) return;
-
-            base.Destroy();
-
-            _log.Info("Initialitation sdk destroy.");
-
-            var task = new List<Task>
-            {
-                _uniqueKeysTracker.StopAsync(),
-                _impressionsCounter.StopAsync()
-            };
-
-            Task.WaitAll(task.ToArray(), Constants.Gral.DestroyTimeount);
-
-            _connectionPoolManager.Dispose();
-
-            _log.Info("Stopped Redis submitter tasks");
+            _syncManager.Start();
         }
 
         #region Private Methods
@@ -175,6 +156,11 @@ namespace Splitio.Redis.Services.Client.Classes
             _telemetryEvaluationProducer = redisTelemetryStorage;
         }
 
+        private void BuildSyncManager()
+        {
+            _syncManager = new RedisSyncManager(_uniqueKeysTracker, _impressionsCounter, _connectionPoolManager);
+        }
+
         private void RecordConfigInit()
         {
             var config = new Config
@@ -186,12 +172,6 @@ namespace Splitio.Redis.Services.Client.Classes
             };
 
             _telemetryInitProducer.RecordConfigInit(config);
-        }
-
-        private void Start()
-        {
-            _uniqueKeysTracker.Start();
-            _impressionsCounter.Start();
         }
         #endregion
     }

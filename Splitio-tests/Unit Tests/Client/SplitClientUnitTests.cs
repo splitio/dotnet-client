@@ -2,6 +2,7 @@
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Common;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
@@ -19,6 +20,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         private Mock<IBlockUntilReadyService> _blockUntilReadyService;
         private Mock<IEvaluator> _evaluatorMock;
         private Mock<IImpressionsManager> _impressionsManager;
+        private Mock<ISyncManager> _syncManager;
 
         private SplitClientForTesting _splitClientForTesting;
 
@@ -30,8 +32,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
             _evaluatorMock = new Mock<IEvaluator>();
             _impressionsManager = new Mock<IImpressionsManager>();
+            _syncManager = new Mock<ISyncManager>();
 
-            _splitClientForTesting = new SplitClientForTesting(_splitCacheMock.Object, _eventsLogMock.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluatorMock.Object, _impressionsManager.Object);
+            _splitClientForTesting = new SplitClientForTesting(_splitCacheMock.Object, _eventsLogMock.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluatorMock.Object, _impressionsManager.Object, _syncManager.Object);
 
             _splitClientForTesting.BlockUntilReady(1000);
         }

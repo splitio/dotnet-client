@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.CommonLibraries;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EventSource;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
@@ -34,6 +35,8 @@ namespace Splitio.Services.Common
         private readonly ISplitTask _startupTask;
         private readonly ISplitTask _onStreamingStatusTask;
 
+        private long _startSessionMs;
+
         public SyncManager(bool streamingEnabled,
             ISynchronizer synchronizer,
             IPushManager pushManager,
@@ -68,6 +71,7 @@ namespace Splitio.Services.Common
         #region Public Methods
         public void Start()
         {
+            _startSessionMs = CurrentTimeHelper.CurrentTimeMillis();
             _startupTask.Start();
         }
 
@@ -75,7 +79,7 @@ namespace Splitio.Services.Common
         {
             try
             {
-                _log.Info("Initialitation sdk destroy.");
+                _telemetryRuntimeProducer.RecordSessionLength(CurrentTimeHelper.CurrentTimeMillis() - _startSessionMs);
 
                 _ctsStreaming.Cancel();
                 _ctsStreaming.Dispose();
@@ -94,8 +98,31 @@ namespace Splitio.Services.Common
                 Task.WaitAll(task.ToArray(), Constants.Gral.DestroyTimeount);
 
                 _synchronizer.ClearFetchersCache();
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Somenthing went wrong destroying the SDK.", ex);
+            }
+        }
 
-                _log.Info("SDK has been destroyed.");
+        public async Task ShutdownAsync()
+        {
+            try
+            {
+                _telemetryRuntimeProducer.RecordSessionLength(CurrentTimeHelper.CurrentTimeMillis() - _startSessionMs);
+
+                _ctsStreaming.Cancel();
+                _ctsStreaming.Dispose();
+
+                await _synchronizer.StopPeriodicDataRecordingAsync();
+                await _synchronizer.StopPeriodicFetchingAsync();
+                await _onStreamingStatusTask.StopAsync();
+                await _sseHandler.StopWorkersAsync();
+                await _pushManager.StopAsync();
+                await _startupTask.StopAsync();
+                await _tasksManager.DestroyAsync();
+
+                _synchronizer.ClearFetchersCache();
             }
             catch (Exception ex)
             {

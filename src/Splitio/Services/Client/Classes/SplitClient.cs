@@ -3,6 +3,7 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Filter;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
+using Splitio.Services.Common;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
@@ -28,8 +29,6 @@ namespace Splitio.Services.Client.Classes
     {
         protected readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitClient));
 
-        protected const string Control = "control";
-
         protected readonly IKeyValidator _keyValidator;
         protected readonly ISplitNameValidator _splitNameValidator;
         protected readonly IEventTypeValidator _eventTypeValidator;
@@ -51,7 +50,7 @@ namespace Splitio.Services.Client.Classes
         protected ITelemetryInitProducer _telemetryInitProducer;
         protected ITasksManager _tasksManager;
         protected IStatusManager _statusManager;
-
+        protected ISyncManager _syncManager;
         protected IImpressionsLog _impressionsLog;
         protected IUniqueKeysTracker _uniqueKeysTracker;
         protected IImpressionListener _customerImpressionListener;
@@ -104,6 +103,19 @@ namespace Splitio.Services.Client.Classes
                     Treatment = r.Value.Treatment,
                     Config = r.Value.Config
                 });
+        }
+
+        public virtual async Task DestroyAsync()
+        {
+            if (_statusManager.IsDestroyed()) return;
+
+            _log.Info(Constants.Messages.InitDestroy);
+
+            _factoryInstantiationsService.Decrease(ApiKey);
+            _statusManager.SetDestroy();
+            await _syncManager.ShutdownAsync();
+
+            _log.Info(Constants.Messages.Destroyed);
         }
         #endregion
 
@@ -215,15 +227,6 @@ namespace Splitio.Services.Client.Classes
             return _statusManager.IsDestroyed();
         }
 
-        public virtual void Destroy()
-        {
-            if (!_statusManager.IsDestroyed())
-            {
-                _factoryInstantiationsService.Decrease(ApiKey);
-                _statusManager.SetDestroy();
-            }
-        }
-
         public void BlockUntilReady(int blockMilisecondsUntilReady)
         {
             _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);
@@ -232,6 +235,19 @@ namespace Splitio.Services.Client.Classes
         public ISplitManager GetSplitManager()
         {
             return _manager;
+        }
+
+        public virtual void Destroy()
+        {
+            if (_statusManager.IsDestroyed()) return;
+
+            _log.Info(Constants.Messages.InitDestroy);
+
+            _factoryInstantiationsService.Decrease(ApiKey);
+            _statusManager.SetDestroy();
+            _syncManager.Shutdown();
+
+            _log.Info(Constants.Messages.Destroyed);
         }
         #endregion
 
@@ -272,6 +288,32 @@ namespace Splitio.Services.Client.Classes
         }
         #endregion
 
+        #region Private Async Methods
+        private async Task<SplitResult> GetTreatmentAsync(string method, Key key, string featureFlagName, Dictionary<string, object> attributes = null)
+        {
+            featureFlagName = ProcessGetTreatmentValidation(method, key, featureFlagName, out TreatmentResult controlTreatment);
+
+            if (controlTreatment != null) return new SplitResult(controlTreatment.Treatment, controlTreatment.Config);
+
+            var evaluatorResult = await _evaluator.EvaluateFeatureAsync(key, featureFlagName, attributes);
+
+            RecordImpressionAndTelemetry(evaluatorResult, key, featureFlagName, method);
+
+            return new SplitResult(evaluatorResult.Treatment, evaluatorResult.Config);
+        }
+
+        private async Task<Dictionary<string, TreatmentResult>> GetTreatmentsAsync(string method, Key key, List<string> features, Dictionary<string, object> attributes = null)
+        {
+            features = ProcessGetTreatmentsValidation(method, key, features, out Dictionary<string, TreatmentResult> controlTreatments);
+
+            if (controlTreatments != null) return controlTreatments;
+
+            var results = await _evaluator.EvaluateFeaturesAsync(key, features, attributes);
+
+            return ParseTreatmentsAndRecordImpressionsAndTelemetry(method, results, key);
+        }
+        #endregion
+
         #region Private Methods
         private SplitResult GetTreatmentSync(string method, Key key, string featureFlagName, Dictionary<string, object> attributes = null)
         {
@@ -293,30 +335,6 @@ namespace Splitio.Services.Client.Classes
             if (controlTreatments != null) return controlTreatments;
 
             var results = _evaluator.EvaluateFeatures(key, features, attributes);
-
-            return ParseTreatmentsAndRecordImpressionsAndTelemetry(method, results, key);
-        }
-
-        private async Task<SplitResult> GetTreatmentAsync(string method, Key key, string featureFlagName, Dictionary<string, object> attributes = null)
-        {
-            featureFlagName = ProcessGetTreatmentValidation(method, key, featureFlagName, out TreatmentResult controlTreatment);
-
-            if (controlTreatment != null) return new SplitResult(controlTreatment.Treatment, controlTreatment.Config);
-
-            var evaluatorResult = await _evaluator.EvaluateFeatureAsync(key, featureFlagName, attributes);
-
-            RecordImpressionAndTelemetry(evaluatorResult, key, featureFlagName, method);
-
-            return new SplitResult(evaluatorResult.Treatment, evaluatorResult.Config);
-        }
-
-        private async Task<Dictionary<string, TreatmentResult>> GetTreatmentsAsync(string method, Key key, List<string> features, Dictionary<string, object> attributes = null)
-        {
-            features = ProcessGetTreatmentsValidation(method, key, features, out Dictionary<string, TreatmentResult> controlTreatments);
-
-            if (controlTreatments != null) return controlTreatments;
-
-            var results = await _evaluator.EvaluateFeaturesAsync(key, features, attributes);
 
             return ParseTreatmentsAndRecordImpressionsAndTelemetry(method, results, key);
         }
@@ -365,7 +383,7 @@ namespace Splitio.Services.Client.Classes
 
             if (!IsClientReady(method) || !_keyValidator.IsValid(key, method))
             {
-                result = new TreatmentResult(string.Empty, Control, null);
+                result = new TreatmentResult(string.Empty, Constants.Gral.Control, null);
                 return string.Empty;
             }
 
@@ -373,7 +391,7 @@ namespace Splitio.Services.Client.Classes
 
             if (!splitNameResult.Success)
             {
-                result = new TreatmentResult(string.Empty, Control, null);
+                result = new TreatmentResult(string.Empty, Constants.Gral.Control, null);
                 return string.Empty;
             }
 
@@ -389,7 +407,7 @@ namespace Splitio.Services.Client.Classes
                 result = new Dictionary<string, TreatmentResult>();
                 foreach (var feature in features)
                 {
-                    result.Add(feature, new TreatmentResult(string.Empty, Control, null));
+                    result.Add(feature, new TreatmentResult(string.Empty, Constants.Gral.Control, null));
                 }
 
                 return new List<string>();

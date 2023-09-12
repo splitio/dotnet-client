@@ -1,6 +1,6 @@
 ﻿using Splitio.Domain;
-using Splitio.Services.Logger;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -15,12 +15,19 @@ namespace Splitio.Services.Client.Classes
 
         public override void Destroy()
         {
-            _tests = new Dictionary<string, string>();
+            _tests.Clear();
+        }
+
+        public override Task DestroyAsync()
+        {
+            Destroy();
+
+            return Task.FromResult(0);
         }
 
         public void ClearTreatments()
         {
-            _tests = new Dictionary<string, string>();
+            _tests.Clear();
         }
 
         public void RegisterTreatments(Dictionary<string, string> treatments)

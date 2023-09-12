@@ -1,5 +1,4 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
@@ -36,7 +35,6 @@ namespace Splitio.Services.Client.Classes
         /// More details : https://msdn.microsoft.com/en-us/library/dd287171(v=vs.110).aspx
         /// </summary>
         private const int InitialCapacity = 31;
-        private readonly long _startSessionMs;
 
         private ISplitFetcher _splitFetcher;
         private ISplitSdkApiClient _splitSdkApiClient;
@@ -44,7 +42,6 @@ namespace Splitio.Services.Client.Classes
         private IImpressionsSdkApiClient _impressionsSdkApiClient;
         private IEventSdkApiClient _eventSdkApiClient;
         private ISelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
-        private ISyncManager _syncManager;
         private ITelemetrySyncTask _telemetrySyncTask;        
         private ITelemetryStorageConsumer _telemetryStorageConsumer;
         private ITelemetryRuntimeProducer _telemetryRuntimeProducer;
@@ -78,20 +75,8 @@ namespace Splitio.Services.Client.Classes
             BuildManager();
             BuildSyncManager();
 
-            _startSessionMs = CurrentTimeHelper.CurrentTimeMillis();
-            Start();
+            _syncManager.Start();
         }
-
-        #region Public Methods
-        public override void Destroy()
-        {
-            if (_statusManager.IsDestroyed()) return;
-
-            base.Destroy();
-            _telemetryRuntimeProducer.RecordSessionLength(CurrentTimeHelper.CurrentTimeMillis() - _startSessionMs);
-            Stop();
-        }
-        #endregion
 
         #region Private Methods
         private void BuildSplitCache()
@@ -301,16 +286,6 @@ namespace Splitio.Services.Client.Classes
             }
 
             return headers;
-        }
-
-        private void Start()
-        {
-            _syncManager.Start();
-        }
-
-        private void Stop()
-        {
-            _syncManager.Shutdown();
         }
         #endregion
     }

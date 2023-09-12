@@ -3,6 +3,7 @@ using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
+using Splitio.Services.Common;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
@@ -21,6 +22,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         private readonly Mock<IBlockUntilReadyService> _blockUntilReadyService;
         private readonly Mock<IEvaluator> _evaluator;
         private readonly Mock<IImpressionsManager> _impressionsManager;
+        private readonly Mock<ISyncManager> _syncManager;
 
         private readonly ISplitClient _splitClient;
         public SplitClientAsyncTests()
@@ -31,8 +33,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
             _evaluator = new Mock<IEvaluator>();
             _impressionsManager = new Mock<IImpressionsManager>();
+            _syncManager = new Mock<ISyncManager>();
 
-            _splitClient = new SplitClientForTesting(_splitCache.Object, _eventsLog.Object, _impressionsLog.Object, _blockUntilReadyService.Object, _evaluator.Object, _impressionsManager.Object, true);
+            _splitClient = new SplitClientForTesting(_splitCache.Object, _eventsLog.Object, _impressionsLog.Object, _blockUntilReadyService.Object, _evaluator.Object, _impressionsManager.Object, _syncManager.Object, true);
         }
 
         #region GetTreatmentAsync

@@ -10,6 +10,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -77,12 +78,18 @@ namespace Splitio.Services.Client.Classes
 
         public override void Destroy()
         {
-            if (!_statusManager.IsDestroyed())
-            {
-                _watcher.Dispose();
-                _featureFlagCache.Clear();
-                base.Destroy();
-            }
+            if (_statusManager.IsDestroyed()) return;
+
+            _factoryInstantiationsService.Decrease(ApiKey);
+            _statusManager.SetDestroy();
+            _watcher.Dispose();
+            _featureFlagCache.Clear();
+        }
+
+        public override Task DestroyAsync()
+        {
+            Destroy();
+            return Task.FromResult(0);
         }
         #endregion
 
