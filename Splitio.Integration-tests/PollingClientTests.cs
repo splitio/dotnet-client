@@ -306,42 +306,39 @@ namespace Splitio.Integration_tests
         public async Task GetTreatments_WithImpressionsInNoneMode()
         {
             // Arrange.
-            using (var httpClientMock = GetHttpClientMock())
-            {
-                var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
-                configurations.ImpressionsMode = ImpressionsMode.None;
+            var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
+            configurations.ImpressionsMode = ImpressionsMode.None;
 
-                var apikey = "apikey10";
+            var apikey = "apikey10";
 
-                var splitFactory = new SplitFactory(apikey, configurations);
-                var client = splitFactory.Client();
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
 
-                client.BlockUntilReady(10000);
+            client.BlockUntilReady(10000);
 
-                // Act.
-                client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
-                client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
-                client.GetTreatmentWithConfig("test", "MAURO_TEST");
-                client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
-                client.GetTreatments("admin", new List<string> { "FACUNDO_TEST", "Test_Save_1" });
-                client.GetTreatment("admin", "FACUNDO_TEST");
-                client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
+            // Act.
+            client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+            client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+            client.GetTreatmentWithConfig("test", "MAURO_TEST");
+            client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
+            client.GetTreatments("admin", new List<string> { "FACUNDO_TEST", "Test_Save_1" });
+            client.GetTreatment("admin", "FACUNDO_TEST");
+            client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
-                client.Destroy();
-                await Task.Delay(5000);
+            client.Destroy();
+            await Task.Delay(5000);
 
-                // Assert.
-                var sentImpressions = GetImpressionsSentBackend(httpClientMock);
-                Assert.AreEqual(0, sentImpressions.Count);
+            // Assert.
+            var sentImpressions = GetImpressionsSentBackend(httpClientMock);
+            Assert.AreEqual(0, sentImpressions.Count);
 
-                var impressionCounts = GetImpressionsCountsSentBackend(httpClientMock);
-                var names = new List<string>();
-                impressionCounts.ForEach(item => names.AddRange(item.Pf.Select(x => x.F)));
-                Assert.AreEqual(3, names.Distinct().Count(), "5");
-                Assert.AreEqual(5, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("FACUNDO_TEST")).Sum(z => z.Rc)), "6");
-                Assert.AreEqual(3, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("MAURO_TEST")).Sum(z => z.Rc)), "7");
-                Assert.AreEqual(1, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("Test_Save_1")).Sum(z => z.Rc)), "8");
-            }
+            var impressionCounts = GetImpressionsCountsSentBackend(httpClientMock);
+            var names = new List<string>();
+            impressionCounts.ForEach(item => names.AddRange(item.Pf.Select(x => x.F)));
+            Assert.AreEqual(3, names.Distinct().Count(), "5");
+            Assert.AreEqual(5, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("FACUNDO_TEST")).Sum(z => z.Rc)), "6");
+            Assert.AreEqual(3, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("MAURO_TEST")).Sum(z => z.Rc)), "7");
+            Assert.AreEqual(1, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("Test_Save_1")).Sum(z => z.Rc)), "8");
         }
 
         [TestMethod]
@@ -420,27 +417,6 @@ namespace Splitio.Integration_tests
                 IPAddressesEnabled = ipAddressesEnabled,
                 StreamingEnabled = false,
             };
-        }
-
-        protected override HttpClientMock GetHttpClientMock()
-        {
-            var httpClientMock = new HttpClientMock();
-            httpClientMock.SplitChangesOk("split_changes.json", "-1");
-            httpClientMock.SplitChangesOk("split_changes_1.json", "1506703262916");
-
-            httpClientMock.SegmentChangesOk("-1", "segment1");
-            httpClientMock.SegmentChangesOk("1470947453877", "segment1");
-
-            httpClientMock.SegmentChangesOk("-1", "segment2");
-            httpClientMock.SegmentChangesOk("1470947453878", "segment2");
-
-            httpClientMock.SegmentChangesOk("-1", "segment3");
-            httpClientMock.SegmentChangesOk("1470947453879", "segment3");
-
-            httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
-            httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
-
-            return httpClientMock;
         }
 
         protected override Task AssertSentImpressionsAsync(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)

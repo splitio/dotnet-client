@@ -281,13 +281,6 @@ namespace Splitio.Integration_tests
             };
         }
 
-        protected override HttpClientMock GetHttpClientMock()
-        {
-            // No-op
-
-            return null;
-        }
-
         protected override async Task AssertSentImpressionsAsync(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
         {
             await Task.Delay(1500);
