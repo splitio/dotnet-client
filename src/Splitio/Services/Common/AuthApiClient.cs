@@ -60,7 +60,7 @@ namespace Splitio.Services.Common
                 }
                 catch (Exception ex)
                 {
-                    _log.Error(ex.Message);
+                    _log.Error("Somenthing went wrong getting Auth authentication", ex);
 
                     return new AuthenticationResponse { PushEnabled = false, Retry = false };
                 }
