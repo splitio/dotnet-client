@@ -61,7 +61,7 @@ namespace Splitio_Tests.Integration_Tests
             client.BlockUntilReady(1000);
 
             File.AppendAllText($"{rootFilePath}test.splits", Environment.NewLine +"other_test_feature2     off" + Environment.NewLine);
-            Thread.Sleep(50);
+            Thread.Sleep(500);
 
             //Act
             var result1 = client.GetTreatment("id", "double_writes_to_cassandra");

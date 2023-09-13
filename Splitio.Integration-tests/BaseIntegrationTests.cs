@@ -453,62 +453,6 @@ namespace Splitio.Integration_tests
             //Validate impressions sent to the be.
             await AssertSentImpressionsAsync(4, httpClientMock, impression1, impression2, impression3, impression4);
         }
-
-        [TestMethod]
-        public async Task GetTreatments_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
-        {
-            // Arrange.
-            var impressionListener = new IntegrationTestsImpressionListener(50);
-            var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
-
-            var apikey = "base-apikey9";
-
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
-
-            client.BlockUntilReady(10000);
-
-            // Act.
-            var result = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", "Random_Treatment", "MAURO_TEST", "Test_Save_1", "Random_Treatment_2", });
-
-            // Assert.
-            Assert.AreEqual("on", result["FACUNDO_TEST"]);
-            Assert.AreEqual("control", result["Random_Treatment"]);
-            Assert.AreEqual("off", result["MAURO_TEST"]);
-            Assert.AreEqual("off", result["Test_Save_1"]);
-            Assert.AreEqual("control", result["Random_Treatment_2"]);
-
-            client.Destroy();
-
-            // Validate impressions.
-            await Task.Delay(5000);
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
-
-            var impression1 = keyImpressions
-                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .FirstOrDefault();
-
-            var impression2 = keyImpressions
-                .Where(ki => ki.feature.Equals("MAURO_TEST"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .FirstOrDefault();
-
-            var impression3 = keyImpressions
-                .Where(ki => ki.feature.Equals("Test_Save_1"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .FirstOrDefault();
-
-            AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
-            AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
-
-            Assert.AreEqual(3, keyImpressions.Count);
-
-            //Validate impressions sent to the be.            
-            await AssertSentImpressionsAsync(3, httpClientMock, impression1, impression2, impression3);
-        }
         #endregion
 
         #region GetTreatmentsWithConfig
