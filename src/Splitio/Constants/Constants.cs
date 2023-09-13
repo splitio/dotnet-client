@@ -29,6 +29,9 @@
     {
         public static string Unknown => "unknown";
         public static string NA => "NA";
+        public static int DestroyTimeount => 30000;
+        public static int IntervalToClearLongTermCache => 3600000;
+        public static string Control => "control";
     }
 
     public static class Urls

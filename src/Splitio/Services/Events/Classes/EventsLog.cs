@@ -3,80 +3,56 @@ using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Events.Classes
 {
     public class EventsLog : IEventsLog
     {
         private static readonly long MAX_SIZE_BYTES = 5 * 1024 * 1024L;
-        protected static readonly ISplitLogger Logger = WrapperAdapter.Instance().GetLogger(typeof(EventsLog));
+        
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(EventsLog));
 
-        private readonly IWrapperAdapter _wrapperAdapter;
         private readonly IEventSdkApiClient _apiClient;
         private readonly ISimpleProducerCache<WrappedEvent> _wrappedEventsCache;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
-        private readonly ITasksManager _tasksManager;
-        private readonly CancellationTokenSource _cancellationTokenSource;
-        private readonly int _interval;
-        private readonly int _firstPushWindow;
-        
-        private readonly object _lock = new object();
-        private readonly object _sendBulkEventsLock = new object();
+        private readonly ISplitTask _task;
+        private readonly ISplitTask _sendBulkDataTask;
 
-        private bool _running;
         private long _acumulateSize;
         
-        public EventsLog(IEventSdkApiClient apiClient, 
-            int firstPushWindow, 
-            int interval, 
+        public EventsLog(IEventSdkApiClient apiClient,
             ISimpleCache<WrappedEvent> eventsCache,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
-            ITasksManager tasksManager,
+            ISplitTask task,
+            ISplitTask sendBulkDataTask,
             int maximumNumberOfKeysToCache = -1)
         {
-            _cancellationTokenSource = new CancellationTokenSource();
-
             _wrappedEventsCache = (eventsCache as ISimpleProducerCache<WrappedEvent>) ?? new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(maximumNumberOfKeysToCache));
             _apiClient = apiClient;
-            _interval = interval;
-            _firstPushWindow = firstPushWindow;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
-            _tasksManager = tasksManager;
+            _task = task;
+            _task.SetFunction(SendBulkEventsAsync);
+            _task.OnStop(SendBulkEventsAsync);
 
-            _wrapperAdapter = WrapperAdapter.Instance();
+            _sendBulkDataTask = sendBulkDataTask;
+            _sendBulkDataTask.SetFunction(SendBulkEventsAsync);
         }
 
         public void Start()
         {
-            lock (_lock)
-            {
-                if (_running) return;
-
-                _running = true;
-                _tasksManager.Start(() =>
-                {
-                    _wrapperAdapter.TaskDelay(_firstPushWindow * 1000).Wait();
-                    _tasksManager.StartPeriodic(() => SendBulkEvents(), _interval * 1000, _cancellationTokenSource, "Send Bulk Events.");
-                }, new CancellationTokenSource(), "Main Events Log.");
-            }
+            _task.Start();
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
-            lock (_lock)
-            {
-                if (!_running) return;
-
-                _running = false;
-                _cancellationTokenSource.Cancel();
-                SendBulkEvents();
-            }
+            await _task.StopAsync();
         }
 
         public void Log(WrappedEvent wrappedEvent)
@@ -92,39 +68,36 @@ namespace Splitio.Services.Events.Classes
 
             if (_wrappedEventsCache.HasReachedMaxSize() || _acumulateSize >= MAX_SIZE_BYTES)
             {
-                SendBulkEvents();
+                _sendBulkDataTask.Start();
             }
         }
 
-        private void SendBulkEvents()
+        private async Task SendBulkEventsAsync()
         {
-            lock (_sendBulkEventsLock)
+            if (_wrappedEventsCache.IsEmpty()) return;
+
+            if (_wrappedEventsCache.HasReachedMaxSize())
             {
-                if (_wrappedEventsCache.IsEmpty()) return;
+                _log.Warn("Split SDK events queue is full. Events may have been dropped. Consider increasing capacity.");
+            }
 
-                if (_wrappedEventsCache.HasReachedMaxSize())
-                {
-                    Logger.Warn("Split SDK events queue is full. Events may have been dropped. Consider increasing capacity.");
-                }
+            var wrappedEvents = _wrappedEventsCache.FetchAllAndClear();
 
-                var wrappedEvents = _wrappedEventsCache.FetchAllAndClear();
+            if (wrappedEvents.Count <= 0) return;
 
-                if (wrappedEvents.Count <= 0) return;
+            try
+            {
+                var events = wrappedEvents
+                    .Select(x => x.Event)
+                    .ToList();
 
-                try
-                {
-                    var events = wrappedEvents
-                        .Select(x => x.Event)
-                        .ToList();
+                await _apiClient.SendBulkEventsAsync(events);
 
-                    _apiClient.SendBulkEventsTask(events);
-
-                    _acumulateSize = 0;
-                }
-                catch (Exception e)
-                {
-                    Logger.Error("Exception caught updating events.", e);
-                }
+                _acumulateSize = 0;
+            }
+            catch (Exception e)
+            {
+                _log.Error("Exception caught updating events.", e);
             }
         }
 

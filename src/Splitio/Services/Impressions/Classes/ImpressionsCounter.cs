@@ -1,24 +1,26 @@
 ﻿using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Tasks;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {
     public class ImpressionsCounter : TrackerComponent, IImpressionsCounter
     {
-        private static readonly ISplitLogger Logger = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsCounter));
+        private readonly ISplitLogger Logger = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsCounter));
         private const int DefaultAmount = 1;
 
         private readonly IImpressionsSenderAdapter _senderAdapter;
         private readonly ConcurrentDictionary<KeyCache, int> _cache;
 
-
         public ImpressionsCounter(ComponentConfig config,
             IImpressionsSenderAdapter senderAdapter,
-            ITasksManager tasksManager) : base(config, tasksManager)
+            ISplitTask task,
+            ISplitTask sendBulkDataTask) : base(config, task, sendBulkDataTask)
         {
             _cache = new ConcurrentDictionary<KeyCache, int>();
             _senderAdapter = senderAdapter;
@@ -32,47 +34,40 @@ namespace Splitio.Services.Impressions.Classes
 
             if (_cache.Count >= _cacheMaxSize)
             {
-                SendBulkData();
+                _taskBulkData.Start();
             }
         }
 
-        protected override void StartTask()
+        protected override async Task SendBulkDataAsync()
         {
-            _tasksManager.StartPeriodic(() => SendBulkData(), _taskInterval * 1000, _cancellationTokenSource, "Main Impressions Count Sender.");
-        }
-
-        protected override void SendBulkData()
-        {
-            lock (_lock)
+            try
             {
                 var impressions = new ConcurrentDictionary<KeyCache, int>(_cache);
+
                 _cache.Clear();
 
                 if (impressions.Count <= 0) return;
 
-                try
+                var values = impressions
+                    .Select(x => new ImpressionsCountModel(x.Key, x.Value))
+                    .ToList();
+
+                if (values.Count <= _maxBulkSize)
                 {
-                    var values = impressions
-                        .Select(x => new ImpressionsCountModel(x.Key, x.Value))
-                        .ToList();
-
-                    if (values.Count <= _maxBulkSize)
-                    {
-                        _senderAdapter.RecordImpressionsCount(values);
-                        return;
-                    }
-
-                    while (values.Count > 0)
-                    {
-                        var bulkToPost = Util.Helper.TakeFromList(values, _maxBulkSize);
-
-                        _senderAdapter.RecordImpressionsCount(bulkToPost);
-                    }
+                    await _senderAdapter.RecordImpressionsCountAsync(values);
+                    return;
                 }
-                catch (Exception e)
+
+                while (values.Count > 0)
                 {
-                    Logger.Error("Exception caught sending impressions count.", e);
+                    var bulkToPost = Util.Helper.TakeFromList(values, _maxBulkSize);
+
+                    await _senderAdapter.RecordImpressionsCountAsync(bulkToPost);
                 }
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Exception caught sending impressions count.", e);
             }
         }
     }

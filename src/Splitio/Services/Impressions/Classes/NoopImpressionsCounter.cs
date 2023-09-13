@@ -1,5 +1,6 @@
 ﻿using Splitio.Services.Impressions.Interfaces;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -21,9 +22,10 @@ namespace Splitio.Services.Impressions.Classes
             // No op.
         }
 
-        public void Stop()
+        public Task StopAsync()
         {
             // No op.
+            return Task.FromResult(0);
         }
     }
 }

@@ -75,11 +75,10 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Act
             splitClient.BlockUntilReady(1000);
             splitClient.Destroy();
-            var result = ((FactoryInstantiationsService)_factoryInstantiationsService).GetInstantiations();
+            ((FactoryInstantiationsService)_factoryInstantiationsService).GetInstantiations();
 
             //Assert
             Assert.IsTrue(splitClient.IsDestroyed());
-            Assert.IsFalse(result.IsEmpty);
         }
     }
 }

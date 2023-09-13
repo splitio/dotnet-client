@@ -2,32 +2,38 @@
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {
     public class UniqueKeysTracker : TrackerComponent, IUniqueKeysTracker
     {
         private static readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger(typeof(UniqueKeysTracker));
-        private static readonly int IntervalToClearLongTermCache = 3600000;        
 
         private readonly IFilterAdapter _filterAdapter;
         private readonly ConcurrentDictionary<string, HashSet<string>> _cache;
         private readonly IImpressionsSenderAdapter _senderAdapter;
+        private readonly ISplitTask _cacheLongTermCleaningTask;
 
         public UniqueKeysTracker(ComponentConfig config,
             IFilterAdapter filterAdapter,
             ConcurrentDictionary<string, HashSet<string>> cache,
             IImpressionsSenderAdapter senderAdapter,
-            ITasksManager tasksManager) : base(config, tasksManager)
+            ISplitTask mtksTask,
+            ISplitTask cacheLongTermCleaningTask,
+            ISplitTask sendBulkDataTask) : base(config, mtksTask, sendBulkDataTask)
         {
             _filterAdapter = filterAdapter;
             _cache = cache;
             _senderAdapter = senderAdapter;
+            _cacheLongTermCleaningTask = cacheLongTermCleaningTask;
+            _cacheLongTermCleaningTask.SetAction(_filterAdapter.Clear);
         }
 
         #region Public Methods
@@ -45,7 +51,7 @@ namespace Splitio.Services.Impressions.Classes
 
             if (_cache.Count >= _cacheMaxSize)
             {
-                SendBulkData();
+                _taskBulkData.Start();
             }
 
             return true;
@@ -55,13 +61,19 @@ namespace Splitio.Services.Impressions.Classes
         #region Protected Methods
         protected override void StartTask()
         {
-            _tasksManager.StartPeriodic(() => SendBulkData(), _taskInterval * 1000, _cancellationTokenSource, "MTKs sender.");
-            _tasksManager.StartPeriodic(() => _filterAdapter.Clear(), IntervalToClearLongTermCache, _cancellationTokenSource, "Cache Long Term clear.");
+            base.StartTask();
+            _cacheLongTermCleaningTask.Start();
         }
 
-        protected override void SendBulkData()
+        protected override async Task StopTaskAsync()
         {
-            lock (_lock)
+            await base.StopTaskAsync();
+            await _cacheLongTermCleaningTask.StopAsync();
+        }
+
+        protected override async Task SendBulkDataAsync()
+        {
+            try
             {
                 var uniques = new ConcurrentDictionary<string, HashSet<string>>(_cache);
 
@@ -69,29 +81,26 @@ namespace Splitio.Services.Impressions.Classes
 
                 if (!uniques.Any()) return;
 
-                try
+                var values = uniques
+                    .Select(v => new Mtks(v.Key, v.Value))
+                    .ToList();
+
+                if (values.Count <= _maxBulkSize)
                 {
-                    var values = uniques
-                        .Select(v => new Mtks(v.Key, v.Value))
-                        .ToList();
-
-                    if (values.Count <= _maxBulkSize)
-                    {
-                        _senderAdapter.RecordUniqueKeys(values);
-                        return;
-                    }
-
-                    while (values.Count > 0)
-                    {
-                        var bulkToPost = Util.Helper.TakeFromList(values, _maxBulkSize);
-
-                        _senderAdapter.RecordUniqueKeys(bulkToPost);
-                    }
+                    await _senderAdapter.RecordUniqueKeysAsync(values);
+                    return;
                 }
-                catch (Exception e)
+
+                while (values.Count > 0)
                 {
-                    _logger.Error("Exception caught sending Unique Keys.", e);
+                    var bulkToPost = Util.Helper.TakeFromList(values, _maxBulkSize);
+
+                    await _senderAdapter.RecordUniqueKeysAsync(bulkToPost);
                 }
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Exception caught sending Unique Keys.", e);
             }
         }
         #endregion

@@ -1,9 +1,9 @@
-﻿namespace Splitio.Telemetry.Common
+﻿using Splitio.Services.Shared.Interfaces;
+
+namespace Splitio.Telemetry.Common
 {
-    public interface ITelemetrySyncTask
+    public interface ITelemetrySyncTask : IPeriodicTask
     {
-        void Start();
-        void Stop();
-        void RecordConfigInit();
+        void RecordConfigInit(long timeUntilSDKReady);
     }
 }

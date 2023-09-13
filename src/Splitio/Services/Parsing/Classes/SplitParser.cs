@@ -131,20 +131,23 @@ namespace Splitio.Services.Parsing
                             matcher = GetEndsWithMatcher(matcherDefinition); break;
                         case MatcherTypeEnum.CONTAINS_STRING:
                             matcher = GetContainsStringMatcher(matcherDefinition); break;
-                        case MatcherTypeEnum.IN_SPLIT_TREATMENT: matcher = GetDependencyMatcher(matcherDefinition); break;
-                        case MatcherTypeEnum.EQUAL_TO_BOOLEAN: matcher = GetEqualToBooleanMatcher(matcherDefinition); break;
-                        case MatcherTypeEnum.MATCHES_STRING: matcher = GetMatchesStringMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.IN_SPLIT_TREATMENT:
+                            matcher = GetDependencyMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.EQUAL_TO_BOOLEAN:
+                            matcher = GetEqualToBooleanMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.MATCHES_STRING:
+                            matcher = GetMatchesStringMatcher(matcherDefinition); break;
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _log.Error("Error parsing matcher", e);
+                _log.Error("Error parsing matcher", ex);
             }
 
             if (matcher == null)
             {
-                throw new Exception(string.Format("Unable to create matcher for matcher type: {0}", matcherType));
+                throw new Exception($"Unable to create matcher for matcher type: {matcherType}");
             }
 
             var attributeMatcher = new AttributeMatcher()

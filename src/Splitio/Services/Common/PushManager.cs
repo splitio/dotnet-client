@@ -1,13 +1,13 @@
 ﻿using Splitio.CommonLibraries;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EventSource;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
@@ -16,114 +16,110 @@ namespace Splitio.Services.Common
     {
         private readonly IAuthApiClient _authApiClient;
         private readonly ISplitLogger _log;
-        private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISSEHandler _sseHandler;
-        private readonly IBackOff _backOff;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
+        private readonly INotificationManagerKeeper _notificationManagerKeeper;
+        private readonly ISplitTask _refreshTokenTask;
+        private readonly IStatusManager _statusManager;
 
-        private CancellationTokenSource _cancellationTokenSourceRefreshToken;
+        private double _intervalToken;
 
         public PushManager(ISSEHandler sseHandler,
             IAuthApiClient authApiClient,
-            IWrapperAdapter wrapperAdapter,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
-            IBackOff backOff)
+            INotificationManagerKeeper notificationManagerKeeper,
+            ISplitTask periodicTask,
+            IStatusManager statusManager)
         {
             _sseHandler = sseHandler;
             _authApiClient = authApiClient;
             _log = WrapperAdapter.Instance().GetLogger(typeof(PushManager));
-            _wrapperAdapter = wrapperAdapter;
-            _backOff = backOff;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
+            _notificationManagerKeeper = notificationManagerKeeper;
+            _refreshTokenTask = periodicTask;
+            _refreshTokenTask.SetFunction(RefreshTokenLogicAsync);
+            _statusManager = statusManager;
         }
 
         #region Public Methods
-        public async Task<bool> StartSse()
+        public async Task StartAsync()
         {
+            if (_statusManager.IsDestroyed()) return;
+
             try
             {
                 var response = await _authApiClient.AuthenticateAsync();
 
+                if (_statusManager.IsDestroyed()) return;
+
                 _log.Debug($"Auth service response pushEnabled: {response.PushEnabled}.");
 
                 if (response.PushEnabled.Value && _sseHandler.Start(response.Token, response.Channels))
-                {                    
-                    _backOff.Reset();
-                    ScheduleNextTokenRefresh(response.Expiration.Value);
-                    _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.TokenRefresh, CalcularteNextTokenExpiration(response.Expiration.Value)));
-                    return true;
-                }
-                
-                StopSse();
-
-                if (response.Retry.Value)
                 {
-                    var interval = _backOff.GetInterval();
-
-                    _log.Info($"Streaming service temporarily unavailable, working in polling mode and retrying in {interval} seconds.");
-                    ScheduleNextTokenRefresh(interval);
+                    _intervalToken = response.Expiration.Value;
+                    _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.TokenRefresh, CalcularteNextTokenExpiration(_intervalToken)));
+                    return;
                 }
-                else
+
+                if (!_statusManager.IsDestroyed() && response.Retry.Value)
                 {
-                    ForceCancellationToken();
+                    _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
                 }
             }
             catch (Exception ex)
             {
-                _log.Error($"StartSse: {ex.Message}");
+                _log.Error("Somenthing went wrong connecting event source client.", ex);
             }
-
-            return false;
         }
 
-        public void StopSse()
+        public async Task StopAsync()
         {
             try
             {
-                _sseHandler.Stop();
+                await _sseHandler.StopAsync();
+                await _refreshTokenTask.StopAsync();
             }
             catch (Exception ex)
             {
                 _log.Error($"StopSse: {ex.Message}");
             }
         }
+
+        public async Task ScheduleConnectionResetAsync()
+        {
+            if (_refreshTokenTask.IsRunning())
+            {
+                _log.Debug("ScheduleConnectionReset task is running. Stoping and creating a new one.");
+                await _refreshTokenTask.StopAsync();
+            }
+
+            var intervalTime = Convert.ToInt32(_intervalToken) * 1000;
+            _log.Debug($"ScheduleNextTokenRefresh interval time : {intervalTime} milliseconds.");
+
+            _refreshTokenTask.SetInterval(intervalTime);
+            _refreshTokenTask.Start();
+
+        }
         #endregion
 
         #region Private Methods
-        private void ScheduleNextTokenRefresh(double time)
+        private static long CalcularteNextTokenExpiration(double time)
+        {
+            return CurrentTimeHelper.CurrentTimeMillis() + Convert.ToInt64(time * 1000);
+        }
+
+        private async Task RefreshTokenLogicAsync()
         {
             try
             {
-                ForceCancellationToken();
-                _cancellationTokenSourceRefreshToken = new CancellationTokenSource();
-
-                var sleepTime = Convert.ToInt32(time) * 1000;
-                _log.Debug($"ScheduleNextTokenRefresh sleep time : {sleepTime} miliseconds.");
-
-                _wrapperAdapter
-                    .TaskDelay(sleepTime)
-                    .ContinueWith((t) =>
-                    {
-                        _log.Debug("Starting ScheduleNextTokenRefresh ...");
-                        StopSse();
-                        StartSse();
-                    }, _cancellationTokenSourceRefreshToken.Token);
+                _log.Debug("Starting Streaming Refresh Token...");
+                await _sseHandler.StopAsync();
+                await StartAsync();
             }
             catch (Exception ex)
             {
-                _log.Error($"ScheduleNextTokenRefresh: {ex.Message}");
+                _log.Debug($"Somenthing went wrong refreshing streaming token.", ex);
             }
-        }
-
-        private void ForceCancellationToken()
-        {
-            if (_cancellationTokenSourceRefreshToken != null)
-                _cancellationTokenSourceRefreshToken.Cancel();            
-        }
-
-        private long CalcularteNextTokenExpiration(double time)
-        {
-            return CurrentTimeHelper.CurrentTimeMillis() + Convert.ToInt64(time * 1000);
         }
         #endregion
     }

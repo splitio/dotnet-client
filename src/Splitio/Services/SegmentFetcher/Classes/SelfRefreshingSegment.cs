@@ -11,33 +11,38 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class SelfRefreshingSegment : ISelfRefreshingSegment
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingSegment));
+        public readonly string Name;
 
-        public string Name;
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingSegment));
+
         private readonly ISegmentChangeFetcher _segmentChangeFetcher;
         private readonly ISegmentCache _segmentCache;
+        private readonly IStatusManager _statusManager;
 
-        public SelfRefreshingSegment(string name, ISegmentChangeFetcher segmentChangeFetcher, ISegmentCache segmentCache)
+        public SelfRefreshingSegment(string name,
+            ISegmentChangeFetcher segmentChangeFetcher,
+            ISegmentCache segmentCache,
+            IStatusManager statusManager)
         {
             Name = name;
-
             _segmentChangeFetcher = segmentChangeFetcher;
             _segmentCache = segmentCache;
+            _statusManager = statusManager;
         }
 
-        public async Task<bool> FetchSegment(FetchOptions fetchOptions)
+        public async Task<bool> FetchSegmentAsync(FetchOptions fetchOptions)
         {
             var success = false;
 
-            while (true)
+            while (!_statusManager.IsDestroyed())
             {
                 var changeNumber = _segmentCache.GetChangeNumber(Name);
 
                 try
                 {
-                    var response = await _segmentChangeFetcher.Fetch(Name, changeNumber, fetchOptions);
+                    var response = await _segmentChangeFetcher.FetchAsync(Name, changeNumber, fetchOptions);
 
-                    if (response == null)
+                    if (response == null || _statusManager.IsDestroyed())
                     {
                         break;
                     }

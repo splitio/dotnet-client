@@ -1,12 +1,11 @@
 ﻿using Splitio.Domain;
+using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Impressions.Interfaces
 {
-    public interface IImpressionsLog
+    public interface IImpressionsLog : IPeriodicTask
     {
-        void Start();
-        void Stop();
         int Log(IList<KeyImpression> impressions);
     }
 }

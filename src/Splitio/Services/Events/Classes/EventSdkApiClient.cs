@@ -4,13 +4,10 @@ using Splitio.Services.Common;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Events.Classes
@@ -19,37 +16,25 @@ namespace Splitio.Services.Events.Classes
     {
         private const int MaxAttempts = 3; 
         
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(EventSdkApiClient));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(EventSdkApiClient));
         
         private readonly ISplitioHttpClient _httpClient;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
-        private readonly ITasksManager _tasksManager;
-        private readonly IWrapperAdapter _wrapperAdapter;
         private readonly int _maxBulkSize;
         private readonly string _baseUrl;
 
         public EventSdkApiClient(ISplitioHttpClient httpClient,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
-            ITasksManager tasksManager,
-            IWrapperAdapter wrapperAdapter,
             string baseUrl,
             int maxBulkSize)
         {
             _httpClient = httpClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
-            _tasksManager = tasksManager;
-            _wrapperAdapter = wrapperAdapter;
             _maxBulkSize = maxBulkSize;
             _baseUrl = baseUrl;
         }
 
-        public void SendBulkEventsTask(List<Event> events)
-        {
-            _tasksManager.Start(async () => await SendBulkEventsAsync(events), new CancellationTokenSource(), "Send Bulk Events.");
-        }
-
-        #region Private Methods
-        private async Task SendBulkEventsAsync(List<Event> events)
+        public async Task SendBulkEventsAsync(List<Event> events)
         {
             try
             {
@@ -59,7 +44,7 @@ namespace Splitio.Services.Events.Classes
 
                     if (events.Count <= _maxBulkSize)
                     {
-                        await BuildJsonAndPost(events, clock);
+                        await BuildJsonAndPostAsync(events, clock);
                         return;
                     }
 
@@ -67,7 +52,7 @@ namespace Splitio.Services.Events.Classes
                     {
                         var bulkToPost = Util.Helper.TakeFromList(events, _maxBulkSize);
 
-                        await BuildJsonAndPost(bulkToPost, clock);
+                        await BuildJsonAndPostAsync(bulkToPost, clock);
                     }
                 }
             }
@@ -76,8 +61,9 @@ namespace Splitio.Services.Events.Classes
                 _log.Error("Exception caught sending bulk of events", ex);
             }
         }
-
-        private async Task BuildJsonAndPost(List<Event> events, Util.SplitStopwatch clock)
+        
+        #region Private Methods
+        private async Task BuildJsonAndPostAsync(List<Event> events, Util.SplitStopwatch clock)
         {
             var eventsJson = JsonConvert.SerializeObject(events, new JsonSerializerSettings
             {
@@ -86,11 +72,11 @@ namespace Splitio.Services.Events.Classes
 
             for (int i = 0; i < MaxAttempts; i++)
             {
-                if (i > 0) _wrapperAdapter.TaskDelay(500).Wait();
+                if (i > 0) await Task.Delay(500);
 
                 var response = await _httpClient.PostAsync(EventsUrl, eventsJson);
 
-                Util.Helper.RecordTelemetrySync(nameof(SendBulkEventsTask), response, ResourceEnum.EventSync, clock, _telemetryRuntimeProducer, _log);
+                Util.Helper.RecordTelemetrySync(nameof(SendBulkEventsAsync), response, ResourceEnum.EventSync, clock, _telemetryRuntimeProducer, _log);
 
                 if (response.IsSuccessStatusCode)
                 {

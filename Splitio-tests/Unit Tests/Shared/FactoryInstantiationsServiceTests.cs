@@ -47,7 +47,6 @@ namespace Splitio_Tests.Unit_Tests.Shared
 
             // Assert
             Assert.AreEqual(2, result[apiKey]);
-            _logMock.Verify(mock => mock.Warn("factory instantiation: You already have 1 factories with this API Key. We recommend keeping only one instance of the factory at all times(Singleton pattern) and reusing it throughout your application."), Times.Once);
 
             // ######################################################
             // #############  Increase_WhenIsNewApiKey  #############
@@ -62,7 +61,6 @@ namespace Splitio_Tests.Unit_Tests.Shared
 
             // Assert
             Assert.AreEqual(1, result[newApiKey]);
-            _logMock.Verify(mock => mock.Warn("factory instantiation: You already have an instance of the Split factory. Make sure you definitely want this additional instance. We recommend keeping only one instance of the factory at all times(Singleton pattern) and reusing it throughout your application."), Times.Once);
 
             // ####################################################################
             // #############  Increase_WhenApiKeyExists_ThanMoreOnce  #############
@@ -74,7 +72,6 @@ namespace Splitio_Tests.Unit_Tests.Shared
 
             // Assert
             Assert.AreEqual(3, result[apiKey]);
-            _logMock.Verify(mock => mock.Warn("factory instantiation: You already have 2 factories with this API Key. We recommend keeping only one instance of the factory at all times(Singleton pattern) and reusing it throughout your application."), Times.Once);
 
             // #######################################################
             // #############  Decrease_WhenApiKeyExists  #############

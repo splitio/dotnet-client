@@ -21,19 +21,19 @@ namespace Splitio.Services.Shared.Classes
 
         public void BlockUntilReady(int blockMilisecondsUntilReady)
         {
-            if (!IsSdkReady())
+            if (IsSdkReady()) return;
+            
+            if (blockMilisecondsUntilReady <= 0)
             {
-                if (blockMilisecondsUntilReady <= 0)
-                {
-                    _log.Warn("The blockMilisecondsUntilReady param has to be higher than 0.");
-                }
-                
-                if (!_statusManager.WaitUntilReady(blockMilisecondsUntilReady))
-                {
-                    _telemetryInitProducer.RecordBURTimeout();
-                    throw new TimeoutException(string.Format($"SDK was not ready in {blockMilisecondsUntilReady} miliseconds"));
-                }
+                _log.Warn("The blockMilisecondsUntilReady param has to be higher than 0.");
             }
+                
+            if (!_statusManager.WaitUntilReady(blockMilisecondsUntilReady))
+            {
+                _telemetryInitProducer.RecordBURTimeout();
+                throw new TimeoutException($"SDK was not ready in {blockMilisecondsUntilReady} milliseconds");
+            }
+            
         }
 
         public bool IsSdkReady()

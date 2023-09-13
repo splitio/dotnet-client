@@ -2,6 +2,7 @@
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource
 {
@@ -14,7 +15,6 @@ namespace Splitio.Services.EventSource
         private readonly INotificationManagerKeeper _notificationManagerKeeper;
         private readonly IEventSourceClient _eventSourceClient;
         private readonly string _streaminServiceUrl;
-
 
         public SSEHandler(string streaminServiceUrl,
             ISplitsWorker splitsWorker,
@@ -42,7 +42,7 @@ namespace Splitio.Services.EventSource
                 _log.Debug($"SSE Handler starting...");
                 var url = $"{_streaminServiceUrl}?channels={channels}&v=1.1&accessToken={token}";
 
-                return _eventSourceClient.ConnectAsync(url);
+                return _eventSourceClient.Connect(url);
             }
             catch (Exception ex)
             {
@@ -52,13 +52,13 @@ namespace Splitio.Services.EventSource
             return false;
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
             try
             {
                 if (_eventSourceClient != null)
                 {
-                    _eventSourceClient.Disconnect();
+                    await _eventSourceClient.DisconnectAsync();
                     _log.Debug($"SSE Handler stoped...");
                 }
             }
@@ -74,17 +74,17 @@ namespace Splitio.Services.EventSource
             _segmentsWorker.Start();
         }
 
-        public void StopWorkers()
+        public async Task StopWorkersAsync()
         {
-            _splitsWorker.Stop();
-            _segmentsWorker.Stop();
+            await _splitsWorker.StopAsync();
+            await _segmentsWorker.StopAsync();
         }
         #endregion
 
         #region Private Methods
         private void EventReceived(object sender, EventReceivedEventArgs e)
         {
-            _log.Debug($"Event received {e.Event}");
+            _log.Debug($"Event received {e.Event.Type}, {e.Event.Channel}");
 
             if (e.Event.Type == NotificationType.OCCUPANCY || e.Event.Type == NotificationType.CONTROL)
             {

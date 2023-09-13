@@ -31,24 +31,24 @@ namespace Splitio.Telemetry.Common
         }
 
         #region Public Methods
-        public async void RecordConfigInit(Config init)
+        public async Task RecordConfigInitAsync(Config init)
         {
-            await ExecutePost(ConfigURL, init, nameof(RecordConfigInit));
+            await ExecutePostAsync(ConfigURL, init, nameof(RecordConfigInitAsync));
         }
 
-        public async void RecordStats(Stats stats)
+        public async Task RecordStatsAsync(Stats stats)
         {
-            await ExecutePost(UsageURL, stats, nameof(RecordStats));
+            await ExecutePostAsync(UsageURL, stats, nameof(RecordStatsAsync));
         }
 
-        public async void RecordUniqueKeys(UniqueKeys uniqueKeys)
+        public async Task RecordUniqueKeysAsync(UniqueKeys uniqueKeys)
         {
-            await ExecutePost(UniqueKeysURL, uniqueKeys, nameof(RecordUniqueKeys));
+            await ExecutePostAsync(UniqueKeysURL, uniqueKeys, nameof(RecordUniqueKeysAsync));
         }
         #endregion
 
         #region Private Methods
-        private async Task ExecutePost(string url, object data, string method)
+        private async Task ExecutePostAsync(string url, object data, string method)
         {
             using (var clock = new Util.SplitStopwatch())
             {

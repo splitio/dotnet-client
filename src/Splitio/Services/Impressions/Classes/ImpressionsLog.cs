@@ -3,59 +3,41 @@ using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {
     public class ImpressionsLog : IImpressionsLog
     {
-        protected static readonly ISplitLogger Logger = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsLog));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsLog));
 
         private readonly IImpressionsSdkApiClient _apiClient;
         private readonly ISimpleProducerCache<KeyImpression> _impressionsCache;
-        private readonly CancellationTokenSource _cancellationTokenSource;
-        private readonly ITasksManager _tasksManager;
-        private readonly int _interval;
-        private readonly object _lock = new object();
-
-        private bool _running;
+        private readonly ISplitTask _task;
 
         public ImpressionsLog(IImpressionsSdkApiClient apiClient,
-            int interval,
             ISimpleCache<KeyImpression> impressionsCache,
-            ITasksManager tasksManager,
+            ISplitTask task,
             int maximumNumberOfKeysToCache = -1)
         {
             _apiClient = apiClient;
             _impressionsCache = (impressionsCache as ISimpleProducerCache<KeyImpression>) ?? new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(maximumNumberOfKeysToCache));            
-            _interval = interval;
-            _cancellationTokenSource = new CancellationTokenSource();
-            _tasksManager = tasksManager;
+            _task = task;
+            _task.SetFunction(SendBulkImpressionsAsync);
+            _task.OnStop(SendBulkImpressionsAsync);
         }
 
         public void Start()
         {
-            lock (_lock)
-            {
-                if (_running) return;
-
-                _running = true;
-                _tasksManager.StartPeriodic(() => SendBulkImpressions(), _interval * 1000, _cancellationTokenSource, "Main Impressions Log.");
-            }
+            _task.Start();
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
-            lock (_lock)
-            {
-                if (!_running) return;
-
-                _running = false;
-                _cancellationTokenSource.Cancel();
-                SendBulkImpressions();
-            }
+            await _task.StopAsync();
         }
 
         public int Log(IList<KeyImpression> impressions)
@@ -63,25 +45,24 @@ namespace Splitio.Services.Impressions.Classes
             return _impressionsCache.AddItems(impressions);
         }
 
-        private void SendBulkImpressions()
+        private async Task SendBulkImpressionsAsync()
         {
-            if (_impressionsCache.HasReachedMaxSize())
+            try
             {
-                Logger.Warn("Split SDK impressions queue is full. Impressions may have been dropped. Consider increasing capacity.");
+                if (_impressionsCache.HasReachedMaxSize())
+                {
+                    _log.Warn("Split SDK impressions queue is full. Impressions may have been dropped. Consider increasing capacity.");
+                }
+
+                var impressions = _impressionsCache.FetchAllAndClear();
+
+                if (impressions.Count <= 0) return;
+
+                await _apiClient.SendBulkImpressionsAsync(impressions);                
             }
-
-            var impressions = _impressionsCache.FetchAllAndClear();
-
-            if (impressions.Count > 0)
+            catch (Exception ex)
             {
-                try
-                {
-                    _apiClient.SendBulkImpressions(impressions);
-                }
-                catch (Exception e)
-                {
-                    Logger.Error("Exception caught updating impressions.", e);
-                }
+                _log.Debug($"Somenthing went wrong posting impressions.", ex);
             }
         }
     }

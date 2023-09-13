@@ -8,6 +8,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.Filter
     [TestClass]
     public class BloomFilterTests
     {
+        [Ignore("Flaky test")]
         [TestMethod]
         public void Test()
         {

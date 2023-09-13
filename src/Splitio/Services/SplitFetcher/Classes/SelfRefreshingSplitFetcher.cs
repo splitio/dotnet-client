@@ -4,92 +4,69 @@ using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
+using Splitio.Services.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {
     public class SelfRefreshingSplitFetcher : ISplitFetcher
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingSplitFetcher));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingSplitFetcher));
 
         private readonly ISplitChangeFetcher _splitChangeFetcher;
         private readonly ISplitParser _splitParser;
         private readonly IStatusManager _statusManager;
-        private readonly ISplitCache _splitCache;        
-        private readonly int _interval;
-        private readonly ITasksManager _taskManager;
-
-        private readonly object _lock = new object();
-        private CancellationTokenSource _cancelTokenSource;
-        private bool _running;
+        private readonly ISplitCache _splitCache;
+        private readonly ISplitTask _periodicTask;
 
         public SelfRefreshingSplitFetcher(ISplitChangeFetcher splitChangeFetcher,
             ISplitParser splitParser,
             IStatusManager statusManager,
-            int interval,
-            ITasksManager taskManager,
-            ISplitCache splitCache = null)
+            ISplitCache splitCache,
+            ISplitTask periodicTask)
         {
             _splitChangeFetcher = splitChangeFetcher;
             _splitParser = splitParser;
             _statusManager = statusManager;
-            _interval = interval;
             _splitCache = splitCache;
-            _taskManager = taskManager;
+            _periodicTask = periodicTask;
+            _periodicTask.SetFunction(async () => await FetchSplitsAsync(new FetchOptions()));
         }
 
         #region Public Methods
         public void Start()
         {
-            lock (_lock)
-            {
-                if (_running || _statusManager.IsDestroyed()) return;
-
-                _running = true;
-                _cancelTokenSource = new CancellationTokenSource();
-
-                _taskManager.StartPeriodic(async () =>
-                {
-                    await FetchSplits(new FetchOptions());
-                }, _interval * 1000, _cancelTokenSource, "Splits Fetcher.");
-            }
+            _periodicTask.Start();
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
-            lock (_lock)
-            {
-                if (!_running) return;
-
-                _running = false;
-                _cancelTokenSource.Cancel();
-                _cancelTokenSource.Dispose();
-            }
+            await _periodicTask.StopAsync();
         }
 
         public void Clear()
         {
             _splitCache.Clear();
+            _log.Debug("FeatureFlags cache disposed ...");
         }
 
-        public async Task<FetchResult> FetchSplits(FetchOptions fetchOptions)
+        public async Task<FetchResult> FetchSplitsAsync(FetchOptions fetchOptions)
         {
             var segmentNames = new List<string>();
             var success = false;
 
-            while (true)
-            {
+            while (!_statusManager.IsDestroyed())
+            {   
                 var changeNumber = _splitCache.GetChangeNumber();
 
                 try
                 {
-                    var result = await _splitChangeFetcher.Fetch(changeNumber, fetchOptions);
+                    var result = await _splitChangeFetcher.FetchAsync(changeNumber, fetchOptions);
 
-                    if (result == null)
+                    if (result == null || _statusManager.IsDestroyed())
                     {
                         break;
                     }
@@ -110,7 +87,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                 catch (Exception e)
                 {
                     _log.Error("Exception caught refreshing splits", e);
-                    Stop();
+                    await StopAsync();
                 }
                 finally
                 {
