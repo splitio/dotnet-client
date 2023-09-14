@@ -259,7 +259,7 @@ namespace Splitio.Integration_tests
             //Validate impressions sent to the be.
             await AssertSentImpressionsAsync(3, httpClientMock, impression1, impression2, impression3);
         }
-        #endregion
+        #endregion  
 
         #region GetTreatment
         [TestMethod]
@@ -291,7 +291,7 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions in listener.
-            await Task.Delay(5000);
+            // await Task.Delay(5000);
             var impressionQueue = impressionListener.GetQueue();
             var keyImpressions = impressionQueue.FetchAll();
 
@@ -355,7 +355,7 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions in listener.
-            await Task.Delay(5000);
+            // await Task.Delay(5000);
             var impressionQueue = impressionListener.GetQueue();
             var keyImpressions = impressionQueue.FetchAll();
 
@@ -401,7 +401,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("control", result);
 
             // Validate impressions in listener.
-            await Task.Delay(5000);
+            // await Task.Delay(5000);
             var impressionQueue = impressionListener.GetQueue();
             var keyImpressions = impressionQueue.FetchAll();
 
@@ -449,7 +449,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("{\"version\":\"v1\"}", result4.Config);
 
             // Validate impressions.
-            await Task.Delay(5000);
+            // await Task.Delay(5000);
             var impressionQueue = impressionListener.GetQueue();
             var keyImpressions = impressionQueue.FetchAll();
 
@@ -518,7 +518,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("{\"version\":\"v2\"}", result4.Config);
 
             // Validate impressions.
-            await Task.Delay(5000);
+            // await Task.Delay(5000);
             var impressionQueue = impressionListener.GetQueue();
             var keyImpressions = impressionQueue.FetchAll();
 
@@ -562,7 +562,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("control", result);
 
             // Validate impressions in listener.
-            await Task.Delay(5000);
+            // await Task.Delay(5000);
             var impressionQueue = impressionListener.GetQueue();
             var keyImpressions = impressionQueue.FetchAll();
 
@@ -601,7 +601,7 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions.
-            await Task.Delay(5000);
+            // await Task.Delay(5000);
             var impressionQueue = impressionListener.GetQueue();
             var keyImpressions = impressionQueue.FetchAll();
 
@@ -661,7 +661,7 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions.
-            await Task.Delay(5000);
+            // await Task.Delay(5000);
             var impressionQueue = impressionListener.GetQueue();
             var keyImpressions = impressionQueue.FetchAll();
 
@@ -726,7 +726,7 @@ namespace Splitio.Integration_tests
             Assert.IsNull(result["Test_Save_1"].Config);
 
             // Validate impressions.
-            await Task.Delay(5000);
+            // await Task.Delay(5000);
             var impressionQueue = impressionListener.GetQueue();
             var keyImpressions = impressionQueue.FetchAll();
 
@@ -794,7 +794,7 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions.
-            await Task.Delay(5000);
+            // await Task.Delay(5000);
             var impressionQueue = impressionListener.GetQueue();
             var keyImpressions = impressionQueue.FetchAll();
 
@@ -860,7 +860,7 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions.
-            await Task.Delay(5000);
+            // await Task.Delay(5000);
             var impressionQueue = impressionListener.GetQueue();
             var keyImpressions = impressionQueue.FetchAll();
 
@@ -1119,7 +1119,7 @@ namespace Splitio.Integration_tests
 
                 // Assert. 
                 Assert.IsTrue(result);
-                await Task.Delay(1000);
+                // await Task.Delay(1000);
             }
 
             //Validate Events sent to the be.
@@ -1207,7 +1207,7 @@ namespace Splitio.Integration_tests
                 else
                     Assert.IsTrue(result);
 
-                await Task.Delay(1000);
+                // await Task.Delay(1000);
             }
 
             events = events
