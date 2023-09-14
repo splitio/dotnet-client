@@ -1,6 +1,6 @@
 CHANGES
 
-7.5.1 (Sep 13, 2023)
+7.5.2 (Sep 14, 2023)
 - Fixed Destroy mechanism when called before the SDK finishes the startup logic.
   - Updated TasksManager to be sure that tasks are finishing correctly.
   - Improved log messages avoiding "The collection has been disposed. Object name: 'BlockingCollection'"
