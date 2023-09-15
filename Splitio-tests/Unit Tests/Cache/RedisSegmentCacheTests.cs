@@ -4,7 +4,6 @@ using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using StackExchange.Redis;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
@@ -16,29 +15,16 @@ namespace Splitio_Tests.Unit_Tests.Cache
         private const string segmentsKeyPrefix = "SPLITIO.segments.";
 
         [TestMethod]
-        public void RegisterSegmentTest()
-        {
-            //Arrange
-            var segmentName = "test";
-            var redisAdapterMock = new Mock<IRedisAdapter>();
-            redisAdapterMock.Setup(x => x.SAdd(It.IsAny<string>(), It.IsAny<RedisValue[]>())).Returns(1);
-            var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
-            
-            //Act
-            var result = segmentCache.RegisterSegment(segmentName);
-
-            //Assert
-            Assert.AreEqual(1, result);
-        }
-
-        [TestMethod]
         public void GetRegisteredSegmentTest()
         {
             //Arrange
             var segmentName = "segment_test";
             var redisAdapterMock = new Mock<IRedisAdapter>();
-            redisAdapterMock.Setup(x => x.SMembers(segmentsKeyPrefix + "registered")).Returns(new RedisValue[]{segmentName});
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
+
+            redisAdapterMock
+                .Setup(x => x.SMembers(segmentsKeyPrefix + "registered"))
+                .Returns(new RedisValue[] { segmentName });
 
             //Act
             var result = segmentCache.GetSegmentNames();
@@ -54,9 +40,11 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Arrange
             var segmentName = "segment_test";
             var redisAdapterMock = new Mock<IRedisAdapter>();
-            redisAdapterMock.Setup(x => x.SIsMember(segmentKeyPrefix + segmentName, "abcd")).Returns(false);
-
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
+
+            redisAdapterMock
+                .Setup(x => x.SIsMember(segmentKeyPrefix + segmentName, "abcd"))
+                .Returns(false);
 
             //Act
             var result = segmentCache.IsInSegment(segmentName, "abcd");
@@ -70,9 +58,11 @@ namespace Splitio_Tests.Unit_Tests.Cache
         {
             //Arrange
             var redisAdapterMock = new Mock<IRedisAdapter>();
-            redisAdapterMock.Setup(x => x.SIsMember(segmentKeyPrefix + "test", "abcd")).Returns(false);
-
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
+
+            redisAdapterMock
+                .Setup(x => x.SIsMember(segmentKeyPrefix + "test", "abcd"))
+                .Returns(false);
 
             //Act
             var result = segmentCache.IsInSegment("test", "abcd");
@@ -88,8 +78,11 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var changeNumber = -1;
             var segmentName = "segment_test";
             var redisAdapterMock = new Mock<IRedisAdapter>();
-            redisAdapterMock.Setup(x => x.Get(segmentNameKeyPrefix.Replace("{segmentname}", segmentName) + "till")).Returns("");
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
+
+            redisAdapterMock
+                .Setup(x => x.Get(segmentNameKeyPrefix.Replace("{segmentname}", segmentName) + "till"))
+                .Returns("");
 
             //Act
             var result = segmentCache.GetChangeNumber(segmentName);

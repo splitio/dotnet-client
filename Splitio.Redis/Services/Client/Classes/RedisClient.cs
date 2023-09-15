@@ -10,7 +10,6 @@ using Splitio.Redis.Services.Shared;
 using Splitio.Redis.Telemetry.Storages;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
-using Splitio.Services.Common;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Impressions.Classes;
@@ -18,7 +17,6 @@ using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
-using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Client.Classes
 {
