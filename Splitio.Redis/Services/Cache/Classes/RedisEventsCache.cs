@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Shared.Interfaces;
+using System.Collections.Generic;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
@@ -12,12 +12,15 @@ namespace Splitio.Redis.Services.Cache.Classes
         private readonly string _machineIP;
         private readonly string _sdkVersion;
 
-        public RedisEventsCache(IRedisAdapter redisAdapter, 
+        private readonly IRedisAdapterProducer _redisAdapterProducer;
+
+        public RedisEventsCache(IRedisAdapterProducer redisAdapter, 
             string machineName,
             string machineIP, 
             string sdkVersion, 
-            string userPrefix = null) : base(redisAdapter, userPrefix) 
+            string userPrefix = null) : base(userPrefix) 
         {
+            _redisAdapterProducer = redisAdapter;
             _machineName = machineName;
             _machineIP = machineIP;
             _sdkVersion = sdkVersion;
@@ -33,7 +36,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     e = item.Event
                 });
 
-                _redisAdapter.ListRightPush($"{RedisKeyPrefix}events", eventJson);
+                _redisAdapterProducer.ListRightPush($"{RedisKeyPrefix}events", eventJson);
             }
 
             return 0;

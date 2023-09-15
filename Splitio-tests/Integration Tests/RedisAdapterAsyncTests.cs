@@ -1,14 +1,12 @@
-﻿using Castle.Core.Smtp;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Redis.Services.Cache.Classes;
-using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
+using Splitio_Tests.Resources;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using YamlDotNet.Core.Tokens;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -16,7 +14,7 @@ namespace Splitio_Tests.Integration_Tests
     public class RedisAdapterAsyncTests
     {
         private readonly string _redisPrefix = "async-tests";
-        private IRedisAdapter _adapter;
+        private RedisAdapterForTests _adapter;
 
         [TestInitialize]
         public async Task Initialization()
@@ -35,7 +33,7 @@ namespace Splitio_Tests.Integration_Tests
             };
 
             var pool = new ConnectionPoolManager(config);
-            _adapter = new RedisAdapter(config, pool);
+            _adapter = new RedisAdapterForTests(config, pool);
 
             await CleanKeys();
         }

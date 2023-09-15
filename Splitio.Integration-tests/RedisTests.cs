@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Integration_tests.Resources;
 using Splitio.Redis.Services.Cache.Classes;
-using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
@@ -24,7 +23,7 @@ namespace Splitio.Integration_tests
         private const int Database = 0;
         private const string UserPrefix = "prefix-test";
 
-        private readonly IRedisAdapter _redisAdapter;
+        private readonly RedisAdapterForTests _redisAdapter;
         private readonly string rootFilePath;
 
         public RedisTests()
@@ -39,7 +38,7 @@ namespace Splitio.Integration_tests
                 RedisUserPrefix = UserPrefix,
             };
             var pool = new ConnectionPoolManager(config);
-            _redisAdapter = new RedisAdapter(config, pool);
+            _redisAdapter = new RedisAdapterForTests(config, pool);
 
             rootFilePath = string.Empty;
 

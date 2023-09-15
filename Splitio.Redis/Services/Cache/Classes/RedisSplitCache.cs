@@ -16,9 +16,11 @@ namespace Splitio.Redis.Services.Cache.Classes
         protected const string SplitsKeyPrefix = "splits.";
 
         private readonly ISplitParser _splitParser;
+        private readonly IRedisAdapterConsumer _redisAdapter;
 
-        public RedisSplitCache(IRedisAdapter redisAdapter, ISplitParser splitParser, string userPrefix = null) : base(redisAdapter, userPrefix)
+        public RedisSplitCache(IRedisAdapterConsumer redisAdapter, ISplitParser splitParser, string userPrefix = null) : base(userPrefix)
         {
+            _redisAdapter = redisAdapter;
             _splitParser = splitParser;
         }
 
@@ -51,18 +53,16 @@ namespace Splitio.Redis.Services.Cache.Classes
             var splitKeys = _redisAdapter.Keys(pattern);
             var splitValues = _redisAdapter.MGet(splitKeys);
 
-            if (splitValues != null && splitValues.Any())
-            {
-                var splits = splitValues
-                    .Where(x => !x.IsNull)
-                    .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s)));
+            if (splitValues == null || !splitValues.Any())
+                return new List<ParsedSplit>();
+            
+            var splits = splitValues
+                .Where(x => !x.IsNull)
+                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s)));
 
-                return splits
-                    .Where(s => s != null)
-                    .ToList();
-            }
-
-            return new List<ParsedSplit>();
+            return splits
+                .Where(s => s != null)
+                .ToList();
         }
 
         public List<string> GetKeys()

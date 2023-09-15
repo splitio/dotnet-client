@@ -14,6 +14,8 @@ namespace Splitio.Redis.Services.Cache.Classes
         private static readonly TimeSpan _expireTimeOneHour = new TimeSpan(0, 0, 3600);
         private readonly object _lock = new object();
 
+        private readonly IRedisAdapterProducer _redisAdapterProducer;
+
         private string UniqueKeysKey => "{prefix}.SPLITIO.uniquekeys"
             .Replace("{prefix}.", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
 
@@ -23,12 +25,14 @@ namespace Splitio.Redis.Services.Cache.Classes
         private string ImpressionsKey => "{prefix}.SPLITIO.impressions"
             .Replace("{prefix}.", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
         
-        public RedisImpressionsCache(IRedisAdapter redisAdapter, 
+        public RedisImpressionsCache(IRedisAdapterProducer redisAdapter, 
             string machineIP, 
             string sdkVersion, 
             string machineName, 
-            string userPrefix = null) : base(redisAdapter, machineIP, sdkVersion, machineName, userPrefix) 
-        { }
+            string userPrefix = null) : base(machineIP, sdkVersion, machineName, userPrefix) 
+        {
+            _redisAdapterProducer = redisAdapter;
+        }
 
         public int AddItems(IList<KeyImpression> items)
         {
@@ -38,11 +42,11 @@ namespace Splitio.Redis.Services.Cache.Classes
                 i = new { k = item.keyName, b = item.bucketingKey, f = item.feature, t = item.treatment, r = item.label, c = item.changeNumber, m = item.time, pt = item.previousTime }
             }));
 
-            var lengthRedis = _redisAdapter.ListRightPush(ImpressionsKey, impressions.Select(i => (RedisValue)i).ToArray());
+            var lengthRedis = _redisAdapterProducer.ListRightPush(ImpressionsKey, impressions.Select(i => (RedisValue)i).ToArray());
 
             if (lengthRedis == items.Count)
             {
-                _redisAdapter.KeyExpire(ImpressionsKey, _expireTimeOneHour);
+                _redisAdapterProducer.KeyExpire(ImpressionsKey, _expireTimeOneHour);
             }
 
             return 0;
@@ -55,7 +59,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 var lengthRedis = 0L;
                 foreach (var item in uniqueKeys)
                 {
-                    lengthRedis = _redisAdapter.ListRightPush(UniqueKeysKey, JsonConvert.SerializeObject(item));
+                    lengthRedis = _redisAdapterProducer.ListRightPush(UniqueKeysKey, JsonConvert.SerializeObject(item));
                 }
 
                 // This operation will simply do nothing if the key no longer exists (queue is empty)
@@ -64,18 +68,18 @@ namespace Splitio.Redis.Services.Cache.Classes
                 // a huge amount of memory.
                 if (lengthRedis == uniqueKeys.Count)
                 {
-                    _redisAdapter.KeyExpire(UniqueKeysKey, _expireTimeOneHour);
+                    _redisAdapterProducer.KeyExpire(UniqueKeysKey, _expireTimeOneHour);
                 }
             }
         }
 
         public void RecordImpressionsCount(Dictionary<string, int> impressionsCount)
         {
-            var result = _redisAdapter.HashIncrementAsyncBatch(ImpressionsCountKey, impressionsCount);
+            var result = _redisAdapterProducer.HashIncrementAsyncBatch(ImpressionsCountKey, impressionsCount);
 
             if (result == (impressionsCount.Count + impressionsCount.Sum(i => i.Value)))
             {
-                _redisAdapter.KeyExpire(UniqueKeysKey, _expireTimeOneHour);
+                _redisAdapterProducer.KeyExpire(UniqueKeysKey, _expireTimeOneHour);
             }
         }
     }
