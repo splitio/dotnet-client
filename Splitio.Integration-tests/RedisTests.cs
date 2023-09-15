@@ -81,7 +81,6 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions.
-            await Task.Delay(5000);
             var impressionQueue = impressionListener.GetQueue();
             var keyImpressions = impressionQueue.FetchAll();
 
@@ -229,7 +228,7 @@ namespace Splitio.Integration_tests
         // TODO: None mode is not supported yet.
         [Ignore]
         [TestMethod]
-        public async Task GetTreatment_WithImpressionModeInNone_ShouldGetUniqueKeys()
+        public void GetTreatment_WithImpressionModeInNone_ShouldGetUniqueKeys()
         {
             // Arrange.
             var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
@@ -250,7 +249,6 @@ namespace Splitio.Integration_tests
             client.GetTreatment("redo_test", "MAURO_TEST");
 
             client.Destroy();
-            await Task.Delay(500);
             var result = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.uniquekeys");
 
             // Assert.
@@ -265,7 +263,7 @@ namespace Splitio.Integration_tests
         // TODO: Optimized mode is not supported yet.
         [Ignore]
         [TestMethod]
-        public async Task GetTreatment_WithImpressionModeOptimized_ShouldGetImpressionCount()
+        public void GetTreatment_WithImpressionModeOptimized_ShouldGetImpressionCount()
         {
             // Arrange.
             var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
@@ -289,7 +287,6 @@ namespace Splitio.Integration_tests
             client.GetTreatment("redo_test", "MAURO_TEST");
 
             client.Destroy();
-            await Task.Delay(500);
             var result = _redisAdapter.HashGetAll($"{UserPrefix}.SPLITIO.impressions.count");
             var redisImpressions = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.impressions");
 
