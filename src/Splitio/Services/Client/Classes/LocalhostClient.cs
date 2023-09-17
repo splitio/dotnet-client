@@ -8,6 +8,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -16,7 +17,7 @@ namespace Splitio.Services.Client.Classes
         private const string DefaultSplitFileName = ".split";
         private const string SplitFileYml = ".yml";
         private const string SplitFileYaml = ".yaml";
-        
+
         private ILocalhostFileService _localhostFileService;
 
         private readonly FileSystemWatcher _watcher;
@@ -86,16 +87,7 @@ namespace Splitio.Services.Client.Classes
         private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
             var splits = ParseSplitFile(_fullPath);
-
-            _splitCache.Clear();
-
-            foreach (var split in splits)
-            {
-                if (split.Value != null)
-                {
-                    _splitCache.AddSplit(split.Key, split.Value);
-                }
-            }
+            _splitCache.Update(splits.ToDictionary(x => x.Key, x => x.Value));
         }
 
         private string LookupFilePath(string filePath)

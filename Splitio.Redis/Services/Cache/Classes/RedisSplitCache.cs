@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Cache.Interfaces;
@@ -18,7 +19,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public RedisSplitCache(IRedisAdapter redisAdapter,
             ISplitParser splitParser,
-            string userPrefix = null) 
+            string userPrefix = null)
             : base(redisAdapter, userPrefix)
         {
             _splitParser = splitParser;
@@ -29,7 +30,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             var key = $"{RedisKeyPrefix}{splitsKeyPrefix}till";
             var changeNumberString = _redisAdapter.Get(key);
             var result = long.TryParse(changeNumberString, out long changeNumberParsed);
-            
+
             return result ? changeNumberParsed : -1;
         }
 
@@ -62,7 +63,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                     .Where(s => s != null)
                     .ToList();
             }
-            
+
             return new List<ParsedSplit>();
         }
 
@@ -138,7 +139,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             {
                 redisKey.Add($"{RedisKeyPrefix}{splitKeyPrefix}{name}");
             }
-                        
+
             var splitValues = _redisAdapter.MGet(redisKey.ToArray());
 
             if (splitValues == null || !splitValues.Any()) return new List<ParsedSplit>();
@@ -168,6 +169,10 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             return 0; // No-op
         }
+
+        public void Update(Dictionary<string, ParsedSplit> newSplits)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
- 

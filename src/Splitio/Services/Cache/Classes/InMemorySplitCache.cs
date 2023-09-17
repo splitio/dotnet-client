@@ -48,7 +48,7 @@ namespace Splitio.Services.Cache.Classes
             }
 
             _splits.AddOrUpdate(splitName, parsedSplit, (key, oldValue) => parsedSplit);
-            
+
             IncreaseTrafficTypeCount(parsedSplit?.trafficTypeName);
 
             return exists;
@@ -65,13 +65,13 @@ namespace Splitio.Services.Cache.Classes
         }
 
         public bool RemoveSplit(string splitName)
-        {            
+        {
             var removed = _splits.TryRemove(splitName, out ParsedSplit removedSplit);
 
             if (removed)
             {
                 DecreaseTrafficTypeCount(removedSplit);
-            }            
+            }
 
             return removed;
         }
@@ -99,7 +99,7 @@ namespace Splitio.Services.Cache.Classes
         }
 
         public List<ParsedSplit> GetAllSplits()
-        {            
+        {
             return _splits
                 .Values
                 .Where(s => s != null)
@@ -108,7 +108,7 @@ namespace Splitio.Services.Cache.Classes
 
         public void Clear()
         {
-            _splits.Clear();            
+            _splits.Clear();
             _trafficTypes.Clear();
         }
 
@@ -129,7 +129,7 @@ namespace Splitio.Services.Cache.Classes
         private void DecreaseTrafficTypeCount(ParsedSplit split)
         {
             if (split == null || string.IsNullOrEmpty(split.trafficTypeName)) return;
-            
+
             if (_trafficTypes.TryGetValue(split.trafficTypeName, out int quantity))
             {
                 if (quantity <= 1)
@@ -183,6 +183,23 @@ namespace Splitio.Services.Cache.Classes
         public int SplitsCount()
         {
             return GetSplitNames().Count;
+        }
+
+        public void Update(Dictionary<string, ParsedSplit> newSplits)
+        {
+            var keysToRemove = _splits.Keys.Except(newSplits.Keys).ToArray();
+            foreach (var key in keysToRemove)
+            {
+                _splits.TryRemove(key, out ParsedSplit removedSplit);
+            }
+
+            foreach (var newSplit in newSplits)
+            {
+                if (newSplit.Value != null)
+                {
+                    _splits.AddOrUpdate(newSplit.Key, newSplit.Value, (key, oldValue) => newSplit.Value);
+                }
+            }
         }
     }
 }
