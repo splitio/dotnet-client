@@ -886,7 +886,7 @@ namespace Splitio_Tests.Integration_Tests
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", trafficTypeValidator: trafficTypeValidator.Object, eventsLog: eventLog.Object);
 
             trafficTypeValidator
-                .Setup(mock => mock.IsValid(It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(mock => mock.IsValid(It.IsAny<string>(), It.IsAny<Splitio.Enums.API>()))
                 .Returns(new ValidatorResult { Success = true }); ;
 
             // Act.

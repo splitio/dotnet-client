@@ -56,12 +56,14 @@ namespace Splitio.Services.Client.Classes
             _featureFlagCache = new InMemorySplitCache(splits);
             _blockUntilReadyService = new NoopBlockUntilReadyService();
             _manager = new SplitManager(_featureFlagCache, _blockUntilReadyService);
-            _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCache);
+            _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCache, _blockUntilReadyService);
             _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter());
             _uniqueKeysTracker = new NoopUniqueKeysTracker();
             _impressionsCounter = new NoopImpressionsCounter();
             _impressionsObserver = new NoopImpressionsObserver();
             _impressionsManager = new ImpressionsManager(null, null, _impressionsCounter, false, ImpressionsMode.Debug, null, _tasksManager, _uniqueKeysTracker, _impressionsObserver, false);
+
+            BuildClientExtension();
         }
 
         #region Public Methods

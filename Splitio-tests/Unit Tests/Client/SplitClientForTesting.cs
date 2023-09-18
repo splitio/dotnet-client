@@ -23,12 +23,13 @@ namespace Splitio_Tests.Unit_Tests.Client
             _eventsLog = eventsLog;
             _impressionsLog = impressionsLog;
             _blockUntilReadyService = blockUntilReadyService;
-            _trafficTypeValidator = new TrafficTypeValidator(featureFlagCacheConsumer);
+            _trafficTypeValidator = new TrafficTypeValidator(featureFlagCacheConsumer, _blockUntilReadyService);
             _evaluator = evaluator;
             _impressionsManager = impressionsManager;
             _syncManager = syncManager;
 
             ApiKey = "SplitClientForTesting";
+            BuildClientExtension();
         }
     }
 }

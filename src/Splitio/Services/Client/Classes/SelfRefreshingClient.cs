@@ -58,6 +58,8 @@ namespace Splitio.Services.Client.Classes
             BuildSegmentCache();
             BuildTelemetryStorage();
             BuildTelemetrySyncTask();
+
+            BuildBlockUntilReadyService();
             BuildSdkApiClients();
             BuildSplitFetcher();
             BuildTreatmentLog(config);
@@ -70,9 +72,10 @@ namespace Splitio.Services.Client.Classes
 
             BuildEventLog();
             BuildEvaluator();
-            BuildBlockUntilReadyService();
             BuildManager();
             BuildSyncManager();
+
+            BuildClientExtension();
 
             _syncManager.Start();
         }
@@ -113,7 +116,7 @@ namespace Splitio.Services.Client.Classes
             var featureFlagRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SplitsRefreshRate) : _config.SplitsRefreshRate;
             var featureFlagsTask = _tasksManager.NewPeriodicTask(Enums.Task.FeatureFlagsFetcher, featureFlagRefreshRate * 1000);
             _splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, _splitParser, _statusManager, featureFlagsTask, _featureFlagCache);
-            _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCache);
+            _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCache, _blockUntilReadyService);
         }
 
         private void BuildTreatmentLog(ConfigurationOptions config)

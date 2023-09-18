@@ -46,10 +46,11 @@ namespace Splitio.Redis.Services.Client.Classes
             BuildImpressionManager();
 
             BuildEventLog();
-            BuildBlockUntilReadyService();
             BuildManager();
             BuildEvaluator();
             BuildSyncManager();
+
+            BuildClientExtension();
 
             _syncManager.Start();
         }
@@ -84,8 +85,9 @@ namespace Splitio.Redis.Services.Client.Classes
 
             _segmentCacheConsumer = new RedisSegmentCache(_redisAdapter, _config.RedisUserPrefix);
             _splitParser = new RedisSplitParser(_segmentCacheConsumer);
-            _featureFlagCacheConsumer = new RedisSplitCache(_redisAdapter, _splitParser, _config.RedisUserPrefix);            
-            _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCacheConsumer);
+            _featureFlagCacheConsumer = new RedisSplitCache(_redisAdapter, _splitParser, _config.RedisUserPrefix);
+            _blockUntilReadyService = new RedisBlockUntilReadyService(_redisAdapter);
+            _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCacheConsumer, _blockUntilReadyService);
         }
 
         private void BuildTreatmentLog(IImpressionListener impressionListener)
@@ -134,11 +136,6 @@ namespace Splitio.Redis.Services.Client.Classes
         {
             var splitter = new Splitter();
             _evaluator = new Evaluator(_featureFlagCacheConsumer, splitter);
-        }
-
-        private void BuildBlockUntilReadyService()
-        {
-            _blockUntilReadyService = new RedisBlockUntilReadyService(_redisAdapter);
         }
 
         private void BuildTelemetryStorage()
