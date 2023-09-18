@@ -52,7 +52,6 @@ namespace Splitio.Services.Client.Classes
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config) : base()
         {
             _config = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
-            LabelsEnabled = _config.LabelsEnabled;
             ApiKey = apiKey;
 
             BuildSplitCache();
@@ -145,7 +144,7 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildImpressionManager()
         {
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, true, _config.ImpressionsMode, _telemetryRuntimeProducer, _tasksManager, _uniqueKeysTracker, _impressionsObserver);
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, true, _config.ImpressionsMode, _telemetryRuntimeProducer, _tasksManager, _uniqueKeysTracker, _impressionsObserver, _config.LabelsEnabled);
         }
 
         private void BuildEventLog()

@@ -35,7 +35,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             _impressionsManager = new Mock<IImpressionsManager>();
             _syncManager = new Mock<ISyncManager>();
 
-            _splitClient = new SplitClientForTesting(_splitCache.Object, _eventsLog.Object, _impressionsLog.Object, _blockUntilReadyService.Object, _evaluator.Object, _impressionsManager.Object, _syncManager.Object, true);
+            _splitClient = new SplitClientForTesting(_splitCache.Object, _eventsLog.Object, _impressionsLog.Object, _blockUntilReadyService.Object, _evaluator.Object, _impressionsManager.Object, _syncManager.Object);
         }
 
         #region GetTreatmentAsync
@@ -72,8 +72,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             // Assert
             Assert.AreEqual("control", result);
 
-            _impressionsManager.Verify(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _impressionsManager.Verify(mock => mock.Track(It.IsAny<List<KeyImpression>>()), Times.Never);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Never);
         }
 
         [TestMethod]
@@ -89,7 +89,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .ReturnsAsync(new TreatmentResult(Labels.DefaultRule, "on", 1000, null, 11111));
 
             _impressionsManager
-                .Setup(mock => mock.BuildImpression("key", "feature_flag_test", "on", It.IsAny<long>(), 1000, Labels.DefaultRule, It.IsAny<string>()))
+                .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()))
                 .Returns(new KeyImpression());
 
             // Act
@@ -100,8 +100,8 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             _splitClient.Destroy();
 
-            _impressionsManager.Verify(mock => mock.BuildImpression("key", "feature_flag_test", "on", It.IsAny<long>(), 1000, Labels.DefaultRule, It.IsAny<string>()), Times.Once);
-            _impressionsManager.Verify(mock => mock.Track(It.IsAny<List<KeyImpression>>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
         }
         #endregion
 
@@ -123,8 +123,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 Assert.AreEqual("control", res.Value);
             }
 
-            _impressionsManager.Verify(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _impressionsManager.Verify(mock => mock.Track(It.IsAny<List<KeyImpression>>()), Times.Never);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()), Times.Never);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Never);
         }
 
         [TestMethod]
@@ -187,7 +187,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 });
 
             _impressionsManager
-                .Setup(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()))
                 .Returns(new KeyImpression());
 
             _blockUntilReadyService
@@ -204,8 +204,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             var resultOff = result[parsedSplitOff.name];
             Assert.AreEqual("off", resultOff);
 
-            _impressionsManager.Verify(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
-            _impressionsManager.Verify(mock => mock.Track(It.IsAny<List<KeyImpression>>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()), Times.Exactly(2));
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
         }
 
         [TestMethod]
@@ -238,8 +238,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 Assert.IsNull(res.Value.Config);
             }
 
-            _impressionsManager.Verify(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _impressionsManager.Verify(mock => mock.Track(It.IsAny<List<KeyImpression>>()), Times.Never);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Never);
         }
         #endregion
 
@@ -287,7 +287,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .ReturnsAsync(new TreatmentResult(Labels.DefaultRule, treatmentExpected, null, configExpected));
 
             _impressionsManager
-                .Setup(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()))
                 .Returns(new KeyImpression());
 
             // Act
@@ -297,8 +297,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(treatmentExpected, result.Treatment);
             Assert.AreEqual(configExpected, result.Config);
 
-            _impressionsManager.Verify(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-            _impressionsManager.Verify(mock => mock.Track(It.IsAny<List<KeyImpression>>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
         }
 
         [TestMethod]
@@ -329,7 +329,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .ReturnsAsync(new TreatmentResult("label", defaultTreatment, null, configExpected));
 
             _impressionsManager
-                .Setup(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()))
                 .Returns(new KeyImpression());
 
             // Act
@@ -339,8 +339,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(defaultTreatment, result.Treatment);
             Assert.AreEqual(configExpected, result.Config);
 
-            _impressionsManager.Verify(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-            _impressionsManager.Verify(mock => mock.Track(It.IsAny<List<KeyImpression>>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
         }
 
         [TestMethod]
@@ -366,7 +366,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _impressionsManager
-                .Setup(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()))
                 .Returns(new KeyImpression());
 
             // Act
@@ -376,8 +376,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(treatmentExpected, result.Treatment);
             Assert.IsNull(result.Config);
 
-            _impressionsManager.Verify(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-            _impressionsManager.Verify(mock => mock.Track(It.IsAny<List<KeyImpression>>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
         }
 
         [TestMethod]
@@ -408,7 +408,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .ReturnsAsync(new TreatmentResult("label", defaultTreatment, null, configExpected));
 
             _impressionsManager
-                .Setup(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()))
                 .Returns(new KeyImpression());
 
             // Act
@@ -418,8 +418,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(defaultTreatment, result.Treatment);
             Assert.AreEqual(configExpected, result.Config);
 
-            _impressionsManager.Verify(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-            _impressionsManager.Verify(mock => mock.Track(It.IsAny<List<KeyImpression>>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
         }
 
         [TestMethod]
@@ -450,7 +450,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .ReturnsAsync(new TreatmentResult("label", defaultTreatment, config: configExpected));
 
             _impressionsManager
-                .Setup(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()))
                 .Returns(new KeyImpression());
 
             // Act
@@ -460,8 +460,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(defaultTreatment, result.Treatment);
             Assert.AreEqual(configExpected, result.Config);
 
-            _impressionsManager.Verify(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-            _impressionsManager.Verify(mock => mock.Track(It.IsAny<List<KeyImpression>>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
         }
 
         [TestMethod]
@@ -576,8 +576,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual("control", result.Treatment);
             Assert.IsNull(result.Config);
 
-            _impressionsManager.Verify(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _impressionsManager.Verify(mock => mock.Track(It.IsAny<List<KeyImpression>>()), Times.Never);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Never);
         }
         #endregion
 
@@ -600,8 +600,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 Assert.IsNull(res.Value.Config);
             }
 
-            _impressionsManager.Verify(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _impressionsManager.Verify(mock => mock.Track(It.IsAny<List<KeyImpression>>()), Times.Never);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()), Times.Never);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Never);
         }
 
         [TestMethod]
@@ -664,7 +664,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 });
 
             _impressionsManager
-                .Setup(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()))
                 .Returns(new KeyImpression());
 
             _blockUntilReadyService
@@ -683,8 +683,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual("off", resultOff.Treatment);
             Assert.AreEqual(configExpectedOff, resultOff.Config);
 
-            _impressionsManager.Verify(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
-            _impressionsManager.Verify(mock => mock.Track(It.IsAny<List<KeyImpression>>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()), Times.Exactly(2));
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
         }
 
         [TestMethod]
@@ -717,8 +717,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 Assert.IsNull(res.Value.Config);
             }
 
-            _impressionsManager.Verify(mock => mock.BuildImpression(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _impressionsManager.Verify(mock => mock.Track(It.IsAny<List<KeyImpression>>()), Times.Never);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<string>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Never);
         }
         #endregion
     }

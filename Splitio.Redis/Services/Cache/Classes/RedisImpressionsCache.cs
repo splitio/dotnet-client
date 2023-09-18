@@ -6,6 +6,7 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
@@ -24,29 +25,35 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         private string ImpressionsKey => "{prefix}.SPLITIO.impressions"
             .Replace("{prefix}.", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
-        
-        public RedisImpressionsCache(IRedisAdapterProducer redisAdapter, 
-            string machineIP, 
-            string sdkVersion, 
-            string machineName, 
-            string userPrefix = null) : base(machineIP, sdkVersion, machineName, userPrefix) 
+
+        public RedisImpressionsCache(IRedisAdapterProducer redisAdapter,
+            string machineIP,
+            string sdkVersion,
+            string machineName,
+            string userPrefix = null) : base(machineIP, sdkVersion, machineName, userPrefix)
         {
             _redisAdapterProducer = redisAdapter;
         }
 
-        public int AddItems(IList<KeyImpression> items)
+        public int Add(IList<KeyImpression> items)
         {
-            var impressions = items.Select(item => JsonConvert.SerializeObject(new
-            {
-                m = new { s = SdkVersion, i = MachineIp, n = MachineName },
-                i = new { k = item.keyName, b = item.bucketingKey, f = item.feature, t = item.treatment, r = item.label, c = item.changeNumber, m = item.time, pt = item.previousTime }
-            }));
-
-            var lengthRedis = _redisAdapterProducer.ListRightPush(ImpressionsKey, impressions.Select(i => (RedisValue)i).ToArray());
+            var lengthRedis = _redisAdapterProducer.ListRightPush(ImpressionsKey, GetImpressions(items));
 
             if (lengthRedis == items.Count)
             {
                 _redisAdapterProducer.KeyExpire(ImpressionsKey, _expireTimeOneHour);
+            }
+
+            return 0;
+        }
+
+        public async Task<int> AddAsync(IList<KeyImpression> items)
+        {
+            var lengthRedis = await _redisAdapterProducer.ListRightPushAsync(ImpressionsKey, GetImpressions(items));
+
+            if (lengthRedis == items.Count)
+            {
+                await _redisAdapterProducer.KeyExpireAsync(ImpressionsKey, _expireTimeOneHour);
             }
 
             return 0;
@@ -81,6 +88,19 @@ namespace Splitio.Redis.Services.Cache.Classes
             {
                 _redisAdapterProducer.KeyExpire(UniqueKeysKey, _expireTimeOneHour);
             }
+        }
+
+        private RedisValue[] GetImpressions(IList<KeyImpression> items)
+        {
+            var impressions = items.Select(item => JsonConvert.SerializeObject(new
+            {
+                m = new { s = SdkVersion, i = MachineIp, n = MachineName },
+                i = new { k = item.keyName, b = item.bucketingKey, f = item.feature, t = item.treatment, r = item.label, c = item.changeNumber, m = item.time, pt = item.previousTime }
+            }));
+
+            return impressions
+                .Select(i => (RedisValue)i)
+                .ToArray();
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
+using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Impressions.Classes;
-using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,13 +13,13 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     [TestClass]
     public class RedisImpressionsLogUnitTests
     {
-        private Mock<ISimpleCache<KeyImpression>> _impressionsCache;
+        private Mock<IImpressionsCache> _impressionsCache;
         private RedisImpressionLog _redisImpressionLog;
 
         [TestInitialize]
         public void Initialization()
         {
-            _impressionsCache = new Mock<ISimpleCache<KeyImpression>>();
+            _impressionsCache = new Mock<IImpressionsCache>();
 
             _redisImpressionLog = new RedisImpressionLog(_impressionsCache.Object);
         }
@@ -37,7 +37,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _redisImpressionLog.Log(impressions);
 
             //Assert
-            _impressionsCache.Verify(mock => mock.AddItems(It.IsAny<IList<KeyImpression>>()), Times.Once());
+            _impressionsCache.Verify(mock => mock.Add(It.IsAny<IList<KeyImpression>>()), Times.Once());
         }
 
         [TestMethod]
@@ -56,13 +56,13 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             //Assert
             _impressionsCache
-                .Verify(mock => mock.AddItems(It.Is<IList<KeyImpression>>(v => v.Any(ki => ki.keyName == key.matchingKey
-                                                                                       && ki.feature == "test"
-                                                                                       && ki.treatment == "on"
-                                                                                       && ki.time == 7000
-                                                                                       && ki.changeNumber == 1
-                                                                                       && ki.label == "test-label"
-                                                                                       && ki.bucketingKey == key.bucketingKey))), Times.Once());
+                .Verify(mock => mock.Add(It.Is<IList<KeyImpression>>(v => v.Any(ki => ki.keyName == key.matchingKey && 
+                                                                                      ki.feature == "test" &&
+                                                                                      ki.treatment == "on" &&
+                                                                                      ki.time == 7000 &&
+                                                                                      ki.changeNumber == 1 &&
+                                                                                      ki.label == "test-label" &&
+                                                                                      ki.bucketingKey == key.bucketingKey))), Times.Once());
         }
 
         [TestMethod]

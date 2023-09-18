@@ -6,7 +6,6 @@ using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Shared.Interfaces;
-using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {
@@ -18,8 +17,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             IBlockUntilReadyService blockUntilReadyService,
             IEvaluator evaluator,
             IImpressionsManager impressionsManager,
-            ISyncManager syncManager,
-            bool labelsEnabled = false)
+            ISyncManager syncManager)
             : base()
         {
             _eventsLog = eventsLog;
@@ -29,7 +27,6 @@ namespace Splitio_Tests.Unit_Tests.Client
             _evaluator = evaluator;
             _impressionsManager = impressionsManager;
             _syncManager = syncManager;
-            LabelsEnabled = labelsEnabled;
 
             ApiKey = "SplitClientForTesting";
         }
