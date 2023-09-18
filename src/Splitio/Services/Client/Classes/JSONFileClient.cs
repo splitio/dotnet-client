@@ -31,6 +31,7 @@ namespace Splitio.Services.Client.Classes
             ITrafficTypeValidator trafficTypeValidator = null,
             IImpressionsManager impressionsManager = null) : base()
         {
+            ApiKey = "localhost";
             _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
 
             var segmentFetcher = new JSONFileSegmentFetcher(segmentsFilePath, _segmentCache);
@@ -49,26 +50,16 @@ namespace Splitio.Services.Client.Classes
             }
 
             _featureFlagCache = featureFlagCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits));
-
             _impressionsLog = impressionsLog;
-
-            LabelsEnabled = isLabelsEnabled;
-
             _eventsLog = eventsLog;
             _trafficTypeValidator = trafficTypeValidator;
-            
             _blockUntilReadyService = new NoopBlockUntilReadyService();
             _manager = new SplitManager(_featureFlagCache, _blockUntilReadyService);
-
-            ApiKey = "localhost";
-
-            var splitter = new Splitter();
-            _evaluator = new Evaluator.Evaluator(_featureFlagCache, splitter);
-
+            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter());
             _uniqueKeysTracker = new NoopUniqueKeysTracker();
             _impressionsCounter = new NoopImpressionsCounter();
             _impressionsObserver = new NoopImpressionsObserver();
-            _impressionsManager = impressionsManager ?? new ImpressionsManager(impressionsLog, null, _impressionsCounter, false, ImpressionsMode.Debug, null, _tasksManager, _uniqueKeysTracker, _impressionsObserver);
+            _impressionsManager = impressionsManager ?? new ImpressionsManager(impressionsLog, null, _impressionsCounter, false, ImpressionsMode.Debug, null, _tasksManager, _uniqueKeysTracker, _impressionsObserver, isLabelsEnabled);
         }
 
         #region Public Methods
