@@ -77,14 +77,5 @@ namespace Splitio.Redis.Telemetry.Storages
         {
             // No-Op.
         }
-
-        private string BuildConfigJsonData(Config config)
-        {
-            return JsonConvert.SerializeObject(new
-            {
-                t = new { oM = config.OperationMode, st = config.Storage, aF = config.ActiveFactories, rF = config.RedundantActiveFactories, t = config.Tags },
-                m = new { i = _machineIp, n = _machineName, s = _sdkVersion }
-            });
-        }
     }
 }

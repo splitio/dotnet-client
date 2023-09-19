@@ -1,4 +1,5 @@
 ﻿using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Interfaces;
@@ -64,7 +65,7 @@ namespace Splitio.Redis.Services.Common
         {
             var config = new Config
             {
-                OperationMode = 1,
+                OperationMode = (int)Mode.Consumer,
                 Storage = Constants.StorageType.Redis,
                 ActiveFactories = _factoryInstantiationsService.GetActiveFactories(),
                 RedundantActiveFactories = _factoryInstantiationsService.GetRedundantActiveFactories()
