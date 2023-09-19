@@ -5,14 +5,14 @@ namespace Splitio.Domain
     public class MultipleEvaluatorResult
     {
         public MultipleEvaluatorResult() { }
-        public MultipleEvaluatorResult(Dictionary<string, TreatmentResult> results, long elapsedMilliseconds, bool exception)
+        public MultipleEvaluatorResult(List<TreatmentResult> results, long elapsedMilliseconds, bool exception)
         {
-            TreatmentResults = results;
+            Results = results;
             ElapsedMilliseconds = elapsedMilliseconds;
             Exception = exception;
         }
 
-        public Dictionary<string, TreatmentResult> TreatmentResults { get; set; }
+        public List<TreatmentResult> Results { get; set; }
         public long ElapsedMilliseconds { get; set; }
         public bool Exception { get; set; }
     }

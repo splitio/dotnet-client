@@ -21,8 +21,11 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
-                .Returns(new TreatmentResult("label", "on"));
+                .Setup(mock => mock.EvaluateFeatures(key, new List<string> { "test1" }, null))
+                .Returns(new MultipleEvaluatorResult
+                {
+                    Results = new List<TreatmentResult> { new TreatmentResult("test1", "label", "on") }
+                });
 
             //Act
             var result = matcher.Match(key, null, evaluatorMock.Object);
@@ -41,8 +44,11 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
-                .Returns(new TreatmentResult("label", "on"));
+                .Setup(mock => mock.EvaluateFeatures(key, new List<string> { "test1" }, null))
+                .Returns(new MultipleEvaluatorResult
+                {
+                    Results = new List<TreatmentResult> { new TreatmentResult("test1", "label", "on") }
+                });
 
             //Act
             var result = matcher.Match(key, null, evaluatorMock.Object);
@@ -76,8 +82,11 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
-                .Returns(new TreatmentResult("label", "on"));
+                .Setup(mock => mock.EvaluateFeatures(key, new List<string> { "test1" }, null))
+                .Returns(new MultipleEvaluatorResult
+                {
+                    Results = new List<TreatmentResult> { new TreatmentResult("test1", "label", "on") }
+                });
 
             //Act
             var result = matcher.Match(key, null, evaluatorMock.Object);
@@ -96,8 +105,11 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
-                .Returns(new TreatmentResult("label", "on"));
+                .Setup(mock => mock.EvaluateFeatures(key, new List<string> { "test1" }, null))
+                .Returns(new MultipleEvaluatorResult
+                {
+                    Results = new List<TreatmentResult> { new TreatmentResult("test1", "label", "on") }
+                });
 
             //Act
             var result = matcher.Match(123, null, evaluatorMock.Object);
@@ -116,8 +128,11 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
-                .Returns(new TreatmentResult("label", "on"));
+                .Setup(mock => mock.EvaluateFeatures(key, new List<string> { "test1" }, null))
+                .Returns(new MultipleEvaluatorResult
+                {
+                    Results = new List<TreatmentResult> { new TreatmentResult("test1", "label", "on") }
+                });
 
             //Act
             var result = matcher.Match(DateTime.UtcNow, null, evaluatorMock.Object);
@@ -137,8 +152,11 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
-                .Returns(new TreatmentResult("label", "on"));
+                .Setup(mock => mock.EvaluateFeatures(key, new List<string> { "test1" }, null))
+                .Returns(new MultipleEvaluatorResult
+                {
+                    Results = new List<TreatmentResult> { new TreatmentResult("test1", "label", "on") }
+                });
 
             //Act
             var result = matcher.Match(DateTime.UtcNow, null, evaluatorMock.Object);
@@ -157,8 +175,11 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
-                .Returns(new TreatmentResult("label", "on"));
+                .Setup(mock => mock.EvaluateFeatures(key, new List<string> { "test1" }, null))
+                .Returns(new MultipleEvaluatorResult
+                {
+                    Results = new List<TreatmentResult> { new TreatmentResult("test1", "label", "on") }
+                });
 
             //Act
             var result = matcher.Match("test", null, evaluatorMock.Object);
@@ -177,8 +198,11 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
-                .Returns(new TreatmentResult("label", "on"));
+                .Setup(mock => mock.EvaluateFeatures(key, new List<string> { "test1" }, null))
+                .Returns(new MultipleEvaluatorResult
+                {
+                    Results = new List<TreatmentResult> { new TreatmentResult("test1", "label", "on") }
+                });
 
             //Act
             var result = matcher.Match(true, null, evaluatorMock.Object);

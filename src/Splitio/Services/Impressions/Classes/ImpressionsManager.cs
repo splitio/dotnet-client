@@ -51,11 +51,11 @@ namespace Splitio.Services.Impressions.Classes
         }
 
         #region Public Methods
-        public KeyImpression Build(TreatmentResult result, Key key, string feature)
+        public KeyImpression Build(TreatmentResult result, Key key)
         {
             if (Labels.SplitNotFound.Equals(result.Label)) return null;
 
-            var impression = new KeyImpression(key.matchingKey, feature, result.Treatment, result.ImpTime, result.ChangeNumber, _labelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null);
+            var impression = new KeyImpression(key.matchingKey, result.FeatureFlagName, result.Treatment, result.ImpTime, result.ChangeNumber, _labelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null);
 
             try
             {
@@ -67,8 +67,8 @@ namespace Splitio.Services.Impressions.Classes
                         break;
                     // In NONE mode we should track the total amount of evaluations and the unique keys.
                     case ImpressionsMode.None:
-                        _impressionsCounter.Inc(feature, result.ImpTime);
-                        _uniqueKeysTracker.Track(key.matchingKey, feature);
+                        _impressionsCounter.Inc(result.FeatureFlagName, result.ImpTime);
+                        _uniqueKeysTracker.Track(key.matchingKey, result.FeatureFlagName);
                         break;
                     // In OPTIMIZED mode we should track the total amount of evaluations and deduplicate the impressions.
                     case ImpressionsMode.Optimized:
@@ -76,7 +76,7 @@ namespace Splitio.Services.Impressions.Classes
                         ShouldCalculatePreviousTime(impression);
 
                         if (impression.previousTime.HasValue)
-                            _impressionsCounter.Inc(feature, result.ImpTime);
+                            _impressionsCounter.Inc(result.FeatureFlagName, result.ImpTime);
 
                         impression.Optimized = ShouldQueueImpression(impression);
                         break;

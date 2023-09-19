@@ -1,4 +1,5 @@
 ﻿using Splitio.CommonLibraries;
+using Splitio.Constants;
 using Splitio.Domain;
 using Splitio.Services.Cache.Filter;
 using Splitio.Services.Cache.Interfaces;
@@ -74,7 +75,8 @@ namespace Splitio.Services.Client.Classes
         #region Public Async Methods
         public async Task<string> GetTreatmentAsync(string key, string feature, Dictionary<string, object> attributes = null)
         {
-            var result = await GetTreatmentAsync(Enums.API.GetTreatmentAsync, new Key(key, null), feature, attributes);
+            var evaluationResult = await GetTreatmentsAsync(Enums.API.GetTreatmentAsync, new Key(key, null), new List<string> { feature }, attributes);
+            var result = evaluationResult.FirstOrDefault();
 
             return result.Treatment;
         }
@@ -84,12 +86,15 @@ namespace Splitio.Services.Client.Classes
             var results = await GetTreatmentsAsync(Enums.API.GetTreatmentsAsync, new Key(key, null), features, attributes);
 
             return results
-                .ToDictionary(r => r.Key, r => r.Value.Treatment);
+                .ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
         }
 
         public async Task<SplitResult> GetTreatmentWithConfigAsync(string key, string feature, Dictionary<string, object> attributes = null)
         {
-            return await GetTreatmentAsync(Enums.API.GetTreatmentWithConfigAsync, new Key(key, null), feature, attributes);
+            var evaluationResult = await GetTreatmentsAsync(Enums.API.GetTreatmentWithConfigAsync, new Key(key, null), new List<string> { feature }, attributes);
+            var result = evaluationResult.FirstOrDefault();
+
+            return new SplitResult(result.Treatment, result.Config);
         }
 
         public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigAsync(string key, List<string> features, Dictionary<string, object> attributes = null)
@@ -97,10 +102,10 @@ namespace Splitio.Services.Client.Classes
             var results = await GetTreatmentsAsync(Enums.API.GetTreatmentsWithConfigAsync, new Key(key, null), features, attributes);
 
             return results
-                .ToDictionary(r => r.Key, r => new SplitResult
+                .ToDictionary(r => r.FeatureFlagName, r => new SplitResult
                 {
-                    Treatment = r.Value.Treatment,
-                    Config = r.Value.Config
+                    Treatment = r.Treatment,
+                    Config = r.Config
                 });
         }
 
@@ -121,7 +126,11 @@ namespace Splitio.Services.Client.Classes
         #region Public Sync Methods
         public virtual string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null)
         {
-            var result = GetTreatmentSync(Enums.API.GetTreatment, key, feature, attributes);
+            var evaluationResult = GetTreatmentsSync(Enums.API.GetTreatment, key, new List<string> { feature }, attributes);
+
+            if (!evaluationResult.Any()) return Gral.Control;
+
+            var result = evaluationResult.FirstOrDefault();
 
             return result.Treatment;
         }
@@ -138,7 +147,13 @@ namespace Splitio.Services.Client.Classes
 
         public SplitResult GetTreatmentWithConfig(Key key, string feature, Dictionary<string, object> attributes = null)
         {
-            return GetTreatmentSync(Enums.API.GetTreatmentWithConfig, key, feature, attributes);
+            var evaluationResult = GetTreatmentsSync(Enums.API.GetTreatmentWithConfig, key, new List<string> { feature }, attributes);
+
+            if (!evaluationResult.Any()) return new SplitResult(Gral.Control, null);
+
+            var result = evaluationResult.FirstOrDefault();
+
+            return new SplitResult(result.Treatment, result.Config);
         }
 
         public Dictionary<string, SplitResult> GetTreatmentsWithConfig(string key, List<string> features, Dictionary<string, object> attributes = null)
@@ -151,10 +166,10 @@ namespace Splitio.Services.Client.Classes
             var results = GetTreatmentsSync(Enums.API.GetTreatmentsWithConfig, key, features, attributes);
 
             return results
-                .ToDictionary(r => r.Key, r => new SplitResult
+                .ToDictionary(r => r.FeatureFlagName, r => new SplitResult
                 {
-                    Treatment = r.Value.Treatment,
-                    Config = r.Value.Config
+                    Treatment = r.Treatment,
+                    Config = r.Config
                 });
         }
 
@@ -168,7 +183,7 @@ namespace Splitio.Services.Client.Classes
             var results = GetTreatmentsSync(Enums.API.GetTreatments, key, features, attributes);
 
             return results
-                .ToDictionary(r => r.Key, r => r.Value.Treatment);
+                .ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
         }
 
         public virtual bool Track(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null)
@@ -290,27 +305,9 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Private Async Methods
-        private async Task<SplitResult> GetTreatmentAsync(Enums.API method, Key key, string featureFlagName, Dictionary<string, object> attributes = null)
+        private async Task<List<TreatmentResult>> GetTreatmentsAsync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            if (!_clientExtensionService.TreatmentValidations(method, key, featureFlagName, _log, out var ffNameSanitized))
-                return new SplitResult(Constants.Gral.Control, null);
-
-            var evaluatorResult = await _evaluator.EvaluateFeatureAsync(key, ffNameSanitized, attributes);
-            
-            if (evaluatorResult.Exception) await _clientExtensionService.RecordExceptionAsync(method);
-
-            await _clientExtensionService.RecordLatencyAsync(method, evaluatorResult.ElapsedMilliseconds);
-
-            var impression = _impressionsManager.Build(evaluatorResult, key, ffNameSanitized);
-            
-            if (impression != null) await _impressionsManager.TrackAsync(new List<KeyImpression> { impression });
-
-            return new SplitResult(evaluatorResult.Treatment, evaluatorResult.Config);
-        }
-
-        private async Task<Dictionary<string, TreatmentResult>> GetTreatmentsAsync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes = null)
-        {
-            features = _clientExtensionService.TreatmentsValidations(method, key, features, _log, out Dictionary<string, TreatmentResult> controlTreatments);
+            features = _clientExtensionService.TreatmentsValidations(method, key, features, _log, out List<TreatmentResult> controlTreatments);
 
             if (controlTreatments != null) return controlTreatments;
 
@@ -320,7 +317,7 @@ namespace Splitio.Services.Client.Classes
 
             await _clientExtensionService.RecordLatencyAsync(method, results.ElapsedMilliseconds);
 
-            var toReturn = ParseTreatmentsAndRecordTelemetry(method, results, key, out var impressions);
+            var toReturn = ParseTreatmentsAndRecordTelemetry(results, key, out var impressions);
 
             if (impressions.Any()) await _impressionsManager.TrackAsync(impressions);
 
@@ -329,27 +326,9 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Private Methods
-        private SplitResult GetTreatmentSync(Enums.API method, Key key, string featureFlagName, Dictionary<string, object> attributes = null)
+        private List<TreatmentResult> GetTreatmentsSync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            if (!_clientExtensionService.TreatmentValidations(method, key, featureFlagName, _log, out var ffNameSanitized))
-                return new SplitResult(Constants.Gral.Control, null);
-
-            var evaluatorResult = _evaluator.EvaluateFeature(key, ffNameSanitized, attributes);
-
-            if (evaluatorResult.Exception) _clientExtensionService.RecordException(method);
-
-            _clientExtensionService.RecordLatency(method, evaluatorResult.ElapsedMilliseconds);
-
-            var impression = _impressionsManager.Build(evaluatorResult, key, ffNameSanitized);
-            
-            if (impression != null) _impressionsManager.Track(new List<KeyImpression> { impression });
-
-            return new SplitResult(evaluatorResult.Treatment, evaluatorResult.Config);
-        }
-
-        private Dictionary<string, TreatmentResult> GetTreatmentsSync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes = null)
-        {
-            features = _clientExtensionService.TreatmentsValidations(method, key, features, _log, out Dictionary<string, TreatmentResult> controlTreatments);
+            features = _clientExtensionService.TreatmentsValidations(method, key, features, _log, out List<TreatmentResult> controlTreatments);
 
             if (controlTreatments != null) return controlTreatments;
 
@@ -359,27 +338,24 @@ namespace Splitio.Services.Client.Classes
 
             _clientExtensionService.RecordLatency(method, results.ElapsedMilliseconds);
 
-            var toReturn = ParseTreatmentsAndRecordTelemetry(method, results, key, out var impressions);
+            var toReturn = ParseTreatmentsAndRecordTelemetry(results, key, out var impressions);
 
             if (impressions.Any()) _impressionsManager.Track(impressions);
 
             return toReturn;
         }
 
-        private Dictionary<string, TreatmentResult> ParseTreatmentsAndRecordTelemetry(Enums.API method, MultipleEvaluatorResult results, Key key, out List<KeyImpression> impressionsQueue)
+        private List<TreatmentResult> ParseTreatmentsAndRecordTelemetry(MultipleEvaluatorResult results, Key key, out List<KeyImpression> impressionsQueue)
         {
             impressionsQueue = new List<KeyImpression>();
-            var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
 
-            foreach (var treatmentResult in results.TreatmentResults)
+            foreach (var treatmentResult in results.Results)
             {
-                treatmentsForFeatures.Add(treatmentResult.Key, treatmentResult.Value);
-
-                var impression = _impressionsManager.Build(treatmentResult.Value, key, treatmentResult.Key);
+                var impression = _impressionsManager.Build(treatmentResult, key);
                 if (impression != null) impressionsQueue.Add(impression);
             }
 
-            return treatmentsForFeatures;
+            return results.Results;
         }
         #endregion
     }
