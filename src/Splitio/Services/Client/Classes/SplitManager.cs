@@ -41,7 +41,7 @@ namespace Splitio.Services.Client.Classes
         {
             if (!IsSdkReady(nameof(SplitAsync))) return null;
 
-            if (!IsFeatureFlagNameValid(nameof(SplitAsync), featureName, out featureName)) return null;
+            if (!IsFeatureFlagNameValid(Enums.API.SplitAsync, featureName, out featureName)) return null;
 
             var featureFlag = await _featureFlagCacheConsumer.GetSplitAsync(featureName);
 
@@ -70,7 +70,7 @@ namespace Splitio.Services.Client.Classes
         {
             if (!IsSdkReady(nameof(Split))) return null;
 
-            if (!IsFeatureFlagNameValid(nameof(Split), featureName, out featureName)) return null;
+            if (!IsFeatureFlagNameValid(Enums.API.Split, featureName, out featureName)) return null;
 
             var featureFlag = _featureFlagCacheConsumer.GetSplit(featureName);
 
@@ -104,7 +104,7 @@ namespace Splitio.Services.Client.Classes
             return true;
         }
 
-        private bool IsFeatureFlagNameValid(string method, string featureName, out string featureNameUpdated)
+        private bool IsFeatureFlagNameValid(Enums.API method, string featureName, out string featureNameUpdated)
         {
             var result = _splitNameValidator.SplitNameIsValid(featureName, method);
 
