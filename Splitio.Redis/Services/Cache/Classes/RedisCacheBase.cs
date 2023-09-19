@@ -1,12 +1,8 @@
-﻿using Splitio.Redis.Services.Cache.Interfaces;
-
-namespace Splitio.Redis.Services.Cache.Classes
+﻿namespace Splitio.Redis.Services.Cache.Classes
 {
     public abstract class RedisCacheBase
     {
         private const string RedisKeyPrefixFormat = "SPLITIO/{sdk-language-version}/{instance-id}/";
-
-        protected IRedisAdapter _redisAdapter;
 
         protected string RedisKeyPrefix;
         protected string UserPrefix;
@@ -14,11 +10,8 @@ namespace Splitio.Redis.Services.Cache.Classes
         protected string MachineIp;
         protected string MachineName;
 
-        public RedisCacheBase(IRedisAdapter redisAdapter, 
-            string userPrefix = null)
+        public RedisCacheBase(string userPrefix = null)
         {
-            _redisAdapter = redisAdapter;
-
             UserPrefix = userPrefix;
             RedisKeyPrefix = "SPLITIO.";
 
@@ -28,14 +21,11 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
         }
 
-        public RedisCacheBase(IRedisAdapter redisAdapter, 
-            string machineIP, 
-            string sdkVersion, 
-            string machineName, 
+        public RedisCacheBase(string machineIP,
+            string sdkVersion,
+            string machineName,
             string userPrefix = null)
         {
-            _redisAdapter = redisAdapter;
-
             UserPrefix = userPrefix;
             MachineIp = machineIP;
             SdkVersion = sdkVersion;

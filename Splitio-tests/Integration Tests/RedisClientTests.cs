@@ -21,7 +21,7 @@ namespace Splitio_Tests.Integration_Tests
         private const string API_KEY = "redis_api_key";
 
         private ConfigurationOptions config;
-        private IRedisAdapter _redisAdapter;
+        private RedisAdapterForTests _redisAdapter;
 
         [TestInitialize]
         public void Initialization()
@@ -51,7 +51,7 @@ namespace Splitio_Tests.Integration_Tests
                 RedisUserPrefix = _prefix
             };
             var pool = new ConnectionPoolManager(rconfig);
-            _redisAdapter = new RedisAdapter(rconfig, pool);
+            _redisAdapter = new RedisAdapterForTests(rconfig, pool);
 
             CleanKeys();
             LoadSplits();

@@ -2,6 +2,7 @@
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
+using Splitio_Tests.Resources;
 using StackExchange.Redis;
 using System;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace Splitio_Tests.Integration_Tests
     public class RedisAdapterTests
     {
         private readonly string _userPrefix = "adapter-test";
-        IRedisAdapter adapter;
+        RedisAdapterForTests adapter;
 
         [TestInitialize]
         public void Initialization()
@@ -31,7 +32,7 @@ namespace Splitio_Tests.Integration_Tests
             };
 
             var pool = new ConnectionPoolManager(config);
-            adapter = new RedisAdapter(config, pool);
+            adapter = new RedisAdapterForTests(config, pool);
 
             CleanKeys();
         }
@@ -57,7 +58,7 @@ namespace Splitio_Tests.Integration_Tests
             var config = new RedisConfig();
             var pool = new ConnectionPoolManager(config);
 
-            var adapter = new RedisAdapter(config, pool);
+            var adapter = new RedisAdapterForTests(config, pool);
 
             //Act
             var isSet = adapter.Set($"{_userPrefix}-test_key", "test_value");
@@ -178,7 +179,7 @@ namespace Splitio_Tests.Integration_Tests
             var config = new RedisConfig();
             var pool = new ConnectionPoolManager(config);
 
-            var adapter = new RedisAdapter(config, pool);
+            var adapter = new RedisAdapterForTests(config, pool);
 
             //Act
             var isDel = adapter.Del(new RedisKey[] { $"{_userPrefix}-testdel.test_key" });
@@ -225,7 +226,7 @@ namespace Splitio_Tests.Integration_Tests
             var config = new RedisConfig();
             var pool = new ConnectionPoolManager(config);
 
-            var adapter = new RedisAdapter(config, pool);
+            var adapter = new RedisAdapterForTests(config, pool);
 
             //Act
             var setCount = adapter.SAdd($"{_userPrefix}-test_key_set", "test_value_1");
@@ -273,7 +274,7 @@ namespace Splitio_Tests.Integration_Tests
             var config = new RedisConfig();
             var pool = new ConnectionPoolManager(config);
 
-            var adapter = new RedisAdapter(config, pool);
+            var adapter = new RedisAdapterForTests(config, pool);
 
             //Act
             var setCount = adapter.SAdd($"{_userPrefix}-test_key_set_multiple", new RedisValue[] { "test_value", "test_value2" });
@@ -307,7 +308,7 @@ namespace Splitio_Tests.Integration_Tests
             var config = new RedisConfig();
             var pool = new ConnectionPoolManager(config);
 
-            var adapter = new RedisAdapter(config, pool);
+            var adapter = new RedisAdapterForTests(config, pool);
 
             //Act
             var remCount = adapter.SRem($"{_userPrefix}-test_key_set", new RedisValue[] { "test_value2" });
@@ -336,7 +337,7 @@ namespace Splitio_Tests.Integration_Tests
             var config = new RedisConfig();
             var pool = new ConnectionPoolManager(config);
 
-            var adapter = new RedisAdapter(config, pool);
+            var adapter = new RedisAdapterForTests(config, pool);
 
             //Act
             var result = adapter.IcrBy($"{_userPrefix}-test_count", 2);
