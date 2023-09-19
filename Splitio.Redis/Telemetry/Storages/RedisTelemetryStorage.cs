@@ -3,6 +3,7 @@ using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
+using System.Threading.Tasks;
 
 namespace Splitio.Redis.Telemetry.Storages
 {
@@ -36,7 +37,7 @@ namespace Splitio.Redis.Telemetry.Storages
             _machineName = machineName;
         }
 
-        public void RecordConfigInit(Config config)
+        public async Task RecordConfigInitAsync(Config config)
         {
             var jsonData = JsonConvert.SerializeObject(new
             {
@@ -44,7 +45,7 @@ namespace Splitio.Redis.Telemetry.Storages
                 m = new { i = _machineIp, n = _machineName, s = _sdkVersion }
             });
 
-            _redisAdapter.HashSet(TelemetryInitKey, $"{_sdkVersion}/{_machineName}/{_machineIp}", jsonData);
+            await _redisAdapter.HashSetAsync(TelemetryInitKey, $"{_sdkVersion}/{_machineName}/{_machineIp}", jsonData);
         }
 
         public void RecordLatency(MethodEnum method, int bucket)
@@ -52,9 +53,19 @@ namespace Splitio.Redis.Telemetry.Storages
             _redisAdapter.HashIncrement(TelemetryLatencyKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}/{bucket}", 1);
         }
 
+        public async Task RecordLatencyAsync(MethodEnum method, int bucket)
+        {
+            await _redisAdapter.HashIncrementAsync(TelemetryLatencyKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}/{bucket}", 1);
+        }
+
         public void RecordException(MethodEnum method)
         {
             _redisAdapter.HashIncrement(TelemetryExceptionKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}", 1);
+        }
+
+        public async Task RecordExceptionAsync(MethodEnum method)
+        {
+            await _redisAdapter.HashIncrementAsync(TelemetryExceptionKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}", 1);
         }
 
         public void RecordNonReadyUsages()
@@ -65,6 +76,15 @@ namespace Splitio.Redis.Telemetry.Storages
         public void RecordBURTimeout()
         {
             // No-Op.
+        }
+
+        private string BuildConfigJsonData(Config config)
+        {
+            return JsonConvert.SerializeObject(new
+            {
+                t = new { oM = config.OperationMode, st = config.Storage, aF = config.ActiveFactories, rF = config.RedundantActiveFactories, t = config.Tags },
+                m = new { i = _machineIp, n = _machineName, s = _sdkVersion }
+            });
         }
     }
 }
