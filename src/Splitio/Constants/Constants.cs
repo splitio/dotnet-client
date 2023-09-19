@@ -48,4 +48,10 @@
         public static string Memory => "memory";
         public static string Redis => "redis";
     }
+
+    public static class Messages
+    {
+        public static string InitDestroy => "Initialization SDK destroy.";
+        public static string Destroyed => "SDK has been destroyed.";
+    }
 }

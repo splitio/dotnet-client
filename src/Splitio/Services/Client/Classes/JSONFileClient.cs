@@ -12,6 +12,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -83,12 +84,18 @@ namespace Splitio.Services.Client.Classes
 
         public override void Destroy()
         {
-            if (!_statusManager.IsDestroyed())
-            {
-                _featureFlagCache.Clear();
-                _segmentCache.Clear();
-                base.Destroy();
-            }
+            if (_statusManager.IsDestroyed()) return;
+
+            _factoryInstantiationsService.Decrease(ApiKey);
+            _statusManager.SetDestroy();
+            _featureFlagCache.Clear();
+            _segmentCache.Clear();
+        }
+
+        public override Task DestroyAsync()
+        {
+            Destroy();
+            return Task.FromResult(0);
         }
         #endregion
     }

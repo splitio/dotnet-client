@@ -6,5 +6,6 @@ namespace Splitio.Services.Common
     {
         void Start();
         void Shutdown();
+        Task ShutdownAsync();
     }
 }

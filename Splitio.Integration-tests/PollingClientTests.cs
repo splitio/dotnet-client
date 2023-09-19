@@ -42,7 +42,6 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions.
-            await Task.Delay(5000);
             var impressionQueue = impressionListener.GetQueue();
             var keyImpressions = impressionQueue.FetchAll();
 
@@ -278,7 +277,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public async Task GetTreatments_ValidateDedupeImpressions_Optimized()
+        public void GetTreatments_ValidateDedupeImpressions_Optimized()
         {
             // Arrange.
             var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
@@ -302,7 +301,6 @@ namespace Splitio.Integration_tests
             client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
             client.Destroy();
-            await Task.Delay(5000);
 
             // Assert.
             var sentImpressions = GetImpressionsSentBackend(httpClientMock);
@@ -321,7 +319,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public async Task GetTreatments_ValidateDedupeImpressions_Debug()
+        public void GetTreatments_ValidateDedupeImpressions_Debug()
         {
             // Arrange.
             var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
@@ -344,7 +342,6 @@ namespace Splitio.Integration_tests
             client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
             client.Destroy();
-            await Task.Delay(5000);
 
             // Assert.
             var sentImpressions = GetImpressionsSentBackend(httpClientMock);
@@ -360,7 +357,7 @@ namespace Splitio.Integration_tests
         // TODO: None mode is not supported yet.
         [Ignore]
         [TestMethod]
-        public async Task GetTreatments_WithImpressionsInNoneMode()
+        public void GetTreatments_WithImpressionsInNoneMode()
         {
             // Arrange.
             var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
@@ -383,7 +380,6 @@ namespace Splitio.Integration_tests
             client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
             client.Destroy();
-            await Task.Delay(5000);
 
             // Assert.
             var sentImpressions = GetImpressionsSentBackend(httpClientMock);
