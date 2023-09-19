@@ -51,7 +51,7 @@
 
     public static class Messages
     {
-        public static string InitDestroy => "Initialitation sdk destroy.";
+        public static string InitDestroy => "Initialization SDK destroy.";
         public static string Destroyed => "SDK has been destroyed.";
     }
 }

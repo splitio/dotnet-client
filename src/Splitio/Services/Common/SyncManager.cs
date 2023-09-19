@@ -79,21 +79,7 @@ namespace Splitio.Services.Common
         {
             try
             {
-                _telemetryRuntimeProducer.RecordSessionLength(CurrentTimeHelper.CurrentTimeMillis() - _startSessionMs);
-
-                _ctsStreaming.Cancel();
-                _ctsStreaming.Dispose();
-
-                var task = new List<Task>
-                {
-                    _synchronizer.StopPeriodicDataRecordingAsync(),
-                    _synchronizer.StopPeriodicFetchingAsync(),
-                    _onStreamingStatusTask.StopAsync(),
-                    _sseHandler.StopWorkersAsync(),
-                    _pushManager.StopAsync(),
-                    _startupTask.StopAsync(),
-                    _tasksManager.DestroyAsync()
-                };
+                var task = GetShutdownTasks();
 
                 Task.WaitAll(task.ToArray(), Constants.Gral.DestroyTimeount);
 
@@ -109,18 +95,9 @@ namespace Splitio.Services.Common
         {
             try
             {
-                _telemetryRuntimeProducer.RecordSessionLength(CurrentTimeHelper.CurrentTimeMillis() - _startSessionMs);
+                var task = GetShutdownTasks();
 
-                _ctsStreaming.Cancel();
-                _ctsStreaming.Dispose();
-
-                await _synchronizer.StopPeriodicDataRecordingAsync();
-                await _synchronizer.StopPeriodicFetchingAsync();
-                await _onStreamingStatusTask.StopAsync();
-                await _sseHandler.StopWorkersAsync();
-                await _pushManager.StopAsync();
-                await _startupTask.StopAsync();
-                await _tasksManager.DestroyAsync();
+                await Task.WhenAll(task.ToArray());
 
                 _synchronizer.ClearFetchersCache();
             }
@@ -233,6 +210,24 @@ namespace Splitio.Services.Common
             {
                 _log.Debug("Exception initialization SDK.", ex);
             }
+        }
+
+        private List<Task> GetShutdownTasks()
+        {
+            _telemetryRuntimeProducer.RecordSessionLength(CurrentTimeHelper.CurrentTimeMillis() - _startSessionMs);
+            _ctsStreaming.Cancel();
+            _ctsStreaming.Dispose();
+
+            return new List<Task>
+            {
+                _synchronizer.StopPeriodicDataRecordingAsync(),
+                _synchronizer.StopPeriodicFetchingAsync(),
+                _onStreamingStatusTask.StopAsync(),
+                _sseHandler.StopWorkersAsync(),
+                _pushManager.StopAsync(),
+                _startupTask.StopAsync(),
+                _tasksManager.DestroyAsync()
+            };
         }
         #endregion
     }

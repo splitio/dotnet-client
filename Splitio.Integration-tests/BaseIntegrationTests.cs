@@ -1108,7 +1108,6 @@ namespace Splitio.Integration_tests
 
                 // Assert. 
                 Assert.IsTrue(result);
-                // await Task.Delay(1000);
             }
 
             //Validate Events sent to the be.
