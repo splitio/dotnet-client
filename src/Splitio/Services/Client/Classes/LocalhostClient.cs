@@ -28,6 +28,7 @@ namespace Splitio.Services.Client.Classes
 
         public LocalhostClient(string filePath) : base()
         {
+            ApiKey = "localhost";
             _fullPath = LookupFilePath(filePath);
 
             if (_fullPath.ToLower().EndsWith(SplitFileYaml) || _fullPath.ToLower().EndsWith(SplitFileYml))
@@ -53,21 +54,14 @@ namespace Splitio.Services.Client.Classes
 
             var splits = ParseSplitFile(_fullPath);
             _featureFlagCache = new InMemorySplitCache(splits);
-
             _blockUntilReadyService = new NoopBlockUntilReadyService();
             _manager = new SplitManager(_featureFlagCache, _blockUntilReadyService);
-
-            ApiKey = "localhost";
-
             _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCache);
-
-            var splitter = new Splitter();
-            _evaluator = new Evaluator.Evaluator(_featureFlagCache, splitter);
-
+            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter());
             _uniqueKeysTracker = new NoopUniqueKeysTracker();
             _impressionsCounter = new NoopImpressionsCounter();
             _impressionsObserver = new NoopImpressionsObserver();
-            _impressionsManager = new ImpressionsManager(null, null, _impressionsCounter, false, ImpressionsMode.Debug, null, _tasksManager, _uniqueKeysTracker, _impressionsObserver);
+            _impressionsManager = new ImpressionsManager(null, null, _impressionsCounter, false, ImpressionsMode.Debug, null, _tasksManager, _uniqueKeysTracker, _impressionsObserver, false);
         }
 
         #region Public Methods

@@ -63,19 +63,14 @@ namespace Splitio.Redis.Services.Client.Classes
             _config.SdkMachineIP = baseConfig.SdkMachineIP;
             _config.BfExpectedElements = baseConfig.BfExpectedElements;
             _config.BfErrorRate = baseConfig.BfErrorRate;
-
             _config.UniqueKeysRefreshRate = baseConfig.UniqueKeysRefreshRate;
             _config.UniqueKeysCacheMaxSize = baseConfig.UniqueKeysCacheMaxSize;
             _config.UniqueKeysBulkSize = baseConfig.UniqueKeysBulkSize;
-
             _config.ImpressionsMode = baseConfig.ImpressionsMode;
-
             _config.ImpressionsCounterRefreshRate = baseConfig.ImpressionsCounterRefreshRate;
             _config.ImpressionsCounterCacheMaxSize = baseConfig.ImpressionsCounterCacheMaxSize;
             _config.ImpressionsCountBulkSize = baseConfig.ImpressionsCountBulkSize;
-
-            LabelsEnabled = baseConfig.LabelsEnabled;
-
+            _config.LabelsEnabled = baseConfig.LabelsEnabled;
             _config.Mode = config.Mode;
             _config.FromCacheAdapterConfig(config.CacheAdapterConfig);
     }
@@ -121,7 +116,7 @@ namespace Splitio.Redis.Services.Client.Classes
         {
             var shouldCalculatePreviousTime = _config.ImpressionsMode == ImpressionsMode.Optimized;
 
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, shouldCalculatePreviousTime, _config.ImpressionsMode, null, _tasksManager, _uniqueKeysTracker, _impressionsObserver);
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, shouldCalculatePreviousTime, _config.ImpressionsMode, null, _tasksManager, _uniqueKeysTracker, _impressionsObserver, _config.LabelsEnabled);
         }
 
         private void BuildEventLog()

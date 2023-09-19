@@ -36,7 +36,6 @@ namespace Splitio.Services.Client.Classes
         protected readonly IWrapperAdapter _wrapperAdapter;
         protected readonly IConfigService _configService;
 
-        protected bool LabelsEnabled;
         protected string ApiKey;
 
         protected ISplitManager _manager;
@@ -297,7 +296,11 @@ namespace Splitio.Services.Client.Classes
 
             var evaluatorResult = await _evaluator.EvaluateFeatureAsync(key, featureFlagName, attributes);
 
-            RecordImpressionAndTelemetry(evaluatorResult, key, featureFlagName, method);
+            RecordTelemetry(evaluatorResult.Exception, method, evaluatorResult.ElapsedMilliseconds);
+
+            var impression = _impressionsManager.Build(evaluatorResult, key, featureFlagName);
+            
+            if (impression != null) await _impressionsManager.TrackAsync(new List<KeyImpression> { impression });
 
             return new SplitResult(evaluatorResult.Treatment, evaluatorResult.Config);
         }
@@ -310,7 +313,11 @@ namespace Splitio.Services.Client.Classes
 
             var results = await _evaluator.EvaluateFeaturesAsync(key, features, attributes);
 
-            return ParseTreatmentsAndRecordImpressionsAndTelemetry(method, results, key);
+            var toReturn = ParseTreatmentsAndRecordTelemetry(method, results, key, out var impressions);
+
+            if (impressions.Any()) await _impressionsManager.TrackAsync(impressions);
+
+            return toReturn;
         }
         #endregion
 
@@ -323,7 +330,11 @@ namespace Splitio.Services.Client.Classes
 
             var evaluatorResult = _evaluator.EvaluateFeature(key, featureFlagName, attributes);
 
-            RecordImpressionAndTelemetry(evaluatorResult, key, featureFlagName, method);
+            RecordTelemetry(evaluatorResult.Exception, method, evaluatorResult.ElapsedMilliseconds);
+
+            var impression = _impressionsManager.Build(evaluatorResult, key, featureFlagName);
+            
+            if (impression != null) _impressionsManager.Track(new List<KeyImpression> { impression });
 
             return new SplitResult(evaluatorResult.Treatment, evaluatorResult.Config);
         }
@@ -336,7 +347,11 @@ namespace Splitio.Services.Client.Classes
 
             var results = _evaluator.EvaluateFeatures(key, features, attributes);
 
-            return ParseTreatmentsAndRecordImpressionsAndTelemetry(method, results, key);
+            var toReturn = ParseTreatmentsAndRecordTelemetry(method, results, key, out var impressions);
+
+            if (impressions.Any()) _impressionsManager.Track(impressions);
+
+            return toReturn;
         }
 
         private bool IsClientReady(string methodName)
@@ -356,9 +371,9 @@ namespace Splitio.Services.Client.Classes
             return true;
         }
 
-        private Dictionary<string, TreatmentResult> ParseTreatmentsAndRecordImpressionsAndTelemetry(string method, MultipleEvaluatorResult results, Key key)
+        private Dictionary<string, TreatmentResult> ParseTreatmentsAndRecordTelemetry(string method, MultipleEvaluatorResult results, Key key, out List<KeyImpression> impressionsQueue)
         {
-            var impressionsQueue = new List<KeyImpression>();
+            impressionsQueue = new List<KeyImpression>();
             var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
 
             RecordTelemetry(results.Exception, method, results.ElapsedMilliseconds);
@@ -367,12 +382,9 @@ namespace Splitio.Services.Client.Classes
             {
                 treatmentsForFeatures.Add(treatmentResult.Key, treatmentResult.Value);
 
-                var impression = BuildImpression(treatmentResult.Value, key, treatmentResult.Key);
-
+                var impression = _impressionsManager.Build(treatmentResult.Value, key, treatmentResult.Key);
                 if (impression != null) impressionsQueue.Add(impression);
             }
-
-            if (impressionsQueue.Any()) _impressionsManager.Track(impressionsQueue);
 
             return treatmentsForFeatures;
         }
@@ -414,15 +426,6 @@ namespace Splitio.Services.Client.Classes
             }
 
             return _splitNameValidator.SplitNamesAreValid(features, method);
-        }
-
-        private void RecordImpressionAndTelemetry(TreatmentResult evaluationResult, Key key, string feature, string method)
-        {
-            RecordTelemetry(evaluationResult.Exception, method, evaluationResult.ElapsedMilliseconds);
-
-            var impression = BuildImpression(evaluationResult, key, feature);
-
-            if (impression != null) _impressionsManager.Track(new List<KeyImpression> { impression });
         }
 
         private void RecordTelemetry(bool exception, string method, long latency)
@@ -478,13 +481,6 @@ namespace Splitio.Services.Client.Classes
                     _telemetryEvaluationProducer.RecordException(MethodEnum.Track);
                     break;
             }
-        }
-
-        private KeyImpression BuildImpression(TreatmentResult treatmentResult, Key key, string featureName)
-        {
-            if (Labels.SplitNotFound.Equals(treatmentResult.Label)) return null;
-
-            return _impressionsManager.BuildImpression(key.matchingKey, featureName, treatmentResult.Treatment, CurrentTimeHelper.CurrentTimeMillis(), treatmentResult.ChangeNumber, LabelsEnabled ? treatmentResult.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null);
         }
         #endregion
     }
