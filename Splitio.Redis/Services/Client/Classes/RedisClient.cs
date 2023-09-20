@@ -81,7 +81,6 @@ namespace Splitio.Redis.Services.Client.Classes
             _connectionPoolManager = new ConnectionPoolManager(_config);
             _redisAdapter = new RedisAdapter(_config, _connectionPoolManager);
             BuildTelemetryStorage();
-            RecordConfigInit();
 
             _segmentCacheConsumer = new RedisSegmentCache(_redisAdapter, _config.RedisUserPrefix);
             _splitParser = new RedisSplitParser(_segmentCacheConsumer);
@@ -148,20 +147,7 @@ namespace Splitio.Redis.Services.Client.Classes
 
         private void BuildSyncManager()
         {
-            _syncManager = new RedisSyncManager(_uniqueKeysTracker, _impressionsCounter, _connectionPoolManager);
-        }
-
-        private void RecordConfigInit()
-        {
-            var config = new Config
-            {
-                OperationMode = (int)_config.Mode,
-                Storage = Constants.StorageType.Redis,
-                ActiveFactories = _factoryInstantiationsService.GetActiveFactories(),
-                RedundantActiveFactories = _factoryInstantiationsService.GetRedundantActiveFactories()
-            };
-
-            _telemetryInitProducer.RecordConfigInit(config);
+            _syncManager = new RedisSyncManager(_uniqueKeysTracker, _impressionsCounter, _connectionPoolManager, _tasksManager, _telemetryInitProducer, _factoryInstantiationsService);
         }
         #endregion
     }

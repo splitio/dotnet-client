@@ -1,9 +1,9 @@
 ﻿using Splitio.Domain;
+using Splitio.Enums;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
-using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +31,7 @@ namespace Splitio.Services.Shared.Classes
             _telemetryEvaluationProducer = telemetryEvaluationProducer;
         }
 
-        public bool TreatmentValidations(Enums.API method, Key key, string featureFlagName, ISplitLogger logger, out string ffNameSanitized)
+        public bool TreatmentValidations(API method, Key key, string featureFlagName, ISplitLogger logger, out string ffNameSanitized)
         {
             ffNameSanitized = null;
 
@@ -44,7 +44,7 @@ namespace Splitio.Services.Shared.Classes
             return true;
         }
 
-        public List<string> TreatmentsValidations(Enums.API method, Key key, List<string> features, ISplitLogger logger, out Dictionary<string, TreatmentResult> result)
+        public List<string> TreatmentsValidations(API method, Key key, List<string> features, ISplitLogger logger, out Dictionary<string, TreatmentResult> result)
         {
             result = null;
 
@@ -62,67 +62,35 @@ namespace Splitio.Services.Shared.Classes
             return _splitNameValidator.SplitNamesAreValid(features, method);
         }
 
-        public void RecordException(Enums.API method)
+        public void RecordException(API method)
         {
             if (_telemetryEvaluationProducer == null) return;
 
-            switch (method)
-            {
-                case Enums.API.GetTreatment:
-                case Enums.API.GetTreatmentAsync:
-                    _telemetryEvaluationProducer.RecordException(MethodEnum.Treatment);
-                    break;
-                case Enums.API.GetTreatments:
-                case Enums.API.GetTreatmentsAsync:
-                    _telemetryEvaluationProducer.RecordException(MethodEnum.Treatments);
-                    break;
-                case Enums.API.GetTreatmentWithConfig:
-                case Enums.API.GetTreatmentWithConfigAsync:
-                    _telemetryEvaluationProducer.RecordException(MethodEnum.TreatmentWithConfig);
-                    break;
-                case Enums.API.GetTreatmentsWithConfig:
-                case Enums.API.GetTreatmentsWithConfigAsync:
-                    _telemetryEvaluationProducer.RecordException(MethodEnum.TreatmentsWithConfig);
-                    break;
-                case Enums.API.Track:
-                case Enums.API.TrackAsync:
-                    _telemetryEvaluationProducer.RecordException(MethodEnum.Track);
-                    break;
-            }
+            _telemetryEvaluationProducer.RecordException(method.ConvertToMethodEnum());
         }
 
-        public void RecordLatency(Enums.API method, long latency)
+        public void RecordLatency(API method, long latency)
         {
             if (_telemetryEvaluationProducer == null) return;
 
-            int bucket = Util.Metrics.Bucket(latency);
-
-            switch (method)
-            {
-                case Enums.API.GetTreatment:
-                case Enums.API.GetTreatmentAsync:
-                    _telemetryEvaluationProducer.RecordLatency(MethodEnum.Treatment, bucket);
-                    break;
-                case Enums.API.GetTreatments:
-                case Enums.API.GetTreatmentsAsync:
-                    _telemetryEvaluationProducer.RecordLatency(MethodEnum.Treatments, bucket);
-                    break;
-                case Enums.API.GetTreatmentWithConfig:
-                case Enums.API.GetTreatmentWithConfigAsync:
-                    _telemetryEvaluationProducer.RecordLatency(MethodEnum.TreatmentWithConfig, bucket);
-                    break;
-                case Enums.API.GetTreatmentsWithConfig:
-                case Enums.API.GetTreatmentsWithConfigAsync:
-                    _telemetryEvaluationProducer.RecordLatency(MethodEnum.TreatmentsWithConfig, bucket);
-                    break;
-                case Enums.API.Track:
-                case Enums.API.TrackAsync:
-                    _telemetryEvaluationProducer.RecordLatency(MethodEnum.Track, bucket);
-                    break;
-            }
+            _telemetryEvaluationProducer.RecordLatency(method.ConvertToMethodEnum(), Util.Metrics.Bucket(latency));
         }
 
-        private bool IsClientReady(Enums.API method, ISplitLogger logger)
+        public async System.Threading.Tasks.Task RecordExceptionAsync(API method)
+        {
+            if (_telemetryEvaluationProducer == null) return;
+
+            await _telemetryEvaluationProducer.RecordExceptionAsync(method.ConvertToMethodEnum());
+        }
+
+        public async System.Threading.Tasks.Task RecordLatencyAsync(API method, long latency)
+        {
+            if (_telemetryEvaluationProducer == null) return;
+
+            await _telemetryEvaluationProducer.RecordLatencyAsync(method.ConvertToMethodEnum(), Util.Metrics.Bucket(latency));
+        }
+
+        private bool IsClientReady(API method, ISplitLogger logger)
         {
             if (_statusManager.IsDestroyed())
             {

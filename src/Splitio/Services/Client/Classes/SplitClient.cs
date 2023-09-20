@@ -297,9 +297,9 @@ namespace Splitio.Services.Client.Classes
 
             var evaluatorResult = await _evaluator.EvaluateFeatureAsync(key, ffNameSanitized, attributes);
             
-            if (evaluatorResult.Exception) _clientExtensionService.RecordException(method);
+            if (evaluatorResult.Exception) await _clientExtensionService.RecordExceptionAsync(method);
 
-            _clientExtensionService.RecordLatency(method, evaluatorResult.ElapsedMilliseconds);
+            await _clientExtensionService.RecordLatencyAsync(method, evaluatorResult.ElapsedMilliseconds);
 
             var impression = _impressionsManager.Build(evaluatorResult, key, ffNameSanitized);
             
@@ -316,9 +316,9 @@ namespace Splitio.Services.Client.Classes
 
             var results = await _evaluator.EvaluateFeaturesAsync(key, features, attributes);
 
-            if (results.Exception) _clientExtensionService.RecordException(method);
+            if (results.Exception) await _clientExtensionService.RecordExceptionAsync(method);
 
-            _clientExtensionService.RecordLatency(method, results.ElapsedMilliseconds);
+            await _clientExtensionService.RecordLatencyAsync(method, results.ElapsedMilliseconds);
 
             var toReturn = ParseTreatmentsAndRecordTelemetry(method, results, key, out var impressions);
 
