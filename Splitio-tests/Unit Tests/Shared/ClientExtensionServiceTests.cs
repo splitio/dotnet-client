@@ -20,8 +20,12 @@ namespace Splitio_Tests.Unit_Tests.Shared
         private readonly Mock<IStatusManager> _statusManager;
         private readonly Mock<ITelemetryEvaluationProducer> _telemetryEvaluationProducer;
         private readonly Mock<ISplitLogger> _logger;
+        private readonly Mock<IFeatureFlagCacheConsumer> _featureFlagCacheConsumer;
         private readonly ISplitNameValidator _splitNameValidator;
         private readonly IKeyValidator _keyValidator;
+        private readonly IEventTypeValidator _eventTypeValidator;
+        private readonly IEventPropertiesValidator _eventPropertiesValidator;
+        private readonly ITrafficTypeValidator _trafficTypeValidator;
 
         private readonly IClientExtensionService _service;
 
@@ -31,10 +35,14 @@ namespace Splitio_Tests.Unit_Tests.Shared
             _statusManager = new Mock<IStatusManager>();
             _logger = new Mock<ISplitLogger>();
             _telemetryEvaluationProducer = new Mock<ITelemetryEvaluationProducer>();
-            _keyValidator = new KeyValidator(_logger.Object);
+            _featureFlagCacheConsumer = new Mock<IFeatureFlagCacheConsumer>();
             _splitNameValidator = new SplitNameValidator();
+            _keyValidator = new KeyValidator(_logger.Object);
+            _eventTypeValidator = new EventTypeValidator(_logger.Object);
+            _eventPropertiesValidator = new EventPropertiesValidator(_logger.Object);
+            _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCacheConsumer.Object, _blockUntilReadyService.Object, _logger.Object);
 
-            _service = new ClientExtensionService(_blockUntilReadyService.Object, _statusManager.Object, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer.Object);
+            _service = new ClientExtensionService(_blockUntilReadyService.Object, _statusManager.Object, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer.Object, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator);
         }
 
         [TestMethod]

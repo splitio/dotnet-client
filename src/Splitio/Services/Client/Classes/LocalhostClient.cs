@@ -67,9 +67,14 @@ namespace Splitio.Services.Client.Classes
         }
 
         #region Public Methods
-        public override bool Track(string key, string trafficType, string eventType, double? value = default(double?), Dictionary<string, object> properties = null)
+        public override bool Track(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null)
         {
             return true;
+        }
+
+        public override Task<bool> TrackAsync(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null)
+        {
+            return Task.FromResult(true);
         }
 
         public override void Destroy()

@@ -20,6 +20,7 @@ using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -72,62 +73,18 @@ namespace Splitio.Services.Client.Classes
             _tasksManager = new TasksManager(_statusManager);
         }
 
-        #region Public Async Methods
+        #region GetTreatment
         public async Task<string> GetTreatmentAsync(string key, string feature, Dictionary<string, object> attributes = null)
         {
             var evaluationResult = await GetTreatmentsAsync(Enums.API.GetTreatmentAsync, new Key(key, null), new List<string> { feature }, attributes);
-            var result = evaluationResult.FirstOrDefault();
-
+            
             if (!evaluationResult.Any()) return Gral.Control;
+            
+            var result = evaluationResult.FirstOrDefault();
 
             return result.Treatment;
         }
 
-        public async Task<Dictionary<string, string>> GetTreatmentsAsync(string key, List<string> features, Dictionary<string, object> attributes = null)
-        {
-            var results = await GetTreatmentsAsync(Enums.API.GetTreatmentsAsync, new Key(key, null), features, attributes);
-
-            return results
-                .ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
-        }
-
-        public async Task<SplitResult> GetTreatmentWithConfigAsync(string key, string feature, Dictionary<string, object> attributes = null)
-        {
-            var evaluationResult = await GetTreatmentsAsync(Enums.API.GetTreatmentWithConfigAsync, new Key(key, null), new List<string> { feature }, attributes);
-            var result = evaluationResult.FirstOrDefault();
-
-            if (!evaluationResult.Any()) return new SplitResult(Gral.Control, null);
-
-            return new SplitResult(result.Treatment, result.Config);
-        }
-
-        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigAsync(string key, List<string> features, Dictionary<string, object> attributes = null)
-        {
-            var results = await GetTreatmentsAsync(Enums.API.GetTreatmentsWithConfigAsync, new Key(key, null), features, attributes);
-
-            return results
-                .ToDictionary(r => r.FeatureFlagName, r => new SplitResult
-                {
-                    Treatment = r.Treatment,
-                    Config = r.Config
-                });
-        }
-
-        public virtual async Task DestroyAsync()
-        {
-            if (_statusManager.IsDestroyed()) return;
-
-            _log.Info(Constants.Messages.InitDestroy);
-
-            _factoryInstantiationsService.Decrease(ApiKey);
-            _statusManager.SetDestroy();
-            await _syncManager.ShutdownAsync();
-
-            _log.Info(Constants.Messages.Destroyed);
-        }
-        #endregion
-
-        #region Public Sync Methods
         public virtual string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null)
         {
             var evaluationResult = GetTreatmentsSync(Enums.API.GetTreatment, key, new List<string> { feature }, attributes);
@@ -143,10 +100,39 @@ namespace Splitio.Services.Client.Classes
         {
             return GetTreatment(new Key(key, null), feature, attributes);
         }
+        #endregion
 
-        public SplitResult GetTreatmentWithConfig(string key, string feature, Dictionary<string, object> attributes = null)
+        #region GetTreatments
+        public async Task<Dictionary<string, string>> GetTreatmentsAsync(string key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            return GetTreatmentWithConfig(new Key(key, null), feature, attributes);
+            var results = await GetTreatmentsAsync(Enums.API.GetTreatmentsAsync, new Key(key, null), features, attributes);
+
+            return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
+        }
+
+        public Dictionary<string, string> GetTreatments(Key key, List<string> features, Dictionary<string, object> attributes = null)
+        {
+            var results = GetTreatmentsSync(Enums.API.GetTreatments, key, features, attributes);
+
+            return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
+        }
+
+        public Dictionary<string, string> GetTreatments(string key, List<string> features, Dictionary<string, object> attributes = null)
+        {
+            return GetTreatments(new Key(key, null), features, attributes);
+        }
+        #endregion
+
+        #region GetTreatmentWithConfig
+        public async Task<SplitResult> GetTreatmentWithConfigAsync(string key, string feature, Dictionary<string, object> attributes = null)
+        {
+            var evaluationResult = await GetTreatmentsAsync(Enums.API.GetTreatmentWithConfigAsync, new Key(key, null), new List<string> { feature }, attributes);
+
+            if (!evaluationResult.Any()) return new SplitResult(Gral.Control, null);
+
+            var result = evaluationResult.FirstOrDefault();
+
+            return new SplitResult(result.Treatment, result.Config);
         }
 
         public SplitResult GetTreatmentWithConfig(Key key, string feature, Dictionary<string, object> attributes = null)
@@ -160,9 +146,23 @@ namespace Splitio.Services.Client.Classes
             return new SplitResult(result.Treatment, result.Config);
         }
 
-        public Dictionary<string, SplitResult> GetTreatmentsWithConfig(string key, List<string> features, Dictionary<string, object> attributes = null)
+        public SplitResult GetTreatmentWithConfig(string key, string feature, Dictionary<string, object> attributes = null)
         {
-            return GetTreatmentsWithConfig(new Key(key, null), features, attributes);
+            return GetTreatmentWithConfig(new Key(key, null), feature, attributes);
+        }
+        #endregion
+
+        #region GetTreatmentsWithConfig
+        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigAsync(string key, List<string> features, Dictionary<string, object> attributes = null)
+        {
+            var results = await GetTreatmentsAsync(Enums.API.GetTreatmentsWithConfigAsync, new Key(key, null), features, attributes);
+
+            return results
+                .ToDictionary(r => r.FeatureFlagName, r => new SplitResult
+                {
+                    Treatment = r.Treatment,
+                    Config = r.Config
+                });
         }
 
         public Dictionary<string, SplitResult> GetTreatmentsWithConfig(Key key, List<string> features, Dictionary<string, object> attributes = null)
@@ -177,66 +177,95 @@ namespace Splitio.Services.Client.Classes
                 });
         }
 
-        public Dictionary<string, string> GetTreatments(string key, List<string> features, Dictionary<string, object> attributes = null)
+        public Dictionary<string, SplitResult> GetTreatmentsWithConfig(string key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            return GetTreatments(new Key(key, null), features, attributes);
+            return GetTreatmentsWithConfig(new Key(key, null), features, attributes);
+        }
+        #endregion
+
+        #region Destroy
+        public virtual async Task DestroyAsync()
+        {
+            if (_statusManager.IsDestroyed()) return;
+
+            _log.Info(Messages.InitDestroy);
+
+            _factoryInstantiationsService.Decrease(ApiKey);
+            _statusManager.SetDestroy();
+            await _syncManager.ShutdownAsync();
+
+            _log.Info(Messages.Destroyed);
         }
 
-        public Dictionary<string, string> GetTreatments(Key key, List<string> features, Dictionary<string, object> attributes = null)
+        public virtual void Destroy()
         {
-            var results = GetTreatmentsSync(Enums.API.GetTreatments, key, features, attributes);
+            if (_statusManager.IsDestroyed()) return;
 
-            return results
-                .ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
+            _log.Info(Messages.InitDestroy);
+
+            _factoryInstantiationsService.Decrease(ApiKey);
+            _statusManager.SetDestroy();
+            _syncManager.Shutdown();
+
+            _log.Info(Messages.Destroyed);
         }
+        #endregion
 
+        #region Track
         public virtual bool Track(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null)
         {
             if (_statusManager.IsDestroyed()) return false;
 
-            using (var clock = new Util.SplitStopwatch())
+            var clock = new Stopwatch();
+            clock.Start();
+
+            try
             {
-                clock.Start();
+                if (!_clientExtensionService.TrackValidations(key, trafficType, eventType, value, properties, out var wrappedEvent)) return false;
 
-                var keyResult = _keyValidator.IsValid(new Key(key, null), Enums.API.Track);
-                var eventTypeResult = _eventTypeValidator.IsValid(eventType, nameof(eventType));
-                var eventPropertiesResult = _eventPropertiesValidator.IsValid(properties);
-                var trafficTypeResult = _trafficTypeValidator.IsValid(trafficType, Enums.API.Track);
+                _eventsLog.Log(wrappedEvent);
+                _clientExtensionService.RecordLatency(Enums.API.Track, clock.ElapsedMilliseconds);
 
-                if (!keyResult || !trafficTypeResult.Success || !eventTypeResult || !eventPropertiesResult.Success)
-                    return false;
-
-                try
-                {
-                    var eventToLog = new Event
-                    {
-                        key = key,
-                        trafficTypeName = trafficTypeResult.Value,
-                        eventTypeId = eventType,
-                        value = value,
-                        timestamp = CurrentTimeHelper.CurrentTimeMillis(),
-                        properties = (Dictionary<string, object>)eventPropertiesResult.Value
-                    };
-
-                    _eventsLog.Log(new WrappedEvent
-                    {
-                        Event = eventToLog,
-                        Size = eventPropertiesResult.EventSize
-                    });
-
-                    _clientExtensionService.RecordLatency(Enums.API.Track, clock.ElapsedMilliseconds);
-
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    _log.Error("Exception caught trying to track an event", e);
-                    _clientExtensionService.RecordException(Enums.API.Track);
-                    return false;
-                }
+                return true;
             }
+            catch (Exception e)
+            {
+                _log.Error("Exception caught trying to track an event", e);
+                _clientExtensionService.RecordException(Enums.API.Track);
+
+                return false;
+            }
+            finally { clock.Stop(); }
         }
 
+        public virtual async Task<bool> TrackAsync(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null)
+        {
+            if (_statusManager.IsDestroyed()) return false;
+
+            var clock = new Stopwatch();
+            clock.Start();
+
+            try
+            {
+                if (!_clientExtensionService.TrackValidations(key, trafficType, eventType, value, properties, out var wrappedEvent)) return false;
+
+                await _eventsLog.LogAsync(wrappedEvent);
+                await _clientExtensionService.RecordLatencyAsync(Enums.API.Track, clock.ElapsedMilliseconds);
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                _log.Error("Exception caught trying to track an event", e);
+                await _clientExtensionService.RecordExceptionAsync(Enums.API.Track);
+
+                return false;
+            }
+            finally { clock.Stop(); }
+        }
+        #endregion
+
+        #region Public Methods
         public bool IsDestroyed()
         {
             return _statusManager.IsDestroyed();
@@ -250,19 +279,6 @@ namespace Splitio.Services.Client.Classes
         public ISplitManager GetSplitManager()
         {
             return _manager;
-        }
-
-        public virtual void Destroy()
-        {
-            if (_statusManager.IsDestroyed()) return;
-
-            _log.Info(Constants.Messages.InitDestroy);
-
-            _factoryInstantiationsService.Decrease(ApiKey);
-            _statusManager.SetDestroy();
-            _syncManager.Shutdown();
-
-            _log.Info(Constants.Messages.Destroyed);
         }
         #endregion
 
@@ -304,7 +320,7 @@ namespace Splitio.Services.Client.Classes
 
         protected void BuildClientExtension()
         {
-            _clientExtensionService = new ClientExtensionService(_blockUntilReadyService, _statusManager, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer);
+            _clientExtensionService = new ClientExtensionService(_blockUntilReadyService, _statusManager, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator);
         }
         #endregion
 

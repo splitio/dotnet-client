@@ -751,5 +751,189 @@ namespace Splitio_Tests.Unit_Tests.Client
             _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Never);
         }
         #endregion
+
+        #region TrackAsync
+        [TestMethod]
+        public async Task Track_ShouldReturnFalse_WithNullKey()
+        {
+            // Arrange
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            // Act
+            var result = await _splitClient.TrackAsync(null, string.Empty, string.Empty);
+
+            // Assert
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Track_ShouldReturnFalse_WithNullTrafficType()
+        {
+            //Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            // Act
+            var result = await _splitClient.TrackAsync(string.Empty, null, string.Empty);
+
+            // Assert
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Track_ShouldReturnFalse_WithNullEventType()
+        {
+            // Arrange
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            // Act
+            var result = await _splitClient.TrackAsync(string.Empty, string.Empty, null);
+
+            // Assert
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Track_WithProperties_RetunrsTrue()
+        {
+            // Arrange. 
+            decimal decimalValue = 111;
+            float floatValue = 112;
+            double doubleValue = 113;
+            short shortValue = 114;
+            int intValue = 115;
+            long longValue = 116;
+            ushort ushortValue = 117;
+            uint uintValue = 118;
+            ulong ulongValue = 119;
+
+            var properties = new Dictionary<string, object>
+            {
+                { "property_1", "value1" },
+                { "property_2", new ParsedSplit() },
+                { "property_3", false },
+                { "property_4", null },
+                { "property_5", decimalValue },
+                { "property_6", floatValue },
+                { "property_7", doubleValue },
+                { "property_8", shortValue },
+                { "property_9", intValue },
+                { "property_10", longValue },
+                { "property_11", ushortValue },
+                { "property_12", uintValue },
+                { "property_13", ulongValue }
+            };
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            // Act.
+            var result = await _splitClient.TrackAsync("key", "user", "event_type", 132, properties);
+
+            // Assert.
+            //await Task.Delay(1500);
+            Assert.IsTrue(result);
+            _eventsLog.Verify(mock => mock.LogAsync(It.Is<WrappedEvent>(we => we.Event.properties != null &&
+                                                                              we.Event.key.Equals("key") &&
+                                                                              we.Event.eventTypeId.Equals("event_type") &&
+                                                                              we.Event.trafficTypeName.Equals("user") &&
+                                                                              we.Event.value == 132)), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task Track_WhenPropertiesIsNull_ReturnsTrue()
+        {
+            // Arrange.
+            Dictionary<string, object> properties = null;
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            // Act.
+            var result = await _splitClient.TrackAsync("key", "user", "event_type", 132, properties);
+
+            // Assert.
+            //Thread.Sleep(1500);
+            Assert.IsTrue(result);
+            _eventsLog.Verify(mock => mock.LogAsync(It.Is<WrappedEvent>(we => we.Event.properties == null &&
+                                                                              we.Event.key.Equals("key") &&
+                                                                              we.Event.eventTypeId.Equals("event_type") &&
+                                                                              we.Event.trafficTypeName.Equals("user") &&
+                                                                              we.Event.value == 132)), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task Track_WhenTraffictTypeDoesNotExist_ReturnsTrue()
+        {
+            // Arrange.
+            var trafficType = "traffict_type";
+
+            _splitCache
+                .Setup(mock => mock.TrafficTypeExists(trafficType))
+                .Returns(false);
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            // Act.
+            var result = await _splitClient.TrackAsync("key", trafficType, "event_type", 132);
+
+            // Assert.
+            //Thread.Sleep(1500);
+            Assert.IsTrue(result);
+            _eventsLog.Verify(mock => mock.LogAsync(It.Is<WrappedEvent>(we => we.Event.properties == null &&
+                                                                              we.Event.key.Equals("key") &&
+                                                                              we.Event.eventTypeId.Equals("event_type") &&
+                                                                              we.Event.trafficTypeName.Equals(trafficType) &&
+                                                                              we.Event.value == 132)), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task Track_WhenTraffictTypeExists_ReturnsTrue()
+        {
+            // Arrange.
+            var trafficType = "traffict_type";
+
+            _splitCache
+                .Setup(mock => mock.TrafficTypeExists(trafficType))
+                .Returns(true);
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            // Act.
+            var result = await _splitClient.TrackAsync("key", trafficType, "event_type", 132);
+
+            // Assert.
+            //Thread.Sleep(1500);
+            Assert.IsTrue(result);
+            _eventsLog.Verify(mock => mock.LogAsync(It.Is<WrappedEvent>(we => we.Event.properties == null &&
+                                                                              we.Event.key.Equals("key") &&
+                                                                              we.Event.eventTypeId.Equals("event_type") &&
+                                                                              we.Event.trafficTypeName.Equals(trafficType) &&
+                                                                              we.Event.value == 132)), Times.Once);
+        }
+        #endregion
+
+        //#region Destroy
+        //[TestMethod]
+        //public void Destroy_ShouldsDecreaseFactoryInstatiation()
+        //{
+        //    // Act
+        //    _splitClientForTesting.Destroy();
+
+        //    // Assert
+        //    Assert.IsTrue(_splitClientForTesting.IsDestroyed());
+        //}
+        //#endregion
     }
 }

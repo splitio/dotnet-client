@@ -1,4 +1,5 @@
-﻿using Splitio.Domain;
+﻿using Splitio.CommonLibraries;
+using Splitio.Domain;
 using Splitio.Enums;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
@@ -17,18 +18,56 @@ namespace Splitio.Services.Shared.Classes
         private readonly IKeyValidator _keyValidator;
         private readonly ISplitNameValidator _splitNameValidator;
         private readonly ITelemetryEvaluationProducer _telemetryEvaluationProducer;
+        private readonly IEventTypeValidator _eventTypeValidator;
+        private readonly IEventPropertiesValidator _eventPropertiesValidator;
+        private readonly ITrafficTypeValidator _trafficTypeValidator;
 
         public ClientExtensionService(IBlockUntilReadyService blockUntilReadyService,
             IStatusManager statusManager,
             IKeyValidator keyValidator,
             ISplitNameValidator splitNameValidator,
-            ITelemetryEvaluationProducer telemetryEvaluationProducer)
+            ITelemetryEvaluationProducer telemetryEvaluationProducer,
+            IEventTypeValidator eventTypeValidator,
+            IEventPropertiesValidator eventPropertiesValidator,
+            ITrafficTypeValidator trafficTypeValidator)
         {
             _blockUntilReadyService = blockUntilReadyService;
             _statusManager = statusManager;
             _keyValidator = keyValidator;
             _splitNameValidator = splitNameValidator;
             _telemetryEvaluationProducer = telemetryEvaluationProducer;
+            _eventTypeValidator = eventTypeValidator;
+            _eventPropertiesValidator = eventPropertiesValidator;
+            _trafficTypeValidator = trafficTypeValidator;
+        }
+
+        public bool TrackValidations(string key, string trafficType, string eventType, double? value, Dictionary<string, object> properties, out WrappedEvent wrappedEvent)
+        {
+            wrappedEvent = null;
+
+            var keyResult = _keyValidator.IsValid(new Key(key, null), API.Track);
+            var eventTypeResult = _eventTypeValidator.IsValid(eventType, nameof(eventType));
+            var eventPropertiesResult = _eventPropertiesValidator.IsValid(properties);
+            var trafficTypeResult = _trafficTypeValidator.IsValid(trafficType, API.Track);
+
+            if (!keyResult || !trafficTypeResult.Success || !eventTypeResult || !eventPropertiesResult.Success)
+                return false;
+
+            wrappedEvent = new WrappedEvent
+            {
+                Size = eventPropertiesResult.EventSize,
+                Event = new Event
+                {
+                    key = key,
+                    trafficTypeName = trafficTypeResult.Value,
+                    eventTypeId = eventType,
+                    value = value,
+                    timestamp = CurrentTimeHelper.CurrentTimeMillis(),
+                    properties = (Dictionary<string, object>)eventPropertiesResult.Value
+                }
+            };
+
+            return true;
         }
 
         public bool TreatmentValidations(API method, Key key, string featureFlagName, ISplitLogger logger, out string ffNameSanitized)
