@@ -78,6 +78,8 @@ namespace Splitio.Services.Client.Classes
             var evaluationResult = await GetTreatmentsAsync(Enums.API.GetTreatmentAsync, new Key(key, null), new List<string> { feature }, attributes);
             var result = evaluationResult.FirstOrDefault();
 
+            if (!evaluationResult.Any()) return Gral.Control;
+
             return result.Treatment;
         }
 
@@ -93,6 +95,8 @@ namespace Splitio.Services.Client.Classes
         {
             var evaluationResult = await GetTreatmentsAsync(Enums.API.GetTreatmentWithConfigAsync, new Key(key, null), new List<string> { feature }, attributes);
             var result = evaluationResult.FirstOrDefault();
+
+            if (!evaluationResult.Any()) return new SplitResult(Gral.Control, null);
 
             return new SplitResult(result.Treatment, result.Config);
         }
