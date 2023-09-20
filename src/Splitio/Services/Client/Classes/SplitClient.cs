@@ -77,23 +77,15 @@ namespace Splitio.Services.Client.Classes
         public async Task<string> GetTreatmentAsync(string key, string feature, Dictionary<string, object> attributes = null)
         {
             var evaluationResult = await GetTreatmentsAsync(Enums.API.GetTreatmentAsync, new Key(key, null), new List<string> { feature }, attributes);
-            
-            if (!evaluationResult.Any()) return Gral.Control;
-            
-            var result = evaluationResult.FirstOrDefault();
 
-            return result.Treatment;
+            return TreatmentWithConfig(evaluationResult).Treatment;
         }
 
         public virtual string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null)
         {
             var evaluationResult = GetTreatmentsSync(Enums.API.GetTreatment, key, new List<string> { feature }, attributes);
 
-            if (!evaluationResult.Any()) return Gral.Control;
-
-            var result = evaluationResult.FirstOrDefault();
-
-            return result.Treatment;
+            return TreatmentWithConfig(evaluationResult).Treatment;
         }
 
         public virtual string GetTreatment(string key, string feature, Dictionary<string, object> attributes = null)
@@ -128,22 +120,14 @@ namespace Splitio.Services.Client.Classes
         {
             var evaluationResult = await GetTreatmentsAsync(Enums.API.GetTreatmentWithConfigAsync, new Key(key, null), new List<string> { feature }, attributes);
 
-            if (!evaluationResult.Any()) return new SplitResult(Gral.Control, null);
-
-            var result = evaluationResult.FirstOrDefault();
-
-            return new SplitResult(result.Treatment, result.Config);
+            return TreatmentWithConfig(evaluationResult);
         }
 
         public SplitResult GetTreatmentWithConfig(Key key, string feature, Dictionary<string, object> attributes = null)
         {
             var evaluationResult = GetTreatmentsSync(Enums.API.GetTreatmentWithConfig, key, new List<string> { feature }, attributes);
 
-            if (!evaluationResult.Any()) return new SplitResult(Gral.Control, null);
-
-            var result = evaluationResult.FirstOrDefault();
-
-            return new SplitResult(result.Treatment, result.Config);
+            return TreatmentWithConfig(evaluationResult);
         }
 
         public SplitResult GetTreatmentWithConfig(string key, string feature, Dictionary<string, object> attributes = null)
@@ -325,7 +309,7 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Private Async Methods
-        private async Task<List<TreatmentResult>> GetTreatmentsAsync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes = null)
+        private async Task<List<TreatmentResult>> GetTreatmentsAsync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes)
         {
             features = _clientExtensionService.TreatmentsValidations(method, key, features, _log, out List<TreatmentResult> controlTreatments);
 
@@ -376,6 +360,17 @@ namespace Splitio.Services.Client.Classes
             }
 
             return results.Results;
+        }
+
+        private static SplitResult TreatmentWithConfig(List<TreatmentResult> results)
+        {
+            if (!results.Any()) return new SplitResult(Gral.Control, null);
+
+            var result = results.FirstOrDefault();
+
+            if (result == null) return new SplitResult(Gral.Control, null);
+
+            return new SplitResult(result.Treatment, result.Config);
         }
         #endregion
     }
