@@ -924,16 +924,17 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
         #endregion
 
-        //#region Destroy
-        //[TestMethod]
-        //public void Destroy_ShouldsDecreaseFactoryInstatiation()
-        //{
-        //    // Act
-        //    _splitClientForTesting.Destroy();
+        #region DestroyAsync
+        [TestMethod]
+        public void Destroy_ShouldsDecreaseFactoryInstatiation()
+        {
+            // Act
+            _splitClient.DestroyAsync();
 
-        //    // Assert
-        //    Assert.IsTrue(_splitClientForTesting.IsDestroyed());
-        //}
-        //#endregion
+            // Assert
+            _syncManager.Verify(mock => mock.ShutdownAsync(), Times.Once);
+            Assert.IsTrue(_splitClient.IsDestroyed());
+        }
+        #endregion
     }
 }

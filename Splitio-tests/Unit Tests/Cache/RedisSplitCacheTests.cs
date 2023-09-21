@@ -137,38 +137,6 @@ namespace Splitio_Tests.Unit_Tests.Cache
             Assert.AreEqual(0, result.Count);
         }
 
-        [TestMethod]
-        public void GetKeysTestSuccessfully()
-        {
-            //Arrange
-            _redisAdapterMock
-                .Setup(x => x.Keys(splitKeyPrefix + "*"))
-                .Returns(new RedisKey[] { "test_split", "test_split2" });
-
-            //Act
-            var result = _redisSplitCache.GetKeys();
-
-            //Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(2, result.Count);
-        }
-
-        [TestMethod]
-        public void GetKeysShouldReturnEmptyResultIfNoKeysOrRedisException()
-        {
-            //Arrange
-            _redisAdapterMock
-                .Setup(x => x.Keys(splitKeyPrefix + "*"))
-                .Returns(Array.Empty<RedisKey>());
-
-            //Act
-            var result = _redisSplitCache.GetKeys();
-
-            //Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.Count);
-        }
-
         #region TrafficTypeExists
         [TestMethod]
         public void TrafficTypeExists_WhenHasQuantity_ReturnsTrue()

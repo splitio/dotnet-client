@@ -65,15 +65,6 @@ namespace Splitio.Redis.Services.Cache.Classes
                 .ToList();
         }
 
-        public List<string> GetKeys()
-        {
-            var pattern = $"{RedisKeyPrefix}{SplitKeyPrefix}*";
-            var splitKeys = _redisAdapter.Keys(pattern);
-            var result = splitKeys.Select(x => x.ToString()).ToList();
-
-            return result;
-        }
-
         public bool TrafficTypeExists(string trafficType)
         {
             if (string.IsNullOrEmpty(trafficType)) return false;
