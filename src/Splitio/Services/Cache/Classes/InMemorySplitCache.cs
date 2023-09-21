@@ -163,35 +163,6 @@ namespace Splitio.Services.Cache.Classes
         #endregion
 
         #region Async Methods
-        public Task AddSplitAsync(string splitName, SplitBase split)
-        {
-            AddSplit(splitName, split);
-
-            return Task.FromResult(0);
-        }
-
-        public Task<bool> RemoveSplitAsync(string splitName)
-        {
-            return Task.FromResult(RemoveSplit(splitName));
-        }
-
-        public Task<bool> AddOrUpdateAsync(string splitName, SplitBase split)
-        {
-            return Task.FromResult(AddOrUpdate(splitName, split));
-        }
-
-        public Task SetChangeNumberAsync(long changeNumber)
-        {
-            SetChangeNumber(changeNumber);
-            
-            return Task.FromResult(0);
-        }
-
-        public Task<long> GetChangeNumberAsync()
-        {
-            return Task.FromResult(GetChangeNumber());
-        }
-
         public Task<ParsedSplit> GetSplitAsync(string splitName)
         {
             return Task.FromResult(GetSplit(splitName));
@@ -202,38 +173,14 @@ namespace Splitio.Services.Cache.Classes
             return Task.FromResult(GetAllSplits());
         }
 
-        public Task ClearAsync()
-        {
-            Clear();
-
-            return Task.FromResult(0);
-        }
-
-        public Task<bool> TrafficTypeExistsAsync(string trafficType)
-        {
-            return Task.FromResult(TrafficTypeExists(trafficType));
-        }
-
         public Task<List<ParsedSplit>> FetchManyAsync(List<string> splitNames)
         {
             return Task.FromResult(FetchMany(splitNames));
         }
 
-        public Task KillAsync(long changeNumber, string splitName, string defaultTreatment)
-        {
-            Kill(changeNumber, splitName, defaultTreatment);
-            
-            return Task.FromResult(0);
-        }
-
         public Task<List<string>> GetSplitNamesAsync()
         {
             return Task.FromResult(GetSplitNames());
-        }
-
-        public Task<int> SplitsCountAsync()
-        {
-            return Task.FromResult(SplitsCount());
         }
         #endregion
 

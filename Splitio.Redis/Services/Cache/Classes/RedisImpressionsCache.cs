@@ -59,34 +59,31 @@ namespace Splitio.Redis.Services.Cache.Classes
             return 0;
         }
 
-        public void RecordUniqueKeys(List<Mtks> uniqueKeys)
+        public async Task RecordUniqueKeysAsync(List<Mtks> uniqueKeys)
         {
-            lock (_lock)
+            var lengthRedis = 0L;
+            foreach (var item in uniqueKeys)
             {
-                var lengthRedis = 0L;
-                foreach (var item in uniqueKeys)
-                {
-                    lengthRedis = _redisAdapterProducer.ListRightPush(UniqueKeysKey, JsonConvert.SerializeObject(item));
-                }
+                lengthRedis = await _redisAdapterProducer.ListRightPushAsync(UniqueKeysKey, JsonConvert.SerializeObject(item));
+            }
 
-                // This operation will simply do nothing if the key no longer exists (queue is empty)
-                // It's only done in the "successful" exit path so that the TTL is not overridden if mtks weren't
-                // popped correctly. This will result in mtks getting lost but will prevent the queue from taking
-                // a huge amount of memory.
-                if (lengthRedis == uniqueKeys.Count)
-                {
-                    _redisAdapterProducer.KeyExpire(UniqueKeysKey, _expireTimeOneHour);
-                }
+            // This operation will simply do nothing if the key no longer exists (queue is empty)
+            // It's only done in the "successful" exit path so that the TTL is not overridden if mtks weren't
+            // popped correctly. This will result in mtks getting lost but will prevent the queue from taking
+            // a huge amount of memory.
+            if (lengthRedis == uniqueKeys.Count)
+            {
+                await _redisAdapterProducer.KeyExpireAsync(UniqueKeysKey, _expireTimeOneHour);
             }
         }
 
-        public void RecordImpressionsCount(Dictionary<string, int> impressionsCount)
+        public async Task RecordImpressionsCountAsync(Dictionary<string, int> impressionsCount)
         {
-            var result = _redisAdapterProducer.HashIncrementAsyncBatch(ImpressionsCountKey, impressionsCount);
+            var result = await _redisAdapterProducer.HashIncrementBatchAsync(ImpressionsCountKey, impressionsCount);
 
             if (result == (impressionsCount.Count + impressionsCount.Sum(i => i.Value)))
             {
-                _redisAdapterProducer.KeyExpire(UniqueKeysKey, _expireTimeOneHour);
+                await _redisAdapterProducer.KeyExpireAsync(UniqueKeysKey, _expireTimeOneHour);
             }
         }
 
