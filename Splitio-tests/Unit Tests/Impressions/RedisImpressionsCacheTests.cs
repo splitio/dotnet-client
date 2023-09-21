@@ -32,12 +32,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var expected2 = "{\"f\":\"Feature2\",\"ks\":[\"key-1\",\"key-2\"]}";
             
             _redisAdapter
-                .Setup(mock => mock.ListRightPush(key, expected1))
-                .Returns(1);
+                .Setup(mock => mock.ListRightPushAsync(key, expected1))
+                .ReturnsAsync(1);
 
             _redisAdapter
-                .Setup(mock => mock.ListRightPush(key, expected2))
-                .Returns(2);
+                .Setup(mock => mock.ListRightPushAsync(key, expected2))
+                .ReturnsAsync(2);
 
             await _cache.RecordUniqueKeysAsync(new List<Mtks>
             {
@@ -58,12 +58,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var expected2 = "{\"f\":\"Feature2\",\"ks\":[\"key-1\",\"key-2\"]}";
 
             _redisAdapter
-                .Setup(mock => mock.ListRightPush(key, expected1))
-                .Returns(2);
+                .Setup(mock => mock.ListRightPushAsync(key, expected1))
+                .ReturnsAsync(2);
 
             _redisAdapter
-                .Setup(mock => mock.ListRightPush(key, expected2))
-                .Returns(3);
+                .Setup(mock => mock.ListRightPushAsync(key, expected2))
+                .ReturnsAsync(3);
 
             await _cache.RecordUniqueKeysAsync(new List<Mtks>
             {

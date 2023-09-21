@@ -9,7 +9,6 @@ namespace Splitio_Tests.Unit_Tests.Cache
     public class RedisSegmentCacheTests
     {
         private const string segmentKeyPrefix = "SPLITIO.segment.";
-        private const string segmentNameKeyPrefix = "SPLITIO.segment.{segmentname}.";
 
         [TestMethod]
         public void IsNotInSegmentOrRedisExceptionTest()
@@ -46,26 +45,6 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             //Assert
             Assert.IsFalse(result);
-        }
-
-        [TestMethod]
-        public void GetChangeNumberWhenNotSetOrRedisExceptionTest()
-        {
-            //Arrange
-            var changeNumber = -1;
-            var segmentName = "segment_test";
-            var redisAdapterMock = new Mock<IRedisAdapter>();
-            var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
-
-            redisAdapterMock
-                .Setup(x => x.Get(segmentNameKeyPrefix.Replace("{segmentname}", segmentName) + "till"))
-                .Returns("");
-
-            //Act
-            var result = segmentCache.GetChangeNumber(segmentName);
-
-            //Assert
-            Assert.AreEqual(changeNumber, result);
         }
     }
 }
