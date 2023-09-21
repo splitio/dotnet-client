@@ -38,15 +38,15 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             ParsedSplit parsedSplit = null;
 
             _splitCache
-                .Setup(mock => mock.GetSplitAsync(splitName))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.FetchManyAsync(new List<string> { splitName }))
+                .ReturnsAsync(new List<ParsedSplit> { parsedSplit });
 
             // Act.
-            var result = await _evaluator.EvaluateFeatureAsync(key, splitName);
+            var result = await _evaluator.EvaluateFeaturesAsync(key, new List<string> { splitName });
 
             // Assert.
-            Assert.AreEqual("control", result.Treatment);
-            Assert.AreEqual(Labels.SplitNotFound, result.Label);
+            Assert.AreEqual("control", result.Results.FirstOrDefault().Treatment);
+            Assert.AreEqual(Labels.SplitNotFound, result.Results.FirstOrDefault().Label);
         }
 
         [TestMethod]
@@ -66,16 +66,16 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             };
 
             _splitCache
-                .Setup(mock => mock.GetSplitAsync(splitName))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.FetchManyAsync(new List<string> { splitName }))
+                .ReturnsAsync(new List<ParsedSplit> { parsedSplit });
 
             // Act.
-            var result = await _evaluator.EvaluateFeatureAsync(key, splitName);
+            var result = await _evaluator.EvaluateFeaturesAsync(key, new List<string> { splitName });
 
             // Assert.
-            Assert.AreEqual(parsedSplit.defaultTreatment, result.Treatment);
-            Assert.AreEqual(parsedSplit.changeNumber, result.ChangeNumber);
-            Assert.AreEqual(Labels.Killed, result.Label);
+            Assert.AreEqual(parsedSplit.defaultTreatment, result.Results.FirstOrDefault().Treatment);
+            Assert.AreEqual(parsedSplit.changeNumber, result.Results.FirstOrDefault().ChangeNumber);
+            Assert.AreEqual(Labels.Killed, result.Results.FirstOrDefault().Label);
         }
 
         [TestMethod]
@@ -95,16 +95,16 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             };
 
             _splitCache
-                .Setup(mock => mock.GetSplitAsync(splitName))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.FetchManyAsync(new List<string> { splitName }))
+                .ReturnsAsync(new List<ParsedSplit> { parsedSplit });
 
             // Act.
-            var result = await _evaluator.EvaluateFeatureAsync(key, splitName);
+            var result = await _evaluator.EvaluateFeaturesAsync(key, new List<string> { splitName });
 
             // Assert.
-            Assert.AreEqual(parsedSplit.defaultTreatment, result.Treatment);
-            Assert.AreEqual(parsedSplit.changeNumber, result.ChangeNumber);
-            Assert.AreEqual(Labels.DefaultRule, result.Label);
+            Assert.AreEqual(parsedSplit.defaultTreatment, result.Results.FirstOrDefault().Treatment);
+            Assert.AreEqual(parsedSplit.changeNumber, result.Results.FirstOrDefault().ChangeNumber);
+            Assert.AreEqual(Labels.DefaultRule, result.Results.FirstOrDefault().Label);
         }
 
         [TestMethod]
@@ -148,20 +148,20 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             };
 
             _splitCache
-                .Setup(mock => mock.GetSplitAsync(splitName))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.FetchManyAsync(new List<string> { splitName }))
+                .ReturnsAsync(new List<ParsedSplit> { parsedSplit });
 
             _splitter
                 .Setup(mock => mock.GetBucket(key.bucketingKey, parsedSplit.trafficAllocationSeed, AlgorithmEnum.Murmur))
                 .Returns(18);
 
             // Act.
-            var result = await _evaluator.EvaluateFeatureAsync(key, splitName);
+            var result = await _evaluator.EvaluateFeaturesAsync(key, new List<string> { splitName });
 
             // Assert.
-            Assert.AreEqual(parsedSplit.defaultTreatment, result.Treatment);
-            Assert.AreEqual(parsedSplit.changeNumber, result.ChangeNumber);
-            Assert.AreEqual(Labels.TrafficAllocationFailed, result.Label);
+            Assert.AreEqual(parsedSplit.defaultTreatment, result.Results.FirstOrDefault().Treatment);
+            Assert.AreEqual(parsedSplit.changeNumber, result.Results.FirstOrDefault().ChangeNumber);
+            Assert.AreEqual(Labels.TrafficAllocationFailed, result.Results.FirstOrDefault().Label);
         }
 
         [TestMethod]
@@ -209,8 +209,8 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             };
 
             _splitCache
-                .Setup(mock => mock.GetSplitAsync(splitName))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.FetchManyAsync(new List<string> { splitName }))
+                .ReturnsAsync(new List<ParsedSplit> { parsedSplit });
 
             _splitter
                 .Setup(mock => mock.GetBucket(key.bucketingKey, parsedSplit.trafficAllocationSeed, AlgorithmEnum.Murmur))
@@ -221,12 +221,12 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns("on");
 
             // Act.
-            var result = await _evaluator.EvaluateFeatureAsync(key, splitName);
+            var result = await _evaluator.EvaluateFeaturesAsync(key, new List<string> { splitName });
 
             // Assert.
-            Assert.AreEqual("on", result.Treatment);
-            Assert.AreEqual("labelCondition", result.Label);
-            Assert.AreEqual(parsedSplit.changeNumber, result.ChangeNumber);
+            Assert.AreEqual("on", result.Results.FirstOrDefault().Treatment);
+            Assert.AreEqual("labelCondition", result.Results.FirstOrDefault().Label);
+            Assert.AreEqual(parsedSplit.changeNumber, result.Results.FirstOrDefault().ChangeNumber);
         }
 
         [TestMethod]
@@ -276,20 +276,20 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             };
 
             _splitCache
-                .Setup(mock => mock.GetSplitAsync(splitName))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.FetchManyAsync(new List<string> { splitName }))
+                .ReturnsAsync(new List<ParsedSplit> { parsedSplit });
 
             _splitter
                 .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplit.seed, It.IsAny<List<PartitionDefinition>>(), parsedSplit.algo))
                 .Returns("on");
 
             // Act.
-            var result = await _evaluator.EvaluateFeatureAsync(key, splitName, attributes);
+            var result = await _evaluator.EvaluateFeaturesAsync(key, new List<string> { splitName }, attributes);
 
             // Assert.
-            Assert.AreEqual("on", result.Treatment);
-            Assert.AreEqual("label", result.Label);
-            Assert.AreEqual(parsedSplit.changeNumber, result.ChangeNumber);
+            Assert.AreEqual("on", result.Results.FirstOrDefault().Treatment);
+            Assert.AreEqual("label", result.Results.FirstOrDefault().Label);
+            Assert.AreEqual(parsedSplit.changeNumber, result.Results.FirstOrDefault().ChangeNumber);
         }
 
         [TestMethod]
@@ -337,16 +337,16 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             };
 
             _splitCache
-                .Setup(mock => mock.GetSplitAsync(splitName))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.FetchManyAsync(new List<string> { splitName }))
+                .ReturnsAsync(new List<ParsedSplit> { parsedSplit });
 
             // Act.
-            var result = await _evaluator.EvaluateFeatureAsync(key, splitName);
+            var result = await _evaluator.EvaluateFeaturesAsync(key, new List<string> { splitName });
 
             // Assert.
-            Assert.AreEqual("off", result.Treatment);
-            Assert.AreEqual(Labels.DefaultRule, result.Label);
-            Assert.AreEqual(parsedSplit.changeNumber, result.ChangeNumber);
+            Assert.AreEqual("off", result.Results.FirstOrDefault().Treatment);
+            Assert.AreEqual(Labels.DefaultRule, result.Results.FirstOrDefault().Label);
+            Assert.AreEqual(parsedSplit.changeNumber, result.Results.FirstOrDefault().ChangeNumber);
         }
 
         [TestMethod]
@@ -418,20 +418,20 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             };
 
             _splitCache
-                .Setup(mock => mock.GetSplitAsync(splitName))
-                .ReturnsAsync(parsedSplit);
+                .Setup(mock => mock.FetchManyAsync(new List<string> { splitName }))
+                .ReturnsAsync(new List<ParsedSplit> { parsedSplit });
 
             _splitter
                 .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplit.seed, It.IsAny<List<PartitionDefinition>>(), parsedSplit.algo))
                 .Returns("on");
 
             // Act.
-            var result = await _evaluator.EvaluateFeatureAsync(key, splitName);
+            var result = await _evaluator.EvaluateFeaturesAsync(key, new List<string> { splitName });
 
             // Assert.
-            Assert.AreEqual("on", result.Treatment);
-            Assert.AreEqual("labelEndsWith", result.Label);
-            Assert.AreEqual(parsedSplit.changeNumber, result.ChangeNumber);
+            Assert.AreEqual("on", result.Results.FirstOrDefault().Treatment);
+            Assert.AreEqual("labelEndsWith", result.Results.FirstOrDefault().Label);
+            Assert.AreEqual(parsedSplit.changeNumber, result.Results.FirstOrDefault().ChangeNumber);
         }
         #endregion
 
@@ -566,15 +566,15 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             var result = await _evaluator.EvaluateFeaturesAsync(key, splitNames);
 
             // Assert.
-            var resultOn = result.TreatmentResults.FirstOrDefault(tr => tr.Key.Equals("always_on"));
-            Assert.AreEqual("on", resultOn.Value.Treatment);
-            Assert.AreEqual(parsedSplitOn.changeNumber, resultOn.Value.ChangeNumber);
-            Assert.AreEqual("labelEndsWithMatcher", resultOn.Value.Label);
+            var resultOn = result.Results.FirstOrDefault(tr => tr.FeatureFlagName.Equals("always_on"));
+            Assert.AreEqual("on", resultOn.Treatment);
+            Assert.AreEqual(parsedSplitOn.changeNumber, resultOn.ChangeNumber);
+            Assert.AreEqual("labelEndsWithMatcher", resultOn.Label);
 
-            var resultOff = result.TreatmentResults.FirstOrDefault(tr => tr.Key.Equals("always_off"));
-            Assert.AreEqual("off", resultOff.Value.Treatment);
-            Assert.AreEqual(parsedSplitOn.changeNumber, resultOff.Value.ChangeNumber);
-            Assert.AreEqual("labelWhiteList", resultOff.Value.Label);
+            var resultOff = result.Results.FirstOrDefault(tr => tr.FeatureFlagName.Equals("always_off"));
+            Assert.AreEqual("off", resultOff.Treatment);
+            Assert.AreEqual(parsedSplitOn.changeNumber, resultOff.ChangeNumber);
+            Assert.AreEqual("labelWhiteList", resultOff.Label);
         }
         #endregion
     }

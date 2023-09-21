@@ -1,6 +1,7 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Evaluator;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Parsing.Classes
@@ -23,7 +24,8 @@ namespace Splitio.Services.Parsing.Classes
                 return false;
             }
 
-            var result = evaluator.EvaluateFeature(key, _split, attributes);
+            var evaluatorResult = evaluator.EvaluateFeatures(key, new List<string> { _split }, attributes);
+            var result = evaluatorResult.Results.FirstOrDefault();
 
             return _treatments.Contains(result.Treatment);
         }
@@ -35,7 +37,8 @@ namespace Splitio.Services.Parsing.Classes
                 return false;
             }
 
-            var result = await evaluator.EvaluateFeatureAsync(key, _split, attributes);
+            var evaluatorResult = await evaluator.EvaluateFeaturesAsync(key, new List<string> { _split }, attributes);
+            var result = evaluatorResult.Results.FirstOrDefault();
 
             return _treatments.Contains(result.Treatment);
         }

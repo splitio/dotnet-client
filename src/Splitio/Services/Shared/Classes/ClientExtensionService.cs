@@ -35,7 +35,7 @@ namespace Splitio.Services.Shared.Classes
         {
             ffNameSanitized = null;
 
-            var ffNames = TreatmentsValidations(method, key, new List<string> { featureFlagName }, logger, out Dictionary<string, TreatmentResult> controlTreatments);
+            var ffNames = TreatmentsValidations(method, key, new List<string> { featureFlagName }, logger, out List<TreatmentResult> controlTreatments);
 
             if (controlTreatments != null || !ffNames.Any()) return false;
 
@@ -44,16 +44,16 @@ namespace Splitio.Services.Shared.Classes
             return true;
         }
 
-        public List<string> TreatmentsValidations(API method, Key key, List<string> features, ISplitLogger logger, out Dictionary<string, TreatmentResult> result)
+        public List<string> TreatmentsValidations(API method, Key key, List<string> features, ISplitLogger logger, out List<TreatmentResult> result)
         {
             result = null;
 
             if (!IsClientReady(method, logger) || !_keyValidator.IsValid(key, method))
             {
-                result = new Dictionary<string, TreatmentResult>();
+                result = new List<TreatmentResult>();
                 foreach (var feature in features)
                 {
-                    result.Add(feature, new TreatmentResult(string.Empty, Constants.Gral.Control, null));
+                    result.Add(new TreatmentResult(feature, string.Empty, Constants.Gral.Control, null));
                 }
 
                 return new List<string>();

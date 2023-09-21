@@ -28,29 +28,10 @@ namespace Splitio.Services.Evaluator
         }
 
         #region Public Sync Methods
-        public TreatmentResult EvaluateFeature(Key key, string featureName, Dictionary<string, object> attributes = null)
-        {
-            using (var clock = new SplitStopwatch())
-            {
-                clock.Start();
-
-                try
-                {
-                    var parsedSplit = _featureFlagCacheConsumer.GetSplit(featureName);
-
-                    return EvaluateTreatment(key, parsedSplit, featureName, clock, attributes);
-                }
-                catch (Exception e)
-                {
-                    return EvaluateFeatureException(e, featureName, clock);
-                }
-            }
-        }
-
         public MultipleEvaluatorResult EvaluateFeatures(Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
         {
             var exception = false;
-            var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
+            var treatmentsForFeatures = new List<TreatmentResult>();
 
             using (var clock = new SplitStopwatch())
             {
@@ -66,7 +47,7 @@ namespace Splitio.Services.Evaluator
 
                         var result = EvaluateTreatment(key, split, feature, attributes: attributes);
 
-                        treatmentsForFeatures.Add(feature, result);
+                        treatmentsForFeatures.Add(result);
                     }
                 }
                 catch (Exception e)
@@ -80,29 +61,10 @@ namespace Splitio.Services.Evaluator
         #endregion
 
         #region Public Async Methods
-        public async Task<TreatmentResult> EvaluateFeatureAsync(Key key, string featureName, Dictionary<string, object> attributes = null)
-        {
-            using (var clock = new SplitStopwatch())
-            {
-                clock.Start();
-
-                try
-                {
-                    var parsedSplit = await _featureFlagCacheConsumer.GetSplitAsync(featureName);
-
-                    return await EvaluateTreatmentAsync(key, parsedSplit, featureName, clock, attributes);
-                }
-                catch (Exception e)
-                {
-                    return EvaluateFeatureException(e, featureName, clock);
-                }
-            }
-        }
-
         public async Task<MultipleEvaluatorResult> EvaluateFeaturesAsync(Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
         {
             var exception = false;
-            var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
+            var treatmentsForFeatures = new List<TreatmentResult>();
 
             using (var clock = new SplitStopwatch())
             {
@@ -118,7 +80,7 @@ namespace Splitio.Services.Evaluator
 
                         var result = await EvaluateTreatmentAsync(key, split, feature, attributes: attributes);
 
-                        treatmentsForFeatures.Add(feature, result);
+                        treatmentsForFeatures.Add(result);
                     }
                 }
                 catch (Exception e)
@@ -132,13 +94,13 @@ namespace Splitio.Services.Evaluator
         #endregion
 
         #region Private Sync Methods
-        private TreatmentResult EvaluateTreatment(Key key, ParsedSplit parsedSplit, string featureFlagName, Util.SplitStopwatch clock = null, Dictionary<string, object> attributes = null)
+        private TreatmentResult EvaluateTreatment(Key key, ParsedSplit parsedSplit, string featureFlagName, SplitStopwatch clock = null, Dictionary<string, object> attributes = null)
         {
             try
             {
                 if (clock == null)
                 {
-                    clock = new Util.SplitStopwatch();
+                    clock = new SplitStopwatch();
                     clock.Start();
                 }
 
@@ -230,7 +192,7 @@ namespace Splitio.Services.Evaluator
         {
             if (split.killed)
             {
-                result = new TreatmentResult(Labels.Killed, split.defaultTreatment, split.changeNumber);
+                result = new TreatmentResult(split.name, Labels.Killed, split.defaultTreatment, split.changeNumber);
                 return true;
             }
 
@@ -251,7 +213,7 @@ namespace Splitio.Services.Evaluator
 
                     if (bucket > split.trafficAllocation)
                     {
-                        result = new TreatmentResult(Labels.TrafficAllocationFailed, split.defaultTreatment, split.changeNumber);
+                        result = new TreatmentResult(split.name, Labels.TrafficAllocationFailed, split.defaultTreatment, split.changeNumber);
                     }
                 }
 
@@ -263,7 +225,7 @@ namespace Splitio.Services.Evaluator
 
         private static TreatmentResult ReturnDefaultTreatment(ParsedSplit split)
         {
-            return new TreatmentResult(Labels.DefaultRule, split.defaultTreatment, split.changeNumber);
+            return new TreatmentResult(split.name, Labels.DefaultRule, split.defaultTreatment, split.changeNumber);
         }
 
         private TreatmentResult IfConditionMatched(bool matched, Key key, ParsedSplit split, ConditionWithLogic condition)
@@ -272,25 +234,25 @@ namespace Splitio.Services.Evaluator
 
             var treatment = _splitter.GetTreatment(key.bucketingKey, split.seed, condition.partitions, split.algo);
 
-            return new TreatmentResult(condition.label, treatment, split.changeNumber);
+            return new TreatmentResult(split.name, condition.label, treatment, split.changeNumber);
         }
 
         private static TreatmentResult EvaluateFeatureException(Exception e, string featureName, SplitStopwatch clock)
         {
             _log.Error($"Exception caught getting treatment for feature flag: {featureName}", e);
 
-            return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds, exception: true);
+            return new TreatmentResult(featureName, Labels.Exception, Control, exception: true);
         }
 
-        private static bool EvaluateFeaturesException(Exception e, List<string> featureNames, SplitStopwatch clock, out Dictionary<string, TreatmentResult> results)
+        private static bool EvaluateFeaturesException(Exception e, List<string> featureNames, SplitStopwatch clock, out List<TreatmentResult> results)
         {
-            results = new Dictionary<string, TreatmentResult>();
+            results = new List<TreatmentResult>();
 
             _log.Error($"Exception caught getting treatments", e);
 
             foreach (var name in featureNames)
             {
-                results.Add(name, new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds));
+                results.Add(new TreatmentResult(name, Labels.Exception, Control));
             }
 
             return true;
@@ -305,7 +267,7 @@ namespace Splitio.Services.Evaluator
 
             _log.Warn($"GetTreatment: you passed {featureFlagName} that does not exist in this environment, please double check what feature flags exist in the Split user interface.");
 
-            result = new TreatmentResult(Labels.SplitNotFound, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
+            result = new TreatmentResult(featureFlagName, Labels.SplitNotFound, Control);
 
             return true;
         }
@@ -316,8 +278,6 @@ namespace Splitio.Services.Evaluator
             {
                 treatmentResult.Config = parsedSplit.configurations[treatmentResult.Treatment];
             }
-
-            treatmentResult.ElapsedMilliseconds = clock.ElapsedMilliseconds;
 
             return treatmentResult;
         }
