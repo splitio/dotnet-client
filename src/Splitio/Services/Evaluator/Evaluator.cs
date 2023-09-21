@@ -94,13 +94,13 @@ namespace Splitio.Services.Evaluator
         #endregion
 
         #region Private Sync Methods
-        private TreatmentResult EvaluateTreatment(Key key, ParsedSplit parsedSplit, string featureFlagName, Util.SplitStopwatch clock = null, Dictionary<string, object> attributes = null)
+        private TreatmentResult EvaluateTreatment(Key key, ParsedSplit parsedSplit, string featureFlagName, SplitStopwatch clock = null, Dictionary<string, object> attributes = null)
         {
             try
             {
                 if (clock == null)
                 {
-                    clock = new Util.SplitStopwatch();
+                    clock = new SplitStopwatch();
                     clock.Start();
                 }
 
@@ -241,7 +241,7 @@ namespace Splitio.Services.Evaluator
         {
             _log.Error($"Exception caught getting treatment for feature flag: {featureName}", e);
 
-            return new TreatmentResult(featureName, Labels.Exception, Control, /*elapsedMilliseconds: clock.ElapsedMilliseconds, */exception: true);
+            return new TreatmentResult(featureName, Labels.Exception, Control, exception: true);
         }
 
         private static bool EvaluateFeaturesException(Exception e, List<string> featureNames, SplitStopwatch clock, out List<TreatmentResult> results)
@@ -252,7 +252,7 @@ namespace Splitio.Services.Evaluator
 
             foreach (var name in featureNames)
             {
-                results.Add(new TreatmentResult(name, Labels.Exception, Control/*, elapsedMilliseconds: clock.ElapsedMilliseconds*/));
+                results.Add(new TreatmentResult(name, Labels.Exception, Control));
             }
 
             return true;
@@ -267,7 +267,7 @@ namespace Splitio.Services.Evaluator
 
             _log.Warn($"GetTreatment: you passed {featureFlagName} that does not exist in this environment, please double check what feature flags exist in the Split user interface.");
 
-            result = new TreatmentResult(featureFlagName, Labels.SplitNotFound, Control/*, elapsedMilliseconds: clock.ElapsedMilliseconds*/);
+            result = new TreatmentResult(featureFlagName, Labels.SplitNotFound, Control);
 
             return true;
         }
@@ -278,8 +278,6 @@ namespace Splitio.Services.Evaluator
             {
                 treatmentResult.Config = parsedSplit.configurations[treatmentResult.Treatment];
             }
-
-            //treatmentResult.ElapsedMilliseconds = clock.ElapsedMilliseconds;
 
             return treatmentResult;
         }
