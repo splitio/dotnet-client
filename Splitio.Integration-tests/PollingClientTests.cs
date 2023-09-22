@@ -14,7 +14,6 @@ namespace Splitio.Integration_tests
     [TestClass]
     public class PollingClientTests : BaseIntegrationTests
     {
-        [Ignore("Flaky tests.")]
         [TestMethod]
         public async Task GetTreatments_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
         {

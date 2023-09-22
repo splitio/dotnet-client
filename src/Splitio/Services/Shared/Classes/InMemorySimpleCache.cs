@@ -1,6 +1,7 @@
 ﻿using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Shared.Classes
 {
@@ -11,6 +12,11 @@ namespace Splitio.Services.Shared.Classes
         public InMemorySimpleCache(BlockingQueue<T> queue)
         {
             _queue = queue;
+        }
+
+        public Task<int> AddItemsAsync(IList<T> items)
+        {
+            return Task.FromResult(AddItems(items));
         }
 
         public int AddItems(IList<T> items)

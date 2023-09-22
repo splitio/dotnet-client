@@ -1194,8 +1194,6 @@ namespace Splitio.Integration_tests
                     Assert.IsFalse(result);
                 else
                     Assert.IsTrue(result);
-
-                // await Task.Delay(1000);
             }
 
             events = events
@@ -1208,7 +1206,6 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        [Ignore]
         public async Task Track_WithLowQueue_ReturnsTrue()
         {
             // Arrange.
@@ -1240,6 +1237,181 @@ namespace Splitio.Integration_tests
             {
                 // Act.
                 var result = client.Track(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
+
+                // Assert. 
+                Assert.IsTrue(result);
+            }
+
+            //Validate Events sent to the be.
+            await AssertSentEventsAsync(events, httpClientMock, sleepTime: 1000, eventsCount: 3, validateEvents: false);
+            client.Destroy();
+        }
+        #endregion
+
+        #region TrackAsync
+        [TestMethod]
+        public async Task TrackAsync_WithValidData_ReturnsTrue()
+        {
+            // Arrange.
+            var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
+
+            var properties = new Dictionary<string, object>
+            {
+                { "property_1",  1 },
+                { "property_2",  2 }
+            };
+
+            var events = new List<EventBackend>
+            {
+                new EventBackend { Key = "key_1", TrafficTypeName = "traffic_type_1", EventTypeId = "event_type_1", Value = 123, Properties = properties },
+                new EventBackend { Key = "key_2", TrafficTypeName = "traffic_type_2", EventTypeId = "event_type_2", Value = 222 },
+                new EventBackend { Key = "key_3", TrafficTypeName = "traffic_type_3", EventTypeId = "event_type_3", Value = 333 },
+                new EventBackend { Key = "key_4", TrafficTypeName = "traffic_type_4", EventTypeId = "event_type_4", Value = 444, Properties = properties }
+            };
+
+            var apikey = "base-apikey17";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            foreach (var _event in events)
+            {
+                // Act.
+                var result = await client.TrackAsync(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
+
+                // Assert. 
+                Assert.IsTrue(result);
+            }
+
+            //Validate Events sent to the be.
+            await AssertSentEventsAsync(events, httpClientMock);
+            client.Destroy();
+        }
+
+        [TestMethod]
+        public async Task TrackAsync_WithBUR_ReturnsTrue()
+        {
+            // Arrange.
+            var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
+
+            var properties = new Dictionary<string, object>
+            {
+                { "property_1",  1 },
+                { "property_2",  2 }
+            };
+
+            var events = new List<EventBackend>
+            {
+                new EventBackend { Key = "key_1", TrafficTypeName = "traffic_type_1", EventTypeId = "event_type_1", Value = 123, Properties = properties },
+                new EventBackend { Key = "key_2", TrafficTypeName = "traffic_type_2", EventTypeId = "event_type_2", Value = 222 },
+                new EventBackend { Key = "key_3", TrafficTypeName = "traffic_type_3", EventTypeId = "event_type_3", Value = 333 },
+                new EventBackend { Key = "key_4", TrafficTypeName = "traffic_type_4", EventTypeId = "event_type_4", Value = 444, Properties = properties }
+            };
+
+            var apikey = "base-apikey18";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            foreach (var _event in events)
+            {
+                // Act.
+                var result = await client.TrackAsync(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
+
+                // Assert. 
+                Assert.IsTrue(result);
+            }
+
+            //Validate Events sent to the be.
+            await AssertSentEventsAsync(events, httpClientMock);
+            client.Destroy();
+        }
+
+        [TestMethod]
+        public async Task TrackAsync_WithInvalidData_ReturnsFalse()
+        {
+            // Arrange.
+            var configurations = GetConfigurationOptions(httpClientMock?.GetUrl());
+
+            var properties = new Dictionary<string, object>
+            {
+                { "property_1",  1 },
+                { "property_2",  2 }
+            };
+
+            var events = new List<EventBackend>
+            {
+                new EventBackend { Key = string.Empty, TrafficTypeName = "traffic_type_1", EventTypeId = "event_type_1", Value = 123, Properties = properties },
+                new EventBackend { Key = "key_2", TrafficTypeName = string.Empty, EventTypeId = "event_type_2", Value = 222 },
+                new EventBackend { Key = "key_3", TrafficTypeName = "traffic_type_3", EventTypeId = string.Empty, Value = 333 },
+                new EventBackend { Key = "key_4", TrafficTypeName = "traffic_type_4", EventTypeId = "event_type_4", Value = 444, Properties = properties },
+                new EventBackend { Key = "key_5", TrafficTypeName = "traffic_type_5", EventTypeId = "event_type_5"}
+            };
+
+            var apikey = "base-apikey19";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            foreach (var _event in events)
+            {
+                // Act.
+                var result = await client.TrackAsync(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
+
+                // Assert. 
+                if (string.IsNullOrEmpty(_event.Key) || _event.Key.Equals("key_2") || _event.Key.Equals("key_3"))
+                    Assert.IsFalse(result);
+                else
+                    Assert.IsTrue(result);
+            }
+
+            events = events
+                .Where(e => e.Key.Equals("key_4") || e.Key.Equals("key_5"))
+                .ToList();
+
+            //Validate Events sent to the be.
+            await AssertSentEventsAsync(events, httpClientMock);
+            client.Destroy();
+        }
+
+        [TestMethod]
+        public async Task TrackAsync_WithLowQueue_ReturnsTrue()
+        {
+            // Arrange.
+            var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), eventsPushRate: 60, eventsQueueSize: 3);
+
+            var properties = new Dictionary<string, object>
+            {
+                { "property_1",  1 },
+                { "property_2",  2 }
+            };
+
+            var events = new List<EventBackend>
+            {
+                new EventBackend { Key = "key_1", TrafficTypeName = "traffic_type_1", EventTypeId = "event_type_1", Value = 123, Properties = properties },
+                new EventBackend { Key = "key_2", TrafficTypeName = "traffic_type_2", EventTypeId = "event_type_2", Value = 222 },
+                new EventBackend { Key = "key_3", TrafficTypeName = "traffic_type_3", EventTypeId = "event_type_3", Value = 333 },
+                new EventBackend { Key = "key_4", TrafficTypeName = "traffic_type_4", EventTypeId = "event_type_4", Value = 444, Properties = properties },
+                new EventBackend { Key = "key_5", TrafficTypeName = "traffic_type_5", EventTypeId = "event_type_5"}
+            };
+
+            var apikey = "base-apikey20";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            foreach (var _event in events)
+            {
+                // Act.
+                var result = await client.TrackAsync(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
 
                 // Assert. 
                 Assert.IsTrue(result);
