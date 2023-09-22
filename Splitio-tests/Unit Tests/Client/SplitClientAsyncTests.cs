@@ -799,7 +799,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
 
         [TestMethod]
-        public async Task Track_WithProperties_RetunrsTrue()
+        public async Task Track_WithProperties_ReturnsTrue()
         {
             // Arrange. 
             decimal decimalValue = 111;
@@ -837,7 +837,6 @@ namespace Splitio_Tests.Unit_Tests.Client
             var result = await _splitClient.TrackAsync("key", "user", "event_type", 132, properties);
 
             // Assert.
-            //await Task.Delay(1500);
             Assert.IsTrue(result);
             _eventsLog.Verify(mock => mock.LogAsync(It.Is<WrappedEvent>(we => we.Event.properties != null &&
                                                                               we.Event.key.Equals("key") &&
@@ -860,7 +859,6 @@ namespace Splitio_Tests.Unit_Tests.Client
             var result = await _splitClient.TrackAsync("key", "user", "event_type", 132, properties);
 
             // Assert.
-            //Thread.Sleep(1500);
             Assert.IsTrue(result);
             _eventsLog.Verify(mock => mock.LogAsync(It.Is<WrappedEvent>(we => we.Event.properties == null &&
                                                                               we.Event.key.Equals("key") &&
@@ -887,7 +885,6 @@ namespace Splitio_Tests.Unit_Tests.Client
             var result = await _splitClient.TrackAsync("key", trafficType, "event_type", 132);
 
             // Assert.
-            //Thread.Sleep(1500);
             Assert.IsTrue(result);
             _eventsLog.Verify(mock => mock.LogAsync(It.Is<WrappedEvent>(we => we.Event.properties == null &&
                                                                               we.Event.key.Equals("key") &&
@@ -914,7 +911,6 @@ namespace Splitio_Tests.Unit_Tests.Client
             var result = await _splitClient.TrackAsync("key", trafficType, "event_type", 132);
 
             // Assert.
-            //Thread.Sleep(1500);
             Assert.IsTrue(result);
             _eventsLog.Verify(mock => mock.LogAsync(It.Is<WrappedEvent>(we => we.Event.properties == null &&
                                                                               we.Event.key.Equals("key") &&

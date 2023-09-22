@@ -49,10 +49,9 @@ namespace Splitio.Services.Client.Classes
         private IFeatureFlagCache _featureFlagCache;
         private ISegmentCache _segmentCache;
 
-        public SelfRefreshingClient(string apiKey, ConfigurationOptions config) : base()
+        public SelfRefreshingClient(string apiKey, ConfigurationOptions config) : base(apiKey)
         {
             _config = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
-            ApiKey = apiKey;
 
             BuildSplitCache();
             BuildSegmentCache();

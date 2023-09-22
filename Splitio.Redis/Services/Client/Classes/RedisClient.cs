@@ -16,7 +16,6 @@ using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Shared.Classes;
-using Splitio.Telemetry.Domain;
 
 namespace Splitio.Redis.Services.Client.Classes
 {
@@ -30,10 +29,9 @@ namespace Splitio.Redis.Services.Client.Classes
         private IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
         private ISegmentCacheConsumer _segmentCacheConsumer;
 
-        public RedisClient(ConfigurationOptions config, string apiKey) : base()
+        public RedisClient(ConfigurationOptions config, string apiKey) : base(apiKey)
         {
             _config = new RedisConfig();
-            ApiKey = apiKey;
 
             ReadConfig(config);
             BuildRedisCache();
