@@ -18,7 +18,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             IEvaluator evaluator,
             IImpressionsManager impressionsManager,
             ISyncManager syncManager)
-            : base()
+            : base("SplitClientForTesting")
         {
             _eventsLog = eventsLog;
             _impressionsLog = impressionsLog;
@@ -28,7 +28,6 @@ namespace Splitio_Tests.Unit_Tests.Client
             _impressionsManager = impressionsManager;
             _syncManager = syncManager;
 
-            ApiKey = "SplitClientForTesting";
             BuildClientExtension();
         }
     }

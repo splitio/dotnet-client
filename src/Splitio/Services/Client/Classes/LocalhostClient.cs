@@ -26,9 +26,8 @@ namespace Splitio.Services.Client.Classes
         private readonly FileSystemWatcher _watcher;
         private readonly string _fullPath;
 
-        public LocalhostClient(string filePath) : base()
+        public LocalhostClient(string filePath) : base("localhost")
         {
-            ApiKey = "localhost";
             _fullPath = LookupFilePath(filePath);
 
             if (_fullPath.ToLower().EndsWith(SplitFileYaml) || _fullPath.ToLower().EndsWith(SplitFileYml))

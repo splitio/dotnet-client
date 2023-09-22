@@ -279,7 +279,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"))
             };
 
-            var optimizedImpressions = impressions.Where(i => impressionsManager.ShouldQueueImpression(i)).ToList();
+            var optimizedImpressions = impressions.Where(i => ImpressionsManager.ShouldQueueImpression(i)).ToList();
 
             // Act.
             impressionsManager.Track(impressions);

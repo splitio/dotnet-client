@@ -6,9 +6,9 @@ namespace Splitio.Services.Client.Classes
 {
     public class SplitClientForTest : SplitClient
     {
-        private Dictionary<string, string> _tests;
+        private readonly Dictionary<string, string> _tests;
 
-        public SplitClientForTest() : base()
+        public SplitClientForTest() : base("SplitClientForTest")
         {
             _tests = new Dictionary<string, string>();
         }

@@ -29,9 +29,8 @@ namespace Splitio.Services.Client.Classes
             bool isLabelsEnabled = true,
             IEventsLog eventsLog = null,
             ITrafficTypeValidator trafficTypeValidator = null,
-            IImpressionsManager impressionsManager = null) : base()
+            IImpressionsManager impressionsManager = null) : base("localhost")
         {
-            ApiKey = "localhost";
             _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
 
             var segmentFetcher = new JSONFileSegmentFetcher(segmentsFilePath, _segmentCache);

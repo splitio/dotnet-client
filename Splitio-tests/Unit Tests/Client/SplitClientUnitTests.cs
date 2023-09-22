@@ -651,7 +651,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
 
         [TestMethod]
-        public void Track_WithProperties_RetunrsTrue()
+        public void Track_WithProperties_ReturnsTrue()
         {
             // Arrange. 
             decimal decimalValue = 111;

@@ -19,7 +19,7 @@ namespace Splitio.Integration_tests
     {
         protected static readonly HttpClientMock httpClientMock = new HttpClientMock("test");
 
-        #region Async Evaluations
+        #region GetTreatmentAsync
         [TestMethod]
         public async Task GetTreatmentAsync_WithtBUR_WithMultipleCalls_ReturnsTreatments()
         {
@@ -84,13 +84,13 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public async Task GetTreatmentWithConfigAsync_WithtBUR_WithMultipleCalls_ReturnsTreatments()
+        public async Task GetTreatmentAsync_WithtInputValidation_ReturnsTreatments()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
             var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
 
-            var apikey = "base-apikey4";
+            var apikey = "base-apikey2";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
@@ -98,29 +98,24 @@ namespace Splitio.Integration_tests
             client.BlockUntilReady(5000);
 
             // Act.
-            var result1 = await client.GetTreatmentWithConfigAsync("nico_test", "FACUNDO_TEST");
-            var result2 = await client.GetTreatmentWithConfigAsync("mauro_test", "FACUNDO_TEST");
-            var result3 = await client.GetTreatmentWithConfigAsync("mauro", "MAURO_TEST");
-            var result4 = await client.GetTreatmentWithConfigAsync("test", "MAURO_TEST");
+            var result1 = await client.GetTreatmentAsync("nico_test", "FACUNDO_TEST");
+            var result2 = await client.GetTreatmentAsync(string.Empty, "FACUNDO_TEST");
+            var result3 = await client.GetTreatmentAsync("1", string.Empty);
+            var result4 = await client.GetTreatmentAsync("24", "Test_Save_1");
+
+            // Assert.
+            Assert.AreEqual("on", result1);
+            Assert.AreEqual("control", result2);
+            Assert.AreEqual("control", result3);
+            Assert.AreEqual("off", result4);
 
             await client.DestroyAsync();
 
-            // Assert.
-            Assert.AreEqual("on", result1.Treatment);
-            Assert.AreEqual("off", result2.Treatment);
-            Assert.AreEqual("on", result3.Treatment);
-            Assert.AreEqual("off", result4.Treatment);
-
-            Assert.AreEqual("{\"color\":\"green\"}", result1.Config);
-            Assert.IsNull(result2.Config);
-            Assert.AreEqual("{\"version\":\"v2\"}", result3.Config);
-            Assert.AreEqual("{\"version\":\"v1\"}", result4.Config);
-
-            // Validate impressions.
+            // Validate impressions in listener.
             var impressionQueue = impressionListener.GetQueue();
             var keyImpressions = impressionQueue.FetchAll();
 
-            Assert.AreEqual(4, keyImpressions.Count);
+            Assert.AreEqual(2, keyImpressions.Count);
 
             var impression1 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
@@ -128,138 +123,51 @@ namespace Splitio.Integration_tests
                 .FirstOrDefault();
 
             var impression2 = keyImpressions
-                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
-                .Where(ki => ki.keyName.Equals("mauro_test"))
-                .FirstOrDefault();
-
-            var impression3 = keyImpressions
-                .Where(ki => ki.feature.Equals("MAURO_TEST"))
-                .Where(ki => ki.keyName.Equals("mauro"))
-                .FirstOrDefault();
-
-            var impression4 = keyImpressions
-                .Where(ki => ki.feature.Equals("MAURO_TEST"))
-                .Where(ki => ki.keyName.Equals("test"))
+                .Where(ki => ki.feature.Equals("Test_Save_1"))
+                .Where(ki => ki.keyName.Equals("24"))
                 .FirstOrDefault();
 
             AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            AssertImpression(impression2, 1506703262916, "FACUNDO_TEST", "mauro_test", "in segment all", "off");
-            AssertImpression(impression3, 1506703262966, "MAURO_TEST", "mauro", "whitelisted", "on");
-            AssertImpression(impression4, 1506703262966, "MAURO_TEST", "test", "not in split", "off");
+            AssertImpression(impression2, 1503956389520, "Test_Save_1", "24", "in segment all", "off");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(4, httpClientMock, impression1, impression2, impression3, impression4);
+            await AssertSentImpressionsAsync(2, httpClientMock, impression1, impression2);
+
+            client.Destroy();
         }
 
         [TestMethod]
-        public async Task GetTreatmentsAsync_WithtBUR_ReturnsTreatments()
+        public async Task GetTreatmentAsync_WithtBUR_WhenTreatmentDoesntExist_ReturnsControl()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
             var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
 
-            var apikey = "base-apikey7";
+            var apikey = "base-apikey3";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            client.BlockUntilReady(10000);
+            client.BlockUntilReady(5000);
 
             // Act.
-            var result = await client.GetTreatmentsAsync("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+            var result = await client.GetTreatmentAsync("nico_test", "Random_Treatment");
 
             // Assert.
-            Assert.AreEqual("on", result["FACUNDO_TEST"]);
-            Assert.AreEqual("off", result["MAURO_TEST"]);
-            Assert.AreEqual("off", result["Test_Save_1"]);
+            Assert.AreEqual("control", result);
 
-            await client.DestroyAsync();
-
-            // Validate impressions.
+            // Validate impressions in listener.
             var impressionQueue = impressionListener.GetQueue();
             var keyImpressions = impressionQueue.FetchAll();
 
-            Assert.AreEqual(3, keyImpressions.Count);
-
-            var impression1 = keyImpressions
-                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .FirstOrDefault();
-
-            var impression2 = keyImpressions
-                .Where(ki => ki.feature.Equals("MAURO_TEST"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .FirstOrDefault();
-
-            var impression3 = keyImpressions
-                .Where(ki => ki.feature.Equals("Test_Save_1"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .FirstOrDefault();
-
-            AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
-            AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
+            Assert.AreEqual(0, keyImpressions.Count);
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(3, httpClientMock, impression1, impression2, impression3);
-        }
-
-        [TestMethod]
-        public async Task GetTreatmentsWithConfigAsync_WithtBUR_ReturnsTreatments()
-        {
-            var impressionListener = new IntegrationTestsImpressionListener(50);
-            var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
-
-            var apikey = "base-apikey10";
-
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
-
-            client.BlockUntilReady(10000);
-
-            // Act.
-            var result = await client.GetTreatmentsWithConfigAsync("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+            await AssertSentImpressionsAsync(0, httpClientMock);
 
             await client.DestroyAsync();
-
-            // Assert.
-            Assert.AreEqual("on", result["FACUNDO_TEST"].Treatment);
-            Assert.AreEqual("off", result["MAURO_TEST"].Treatment);
-            Assert.AreEqual("off", result["Test_Save_1"].Treatment);
-
-            Assert.AreEqual("{\"color\":\"green\"}", result["FACUNDO_TEST"].Config);
-            Assert.AreEqual("{\"version\":\"v1\"}", result["MAURO_TEST"].Config);
-            Assert.IsNull(result["Test_Save_1"].Config);
-
-            // Validate impressions.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
-
-            var impression1 = keyImpressions
-                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .FirstOrDefault();
-
-            var impression2 = keyImpressions
-                .Where(ki => ki.feature.Equals("MAURO_TEST"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .FirstOrDefault();
-
-            var impression3 = keyImpressions
-                .Where(ki => ki.feature.Equals("Test_Save_1"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .FirstOrDefault();
-
-            AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
-            AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
-
-            Assert.AreEqual(3, keyImpressions.Count);
-
-            //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(3, httpClientMock, impression1, impression2, impression3);
         }
-        #endregion  
+        #endregion 
 
         #region GetTreatment
         [TestMethod]
@@ -411,6 +319,164 @@ namespace Splitio.Integration_tests
         }
         #endregion
 
+        #region GetTreatmentWithConfigAsync
+        [TestMethod]
+        public async Task GetTreatmentWithConfigAsync_WithtBUR_WithMultipleCalls_ReturnsTreatments()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
+
+            var apikey = "base-apikey4";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(5000);
+
+            // Act.
+            var result1 = await client.GetTreatmentWithConfigAsync("nico_test", "FACUNDO_TEST");
+            var result2 = await client.GetTreatmentWithConfigAsync("mauro_test", "FACUNDO_TEST");
+            var result3 = await client.GetTreatmentWithConfigAsync("mauro", "MAURO_TEST");
+            var result4 = await client.GetTreatmentWithConfigAsync("test", "MAURO_TEST");
+
+            await client.DestroyAsync();
+
+            // Assert.
+            Assert.AreEqual("on", result1.Treatment);
+            Assert.AreEqual("off", result2.Treatment);
+            Assert.AreEqual("on", result3.Treatment);
+            Assert.AreEqual("off", result4.Treatment);
+
+            Assert.AreEqual("{\"color\":\"green\"}", result1.Config);
+            Assert.IsNull(result2.Config);
+            Assert.AreEqual("{\"version\":\"v2\"}", result3.Config);
+            Assert.AreEqual("{\"version\":\"v1\"}", result4.Config);
+
+            // Validate impressions.
+            var impressionQueue = impressionListener.GetQueue();
+            var keyImpressions = impressionQueue.FetchAll();
+
+            Assert.AreEqual(4, keyImpressions.Count);
+
+            var impression1 = keyImpressions
+                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
+                .Where(ki => ki.keyName.Equals("nico_test"))
+                .FirstOrDefault();
+
+            var impression2 = keyImpressions
+                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
+                .Where(ki => ki.keyName.Equals("mauro_test"))
+                .FirstOrDefault();
+
+            var impression3 = keyImpressions
+                .Where(ki => ki.feature.Equals("MAURO_TEST"))
+                .Where(ki => ki.keyName.Equals("mauro"))
+                .FirstOrDefault();
+
+            var impression4 = keyImpressions
+                .Where(ki => ki.feature.Equals("MAURO_TEST"))
+                .Where(ki => ki.keyName.Equals("test"))
+                .FirstOrDefault();
+
+            AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+            AssertImpression(impression2, 1506703262916, "FACUNDO_TEST", "mauro_test", "in segment all", "off");
+            AssertImpression(impression3, 1506703262966, "MAURO_TEST", "mauro", "whitelisted", "on");
+            AssertImpression(impression4, 1506703262966, "MAURO_TEST", "test", "not in split", "off");
+
+            //Validate impressions sent to the be.
+            await AssertSentImpressionsAsync(4, httpClientMock, impression1, impression2, impression3, impression4);
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentWithConfigAsync_WithtInputValidation_ReturnsTreatments()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
+
+            var apikey = "base-apikey5";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result1 = await client.GetTreatmentWithConfigAsync("nico_test", "FACUNDO_TEST");
+            var result2 = await client.GetTreatmentWithConfigAsync(string.Empty, "FACUNDO_TEST");
+            var result3 = await client.GetTreatmentWithConfigAsync("test", string.Empty);
+            var result4 = await client.GetTreatmentWithConfigAsync("mauro", "MAURO_TEST");
+
+            await client.DestroyAsync();
+
+            // Assert.
+            Assert.AreEqual("on", result1.Treatment);
+            Assert.AreEqual("control", result2.Treatment);
+            Assert.AreEqual("control", result3.Treatment);
+            Assert.AreEqual("on", result4.Treatment);
+
+            Assert.AreEqual("{\"color\":\"green\"}", result1.Config);
+            Assert.IsNull(result2.Config);
+            Assert.IsNull(result3.Config);
+            Assert.AreEqual("{\"version\":\"v2\"}", result4.Config);
+
+            // Validate impressions.
+            var impressionQueue = impressionListener.GetQueue();
+            var keyImpressions = impressionQueue.FetchAll();
+
+            Assert.AreEqual(2, keyImpressions.Count);
+
+            var impression1 = keyImpressions
+                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
+                .Where(ki => ki.keyName.Equals("nico_test"))
+                .FirstOrDefault();
+
+            var impression2 = keyImpressions
+                .Where(ki => ki.feature.Equals("MAURO_TEST"))
+                .Where(ki => ki.keyName.Equals("mauro"))
+                .FirstOrDefault();
+
+            AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+            AssertImpression(impression2, 1506703262966, "MAURO_TEST", "mauro", "whitelisted", "on");
+
+            //Validate impressions sent to the be.
+            await AssertSentImpressionsAsync(2, httpClientMock, impression1, impression2);
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentWithConfigAsync_WithtBUR_WhenTreatmentDoesntExist_ReturnsControl()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
+
+            var apikey = "base-apikey6";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = await client.GetTreatmentWithConfigAsync("nico_test", "Random_Treatment");
+
+            // Assert.
+            Assert.AreEqual("control", result.Treatment);
+
+            // Validate impressions in listener.
+            var impressionQueue = impressionListener.GetQueue();
+            var keyImpressions = impressionQueue.FetchAll();
+
+            Assert.AreEqual(0, keyImpressions.Count);
+
+            //Validate impressions sent to the be.
+            await AssertSentImpressionsAsync(0, httpClientMock);
+
+            await client.DestroyAsync();
+        }
+        #endregion
+
         #region GetTreatmentWithConfig        
         [TestMethod]
         public async Task GetTreatmentWithConfig_WithtBUR_WithMultipleCalls_ReturnsTreatments()
@@ -551,10 +617,10 @@ namespace Splitio.Integration_tests
             client.BlockUntilReady(10000);
 
             // Act.
-            var result = client.GetTreatment("nico_test", "Random_Treatment");
+            var result = client.GetTreatmentWithConfig("nico_test", "Random_Treatment");
 
             // Assert.
-            Assert.AreEqual("control", result);
+            Assert.AreEqual("control", result.Treatment);
 
             // Validate impressions in listener.
             var impressionQueue = impressionListener.GetQueue();
@@ -566,6 +632,126 @@ namespace Splitio.Integration_tests
             await AssertSentImpressionsAsync(0, httpClientMock);
 
             client.Destroy();
+        }
+        #endregion
+
+        #region GetTreatmentsAsync
+        [TestMethod]
+        public async Task GetTreatmentsAsync_WithtBUR_ReturnsTreatments()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
+
+            var apikey = "base-apikey7";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = await client.GetTreatmentsAsync("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+
+            // Assert.
+            Assert.AreEqual("on", result["FACUNDO_TEST"]);
+            Assert.AreEqual("off", result["MAURO_TEST"]);
+            Assert.AreEqual("off", result["Test_Save_1"]);
+
+            await client.DestroyAsync();
+
+            // Validate impressions.
+            var impressionQueue = impressionListener.GetQueue();
+            var keyImpressions = impressionQueue.FetchAll();
+
+            Assert.AreEqual(3, keyImpressions.Count);
+
+            var impression1 = keyImpressions
+                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
+                .Where(ki => ki.keyName.Equals("nico_test"))
+                .FirstOrDefault();
+
+            var impression2 = keyImpressions
+                .Where(ki => ki.feature.Equals("MAURO_TEST"))
+                .Where(ki => ki.keyName.Equals("nico_test"))
+                .FirstOrDefault();
+
+            var impression3 = keyImpressions
+                .Where(ki => ki.feature.Equals("Test_Save_1"))
+                .Where(ki => ki.keyName.Equals("nico_test"))
+                .FirstOrDefault();
+
+            AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+            AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
+            AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
+
+            //Validate impressions sent to the be.
+            await AssertSentImpressionsAsync(3, httpClientMock, impression1, impression2, impression3);
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentsAsync_WithtInputValidation_ReturnsTreatments()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
+
+            var apikey = "base-apikey8";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result1 = await client.GetTreatmentsAsync("nico_test", new List<string> { "FACUNDO_TEST", string.Empty, "Test_Save_1" });
+            var result2 = await client.GetTreatmentsAsync("mauro", new List<string> { string.Empty, "MAURO_TEST", "Test_Save_1" });
+            var result3 = await client.GetTreatmentsAsync(string.Empty, new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+
+            // Assert.
+            Assert.AreEqual("on", result1["FACUNDO_TEST"]);
+            Assert.AreEqual("off", result1["Test_Save_1"]);
+            Assert.AreEqual("on", result2["MAURO_TEST"]);
+            Assert.AreEqual("off", result2["Test_Save_1"]);
+            Assert.AreEqual("control", result3["FACUNDO_TEST"]);
+            Assert.AreEqual("control", result3["MAURO_TEST"]);
+            Assert.AreEqual("control", result3["Test_Save_1"]);
+
+            await client.DestroyAsync();
+
+            // Validate impressions.
+            var impressionQueue = impressionListener.GetQueue();
+            var keyImpressions = impressionQueue.FetchAll();
+
+            Assert.AreEqual(4, keyImpressions.Count);
+
+            var impression1 = keyImpressions
+                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
+                .Where(ki => ki.keyName.Equals("nico_test"))
+                .FirstOrDefault();
+
+            var impression2 = keyImpressions
+                .Where(ki => ki.feature.Equals("Test_Save_1"))
+                .Where(ki => ki.keyName.Equals("nico_test"))
+                .FirstOrDefault();
+
+            var impression3 = keyImpressions
+                .Where(ki => ki.feature.Equals("MAURO_TEST"))
+                .Where(ki => ki.keyName.Equals("mauro"))
+                .FirstOrDefault();
+
+            var impression4 = keyImpressions
+                .Where(ki => ki.feature.Equals("Test_Save_1"))
+                .Where(ki => ki.keyName.Equals("mauro"))
+                .FirstOrDefault();
+
+            AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+            AssertImpression(impression2, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
+            AssertImpression(impression3, 1506703262966, "MAURO_TEST", "mauro", "whitelisted", "on");
+            AssertImpression(impression4, 1503956389520, "Test_Save_1", "mauro", "in segment all", "off");
+
+            //Validate impressions sent to the be.
+            await AssertSentImpressionsAsync(4, httpClientMock, impression1, impression2, impression3, impression4);
         }
         #endregion
 
@@ -686,6 +872,196 @@ namespace Splitio.Integration_tests
 
             //Validate impressions sent to the be.
             await AssertSentImpressionsAsync(4, httpClientMock, impression1, impression2, impression3, impression4);
+        }
+        #endregion
+
+        #region GetTreatmentsWithConfigAsync
+        [TestMethod]
+        public async Task GetTreatmentsWithConfigAsync_WithtBUR_ReturnsTreatments()
+        {
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
+
+            var apikey = "base-apikey10";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = await client.GetTreatmentsWithConfigAsync("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+
+            await client.DestroyAsync();
+
+            // Assert.
+            Assert.AreEqual("on", result["FACUNDO_TEST"].Treatment);
+            Assert.AreEqual("off", result["MAURO_TEST"].Treatment);
+            Assert.AreEqual("off", result["Test_Save_1"].Treatment);
+
+            Assert.AreEqual("{\"color\":\"green\"}", result["FACUNDO_TEST"].Config);
+            Assert.AreEqual("{\"version\":\"v1\"}", result["MAURO_TEST"].Config);
+            Assert.IsNull(result["Test_Save_1"].Config);
+
+            // Validate impressions.
+            var impressionQueue = impressionListener.GetQueue();
+            var keyImpressions = impressionQueue.FetchAll();
+
+            var impression1 = keyImpressions
+                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
+                .Where(ki => ki.keyName.Equals("nico_test"))
+                .FirstOrDefault();
+
+            var impression2 = keyImpressions
+                .Where(ki => ki.feature.Equals("MAURO_TEST"))
+                .Where(ki => ki.keyName.Equals("nico_test"))
+                .FirstOrDefault();
+
+            var impression3 = keyImpressions
+                .Where(ki => ki.feature.Equals("Test_Save_1"))
+                .Where(ki => ki.keyName.Equals("nico_test"))
+                .FirstOrDefault();
+
+            AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+            AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
+            AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
+
+            Assert.AreEqual(3, keyImpressions.Count);
+
+            //Validate impressions sent to the be.
+            await AssertSentImpressionsAsync(3, httpClientMock, impression1, impression2, impression3);
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentsWithConfigAsync_WithtInputValidation_ReturnsTreatments()
+        {
+            // Arrange.           
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
+
+            var apikey = "base-apikey11";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result1 = await client.GetTreatmentsWithConfigAsync("nico_test", new List<string> { "FACUNDO_TEST", string.Empty, "Test_Save_1" });
+            var result2 = await client.GetTreatmentsWithConfigAsync("mauro", new List<string> { string.Empty, "MAURO_TEST", "Test_Save_1" });
+            var result3 = await client.GetTreatmentsWithConfigAsync(string.Empty, new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+
+            // Assert.
+            Assert.AreEqual("on", result1["FACUNDO_TEST"].Treatment);
+            Assert.AreEqual("off", result1["Test_Save_1"].Treatment);
+            Assert.AreEqual("on", result2["MAURO_TEST"].Treatment);
+            Assert.AreEqual("off", result2["Test_Save_1"].Treatment);
+            Assert.AreEqual("control", result3["FACUNDO_TEST"].Treatment);
+            Assert.AreEqual("control", result3["MAURO_TEST"].Treatment);
+            Assert.AreEqual("control", result3["Test_Save_1"].Treatment);
+
+            Assert.AreEqual("{\"color\":\"green\"}", result1["FACUNDO_TEST"].Config);
+            Assert.IsNull(result1["Test_Save_1"].Config);
+            Assert.AreEqual("{\"version\":\"v2\"}", result2["MAURO_TEST"].Config);
+            Assert.IsNull(result2["Test_Save_1"].Config);
+            Assert.IsNull(result3["FACUNDO_TEST"].Config);
+            Assert.IsNull(result3["MAURO_TEST"].Config);
+            Assert.IsNull(result3["Test_Save_1"].Config);
+
+            await client.DestroyAsync();
+
+            // Validate impressions.
+            var impressionQueue = impressionListener.GetQueue();
+            var keyImpressions = impressionQueue.FetchAll();
+
+            Assert.AreEqual(4, keyImpressions.Count);
+
+            var impression1 = keyImpressions
+                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
+                .Where(ki => ki.keyName.Equals("nico_test"))
+                .FirstOrDefault();
+
+            var impression2 = keyImpressions
+                .Where(ki => ki.feature.Equals("Test_Save_1"))
+                .Where(ki => ki.keyName.Equals("nico_test"))
+                .FirstOrDefault();
+
+            var impression3 = keyImpressions
+                .Where(ki => ki.feature.Equals("MAURO_TEST"))
+                .Where(ki => ki.keyName.Equals("mauro"))
+                .FirstOrDefault();
+
+            var impression4 = keyImpressions
+                .Where(ki => ki.feature.Equals("Test_Save_1"))
+                .Where(ki => ki.keyName.Equals("mauro"))
+                .FirstOrDefault();
+
+            AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+            AssertImpression(impression2, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
+            AssertImpression(impression3, 1506703262966, "MAURO_TEST", "mauro", "whitelisted", "on");
+            AssertImpression(impression4, 1503956389520, "Test_Save_1", "mauro", "in segment all", "off");
+
+            //Validate impressions sent to the be.
+            await AssertSentImpressionsAsync(4, httpClientMock, impression1, impression2, impression3, impression4);
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentsWithConfigAsync_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
+
+            var apikey = "base-apikey12";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = await client.GetTreatmentsWithConfigAsync("nico_test", new List<string> { "FACUNDO_TEST", "Random_Treatment", "MAURO_TEST", "Test_Save_1", "Random_Treatment_1" });
+
+            // Assert.
+            Assert.AreEqual("on", result["FACUNDO_TEST"].Treatment);
+            Assert.AreEqual("control", result["Random_Treatment"].Treatment);
+            Assert.AreEqual("off", result["MAURO_TEST"].Treatment);
+            Assert.AreEqual("off", result["Test_Save_1"].Treatment);
+            Assert.AreEqual("control", result["Random_Treatment_1"].Treatment);
+
+            Assert.AreEqual("{\"color\":\"green\"}", result["FACUNDO_TEST"].Config);
+            Assert.AreEqual("{\"version\":\"v1\"}", result["MAURO_TEST"].Config);
+            Assert.IsNull(result["Test_Save_1"].Config);
+
+            await client.DestroyAsync();
+
+            // Validate impressions.
+            var impressionQueue = impressionListener.GetQueue();
+            var keyImpressions = impressionQueue.FetchAll();
+
+            Assert.AreEqual(3, keyImpressions.Count);
+
+            var impression1 = keyImpressions
+                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
+                .Where(ki => ki.keyName.Equals("nico_test"))
+                .FirstOrDefault();
+
+            var impression2 = keyImpressions
+                .Where(ki => ki.feature.Equals("MAURO_TEST"))
+                .Where(ki => ki.keyName.Equals("nico_test"))
+                .FirstOrDefault();
+
+            var impression3 = keyImpressions
+                .Where(ki => ki.feature.Equals("Test_Save_1"))
+                .Where(ki => ki.keyName.Equals("nico_test"))
+                .FirstOrDefault();
+
+            AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+            AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
+            AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
+
+            //Validate impressions sent to the be.
+            await AssertSentImpressionsAsync(3, httpClientMock, impression1, impression2, impression3);
         }
         #endregion
 

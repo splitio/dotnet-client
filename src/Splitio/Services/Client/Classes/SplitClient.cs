@@ -36,8 +36,7 @@ namespace Splitio.Services.Client.Classes
         protected readonly IEventPropertiesValidator _eventPropertiesValidator;
         protected readonly IWrapperAdapter _wrapperAdapter;
         protected readonly IConfigService _configService;
-
-        protected string ApiKey;
+        protected readonly string ApiKey;
 
         protected ISplitManager _manager;
         protected IEventsLog _eventsLog;
@@ -60,8 +59,10 @@ namespace Splitio.Services.Client.Classes
         protected IImpressionsObserver _impressionsObserver;
         protected IClientExtensionService _clientExtensionService;
 
-        public SplitClient()
+        public SplitClient(string apikey)
         {
+            ApiKey = apikey;
+
             _wrapperAdapter = WrapperAdapter.Instance();
             _keyValidator = new KeyValidator();
             _splitNameValidator = new SplitNameValidator();
@@ -315,17 +316,16 @@ namespace Splitio.Services.Client.Classes
 
             if (controlTreatments != null) return controlTreatments;
 
-            var results = await _evaluator.EvaluateFeaturesAsync(key, features, attributes);
+            var evaluatorResult = await _evaluator.EvaluateFeaturesAsync(key, features, attributes);
 
-            if (results.Exception) await _clientExtensionService.RecordExceptionAsync(method);
+            if (evaluatorResult.Exception) await _clientExtensionService.RecordExceptionAsync(method);
 
-            await _clientExtensionService.RecordLatencyAsync(method, results.ElapsedMilliseconds);
+            await _clientExtensionService.RecordLatencyAsync(method, evaluatorResult.ElapsedMilliseconds);
 
-            var toReturn = ParseTreatmentsAndRecordTelemetry(results, key, out var impressions);
+            if (BuildAndGetImpressions(evaluatorResult, key, out var impressions))
+                await _impressionsManager.TrackAsync(impressions);
 
-            if (impressions.Any()) await _impressionsManager.TrackAsync(impressions);
-
-            return toReturn;
+            return evaluatorResult.Results;
         }
         #endregion
 
@@ -336,30 +336,30 @@ namespace Splitio.Services.Client.Classes
 
             if (controlTreatments != null) return controlTreatments;
 
-            var results = _evaluator.EvaluateFeatures(key, features, attributes);
+            var evaluatorResult = _evaluator.EvaluateFeatures(key, features, attributes);
 
-            if (results.Exception) _clientExtensionService.RecordException(method);
+            if (evaluatorResult.Exception) _clientExtensionService.RecordException(method);
 
-            _clientExtensionService.RecordLatency(method, results.ElapsedMilliseconds);
+            _clientExtensionService.RecordLatency(method, evaluatorResult.ElapsedMilliseconds);
 
-            var toReturn = ParseTreatmentsAndRecordTelemetry(results, key, out var impressions);
+            if (BuildAndGetImpressions(evaluatorResult, key, out var impressions))
+                _impressionsManager.Track(impressions);
 
-            if (impressions.Any()) _impressionsManager.Track(impressions);
-
-            return toReturn;
+            return evaluatorResult.Results;
         }
 
-        private List<TreatmentResult> ParseTreatmentsAndRecordTelemetry(MultipleEvaluatorResult results, Key key, out List<KeyImpression> impressionsQueue)
+        private bool BuildAndGetImpressions(MultipleEvaluatorResult evaluatorResult, Key key, out List<KeyImpression> impressions)
         {
-            impressionsQueue = new List<KeyImpression>();
+            impressions = new List<KeyImpression>();
 
-            foreach (var treatmentResult in results.Results)
+            foreach (var treatmentResult in evaluatorResult.Results)
             {
                 var impression = _impressionsManager.Build(treatmentResult, key);
-                if (impression != null) impressionsQueue.Add(impression);
+
+                if (impression != null) impressions.Add(impression);
             }
 
-            return results.Results;
+            return impressions.Any();
         }
 
         private static SplitResult TreatmentWithConfig(List<TreatmentResult> results)
