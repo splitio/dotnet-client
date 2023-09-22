@@ -202,7 +202,7 @@ namespace Splitio.Integration_tests
             var impressionQueue = impressionListener.GetQueue();
             var keyImpressions = impressionQueue.FetchAll();
 
-            Assert.AreEqual(4, keyImpressions.Count);
+            Assert.AreEqual(4, keyImpressions.Count, "Impression Listener not match");
 
             var impression1 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
@@ -664,7 +664,7 @@ namespace Splitio.Integration_tests
             var impressionQueue = impressionListener.GetQueue();
             var keyImpressions = impressionQueue.FetchAll();
 
-            Assert.AreEqual(3, keyImpressions.Count);
+            Assert.AreEqual(3, keyImpressions.Count, "Impression Listener not Match");
 
             var impression1 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))

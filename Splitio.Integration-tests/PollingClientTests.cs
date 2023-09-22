@@ -477,7 +477,7 @@ namespace Splitio.Integration_tests
 
             var sentImpressions = GetImpressionsSentBackend(httpClientMock);
 
-            Assert.AreEqual(sentImpressionsCount, sentImpressions.Sum(si => si.I.Count));
+            Assert.AreEqual(sentImpressionsCount, sentImpressions.Sum(si => si.I.Count), "AssertSentImpressions");
 
             foreach (var expectedImp in expectedImpressions)
             {
