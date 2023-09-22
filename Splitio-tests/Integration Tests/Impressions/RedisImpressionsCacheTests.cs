@@ -5,6 +5,7 @@ using Splitio.Redis.Services.Domain;
 using Splitio.Telemetry.Domain;
 using Splitio_Tests.Resources;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Integration_Tests.Impressions
 {
@@ -37,15 +38,15 @@ namespace Splitio_Tests.Integration_Tests.Impressions
         }
 
         [TestMethod]
-        public void RecordUniqueKeysAndExpire()
+        public async Task RecordUniqueKeysAndExpire()
         {
-            _impressionsCache.RecordUniqueKeys(new List<Mtks>
+            await _impressionsCache.RecordUniqueKeysAsync(new List<Mtks>
             {
                 new Mtks("Feature1", new HashSet<string>{ "key-1", "key-2" }),
                 new Mtks("Feature2", new HashSet<string>{ "key-1", "key-2" })
             });
 
-            _impressionsCache.RecordUniqueKeys(new List<Mtks>
+            await _impressionsCache.RecordUniqueKeysAsync(new List<Mtks>
             {
                 new Mtks("Feature1", new HashSet<string>{ "key-1", "key-2" }),
                 new Mtks("Feature2", new HashSet<string>{ "key-1", "key-2" })

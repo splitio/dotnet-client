@@ -74,55 +74,6 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             finally { FinishProfiling("HashIncrement", key); }
         }
-
-        public long HashIncrementAsyncBatch(string key, Dictionary<string, int> values)
-        {
-            var tasks = new List<Task<long>>();
-            long keysCount = 0;
-            long hashLength = 0;
-            var db = GetDatabase();
-
-            try
-            {
-                foreach (var item in values)
-                {
-                    tasks.Add(db.HashIncrementAsync(key, item.Key, item.Value));
-                }
-            }
-            catch (Exception e)
-            {
-                LogError("HashIncrementAsync", key, e);
-            }
-            finally
-            {
-                if (tasks.Any())
-                {
-                    Task.WaitAll(tasks.ToArray());
-
-                    keysCount = tasks.Sum(t => t.Result);
-                    hashLength = db.HashLengthAsync(key).Result;
-                }
-
-                FinishProfiling("HashIncrementAsync", key);
-            }
-
-            return keysCount + hashLength;
-        }
-
-        public bool HashSet(RedisKey key, RedisValue hashField, RedisValue value)
-        {
-            try
-            {
-                var db = GetDatabase();
-                return db.HashSet(key, hashField, value);
-            }
-            catch (Exception e)
-            {
-                LogError("HashSet", key, e);
-                return false;
-            }
-            finally { FinishProfiling("HashSet", key); }
-        }
         #endregion
 
         #region Async Methods
@@ -205,14 +156,18 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
+                var tasks = new List<Task<long>>();
                 var db = GetDatabase();
 
-                long keysCount = 0;
                 foreach (var item in values)
                 {
-                    keysCount += await db.HashIncrementAsync(key, item.Key, item.Value);
+                    tasks.Add(db.HashIncrementAsync(key, item.Key, item.Value));
                 }
 
+                if (!tasks.Any()) return 0;
+                
+                var result = await Task.WhenAll(tasks.ToArray());
+                var keysCount = result.Sum();
                 var hashLength = await db.HashLengthAsync(key);
 
                 return keysCount + hashLength;
@@ -220,6 +175,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             catch (Exception e)
             {
                 LogError(nameof(HashIncrementBatchAsync), key, e);
+
                 return 0;
             }
             finally { FinishProfiling(nameof(HashIncrementBatchAsync), key); }

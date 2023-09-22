@@ -65,15 +65,6 @@ namespace Splitio.Redis.Services.Cache.Classes
                 .ToList();
         }
 
-        public List<string> GetKeys()
-        {
-            var pattern = $"{RedisKeyPrefix}{SplitKeyPrefix}*";
-            var splitKeys = _redisAdapter.Keys(pattern);
-            var result = splitKeys.Select(x => x.ToString()).ToList();
-
-            return result;
-        }
-
         public bool TrafficTypeExists(string trafficType)
         {
             if (string.IsNullOrEmpty(trafficType)) return false;
@@ -152,7 +143,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         public async Task<List<ParsedSplit>> GetAllSplitsAsync()
         {
             var pattern = $"{RedisKeyPrefix}{SplitKeyPrefix}*";
-            var splitKeys = _redisAdapter.Keys(pattern);
+            var splitKeys = await _redisAdapter.KeysAsync(pattern);
             var splitValues = await _redisAdapter.MGetAsync(splitKeys);
 
             if (splitValues == null || !splitValues.Any()) return new List<ParsedSplit>();
@@ -164,15 +155,6 @@ namespace Splitio.Redis.Services.Cache.Classes
             return splits
                 .Where(s => s != null)
                 .ToList();
-        }
-
-        public async Task<long> GetChangeNumberAsync()
-        {
-            var key = $"{RedisKeyPrefix}{SplitsKeyPrefix}till";
-            var changeNumberString = await _redisAdapter.GetAsync(key);
-            var result = long.TryParse(changeNumberString, out long changeNumberParsed);
-
-            return result ? changeNumberParsed : -1;
         }
 
         public async Task<ParsedSplit> GetSplitAsync(string splitName)
@@ -194,24 +176,6 @@ namespace Splitio.Redis.Services.Cache.Classes
             return splits
                 .Select(s => s.name)
                 .ToList();
-        }
-
-        public Task<int> SplitsCountAsync()
-        {
-            return Task.FromResult(0);
-        }
-
-        public async Task<bool> TrafficTypeExistsAsync(string trafficType)
-        {
-            if (string.IsNullOrEmpty(trafficType)) return false;
-
-            var value = await _redisAdapter.GetAsync(GetTrafficTypeKey(trafficType));
-
-            var quantity = value ?? "0";
-
-            int.TryParse(quantity, out int quantityInt);
-
-            return quantityInt > 0;
         }
         #endregion
 

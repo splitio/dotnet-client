@@ -15,13 +15,10 @@ namespace Splitio.Services.Cache.Interfaces
         int SplitsCount();
 
         #region Async
-        Task<long> GetChangeNumberAsync();
         Task<ParsedSplit> GetSplitAsync(string splitName);
         Task<List<ParsedSplit>> GetAllSplitsAsync();
-        Task<bool> TrafficTypeExistsAsync(string trafficType);
         Task<List<ParsedSplit>> FetchManyAsync(List<string> splitNames);
         Task<List<string>> GetSplitNamesAsync();
-        Task<int> SplitsCountAsync();
         #endregion
     }
 }

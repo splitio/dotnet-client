@@ -22,205 +22,139 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
-        public async Task ExecuteAddSplitAsyncSuccessful()
+        public async Task GetSplitAsyncReturnsNull()
         {
-            // Arrange
-            var splitName = "split-name-1";
-            var parsedSplit = new ParsedSplit() { name = splitName };
+            // Arrange.
+            var ffName = "feature-flag";
 
-            // Act
-            await _cache.AddSplitAsync(splitName, parsedSplit);
-            var split = await _cache.GetSplitAsync(splitName);
+            // Act.
+            var result = await _cache.GetSplitAsync(ffName);
 
-            // Assert
-            Assert.AreEqual(splitName, split.name);
+            // Assert.
+            Assert.IsNull(result);
         }
 
         [TestMethod]
-        public async Task ExecuteAddOrUpdateAsyncSuccessful()
+        public async Task GetSplitAsyncReturnsObject()
         {
-            // Arrange
-            var splitName = "split-name-2";
-            var parsedSplit = new ParsedSplit() { name = splitName };
+            // Arrange.
+            var ffName = "feature-flag";
 
-            // Act & Assert
-            var result = await _cache.AddOrUpdateAsync(splitName, parsedSplit);
-            Assert.IsFalse(result);
-
-            result = await _cache.AddOrUpdateAsync(splitName, parsedSplit);
-            Assert.IsTrue(result);
-
-            var split = await _cache.GetSplitAsync(splitName);
-            Assert.AreEqual(splitName, split.name);
-        }
-
-        [TestMethod]
-        public async Task ExecuteRemoveSplitAsyncSuccessful()
-        {
-            // Arrange
-            var splitName = "split-name-3";
-            var parsedSplit = new ParsedSplit() { name = splitName };
-
-            await _cache.AddSplitAsync(splitName, parsedSplit);
-
-            // Act
-            var result = await _cache.RemoveSplitAsync(splitName);
-
-            // Assert
-            Assert.IsTrue(result);
-            Assert.IsFalse(await _cache.RemoveSplitAsync("split-test"));
-        }
-
-        [TestMethod]
-        public async Task ExecuteSetChangeNumberAsyncSuccessful()
-        {
-            // Act
-            await _cache.SetChangeNumberAsync(10);
-            var result = await _cache.GetChangeNumberAsync();
-
-            // Assert
-            Assert.AreEqual(10, result);
-        }
-
-        [TestMethod]
-        public async Task ExecuteClearAsyncSuccessful()
-        {
-            // Arrange
-            for (int i = 0; i < 5; i++)
+            _cache.AddSplit(ffName, new ParsedSplit
             {
-                var splitName = "split-name-" + i;
-                var parsedSplit = new ParsedSplit() { name = splitName };
+                name = ffName,
+                defaultTreatment = "on",
+                changeNumber = 1
+            });
 
-                await _cache.AddSplitAsync(splitName, parsedSplit);
-            }
+            // Act.
+            var result = await _cache.GetSplitAsync(ffName);
 
-            // Act & Assert
-            var splits = await _cache.GetAllSplitsAsync();
-            Assert.AreEqual(5, splits.Count);
-
-            await _cache.ClearAsync();
-
-            splits = await _cache.GetAllSplitsAsync();
-            Assert.IsFalse(splits.Any());
+            // Assert.
+            Assert.AreEqual(ffName, result.name);
+            Assert.AreEqual("on", result.defaultTreatment);
+            Assert.AreEqual(1, result.changeNumber);
         }
 
         [TestMethod]
-        public async Task ExecuteKillAsyncSuccessful()
+        public async Task GetAllSplitsAsyncResturnsEmpty()
         {
-            // Arrange
-            var splitName = "split-name-5";
-            var parsedSplit = new ParsedSplit() { name = splitName, changeNumber = 5, defaultTreatment = "on" };
-            var changeNumber = 111;
-            var defaultTreatment = "off";
+            // Act.
+            var result = await _cache.GetAllSplitsAsync();
 
-            await _cache.AddSplitAsync(splitName, parsedSplit);
-
-            // Act & Assert
-            var split = await _cache.GetSplitAsync(splitName);
-            Assert.AreEqual(splitName, split.name);
-            Assert.AreEqual(5, split.changeNumber);
-            Assert.AreEqual("on", split.defaultTreatment);
-
-            await _cache.KillAsync(changeNumber, splitName, defaultTreatment);
-
-            split = await _cache.GetSplitAsync(splitName);
-            Assert.AreEqual(splitName, split.name);
-            Assert.AreEqual(changeNumber, split.changeNumber);
-            Assert.AreEqual(defaultTreatment, split.defaultTreatment);
-        }
-
-        [TestMethod]
-        public async Task ExecuteGetSplitNamesAsyncSuccessful()
-        {
-            // Arrange
-            for (int i = 0; i < 5; i++)
-            {
-                var splitName = "split-name-" + i;
-                var parsedSplit = new ParsedSplit() { name = splitName };
-
-                await _cache.AddSplitAsync(splitName, parsedSplit);
-            }
-
-            // Act
-            var result = await _cache.GetSplitNamesAsync();
-
-            // Assert
-            Assert.AreEqual(5, result.Count);
-            Assert.IsTrue(result.Contains("split-name-0"));
-            Assert.IsTrue(result.Contains("split-name-1"));
-            Assert.IsTrue(result.Contains("split-name-2"));
-            Assert.IsTrue(result.Contains("split-name-3"));
-            Assert.IsTrue(result.Contains("split-name-4"));
-        }
-
-        [TestMethod]
-        public async Task ExecuteSplitsCountAsyncSuccessful()
-        {
-            // Arrange
-            for (int i = 0; i < 15; i++)
-            {
-                var splitName = "split-name-" + i;
-                var parsedSplit = new ParsedSplit() { name = splitName };
-
-                await _cache.AddSplitAsync(splitName, parsedSplit);
-            }
-
-            // Act
-            var result = await _cache.SplitsCountAsync();
-
-            // Assert
-            Assert.AreEqual(15, result);
-        }
-
-        [TestMethod]
-        public async Task ExecuteTrafficTypeExistsAsyncSuccessful()
-        {
-            // Arrange
-            var traficType = "tt-test";
-            var splitName = "split-name";
-            var parsedSplit = new ParsedSplit() { name = splitName, trafficTypeName = traficType };
-
-            await _cache.AddSplitAsync(splitName, parsedSplit);
-
-            // Act & Assert
-            var exists = await _cache.TrafficTypeExistsAsync(traficType);
-            Assert.IsTrue(exists);
-
-            exists = await _cache.TrafficTypeExistsAsync("user");
-            Assert.IsFalse(exists);
-        }
-
-        [TestMethod]
-        public async Task ExecuteFetchManyAsyncSuccessful()
-        {
-            // Arrange
-            var splitNames = new List<string>();
-
-            for (int i = 0; i < 3; i++)
-            {
-                var splitName = "split-name-" + i;
-                splitNames.Add(splitName);
-
-                var parsedSplit = new ParsedSplit() { name = splitName };
-
-                await _cache.AddSplitAsync(splitName, parsedSplit);
-            }
-
-            // Act & Assert
-            var result = await _cache.FetchManyAsync(splitNames);
-            Assert.AreEqual(3, result.Count);
-            Assert.IsTrue(result.Any(s => s.name == "split-name-0"));
-            Assert.IsTrue(result.Any(s => s.name == "split-name-1"));
-            Assert.IsTrue(result.Any(s => s.name == "split-name-2"));
-
-            result = await _cache.FetchManyAsync(new List<string>() { "split-name-10", "split-name-11" });
+            // Assert.
             Assert.IsFalse(result.Any());
         }
 
-        [TestCleanup]
-        public async Task Cleanup()
+        [TestMethod]
+        public async Task GetAllSplitsAsyncResturnsItems()
         {
-            await _cache.ClearAsync();
+            // Arrange.
+            _cache.AddSplit("feature-flag-1", new ParsedSplit
+            {
+                name = "feature-flag-1",
+                defaultTreatment = "on",
+                changeNumber = 1
+            });
+
+            _cache.AddSplit("feature-flag-2", new ParsedSplit
+            {
+                name = "feature-flag-2",
+                defaultTreatment = "on",
+                changeNumber = 1
+            });
+
+            // Act.
+            var result = await _cache.GetAllSplitsAsync();
+
+            // Assert.
+            Assert.AreEqual(2, result.Count);
+        }
+
+        [TestMethod]
+        public async Task FetchManyAsyncReturnsEmpty()
+        {
+            // Act.
+            var result = await _cache.FetchManyAsync(new List<string> { "feature-flag-1", "feature-flag-2" });
+
+            // Assert.
+            Assert.IsFalse(result.Any());
+        }
+
+        [TestMethod]
+        public async Task FetchManyAsyncReturnsItems()
+        {
+            // Arrange.
+            for (int i = 1; i <= 3; i++)
+            {
+                _cache.AddSplit($"feature-flag-{i}", new ParsedSplit
+                {
+                    name = $"feature-flag-{i}",
+                    defaultTreatment = "on",
+                    changeNumber = i
+                });
+            }
+
+            // Act.
+            var result = await _cache.FetchManyAsync(new List<string> { "feature-flag-2" });
+
+            // Assert.
+            Assert.AreEqual(1, result.Count);
+            var ff = result.FirstOrDefault();
+            Assert.AreEqual("feature-flag-2", ff.name);
+            Assert.AreEqual("on", ff.defaultTreatment);
+            Assert.AreEqual(2, ff.changeNumber);
+        }
+
+        [TestMethod]
+        public async Task GetSplitNamesAsyncReturnsEmpty()
+        {
+            // Act.
+            var result = await _cache.GetSplitNamesAsync();
+
+            // Assert.
+            Assert.IsFalse(result.Any());
+        }
+
+        [TestMethod]
+        public async Task GetSplitNamesAsyncReturnsItems()
+        {
+            // Arrange.
+            for (int i = 1; i <= 5; i++)
+            {
+                _cache.AddSplit($"feature-flag-{i}", new ParsedSplit
+                {
+                    name = $"feature-flag-{i}",
+                    defaultTreatment = "on",
+                    changeNumber = i
+                });
+            }
+
+            // Act.
+            var result = await _cache.GetSplitNamesAsync();
+
+            // Assert.
+            Assert.AreEqual(5, result.Count);
         }
     }
 }

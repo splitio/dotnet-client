@@ -17,8 +17,6 @@ namespace Splitio_Tests.Unit_Tests.Cache
     public class RedisSplitCacheAsyncTests
     {
         private const string SplitKeyPrefix = "SPLITIO.split.";
-        private const string SplitsKeyPrefix = "SPLITIO.splits.";
-        private const string TrafficTypeKeyPrefix = "SPLITIO.trafficType.";
 
         private readonly Mock<IRedisAdapter> _redisAdapterMock;
         private readonly Mock<ISplitParser> _splitParserMock;
@@ -48,23 +46,6 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             //Assert
             Assert.IsNull(result);
-        }
-
-        [TestMethod]
-        public async Task GetChangeNumberWhenNotSetOrRedisThrowsException()
-        {
-            //Arrange
-            var changeNumber = -1;
-
-            _redisAdapterMock
-                .Setup(x => x.GetAsync(SplitsKeyPrefix + "till"))
-                .ReturnsAsync(string.Empty);
-
-            //Act
-            var result = await _redisSplitCache.GetChangeNumberAsync();
-
-            //Assert
-            Assert.AreEqual(changeNumber, result);
         }
 
         [TestMethod]
@@ -136,103 +117,6 @@ namespace Splitio_Tests.Unit_Tests.Cache
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
         }
-
-        #region TrafficTypeExists
-        [TestMethod]
-        public async Task TrafficTypeExists_WhenHasQuantity_ReturnsTrue()
-        {
-            //Arrange
-            var trafficType = "test";
-
-            var ttKey = $"{TrafficTypeKeyPrefix}{trafficType}";
-
-            _redisAdapterMock
-                .Setup(mock => mock.GetAsync(ttKey))
-                .ReturnsAsync("1");
-
-            //Act
-            var result = await _redisSplitCache.TrafficTypeExistsAsync(trafficType);
-
-            //Assert
-            Assert.IsTrue(result);
-        }
-
-        [TestMethod]
-        public async Task TrafficTypeExists_WhenQuantityIs0_ReturnsFalse()
-        {
-            //Arrange
-            var trafficType = "test";
-
-            var ttKey = $"{TrafficTypeKeyPrefix}{trafficType}";
-
-            _redisAdapterMock
-                .Setup(mock => mock.GetAsync(ttKey))
-                .ReturnsAsync("0");
-
-            //Act
-            var result = await _redisSplitCache.TrafficTypeExistsAsync(trafficType);
-
-            //Assert
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
-        public async Task TrafficTypeExists_WhenKeyDoesNotExist_ReturnsFalse()
-        {
-            //Arrange
-            var trafficType = "test";
-
-            var ttKey = $"{TrafficTypeKeyPrefix}{trafficType}";
-
-            _redisAdapterMock
-                .Setup(mock => mock.GetAsync(ttKey))
-                .ReturnsAsync((string)null);
-
-            //Act
-            var result = await _redisSplitCache.TrafficTypeExistsAsync(trafficType);
-
-            //Assert
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
-        public async Task TrafficTypeExists_WhenValueIsEmpty_ReturnsFalse()
-        {
-            //Arrange
-            var trafficType = "test";
-
-            var ttKey = $"{TrafficTypeKeyPrefix}{trafficType}";
-
-            _redisAdapterMock
-                .Setup(mock => mock.GetAsync(ttKey))
-                .ReturnsAsync(string.Empty);
-
-            //Act
-            var result = await _redisSplitCache.TrafficTypeExistsAsync(trafficType);
-
-            //Assert
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
-        public async Task TrafficTypeExists_WhenKeyIsNull_ReturnsFalse()
-        {
-            //Arrange
-            var trafficType = "test";
-
-            var ttKey = $"{TrafficTypeKeyPrefix}{trafficType}";
-
-            _redisAdapterMock
-                .Setup(mock => mock.GetAsync(ttKey))
-                .ReturnsAsync(string.Empty);
-
-            //Act
-            var result = await _redisSplitCache.TrafficTypeExistsAsync(null);
-
-            //Assert
-            Assert.IsFalse(result);
-        }
-        #endregion
 
         [TestMethod]
         public async Task FetchMany_VerifyMGetCall_Once()

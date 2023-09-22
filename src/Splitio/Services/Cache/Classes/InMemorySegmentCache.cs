@@ -4,7 +4,6 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Cache.Classes
@@ -79,26 +78,9 @@ namespace Splitio.Services.Cache.Classes
             _segments.Clear();
         }
 
-        public List<string> GetSegmentNames()
-        {
-            return _segments
-                .Keys
-                .ToList();
-        }
-
-        public List<string> GetSegmentKeys(string segmentName)
-        {
-            if (_segments.TryGetValue(segmentName, out Segment segment))
-            {
-                return segment.GetKeys();
-            }
-
-            return new List<string>();
-        }
-
         public int SegmentsCount()
         {
-            return GetSegmentNames().Count;
+            return _segments.Count;
         }
 
         public int SegmentKeysCount()
@@ -120,62 +102,10 @@ namespace Splitio.Services.Cache.Classes
         #endregion
 
         #region Methods Async
-        public Task AddToSegmentAsync(string segmentName, List<string> segmentKeys)
-        {
-            AddToSegment(segmentName, segmentKeys);
-
-            return Task.FromResult(0);
-        }
-
-        public Task RemoveFromSegmentAsync(string segmentName, List<string> segmentKeys)
-        {
-            RemoveFromSegment(segmentName, segmentKeys);
-
-            return Task.FromResult(0);
-        }
 
         public Task<bool> IsInSegmentAsync(string segmentName, string key)
         {
             return Task.FromResult(IsInSegment(segmentName, key));
-        }
-
-        public Task SetChangeNumberAsync(string segmentName, long changeNumber)
-        {
-            SetChangeNumber(segmentName, changeNumber);
-
-            return Task.FromResult(0);
-        }
-
-        public Task<long> GetChangeNumberAsync(string segmentName)
-        {
-            return Task.FromResult(GetChangeNumber(segmentName));
-        }
-
-        public Task ClearAsync()
-        {
-            Clear();
-
-            return Task.FromResult(0);
-        }
-
-        public Task<List<string>> GetSegmentNamesAsync()
-        {
-            return Task.FromResult(GetSegmentNames());
-        }
-
-        public Task<List<string>> GetSegmentKeysAsync(string segmentName)
-        {
-            return Task.FromResult(GetSegmentKeys(segmentName));
-        }
-
-        public Task<int> SegmentsCountAsync()
-        {
-            return Task.FromResult(SegmentsCount());
-        }
-
-        public Task<int> SegmentKeysCountAsync()
-        {
-            return Task.FromResult(SegmentKeysCount());
         }
         #endregion
     }

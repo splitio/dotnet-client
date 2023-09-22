@@ -2,6 +2,7 @@
 using Splitio.Redis.Services.Domain;
 using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -217,6 +218,26 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             finally { FinishProfiling(nameof(SIsMemberAsync), key); }
         }
-        #endregion
+
+        public async Task<RedisKey[]> KeysAsync(string pattern)
+        {
+            try
+            {
+                var server = GetServer();
+#if NET45
+                return await Task.FromResult(Keys(pattern));
+#else
+                var keys = server.KeysAsync(_config.RedisDatabase, pattern);
+                return await keys.ToArrayAsync();
+#endif
+            }
+            catch (Exception e)
+            {
+                LogError("Keys", pattern, e);
+                return new RedisKey[0];
+            }
+            finally { FinishProfiling("Keys", pattern); }
+        }
+#endregion
     }
 }
