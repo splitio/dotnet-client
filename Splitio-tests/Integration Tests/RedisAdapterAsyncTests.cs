@@ -252,30 +252,10 @@ namespace Splitio_Tests.Integration_Tests
             Assert.AreEqual(162, count);
         }
 
-        [TestMethod]
-        public async Task KeysAsync()
-        {
-            // Arrange
-            var key = $"{_redisPrefix}test_key";
-            var value = "test_value";
-            await _adapter.SetAsync(key + "-0", value);
-            await _adapter.SetAsync(key + "-1", value);
-            await _adapter.SetAsync(key + "-2", value);
-
-            // Act
-            var result = await _adapter.KeysAsync($"{_redisPrefix}*");
-
-            // Assert
-            Assert.AreEqual(3, result.Length);
-            Assert.IsTrue(result.Contains($"{_redisPrefix}test_key-0"));
-            Assert.IsTrue(result.Contains($"{_redisPrefix}test_key-1"));
-            Assert.IsTrue(result.Contains($"{_redisPrefix}test_key-2"));
-        }
-
         [TestCleanup]
         public async Task CleanKeys()
         {
-            var keys = await _adapter.KeysAsync($"{_redisPrefix}*");
+            var keys = _adapter.Keys($"{_redisPrefix}*");
 
             await _adapter.DelAsync(keys);
         }
