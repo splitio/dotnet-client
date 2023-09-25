@@ -15,8 +15,7 @@ namespace Splitio.Integration_tests.Resources
 
         public void Log(KeyImpression impression)
         {
-            var key = $"{impression.feature}::{impression.keyName}";
-            _queue.TryAdd(key, impression);
+            _queue.TryAdd($"{impression.feature}::{impression.keyName}", impression);
         }
 
         public KeyImpression Get(string feature, string keyName)

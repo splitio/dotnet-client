@@ -342,7 +342,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("{\"version\":\"v2\"}", result4.Config);
 
             // Validate impressions.
-            Assert.AreEqual(2, impressionListener.Count());
+            Assert.AreEqual(2, impressionListener.Count(), "Impression Listener not Match.");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("MAURO_TEST", "mauro");
@@ -375,7 +375,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("control", result.Treatment);
 
             // Validate impressions in listener.
-            Assert.AreEqual(0, impressionListener.Count());
+            Assert.AreEqual(0, impressionListener.Count(), "Impression Listener not Match.");
 
             //Validate impressions sent to the be.
             await AssertSentImpressionsAsync(0, httpClientMock);
