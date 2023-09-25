@@ -49,8 +49,7 @@ namespace Splitio.Integration_tests
             await client.DestroyAsync();
 
             // Validate impressions in listener.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(4, keyImpressions.Count);
 
@@ -112,8 +111,7 @@ namespace Splitio.Integration_tests
             await client.DestroyAsync();
 
             // Validate impressions in listener.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(2, keyImpressions.Count);
 
@@ -157,8 +155,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("control", result);
 
             // Validate impressions in listener.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(0, keyImpressions.Count);
 
@@ -199,8 +196,7 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions in listener.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(4, keyImpressions.Count, "Impression Listener not match");
 
@@ -262,8 +258,7 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions in listener.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(2, keyImpressions.Count);
 
@@ -307,8 +302,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("control", result);
 
             // Validate impressions in listener.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(0, keyImpressions.Count);
 
@@ -354,8 +348,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("{\"version\":\"v1\"}", result4.Config);
 
             // Validate impressions.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(4, keyImpressions.Count);
 
@@ -422,8 +415,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("{\"version\":\"v2\"}", result4.Config);
 
             // Validate impressions.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(2, keyImpressions.Count);
 
@@ -465,8 +457,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("control", result.Treatment);
 
             // Validate impressions in listener.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(0, keyImpressions.Count);
 
@@ -512,8 +503,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("{\"version\":\"v1\"}", result4.Config);
 
             // Validate impressions.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(4, keyImpressions.Count);
 
@@ -580,8 +570,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("{\"version\":\"v2\"}", result4.Config);
 
             // Validate impressions.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(2, keyImpressions.Count);
 
@@ -623,8 +612,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("control", result.Treatment);
 
             // Validate impressions in listener.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(0, keyImpressions.Count);
 
@@ -661,8 +649,7 @@ namespace Splitio.Integration_tests
             await client.DestroyAsync();
 
             // Validate impressions.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(3, keyImpressions.Count, "Impression Listener not Match");
 
@@ -720,8 +707,7 @@ namespace Splitio.Integration_tests
             await client.DestroyAsync();
 
             // Validate impressions.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(4, keyImpressions.Count);
 
@@ -781,8 +767,7 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(3, keyImpressions.Count);
 
@@ -840,8 +825,7 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(4, keyImpressions.Count);
 
@@ -904,8 +888,7 @@ namespace Splitio.Integration_tests
             Assert.IsNull(result["Test_Save_1"].Config);
 
             // Validate impressions.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             var impression1 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
@@ -971,8 +954,7 @@ namespace Splitio.Integration_tests
             await client.DestroyAsync();
 
             // Validate impressions.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(4, keyImpressions.Count);
 
@@ -1036,8 +1018,7 @@ namespace Splitio.Integration_tests
             await client.DestroyAsync();
 
             // Validate impressions.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(3, keyImpressions.Count);
 
@@ -1094,8 +1075,7 @@ namespace Splitio.Integration_tests
             Assert.IsNull(result["Test_Save_1"].Config);
 
             // Validate impressions.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             var impression1 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
@@ -1161,8 +1141,7 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(4, keyImpressions.Count);
 
@@ -1226,8 +1205,7 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             Assert.AreEqual(3, keyImpressions.Count);
 

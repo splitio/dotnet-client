@@ -41,8 +41,7 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var keyImpressions = impressionListener.GetQueue();
 
             var impression1 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
