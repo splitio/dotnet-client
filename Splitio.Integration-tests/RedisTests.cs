@@ -80,28 +80,15 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions.
-            var keyImpressions = impressionListener.GetQueue();
-
-            var impression1 = keyImpressions
-                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .FirstOrDefault();
-
-            var impression2 = keyImpressions
-                .Where(ki => ki.feature.Equals("MAURO_TEST"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .FirstOrDefault();
-
-            var impression3 = keyImpressions
-                .Where(ki => ki.feature.Equals("Test_Save_1"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .FirstOrDefault();
+            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
+            var impression2 = impressionListener.Get("MAURO_TEST", "nico_test");
+            var impression3 = impressionListener.Get("Test_Save_1", "nico_test");
 
             AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
             AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
             AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
 
-            Assert.AreEqual(3, keyImpressions.Count);
+            Assert.AreEqual(3, impressionListener.Count());
 
             //Validate impressions sent to the be.            
             await AssertSentImpressionsAsync(3, httpClientMock, impression1, impression2, impression3);
