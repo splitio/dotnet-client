@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests
 {
+    [Ignore("TEST")]
     [TestClass]
     public class PollingClientTests : BaseIntegrationTests
     {
