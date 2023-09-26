@@ -394,6 +394,8 @@ namespace Splitio.Integration_tests.Async
             Assert.IsNull(result["Test_Save_1"].Config);
 
             // Validate impressions.
+            Assert.AreEqual(3, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
+
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("MAURO_TEST", "nico_test");
             var impression3 = impressionListener.Get("Test_Save_1", "nico_test");
@@ -401,8 +403,6 @@ namespace Splitio.Integration_tests.Async
             Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
             Helper.AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
             Helper.AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
-
-            Assert.AreEqual(3, impressionListener.Count());
 
             //Validate impressions sent to the be.
             await AssertSentImpressionsAsync(3, impression1, impression2, impression3);
