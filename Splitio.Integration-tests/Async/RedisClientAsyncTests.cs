@@ -24,8 +24,12 @@ namespace Splitio.Integration_tests.Async
         private RedisAdapterForTests _redisAdapter;
         private string rootFilePath;
 
+        public RedisClientAsyncTests() : base("Redis")
+        {
+        }
+
         [TestInitialize]
-        public void Init()
+        public async Task Init()
         {
             var config = new RedisConfig
             {
@@ -45,7 +49,7 @@ namespace Splitio.Integration_tests.Async
             rootFilePath = @"Resources\";
 #endif
 
-            LoadSplits();
+            await LoadSplitsAsync();
         }
 
         protected override async Task AssertSentEventsAsync(List<EventBackend> eventsExcpected, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true)
@@ -58,10 +62,15 @@ namespace Splitio.Integration_tests.Async
             await RedisHelper.AssertSentImpressionsAsync(_redisAdapter, UserPrefix, sentImpressionsCount, expectedImpressions);
         }
 
-        protected override void Cleanup()
+        protected override async Task CleanupAsync()
         {
             var keys = _redisAdapter.Keys($"{UserPrefix}*");
-            _redisAdapter.Del(keys);
+            await _redisAdapter.DelAsync(keys);
+        }
+
+        protected override async Task DelayAsync()
+        {
+            await Task.FromResult(0);
         }
 
         protected override ConfigurationOptions GetConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)
@@ -88,9 +97,9 @@ namespace Splitio.Integration_tests.Async
             };
         }
 
-        private void LoadSplits()
+        private async Task LoadSplitsAsync()
         {
-            Cleanup();
+            await CleanupAsync();
 
             var splitsJson = File.ReadAllText($"{rootFilePath}split_changes.json");
 
@@ -98,7 +107,7 @@ namespace Splitio.Integration_tests.Async
 
             foreach (var split in splitResult.splits)
             {
-                _redisAdapter.Set($"{UserPrefix}.SPLITIO.split.{split.name}", JsonConvert.SerializeObject(split));
+                await _redisAdapter.SetAsync($"{UserPrefix}.SPLITIO.split.{split.name}", JsonConvert.SerializeObject(split));
             }
         }
     }

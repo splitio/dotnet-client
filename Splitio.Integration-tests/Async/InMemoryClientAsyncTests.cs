@@ -13,6 +13,10 @@ namespace Splitio.Integration_tests.Async
     {
         private static readonly HttpClientMock httpClientMock = new HttpClientMock("async");
 
+        public InMemoryClientAsyncTests() : base("InMemory")
+        {
+        }
+
         protected override ConfigurationOptions GetConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)
         {
             return new ConfigurationOptions
@@ -35,9 +39,16 @@ namespace Splitio.Integration_tests.Async
             await InMemoryHelper.AssertSentEventsAsync(eventsExcpected, httpClientMock, sleepTime, eventsCount, validateEvents);
         }
 
-        protected override void Cleanup()
+        protected override async Task CleanupAsync()
         {
             httpClientMock.ResetLogEntries();
+
+            await Task.FromResult(0);
+        }
+
+        protected override async Task DelayAsync()
+        {
+            await Task.Delay(500);
         }
     }
 }
