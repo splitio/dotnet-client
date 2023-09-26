@@ -58,7 +58,7 @@ namespace Splitio.Integration_tests
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
-            var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
 
             var apikey = "base-apikey9";
 
@@ -84,14 +84,14 @@ namespace Splitio.Integration_tests
             var impression2 = impressionListener.Get("MAURO_TEST", "nico_test");
             var impression3 = impressionListener.Get("Test_Save_1", "nico_test");
 
-            AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
-            AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
+            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+            Helper.AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
+            Helper.AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
 
             Assert.AreEqual(3, impressionListener.Count());
 
             //Validate impressions sent to the be.            
-            await AssertSentImpressionsAsync(3, httpClientMock, impression1, impression2, impression3);
+            await AssertSentImpressionsAsync(3, impression1, impression2, impression3);
         }
 
         [TestMethod]
@@ -288,7 +288,7 @@ namespace Splitio.Integration_tests
         }
 
         #region Protected Methods
-        protected override ConfigurationOptions GetConfigurationOptions(string url = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)
+        protected override ConfigurationOptions GetConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)
         {
             var cacheConfig = new CacheAdapterConfigurationOptions
             {
@@ -312,36 +312,14 @@ namespace Splitio.Integration_tests
             };
         }
 
-        protected override async Task AssertSentImpressionsAsync(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
+        protected override async Task AssertSentImpressionsAsync(int sentImpressionsCount, params KeyImpression[] expectedImpressions)
         {
-            await Task.Delay(1500);
-
-            var redisImpressions = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.impressions");
-
-            Assert.AreEqual(sentImpressionsCount, redisImpressions.Length);
-
-            foreach (var item in redisImpressions)
-            {
-                var actualImp = JsonConvert.DeserializeObject<KeyImpressionRedis>(item);
-
-                AssertImpression(actualImp, expectedImpressions.ToList());
-            }
+            await RedisHelper.AssertSentImpressionsAsync(_redisAdapter, UserPrefix, sentImpressionsCount, expectedImpressions);
         }
 
-        protected override async Task AssertSentEventsAsync(List<EventBackend> eventsExcpected, HttpClientMock httpClientMock = null, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true)
+        protected override async Task AssertSentEventsAsync(List<EventBackend> eventsExcpected, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true)
         {
-            await Task.Delay(sleepTime);
-
-            var redisEvents = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.events");
-
-            Assert.AreEqual(eventsExcpected.Count, redisEvents.Length);
-
-            foreach (var item in redisEvents)
-            {
-                var actualEvent = JsonConvert.DeserializeObject<EventRedis>(item);
-
-                AssertEvent(actualEvent, eventsExcpected);
-            }
+            await RedisHelper.AssertSentEventsAsync(_redisAdapter, UserPrefix, eventsExcpected, sleepTime, eventsCount, validateEvents);
         }
         #endregion
 
@@ -350,36 +328,6 @@ namespace Splitio.Integration_tests
         {
             var keys = _redisAdapter.Keys($"{UserPrefix}*");
             _redisAdapter.Del(keys);
-        }
-
-        private static void AssertImpression(KeyImpressionRedis impressionActual, List<KeyImpression> sentImpressions)
-        {
-            Assert.IsFalse(string.IsNullOrEmpty(impressionActual.M.I));
-            Assert.IsFalse(string.IsNullOrEmpty(impressionActual.M.N));
-            Assert.IsFalse(string.IsNullOrEmpty(impressionActual.M.S));
-
-            Assert.IsTrue(sentImpressions
-                .Where(si => impressionActual.I.B == si.bucketingKey)
-                .Where(si => impressionActual.I.C == si.changeNumber)
-                .Where(si => impressionActual.I.K == si.keyName)
-                .Where(si => impressionActual.I.R == si.label)
-                .Where(si => impressionActual.I.T == si.treatment)
-                .Any());
-        }
-
-        private static void AssertEvent(EventRedis eventActual, List<EventBackend> eventsExcpected)
-        {
-            Assert.IsFalse(string.IsNullOrEmpty(eventActual.M.I));
-            Assert.IsFalse(string.IsNullOrEmpty(eventActual.M.N));
-            Assert.IsFalse(string.IsNullOrEmpty(eventActual.M.S));
-
-            Assert.IsTrue(eventsExcpected
-                .Where(ee => eventActual.E.EventTypeId == ee.EventTypeId)
-                .Where(ee => eventActual.E.Key == ee.Key)
-                .Where(ee => eventActual.E.Properties?.Count == ee.Properties?.Count)
-                .Where(ee => eventActual.E.TrafficTypeName == ee.TrafficTypeName)
-                .Where(ee => eventActual.E.Value == ee.Value)
-                .Any());
         }
 
         private void LoadSplits()
