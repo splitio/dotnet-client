@@ -14,9 +14,8 @@ using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests
 {
-    [Ignore("TEST")]
     [TestClass]
-    public class RedisTests : BaseIntegrationTests
+    public class RedisClientTests : BaseIntegrationTests
     {
         private const string Host = "localhost";
         private const string Port = "6379";
@@ -27,7 +26,7 @@ namespace Splitio.Integration_tests
         private readonly RedisAdapterForTests _redisAdapter;
         private readonly string rootFilePath;
 
-        public RedisTests()
+        public RedisClientTests()
         {
             var config = new RedisConfig
             {

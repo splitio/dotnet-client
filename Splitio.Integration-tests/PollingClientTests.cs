@@ -11,11 +11,10 @@ using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests
 {
-    [Ignore("TEST")]
     [TestClass]
     public class PollingClientTests : BaseIntegrationTests
     {
-        protected static readonly HttpClientMock httpClientMock = new HttpClientMock("test");
+        private static readonly HttpClientMock httpClientMock = new HttpClientMock("test");
 
         [TestCleanup]
         public void Cleanup()

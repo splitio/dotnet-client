@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Splitio.Integration_tests
+namespace Splitio.Integration_tests.Async
 {
     [DeploymentItem(@"Resources\split_changes.json")]
     [DeploymentItem(@"Resources\split_changes_1.json")]

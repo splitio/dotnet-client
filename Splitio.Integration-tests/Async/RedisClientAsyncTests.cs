@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Splitio.Integration_tests
+namespace Splitio.Integration_tests.Async
 {
     [TestClass]
     public class RedisClientAsyncTests : BaseAsyncClientTests

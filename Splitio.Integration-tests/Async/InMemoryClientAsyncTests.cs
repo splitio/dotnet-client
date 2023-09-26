@@ -6,12 +6,12 @@ using Splitio.Services.Impressions.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Splitio.Integration_tests
+namespace Splitio.Integration_tests.Async
 {
     [TestClass]
     public class InMemoryClientAsyncTests : BaseAsyncClientTests
     {
-        protected static readonly HttpClientMock httpClientMock = new HttpClientMock("async");
+        private static readonly HttpClientMock httpClientMock = new HttpClientMock("async");
 
         protected override ConfigurationOptions GetConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)
         {
