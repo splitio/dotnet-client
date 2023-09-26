@@ -13,7 +13,6 @@ namespace Splitio.Redis.Services.Cache.Classes
     public class RedisImpressionsCache : RedisCacheBase, IImpressionsCache
     {
         private static readonly TimeSpan _expireTimeOneHour = new TimeSpan(0, 0, 3600);
-        private readonly object _lock = new object();
 
         private readonly IRedisAdapterProducer _redisAdapterProducer;
 

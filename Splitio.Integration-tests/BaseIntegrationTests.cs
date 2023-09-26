@@ -49,7 +49,7 @@ namespace Splitio.Integration_tests
             await client.DestroyAsync();
 
             // Validate impressions in listener.
-            Assert.AreEqual(4, impressionListener.Count());
+            Assert.AreEqual(4, impressionListener.Count(), "Impression Listener not match.");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("FACUNDO_TEST", "mauro_test");
@@ -94,7 +94,7 @@ namespace Splitio.Integration_tests
             await client.DestroyAsync();
 
             // Validate impressions in listener.
-            Assert.AreEqual(2, impressionListener.Count());
+            Assert.AreEqual(2, impressionListener.Count(), "Impression Listener not match.");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("Test_Save_1", "24");
@@ -582,7 +582,7 @@ namespace Splitio.Integration_tests
             await client.DestroyAsync();
 
             // Validate impressions.
-            Assert.AreEqual(4, impressionListener.Count());
+            Assert.AreEqual(4, impressionListener.Count(), "Impression Listener not match.");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("Test_Save_1", "nico_test");
