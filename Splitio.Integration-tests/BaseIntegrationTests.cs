@@ -674,7 +674,7 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions.
-            await Task.Delay(500);
+            Assert.AreEqual(4, impressionListener.Count()), "Impression Listener not Match.";
             Assert.AreEqual(4, impressionListener.Count());
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
