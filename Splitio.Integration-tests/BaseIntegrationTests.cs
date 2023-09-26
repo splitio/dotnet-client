@@ -5,6 +5,7 @@ using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests
@@ -49,6 +50,7 @@ namespace Splitio.Integration_tests
             await client.DestroyAsync();
 
             // Validate impressions in listener.
+            Thread.Sleep(500);
             Assert.AreEqual(4, impressionListener.Count(), "Impression Listener not match.");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
@@ -94,6 +96,7 @@ namespace Splitio.Integration_tests
             await client.DestroyAsync();
 
             // Validate impressions in listener.
+            Thread.Sleep(500);
             Assert.AreEqual(2, impressionListener.Count(), "Impression Listener not match.");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
@@ -537,6 +540,7 @@ namespace Splitio.Integration_tests
             await client.DestroyAsync();
 
             // Validate impressions.
+            Thread.Sleep(500);
             Assert.AreEqual(3, impressionListener.Count(), "Impression Listener not Match");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
@@ -582,6 +586,7 @@ namespace Splitio.Integration_tests
             await client.DestroyAsync();
 
             // Validate impressions.
+            Thread.Sleep(500);
             Assert.AreEqual(4, impressionListener.Count(), "Impression Listener not match.");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
