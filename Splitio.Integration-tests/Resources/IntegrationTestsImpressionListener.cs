@@ -1,21 +1,21 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace Splitio.Integration_tests.Resources
 {
     public class IntegrationTestsImpressionListener : IImpressionListener
     {
-        private readonly Dictionary<string, KeyImpression> _queue;
+        private readonly ConcurrentDictionary<string, KeyImpression> _queue;
 
         public IntegrationTestsImpressionListener(int size)
         {
-            _queue = new Dictionary<string, KeyImpression>();
+            _queue = new ConcurrentDictionary<string, KeyImpression>();
         }
 
         public void Log(KeyImpression impression)
         {
-            _queue.Add($"{impression.feature}::{impression.keyName}", impression);
+            _queue.TryAdd($"{impression.feature}::{impression.keyName}", impression);
         }
 
         public KeyImpression Get(string feature, string keyName)
