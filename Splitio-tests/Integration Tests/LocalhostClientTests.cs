@@ -61,7 +61,7 @@ namespace Splitio_Tests.Integration_Tests
             client.BlockUntilReady(1000);
 
             File.AppendAllText($"{rootFilePath}test.splits", Environment.NewLine +"other_test_feature2     off" + Environment.NewLine);
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             //Act
             var result1 = client.GetTreatment("id", "double_writes_to_cassandra");
@@ -82,6 +82,36 @@ namespace Splitio_Tests.Integration_Tests
 
         [DeploymentItem(@"Resources\test.splits")]
         [TestMethod]
+        public void GetTreatment_UpdatingFile()
+        {
+            //Arrange
+            var client = new LocalhostClient($"{rootFilePath}test.splits");
+
+            client.BlockUntilReady(1000);
+
+            // Act & Assert
+            Assert.AreEqual("off", client.GetTreatment("id", "double_writes_to_cassandra"), "1");
+            Assert.AreEqual("off", client.GetTreatment("id", "double_writes_to_cassandra"), "2");
+            Assert.AreEqual("on", client.GetTreatment("id", "other_test_feature"), "3");
+            Assert.AreEqual("on", client.GetTreatment("id", "other_test_feature"), "4");
+
+            File.WriteAllText($"{rootFilePath}test.splits", Environment.NewLine + "other_test_feature2     off" + Environment.NewLine);
+            Thread.Sleep(500);
+
+            Assert.AreEqual("control", client.GetTreatment("id", "double_writes_to_cassandra"), "1");
+            Assert.AreEqual("control", client.GetTreatment("id", "double_writes_to_cassandra"), "2");
+            Assert.AreEqual("control", client.GetTreatment("id", "other_test_feature"), "3");
+            Assert.AreEqual("control", client.GetTreatment("id", "other_test_feature"), "4");
+            Assert.AreEqual("off", client.GetTreatment("id", "other_test_feature2"));
+
+            File.AppendAllText($"{rootFilePath}test.splits", Environment.NewLine + "always_on on" + Environment.NewLine);
+            Thread.Sleep(500);
+
+            Assert.AreEqual("on", client.GetTreatment("id", "always_on"));
+        }
+
+        [DeploymentItem(@"Resources\test.splits")]
+        [TestMethod]
         public void ClientDestroySuccessfully()
         {
             //Arrange
@@ -93,7 +123,6 @@ namespace Splitio_Tests.Integration_Tests
             var result1 = client.GetTreatment("id", "double_writes_to_cassandra");
             var result2 = client.GetTreatment("id", "double_writes_to_cassandra");
 
-
             client.Destroy();
 
             var resultDestroy1 = client.GetTreatment("id", "double_writes_to_cassandra");
@@ -101,7 +130,6 @@ namespace Splitio_Tests.Integration_Tests
             var resultDestroy2 = manager.Splits();
             var resultDestroy3 = manager.SplitNames();
             var resultDestroy4 = manager.Split("double_writes_to_cassandra");
-
 
             //Asert
             Assert.AreEqual("off", result1);
