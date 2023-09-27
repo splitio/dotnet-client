@@ -786,6 +786,7 @@ namespace Splitio.Integration_tests.Async
             }
 
             //Validate Events sent to the be.
+            await DelayAsync();
             await AssertSentEventsAsync(events, sleepTime: 1000, eventsCount: 3, validateEvents: false);
             await client.DestroyAsync();
         }
