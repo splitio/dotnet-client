@@ -70,7 +70,7 @@ namespace Splitio.Integration_tests.Async
 
         protected override async Task DelayAsync()
         {
-            await Task.FromResult(0);
+            await Task.Delay(1000);
         }
 
         protected override ConfigurationOptions GetConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)
