@@ -24,6 +24,12 @@ namespace Splitio.Integration_tests.Async
             _mode = mode;
         }
 
+        [TestCleanup]
+        public async Task TestCleanup()
+        {
+            await CleanupAsync();
+        }
+
         #region GetTreatmentAsync
         [TestMethod]
         public async Task GetTreatmentAsync_WithtBUR_WithMultipleCalls_ReturnsTreatments()
@@ -785,16 +791,12 @@ namespace Splitio.Integration_tests.Async
         }
         #endregion
 
-        [TestCleanup]
-        public async Task TestCleanup()
-        {
-            await CleanupAsync();
-        }
-
+        #region Protected Methods
         protected abstract ConfigurationOptions GetConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null);
         protected abstract Task AssertSentImpressionsAsync(int sentImpressionsCount, params KeyImpression[] expectedImpressions);
         protected abstract Task AssertSentEventsAsync(List<EventBackend> eventsExcpected, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true);
         protected abstract Task CleanupAsync();
         protected abstract Task DelayAsync();
+        #endregion
     }
 }
