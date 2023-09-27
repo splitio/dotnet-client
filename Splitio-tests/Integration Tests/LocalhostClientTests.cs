@@ -119,25 +119,17 @@ namespace Splitio_Tests.Integration_Tests
 
             client.BlockUntilReady(1000);
 
-            //Act
-            var result1 = client.GetTreatment("id", "double_writes_to_cassandra");
-            var result2 = client.GetTreatment("id", "double_writes_to_cassandra");
+            // Act & Assert
+            Assert.AreEqual("off", client.GetTreatment("id", "double_writes_to_cassandra"));
+            Assert.AreEqual("on", client.GetTreatment("id", "other_test_feature"));
 
             client.Destroy();
 
-            var resultDestroy1 = client.GetTreatment("id", "double_writes_to_cassandra");
             var manager = client.GetSplitManager();
-            var resultDestroy2 = manager.Splits();
-            var resultDestroy3 = manager.SplitNames();
-            var resultDestroy4 = manager.Split("double_writes_to_cassandra");
-
-            //Asert
-            Assert.AreEqual("off", result1);
-            Assert.AreEqual("off", result2);
-            Assert.AreEqual("control", resultDestroy1);
-            Assert.AreEqual(0, resultDestroy2.Count);
-            Assert.AreEqual(0, resultDestroy3.Count);
-            Assert.IsNull(resultDestroy4);
+            Assert.AreEqual("control", client.GetTreatment("id", "double_writes_to_cassandra"));
+            Assert.AreEqual(0, manager.Splits().Count);
+            Assert.AreEqual(0, manager.SplitNames().Count);
+            Assert.IsNull(manager.Split("double_writes_to_cassandra"));
         }
 
         [DeploymentItem(@"Resources\split.yaml")]
