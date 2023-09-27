@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Splitio.Integration_tests
+namespace Splitio.Integration_tests.Async
 {
     [DeploymentItem(@"Resources\split_changes.json")]
     [DeploymentItem(@"Resources\split_changes_1.json")]
@@ -15,11 +15,24 @@ namespace Splitio.Integration_tests
     [DeploymentItem(@"Resources\split_segment2.json")]
     [DeploymentItem(@"Resources\split_segment3.json")]
     [TestClass]
-    public abstract class BaseIntegrationTests
+    public abstract class BaseAsyncClientTests
     {
-        #region GetTreatment
+        private readonly string _mode;
+
+        public BaseAsyncClientTests(string mode)
+        {
+            _mode = mode;
+        }
+
+        [TestCleanup]
+        public async Task TestCleanup()
+        {
+            await CleanupAsync();
+        }
+
+        #region GetTreatmentAsync
         [TestMethod]
-        public async Task GetTreatment_WithtBUR_WithMultipleCalls_ReturnsTreatments()
+        public async Task GetTreatmentAsync_WithtBUR_WithMultipleCalls_ReturnsTreatments()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -30,13 +43,13 @@ namespace Splitio.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            client.BlockUntilReady(10000);
+            client.BlockUntilReady(5000);
 
             // Act.
-            var result1 = client.GetTreatment("nico_test", "FACUNDO_TEST");
-            var result2 = client.GetTreatment("mauro_test", "FACUNDO_TEST");
-            var result3 = client.GetTreatment("1", "Test_Save_1");
-            var result4 = client.GetTreatment("24", "Test_Save_1");
+            var result1 = await client.GetTreatmentAsync("nico_test", "FACUNDO_TEST");
+            var result2 = await client.GetTreatmentAsync("mauro_test", "FACUNDO_TEST");
+            var result3 = await client.GetTreatmentAsync("1", "Test_Save_1");
+            var result4 = await client.GetTreatmentAsync("24", "Test_Save_1");
 
             // Assert.
             Assert.AreEqual("on", result1);
@@ -44,10 +57,11 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("on", result3);
             Assert.AreEqual("off", result4);
 
-            client.Destroy();
+            await client.DestroyAsync();
+            await DelayAsync();
 
             // Validate impressions in listener.
-            Assert.AreEqual(4, impressionListener.Count(), "Impression Listener not match");
+            Assert.AreEqual(4, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("FACUNDO_TEST", "mauro_test");
@@ -64,7 +78,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public async Task GetTreatment_WithtInputValidation_ReturnsTreatments()
+        public async Task GetTreatmentAsync_WithtInputValidation_ReturnsTreatments()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -75,13 +89,13 @@ namespace Splitio.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            client.BlockUntilReady(10000);
+            client.BlockUntilReady(5000);
 
             // Act.
-            var result1 = client.GetTreatment("nico_test", "FACUNDO_TEST");
-            var result2 = client.GetTreatment(string.Empty, "FACUNDO_TEST");
-            var result3 = client.GetTreatment("1", string.Empty);
-            var result4 = client.GetTreatment("24", "Test_Save_1");
+            var result1 = await client.GetTreatmentAsync("nico_test", "FACUNDO_TEST");
+            var result2 = await client.GetTreatmentAsync(string.Empty, "FACUNDO_TEST");
+            var result3 = await client.GetTreatmentAsync("1", string.Empty);
+            var result4 = await client.GetTreatmentAsync("24", "Test_Save_1");
 
             // Assert.
             Assert.AreEqual("on", result1);
@@ -89,10 +103,11 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("control", result3);
             Assert.AreEqual("off", result4);
 
-            client.Destroy();
+            await client.DestroyAsync();
+            await DelayAsync();
 
             // Validate impressions in listener.
-            Assert.AreEqual(2, impressionListener.Count());
+            Assert.AreEqual(2, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("Test_Save_1", "24");
@@ -107,7 +122,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public async Task GetTreatment_WithtBUR_WhenTreatmentDoesntExist_ReturnsControl()
+        public async Task GetTreatmentAsync_WithtBUR_WhenTreatmentDoesntExist_ReturnsControl()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -118,10 +133,10 @@ namespace Splitio.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            client.BlockUntilReady(10000);
+            client.BlockUntilReady(5000);
 
             // Act.
-            var result = client.GetTreatment("nico_test", "Random_Treatment");
+            var result = await client.GetTreatmentAsync("nico_test", "Random_Treatment");
 
             // Assert.
             Assert.AreEqual("control", result);
@@ -132,13 +147,13 @@ namespace Splitio.Integration_tests
             //Validate impressions sent to the be.
             await AssertSentImpressionsAsync(0);
 
-            client.Destroy();
+            await client.DestroyAsync();
         }
         #endregion
 
-        #region GetTreatmentWithConfig        
+        #region GetTreatmentWithConfigAsync
         [TestMethod]
-        public async Task GetTreatmentWithConfig_WithtBUR_WithMultipleCalls_ReturnsTreatments()
+        public async Task GetTreatmentWithConfigAsync_WithtBUR_WithMultipleCalls_ReturnsTreatments()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -149,15 +164,16 @@ namespace Splitio.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            client.BlockUntilReady(10000);
+            client.BlockUntilReady(5000);
 
             // Act.
-            var result1 = client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
-            var result2 = client.GetTreatmentWithConfig("mauro_test", "FACUNDO_TEST");
-            var result3 = client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
-            var result4 = client.GetTreatmentWithConfig("test", "MAURO_TEST");
+            var result1 = await client.GetTreatmentWithConfigAsync("nico_test", "FACUNDO_TEST");
+            var result2 = await client.GetTreatmentWithConfigAsync("mauro_test", "FACUNDO_TEST");
+            var result3 = await client.GetTreatmentWithConfigAsync("mauro", "MAURO_TEST");
+            var result4 = await client.GetTreatmentWithConfigAsync("test", "MAURO_TEST");
 
-            client.Destroy();
+            await client.DestroyAsync();
+            await DelayAsync();
 
             // Assert.
             Assert.AreEqual("on", result1.Treatment);
@@ -171,7 +187,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("{\"version\":\"v1\"}", result4.Config);
 
             // Validate impressions.
-            Assert.AreEqual(4, impressionListener.Count());
+            Assert.AreEqual(4, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("FACUNDO_TEST", "mauro_test");
@@ -188,7 +204,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public async Task GetTreatmentWithConfig_WithtInputValidation_ReturnsTreatments()
+        public async Task GetTreatmentWithConfigAsync_WithtInputValidation_ReturnsTreatments()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -202,12 +218,13 @@ namespace Splitio.Integration_tests
             client.BlockUntilReady(10000);
 
             // Act.
-            var result1 = client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
-            var result2 = client.GetTreatmentWithConfig(string.Empty, "FACUNDO_TEST");
-            var result3 = client.GetTreatmentWithConfig("test", string.Empty);
-            var result4 = client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
+            var result1 = await client.GetTreatmentWithConfigAsync("nico_test", "FACUNDO_TEST");
+            var result2 = await client.GetTreatmentWithConfigAsync(string.Empty, "FACUNDO_TEST");
+            var result3 = await client.GetTreatmentWithConfigAsync("test", string.Empty);
+            var result4 = await client.GetTreatmentWithConfigAsync("mauro", "MAURO_TEST");
 
-            client.Destroy();
+            await client.DestroyAsync();
+            await DelayAsync();
 
             // Assert.
             Assert.AreEqual("on", result1.Treatment);
@@ -221,7 +238,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("{\"version\":\"v2\"}", result4.Config);
 
             // Validate impressions.
-            Assert.AreEqual(2, impressionListener.Count());
+            Assert.AreEqual(2, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("MAURO_TEST", "mauro");
@@ -234,7 +251,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public async Task GetTreatmentWithConfig_WithtBUR_WhenTreatmentDoesntExist_ReturnsControl()
+        public async Task GetTreatmentWithConfigAsync_WithtBUR_WhenTreatmentDoesntExist_ReturnsControl()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -248,24 +265,24 @@ namespace Splitio.Integration_tests
             client.BlockUntilReady(10000);
 
             // Act.
-            var result = client.GetTreatmentWithConfig("nico_test", "Random_Treatment");
+            var result = await client.GetTreatmentWithConfigAsync("nico_test", "Random_Treatment");
 
             // Assert.
             Assert.AreEqual("control", result.Treatment);
 
             // Validate impressions in listener.
-            Assert.AreEqual(0, impressionListener.Count());
+            Assert.AreEqual(0, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
 
             //Validate impressions sent to the be.
             await AssertSentImpressionsAsync(0);
 
-            client.Destroy();
+            await client.DestroyAsync();
         }
         #endregion
 
-        #region GetTreatments
+        #region GetTreatmentsAsync
         [TestMethod]
-        public async Task GetTreatments_WithtBUR_ReturnsTreatments()
+        public async Task GetTreatmentsAsync_WithtBUR_ReturnsTreatments()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -279,17 +296,18 @@ namespace Splitio.Integration_tests
             client.BlockUntilReady(10000);
 
             // Act.
-            var result = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+            var result = await client.GetTreatmentsAsync("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
 
             // Assert.
             Assert.AreEqual("on", result["FACUNDO_TEST"]);
             Assert.AreEqual("off", result["MAURO_TEST"]);
             Assert.AreEqual("off", result["Test_Save_1"]);
 
-            client.Destroy();
+            await client.DestroyAsync();
+            await DelayAsync();
 
             // Validate impressions.
-            Assert.AreEqual(3, impressionListener.Count());
+            Assert.AreEqual(3, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("MAURO_TEST", "nico_test");
@@ -304,7 +322,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public async Task GetTreatments_WithtInputValidation_ReturnsTreatments()
+        public async Task GetTreatmentsAsync_WithtInputValidation_ReturnsTreatments()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -318,9 +336,9 @@ namespace Splitio.Integration_tests
             client.BlockUntilReady(10000);
 
             // Act.
-            var result1 = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", string.Empty, "Test_Save_1" });
-            var result2 = client.GetTreatments("mauro", new List<string> { string.Empty, "MAURO_TEST", "Test_Save_1" });
-            var result3 = client.GetTreatments(string.Empty, new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+            var result1 = await client.GetTreatmentsAsync("nico_test", new List<string> { "FACUNDO_TEST", string.Empty, "Test_Save_1" });
+            var result2 = await client.GetTreatmentsAsync("mauro", new List<string> { string.Empty, "MAURO_TEST", "Test_Save_1" });
+            var result3 = await client.GetTreatmentsAsync(string.Empty, new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
 
             // Assert.
             Assert.AreEqual("on", result1["FACUNDO_TEST"]);
@@ -331,10 +349,11 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("control", result3["MAURO_TEST"]);
             Assert.AreEqual("control", result3["Test_Save_1"]);
 
-            client.Destroy();
+            await client.DestroyAsync();
+            await DelayAsync();
 
             // Validate impressions.
-            Assert.AreEqual(4, impressionListener.Count(), "Impression Listener not Match.");
+            Assert.AreEqual(4, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("Test_Save_1", "nico_test");
@@ -351,9 +370,9 @@ namespace Splitio.Integration_tests
         }
         #endregion
 
-        #region GetTreatmentsWithConfig
+        #region GetTreatmentsWithConfigAsync
         [TestMethod]
-        public async Task GetTreatmentsWithConfig_WithtBUR_ReturnsTreatments()
+        public async Task GetTreatmentsWithConfigAsync_WithtBUR_ReturnsTreatments()
         {
             var impressionListener = new IntegrationTestsImpressionListener(50);
             var configurations = GetConfigurationOptions(impressionListener: impressionListener);
@@ -366,9 +385,10 @@ namespace Splitio.Integration_tests
             client.BlockUntilReady(10000);
 
             // Act.
-            var result = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+            var result = await client.GetTreatmentsWithConfigAsync("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
 
-            client.Destroy();
+            await client.DestroyAsync();
+            await DelayAsync();
 
             // Assert.
             Assert.AreEqual("on", result["FACUNDO_TEST"].Treatment);
@@ -380,6 +400,8 @@ namespace Splitio.Integration_tests
             Assert.IsNull(result["Test_Save_1"].Config);
 
             // Validate impressions.
+            Assert.AreEqual(3, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
+
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("MAURO_TEST", "nico_test");
             var impression3 = impressionListener.Get("Test_Save_1", "nico_test");
@@ -388,14 +410,12 @@ namespace Splitio.Integration_tests
             Helper.AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
             Helper.AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
 
-            Assert.AreEqual(3, impressionListener.Count());
-
             //Validate impressions sent to the be.
             await AssertSentImpressionsAsync(3, impression1, impression2, impression3);
         }
 
         [TestMethod]
-        public async Task GetTreatmentsWithConfig_WithtInputValidation_ReturnsTreatments()
+        public async Task GetTreatmentsWithConfigAsync_WithtInputValidation_ReturnsTreatments()
         {
             // Arrange.           
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -409,9 +429,9 @@ namespace Splitio.Integration_tests
             client.BlockUntilReady(10000);
 
             // Act.
-            var result1 = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", string.Empty, "Test_Save_1" });
-            var result2 = client.GetTreatmentsWithConfig("mauro", new List<string> { string.Empty, "MAURO_TEST", "Test_Save_1" });
-            var result3 = client.GetTreatmentsWithConfig(string.Empty, new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+            var result1 = await client.GetTreatmentsWithConfigAsync("nico_test", new List<string> { "FACUNDO_TEST", string.Empty, "Test_Save_1" });
+            var result2 = await client.GetTreatmentsWithConfigAsync("mauro", new List<string> { string.Empty, "MAURO_TEST", "Test_Save_1" });
+            var result3 = await client.GetTreatmentsWithConfigAsync(string.Empty, new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
 
             // Assert.
             Assert.AreEqual("on", result1["FACUNDO_TEST"].Treatment);
@@ -430,10 +450,11 @@ namespace Splitio.Integration_tests
             Assert.IsNull(result3["MAURO_TEST"].Config);
             Assert.IsNull(result3["Test_Save_1"].Config);
 
-            client.Destroy();
+            await client.DestroyAsync();
+            await DelayAsync();
 
             // Validate impressions.
-            Assert.AreEqual(4, impressionListener.Count());
+            Assert.AreEqual(4, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("Test_Save_1", "nico_test");
@@ -450,7 +471,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public async Task GetTreatmentsWithConfig_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
+        public async Task GetTreatmentsWithConfigAsync_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -464,7 +485,7 @@ namespace Splitio.Integration_tests
             client.BlockUntilReady(10000);
 
             // Act.
-            var result = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "Random_Treatment", "MAURO_TEST", "Test_Save_1", "Random_Treatment_1" });
+            var result = await client.GetTreatmentsWithConfigAsync("nico_test", new List<string> { "FACUNDO_TEST", "Random_Treatment", "MAURO_TEST", "Test_Save_1", "Random_Treatment_1" });
 
             // Assert.
             Assert.AreEqual("on", result["FACUNDO_TEST"].Treatment);
@@ -477,10 +498,11 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("{\"version\":\"v1\"}", result["MAURO_TEST"].Config);
             Assert.IsNull(result["Test_Save_1"].Config);
 
-            client.Destroy();
+            await client.DestroyAsync();
+            await DelayAsync();
 
             // Validate impressions.
-            Assert.AreEqual(3, impressionListener.Count());
+            Assert.AreEqual(3, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("MAURO_TEST", "nico_test");
@@ -495,9 +517,9 @@ namespace Splitio.Integration_tests
         }
         #endregion
 
-        #region Manager
+        #region Async Manager
         [TestMethod]
-        public void Manager_SplitNames_ReturnsSplitNames()
+        public async Task Manager_SplitNamesAsync_ReturnsSplitNames()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -507,22 +529,22 @@ namespace Splitio.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            client.BlockUntilReady(10000);
+            client.BlockUntilReady(5000);
 
             var manager = client.GetSplitManager();
 
             // Act.
-            var result = manager.SplitNames();
+            var result = await manager.SplitNamesAsync();
 
             // Assert.
             Assert.AreEqual(30, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<string>));
 
-            client.Destroy();
+            await client.DestroyAsync();
         }
 
         [TestMethod]
-        public void Manager_Splits_ReturnsSplitList()
+        public async Task Manager_SplitsAsync_ReturnsSplitList()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -532,20 +554,20 @@ namespace Splitio.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var manager = splitFactory.Manager();
 
-            manager.BlockUntilReady(10000);
+            manager.BlockUntilReady(5000);
 
             // Act.
-            var result = manager.Splits();
+            var result = await manager.SplitsAsync();
 
             // Assert.
             Assert.AreEqual(30, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<SplitView>));
 
-            splitFactory.Client().Destroy();
+            await splitFactory.Client().DestroyAsync();
         }
 
         [TestMethod]
-        public void Manager_Split_ReturnsSplit()
+        public async Task Manager_SplitAsync_ReturnsSplit()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -556,20 +578,20 @@ namespace Splitio.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var manager = splitFactory.Manager();
 
-            manager.BlockUntilReady(10000);
+            manager.BlockUntilReady(5000);
 
             // Act.
-            var result = manager.Split(splitName);
+            var result = await manager.SplitAsync(splitName);
 
             // Assert.
             Assert.IsNotNull(result);
             Assert.AreEqual(splitName, result.name);
 
-            splitFactory.Client().Destroy();
+            await splitFactory.Client().DestroyAsync();
         }
 
         [TestMethod]
-        public void Manager_Split_WhenNameDoesntExist_ReturnsSplit()
+        public async Task Manager_SplitAsync_WhenNameDoesntExist_ReturnsSplit()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -580,21 +602,21 @@ namespace Splitio.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var manager = splitFactory.Manager();
 
-            manager.BlockUntilReady(10000);
+            manager.BlockUntilReady(5000);
 
             // Act.
-            var result = manager.Split(splitName);
+            var result = await manager.SplitAsync(splitName);
 
             // Assert.
             Assert.IsNull(result);
 
-            splitFactory.Client().Destroy();
+            await splitFactory.Client().DestroyAsync();
         }
         #endregion
 
-        #region Track
+        #region TrackAsync
         [TestMethod]
-        public async Task Track_WithValidData_ReturnsTrue()
+        public async Task TrackAsync_WithValidData_ReturnsTrue()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -623,7 +645,7 @@ namespace Splitio.Integration_tests
             foreach (var _event in events)
             {
                 // Act.
-                var result = client.Track(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
+                var result = await client.TrackAsync(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
 
                 // Assert. 
                 Assert.IsTrue(result);
@@ -631,11 +653,11 @@ namespace Splitio.Integration_tests
 
             //Validate Events sent to the be.
             await AssertSentEventsAsync(events);
-            client.Destroy();
+            await client.DestroyAsync();
         }
 
         [TestMethod]
-        public async Task Track_WithBUR_ReturnsTrue()
+        public async Task TrackAsync_WithBUR_ReturnsTrue()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -664,7 +686,7 @@ namespace Splitio.Integration_tests
             foreach (var _event in events)
             {
                 // Act.
-                var result = client.Track(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
+                var result = await client.TrackAsync(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
 
                 // Assert. 
                 Assert.IsTrue(result);
@@ -672,11 +694,11 @@ namespace Splitio.Integration_tests
 
             //Validate Events sent to the be.
             await AssertSentEventsAsync(events);
-            client.Destroy();
+            await client.DestroyAsync();
         }
 
         [TestMethod]
-        public async Task Track_WithInvalidData_ReturnsFalse()
+        public async Task TrackAsync_WithInvalidData_ReturnsFalse()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -706,7 +728,7 @@ namespace Splitio.Integration_tests
             foreach (var _event in events)
             {
                 // Act.
-                var result = client.Track(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
+                var result = await client.TrackAsync(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
 
                 // Assert. 
                 if (string.IsNullOrEmpty(_event.Key) || _event.Key.Equals("key_2") || _event.Key.Equals("key_3"))
@@ -725,10 +747,12 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public async Task Track_WithLowQueue_ReturnsTrue()
+        public async Task TrackAsync_WithLowQueue_ReturnsTrue()
         {
             // Arrange.
-            var configurations = GetConfigurationOptions(eventsPushRate: 60, eventsQueueSize: 3);
+            var configurations = GetConfigurationOptions();
+            configurations.EventsPushRate = 60;
+            configurations.EventsQueueSize = 3;
 
             var properties = new Dictionary<string, object>
             {
@@ -755,7 +779,7 @@ namespace Splitio.Integration_tests
             foreach (var _event in events)
             {
                 // Act.
-                var result = client.Track(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
+                var result = await client.TrackAsync(_event.Key, _event.TrafficTypeName, _event.EventTypeId, _event.Value, _event.Properties);
 
                 // Assert. 
                 Assert.IsTrue(result);
@@ -763,44 +787,7 @@ namespace Splitio.Integration_tests
 
             //Validate Events sent to the be.
             await AssertSentEventsAsync(events, sleepTime: 1000, eventsCount: 3, validateEvents: false);
-            client.Destroy();
-        }
-        #endregion
-
-        #region Destroy
-        [TestMethod]
-        public void Destroy()
-        {
-            // Arrange.
-            var configurations = GetConfigurationOptions();
-
-            var apikey = "base-apikey21";
-
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
-
-            client.BlockUntilReady(10000);
-
-            var manager = client.GetSplitManager();
-
-            // Act.
-            var treatmentResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
-            var managerResult = manager.Split("MAURO_TEST");
-
-            client.Destroy();
-
-            var destroyResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
-            var managerDestroyResult = manager.Split("MAURO_TEST");
-
-            // Assert.
-            Assert.AreEqual("on", treatmentResult);
-            Assert.AreEqual("control", destroyResult);
-            Assert.IsTrue(client.IsDestroyed());
-
-            Assert.IsNotNull(managerResult);
-            Assert.AreEqual("MAURO_TEST", managerResult.name);
-            // TODO : Redis destroy doesn't work. Refactor this and uncomment assert
-            //Assert.IsNull(managerDestroyResult);
+            await client.DestroyAsync();
         }
         #endregion
 
@@ -808,6 +795,8 @@ namespace Splitio.Integration_tests
         protected abstract ConfigurationOptions GetConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null);
         protected abstract Task AssertSentImpressionsAsync(int sentImpressionsCount, params KeyImpression[] expectedImpressions);
         protected abstract Task AssertSentEventsAsync(List<EventBackend> eventsExcpected, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true);
+        protected abstract Task CleanupAsync();
+        protected abstract Task DelayAsync();
         #endregion
     }
 }

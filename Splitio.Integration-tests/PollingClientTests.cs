@@ -14,12 +14,20 @@ namespace Splitio.Integration_tests
     [TestClass]
     public class PollingClientTests : BaseIntegrationTests
     {
+        private static readonly HttpClientMock httpClientMock = new HttpClientMock("test");
+
+        [TestCleanup]
+        public void Cleanup()
+        {
+            httpClientMock.ResetLogEntries();
+        }
+
         [TestMethod]
         public async Task GetTreatments_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
-            var configurations = GetConfigurationOptions(httpClientMock?.GetUrl(), impressionListener: impressionListener);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
 
             var apikey = "base-apikey9";
 
@@ -41,39 +49,25 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Validate impressions.
-            var impressionQueue = impressionListener.GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
+            var impression2 = impressionListener.Get("MAURO_TEST", "nico_test");
+            var impression3 = impressionListener.Get("Test_Save_1", "nico_test");
 
-            var impression1 = keyImpressions
-                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .FirstOrDefault();
+            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+            Helper.AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
+            Helper.AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
 
-            var impression2 = keyImpressions
-                .Where(ki => ki.feature.Equals("MAURO_TEST"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .FirstOrDefault();
-
-            var impression3 = keyImpressions
-                .Where(ki => ki.feature.Equals("Test_Save_1"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .FirstOrDefault();
-
-            AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
-            AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
-
-            Assert.AreEqual(3, keyImpressions.Count);
+            Assert.AreEqual(3, impressionListener.Count());
 
             //Validate impressions sent to the be.            
-            await AssertSentImpressionsAsync(3, httpClientMock, impression1, impression2, impression3);
+            await AssertSentImpressionsAsync(3, impression1, impression2, impression3);
         }
 
         [TestMethod]
         public void GetTreatment_WithoutBUR_ReturnsControl()
         {
             // Arrange.
-            var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
+            var configurations = GetConfigurationOptions();
 
             var apikey = "apikey1";
 
@@ -93,7 +87,7 @@ namespace Splitio.Integration_tests
         public void GetTreatmentWithConfig_WithoutBUR_ReturnsControl()
         {
             // Arrange
-            var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
+            var configurations = GetConfigurationOptions();
 
             var apikey = "apikey2";
 
@@ -115,7 +109,7 @@ namespace Splitio.Integration_tests
         public void GetTreatments_WithoutBUR_ReturnsControl()
         {
             // Arrange.
-            var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
+            var configurations = GetConfigurationOptions();
 
             var apikey = "apikey3";
 
@@ -136,7 +130,7 @@ namespace Splitio.Integration_tests
         public void GetTreatmentsWithConfig_WithoutBUR_ReturnsControl()
         {
             // Arrange.
-            var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
+            var configurations = GetConfigurationOptions();
 
             var apikey = "apikey4";
 
@@ -159,7 +153,7 @@ namespace Splitio.Integration_tests
         public void GetTreatment_WithtBUR_ReturnsTimeOutException()
         {
             // Arrange.
-            var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
+            var configurations = GetConfigurationOptions();
 
             var apikey = "apikey5";
 
@@ -191,7 +185,7 @@ namespace Splitio.Integration_tests
         public void Manager_SplitNames_WithoutBUR_ReturnsNull()
         {
             // Arrange.
-            var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
+            var configurations = GetConfigurationOptions();
 
             var apikey = "apikey6";
 
@@ -211,7 +205,7 @@ namespace Splitio.Integration_tests
         public async Task CheckingHeaders_WithIPAddressesEnabled_ReturnsWithIpAndName()
         {
             // Arrange.
-            var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
+            var configurations = GetConfigurationOptions();
 
             var apikey = "apikey7";
 
@@ -245,7 +239,7 @@ namespace Splitio.Integration_tests
         public async Task CheckingHeaders_WithIPAddressesDisabled_ReturnsWithoutIpAndName()
         {
             // Arrange.
-            var configurations = GetConfigurationOptions(httpClientMock.GetUrl(), ipAddressesEnabled: false);
+            var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
 
             var apikey = "apikey8";
 
@@ -279,7 +273,7 @@ namespace Splitio.Integration_tests
         public void GetTreatments_ValidateDedupeImpressions_Optimized()
         {
             // Arrange.
-            var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
+            var configurations = GetConfigurationOptions();
 
             var apikey = "apikey9";
 
@@ -302,7 +296,7 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Assert.
-            var sentImpressions = GetImpressionsSentBackend(httpClientMock);
+            var sentImpressions = InMemoryHelper.GetImpressionsSentBackend(httpClientMock);
             Assert.AreEqual(3, sentImpressions.Select(x => x.F).Distinct().Count(), "1");
             Assert.AreEqual(2, sentImpressions.Where(x => x.F.Equals("FACUNDO_TEST")).Sum(x => x.I.Count), "2");
             Assert.AreEqual(3, sentImpressions.Where(x => x.F.Equals("MAURO_TEST")).Sum(x => x.I.Count), "3");
@@ -321,7 +315,7 @@ namespace Splitio.Integration_tests
         public void GetTreatments_ValidateDedupeImpressions_Debug()
         {
             // Arrange.
-            var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
+            var configurations = GetConfigurationOptions();
             configurations.ImpressionsMode = ImpressionsMode.Debug;
 
             var apikey = "apikey10";
@@ -343,7 +337,7 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Assert.
-            var sentImpressions = GetImpressionsSentBackend(httpClientMock);
+            var sentImpressions = InMemoryHelper.GetImpressionsSentBackend(httpClientMock);
             Assert.AreEqual(3, sentImpressions.Select(x => x.F).Distinct().Count());
             Assert.AreEqual(5, sentImpressions.Where(x => x.F.Equals("FACUNDO_TEST")).Sum(x => x.I.Count));
             Assert.AreEqual(3, sentImpressions.Where(x => x.F.Equals("MAURO_TEST")).Sum(x => x.I.Count));
@@ -359,7 +353,7 @@ namespace Splitio.Integration_tests
         public void GetTreatments_WithImpressionsInNoneMode()
         {
             // Arrange.
-            var configurations = GetConfigurationOptions(httpClientMock.GetUrl());
+            var configurations = GetConfigurationOptions();
             configurations.ImpressionsMode = ImpressionsMode.None;
 
             var apikey = "apikey10";
@@ -381,7 +375,7 @@ namespace Splitio.Integration_tests
             client.Destroy();
 
             // Assert.
-            var sentImpressions = GetImpressionsSentBackend(httpClientMock);
+            var sentImpressions = InMemoryHelper.GetImpressionsSentBackend(httpClientMock);
             Assert.AreEqual(0, sentImpressions.Count);
 
             var impressionCounts = GetImpressionsCountsSentBackend(httpClientMock);
@@ -398,7 +392,7 @@ namespace Splitio.Integration_tests
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
-            var configurations = GetConfigurationOptions(httpClientMock.GetUrl(), impressionListener: impressionListener);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
 
             var apikey = "apikey-telemetry";
 
@@ -451,13 +445,13 @@ namespace Splitio.Integration_tests
         }
 
         #region Protected Methods
-        protected override ConfigurationOptions GetConfigurationOptions(string url = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)
+        protected override ConfigurationOptions GetConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)
         {
             return new ConfigurationOptions
             {
-                Endpoint = url,
-                EventsEndpoint = url,
-                TelemetryServiceURL = url,
+                Endpoint = httpClientMock.GetUrl(),
+                EventsEndpoint = httpClientMock.GetUrl(),
+                TelemetryServiceURL = httpClientMock.GetUrl(),
                 ReadTimeout = 20000,
                 ConnectionTimeout = 20000,
                 ImpressionListener = impressionListener,
@@ -471,80 +465,18 @@ namespace Splitio.Integration_tests
             };
         }
 
-        protected override Task AssertSentImpressionsAsync(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
+        protected override async Task AssertSentImpressionsAsync(int sentImpressionsCount, params KeyImpression[] expectedImpressions)
         {
-            if (sentImpressionsCount <= 0) return Task.FromResult(0);
-
-            var sentImpressions = GetImpressionsSentBackend(httpClientMock);
-
-            Assert.AreEqual(sentImpressionsCount, sentImpressions.Sum(si => si.I.Count));
-
-            foreach (var expectedImp in expectedImpressions)
-            {
-                var impressions = new List<ImpressionData>();
-
-                foreach (var ki in sentImpressions.Where(si => si.F.Equals(expectedImp.feature)))
-                {
-                    impressions.AddRange(ki.I);
-                }
-
-                AssertImpression(expectedImp, impressions);
-            }
-
-            return Task.FromResult(0);
+            await InMemoryHelper.AssertSentImpressionsAsync(sentImpressionsCount, httpClientMock, expectedImpressions);
         }
 
-        protected static void AssertImpression(KeyImpression impressionExpected, List<ImpressionData> sentImpressions)
+        protected override async Task AssertSentEventsAsync(List<EventBackend> eventsExpected, int sleepTime = 5000, int? eventsCount = null, bool validateEvents = true)
         {
-            Assert.IsTrue(sentImpressions
-                .Where(si => impressionExpected.bucketingKey == si.B)
-                .Where(si => impressionExpected.changeNumber == si.C)
-                .Where(si => impressionExpected.keyName == si.K)
-                .Where(si => impressionExpected.label == si.R)
-                .Where(si => impressionExpected.treatment == si.T)
-                .Any());
-        }
-
-        protected override async Task AssertSentEventsAsync(List<EventBackend> eventsExpected, HttpClientMock httpClientMock = null, int sleepTime = 5000, int? eventsCount = null, bool validateEvents = true)
-        {
-            await Task.Delay(sleepTime);
-
-            var sentEvents = GetEventsSentBackend(httpClientMock);
-
-            Assert.AreEqual(eventsCount ?? eventsExpected.Count, sentEvents.Count);
-
-            if (validateEvents)
-            {
-                foreach (var expected in eventsExpected)
-                {
-                    Assert.IsTrue(sentEvents
-                        .Where(ee => ee.Key == expected.Key)
-                        .Where(ee => ee.EventTypeId == expected.EventTypeId)
-                        .Where(ee => ee.Value == expected.Value)
-                        .Where(ee => ee.TrafficTypeName == expected.TrafficTypeName)
-                        .Where(ee => ee.Properties?.Count == expected.Properties?.Count)
-                        .Any());
-                }
-            }
+            await InMemoryHelper.AssertSentEventsAsync(eventsExpected, httpClientMock, sleepTime, eventsCount, validateEvents);
         }
         #endregion
 
         #region Private Methods
-        private static List<KeyImpressionBackend> GetImpressionsSentBackend(HttpClientMock httpClientMock = null)
-        {
-            var impressions = new List<KeyImpressionBackend>();
-            var logs = httpClientMock.GetImpressionLogs();
-
-            foreach (var log in logs)
-            {
-                var _impressions = JsonConvert.DeserializeObject<List<KeyImpressionBackend>>(log.RequestMessage.Body);
-
-                impressions.AddRange(_impressions);
-            }
-
-            return impressions;
-        }
-
         private static Telemetry.Domain.Config GetMetricsConfigSentBackend(HttpClientMock httpClientMock)
         {
             var logs = httpClientMock.GetMetricsConfigLog();
@@ -582,24 +514,6 @@ namespace Splitio.Integration_tests
             }
 
             return impressions;
-        }
-
-        private static List<EventBackend> GetEventsSentBackend(HttpClientMock httpClientMock = null)
-        {
-            var events = new List<EventBackend>();
-            var logs = httpClientMock.GetEventsLog();
-
-            foreach (var log in logs)
-            {
-                var _events = JsonConvert.DeserializeObject<List<EventBackend>>(log.RequestMessage.Body);
-
-                foreach (var item in _events)
-                {
-                    events.Add(item);
-                }
-            }
-
-            return events;
         }
         #endregion
     }

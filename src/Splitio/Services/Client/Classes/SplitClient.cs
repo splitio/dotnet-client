@@ -75,11 +75,16 @@ namespace Splitio.Services.Client.Classes
         }
 
         #region GetTreatment
-        public async Task<string> GetTreatmentAsync(string key, string feature, Dictionary<string, object> attributes = null)
+        public async Task<string> GetTreatmentAsync(Key key, string feature, Dictionary<string, object> attributes = null)
         {
-            var evaluationResult = await GetTreatmentsAsync(Enums.API.GetTreatmentAsync, new Key(key, null), new List<string> { feature }, attributes);
+            var evaluationResult = await GetTreatmentsAsync(Enums.API.GetTreatmentAsync, key, new List<string> { feature }, attributes);
 
             return TreatmentWithConfig(evaluationResult).Treatment;
+        }
+
+        public async Task<string> GetTreatmentAsync(string key, string feature, Dictionary<string, object> attributes = null)
+        {
+            return await GetTreatmentAsync(new Key(key, null), feature, attributes);
         }
 
         public virtual string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null)
@@ -96,11 +101,16 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region GetTreatments
-        public async Task<Dictionary<string, string>> GetTreatmentsAsync(string key, List<string> features, Dictionary<string, object> attributes = null)
+        public async Task<Dictionary<string, string>> GetTreatmentsAsync(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            var results = await GetTreatmentsAsync(Enums.API.GetTreatmentsAsync, new Key(key, null), features, attributes);
+            var results = await GetTreatmentsAsync(Enums.API.GetTreatmentsAsync, key, features, attributes);
 
             return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
+        }
+
+        public async Task<Dictionary<string, string>> GetTreatmentsAsync(string key, List<string> features, Dictionary<string, object> attributes = null)
+        {
+            return await GetTreatmentsAsync(new Key(key, null), features, attributes);
         }
 
         public Dictionary<string, string> GetTreatments(Key key, List<string> features, Dictionary<string, object> attributes = null)
@@ -117,11 +127,16 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region GetTreatmentWithConfig
-        public async Task<SplitResult> GetTreatmentWithConfigAsync(string key, string feature, Dictionary<string, object> attributes = null)
+        public async Task<SplitResult> GetTreatmentWithConfigAsync(Key key, string feature, Dictionary<string, object> attributes = null)
         {
-            var evaluationResult = await GetTreatmentsAsync(Enums.API.GetTreatmentWithConfigAsync, new Key(key, null), new List<string> { feature }, attributes);
+            var evaluationResult = await GetTreatmentsAsync(Enums.API.GetTreatmentWithConfigAsync, key, new List<string> { feature }, attributes);
 
             return TreatmentWithConfig(evaluationResult);
+        }
+
+        public async Task<SplitResult> GetTreatmentWithConfigAsync(string key, string feature, Dictionary<string, object> attributes = null)
+        {
+            return await GetTreatmentWithConfigAsync(new Key(key, null), feature, attributes);
         }
 
         public SplitResult GetTreatmentWithConfig(Key key, string feature, Dictionary<string, object> attributes = null)
@@ -138,9 +153,9 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region GetTreatmentsWithConfig
-        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigAsync(string key, List<string> features, Dictionary<string, object> attributes = null)
+        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigAsync(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            var results = await GetTreatmentsAsync(Enums.API.GetTreatmentsWithConfigAsync, new Key(key, null), features, attributes);
+            var results = await GetTreatmentsAsync(Enums.API.GetTreatmentsWithConfigAsync, key, features, attributes);
 
             return results
                 .ToDictionary(r => r.FeatureFlagName, r => new SplitResult
@@ -148,6 +163,11 @@ namespace Splitio.Services.Client.Classes
                     Treatment = r.Treatment,
                     Config = r.Config
                 });
+        }
+
+        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigAsync(string key, List<string> features, Dictionary<string, object> attributes = null)
+        {
+            return await GetTreatmentsWithConfigAsync(new Key(key, null), features, attributes);
         }
 
         public Dictionary<string, SplitResult> GetTreatmentsWithConfig(Key key, List<string> features, Dictionary<string, object> attributes = null)
