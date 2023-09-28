@@ -48,7 +48,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             // Act
-            var result = await _splitClient.GetTreatmentAsync(null, string.Empty);
+            var result = await _splitClient.GetTreatmentAsync((string)null, string.Empty);
 
             // Assert
             Assert.AreEqual("control", result);

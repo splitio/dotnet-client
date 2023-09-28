@@ -14,3 +14,4 @@ Splitio.TestSupport/obj
 /Splitio.Redis/obj
 /src/Splitio/bin
 /src/Splitio/obj
+/Splitio.Integration-tests/TestResults
