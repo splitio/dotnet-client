@@ -20,7 +20,7 @@ namespace Splitio.Services.Client.Classes
         private const string DefaultSplitFileName = ".split";
         private const string SplitFileYml = ".yml";
         private const string SplitFileYaml = ".yaml";
-        
+
         private readonly ILocalhostFileService _localhostFileService;
         private readonly IFeatureFlagCache _featureFlagCache;
 
@@ -97,22 +97,29 @@ namespace Splitio.Services.Client.Classes
         #region Private Methods
         private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-            var featureFlagsToAdd = ParseSplitFile(_fullPath);
-
-            var namesInCache = _featureFlagCache.GetSplitNames();
-            var featureFlagstoRemove = namesInCache.Except(featureFlagsToAdd.Keys).ToArray();
-            
-            foreach (var name in featureFlagstoRemove)
+            try
             {
-                _featureFlagCache.RemoveSplit(name);
-            }
+                var featureFlagsToAdd = ParseSplitFile(_fullPath);
 
-            foreach (var featureFlag in featureFlagsToAdd)
-            {
-                if (featureFlag.Value != null)
+                var namesInCache = _featureFlagCache.GetSplitNames();
+                var featureFlagstoRemove = namesInCache.Except(featureFlagsToAdd.Keys).ToArray();
+
+                foreach (var name in featureFlagstoRemove)
                 {
-                    _featureFlagCache.AddOrUpdate(featureFlag.Key, featureFlag.Value);
+                    _featureFlagCache.RemoveSplit(name);
                 }
+
+                foreach (var featureFlag in featureFlagsToAdd)
+                {
+                    if (featureFlag.Value != null)
+                    {
+                        _featureFlagCache.AddOrUpdate(featureFlag.Key, featureFlag.Value);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Something went wrong parsing SplitFile.", ex);
             }
         }
 
