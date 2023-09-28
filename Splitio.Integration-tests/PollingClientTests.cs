@@ -16,6 +16,9 @@ namespace Splitio.Integration_tests
     {
         private static readonly HttpClientMock httpClientMock = new HttpClientMock("test");
 
+        public PollingClientTests() : base("Polling")
+        { }
+
         [TestCleanup]
         public void Cleanup()
         {

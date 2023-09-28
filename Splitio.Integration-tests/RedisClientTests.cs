@@ -26,7 +26,7 @@ namespace Splitio.Integration_tests
         private readonly RedisAdapterForTests _redisAdapter;
         private readonly string rootFilePath;
 
-        public RedisClientTests()
+        public RedisClientTests() : base("Redis")
         {
             var config = new RedisConfig
             {
