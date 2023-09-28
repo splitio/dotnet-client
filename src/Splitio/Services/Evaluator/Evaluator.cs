@@ -114,7 +114,7 @@ namespace Splitio.Services.Evaluator
             {
                 return EvaluateFeatureException(e, featureFlagName, clock);
             }
-            finally { clock.Dispose(); }
+            finally { clock?.Dispose(); }
         }
 
         private TreatmentResult GetTreatmentResult(Key key, ParsedSplit split, Dictionary<string, object> attributes = null)
@@ -161,7 +161,7 @@ namespace Splitio.Services.Evaluator
             {
                 return EvaluateFeatureException(e, featureFlagName, clock);
             }
-            finally { clock.Dispose(); }
+            finally { clock?.Dispose(); }
         }
 
         private async Task<TreatmentResult> GetTreatmentResultAsync(Key key, ParsedSplit split, Dictionary<string, object> attributes = null)

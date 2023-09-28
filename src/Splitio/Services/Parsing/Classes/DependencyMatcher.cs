@@ -27,6 +27,8 @@ namespace Splitio.Services.Parsing.Classes
             var evaluatorResult = evaluator.EvaluateFeatures(key, new List<string> { _split }, attributes);
             var result = evaluatorResult.Results.FirstOrDefault();
 
+            if (result == null) return false;
+
             return _treatments.Contains(result.Treatment);
         }
 
@@ -39,6 +41,8 @@ namespace Splitio.Services.Parsing.Classes
 
             var evaluatorResult = await evaluator.EvaluateFeaturesAsync(key, new List<string> { _split }, attributes);
             var result = evaluatorResult.Results.FirstOrDefault();
+
+            if (result == null) return false;
 
             return _treatments.Contains(result.Treatment);
         }
