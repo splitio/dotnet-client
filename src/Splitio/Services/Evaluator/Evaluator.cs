@@ -52,7 +52,7 @@ namespace Splitio.Services.Evaluator
                 }
                 catch (Exception e)
                 {
-                    exception = EvaluateFeaturesException(e, featureNames, clock, out treatmentsForFeatures);
+                    exception = EvaluateFeaturesException(e, featureNames, out treatmentsForFeatures);
                 }
 
                 return new MultipleEvaluatorResult(treatmentsForFeatures, clock.ElapsedMilliseconds, exception);
@@ -85,7 +85,7 @@ namespace Splitio.Services.Evaluator
                 }
                 catch (Exception e)
                 {
-                    exception = EvaluateFeaturesException(e, featureNames, clock, out treatmentsForFeatures);
+                    exception = EvaluateFeaturesException(e, featureNames, out treatmentsForFeatures);
                 }
 
                 return new MultipleEvaluatorResult(treatmentsForFeatures, clock.ElapsedMilliseconds, exception);
@@ -94,27 +94,20 @@ namespace Splitio.Services.Evaluator
         #endregion
 
         #region Private Sync Methods
-        private TreatmentResult EvaluateTreatment(Key key, ParsedSplit parsedSplit, string featureFlagName, SplitStopwatch clock = null, Dictionary<string, object> attributes = null)
+        private TreatmentResult EvaluateTreatment(Key key, ParsedSplit parsedSplit, string featureFlagName, Dictionary<string, object> attributes = null)
         {
             try
             {
-                if (clock == null)
-                {
-                    clock = new SplitStopwatch();
-                    clock.Start();
-                }
-
-                if (IsSplitNotFound(featureFlagName, parsedSplit, clock, out TreatmentResult resultNotFound)) return resultNotFound;
+                if (IsSplitNotFound(featureFlagName, parsedSplit, out TreatmentResult resultNotFound)) return resultNotFound;
 
                 var treatmentResult = GetTreatmentResult(key, parsedSplit, attributes);
 
-                return ParseConfigurationAndReturnTreatment(parsedSplit, treatmentResult, clock);
+                return ParseConfigurationAndReturnTreatment(parsedSplit, treatmentResult);
             }
             catch (Exception e)
             {
-                return EvaluateFeatureException(e, featureFlagName, clock);
+                return EvaluateFeatureException(e, featureFlagName);
             }
-            finally { clock?.Dispose(); }
         }
 
         private TreatmentResult GetTreatmentResult(Key key, ParsedSplit split, Dictionary<string, object> attributes = null)
@@ -141,27 +134,20 @@ namespace Splitio.Services.Evaluator
         #endregion
 
         #region Private Async Methods
-        private async Task<TreatmentResult> EvaluateTreatmentAsync(Key key, ParsedSplit parsedSplit, string featureFlagName, SplitStopwatch clock = null, Dictionary<string, object> attributes = null)
+        private async Task<TreatmentResult> EvaluateTreatmentAsync(Key key, ParsedSplit parsedSplit, string featureFlagName, Dictionary<string, object> attributes = null)
         {
             try
             {
-                if (clock == null)
-                {
-                    clock = new SplitStopwatch();
-                    clock.Start();
-                }
-
-                if (IsSplitNotFound(featureFlagName, parsedSplit, clock, out TreatmentResult resultNotFound)) return resultNotFound;
+                if (IsSplitNotFound(featureFlagName, parsedSplit, out TreatmentResult resultNotFound)) return resultNotFound;
 
                 var treatmentResult = await GetTreatmentResultAsync(key, parsedSplit, attributes);
 
-                return ParseConfigurationAndReturnTreatment(parsedSplit, treatmentResult, clock);
+                return ParseConfigurationAndReturnTreatment(parsedSplit, treatmentResult);
             }
             catch (Exception e)
             {
-                return EvaluateFeatureException(e, featureFlagName, clock);
+                return EvaluateFeatureException(e, featureFlagName);
             }
-            finally { clock?.Dispose(); }
         }
 
         private async Task<TreatmentResult> GetTreatmentResultAsync(Key key, ParsedSplit split, Dictionary<string, object> attributes = null)
@@ -237,14 +223,14 @@ namespace Splitio.Services.Evaluator
             return new TreatmentResult(split.name, condition.label, treatment, split.changeNumber);
         }
 
-        private static TreatmentResult EvaluateFeatureException(Exception e, string featureName, SplitStopwatch clock)
+        private static TreatmentResult EvaluateFeatureException(Exception e, string featureName)
         {
             _log.Error($"Exception caught getting treatment for feature flag: {featureName}", e);
 
             return new TreatmentResult(featureName, Labels.Exception, Control, exception: true);
         }
 
-        private static bool EvaluateFeaturesException(Exception e, List<string> featureNames, SplitStopwatch clock, out List<TreatmentResult> results)
+        private static bool EvaluateFeaturesException(Exception e, List<string> featureNames, out List<TreatmentResult> results)
         {
             results = new List<TreatmentResult>();
 
@@ -258,7 +244,7 @@ namespace Splitio.Services.Evaluator
             return true;
         }
 
-        private static bool IsSplitNotFound(string featureFlagName, ParsedSplit parsedSplit, SplitStopwatch clock, out TreatmentResult result)
+        private static bool IsSplitNotFound(string featureFlagName, ParsedSplit parsedSplit, out TreatmentResult result)
         {
             result = null;
 
@@ -272,7 +258,7 @@ namespace Splitio.Services.Evaluator
             return true;
         }
 
-        private static TreatmentResult ParseConfigurationAndReturnTreatment(ParsedSplit parsedSplit, TreatmentResult treatmentResult, SplitStopwatch clock)
+        private static TreatmentResult ParseConfigurationAndReturnTreatment(ParsedSplit parsedSplit, TreatmentResult treatmentResult)
         {
             if (parsedSplit.configurations != null && parsedSplit.configurations.ContainsKey(treatmentResult.Treatment))
             {
