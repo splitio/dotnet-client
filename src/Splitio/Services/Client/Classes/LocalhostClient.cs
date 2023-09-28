@@ -10,6 +10,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
@@ -19,7 +20,7 @@ namespace Splitio.Services.Client.Classes
         private const string DefaultSplitFileName = ".split";
         private const string SplitFileYml = ".yml";
         private const string SplitFileYaml = ".yaml";
-        
+
         private readonly ILocalhostFileService _localhostFileService;
         private readonly IFeatureFlagCache _featureFlagCache;
 
@@ -96,20 +97,33 @@ namespace Splitio.Services.Client.Classes
         #region Private Methods
         private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-            var splits = ParseSplitFile(_fullPath);
-
-            _featureFlagCache.Clear();
-
-            foreach (var split in splits)
+            try
             {
-                if (split.Value != null)
+                var featureFlagsToAdd = ParseSplitFile(_fullPath);
+
+                var namesInCache = _featureFlagCache.GetSplitNames();
+                var featureFlagstoRemove = namesInCache.Except(featureFlagsToAdd.Keys).ToArray();
+
+                foreach (var name in featureFlagstoRemove)
                 {
-                    _featureFlagCache.AddSplit(split.Key, split.Value);
+                    _featureFlagCache.RemoveSplit(name);
                 }
+
+                foreach (var featureFlag in featureFlagsToAdd)
+                {
+                    if (featureFlag.Value != null)
+                    {
+                        _featureFlagCache.AddOrUpdate(featureFlag.Key, featureFlag.Value);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Something went wrong parsing SplitFile.", ex);
             }
         }
 
-        private string LookupFilePath(string filePath)
+        private static string LookupFilePath(string filePath)
         {
             filePath = filePath ?? DefaultSplitFileName;
 

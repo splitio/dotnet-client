@@ -1,4 +1,5 @@
 ﻿using Splitio.Domain;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -12,37 +13,40 @@ namespace Splitio.Services.Shared.Classes
         {
             var splits = new ConcurrentDictionary<string, ParsedSplit>();
 
-            string line;
-
-            using (var file = new StreamReader(File.OpenText(filePath).BaseStream))
+            try
             {
-                while ((line = file.ReadLine()) != null)
+                string line;
+                using (var file = new StreamReader(File.OpenText(filePath).BaseStream))
                 {
-                    line = line.Trim();
-                    if (string.IsNullOrEmpty(line) || line.StartsWith("#"))
+                    while ((line = file.ReadLine()) != null)
                     {
-                        continue;
+                        line = line.Trim();
+                        if (string.IsNullOrEmpty(line) || line.StartsWith("#"))
+                        {
+                            continue;
+                        }
+
+                        var feature_treatment = Regex.Split(line, @"\s+");
+
+                        if (feature_treatment.Length != 2)
+                        {
+                            _log.Info("Ignoring line since it does not have exactly two columns: " + line);
+                            continue;
+                        }
+
+                        var splitName = feature_treatment[0];
+                        var treatment = feature_treatment[1];
+                        var conditions = new List<ConditionWithLogic> { CreateCondition(treatment) };
+
+                        splits.TryAdd(splitName, CreateParsedSplit(splitName, treatment, conditions));
+                        _log.Info("100% of keys will see " + treatment + " for " + splitName);
+
                     }
-
-                    var feature_treatment = Regex.Split(line, @"\s+");
-
-                    if (feature_treatment.Length != 2)
-                    {
-                        _log.Info("Ignoring line since it does not have exactly two columns: " + line);
-                        continue;
-                    }
-
-                    var splitName = feature_treatment[0];
-                    var treatment = feature_treatment[1];
-                    var conditions = new List<ConditionWithLogic>
-                    {
-                        CreateCondition(treatment)
-                    };
-
-                    splits.TryAdd(splitName, CreateParsedSplit(splitName, treatment, conditions));
-                    _log.Info("100% of keys will see " + treatment + " for " + splitName);
-
                 }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Something went wrong parsing SplitFile.", ex);
             }
 
             return splits;
