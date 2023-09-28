@@ -51,12 +51,12 @@ namespace Splitio_Tests.Integration_Tests
         }
 
 
-        [DeploymentItem(@"Resources\test.splits")]
+        [DeploymentItem(@"Resources\test2.splits")]
         [TestMethod]
         public void GetTreatmentSuccessfullyWhenUpdatingSplitsFile()
         {
             // Arrange
-            var filePath = $"{rootFilePath}test.splits";
+            var filePath = $"{rootFilePath}test2.splits";
             var client = new LocalhostClient(filePath);
 
             client.BlockUntilReady(1000);
