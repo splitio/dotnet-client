@@ -16,7 +16,7 @@ namespace Splitio.Services.Shared.Classes
             try
             {
                 string line;
-                using (var file = new StreamReader(File.OpenText(filePath).BaseStream))
+                using (var file = new StreamReader(filePath))
                 {
                     while ((line = file.ReadLine()) != null)
                     {
