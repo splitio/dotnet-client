@@ -5,10 +5,11 @@ using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Cache.Classes
 {
-    public class InMemorySplitCache : ISplitCache
+    public class InMemorySplitCache : IFeatureFlagCache
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemorySplitCache));
 
@@ -34,6 +35,7 @@ namespace Splitio.Services.Cache.Classes
             }
         }
 
+        #region Sync Methods
         public bool AddOrUpdate(string splitName, SplitBase split)
         {
             if (split == null) return false;
@@ -119,32 +121,6 @@ namespace Splitio.Services.Cache.Classes
             return exists && quantity > 0;
         }
 
-        private void IncreaseTrafficTypeCount(string trafficType)
-        {
-            if (string.IsNullOrEmpty(trafficType)) return;
-
-            _trafficTypes.AddOrUpdate(trafficType, 1, (key, oldValue) => oldValue + 1);
-        }
-
-        private void DecreaseTrafficTypeCount(ParsedSplit split)
-        {
-            if (split == null || string.IsNullOrEmpty(split.trafficTypeName)) return;
-            
-            if (_trafficTypes.TryGetValue(split.trafficTypeName, out int quantity))
-            {
-                if (quantity <= 1)
-                {
-                    _trafficTypes.TryRemove(split.trafficTypeName, out _);
-
-                    return;
-                }
-
-                var newQuantity = quantity - 1;
-
-                _trafficTypes.TryUpdate(split.trafficTypeName, newQuantity, quantity);
-            }
-        }
-
         public List<ParsedSplit> FetchMany(List<string> splitNames)
         {
             var splits = new List<ParsedSplit>();
@@ -184,5 +160,56 @@ namespace Splitio.Services.Cache.Classes
         {
             return GetSplitNames().Count;
         }
+        #endregion
+
+        #region Async Methods
+        public Task<ParsedSplit> GetSplitAsync(string splitName)
+        {
+            return Task.FromResult(GetSplit(splitName));
+        }
+
+        public Task<List<ParsedSplit>> GetAllSplitsAsync()
+        {
+            return Task.FromResult(GetAllSplits());
+        }
+
+        public Task<List<ParsedSplit>> FetchManyAsync(List<string> splitNames)
+        {
+            return Task.FromResult(FetchMany(splitNames));
+        }
+
+        public Task<List<string>> GetSplitNamesAsync()
+        {
+            return Task.FromResult(GetSplitNames());
+        }
+        #endregion
+
+        #region Private Methods
+        private void IncreaseTrafficTypeCount(string trafficType)
+        {
+            if (string.IsNullOrEmpty(trafficType)) return;
+
+            _trafficTypes.AddOrUpdate(trafficType, 1, (key, oldValue) => oldValue + 1);
+        }
+
+        private void DecreaseTrafficTypeCount(ParsedSplit split)
+        {
+            if (split == null || string.IsNullOrEmpty(split.trafficTypeName)) return;
+
+            if (_trafficTypes.TryGetValue(split.trafficTypeName, out int quantity))
+            {
+                if (quantity <= 1)
+                {
+                    _trafficTypes.TryRemove(split.trafficTypeName, out _);
+
+                    return;
+                }
+
+                var newQuantity = quantity - 1;
+
+                _trafficTypes.TryUpdate(split.trafficTypeName, newQuantity, quantity);
+            }
+        }
+        #endregion
     }
 }

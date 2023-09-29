@@ -15,8 +15,9 @@ namespace Splitio.Telemetry.Common
         private const string UsageURL = "/metrics/usage";
         private const string UniqueKeysURL = "/keys/ss";
 
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(TelemetryAPI));
+
         private readonly ISplitioHttpClient _splitioHttpClient;
-        private readonly ISplitLogger _log;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly string _telemetryURL;
 
@@ -27,7 +28,6 @@ namespace Splitio.Telemetry.Common
             _splitioHttpClient = splitioHttpClient;
             _telemetryURL = telemetryURL;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
-            _log = WrapperAdapter.Instance().GetLogger(typeof(TelemetryAPI));
         }
 
         #region Public Methods

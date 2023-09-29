@@ -18,6 +18,8 @@ namespace Splitio.Services.EventSource
 {
     public class EventSourceClient : IEventSourceClient
     {
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(EventSourceClient));
+
         private const string KeepAliveResponse = ":keepalive\n\n";
         private const int ReadTimeoutMs = 70000;
         private const int ConnectTimeoutMs = 30000;
@@ -28,7 +30,6 @@ namespace Splitio.Services.EventSource
         private readonly CountdownEvent _disconnectSignal = new CountdownEvent(1);
         private readonly CountdownEvent _initializationSignal = new CountdownEvent(1);
 
-        private readonly ISplitLogger _log;
         private readonly INotificationParser _notificationParser;   
         private readonly ISplitioHttpClient _splitHttpClient;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
@@ -58,7 +59,6 @@ namespace Splitio.Services.EventSource
             _firstEvent = true;
             _connectTask = connectTask;
             _connectTask.SetFunction(ConnectAsync);
-            _log = WrapperAdapter.Instance().GetLogger(typeof(EventSourceClient));
         }
         
         public event EventHandler<EventReceivedEventArgs> EventReceived;

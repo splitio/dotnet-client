@@ -14,15 +14,15 @@ namespace Splitio_Tests.Unit_Tests.Client
     public class SplitManagerUnitTests
     {
         private readonly Mock<IBlockUntilReadyService> _blockUntilReadyService;
-        private readonly Mock<ISplitCache> _splitCache;
+        private readonly Mock<IFeatureFlagCache> _splitCache;
         private readonly string rootFilePath;
 
-        private ISplitManager _splitManager;
+        private readonly ISplitManager _splitManager;
 
         public SplitManagerUnitTests()
         {
             _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
-            _splitCache = new Mock<ISplitCache>();
+            _splitCache = new Mock<IFeatureFlagCache>();
 
             _splitManager = new SplitManager(_splitCache.Object, _blockUntilReadyService.Object);
 

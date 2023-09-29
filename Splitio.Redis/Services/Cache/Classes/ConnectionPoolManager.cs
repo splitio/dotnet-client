@@ -92,7 +92,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             _disposed = true;
         }
 
-        private ConfigurationOptions GetConfig(RedisConfig redisCfg)
+        private static ConfigurationOptions GetConfig(RedisConfig redisCfg)
         {
             var config = new ConfigurationOptions
             {

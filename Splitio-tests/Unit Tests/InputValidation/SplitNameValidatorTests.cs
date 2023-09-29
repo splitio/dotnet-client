@@ -26,7 +26,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         {
             // Arrange.
             var splitName = string.Empty;
-            var method = "Test";
+            var method = Splitio.Enums.API.GetTreatment;
 
             // Act.
             var result = splitNameValidator.SplitNameIsValid(splitName, method);
@@ -41,7 +41,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         {
             // Arrange.
             string splitName = null;
-            var method = "Test";
+            var method = Splitio.Enums.API.GetTreatment;
 
             // Act.
             var result = splitNameValidator.SplitNameIsValid(splitName, method);
@@ -56,7 +56,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         {
             // Arrange.
             var splitName = "  ASD F654   ";
-            var method = "Test";
+            var method = Splitio.Enums.API.GetTreatment;
 
             // Act.
             var result = splitNameValidator.SplitNameIsValid(splitName, method);
@@ -73,7 +73,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         {
             // Arrange.
             var splitName = "ASD F654";
-            var method = "Test";
+            var method = Splitio.Enums.API.GetTreatment;
 
             // Act.
             var result = splitNameValidator.SplitNameIsValid(splitName, method);
@@ -88,7 +88,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         {
             // Arrange.
             List<string> splitNames = null;
-            var method = "Test";
+            var method = Splitio.Enums.API.GetTreatment;
 
             // Act.
             var result = splitNameValidator.SplitNamesAreValid(splitNames, method);
@@ -103,7 +103,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         {
             // Arrange.
             var splitNames = new List<string>();
-            var method = "Test";
+            var method = Splitio.Enums.API.GetTreatment;
 
             // Act.
             var result = splitNameValidator.SplitNamesAreValid(splitNames, method);
@@ -123,7 +123,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
                 "split_name_2",
                 "split_name_3"
             };
-            var method = "Test";
+            var method = Splitio.Enums.API.GetTreatment;
 
             // Act.
             var result = splitNameValidator.SplitNamesAreValid(splitNames, method);
@@ -143,7 +143,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
                 "split_name_3",
                 "split_name_2",
             };
-            var method = "Test";
+            var method = Splitio.Enums.API.GetTreatment;
 
             // Act.
             var result = splitNameValidator.SplitNamesAreValid(splitNames, method);

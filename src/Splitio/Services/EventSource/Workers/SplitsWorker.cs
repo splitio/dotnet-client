@@ -15,14 +15,14 @@ namespace Splitio.Services.EventSource.Workers
     public class SplitsWorker : BaseWorker, ISplitsWorker
     {
         private readonly ISynchronizer _synchronizer;
-        private readonly ISplitCache _featureFlagCache;
+        private readonly IFeatureFlagCache _featureFlagCache;
         private readonly ISplitParser _featureFlagParser;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly ISelfRefreshingSegmentFetcher _segmentFetcher;
         private readonly BlockingCollection<SplitChangeNotification> _queue;
 
         public SplitsWorker(ISynchronizer synchronizer,
-            ISplitCache featureFlagCache,
+            IFeatureFlagCache featureFlagCache,
             ISplitParser featureFlagParser,
             BlockingCollection<SplitChangeNotification>  queue,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
@@ -103,15 +103,15 @@ namespace Splitio.Services.EventSource.Workers
 
                 var ffParsed = _featureFlagParser.Parse(scn.FeatureFlag);
 
-                // if ffParsed is null it means that the status is ARCHIVED or different to ACTIVE.
-                if (ffParsed == null)
-                {
-                    _featureFlagCache.RemoveSplit(scn.FeatureFlag.name);
-                }
-                else
-                {
-                    _featureFlagCache.AddOrUpdate(scn.FeatureFlag.name, ffParsed);
-                    var segmentNames = Util.Helper.GetSegmentNamesBySplit(scn.FeatureFlag);
+                    // if ffParsed is null it means that the status is ARCHIVED or different to ACTIVE.
+                    if (ffParsed == null)
+                    {
+                        _featureFlagCache.RemoveSplit(scn.FeatureFlag.name);
+                    }
+                    else
+                    {
+                        _featureFlagCache.AddOrUpdate(scn.FeatureFlag.name, ffParsed);
+                        var segmentNames = scn.FeatureFlag.GetSegments();
 
                     if (segmentNames.Count > 0)
                         await _segmentFetcher.FetchSegmentsIfNotExistsAsync(segmentNames);

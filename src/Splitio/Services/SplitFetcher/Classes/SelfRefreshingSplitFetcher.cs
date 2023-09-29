@@ -19,19 +19,19 @@ namespace Splitio.Services.SplitFetcher.Classes
         private readonly ISplitChangeFetcher _splitChangeFetcher;
         private readonly ISplitParser _splitParser;
         private readonly IStatusManager _statusManager;
-        private readonly ISplitCache _splitCache;
         private readonly ISplitTask _periodicTask;
+        private readonly IFeatureFlagCache _featureFlagCache;
 
         public SelfRefreshingSplitFetcher(ISplitChangeFetcher splitChangeFetcher,
             ISplitParser splitParser,
             IStatusManager statusManager,
-            ISplitCache splitCache,
-            ISplitTask periodicTask)
+            ISplitTask periodicTask,
+            IFeatureFlagCache featureFlagCache)
         {
             _splitChangeFetcher = splitChangeFetcher;
             _splitParser = splitParser;
             _statusManager = statusManager;
-            _splitCache = splitCache;
+            _featureFlagCache = featureFlagCache;
             _periodicTask = periodicTask;
             _periodicTask.SetFunction(async () => await FetchSplitsAsync(new FetchOptions()));
         }
@@ -49,7 +49,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
         public void Clear()
         {
-            _splitCache.Clear();
+            _featureFlagCache.Clear();
             _log.Debug("FeatureFlags cache disposed ...");
         }
 
@@ -60,7 +60,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
             while (!_statusManager.IsDestroyed())
             {   
-                var changeNumber = _splitCache.GetChangeNumber();
+                var changeNumber = _featureFlagCache.GetChangeNumber();
 
                 try
                 {
@@ -81,7 +81,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                     if (result.splits != null && result.splits.Count > 0)
                     {
                         segmentNames.AddRange(UpdateSplitsFromChangeFetcherResponse(result.splits));
-                        _splitCache.SetChangeNumber(result.till);
+                        _featureFlagCache.SetChangeNumber(result.till);
                     }
                 }
                 catch (Exception e)
@@ -93,7 +93,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                 {
                     if (_log.IsDebugEnabled)
                     {
-                        _log.Debug($"split fetch before: {changeNumber}, after: {_splitCache.GetChangeNumber()}");
+                        _log.Debug($"split fetch before: {changeNumber}, after: {_featureFlagCache.GetChangeNumber()}");
                     }
                 }
             }
@@ -120,12 +120,12 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                 if (!isValidStatus || result != StatusEnum.ACTIVE)
                 {
-                    _splitCache.RemoveSplit(split.name);
+                    _featureFlagCache.RemoveSplit(split.name);
                     removedSplits.Add(split);
                 }
                 else
                 {
-                    var isUpdated = _splitCache.AddOrUpdate(split.name, _splitParser.Parse(split));
+                    var isUpdated = _featureFlagCache.AddOrUpdate(split.name, _splitParser.Parse(split));
 
                     if (!isUpdated)
                     {
@@ -133,7 +133,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                         addedSplits.Add(split);
                     }
 
-                    segmentNames.AddRange(Util.Helper.GetSegmentNamesBySplit(split));
+                    segmentNames.AddRange(split.GetSegments());
                 }
             }
 

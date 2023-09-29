@@ -1,4 +1,7 @@
-﻿using Splitio.Domain;
+﻿#if NET_LATEST
+using Microsoft.Extensions.Logging;
+#endif
+using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
@@ -78,7 +81,10 @@ namespace Splitio.Services.Shared.Classes
             }
 
 #if NET_LATEST
-            return new MicrosoftExtensionsLogging(type);
+            if (SplitLoggerFactoryExtensions.LoggerFactoryHasValue)
+                return new MicrosoftExtensionsLogging(type);
+            else
+                return new NoopLogging();
 #else
             return new CommonLogging(type);
 #endif
@@ -92,7 +98,10 @@ namespace Splitio.Services.Shared.Classes
             }
 
 #if NET_LATEST
-            return new MicrosoftExtensionsLogging(type);
+            if (SplitLoggerFactoryExtensions.LoggerFactoryHasValue)
+                return new MicrosoftExtensionsLogging(type);
+            else
+                return new NoopLogging();
 #else
             return new CommonLogging(type);
 #endif

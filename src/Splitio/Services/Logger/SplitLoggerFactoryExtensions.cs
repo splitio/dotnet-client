@@ -16,6 +16,8 @@ namespace Microsoft.Extensions.Logging
         {
             return _loggerFactory;
         }
+
+        public static bool LoggerFactoryHasValue => _loggerFactory != null;
     }
 }
 #endif

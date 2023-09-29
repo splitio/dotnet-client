@@ -20,7 +20,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
     {
         private Mock<ITelemetryStorageConsumer> _telemetryStorage;
         private Mock<ITelemetryAPI> _telemetryAPI;
-        private Mock<ISplitCache> _splitCache;
+        private Mock<IFeatureFlagCache> _splitCache;
         private Mock<ISegmentCache> _segmentCache;
         private Mock<IFactoryInstantiationsService> _factoryInstantiationsService;
         private Mock<IStatusManager> _statusManager;
@@ -32,7 +32,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
         {
             _telemetryStorage = new Mock<ITelemetryStorageConsumer>();
             _telemetryAPI = new Mock<ITelemetryAPI>();
-            _splitCache = new Mock<ISplitCache>();
+            _splitCache = new Mock<IFeatureFlagCache>();
             _segmentCache = new Mock<ISegmentCache>();
             _factoryInstantiationsService = new Mock<IFactoryInstantiationsService>();
             _statusManager = new Mock<IStatusManager>();

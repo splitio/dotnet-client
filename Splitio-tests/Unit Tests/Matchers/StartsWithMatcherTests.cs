@@ -13,9 +13,11 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnTrueOnMatchingKey()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string>
+            {
+                "test1",
+                "test2"
+            };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
@@ -29,9 +31,11 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseOnNonMatchingKey()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string>
+            {
+                "test1",
+                "test2"
+            };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
@@ -59,9 +63,11 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseIfNullKey()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string>
+            {
+                "test1",
+                "test2"
+            };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
@@ -76,9 +82,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseIfEmptyKey()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string> { "test1", "test2" };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
@@ -93,9 +97,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseIfMatchingLong()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string> { "test1", "test2" };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
@@ -109,9 +111,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseIfMatchingDate()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string> { "test1", "test2" };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
@@ -125,9 +125,11 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseIfMatchingSet()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string>
+            {
+                "test1",
+                "test2"
+            };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
@@ -143,9 +145,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseIfMatchingBoolean()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string> { "test1", "test2" };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
@@ -159,9 +159,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnTrueOnMatchingKeyString()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string> { "test1", "test2" };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
@@ -175,9 +173,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseOnNonMatchingKeyString()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string> { "test1", "test2" };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
@@ -205,9 +201,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseIfNullKeyString()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string> { "test1", "test2" };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act
@@ -222,9 +216,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseIfEmptyKeyString()
         {
             //Arrange
-            var toCompare = new List<string>();
-            toCompare.Add("test1");
-            toCompare.Add("test2");
+            var toCompare = new List<string> { "test1", "test2" };
             var matcher = new StartsWithMatcher(toCompare);
 
             //Act

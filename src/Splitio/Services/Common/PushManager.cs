@@ -14,8 +14,9 @@ namespace Splitio.Services.Common
 {
     public class PushManager : IPushManager
     {
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(PushManager));
+
         private readonly IAuthApiClient _authApiClient;
-        private readonly ISplitLogger _log;
         private readonly ISSEHandler _sseHandler;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly INotificationManagerKeeper _notificationManagerKeeper;
@@ -33,7 +34,6 @@ namespace Splitio.Services.Common
         {
             _sseHandler = sseHandler;
             _authApiClient = authApiClient;
-            _log = WrapperAdapter.Instance().GetLogger(typeof(PushManager));
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _notificationManagerKeeper = notificationManagerKeeper;
             _refreshTokenTask = periodicTask;
@@ -48,7 +48,7 @@ namespace Splitio.Services.Common
 
             try
             {
-                var response = await _authApiClient.AuthenticateAsync();
+                var response = await _authApiClient.AuthenticateAsync().ConfigureAwait(false);
 
                 if (_statusManager.IsDestroyed()) return;
 

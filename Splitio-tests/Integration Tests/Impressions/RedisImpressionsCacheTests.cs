@@ -1,10 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Telemetry.Domain;
+using Splitio_Tests.Resources;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Integration_Tests.Impressions
 {
@@ -13,7 +14,7 @@ namespace Splitio_Tests.Integration_Tests.Impressions
     {
         private const string RedisPrefix = "test-mtks:";
 
-        private readonly IRedisAdapter _redisAdapter;
+        private readonly RedisAdapterForTests _redisAdapter;
         private readonly IImpressionsCache _impressionsCache;
 
         public RedisImpressionsCacheTests()
@@ -32,20 +33,20 @@ namespace Splitio_Tests.Integration_Tests.Impressions
             };
             var connectionPoolManager = new ConnectionPoolManager(config);
 
-            _redisAdapter = new RedisAdapter(config, connectionPoolManager);
+            _redisAdapter = new RedisAdapterForTests(config, connectionPoolManager);
             _impressionsCache = new RedisImpressionsCache(_redisAdapter, "ip", "version", "mm", RedisPrefix);
         }
 
         [TestMethod]
-        public void RecordUniqueKeysAndExpire()
+        public async Task RecordUniqueKeysAndExpire()
         {
-            _impressionsCache.RecordUniqueKeys(new List<Mtks>
+            await _impressionsCache.RecordUniqueKeysAsync(new List<Mtks>
             {
                 new Mtks("Feature1", new HashSet<string>{ "key-1", "key-2" }),
                 new Mtks("Feature2", new HashSet<string>{ "key-1", "key-2" })
             });
 
-            _impressionsCache.RecordUniqueKeys(new List<Mtks>
+            await _impressionsCache.RecordUniqueKeysAsync(new List<Mtks>
             {
                 new Mtks("Feature1", new HashSet<string>{ "key-1", "key-2" }),
                 new Mtks("Feature2", new HashSet<string>{ "key-1", "key-2" })

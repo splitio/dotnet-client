@@ -3,6 +3,7 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using System.Linq;
 
 namespace Splitio.Services.InputValidation.Classes
@@ -10,16 +11,21 @@ namespace Splitio.Services.InputValidation.Classes
     public class TrafficTypeValidator : ITrafficTypeValidator
     {
         private readonly ISplitLogger _log;
-        private readonly ISplitCache _splitCache;
+        private readonly IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
+        private readonly IBlockUntilReadyService _blockUntilReadyService;
 
-        public TrafficTypeValidator(ISplitCache splitCache, ISplitLogger log = null)
+        public TrafficTypeValidator(IFeatureFlagCacheConsumer featureFlagCacheConsumer, IBlockUntilReadyService blockUntilReadyService, ISplitLogger log = null)
         {
             _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(TrafficTypeValidator));
-            _splitCache = splitCache;
+            _featureFlagCacheConsumer = featureFlagCacheConsumer;
+            _blockUntilReadyService = blockUntilReadyService;
         }
 
-        public ValidatorResult IsValid(string trafficType, string method)
+        public ValidatorResult IsValid(string trafficType, Enums.API method)
         {
+            if (!_blockUntilReadyService.IsSdkReady())
+                return new ValidatorResult { Success = true, Value = trafficType };
+
             if (trafficType == null)
             {
                 _log.Error($"{method}: you passed a null traffic_type, traffic_type must be a non-empty string");
@@ -39,7 +45,7 @@ namespace Splitio.Services.InputValidation.Classes
                 trafficType = trafficType.ToLower();
             }
 
-            if (!_splitCache.TrafficTypeExists(trafficType))
+            if (!_featureFlagCacheConsumer.TrafficTypeExists(trafficType))
             {
                 _log.Warn($"Track: Traffic Type {trafficType} does not have any corresponding feature flags in this environment, make sure you’re tracking your events to a valid traffic type defined in the Split user interface.");
             }

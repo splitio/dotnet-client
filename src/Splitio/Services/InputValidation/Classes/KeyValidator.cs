@@ -16,7 +16,7 @@ namespace Splitio.Services.InputValidation.Classes
             _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(KeyValidator));
         }
 
-        public bool IsValid(Key key, string method)
+        public bool IsValid(Key key, Enums.API method)
         {
             var matchingKeyIsValid = Validate(key?.matchingKey, method, nameof(key.matchingKey));
             var bucketingKeyIsValid = Validate(key?.bucketingKey, method, nameof(key.bucketingKey));
@@ -24,7 +24,7 @@ namespace Splitio.Services.InputValidation.Classes
             return matchingKeyIsValid && bucketingKeyIsValid;
         }
 
-        private bool Validate(string key, string method, string type)
+        private bool Validate(string key, Enums.API method, string type)
         {
             if (key == null)
             {

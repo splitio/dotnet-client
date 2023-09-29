@@ -109,9 +109,11 @@ namespace Splitio_tests.Unit_Tests.Matchers
             var matcher = new MatchesStringMatcher("^a");
 
             //Act
-            var keys = new List<string>();
-            keys.Add("test1");
-            keys.Add("test3");
+            var keys = new List<string>
+            {
+                "test1",
+                "test3"
+            };
 
             var result = matcher.Match(keys);
 

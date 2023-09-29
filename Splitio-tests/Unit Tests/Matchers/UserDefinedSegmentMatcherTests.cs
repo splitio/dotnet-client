@@ -14,9 +14,11 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnTrueOnMatchingSegmentWithKey()
         {
             //Arrange
-            var keys = new List<string>();
-            keys.Add("test1");
-            keys.Add("test2");
+            var keys = new List<string>
+            {
+                "test1",
+                "test2"
+            };
 
             var segmentName = "test-segment";
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
@@ -35,9 +37,11 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseOnNonMatchingSegmentWithKey()
         {
             //Arrange
-            var keys = new List<string>();
-            keys.Add("test1");
-            keys.Add("test2");
+            var keys = new List<string>
+            {
+                "test1",
+                "test2"
+            };
 
             var segmentName = "test-segment";
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
@@ -89,9 +93,11 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnTrueOnMatchingSegment()
         {
             //Arrange
-            var keys = new List<string>();
-            keys.Add("test1");
-            keys.Add("test2");
+            var keys = new List<string>
+            {
+                "test1",
+                "test2"
+            };
 
             var segmentName = "test-segment";
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
@@ -110,9 +116,11 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseOnNonMatchingSegment()
         {
             //Arrange
-            var keys = new List<string>();
-            keys.Add("test1");
-            keys.Add("test2");
+            var keys = new List<string>
+            {
+                "test1",
+                "test2"
+            };
 
             var segmentName = "test-segment";
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());

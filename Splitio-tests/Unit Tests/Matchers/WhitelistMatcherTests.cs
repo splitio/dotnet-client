@@ -13,9 +13,11 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnTrueOnMatchingKeyWithKey()
         {
             //Arrange
-            var keys = new List<string>();
-            keys.Add("test1");
-            keys.Add("test2");
+            var keys = new List<string>
+            {
+                "test1",
+                "test2"
+            };
             var matcher = new WhitelistMatcher(keys);
 
             //Act
@@ -29,9 +31,11 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseOnNonMatchingKeyWithKey()
         {
             //Arrange
-            var keys = new List<string>();
-            keys.Add("test1");
-            keys.Add("test2");
+            var keys = new List<string>
+            {
+                "test1",
+                "test2"
+            };
             var matcher = new WhitelistMatcher(keys);
 
             //Act
@@ -87,9 +91,11 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnTrueOnMatchingKey()
         {
             //Arrange
-            var keys = new List<string>();
-            keys.Add("test1");
-            keys.Add("test2");
+            var keys = new List<string>
+            {
+                "test1",
+                "test2"
+            };
             var matcher = new WhitelistMatcher(keys);
 
             //Act
@@ -103,9 +109,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseOnNonMatchingKey()
         {
             //Arrange
-            var keys = new List<string>();
-            keys.Add("test1");
-            keys.Add("test2");
+            var keys = new List<string> { "test1", "test2" };
             var matcher = new WhitelistMatcher(keys);
 
             //Act

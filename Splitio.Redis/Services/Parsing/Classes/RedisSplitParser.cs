@@ -6,7 +6,7 @@ namespace Splitio.Redis.Services.Parsing.Classes
 {
     public class RedisSplitParser : SplitParser
     {
-        public RedisSplitParser(ISegmentCache segmentsCache)
+        public RedisSplitParser(ISegmentCacheConsumer segmentsCache)
         {
             _segmentsCache = segmentsCache;
         }

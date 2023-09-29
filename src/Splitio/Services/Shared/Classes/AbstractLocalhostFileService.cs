@@ -11,7 +11,7 @@ namespace Splitio.Services.Shared.Classes
     {
         protected const string Control = "control";
 
-        protected ISplitLogger _log;
+        protected static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger("LocalhostFileService");
 
         public abstract ConcurrentDictionary<string, ParsedSplit> ParseSplitFile(string filePath);
 

@@ -1,5 +1,7 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
+using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Shared.Classes;
@@ -8,6 +10,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -16,13 +20,14 @@ namespace Splitio.Services.Client.Classes
         private const string DefaultSplitFileName = ".split";
         private const string SplitFileYml = ".yml";
         private const string SplitFileYaml = ".yaml";
-        
-        private ILocalhostFileService _localhostFileService;
+
+        private readonly ILocalhostFileService _localhostFileService;
+        private readonly IFeatureFlagCache _featureFlagCache;
 
         private readonly FileSystemWatcher _watcher;
         private readonly string _fullPath;
 
-        public LocalhostClient(string filePath) : base()
+        public LocalhostClient(string filePath) : base("localhost")
         {
             _fullPath = LookupFilePath(filePath);
 
@@ -48,57 +53,77 @@ namespace Splitio.Services.Client.Classes
             _watcher.EnableRaisingEvents = true;
 
             var splits = ParseSplitFile(_fullPath);
-            _splitCache = new InMemorySplitCache(splits);
-
+            _featureFlagCache = new InMemorySplitCache(splits);
             _blockUntilReadyService = new NoopBlockUntilReadyService();
-            _manager = new SplitManager(_splitCache, _blockUntilReadyService);
-
-            ApiKey = "localhost";
-
-            _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
-
-            BuildEvaluator();
-
+            _manager = new SplitManager(_featureFlagCache, _blockUntilReadyService);
+            _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCache, _blockUntilReadyService);
+            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter());
             _uniqueKeysTracker = new NoopUniqueKeysTracker();
             _impressionsCounter = new NoopImpressionsCounter();
             _impressionsObserver = new NoopImpressionsObserver();
-            _impressionsManager = new ImpressionsManager(null, null, _impressionsCounter, false, ImpressionsMode.Debug, null, _tasksManager, _uniqueKeysTracker, _impressionsObserver);
+            _impressionsManager = new ImpressionsManager(null, null, _impressionsCounter, false, ImpressionsMode.Debug, null, _tasksManager, _uniqueKeysTracker, _impressionsObserver, false);
+
+            BuildClientExtension();
         }
 
         #region Public Methods
-        public override bool Track(string key, string trafficType, string eventType, double? value = default(double?), Dictionary<string, object> properties = null)
+        public override bool Track(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null)
         {
             return true;
         }
 
+        public override Task<bool> TrackAsync(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null)
+        {
+            return Task.FromResult(true);
+        }
+
         public override void Destroy()
         {
-            if (!_statusManager.IsDestroyed())
-            {
-                _watcher.Dispose();
-                _splitCache.Clear();
-                base.Destroy();
-            }
+            if (_statusManager.IsDestroyed()) return;
+
+            _factoryInstantiationsService.Decrease(ApiKey);
+            _statusManager.SetDestroy();
+            _watcher.Dispose();
+            _featureFlagCache.Clear();
+        }
+
+        public override Task DestroyAsync()
+        {
+            Destroy();
+            return Task.FromResult(0);
         }
         #endregion
 
         #region Private Methods
         private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-            var splits = ParseSplitFile(_fullPath);
-
-            _splitCache.Clear();
-
-            foreach (var split in splits)
+            try
             {
-                if (split.Value != null)
+                var featureFlagsToAdd = ParseSplitFile(_fullPath);
+
+                var namesInCache = _featureFlagCache.GetSplitNames();
+                var featureFlagstoRemove = namesInCache.Except(featureFlagsToAdd.Keys).ToArray();
+
+                foreach (var name in featureFlagstoRemove)
                 {
-                    _splitCache.AddSplit(split.Key, split.Value);
+                    _featureFlagCache.RemoveSplit(name);
                 }
+
+                foreach (var featureFlag in featureFlagsToAdd)
+                {
+                    if (featureFlag.Value != null)
+                    {
+                        _featureFlagCache.AddOrUpdate(featureFlag.Key, featureFlag.Value);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Something went wrong parsing SplitFile.", ex);
             }
         }
 
-        private string LookupFilePath(string filePath)
+        private static string LookupFilePath(string filePath)
         {
             filePath = filePath ?? DefaultSplitFileName;
 

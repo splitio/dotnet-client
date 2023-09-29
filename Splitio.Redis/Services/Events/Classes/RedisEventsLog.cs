@@ -21,10 +21,12 @@ namespace Splitio.Redis.Services.Events.Classes
 
         public void Log(WrappedEvent wrappedEvent)
         {
-            _tasksManager.NewOnTimeTaskAndStart(Enums.Task.Track, () =>
-            {
-                _eventsCache.AddItems(new List<WrappedEvent> { wrappedEvent });
-            });
+            _eventsCache.AddItems(new List<WrappedEvent> { wrappedEvent });
+        }
+
+        public async Task LogAsync(WrappedEvent wrappedEvent)
+        {
+            await _eventsCache.AddItemsAsync(new List<WrappedEvent> { wrappedEvent });
         }
 
         public void Start()

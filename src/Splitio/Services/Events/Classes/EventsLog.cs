@@ -55,6 +55,13 @@ namespace Splitio.Services.Events.Classes
             await _task.StopAsync();
         }
 
+        public Task LogAsync(WrappedEvent wrappedEvent)
+        {
+            Log(wrappedEvent);
+
+            return Task.FromResult(0);
+        }
+
         public void Log(WrappedEvent wrappedEvent)
         {
             var dropped = _wrappedEventsCache.AddItems(new List<WrappedEvent> { wrappedEvent });

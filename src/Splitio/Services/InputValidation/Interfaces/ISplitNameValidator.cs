@@ -5,7 +5,7 @@ namespace Splitio.Services.InputValidation.Interfaces
 {
     public interface ISplitNameValidator
     {
-        List<string> SplitNamesAreValid(List<string> splitNames, string method);
-        ValidatorResult SplitNameIsValid(string splitName, string method);
+        List<string> SplitNamesAreValid(List<string> splitNames, Enums.API method);
+        ValidatorResult SplitNameIsValid(string splitName, Enums.API method);
     }
 }

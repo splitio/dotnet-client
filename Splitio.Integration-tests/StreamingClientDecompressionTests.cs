@@ -84,7 +84,7 @@ namespace Splitio.Integration_tests
                 var splitFactory = new SplitFactory(apikey, config);
                 var client = splitFactory.Client();
 
-                client.BlockUntilReady(5000);
+                client.BlockUntilReady(10000);
 
                 var result = StreamingClientTests.EvaluateWithDelay(key, featureName, treatmentExpected, client);
 
