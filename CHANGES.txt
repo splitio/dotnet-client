@@ -1,5 +1,16 @@
 CHANGES
 
+7.6.0 (Sep 29, 2023)
+- Added ISplitClientAsync implementation which use task-based asynchronous pattern, highly recomemend using it in redis mode, with new methods exposed: 
+  - GetTreatmentAsync
+  - GetTreatmentsAsync
+  - GetTreatmentWithConfigAsync
+  - GetTreatmentsWithConfigAsync
+  - TrackAsync
+  - DestroyAsync
+- Improved LocalhostClient to better handle updates OnFileChanged event.
+- Added SplitLogger implementations for Console, TextWriter and MicrosoftExtensionsLogging. 
+
 7.5.2 (Sep 14, 2023)
 - Fixed Destroy mechanism when called before the SDK finishes the startup logic.
   - Updated TasksManager to be sure that tasks are finishing correctly.
