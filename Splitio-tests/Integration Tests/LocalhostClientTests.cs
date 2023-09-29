@@ -1,7 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using Splitio.Services.Client.Classes;
-using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,14 +10,10 @@ namespace Splitio_Tests.Integration_Tests
     [TestClass]
     public class LocalhostClientTests
     {
-        private readonly Mock<IFactoryInstantiationsService> _factoryInstantiationsServiceMock;
-
         private readonly string rootFilePath;
 
         public LocalhostClientTests()
         {
-            _factoryInstantiationsServiceMock = new Mock<IFactoryInstantiationsService>();
-
             // This line is to clean the warnings.
             rootFilePath = string.Empty;
 
