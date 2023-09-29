@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.CommonLibraries;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EventSource;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
@@ -34,6 +35,8 @@ namespace Splitio.Services.Common
         private readonly ISplitTask _startupTask;
         private readonly ISplitTask _onStreamingStatusTask;
 
+        private long _startSessionMs;
+
         public SyncManager(bool streamingEnabled,
             ISynchronizer synchronizer,
             IPushManager pushManager,
@@ -68,6 +71,7 @@ namespace Splitio.Services.Common
         #region Public Methods
         public void Start()
         {
+            _startSessionMs = CurrentTimeHelper.CurrentTimeMillis();
             _startupTask.Start();
         }
 
@@ -75,27 +79,27 @@ namespace Splitio.Services.Common
         {
             try
             {
-                _log.Info("Initialitation sdk destroy.");
-
-                _ctsStreaming.Cancel();
-                _ctsStreaming.Dispose();
-
-                var task = new List<Task>
-                {
-                    _synchronizer.StopPeriodicDataRecordingAsync(),
-                    _synchronizer.StopPeriodicFetchingAsync(),
-                    _onStreamingStatusTask.StopAsync(),
-                    _sseHandler.StopWorkersAsync(),
-                    _pushManager.StopAsync(),
-                    _startupTask.StopAsync(),
-                    _tasksManager.DestroyAsync()
-                };
+                var task = GetShutdownTasks();
 
                 Task.WaitAll(task.ToArray(), Constants.Gral.DestroyTimeount);
 
                 _synchronizer.ClearFetchersCache();
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Somenthing went wrong destroying the SDK.", ex);
+            }
+        }
 
-                _log.Info("SDK has been destroyed.");
+        public async Task ShutdownAsync()
+        {
+            try
+            {
+                var task = GetShutdownTasks();
+
+                await Task.WhenAll(task.ToArray());
+
+                _synchronizer.ClearFetchersCache();
             }
             catch (Exception ex)
             {
@@ -106,7 +110,7 @@ namespace Splitio.Services.Common
         public async Task OnStreamingStatusAsync()
         {
             try
-            {   
+            {
                 if (_streamingStatusQueue.TryTake(out StreamingStatus status, -1, _ctsStreaming.Token))
                 {
                     _log.Debug($"Streaming status received: {status}");
@@ -188,7 +192,7 @@ namespace Splitio.Services.Common
                 {
                     await Task.Delay(500);
                 }
-                
+
                 if (_statusManager.IsDestroyed()) return;
 
                 _statusManager.SetReady();
@@ -206,6 +210,24 @@ namespace Splitio.Services.Common
             {
                 _log.Debug("Exception initialization SDK.", ex);
             }
+        }
+
+        private List<Task> GetShutdownTasks()
+        {
+            _telemetryRuntimeProducer.RecordSessionLength(CurrentTimeHelper.CurrentTimeMillis() - _startSessionMs);
+            _ctsStreaming.Cancel();
+            _ctsStreaming.Dispose();
+
+            return new List<Task>
+            {
+                _synchronizer.StopPeriodicDataRecordingAsync(),
+                _synchronizer.StopPeriodicFetchingAsync(),
+                _onStreamingStatusTask.StopAsync(),
+                _sseHandler.StopWorkersAsync(),
+                _pushManager.StopAsync(),
+                _startupTask.StopAsync(),
+                _tasksManager.DestroyAsync()
+            };
         }
         #endregion
     }

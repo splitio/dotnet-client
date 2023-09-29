@@ -3,6 +3,7 @@ using Splitio.Domain;
 using Splitio.Services.Parsing;
 using Splitio.Services.Parsing.Classes;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests
 {
@@ -20,10 +21,12 @@ namespace Splitio_Tests.Unit_Tests
                 negate = false
             };
 
-            var attributes = new Dictionary<string, object>();
-            attributes.Add("card_number", 12012);
-            attributes.Add("card_type", "ABC");
-            
+            var attributes = new Dictionary<string, object>
+            {
+                { "card_number", 12012 },
+                { "card_type", "ABC" }
+            };
+
             //Act
             var result = matcher.Match(null, attributes);
 
@@ -42,9 +45,11 @@ namespace Splitio_Tests.Unit_Tests
                 negate = true
             };
 
-            var attributes = new Dictionary<string, object>();
-            attributes.Add("card_number", 12012);
-            attributes.Add("card_type", "ABC");
+            var attributes = new Dictionary<string, object>
+            {
+                { "card_number", 12012 },
+                { "card_type", "ABC" }
+            };
 
             //Act
             var result = matcher.Match(null, attributes);
@@ -83,9 +88,11 @@ namespace Splitio_Tests.Unit_Tests
                 negate = false
             };
 
-            var attributes = new Dictionary<string, object>();
-            attributes.Add("card_number", 12012);
-            attributes.Add("card_type", "ABC");
+            var attributes = new Dictionary<string, object>
+            {
+                { "card_number", 12012 },
+                { "card_type", "ABC" }
+            };
 
             //Act
             var result = matcher.Match(new Key(null, null), attributes);
@@ -105,9 +112,11 @@ namespace Splitio_Tests.Unit_Tests
                 negate = false
             };
 
-            var attributes = new Dictionary<string, object>();
-            attributes.Add("card_number", 12012);
-            attributes.Add("card_type", "ABC");
+            var attributes = new Dictionary<string, object>
+            {
+                { "card_number", 12012 },
+                { "card_type", "ABC" }
+            };
 
             //Act
             var result = matcher.Match(new Key("1", "1"), attributes);
@@ -127,9 +136,11 @@ namespace Splitio_Tests.Unit_Tests
                 negate = false
             };
 
-            var attributes = new Dictionary<string, object>();
-            attributes.Add("card_number", 12012);
-            attributes.Add("card_type", "ABC");
+            var attributes = new Dictionary<string, object>
+            {
+                { "card_number", 12012 },
+                { "card_type", "ABC" }
+            };
 
             //Act
             var result = matcher.Match(new Key ("12012", "12012"), attributes);
@@ -142,13 +153,15 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnTrueIfValueBooleanOrStringBooleanMatching()
         {
             //Arrange
-            var possibleValues = new List<object>();
-            possibleValues.Add(true);
-            possibleValues.Add("true");
-            possibleValues.Add("TRUE");
-            possibleValues.Add("True");
-            possibleValues.Add("TrUe");
-            possibleValues.Add("truE");
+            var possibleValues = new List<object>
+            {
+                true,
+                "true",
+                "TRUE",
+                "True",
+                "TrUe",
+                "truE"
+            };
 
             var matcher = new AttributeMatcher()
             {
@@ -159,8 +172,10 @@ namespace Splitio_Tests.Unit_Tests
 
             foreach (var value in possibleValues)
             {
-                var attributes = new Dictionary<string, object>();
-                attributes.Add("test1", value);
+                var attributes = new Dictionary<string, object>
+                {
+                    { "test1", value }
+                };
 
                 //Act
                 var result = matcher.Match(new Key("12012", "12012"), attributes);
@@ -174,10 +189,12 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseIfValueBooleanOrStringBooleanNotMatching()
         {
             //Arrange
-            var possibleValues = new List<object>();
-            possibleValues.Add(false);
-            possibleValues.Add("False");
-            possibleValues.Add("test");
+            var possibleValues = new List<object>
+            {
+                false,
+                "False",
+                "test"
+            };
 
             var matcher = new AttributeMatcher()
             {
@@ -188,8 +205,10 @@ namespace Splitio_Tests.Unit_Tests
 
             foreach (var value in possibleValues)
             {
-                var attributes = new Dictionary<string, object>();
-                attributes.Add("test1", value);
+                var attributes = new Dictionary<string, object>
+                {
+                    { "test1", value }
+                };
 
                 //Act
                 var result = matcher.Match(new Key("12012", "12012"), attributes);

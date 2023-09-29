@@ -25,7 +25,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         {
             // Arrange. 
             var key = new Key(null, null);
-            var method = "Test";
+            var method = Splitio.Enums.API.GetTreatment;
 
             // Act.
             var result = keyValidator.IsValid(key, method);
@@ -41,7 +41,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         {
             // Arrange. 
             var key = new Key(string.Empty, string.Empty);
-            var method = "Test";
+            var method = Splitio.Enums.API.GetTreatment;
 
             // Act.
             var result = keyValidator.IsValid(key, method);
@@ -57,7 +57,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         {
             // Arrange. 
             var key = new Key("ABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABC1265+5+5+958+54asddasdasdasdCXVXBNVCBV---------////ASDASDSAD3_", null);
-            var method = "Test";
+            var method = Splitio.Enums.API.GetTreatment;
 
             // Act.
             var result = keyValidator.IsValid(key, method);
@@ -73,7 +73,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         {
             // Arrange. 
             var key = new Key("ABCABCABCABCABCABCABCABCABCABCABCABC1265+5+5+958+54asddasdasdasdCXVXBNVCBV---------////ASDASDSAD3_", null);
-            var method = "Test";
+            var method = Splitio.Enums.API.GetTreatment;
 
             // Act.
             var result = keyValidator.IsValid(key, method);

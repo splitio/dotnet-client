@@ -8,7 +8,7 @@ namespace Splitio.Services.Parsing.Classes
     {
         private readonly ISegmentFetcher _segmentFetcher;
 
-        public InMemorySplitParser(ISegmentFetcher segmentFetcher, ISegmentCache segmentsCache)
+        public InMemorySplitParser(ISegmentFetcher segmentFetcher, ISegmentCacheConsumer segmentsCache)
         {
             _segmentFetcher = segmentFetcher;
             _segmentsCache = segmentsCache;

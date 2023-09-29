@@ -115,15 +115,16 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new EqualToBooleanMatcher(true);
 
             //Act
-            var keys = new List<string>();
-            keys.Add("test1");
-            keys.Add("test3");
+            var keys = new List<string>
+            {
+                "test1",
+                "test3"
+            };
 
             var result = matcher.Match(keys);
 
             //Assert
             Assert.IsFalse(result);
         }
-
     }
 }

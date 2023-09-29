@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
@@ -15,7 +14,8 @@ namespace Splitio.Services.Common
 {
     public class AuthApiClient : IAuthApiClient
     {
-        private readonly ISplitLogger _log;
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(AuthApiClient));
+
         private readonly ISplitioHttpClient _splitioHttpClient;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly string _url;
@@ -27,7 +27,6 @@ namespace Splitio.Services.Common
             _url = url;
             _splitioHttpClient = splitioHttpClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
-            _log = WrapperAdapter.Instance().GetLogger(typeof(AuthApiClient));            
         }
 
         #region Public Methods
@@ -39,7 +38,7 @@ namespace Splitio.Services.Common
 
                 try
                 {
-                    var response = await _splitioHttpClient.GetAsync(_url);
+                    var response = await _splitioHttpClient.GetAsync(_url).ConfigureAwait(false);
 
                     Util.Helper.RecordTelemetrySync(nameof(AuthenticateAsync), response, ResourceEnum.TokenSync, clock, _telemetryRuntimeProducer, _log);
 

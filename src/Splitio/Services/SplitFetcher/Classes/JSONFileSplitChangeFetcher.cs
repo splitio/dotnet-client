@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Splitio.Domain;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
@@ -13,8 +12,6 @@ namespace Splitio.Services.SplitFetcher.Classes
     {
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly string _filePath;
-
-        public ISplitCache splitCache { get; private set; }        
 
         public JSONFileSplitChangeFetcher(string filePath)
         {

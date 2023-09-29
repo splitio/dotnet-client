@@ -6,6 +6,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Telemetry.Storages
 {
@@ -105,6 +106,12 @@ namespace Splitio.Telemetry.Storages
             }
         }
 
+        public Task RecordExceptionAsync(MethodEnum method)
+        {
+            RecordException(method);
+            return Task.FromResult(0);
+        }
+
         public void RecordImpressionsStats(ImpressionsEnum data, long count)
         {
             try
@@ -121,26 +128,29 @@ namespace Splitio.Telemetry.Storages
 
         public void RecordLatency(MethodEnum method, int bucket)
         {
-            lock (_methodLatencies)
+            try
             {
-                try
+                if (_methodLatencies.TryGetValue(method, out long[] values))
                 {
-                    if (_methodLatencies.TryGetValue(method, out long[] values))
-                    {
-                        values[bucket]++;
-                        return;
-                    }
-
-                    var latencies = new long[Util.Metrics.Buckets.Length];
-                    latencies[bucket]++;
-
-                    _methodLatencies.TryAdd(method, latencies);
+                    values[bucket]++;
+                    return;
                 }
-                catch (Exception ex)
-                {
-                    _log.Warn("Exception caught executing RecordLatency", ex);
-                }
+
+                var latencies = new long[Util.Metrics.Buckets.Length];
+                latencies[bucket]++;
+
+                _methodLatencies.TryAdd(method, latencies);
             }
+            catch (Exception ex)
+            {
+                _log.Warn("Exception caught executing RecordLatency", ex);
+            }
+        }
+
+        public Task RecordLatencyAsync(MethodEnum method, int bucket)
+        {
+            RecordLatency(method, bucket);
+            return Task.FromResult(0);
         }
 
         public void RecordNonReadyUsages()
@@ -251,9 +261,10 @@ namespace Splitio.Telemetry.Storages
             }
         }
 
-        public void RecordConfigInit(Config config)
+        public Task RecordConfigInitAsync(Config config)
         {
             // No-Op. Config Data will be sent directly to Split Servers. No need to store.
+            return Task.FromResult(0);
         }
 
         public void RecordUpdatesFromSSE(UpdatesFromSSEEnum sseUpdate)

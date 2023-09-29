@@ -3,61 +3,43 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Evaluator
 {
     public class Evaluator : IEvaluator
     {
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(Evaluator));
+
         protected const string Control = "control";
-
+        
         private readonly ISplitter _splitter;
-        private readonly ISplitLogger _log;
-        private readonly ISplitCache _splitCache;
+        private readonly IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
 
-        public Evaluator(ISplitCache splitCache,
+        public Evaluator(IFeatureFlagCacheConsumer featureFlagCache,
             ISplitter splitter)
         {
-            _splitCache = splitCache;
+            _featureFlagCacheConsumer = featureFlagCache;
             _splitter = splitter;
-            _log = WrapperAdapter.Instance().GetLogger(typeof(Evaluator));
         }
 
-        #region Public Method
-        public TreatmentResult EvaluateFeature(Key key, string featureName, Dictionary<string, object> attributes = null)
-        {
-            using (var clock = new Util.SplitStopwatch())
-            {
-                clock.Start();
-
-                try
-                {
-                    var parsedSplit = _splitCache.GetSplit(featureName);
-
-                    return EvaluateTreatment(key, parsedSplit, featureName, clock, attributes);
-                }
-                catch (Exception e)
-                {
-                    _log.Error($"Exception caught getting treatment for feature flag: {featureName}", e);
-
-                    return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds, exception: true);
-                }
-            }
-        }
-
+        #region Public Sync Methods
         public MultipleEvaluatorResult EvaluateFeatures(Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
         {
             var exception = false;
-            var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();            
-            using(var clock = new Util.SplitStopwatch())
+            var treatmentsForFeatures = new List<TreatmentResult>();
+
+            using (var clock = new SplitStopwatch())
             {
                 clock.Start();
 
                 try
                 {
-                    var splits = _splitCache.FetchMany(featureNames);
+                    var splits = _featureFlagCacheConsumer.FetchMany(featureNames);
 
                     foreach (var feature in featureNames)
                     {
@@ -65,111 +47,225 @@ namespace Splitio.Services.Evaluator
 
                         var result = EvaluateTreatment(key, split, feature, attributes: attributes);
 
-                        treatmentsForFeatures.Add(feature, result);
+                        treatmentsForFeatures.Add(result);
                     }
                 }
                 catch (Exception e)
                 {
-                    _log.Error($"Exception caught getting treatments", e);
-
-                    foreach (var name in featureNames)
-                    {
-                        treatmentsForFeatures.Add(name, new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds));
-                    }
-
-                    exception = true;
+                    exception = EvaluateFeaturesException(e, featureNames, out treatmentsForFeatures);
                 }
 
-                return new MultipleEvaluatorResult
-                {
-                    TreatmentResults = treatmentsForFeatures,
-                    ElapsedMilliseconds = clock.ElapsedMilliseconds,
-                    Exception = exception
-                };
+                return new MultipleEvaluatorResult(treatmentsForFeatures, clock.ElapsedMilliseconds, exception);
             }
         }
         #endregion
 
-        #region Private Methods
-        private TreatmentResult EvaluateTreatment(Key key, ParsedSplit parsedSplit, string featureFlagName, Util.SplitStopwatch clock = null, Dictionary<string, object> attributes = null)
+        #region Public Async Methods
+        public async Task<MultipleEvaluatorResult> EvaluateFeaturesAsync(Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
+        {
+            var exception = false;
+            var treatmentsForFeatures = new List<TreatmentResult>();
+
+            using (var clock = new SplitStopwatch())
+            {
+                clock.Start();
+
+                try
+                {
+                    var splits = await _featureFlagCacheConsumer.FetchManyAsync(featureNames);
+
+                    foreach (var feature in featureNames)
+                    {
+                        var split = splits.FirstOrDefault(s => feature.Equals(s?.name));
+
+                        var result = await EvaluateTreatmentAsync(key, split, feature, attributes: attributes);
+
+                        treatmentsForFeatures.Add(result);
+                    }
+                }
+                catch (Exception e)
+                {
+                    exception = EvaluateFeaturesException(e, featureNames, out treatmentsForFeatures);
+                }
+
+                return new MultipleEvaluatorResult(treatmentsForFeatures, clock.ElapsedMilliseconds, exception);
+            }
+        }
+        #endregion
+
+        #region Private Sync Methods
+        private TreatmentResult EvaluateTreatment(Key key, ParsedSplit parsedSplit, string featureFlagName, Dictionary<string, object> attributes = null)
         {
             try
             {
-                if (clock == null)
-                {
-                    clock = new Util.SplitStopwatch();
-                    clock.Start();
-                }
-
-                if (parsedSplit == null)
-                {
-                    _log.Warn($"GetTreatment: you passed {featureFlagName} that does not exist in this environment, please double check what feature flags exist in the Split user interface.");
-
-                    return new TreatmentResult(Labels.SplitNotFound, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
-                }
+                if (IsSplitNotFound(featureFlagName, parsedSplit, out TreatmentResult resultNotFound)) return resultNotFound;
 
                 var treatmentResult = GetTreatmentResult(key, parsedSplit, attributes);
 
-                if (parsedSplit.configurations != null && parsedSplit.configurations.ContainsKey(treatmentResult.Treatment))
-                {
-                    treatmentResult.Config = parsedSplit.configurations[treatmentResult.Treatment];
-                }
-
-                treatmentResult.ElapsedMilliseconds = clock.ElapsedMilliseconds;
-
-                return treatmentResult;
+                return ParseConfigurationAndReturnTreatment(parsedSplit, treatmentResult);
             }
             catch (Exception e)
             {
-                _log.Error($"Exception caught getting treatment for feature flag: {featureFlagName}", e);
-
-                return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
-            }
-            finally
-            {
-                clock.Dispose();
+                return EvaluateFeatureException(e, featureFlagName);
             }
         }
 
         private TreatmentResult GetTreatmentResult(Key key, ParsedSplit split, Dictionary<string, object> attributes = null)
         {
-            if (split.killed)
-            {
-                return new TreatmentResult(Labels.Killed, split.defaultTreatment, split.changeNumber);
-            }
+            if (IsSplitKilled(split, out TreatmentResult result)) return result;
 
             var inRollout = false;
 
             // use the first matching condition
             foreach (var condition in split.conditions)
             {
-                if (!inRollout && condition.conditionType == ConditionType.ROLLOUT)
-                {
-                    if (split.trafficAllocation < 100)
-                    {
-                        // bucket ranges from 1-100.
-                        var bucket = _splitter.GetBucket(key.bucketingKey, split.trafficAllocationSeed, split.algo);
+                inRollout = IsInRollout(inRollout, condition, key, split, out TreatmentResult rResult);
 
-                        if (bucket > split.trafficAllocation)
-                        {
-                            return new TreatmentResult(Labels.TrafficAllocationFailed, split.defaultTreatment, split.changeNumber);
-                        }
-                    }
+                if (rResult != null) return rResult;
 
-                    inRollout = true;
-                }
+                var matched = condition.matcher.Match(key, attributes, this);
+                var treatment = IfConditionMatched(matched, key, split, condition);
 
-                var combiningMatcher = condition.matcher;
-
-                if (combiningMatcher.Match(key, attributes, this))
-                {
-                    var treatment = _splitter.GetTreatment(key.bucketingKey, split.seed, condition.partitions, split.algo);
-
-                    return new TreatmentResult(condition.label, treatment, split.changeNumber);
-                }
+                if (treatment != null) return treatment;
             }
 
-            return new TreatmentResult(Labels.DefaultRule, split.defaultTreatment, split.changeNumber);   
+            return ReturnDefaultTreatment(split);
+        }
+        #endregion
+
+        #region Private Async Methods
+        private async Task<TreatmentResult> EvaluateTreatmentAsync(Key key, ParsedSplit parsedSplit, string featureFlagName, Dictionary<string, object> attributes = null)
+        {
+            try
+            {
+                if (IsSplitNotFound(featureFlagName, parsedSplit, out TreatmentResult resultNotFound)) return resultNotFound;
+
+                var treatmentResult = await GetTreatmentResultAsync(key, parsedSplit, attributes);
+
+                return ParseConfigurationAndReturnTreatment(parsedSplit, treatmentResult);
+            }
+            catch (Exception e)
+            {
+                return EvaluateFeatureException(e, featureFlagName);
+            }
+        }
+
+        private async Task<TreatmentResult> GetTreatmentResultAsync(Key key, ParsedSplit split, Dictionary<string, object> attributes = null)
+        {
+            if (IsSplitKilled(split, out TreatmentResult result)) return result;
+
+            var inRollout = false;
+
+            // use the first matching condition
+            foreach (var condition in split.conditions)
+            {
+                inRollout = IsInRollout(inRollout, condition, key, split, out TreatmentResult rResult);
+
+                if (rResult != null) return rResult;
+
+                var matched = await condition.matcher.MatchAsync(key, attributes, this);
+                var treatment = IfConditionMatched(matched, key, split, condition);
+
+                if (treatment != null) return treatment;
+            }
+
+            return ReturnDefaultTreatment(split);
+        }
+        #endregion
+
+        #region Private Methods
+        private static bool IsSplitKilled(ParsedSplit split, out TreatmentResult result)
+        {
+            if (split.killed)
+            {
+                result = new TreatmentResult(split.name, Labels.Killed, split.defaultTreatment, split.changeNumber);
+                return true;
+            }
+
+            result = null;
+            return false;
+        }
+
+        private bool IsInRollout(bool inRollout, ConditionWithLogic condition, Key key, ParsedSplit split, out TreatmentResult result)
+        {
+            result = null;
+
+            if (!inRollout && condition.conditionType == ConditionType.ROLLOUT)
+            {
+                if (split.trafficAllocation < 100)
+                {
+                    // bucket ranges from 1-100.
+                    var bucket = _splitter.GetBucket(key.bucketingKey, split.trafficAllocationSeed, split.algo);
+
+                    if (bucket > split.trafficAllocation)
+                    {
+                        result = new TreatmentResult(split.name, Labels.TrafficAllocationFailed, split.defaultTreatment, split.changeNumber);
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        private static TreatmentResult ReturnDefaultTreatment(ParsedSplit split)
+        {
+            return new TreatmentResult(split.name, Labels.DefaultRule, split.defaultTreatment, split.changeNumber);
+        }
+
+        private TreatmentResult IfConditionMatched(bool matched, Key key, ParsedSplit split, ConditionWithLogic condition)
+        {
+            if (!matched) return null;
+
+            var treatment = _splitter.GetTreatment(key.bucketingKey, split.seed, condition.partitions, split.algo);
+
+            return new TreatmentResult(split.name, condition.label, treatment, split.changeNumber);
+        }
+
+        private static TreatmentResult EvaluateFeatureException(Exception e, string featureName)
+        {
+            _log.Error($"Exception caught getting treatment for feature flag: {featureName}", e);
+
+            return new TreatmentResult(featureName, Labels.Exception, Control, exception: true);
+        }
+
+        private static bool EvaluateFeaturesException(Exception e, List<string> featureNames, out List<TreatmentResult> results)
+        {
+            results = new List<TreatmentResult>();
+
+            _log.Error($"Exception caught getting treatments", e);
+
+            foreach (var name in featureNames)
+            {
+                results.Add(new TreatmentResult(name, Labels.Exception, Control));
+            }
+
+            return true;
+        }
+
+        private static bool IsSplitNotFound(string featureFlagName, ParsedSplit parsedSplit, out TreatmentResult result)
+        {
+            result = null;
+
+            if (parsedSplit != null)
+                return false;
+
+            _log.Warn($"GetTreatment: you passed {featureFlagName} that does not exist in this environment, please double check what feature flags exist in the Split user interface.");
+
+            result = new TreatmentResult(featureFlagName, Labels.SplitNotFound, Control);
+
+            return true;
+        }
+
+        private static TreatmentResult ParseConfigurationAndReturnTreatment(ParsedSplit parsedSplit, TreatmentResult treatmentResult)
+        {
+            if (parsedSplit.configurations != null && parsedSplit.configurations.ContainsKey(treatmentResult.Treatment))
+            {
+                treatmentResult.Config = parsedSplit.configurations[treatmentResult.Treatment];
+            }
+
+            return treatmentResult;
         }
         #endregion
     }

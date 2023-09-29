@@ -5,9 +5,9 @@ using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Telemetry.Storages;
 using Splitio.Services.Client.Classes;
-using Splitio.Services.Logger;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
 {
@@ -50,7 +50,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         }
 
         [TestMethod]
-        public void RecordConfigInitShouldRecordConfigAndSetExpirationTime()
+        public async Task RecordConfigInitShouldRecordConfigAndSetExpirationTime()
         {
             // Assert.
             var config = new Config
@@ -74,10 +74,10 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
                 .Returns(1);
 
             // Act.
-            _telemetryStorage.RecordConfigInit(config);
+            await _telemetryStorage.RecordConfigInitAsync(config);
 
             // Assert.
-            _redisAdapter.Verify(mock => mock.HashSet(key, $"{_sdkVersion}/{_machineName}/{_machineIp}", redisValue), Times.Once);
+            _redisAdapter.Verify(mock => mock.HashSetAsync(key, $"{_sdkVersion}/{_machineName}/{_machineIp}", redisValue), Times.Once);
         }
 
         [TestMethod]

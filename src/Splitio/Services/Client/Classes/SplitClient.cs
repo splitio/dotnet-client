@@ -1,9 +1,10 @@
 ﻿using Splitio.CommonLibraries;
+using Splitio.Constants;
 using Splitio.Domain;
 using Splitio.Services.Cache.Filter;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
-using Splitio.Services.EngineEvaluator;
+using Splitio.Services.Common;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
@@ -15,33 +16,31 @@ using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.Tasks;
-using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
 {
     public abstract class SplitClient : ISplitClient
     {
-        protected readonly ISplitLogger _log;
+        protected readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitClient));
+
         protected readonly IKeyValidator _keyValidator;
         protected readonly ISplitNameValidator _splitNameValidator;
         protected readonly IEventTypeValidator _eventTypeValidator;
         protected readonly IEventPropertiesValidator _eventPropertiesValidator;
         protected readonly IWrapperAdapter _wrapperAdapter;
         protected readonly IConfigService _configService;
-
-        protected bool LabelsEnabled;
-        protected string ApiKey;
+        protected readonly string ApiKey;
 
         protected ISplitManager _manager;
         protected IEventsLog _eventsLog;
-        protected ISplitCache _splitCache;
         protected ITrafficTypeValidator _trafficTypeValidator;
-        protected ISegmentCache _segmentCache;
         protected IBlockUntilReadyService _blockUntilReadyService;
         protected IFactoryInstantiationsService _factoryInstantiationsService;
         protected ISplitParser _splitParser;
@@ -50,7 +49,7 @@ namespace Splitio.Services.Client.Classes
         protected ITelemetryInitProducer _telemetryInitProducer;
         protected ITasksManager _tasksManager;
         protected IStatusManager _statusManager;
-
+        protected ISyncManager _syncManager;
         protected IImpressionsLog _impressionsLog;
         protected IUniqueKeysTracker _uniqueKeysTracker;
         protected IImpressionListener _customerImpressionListener;
@@ -58,11 +57,13 @@ namespace Splitio.Services.Client.Classes
         protected IImpressionsSenderAdapter _impressionsSenderAdapter;
         protected IImpressionsCounter _impressionsCounter;
         protected IImpressionsObserver _impressionsObserver;
+        protected IClientExtensionService _clientExtensionService;
 
-        public SplitClient()
+        public SplitClient(string apikey)
         {
+            ApiKey = apikey;
+
             _wrapperAdapter = WrapperAdapter.Instance();
-            _log = _wrapperAdapter.GetLogger(typeof(SplitClient));
             _keyValidator = new KeyValidator();
             _splitNameValidator = new SplitNameValidator();
             _eventTypeValidator = new EventTypeValidator();
@@ -73,127 +74,206 @@ namespace Splitio.Services.Client.Classes
             _tasksManager = new TasksManager(_statusManager);
         }
 
-        #region Public Methods
-        public SplitResult GetTreatmentWithConfig(string key, string feature, Dictionary<string, object> attributes = null)
+        #region GetTreatment
+        public async Task<string> GetTreatmentAsync(Key key, string feature, Dictionary<string, object> attributes = null)
         {
-            return GetTreatmentWithConfig(new Key(key, null), feature, attributes);
+            var evaluationResult = await GetTreatmentsAsync(Enums.API.GetTreatmentAsync, key, new List<string> { feature }, attributes);
+
+            return TreatmentWithConfig(evaluationResult).Treatment;
         }
 
-        public SplitResult GetTreatmentWithConfig(Key key, string feature, Dictionary<string, object> attributes = null)
+        public async Task<string> GetTreatmentAsync(string key, string feature, Dictionary<string, object> attributes = null)
         {
-            var result = GetTreatmentResult(key, feature, nameof(GetTreatmentWithConfig), attributes);
+            return await GetTreatmentAsync(new Key(key, null), feature, attributes);
+        }
 
-            return new SplitResult
-            {
-                Treatment = result.Treatment,
-                Config = result.Config
-            };
+        public virtual string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null)
+        {
+            var evaluationResult = GetTreatmentsSync(Enums.API.GetTreatment, key, new List<string> { feature }, attributes);
+
+            return TreatmentWithConfig(evaluationResult).Treatment;
         }
 
         public virtual string GetTreatment(string key, string feature, Dictionary<string, object> attributes = null)
         {
             return GetTreatment(new Key(key, null), feature, attributes);
         }
+        #endregion
 
-        public virtual string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null)
+        #region GetTreatments
+        public async Task<Dictionary<string, string>> GetTreatmentsAsync(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            var result = GetTreatmentResult(key, feature, nameof(GetTreatment), attributes);
+            var results = await GetTreatmentsAsync(Enums.API.GetTreatmentsAsync, key, features, attributes);
 
-            return result.Treatment;
+            return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
         }
 
-        public Dictionary<string, SplitResult> GetTreatmentsWithConfig(string key, List<string> features, Dictionary<string, object> attributes = null)
+        public async Task<Dictionary<string, string>> GetTreatmentsAsync(string key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            return GetTreatmentsWithConfig(new Key(key, null), features, attributes);
+            return await GetTreatmentsAsync(new Key(key, null), features, attributes);
         }
 
-        public Dictionary<string, SplitResult> GetTreatmentsWithConfig(Key key, List<string> features, Dictionary<string, object> attributes = null)
+        public Dictionary<string, string> GetTreatments(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            var results = GetTreatmentsResult(key, features, nameof(GetTreatmentsWithConfig), attributes);
+            var results = GetTreatmentsSync(Enums.API.GetTreatments, key, features, attributes);
 
-            return results
-                .ToDictionary(r => r.Key, r => new SplitResult
-                {
-                    Treatment = r.Value.Treatment,
-                    Config = r.Value.Config
-                });
+            return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
         }
 
         public Dictionary<string, string> GetTreatments(string key, List<string> features, Dictionary<string, object> attributes = null)
         {
             return GetTreatments(new Key(key, null), features, attributes);
         }
+        #endregion
 
-        public Dictionary<string, string> GetTreatments(Key key, List<string> features, Dictionary<string, object> attributes = null)
+        #region GetTreatmentWithConfig
+        public async Task<SplitResult> GetTreatmentWithConfigAsync(Key key, string feature, Dictionary<string, object> attributes = null)
         {
-            var results = GetTreatmentsResult(key, features, nameof(GetTreatments), attributes);
+            var evaluationResult = await GetTreatmentsAsync(Enums.API.GetTreatmentWithConfigAsync, key, new List<string> { feature }, attributes);
+
+            return TreatmentWithConfig(evaluationResult);
+        }
+
+        public async Task<SplitResult> GetTreatmentWithConfigAsync(string key, string feature, Dictionary<string, object> attributes = null)
+        {
+            return await GetTreatmentWithConfigAsync(new Key(key, null), feature, attributes);
+        }
+
+        public SplitResult GetTreatmentWithConfig(Key key, string feature, Dictionary<string, object> attributes = null)
+        {
+            var evaluationResult = GetTreatmentsSync(Enums.API.GetTreatmentWithConfig, key, new List<string> { feature }, attributes);
+
+            return TreatmentWithConfig(evaluationResult);
+        }
+
+        public SplitResult GetTreatmentWithConfig(string key, string feature, Dictionary<string, object> attributes = null)
+        {
+            return GetTreatmentWithConfig(new Key(key, null), feature, attributes);
+        }
+        #endregion
+
+        #region GetTreatmentsWithConfig
+        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigAsync(Key key, List<string> features, Dictionary<string, object> attributes = null)
+        {
+            var results = await GetTreatmentsAsync(Enums.API.GetTreatmentsWithConfigAsync, key, features, attributes);
 
             return results
-                .ToDictionary(r => r.Key, r => r.Value.Treatment);
+                .ToDictionary(r => r.FeatureFlagName, r => new SplitResult
+                {
+                    Treatment = r.Treatment,
+                    Config = r.Config
+                });
         }
 
-        public virtual bool Track(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null)
+        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigAsync(string key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            if (_statusManager.IsDestroyed()) return false;
-
-            using (var clock = new Util.SplitStopwatch())
-            {
-                clock.Start();
-
-                var keyResult = _keyValidator.IsValid(new Key(key, null), nameof(Track));
-                var eventTypeResult = _eventTypeValidator.IsValid(eventType, nameof(eventType));
-                var eventPropertiesResult = _eventPropertiesValidator.IsValid(properties);
-
-                var trafficTypeResult = _blockUntilReadyService.IsSdkReady()
-                    ? _trafficTypeValidator.IsValid(trafficType, nameof(trafficType))
-                    : new ValidatorResult { Success = true, Value = trafficType };
-
-                if (!keyResult || !trafficTypeResult.Success || !eventTypeResult || !eventPropertiesResult.Success)
-                    return false;
-
-                try
-                {
-                    var eventToLog = new Event
-                    {
-                        key = key,
-                        trafficTypeName = trafficTypeResult.Value,
-                        eventTypeId = eventType,
-                        value = value,
-                        timestamp = CurrentTimeHelper.CurrentTimeMillis(),
-                        properties = (Dictionary<string, object>)eventPropertiesResult.Value
-                    };
-
-                    _eventsLog.Log(new WrappedEvent
-                    {
-                        Event = eventToLog,
-                        Size = eventPropertiesResult.EventSize
-                    });
-
-                    RecordLatency(nameof(Track), clock.ElapsedMilliseconds);
-
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    _log.Error("Exception caught trying to track an event", e);
-                    RecordException(nameof(Track));
-                    return false;
-                }
-            }
+            return await GetTreatmentsWithConfigAsync(new Key(key, null), features, attributes);
         }
 
-        public bool IsDestroyed()
+        public Dictionary<string, SplitResult> GetTreatmentsWithConfig(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            return _statusManager.IsDestroyed();
+            var results = GetTreatmentsSync(Enums.API.GetTreatmentsWithConfig, key, features, attributes);
+
+            return results
+                .ToDictionary(r => r.FeatureFlagName, r => new SplitResult
+                {
+                    Treatment = r.Treatment,
+                    Config = r.Config
+                });
+        }
+
+        public Dictionary<string, SplitResult> GetTreatmentsWithConfig(string key, List<string> features, Dictionary<string, object> attributes = null)
+        {
+            return GetTreatmentsWithConfig(new Key(key, null), features, attributes);
+        }
+        #endregion
+
+        #region Destroy
+        public virtual async Task DestroyAsync()
+        {
+            if (_statusManager.IsDestroyed()) return;
+
+            _log.Info(Messages.InitDestroy);
+
+            _factoryInstantiationsService.Decrease(ApiKey);
+            _statusManager.SetDestroy();
+            await _syncManager.ShutdownAsync();
+
+            _log.Info(Messages.Destroyed);
         }
 
         public virtual void Destroy()
         {
-            if (!_statusManager.IsDestroyed())
+            if (_statusManager.IsDestroyed()) return;
+
+            _log.Info(Messages.InitDestroy);
+
+            _factoryInstantiationsService.Decrease(ApiKey);
+            _statusManager.SetDestroy();
+            _syncManager.Shutdown();
+
+            _log.Info(Messages.Destroyed);
+        }
+        #endregion
+
+        #region Track
+        public virtual bool Track(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null)
+        {
+            if (_statusManager.IsDestroyed()) return false;
+
+            var clock = new Stopwatch();
+            clock.Start();
+
+            try
             {
-                _factoryInstantiationsService.Decrease(ApiKey);
-                _statusManager.SetDestroy();
+                if (!_clientExtensionService.TrackValidations(key, trafficType, eventType, value, properties, out var wrappedEvent)) return false;
+
+                _eventsLog.Log(wrappedEvent);
+                _clientExtensionService.RecordLatency(Enums.API.Track, clock.ElapsedMilliseconds);
+
+                return true;
             }
+            catch (Exception e)
+            {
+                _log.Error("Exception caught trying to track an event", e);
+                _clientExtensionService.RecordException(Enums.API.Track);
+
+                return false;
+            }
+            finally { clock.Stop(); }
+        }
+
+        public virtual async Task<bool> TrackAsync(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null)
+        {
+            if (_statusManager.IsDestroyed()) return false;
+
+            var clock = new Stopwatch();
+            clock.Start();
+
+            try
+            {
+                if (!_clientExtensionService.TrackValidations(key, trafficType, eventType, value, properties, out var wrappedEvent)) return false;
+
+                await _eventsLog.LogAsync(wrappedEvent);
+                await _clientExtensionService.RecordLatencyAsync(Enums.API.Track, clock.ElapsedMilliseconds);
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                _log.Error("Exception caught trying to track an event", e);
+                await _clientExtensionService.RecordExceptionAsync(Enums.API.Track);
+
+                return false;
+            }
+            finally { clock.Stop(); }
+        }
+        #endregion
+
+        #region Public Methods
+        public bool IsDestroyed()
+        {
+            return _statusManager.IsDestroyed();
         }
 
         public void BlockUntilReady(int blockMilisecondsUntilReady)
@@ -208,12 +288,6 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Protected Methods
-        protected void BuildEvaluator()
-        {
-            var splitter = new Splitter();
-            _evaluator = new Evaluator.Evaluator(_splitCache, splitter);
-        }
-
         protected void BuildUniqueKeysTracker(BaseConfig config)
         {
             if (config.ImpressionsMode != ImpressionsMode.None)
@@ -244,157 +318,79 @@ namespace Splitio.Services.Client.Classes
 
             var trackerConfig = new ComponentConfig(config.ImpressionsCounterCacheMaxSize, config.ImpressionsCountBulkSize);
             var task = _tasksManager.NewPeriodicTask(Enums.Task.ImpressionsCountSender, config.ImpressionsCounterRefreshRate * 1000);
-            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Enums.Task.ImpressionCounterSendBulkData);
+            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Enums.Task.ImpressionCounterSendBulkData);
 
             _impressionsCounter = new ImpressionsCounter(trackerConfig, _impressionsSenderAdapter, task, sendBulkDataTask);
+        }
+
+        protected void BuildClientExtension()
+        {
+            _clientExtensionService = new ClientExtensionService(_blockUntilReadyService, _statusManager, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator);
+        }
+        #endregion
+
+        #region Private Async Methods
+        private async Task<List<TreatmentResult>> GetTreatmentsAsync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes)
+        {
+            features = _clientExtensionService.TreatmentsValidations(method, key, features, _log, out List<TreatmentResult> controlTreatments);
+
+            if (controlTreatments != null) return controlTreatments;
+
+            var evaluatorResult = await _evaluator.EvaluateFeaturesAsync(key, features, attributes);
+
+            if (evaluatorResult.Exception) await _clientExtensionService.RecordExceptionAsync(method);
+
+            await _clientExtensionService.RecordLatencyAsync(method, evaluatorResult.ElapsedMilliseconds);
+
+            if (BuildAndGetImpressions(evaluatorResult, key, out var impressions))
+                await _impressionsManager.TrackAsync(impressions);
+
+            return evaluatorResult.Results;
         }
         #endregion
 
         #region Private Methods
-        private TreatmentResult GetTreatmentResult(Key key, string feature, string method, Dictionary<string, object> attributes = null)
+        private List<TreatmentResult> GetTreatmentsSync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            if (!IsClientReady(method)) return new TreatmentResult(string.Empty, Constants.Gral.Control, null);
+            features = _clientExtensionService.TreatmentsValidations(method, key, features, _log, out List<TreatmentResult> controlTreatments);
 
-            if (!_keyValidator.IsValid(key, method)) return new TreatmentResult(string.Empty, Constants.Gral.Control, null);
+            if (controlTreatments != null) return controlTreatments;
 
-            var splitNameResult = _splitNameValidator.SplitNameIsValid(feature, method);
+            var evaluatorResult = _evaluator.EvaluateFeatures(key, features, attributes);
 
-            if (!splitNameResult.Success) return new TreatmentResult(string.Empty, Constants.Gral.Control, null);
+            if (evaluatorResult.Exception) _clientExtensionService.RecordException(method);
 
-            feature = splitNameResult.Value;
+            _clientExtensionService.RecordLatency(method, evaluatorResult.ElapsedMilliseconds);
 
-            var result = _evaluator.EvaluateFeature(key, feature, attributes);
+            if (BuildAndGetImpressions(evaluatorResult, key, out var impressions))
+                _impressionsManager.Track(impressions);
 
-            if (result.Exception)
-            {
-                RecordException(method);
-            }
-
-            RecordLatency(method, result.ElapsedMilliseconds);
-
-            if (!Labels.SplitNotFound.Equals(result.Label))
-            {
-                _impressionsManager.BuildAndTrack(key.matchingKey, feature, result.Treatment, CurrentTimeHelper.CurrentTimeMillis(), result.ChangeNumber, LabelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null);
-            }
-
-            return result;
+            return evaluatorResult.Results;
         }
 
-        private Dictionary<string, TreatmentResult> GetTreatmentsResult(Key key, List<string> features, string method, Dictionary<string, object> attributes = null)
+        private bool BuildAndGetImpressions(MultipleEvaluatorResult evaluatorResult, Key key, out List<KeyImpression> impressions)
         {
-            var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
+            impressions = new List<KeyImpression>();
 
-            if (!IsClientReady(method))
+            foreach (var treatmentResult in evaluatorResult.Results)
             {
-                foreach (var feature in features)
-                {
-                    treatmentsForFeatures.Add(feature, new TreatmentResult(string.Empty, Constants.Gral.Control, null));
-                }
+                var impression = _impressionsManager.Build(treatmentResult, key);
 
-                return treatmentsForFeatures;
-            }
-            
-            var ImpressionsQueue = new List<KeyImpression>();
-
-            if (_keyValidator.IsValid(key, method))
-            {
-                features = _splitNameValidator.SplitNamesAreValid(features, method);
-                
-                var results = _evaluator.EvaluateFeatures(key, features, attributes);
-
-                foreach (var treatmentResult in results.TreatmentResults)
-                {
-                    treatmentsForFeatures.Add(treatmentResult.Key, treatmentResult.Value);                    
-
-                    if (!Labels.SplitNotFound.Equals(treatmentResult.Value.Label))
-                    {
-                        ImpressionsQueue.Add(_impressionsManager.BuildImpression(key.matchingKey, treatmentResult.Key, treatmentResult.Value.Treatment, CurrentTimeHelper.CurrentTimeMillis(), treatmentResult.Value.ChangeNumber, LabelsEnabled ? treatmentResult.Value.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null));                        
-                    }                    
-                }
-
-                if (results.Exception)
-                {
-                    RecordException(method);
-                }
-
-                RecordLatency(method, results.ElapsedMilliseconds);
-
-                _impressionsManager.Track(ImpressionsQueue);
-            }
-            else
-            {
-                foreach (var feature in features)
-                {
-                    treatmentsForFeatures.Add(feature, new TreatmentResult(string.Empty, Constants.Gral.Control, null));
-                }                    
+                if (impression != null) impressions.Add(impression);
             }
 
-            return treatmentsForFeatures;
+            return impressions.Any();
         }
 
-        private bool IsClientReady(string methodName)
+        private static SplitResult TreatmentWithConfig(List<TreatmentResult> results)
         {
-            if (!_blockUntilReadyService.IsSdkReady())
-            {
-                _log.Error($"{methodName}: the SDK is not ready, the operation cannot be executed.");
-                return false;
-            }
+            if (!results.Any()) return new SplitResult(Gral.Control, null);
 
-            if (_statusManager.IsDestroyed())
-            {
-                _log.Error("Client has already been destroyed - No calls possible");
-                return false;
-            }
+            var result = results.FirstOrDefault();
 
-            return true;
-        }
+            if (result == null) return new SplitResult(Gral.Control, null);
 
-        private void RecordLatency(string method, long latency)
-        {
-            if (_telemetryEvaluationProducer == null) return;
-
-            switch (method)
-            {
-                case nameof(GetTreatment):
-                    _telemetryEvaluationProducer.RecordLatency(MethodEnum.Treatment, Util.Metrics.Bucket(latency));
-                    break;
-                case nameof(GetTreatments):
-                    _telemetryEvaluationProducer.RecordLatency(MethodEnum.Treatments, Util.Metrics.Bucket(latency));
-                    break;
-                case nameof(GetTreatmentWithConfig):
-                    _telemetryEvaluationProducer.RecordLatency(MethodEnum.TreatmentWithConfig, Util.Metrics.Bucket(latency));
-                    break;
-                case nameof(GetTreatmentsWithConfig):
-                    _telemetryEvaluationProducer.RecordLatency(MethodEnum.TreatmentsWithConfig, Util.Metrics.Bucket(latency));
-                    break;
-                case nameof(Track):
-                    _telemetryEvaluationProducer.RecordLatency(MethodEnum.Track, Util.Metrics.Bucket(latency));
-                    break;
-            }
-        }
-
-        private void RecordException(string method)
-        {
-            if (_telemetryEvaluationProducer == null) return;
-
-            switch (method)
-            {
-                case nameof(GetTreatment):
-                    _telemetryEvaluationProducer.RecordException(MethodEnum.Treatment);
-                    break;
-                case nameof(GetTreatments):
-                    _telemetryEvaluationProducer.RecordException(MethodEnum.Treatments);
-                    break;
-                case nameof(GetTreatmentWithConfig):
-                    _telemetryEvaluationProducer.RecordException(MethodEnum.TreatmentWithConfig);
-                    break;
-                case nameof(GetTreatmentsWithConfig):
-                    _telemetryEvaluationProducer.RecordException(MethodEnum.TreatmentsWithConfig);
-                    break;
-                case nameof(Track):
-                    _telemetryEvaluationProducer.RecordException(MethodEnum.Track);
-                    break;
-            }
+            return new SplitResult(result.Treatment, result.Config);
         }
         #endregion
     }

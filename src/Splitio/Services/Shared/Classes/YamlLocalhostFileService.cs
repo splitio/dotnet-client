@@ -9,11 +9,6 @@ namespace Splitio.Services.Shared.Classes
 {
     public class YamlLocalhostFileService : AbstractLocalhostFileService
     {
-        public YamlLocalhostFileService()
-        {
-            _log = WrapperAdapter.Instance().GetLogger(typeof(YamlLocalhostFileService));
-        }
-
         public override ConcurrentDictionary<string, ParsedSplit> ParseSplitFile(string filePath)
         {
             var splits = new ConcurrentDictionary<string, ParsedSplit>();

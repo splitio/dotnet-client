@@ -3,9 +3,8 @@ using System.Collections.Generic;
 
 namespace Splitio.Services.Client.Interfaces
 {
-    public interface ISplitClient
+    public interface ISplitClient : ISplitClientAsync
     {
-        ISplitManager GetSplitManager();
         string GetTreatment(string key, string feature, Dictionary<string, object> attributes = null);
         string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null);
         SplitResult GetTreatmentWithConfig(string key, string feature, Dictionary<string, object> attributes = null);
@@ -16,6 +15,7 @@ namespace Splitio.Services.Client.Interfaces
         Dictionary<string, SplitResult> GetTreatmentsWithConfig(Key key, List<string> features, Dictionary<string, object> attributes = null);
         bool Track(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null);
         void Destroy();
+        ISplitManager GetSplitManager();
         bool IsDestroyed();
         void BlockUntilReady(int blockMilisecondsUntilReady);
     }

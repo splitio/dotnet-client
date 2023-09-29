@@ -1,31 +1,31 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Shared.Classes;
+using System.Collections.Concurrent;
 
 namespace Splitio.Integration_tests.Resources
 {
     public class IntegrationTestsImpressionListener : IImpressionListener
     {
-        BlockingQueue<KeyImpression> queue;
+        private readonly ConcurrentDictionary<string, KeyImpression> _queue;
 
         public IntegrationTestsImpressionListener(int size)
         {
-            queue = new BlockingQueue<KeyImpression>(size);
+            _queue = new ConcurrentDictionary<string, KeyImpression>();
         }
 
         public void Log(KeyImpression impression)
         {
-            if (queue.HasReachedMaxSize())
-            {
-                queue.Dequeue();
-            }
-
-            queue.Enqueue(impression);            
+            _queue.TryAdd($"{impression.feature}::{impression.keyName}", impression);
         }
 
-        public BlockingQueue<KeyImpression> GetQueue()
+        public KeyImpression Get(string feature, string keyName)
         {
-            return queue;
+            return _queue.TryGetValue($"{feature}::{keyName}", out var key) ? key : null;
+        }
+
+        public int Count()
+        {
+            return _queue.Count;
         }
     }
 }

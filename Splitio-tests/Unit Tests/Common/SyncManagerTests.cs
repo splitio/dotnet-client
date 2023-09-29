@@ -202,7 +202,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            
+
             _synchronizer
                 .Setup(mock => mock.SyncAllAsync())
                 .ReturnsAsync(true);
@@ -236,7 +236,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            
+
             _synchronizer
                 .Setup(mock => mock.SyncAllAsync())
                 .ReturnsAsync(true);

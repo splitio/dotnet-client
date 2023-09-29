@@ -25,6 +25,7 @@ namespace Splitio.Services.Impressions.Classes
         private readonly ImpressionsMode _impressionsMode;
         private readonly IUniqueKeysTracker _uniqueKeysTracker;
         private readonly bool _addPreviousTime;
+        private readonly bool _labelsEnabled;
 
         public ImpressionsManager(IImpressionsLog impressionsLog,
             IImpressionListener customerImpressionListener,
@@ -34,7 +35,8 @@ namespace Splitio.Services.Impressions.Classes
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
             ITasksManager taskManager,
             IUniqueKeysTracker uniqueKeysTracker,
-            IImpressionsObserver impressionsObserver)
+            IImpressionsObserver impressionsObserver,
+            bool labelsEnabled)
         {
             _impressionsLog = impressionsLog;
             _customerImpressionListener = customerImpressionListener;
@@ -45,12 +47,15 @@ namespace Splitio.Services.Impressions.Classes
             _taskManager = taskManager;
             _impressionsMode = impressionsMode;
             _uniqueKeysTracker = uniqueKeysTracker;
+            _labelsEnabled = labelsEnabled;
         }
 
         #region Public Methods
-        public KeyImpression BuildImpression(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey)
+        public KeyImpression Build(TreatmentResult result, Key key)
         {
-            var impression = new KeyImpression(matchingKey, feature, treatment, time, changeNumber, label, bucketingKey);
+            if (Labels.SplitNotFound.Equals(result.Label)) return null;
+
+            var impression = new KeyImpression(key.matchingKey, result.FeatureFlagName, result.Treatment, result.ImpTime, result.ChangeNumber, _labelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null);
 
             try
             {
@@ -62,8 +67,8 @@ namespace Splitio.Services.Impressions.Classes
                         break;
                     // In NONE mode we should track the total amount of evaluations and the unique keys.
                     case ImpressionsMode.None:
-                        _impressionsCounter.Inc(feature, time);
-                        _uniqueKeysTracker.Track(matchingKey, feature);
+                        _impressionsCounter.Inc(result.FeatureFlagName, result.ImpTime);
+                        _uniqueKeysTracker.Track(key.matchingKey, result.FeatureFlagName);
                         break;
                     // In OPTIMIZED mode we should track the total amount of evaluations and deduplicate the impressions.
                     case ImpressionsMode.Optimized:
@@ -71,7 +76,7 @@ namespace Splitio.Services.Impressions.Classes
                         ShouldCalculatePreviousTime(impression);
 
                         if (impression.previousTime.HasValue)
-                            _impressionsCounter.Inc(feature, time);
+                            _impressionsCounter.Inc(result.FeatureFlagName, result.ImpTime);
 
                         impression.Optimized = ShouldQueueImpression(impression);
                         break;
@@ -85,34 +90,15 @@ namespace Splitio.Services.Impressions.Classes
             return impression;
         }
 
-        public void BuildAndTrack(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey)
-        {
-            Track(new List<KeyImpression>()
-            {
-                BuildImpression(matchingKey, feature, treatment, time, changeNumber, label, bucketingKey)
-            });
-        }
-
         public void Track(List<KeyImpression> impressions)
         {
-            if (!impressions.Any()) return;
-
-            var telemetryStats = new TelemetryStats();
-
             try
             {
-                if (_impressionsMode == ImpressionsMode.None || _impressionsLog == null) return;
+                if (!GetImpressionsToTrack(impressions, out var impressionsToTrack)) return;
 
-                switch (_impressionsMode)
-                {
-                    case ImpressionsMode.Debug:
-                        TrackDebugMode(impressions, telemetryStats);
-                        break;
-                    case ImpressionsMode.Optimized:
-                    default:
-                        TrackOptimizedMode(impressions, telemetryStats);
-                        break;
-                }
+                var dropped = _impressionsLog.Log(impressionsToTrack);
+                
+                RecordTelemetry(impressionsToTrack.Count, dropped);
             }
             catch (Exception ex)
             {
@@ -120,67 +106,87 @@ namespace Splitio.Services.Impressions.Classes
             }
             finally
             {
-                RecordStats(telemetryStats);
+                LogImpressionListener(impressions);
+            }
+        }
 
-                if (_customerImpressionListener != null)
-                {
-                    _taskManager.NewOnTimeTaskAndStart(Enums.Task.ImpressionListener, () =>
-                    {
-                        foreach (var imp in impressions)
-                        {
-                            _customerImpressionListener.Log(imp);
-                        }
-                    });
-                }
+        public async Task TrackAsync(List<KeyImpression> impressions)
+        {
+            try
+            {
+                if (!GetImpressionsToTrack(impressions, out var impressionsToTrack)) return;
+
+                var dropped = await _impressionsLog.LogAsync(impressionsToTrack);
+
+                RecordTelemetry(impressionsToTrack.Count, dropped);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Exception caught tracking impressions.", ex);
+            }
+            finally
+            {
+                LogImpressionListener(impressions);
             }
         }
 
         // Public only for tests
-        public bool ShouldQueueImpression(KeyImpression impression)
+        public static bool ShouldQueueImpression(KeyImpression impression)
         {
             return !impression.previousTime.HasValue || (ImpressionsHelper.TruncateTimeFrame(impression.previousTime.Value) != ImpressionsHelper.TruncateTimeFrame(impression.time));
         }
         #endregion
 
         #region Private Methods
-        private void RecordStats(TelemetryStats telemetryStats)
+        private void ShouldCalculatePreviousTime(KeyImpression impression)
+        {
+            if (!_addPreviousTime) return;
+            
+            impression.previousTime = _impressionsObserver.TestAndSet(impression);
+        }
+
+        private void LogImpressionListener(List<KeyImpression> impressions)
+        {
+            if (_customerImpressionListener == null || !impressions.Any()) return;
+
+            _taskManager.NewOnTimeTaskAndStart(Enums.Task.ImpressionListener, () =>
+            {
+                foreach (var imp in impressions)
+                {
+                    _customerImpressionListener.Log(imp);
+                }
+            });
+        }
+
+        private bool GetImpressionsToTrack(List<KeyImpression> impressions, out List<KeyImpression> impressionsToTrack)
+        {
+            impressionsToTrack = new List<KeyImpression>();
+
+            if (_impressionsMode == ImpressionsMode.None || !impressions.Any() || _impressionsLog == null) return false;
+
+            switch (_impressionsMode)
+            {
+                case ImpressionsMode.Debug:
+                    impressionsToTrack.AddRange(impressions);
+                    break;
+                case ImpressionsMode.Optimized:
+                default:
+                    impressionsToTrack.AddRange(impressions.Where(i => i.Optimized).ToList());
+                    var deduped = impressions.Count - impressionsToTrack.Count;
+                    _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, deduped);
+                    break;
+            }
+
+            return true;
+        }
+
+        private void RecordTelemetry(int total, int dropped)
         {
             if (_telemetryRuntimeProducer == null) return;
 
-            _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, telemetryStats.Deduped);
-            _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, telemetryStats.Dropped);
-            _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsQueued, telemetryStats.Queued);
-        }
-
-        private void TrackOptimizedMode(List<KeyImpression> impressions, TelemetryStats telemetryStats)
-        {
-            var optimizedImpressions = impressions.Where(i => i.Optimized).ToList();
-            telemetryStats.Deduped = impressions.Count() - optimizedImpressions.Count;
-
-            if (optimizedImpressions.Any())
-            {
-                telemetryStats.Dropped = _impressionsLog.Log(optimizedImpressions);
-                telemetryStats.Queued = optimizedImpressions.Count - telemetryStats.Dropped;
-            }
-        }
-
-        private void TrackDebugMode(List<KeyImpression> impressions, TelemetryStats telemetryStats)
-        {
-            telemetryStats.Dropped = _impressionsLog.Log(impressions);
-            telemetryStats.Queued = impressions.Count - telemetryStats.Dropped;
-        }
-
-        private void ShouldCalculatePreviousTime(KeyImpression impression)
-        {
-            if (_addPreviousTime) impression.previousTime = _impressionsObserver.TestAndSet(impression);
+            _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, dropped);
+            _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsQueued, total - dropped);
         }
         #endregion
-    }
-
-    public class TelemetryStats
-    {
-        public int Queued { get; set; }
-        public int Dropped { get; set; }
-        public int Deduped { get; set; }
     }
 }

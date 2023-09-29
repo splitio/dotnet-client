@@ -4,7 +4,7 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Cache.Classes
 {
@@ -12,13 +12,14 @@ namespace Splitio.Services.Cache.Classes
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemorySegmentCache));
 
-        private ConcurrentDictionary<string, Segment> _segments;
+        private readonly ConcurrentDictionary<string, Segment> _segments;
 
         public InMemorySegmentCache(ConcurrentDictionary<string, Segment> segments)
         {
             _segments = segments;
         }
 
+        #region Methods Sync
         public void AddToSegment(string segmentName, List<string> segmentKeys)
         {
             _segments.TryGetValue(segmentName, out Segment segment);
@@ -77,26 +78,9 @@ namespace Splitio.Services.Cache.Classes
             _segments.Clear();
         }
 
-        public List<string> GetSegmentNames()
-        {
-            return _segments
-                .Keys
-                .ToList();
-        }
-
-        public List<string> GetSegmentKeys(string segmentName)
-        {
-            if (_segments.TryGetValue(segmentName, out Segment segment))
-            {
-                return segment.GetKeys();
-            }
-
-            return new List<string>();
-        }
-
         public int SegmentsCount()
         {
-            return GetSegmentNames().Count;
+            return _segments.Count;
         }
 
         public int SegmentKeysCount()
@@ -115,5 +99,14 @@ namespace Splitio.Services.Cache.Classes
 
             return keys;
         }
+        #endregion
+
+        #region Methods Async
+
+        public Task<bool> IsInSegmentAsync(string segmentName, string key)
+        {
+            return Task.FromResult(IsInSegment(segmentName, key));
+        }
+        #endregion
     }
 }

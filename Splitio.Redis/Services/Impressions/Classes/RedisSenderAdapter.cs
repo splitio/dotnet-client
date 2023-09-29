@@ -21,21 +21,19 @@ namespace Splitio.Redis.Services.Impressions.Classes
             _impressionsCache = impressionsCache;
         }
 
-        public Task RecordUniqueKeysAsync(List<Mtks> uniques)
+        public async Task RecordUniqueKeysAsync(List<Mtks> uniques)
         {
             try
             {
-                _impressionsCache.RecordUniqueKeys(uniques);
+                await _impressionsCache.RecordUniqueKeysAsync(uniques);
             }
             catch (Exception ex)
             {
                 _logger.Error("Exception caught recording unique keys.", ex);
             }
-
-            return Task.FromResult(0);
         }
 
-        public Task RecordImpressionsCountAsync(List<ImpressionsCountModel> impressionsCount)
+        public async Task RecordImpressionsCountAsync(List<ImpressionsCountModel> impressionsCount)
         {
             try
             {
@@ -46,14 +44,12 @@ namespace Splitio.Redis.Services.Impressions.Classes
                     values.Add($"{item.SplitName}::{item.TimeFrame}", item.Count);
                 }
 
-                _impressionsCache.RecordImpressionsCount(values);
+                await _impressionsCache.RecordImpressionsCountAsync(values);
             }
             catch (Exception ex)
             {
                 _logger.Error("Exception caught recording impressions count.", ex);
             }
-
-            return Task.FromResult(0);
         }
     }
 }

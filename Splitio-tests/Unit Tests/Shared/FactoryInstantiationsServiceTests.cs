@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 
 namespace Splitio_Tests.Unit_Tests.Shared
@@ -8,15 +7,11 @@ namespace Splitio_Tests.Unit_Tests.Shared
     [TestClass]
     public class FactoryInstantiationsServiceTests
     {
-        private readonly Mock<ISplitLogger> _logMock;
-
-        private FactoryInstantiationsService _factoryInstantiationsService;
+        private readonly FactoryInstantiationsService _factoryInstantiationsService;
 
         public FactoryInstantiationsServiceTests()
         {
-            _logMock = new Mock<ISplitLogger>();
-
-            _factoryInstantiationsService = (FactoryInstantiationsService)FactoryInstantiationsService.Instance(_logMock.Object);
+            _factoryInstantiationsService = (FactoryInstantiationsService)FactoryInstantiationsService.Instance();
         }
 
         [TestMethod]
@@ -35,7 +30,6 @@ namespace Splitio_Tests.Unit_Tests.Shared
 
             // Assert
             Assert.AreEqual(1, result[apiKey]);
-            _logMock.Verify(mock => mock.Warn(It.IsAny<string>()), Times.Never);
 
             // #######################################################
             // #############  Increase_WhenApiKeyExists  #############

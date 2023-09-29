@@ -2,6 +2,7 @@
 using Splitio.Services.Parsing;
 using Splitio.Domain;
 using Splitio.CommonLibraries;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests
 {

@@ -9,7 +9,6 @@ using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -19,8 +18,6 @@ namespace Splitio_Tests.Unit_Tests.Events
     [TestClass]
     public class EventsLogUnitTests
     {
-        private readonly IWrapperAdapter wrapperAdapter = WrapperAdapter.Instance();
-
         private BlockingQueue<WrappedEvent> _queue;
         private InMemorySimpleCache<WrappedEvent> _eventsCache;
         private Mock<IEventSdkApiClient> _apiClientMock;

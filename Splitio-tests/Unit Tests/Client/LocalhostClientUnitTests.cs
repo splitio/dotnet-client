@@ -73,7 +73,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             var splitClient = new LocalhostClientForTesting($"{rootFilePath}test.splits");
 
             //Act
-            splitClient.BlockUntilReady(1000);
+            splitClient.BlockUntilReady(10000);
             splitClient.Destroy();
             ((FactoryInstantiationsService)_factoryInstantiationsService).GetInstantiations();
 

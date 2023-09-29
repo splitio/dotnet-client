@@ -15,20 +15,21 @@ namespace Splitio.Telemetry.Common
 {
     public class TelemetrySyncTask : ITelemetrySyncTask
     {
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(TelemetrySyncTask));
+
         private readonly ITelemetryStorageConsumer _telemetryStorageConsumer;
         private readonly ITelemetryAPI _telemetryAPI;
-        private readonly ISplitCache _splitCache;
-        private readonly ISegmentCache _segmentCache;
-        private readonly ISplitLogger _log;
+        private readonly IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
+        private readonly ISegmentCacheConsumer _segmentCache;        
         private readonly IFactoryInstantiationsService _factoryInstantiationsService;
         private readonly ISplitTask _statsTask;
         private readonly ISplitTask _initTask;
         private readonly SelfRefreshingConfig _configurationOptions;
 
         public TelemetrySyncTask(ITelemetryStorageConsumer telemetryStorage,
-            ITelemetryAPI telemetryAPI,            
-            ISplitCache splitCache,
-            ISegmentCache segmentCache,
+            ITelemetryAPI telemetryAPI,
+            IFeatureFlagCacheConsumer featureFlagCacheConsumer,
+            ISegmentCacheConsumer segmentCache,
             SelfRefreshingConfig configurationOptions,
             IFactoryInstantiationsService factoryInstantiationsService,
             ISplitTask statsTask,
@@ -36,11 +37,10 @@ namespace Splitio.Telemetry.Common
         {
             _telemetryStorageConsumer = telemetryStorage;
             _telemetryAPI = telemetryAPI;            
-            _splitCache = splitCache;
+            _featureFlagCacheConsumer = featureFlagCacheConsumer;
             _segmentCache = segmentCache;
             _configurationOptions = configurationOptions;
             _factoryInstantiationsService = factoryInstantiationsService;
-            _log = WrapperAdapter.Instance().GetLogger(typeof(TelemetrySyncTask));
             _statsTask = statsTask;
             _statsTask.SetFunction(RecordStatsAsync);
             _statsTask.OnStop(RecordStatsAsync);
@@ -133,7 +133,7 @@ namespace Splitio.Telemetry.Common
                     StreamingEvents = _telemetryStorageConsumer.PopStreamingEvents().ToList(),
                     Tags = _telemetryStorageConsumer.PopTags().ToList(),
                     TokenRefreshes = _telemetryStorageConsumer.PopTokenRefreshes(),
-                    SplitCount = _splitCache.SplitsCount(),
+                    SplitCount = _featureFlagCacheConsumer.SplitsCount(),
                     SegmentCount = _segmentCache.SegmentsCount(),
                     SegmentKeyCount = _segmentCache.SegmentKeysCount(),
                     UpdatesFromSSE = _telemetryStorageConsumer.PopUpdatesFromSSE()
