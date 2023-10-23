@@ -1,5 +1,4 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Constants;
+﻿using Splitio.Constants;
 using Splitio.Domain;
 using Splitio.Services.Cache.Filter;
 using Splitio.Services.Cache.Interfaces;
@@ -36,6 +35,7 @@ namespace Splitio.Services.Client.Classes
         protected readonly IEventPropertiesValidator _eventPropertiesValidator;
         protected readonly IWrapperAdapter _wrapperAdapter;
         protected readonly IConfigService _configService;
+        protected readonly IFlagSetsValidator _flagSetsValidator;
         protected readonly string ApiKey;
 
         protected ISplitManager _manager;
@@ -69,7 +69,8 @@ namespace Splitio.Services.Client.Classes
             _eventTypeValidator = new EventTypeValidator();
             _eventPropertiesValidator = new EventPropertiesValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
-            _configService = new ConfigService(_wrapperAdapter);
+            _flagSetsValidator = new FlagSetsValidator();
+            _configService = new ConfigService(_wrapperAdapter, _flagSetsValidator);
             _statusManager = new InMemoryReadinessGatesCache();
             _tasksManager = new TasksManager(_statusManager);
         }
