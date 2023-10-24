@@ -7,6 +7,7 @@ using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -45,14 +46,20 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                 try
                 {
-                    var requestUri = GetRequestUri(since, fetchOptions.Till);                    
+                    var requestUri = GetRequestUri(since, fetchOptions.Till);
                     var response = await _httpClient.GetAsync(requestUri, fetchOptions.CacheControlHeaders);
 
+                    clock.Stop();
                     Util.Helper.RecordTelemetrySync(nameof(FetchSplitChangesAsync), response, ResourceEnum.SplitSync, clock, _telemetryRuntimeProducer, _log);
 
                     if (response.IsSuccessStatusCode)
                     {
                         return response.Content;
+                    }
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.RequestUriTooLong)
+                    {
+                        _log.Error($"SDK Initialization, the amount of flag sets provided are big causing uri length error.");
                     }
 
                     return string.Empty;
