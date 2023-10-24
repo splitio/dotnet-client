@@ -3,6 +3,7 @@ using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Splitio.Services.InputValidation.Classes
@@ -19,27 +20,32 @@ namespace Splitio.Services.InputValidation.Classes
 
             foreach (var flagSet in flagSets)
             {
-                var set = flagSet.ToLower();
-                var trimed = set.Trim();
+                if (flagSet.Any(char.IsUpper))
+                {
+                    _log.Warn($"{method}: Flag Set name <<{flagSet}>> should be all lowercase - converting string to lowercase");
+                }
 
-                if (set.Length != trimed.Length)
+                var fSet = flagSet.ToLower();
+                var trimed = fSet.Trim();
+
+                if (fSet.Length != trimed.Length)
                 {
                     _log.Warn($"{method}: Flag Set name <<{flagSet}>> has extra whitespace, trimming");
 
                     // Trim whitespaces and add to a set to be sure that will return unique FlagSets
-                    set = trimed;
+                    fSet = trimed;
                 }
 
-                if (!toReturn.Add(set))
+                if (!toReturn.Add(fSet))
                 {
-                    _log.Warn($"{method}: you passed duplicated Flag Set. {set} was deduplicated.");
+                    _log.Warn($"{method}: you passed duplicated Flag Set. {fSet} was deduplicated.");
                 }
             }
 
             return toReturn;
         }
 
-        public HashSet<string> Items(string method, HashSet<string> flagSets, IFlagSetsFilter service = null)
+        public HashSet<string> Items(string method, HashSet<string> flagSets, IFlagSetsFilter flagSetsFilter = null)
         {
             var toReturn = new HashSet<string>();
 
@@ -51,7 +57,7 @@ namespace Splitio.Services.InputValidation.Classes
                     continue;
                 }
 
-                if (service != null && !service.Match(set))
+                if (flagSetsFilter != null && !flagSetsFilter.Intersect(set))
                 {
                     _log.Warn($"{method}: you passed {set} wich is not part of the configured FlagSetsFilter, ignoring the request.");
                     continue;
@@ -63,7 +69,7 @@ namespace Splitio.Services.InputValidation.Classes
             return toReturn;
         }
 
-        public bool AreValid(string method, List<string> flagSets, IFlagSetsFilter service, out HashSet<string> setsToReturn)
+        public bool AreValid(string method, List<string> flagSets, IFlagSetsFilter flagSetsFilter, out HashSet<string> setsToReturn)
         {
             setsToReturn = null;
 
@@ -75,7 +81,7 @@ namespace Splitio.Services.InputValidation.Classes
             }
 
             var sets = Cleanup(method, flagSets);
-            setsToReturn = Items(method, sets, service);
+            setsToReturn = Items(method, sets, flagSetsFilter);
 
             return setsToReturn != null && setsToReturn.Count > 0;
         }

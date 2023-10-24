@@ -14,7 +14,7 @@ namespace Splitio.Services.Filters
             _flagSets = sets;
         }
 
-        public bool Match(string set)
+        public bool Intersect(string set)
         {
             if (!_shouldFilter) return true;
 
@@ -25,7 +25,7 @@ namespace Splitio.Services.Filters
                 .Any();
         }
 
-        public bool Match(HashSet<string> sets)
+        public bool Intersect(HashSet<string> sets)
         {
             if (!_shouldFilter) return true;
 

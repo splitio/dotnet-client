@@ -15,7 +15,7 @@ namespace Splitio_Tests.Unit_Tests.Filters
             var flagSetsFilter = new FlagSetsFilter(sets);
 
             // Act & Assert.
-            Assert.IsTrue(flagSetsFilter.Match("set_2"));
+            Assert.IsTrue(flagSetsFilter.Intersect("set_2"));
         }
 
         [TestMethod]
@@ -26,7 +26,7 @@ namespace Splitio_Tests.Unit_Tests.Filters
             var flagSetsFilter = new FlagSetsFilter(sets);
 
             // Act & Assert.
-            Assert.IsFalse(flagSetsFilter.Match(""));
+            Assert.IsFalse(flagSetsFilter.Intersect(""));
         }
 
         [TestMethod]
@@ -37,7 +37,7 @@ namespace Splitio_Tests.Unit_Tests.Filters
             var flagSetsFilter = new FlagSetsFilter(sets);
 
             // Act & Assert.
-            Assert.IsTrue(flagSetsFilter.Match("set_2"));
+            Assert.IsTrue(flagSetsFilter.Intersect("set_2"));
         }
 
         [TestMethod]
@@ -48,7 +48,7 @@ namespace Splitio_Tests.Unit_Tests.Filters
             var flagSetsFilter = new FlagSetsFilter(sets);
 
             // Act & Assert.
-            Assert.IsFalse(flagSetsFilter.Match("set_4"));
+            Assert.IsFalse(flagSetsFilter.Intersect("set_4"));
         }
 
         [TestMethod]
@@ -59,7 +59,7 @@ namespace Splitio_Tests.Unit_Tests.Filters
             var flagSetsFilter = new FlagSetsFilter(sets);
 
             // Act & Assert.
-            Assert.IsTrue(flagSetsFilter.Match(new HashSet<string> { "set_2" }));
+            Assert.IsTrue(flagSetsFilter.Intersect(new HashSet<string> { "set_2" }));
         }
 
         [TestMethod]
@@ -70,7 +70,7 @@ namespace Splitio_Tests.Unit_Tests.Filters
             HashSet<string> flagSets = null;
 
             // Act & Assert.
-            Assert.IsFalse(flagSetsFilter.Match(flagSets));
+            Assert.IsFalse(flagSetsFilter.Intersect(flagSets));
         }
 
         [TestMethod]
@@ -81,7 +81,7 @@ namespace Splitio_Tests.Unit_Tests.Filters
             var flagSetsFilter = new FlagSetsFilter(sets);
 
             // Act & Assert.
-            Assert.IsTrue(flagSetsFilter.Match(new HashSet<string> { "set_2" }));
+            Assert.IsTrue(flagSetsFilter.Intersect(new HashSet<string> { "set_2" }));
         }
 
         [TestMethod]
@@ -92,7 +92,7 @@ namespace Splitio_Tests.Unit_Tests.Filters
             var flagSetsFilter = new FlagSetsFilter(sets);
 
             // Act & Assert.
-            Assert.IsFalse(flagSetsFilter.Match(new HashSet<string> { "set_4" }));
+            Assert.IsFalse(flagSetsFilter.Intersect(new HashSet<string> { "set_4" }));
         }
     }
 }
