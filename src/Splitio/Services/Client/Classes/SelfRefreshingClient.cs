@@ -21,6 +21,7 @@ using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -177,7 +178,7 @@ namespace Splitio.Services.Client.Classes
             headers.Add(Constants.Http.KeepAlive, "true");
 
             var sdkHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
-            _splitSdkApiClient = new SplitSdkApiClient(sdkHttpClient, _telemetryRuntimeProducer, _config.BaseUrl);
+            _splitSdkApiClient = new SplitSdkApiClient(sdkHttpClient, _telemetryRuntimeProducer, _config.BaseUrl, _config.FlagSetsFilter);
 
             var segmentsHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
             _segmentSdkApiClient = new SegmentSdkApiClient(segmentsHttpClient, _telemetryRuntimeProducer, _config.BaseUrl);

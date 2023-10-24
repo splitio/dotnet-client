@@ -30,7 +30,7 @@ namespace Splitio_Tests.Integration_Tests
                 HttpReadTimeout = 10000
             };
             var httpClient = new SplitioHttpClient(string.Empty, config, headers);
-            var SplitSdkApiClient = new SplitSdkApiClient(httpClient, telemetryStorage, baseUrl);
+            var SplitSdkApiClient = new SplitSdkApiClient(httpClient, telemetryStorage, baseUrl, new HashSet<string>());
 
             //Act
             var result = await SplitSdkApiClient.FetchSplitChangesAsync(-1, new FetchOptions());
