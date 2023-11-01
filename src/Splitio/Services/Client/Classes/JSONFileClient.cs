@@ -66,7 +66,7 @@ namespace Splitio.Services.Client.Classes
         #region Public Methods
         public void RemoveSplitFromCache(string splitName)
         {
-            _featureFlagCache.RemoveSplit(splitName);
+            _featureFlagCache.Update(new List<ParsedSplit>(), new List<string> { splitName }, -1);
         }
 
         public void RemoveKeyFromSegmentCache(string segmentName, List<string> keys)
