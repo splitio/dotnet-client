@@ -35,18 +35,14 @@ namespace Splitio.Services.Logger
 
         public void Error(string message, Exception exception)
         {
-            if (_level == Level.Error)
-            {
+            if (_level >= Level.Error)
                 WriteLog(message, exception);
-            }
         }
 
         public void Error(string message)
         {
-            if (_level == Level.Error)
-            {
+            if (_level >= Level.Error)
                 WriteLog(message);
-            }
         }
 
         public void Info(string message, Exception exception)
@@ -67,12 +63,12 @@ namespace Splitio.Services.Logger
 
         public void Trace(string message, Exception exception)
         {
-            throw new NotImplementedException();
+            WriteLog(message);
         }
 
         public void Trace(string message)
         {
-            throw new NotImplementedException();
+            WriteLog(message);
         }
 
         public void Warn(string message, Exception exception)

@@ -245,8 +245,6 @@ namespace Splitio.Integration_tests
             Assert.IsTrue(uniques.Any(u => u.Feature.Equals("MAURO_TEST") && u.Keys.Contains("redo_test")));
         }
 
-        // TODO: Optimized mode is not supported yet.
-        [Ignore]
         [TestMethod]
         public void GetTreatment_WithImpressionModeOptimized_ShouldGetImpressionCount()
         {
@@ -276,8 +274,8 @@ namespace Splitio.Integration_tests
             var redisImpressions = _redisAdapter.ListRange($"{UserPrefix}.SPLITIO.impressions");
 
             // Assert.
-            Assert.AreEqual(4, result.FirstOrDefault(x => ((string)x.Name).Contains("FACUNDO_TEST")).Value);
-            Assert.AreEqual(3, result.FirstOrDefault(x => ((string)x.Name).Contains("MAURO_TEST")).Value);
+            Assert.AreEqual(1, result.FirstOrDefault(x => ((string)x.Name).Contains("FACUNDO_TEST")).Value);
+            Assert.AreEqual(1, result.FirstOrDefault(x => ((string)x.Name).Contains("MAURO_TEST")).Value);
             Assert.AreEqual(5, redisImpressions.Count());
 
             Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("FACUNDO_TEST") && ((string)x).Contains("mauro_test")));

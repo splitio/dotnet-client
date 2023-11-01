@@ -16,6 +16,7 @@ namespace Splitio.Redis.Services.Cache.Interfaces
 
         Task<string> GetAsync(string key);
         Task<RedisValue[]> MGetAsync(RedisKey[] keys);
+        Task<RedisKey[]> KeysAsync(string pattern);
         Task<RedisValue[]> ListRangeAsync(RedisKey key, long start = 0, long stop = -1);
         Task<HashEntry[]> HashGetAllAsync(RedisKey key);
         Task<RedisValue[]> SMembersAsync(string key);

@@ -218,6 +218,29 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             finally { FinishProfiling(nameof(SIsMemberAsync), key); }
         }
+
+        public async Task<RedisKey[]> KeysAsync(string pattern)
+        {
+            try
+            {
+#if NET45
+                return await Task.FromResult(Keys(pattern));
+#else
+
+                var server = GetServer();
+                var keys = server.KeysAsync(_config.RedisDatabase, pattern);
+                var values = await keys.ToListAsync();
+
+                return values.ToArray();
+#endif
+            }
+            catch (Exception e)
+            {
+                LogError("Keys", pattern, e);
+                return new RedisKey[0];
+            }
+            finally { FinishProfiling("Keys", pattern); }
+        }
 #endregion
     }
 }

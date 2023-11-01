@@ -143,7 +143,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         public async Task<List<ParsedSplit>> GetAllSplitsAsync()
         {
             var pattern = $"{RedisKeyPrefix}{SplitKeyPrefix}*";
-            var splitKeys = await Task.FromResult(_redisAdapter.Keys(pattern));
+            var splitKeys = await _redisAdapter.KeysAsync(pattern);
             var splitValues = await _redisAdapter.MGetAsync(splitKeys);
 
             if (splitValues == null || !splitValues.Any()) return new List<ParsedSplit>();
