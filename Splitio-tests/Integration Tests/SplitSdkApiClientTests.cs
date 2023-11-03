@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Services.Common;
+using Splitio.Services.Filters;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
@@ -30,7 +31,8 @@ namespace Splitio_Tests.Integration_Tests
                 HttpReadTimeout = 10000
             };
             var httpClient = new SplitioHttpClient(string.Empty, config, headers);
-            var SplitSdkApiClient = new SplitSdkApiClient(httpClient, telemetryStorage, baseUrl);
+            var fsFilter = new FlagSetsFilter(new HashSet<string>());
+            var SplitSdkApiClient = new SplitSdkApiClient(httpClient, telemetryStorage, baseUrl, fsFilter);
 
             //Act
             var result = await SplitSdkApiClient.FetchSplitChangesAsync(-1, new FetchOptions());

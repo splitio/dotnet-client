@@ -1,13 +1,12 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
-using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Services.Tasks;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
@@ -17,21 +16,21 @@ namespace Splitio.Services.SplitFetcher.Classes
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingSplitFetcher));
 
         private readonly ISplitChangeFetcher _splitChangeFetcher;
-        private readonly ISplitParser _splitParser;
         private readonly IStatusManager _statusManager;
         private readonly ISplitTask _periodicTask;
         private readonly IFeatureFlagCache _featureFlagCache;
+        private readonly IFeatureFlagSyncService _featureFlagSyncService;
 
         public SelfRefreshingSplitFetcher(ISplitChangeFetcher splitChangeFetcher,
-            ISplitParser splitParser,
             IStatusManager statusManager,
             ISplitTask periodicTask,
-            IFeatureFlagCache featureFlagCache)
+            IFeatureFlagCache featureFlagCache,
+            IFeatureFlagSyncService featureFlagSyncService)
         {
             _splitChangeFetcher = splitChangeFetcher;
-            _splitParser = splitParser;
             _statusManager = statusManager;
             _featureFlagCache = featureFlagCache;
+            _featureFlagSyncService = featureFlagSyncService;
             _periodicTask = periodicTask;
             _periodicTask.SetFunction(async () => await FetchSplitsAsync(new FetchOptions()));
         }
@@ -80,8 +79,8 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                     if (result.splits != null && result.splits.Count > 0)
                     {
-                        segmentNames.AddRange(UpdateSplitsFromChangeFetcherResponse(result.splits));
-                        _featureFlagCache.SetChangeNumber(result.till);
+                        var sNames = _featureFlagSyncService.UpdateFeatureFlagsFromChanges(result.splits, result.till);
+                        segmentNames.AddRange(sNames);
                     }
                 }
                 catch (Exception e)
@@ -103,59 +102,6 @@ namespace Splitio.Services.SplitFetcher.Classes
                 Success = success,
                 SegmentNames = segmentNames
             };
-        }
-        #endregion
-
-        #region Private Methods
-        private IList<string> UpdateSplitsFromChangeFetcherResponse(List<Split> splitChanges)
-        {
-            var addedSplits = new List<Split>();
-            var removedSplits = new List<Split>();
-            var segmentNames = new List<string>();
-
-            foreach (Split split in splitChanges)
-            {
-                //If not active --> Remove Split
-                var isValidStatus = Enum.TryParse(split.status, out StatusEnum result);
-
-                if (!isValidStatus || result != StatusEnum.ACTIVE)
-                {
-                    _featureFlagCache.RemoveSplit(split.name);
-                    removedSplits.Add(split);
-                }
-                else
-                {
-                    var isUpdated = _featureFlagCache.AddOrUpdate(split.name, _splitParser.Parse(split));
-
-                    if (!isUpdated)
-                    {
-                        //If not existing in _splits, its a new split
-                        addedSplits.Add(split);
-                    }
-
-                    segmentNames.AddRange(split.GetSegments());
-                }
-            }
-
-            if (_log.IsDebugEnabled && addedSplits.Count() > 0)
-            {
-                var addedFeatureNames = addedSplits
-                    .Select(x => x.name)
-                    .ToList();
-
-                _log.Debug(string.Format("Added features: {0}", string.Join(" - ", addedFeatureNames)));
-            }
-
-            if (_log.IsDebugEnabled && removedSplits.Count() > 0)
-            {
-                var removedFeatureNames = removedSplits
-                    .Select(x => x.name)
-                    .ToList();
-
-                _log.Debug(string.Format("Deleted features: {0}", string.Join(" - ", removedFeatureNames)));
-            }
-
-            return segmentNames;
         }
         #endregion
     }

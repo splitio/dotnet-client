@@ -70,6 +70,7 @@ namespace Splitio.Redis.Services.Client.Classes
             _config.ImpressionsCounterCacheMaxSize = baseConfig.ImpressionsCounterCacheMaxSize;
             _config.ImpressionsCountBulkSize = baseConfig.ImpressionsCountBulkSize;
             _config.LabelsEnabled = baseConfig.LabelsEnabled;
+            _config.FlagSetsFilter = baseConfig.FlagSetsFilter;
             _config.Mode = config.Mode;
             _config.FromCacheAdapterConfig(config.CacheAdapterConfig);
     }

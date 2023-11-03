@@ -1,21 +1,25 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 using System;
+using System.Collections.Generic;
 
 namespace Splitio.Services.Shared.Classes
 {
     public class ConfigService : IConfigService
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(ConfigService));
-
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(ConfigService));
         private readonly IWrapperAdapter _wrapperAdapter;
+        private readonly IFlagSetsValidator _flagSetsValidator;
 
-        public ConfigService(IWrapperAdapter wrapperAdapter)
+        public ConfigService(IWrapperAdapter wrapperAdapter,
+            IFlagSetsValidator flagSetsValidator)
         {
             _wrapperAdapter = wrapperAdapter;
+            _flagSetsValidator = flagSetsValidator;
         }
 
         #region Public Methods
@@ -59,6 +63,7 @@ namespace Splitio.Services.Shared.Classes
                 BfExpectedElements = baseConfig.BfExpectedElements,
                 UniqueKeysCacheMaxSize = baseConfig.UniqueKeysCacheMaxSize,
                 ImpressionsCounterCacheMaxSize = baseConfig.ImpressionsCounterCacheMaxSize,
+                FlagSetsFilter = baseConfig.FlagSetsFilter,
                 UniqueKeysBulkSize = 30000,
                 ImpressionsCountBulkSize = 30000,
                 UniqueKeysRefreshRate = 3600,
@@ -114,8 +119,18 @@ namespace Splitio.Services.Shared.Classes
                 BfExpectedElements = 10000000,
                 BfErrorRate = 0.01,
                 UniqueKeysCacheMaxSize = 50000,
-                ImpressionsCounterCacheMaxSize = 50000
+                ImpressionsCounterCacheMaxSize = 50000,
+                FlagSetsFilter = FlagSetsValidations(config.FlagSetsFilter)
             };
+        }
+
+        private HashSet<string> FlagSetsValidations(List<string> flagSets)
+        {
+            if (flagSets == null) return new HashSet<string>();
+
+            var toReturn = _flagSetsValidator.Cleanup("SDK Config", flagSets);
+
+            return _flagSetsValidator.Items("SDK Config", toReturn);
         }
 
         private int GetMinimunAllowed(int value, int minAllowed, string configName)
@@ -130,7 +145,7 @@ namespace Splitio.Services.Shared.Classes
             return value;
         }
 
-        private int GetImpressionRefreshRate(ImpressionsMode impressionsMode, int? impressionsRefreshRate)
+        private static int GetImpressionRefreshRate(ImpressionsMode impressionsMode, int? impressionsRefreshRate)
         {
             switch (impressionsMode)
             {

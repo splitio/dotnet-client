@@ -104,18 +104,7 @@ namespace Splitio.Services.Client.Classes
                 var namesInCache = _featureFlagCache.GetSplitNames();
                 var featureFlagstoRemove = namesInCache.Except(featureFlagsToAdd.Keys).ToArray();
 
-                foreach (var name in featureFlagstoRemove)
-                {
-                    _featureFlagCache.RemoveSplit(name);
-                }
-
-                foreach (var featureFlag in featureFlagsToAdd)
-                {
-                    if (featureFlag.Value != null)
-                    {
-                        _featureFlagCache.AddOrUpdate(featureFlag.Key, featureFlag.Value);
-                    }
-                }
+                _featureFlagCache.Update(featureFlagsToAdd.Values.ToList(), featureFlagstoRemove.ToList(), -1);
             }
             catch (Exception ex)
             {

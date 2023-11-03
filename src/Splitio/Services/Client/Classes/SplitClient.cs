@@ -1,5 +1,4 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Constants;
+﻿using Splitio.Constants;
 using Splitio.Domain;
 using Splitio.Services.Cache.Filter;
 using Splitio.Services.Cache.Interfaces;
@@ -7,6 +6,7 @@ using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
+using Splitio.Services.Filters;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
@@ -36,6 +36,7 @@ namespace Splitio.Services.Client.Classes
         protected readonly IEventPropertiesValidator _eventPropertiesValidator;
         protected readonly IWrapperAdapter _wrapperAdapter;
         protected readonly IConfigService _configService;
+        protected readonly IFlagSetsValidator _flagSetsValidator;
         protected readonly string ApiKey;
 
         protected ISplitManager _manager;
@@ -58,6 +59,7 @@ namespace Splitio.Services.Client.Classes
         protected IImpressionsCounter _impressionsCounter;
         protected IImpressionsObserver _impressionsObserver;
         protected IClientExtensionService _clientExtensionService;
+        protected IFlagSetsFilter _flagSetsFilter;
 
         public SplitClient(string apikey)
         {
@@ -69,7 +71,8 @@ namespace Splitio.Services.Client.Classes
             _eventTypeValidator = new EventTypeValidator();
             _eventPropertiesValidator = new EventPropertiesValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
-            _configService = new ConfigService(_wrapperAdapter);
+            _flagSetsValidator = new FlagSetsValidator();
+            _configService = new ConfigService(_wrapperAdapter, _flagSetsValidator);
             _statusManager = new InMemoryReadinessGatesCache();
             _tasksManager = new TasksManager(_statusManager);
         }
@@ -326,6 +329,11 @@ namespace Splitio.Services.Client.Classes
         protected void BuildClientExtension()
         {
             _clientExtensionService = new ClientExtensionService(_blockUntilReadyService, _statusManager, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator);
+        }
+
+        protected void BuildFlagSetsFilter(BaseConfig config)
+        {
+            _flagSetsFilter = new FlagSetsFilter(config.FlagSetsFilter);
         }
         #endregion
 
