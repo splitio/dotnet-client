@@ -1,14 +1,12 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Common;
+using Splitio.Services.Filters;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
@@ -25,17 +23,12 @@ namespace Splitio.Services.SplitFetcher.Classes
         public SplitSdkApiClient(ISplitioHttpClient httpClient,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
             string baseUrl,
-            HashSet<string> flagSets)
+            IFlagSetsFilter flagSetsFilter)
         {
             _httpClient = httpClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _baseUrl = baseUrl;
-
-            if (flagSets.Any())
-            {
-                var setsOrdered = flagSets.OrderBy(x => x).ToList();
-                _flagSets = string.Join(",", setsOrdered);
-            }
+            _flagSets = flagSetsFilter.GetFlagSets();
         }
 
         public async Task<string> FetchSplitChangesAsync(long since, FetchOptions fetchOptions)

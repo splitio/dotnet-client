@@ -13,69 +13,54 @@ namespace Splitio.Services.Cache.Classes
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemorySplitCache));
 
-        private readonly ConcurrentDictionary<string, ParsedSplit> _splits;
+        private readonly ConcurrentDictionary<string, ParsedSplit> _featureFlags;
         private readonly ConcurrentDictionary<string, int> _trafficTypes;
         private long _changeNumber;
 
-        public InMemorySplitCache(ConcurrentDictionary<string, ParsedSplit> splits, long changeNumber = -1)
+        public InMemorySplitCache(ConcurrentDictionary<string, ParsedSplit> featureFlags, long changeNumber = -1)
         {
-            _splits = splits;
+            _featureFlags = featureFlags;
             _changeNumber = changeNumber;
             _trafficTypes = new ConcurrentDictionary<string, int>();
 
-            if (!splits.IsEmpty)
+            if (!_featureFlags.IsEmpty)
             {
-                foreach (var split in splits)
+                foreach (var featureFlag in _featureFlags)
                 {
-                    if (split.Value != null)
+                    if (featureFlag.Value != null)
                     {
-                        IncreaseTrafficTypeCount(split.Value.trafficTypeName);
+                        IncreaseTrafficTypeCount(featureFlag.Value.trafficTypeName);
                     }
                 }
             }
         }
 
         #region Sync Methods
-        public bool AddOrUpdate(string splitName, SplitBase split)
+        public void Update(List<ParsedSplit> toAdd, List<string> toRemove, long till)
         {
-            if (split == null) return false;
-
-            var parsedSplit = (ParsedSplit)split;
-
-            var exists = _splits.TryGetValue(splitName, out ParsedSplit oldSplit);
-
-            if (exists)
+            foreach (var featureFlag in toAdd)
             {
-                DecreaseTrafficTypeCount(oldSplit);
+                if (_featureFlags.TryGetValue(featureFlag.name, out ParsedSplit existing))
+                {
+                    DecreaseTrafficTypeCount(existing);
+                }
+
+                _featureFlags.AddOrUpdate(featureFlag.name, featureFlag, (key, oldValue) => featureFlag);
+
+                IncreaseTrafficTypeCount(featureFlag.trafficTypeName);
             }
 
-            _splits.AddOrUpdate(splitName, parsedSplit, (key, oldValue) => parsedSplit);
-            
-            IncreaseTrafficTypeCount(parsedSplit?.trafficTypeName);
-
-            return exists;
-        }
-
-        public void AddSplit(string splitName, SplitBase split)
-        {
-            var parsedSplit = (ParsedSplit)split;
-
-            if (_splits.TryAdd(splitName, parsedSplit))
+            foreach (var featureFlagName in toRemove)
             {
-                IncreaseTrafficTypeCount(parsedSplit.trafficTypeName);
+                if (_featureFlags.TryGetValue(featureFlagName, out ParsedSplit cached))
+                {
+                    _featureFlags.TryRemove(featureFlagName, out ParsedSplit removedSplit);
+
+                    DecreaseTrafficTypeCount(removedSplit);
+                }
             }
-        }
 
-        public bool RemoveSplit(string splitName)
-        {            
-            var removed = _splits.TryRemove(splitName, out ParsedSplit removedSplit);
-
-            if (removed)
-            {
-                DecreaseTrafficTypeCount(removedSplit);
-            }            
-
-            return removed;
+            SetChangeNumber(till);
         }
 
         public void SetChangeNumber(long changeNumber)
@@ -95,14 +80,14 @@ namespace Splitio.Services.Cache.Classes
 
         public ParsedSplit GetSplit(string splitName)
         {
-            _splits.TryGetValue(splitName, out ParsedSplit value);
+            _featureFlags.TryGetValue(splitName, out ParsedSplit value);
 
             return value;
         }
 
         public List<ParsedSplit> GetAllSplits()
         {            
-            return _splits
+            return _featureFlags
                 .Values
                 .Where(s => s != null)
                 .ToList();
@@ -110,7 +95,7 @@ namespace Splitio.Services.Cache.Classes
 
         public void Clear()
         {
-            _splits.Clear();            
+            _featureFlags.Clear();            
             _trafficTypes.Clear();
         }
 
@@ -137,20 +122,20 @@ namespace Splitio.Services.Cache.Classes
 
         public void Kill(long changeNumber, string splitName, string defaultTreatment)
         {
-            var split = GetSplit(splitName);
+            var featureFlag = GetSplit(splitName);
 
-            if (split == null) return;
+            if (featureFlag == null) return;
 
-            split.defaultTreatment = defaultTreatment;
-            split.killed = true;
-            split.changeNumber = changeNumber;
+            featureFlag.defaultTreatment = defaultTreatment;
+            featureFlag.killed = true;
+            featureFlag.changeNumber = changeNumber;
 
-            AddOrUpdate(splitName, split);
+            _featureFlags.AddOrUpdate(featureFlag.name, featureFlag, (key, oldValue) => featureFlag);
         }
 
         public List<string> GetSplitNames()
         {
-            return _splits
+            return _featureFlags
                 .Keys
                 .Where(name => !string.IsNullOrEmpty(name))
                 .ToList();

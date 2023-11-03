@@ -3,6 +3,7 @@ using Moq;
 using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Common;
+using Splitio.Services.Filters;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
@@ -27,7 +28,8 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
         {
             // Arrange.
             var baseUrl = "https://app.split-testing.io";
-            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, new HashSet<string>());
+            var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
+            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter);
 
             _httpClient
                 .Setup(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?since=-1", false))
@@ -51,7 +53,8 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
         {
             // Arrange.
             var baseUrl = "https://app.split-testing.io";
-            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, new HashSet<string>());
+            var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
+            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter);
 
             _httpClient
                 .Setup(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?since=-1&till=10", false))
@@ -76,7 +79,8 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
             // Arrange.
             var baseUrl = "https://app.split-testing.io";
             var sets = new HashSet<string> { "set_c", "set_a", "set_b" };
-            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, sets);
+            var flagSetsFilter = new FlagSetsFilter(sets);
+            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter);
 
             _httpClient
                 .Setup(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?since=-1&sets=set_a,set_b,set_c", false))
@@ -101,7 +105,8 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
             // Arrange.
             var baseUrl = "https://app.split-testing.io";
             var sets = new HashSet<string> { "set_c", "set_a", "set_b" };
-            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, sets);
+            var flagSetsFilter = new FlagSetsFilter(sets);
+            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter);
 
             _httpClient
                 .Setup(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?since=-1&till=11&sets=set_a,set_b,set_c", false))
