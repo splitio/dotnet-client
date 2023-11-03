@@ -6,6 +6,7 @@ using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
+using Splitio.Services.Filters;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
@@ -58,6 +59,7 @@ namespace Splitio.Services.Client.Classes
         protected IImpressionsCounter _impressionsCounter;
         protected IImpressionsObserver _impressionsObserver;
         protected IClientExtensionService _clientExtensionService;
+        protected IFlagSetsFilter _flagSetsFilter;
 
         public SplitClient(string apikey)
         {
@@ -327,6 +329,11 @@ namespace Splitio.Services.Client.Classes
         protected void BuildClientExtension()
         {
             _clientExtensionService = new ClientExtensionService(_blockUntilReadyService, _statusManager, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator);
+        }
+
+        protected void BuildFlagSetsFilter(BaseConfig config)
+        {
+            _flagSetsFilter = new FlagSetsFilter(config.FlagSetsFilter);
         }
         #endregion
 

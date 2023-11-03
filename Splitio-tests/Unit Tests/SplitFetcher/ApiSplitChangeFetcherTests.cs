@@ -12,17 +12,26 @@ namespace Splitio_Tests.Unit_Tests
     [TestClass]
     public class ApiSplitChangeFetcherTests
     {
+        private readonly Mock<ISplitSdkApiClient> _apiClient;
+        private readonly ISplitChangeFetcher _apiFetcher;
+
+        public ApiSplitChangeFetcherTests()
+        {
+            _apiClient = new Mock<ISplitSdkApiClient>();
+
+            _apiFetcher = new ApiSplitChangeFetcher(_apiClient.Object);
+        }
+
         [TestMethod]
         [Description("Test a Json that changes its structure and is deserialized without exception. Contains: a field renamed, a field removed and a field added.")]
         public async Task ExecuteJsonDeserializeSuccessfulWithChangeInJsonFormat()
         {
-            //Arrange
-            Mock<ISplitSdkApiClient> apiMock = new Mock<ISplitSdkApiClient>();
-            apiMock
+            //Arrange            
+            _apiClient
                 .Setup(x => x.FetchSplitChangesAsync(-1, It.IsAny<FetchOptions>()))
-                .Returns(Task.FromResult("{\"splits\": [ { \"trafficType\": \"user\", \"name\": \"Reset_Seed_UI\", \"seed\": 1552577712, \"status\": \"ACTIVE\", \"defaultTreatment\": \"off\", \"changeNumber\": 1469827821322, \"conditions\": [ { \"matcherGroup\": { \"combiner\": \"AND\", \"matchers\": [ { \"keySelector\": { \"trafficType\": \"user\", \"attribute\": null }, \"matcherType\": \"ALL_KEYS\", \"negate\": false, \"userDefinedSegmentMatcherData\": null, \"whitelistMatcherData\": null, \"unaryNumericMatcherData\": null, \"betweenMatcherData\": null } ] }, \"partitions\": [ { \"treatment\": \"on\", \"size\": 100 }, { \"treatment\": \"off\", \"size\": 0, \"addedField\": \"test\"  } ] } ] } ], \"since\": 1469817846929, \"till\": 1469827821322 }\r\n"));
+                .ReturnsAsync("{\"splits\": [ { \"trafficType\": \"user\", \"name\": \"Reset_Seed_UI\", \"seed\": 1552577712, \"status\": \"ACTIVE\", \"defaultTreatment\": \"off\", \"changeNumber\": 1469827821322, \"conditions\": [ { \"matcherGroup\": { \"combiner\": \"AND\", \"matchers\": [ { \"keySelector\": { \"trafficType\": \"user\", \"attribute\": null }, \"matcherType\": \"ALL_KEYS\", \"negate\": false, \"userDefinedSegmentMatcherData\": null, \"whitelistMatcherData\": null, \"unaryNumericMatcherData\": null, \"betweenMatcherData\": null } ] }, \"partitions\": [ { \"treatment\": \"on\", \"size\": 100 }, { \"treatment\": \"off\", \"size\": 0, \"addedField\": \"test\"  } ] } ] } ], \"since\": 1469817846929, \"till\": 1469827821322 }\r\n");
 
-            ApiSplitChangeFetcher apiSplitChangeFetcher = new ApiSplitChangeFetcher(apiMock.Object);
+            ApiSplitChangeFetcher apiSplitChangeFetcher = new ApiSplitChangeFetcher(_apiClient.Object);
 
             //Act
             var result = await apiSplitChangeFetcher.FetchAsync(-1, new FetchOptions());
@@ -36,10 +45,9 @@ namespace Splitio_Tests.Unit_Tests
         public async Task FetchSplitChangesSuccessfull()
         {
             //Arrange
-            var apiClient = new Mock<ISplitSdkApiClient>();
-            apiClient
-            .Setup(x => x.FetchSplitChangesAsync(It.IsAny<long>(), It.IsAny<FetchOptions>()))
-            .Returns(Task.FromResult(@"{
+            _apiClient
+                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<long>(), It.IsAny<FetchOptions>()))
+                .ReturnsAsync(@"{
                           'splits': [
                             {
                               'trafficTypeName': 'user',
@@ -84,11 +92,10 @@ namespace Splitio_Tests.Unit_Tests
                           ],
                           'since': -1,
                           'till': 1470855828956
-                        }"));
-            var apiFetcher = new ApiSplitChangeFetcher(apiClient.Object);
+                        }");
 
             //Act
-            var result = await apiFetcher.FetchAsync(-1, new FetchOptions());
+            var result = await _apiFetcher.FetchAsync(-1, new FetchOptions());
 
             //Assert
             Assert.IsNotNull(result);
@@ -108,10 +115,9 @@ namespace Splitio_Tests.Unit_Tests
         public async Task FetchSplitChangesSuccessfullVerifyAlgorithmIsLegacy()
         {
             //Arrange
-            var apiClient = new Mock<ISplitSdkApiClient>();
-            apiClient
-            .Setup(x => x.FetchSplitChangesAsync(It.IsAny<long>(), It.IsAny<FetchOptions>()))
-            .Returns(Task.FromResult(@"{
+            _apiClient
+                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<long>(), It.IsAny<FetchOptions>()))
+                .ReturnsAsync(@"{
                           'splits': [
                             {
                               'trafficTypeName': 'user',
@@ -157,11 +163,10 @@ namespace Splitio_Tests.Unit_Tests
                           ],
                           'since': -1,
                           'till': 1470855828956
-                        }"));
-            var apiFetcher = new ApiSplitChangeFetcher(apiClient.Object);
+                        }");
 
             //Act
-            var result = await apiFetcher.FetchAsync(-1, new FetchOptions());
+            var result = await _apiFetcher.FetchAsync(-1, new FetchOptions());
 
             //Assert
             Assert.IsNotNull(result);
@@ -173,10 +178,9 @@ namespace Splitio_Tests.Unit_Tests
         public async Task FetchSplitChangesSuccessfullVerifyAlgorithmIsMurmur()
         {
             //Arrange
-            var apiClient = new Mock<ISplitSdkApiClient>();
-            apiClient
-            .Setup(x => x.FetchSplitChangesAsync(It.IsAny<long>(), It.IsAny<FetchOptions>()))
-            .Returns(Task.FromResult(@"{
+            _apiClient
+                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<long>(), It.IsAny<FetchOptions>()))
+                .ReturnsAsync(@"{
                           'splits': [
                             {
                               'trafficTypeName': 'user',
@@ -222,11 +226,10 @@ namespace Splitio_Tests.Unit_Tests
                           ],
                           'since': -1,
                           'till': 1470855828956
-                        }"));
-            var apiFetcher = new ApiSplitChangeFetcher(apiClient.Object);
+                        }");
 
             //Act
-            var result = await apiFetcher.FetchAsync(-1, new FetchOptions());
+            var result = await _apiFetcher.FetchAsync(-1, new FetchOptions());
 
             //Assert
             Assert.IsNotNull(result);
@@ -237,16 +240,17 @@ namespace Splitio_Tests.Unit_Tests
         [TestMethod]
         public async Task FetchSplitChangesWithExcepionSouldReturnNull()
         {
-            var apiClient = new Mock<ISplitSdkApiClient>();
-            apiClient
-            .Setup(x => x.FetchSplitChangesAsync(It.IsAny<long>(), It.IsAny<FetchOptions>()))
-            .Throws(new Exception());
-            var apiFetcher = new ApiSplitChangeFetcher(apiClient.Object);
+            // Arrange.
+            _apiClient
+                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<long>(), It.IsAny<FetchOptions>()))
+                .Throws(new Exception());
 
-            //Act
+            var apiFetcher = new ApiSplitChangeFetcher(_apiClient.Object);
+
+            // Act.
             var result = await apiFetcher.FetchAsync(-1, new FetchOptions());
 
-            //Assert
+            // Assert.
             Assert.IsNull(result);
         }
 
@@ -254,10 +258,9 @@ namespace Splitio_Tests.Unit_Tests
         public async Task FetchSplitChangesSuccessfull_WhenConfigurationsIsNotNull()
         {
             //Arrange
-            var apiClient = new Mock<ISplitSdkApiClient>();
-            apiClient
-            .Setup(x => x.FetchSplitChangesAsync(It.IsAny<long>(), It.IsAny<FetchOptions>()))
-            .Returns(Task.FromResult(@"{
+            _apiClient
+                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<long>(), It.IsAny<FetchOptions>()))
+                .ReturnsAsync(@"{
                           'splits': [
                             {
                               'trafficTypeName': 'user',
@@ -307,18 +310,87 @@ namespace Splitio_Tests.Unit_Tests
                           ],
                           'since': -1,
                           'till': 1470855828956
-                        }"));
-
-            var apiFetcher = new ApiSplitChangeFetcher(apiClient.Object);
+                        }");
 
             //Act
-            var result = await apiFetcher.FetchAsync(-1, new FetchOptions());
+            var result = await _apiFetcher.FetchAsync(-1, new FetchOptions());
 
             //Assert
             Assert.IsNotNull(result);
             var split = result.splits.First();
             Assert.AreEqual(AlgorithmEnum.Murmur, (AlgorithmEnum)split.algo);
             Assert.IsNotNull(split.configurations);
+        }
+
+        [TestMethod]
+        public async Task FetchSplitChangesSuccessfull_WithSets()
+        {
+            // Arrange.
+            _apiClient
+                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<long>(), It.IsAny<FetchOptions>()))
+                .ReturnsAsync(@"{
+                          'splits': [
+                            {
+                              'trafficTypeName': 'user',
+                              'name': 'Test_1',
+                              'seed': 673896442,
+                              'status': 'ACTIVE',
+                              'killed': false,
+                              'algo': 2,
+                              'defaultTreatment': 'off',
+                              'changeNumber': 1470855828956,
+                              'sets': ['set_a', 'set_b', 'set_c', 'set_d'],
+                              'configurations': { 
+                                'on': '{ size: 15 }',
+                                'off':'{ size: 10 }'
+                              },
+                              'conditions': [
+                                {
+                                  'matcherGroup': {
+                                    'combiner': 'AND',
+                                    'matchers': [
+                                      {
+                                        'keySelector': {
+                                          'trafficType': 'user',
+                                          'attribute': null
+                                        },
+                                        'matcherType': 'ALL_KEYS',
+                                        'negate': false,
+                                        'userDefinedSegmentMatcherData': null,
+                                        'whitelistMatcherData': null,
+                                        'unaryNumericMatcherData': null,
+                                        'betweenMatcherData': null
+                                      }
+                                    ]
+                                  },
+                                  'partitions': [
+                                    {
+                                      'treatment': 'on',
+                                      'size': 0
+                                    },
+                                    {
+                                      'treatment': 'off',
+                                      'size': 100
+                                    }
+                                  ]
+                                }
+                              ]
+                            }   
+                          ],
+                          'since': -1,
+                          'till': 1470855828956
+                        }");
+
+            // Act.
+            var result = await _apiFetcher.FetchAsync(-1, new FetchOptions());
+
+            // Assert.
+            var split = result.splits.First();
+            Assert.AreEqual(4, split.Sets.Count);
+            Assert.IsTrue(split.Sets.Contains("set_a"));
+            Assert.IsTrue(split.Sets.Contains("set_b"));
+            Assert.IsTrue(split.Sets.Contains("set_c"));
+            Assert.IsTrue(split.Sets.Contains("set_d"));
         }
     }
 }

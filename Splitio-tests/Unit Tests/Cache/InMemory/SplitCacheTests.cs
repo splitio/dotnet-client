@@ -2,6 +2,7 @@
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
@@ -17,7 +18,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var splitName = "test1";
 
             //Act
-            splitCache.AddSplit(splitName, new ParsedSplit() { name = splitName });
+            splitCache.Update(new List<ParsedSplit> { new ParsedSplit() { name = splitName } }, new List<string>(), -1);
             var result = splitCache.GetSplit(splitName);
 
             //Assert
@@ -32,17 +33,16 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var splitName = "test1";
 
             //Act
-            var parsedSplit1 = new ParsedSplit() { name = splitName };
-            splitCache.AddSplit(splitName, parsedSplit1);
-            var parsedSplit2 = new ParsedSplit() { name = splitName };
-            splitCache.AddSplit(splitName, parsedSplit2);
+            var parsedSplit1 = new ParsedSplit() { name = splitName, defaultTreatment = "on" };
+            var parsedSplit2 = new ParsedSplit() { name = splitName, defaultTreatment = "off" };
+            splitCache.Update(new List<ParsedSplit> { parsedSplit1, parsedSplit2 }, new List<string>(), -1);
+            
             var result = splitCache.GetAllSplits();
 
             //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
-            Assert.AreEqual(result[0], parsedSplit1);
-            Assert.AreNotEqual(result[0], parsedSplit2);
+            Assert.AreEqual("off", result[0].defaultTreatment);
         }
 
         [TestMethod]
@@ -69,7 +69,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var splitCache = new InMemorySplitCache(splits);
             
             //Act
-            splitCache.RemoveSplit(splitName);
+            splitCache.Update(new List<ParsedSplit>(), new List<string> { splitName }, -1);
             var result = splitCache.GetSplit(splitName);
 
             //Assert
@@ -100,8 +100,9 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var splitName2 = "test2";
 
             //Act
-            splitCache.AddSplit(splitName, new ParsedSplit() { name = splitName });
-            splitCache.AddSplit(splitName2, new ParsedSplit() { name = splitName2 });
+            var split1 = new ParsedSplit() { name = splitName };
+            var split2 = new ParsedSplit() { name = splitName2 };
+            splitCache.Update(new List<ParsedSplit> { split1, split2 }, new List<string>(), -1);
 
             var result = splitCache.GetAllSplits();
 
@@ -123,10 +124,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var split3 = new ParsedSplit { name = splitName, trafficTypeName = "traffic_type_3" };
             var split4 = new ParsedSplit { name = splitName2, trafficTypeName = "traffic_type_4" };
 
-            splitCache.AddOrUpdate(splitName, split);
-            splitCache.AddOrUpdate(splitName, split2);
-            splitCache.AddOrUpdate(splitName, split3);
-            splitCache.AddOrUpdate(splitName2, split4);
+            splitCache.Update(new List<ParsedSplit> { split, split2, split3, split4 }, new List<string>(), -1);
 
             // Act
             var result1 = splitCache.TrafficTypeExists("traffic_type_1");

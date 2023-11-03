@@ -1,12 +1,11 @@
 ﻿using Splitio.Domain;
+using System.Collections.Generic;
 
 namespace Splitio.Services.Cache.Interfaces
 {
     public interface IFeatureFlagCacheProducer
     {
-        void AddSplit(string splitName, SplitBase split);
-        bool RemoveSplit(string splitName);
-        bool AddOrUpdate(string splitName, SplitBase split);
+        void Update(List<ParsedSplit> toAdd, List<string> toRemove, long till);
         void SetChangeNumber(long changeNumber);
         void Clear();
         void Kill(long changeNumber, string splitName, string defaultTreatment);

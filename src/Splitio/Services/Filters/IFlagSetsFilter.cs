@@ -6,5 +6,6 @@ namespace Splitio.Services.Filters
     {
         bool Intersect(HashSet<string> sets);
         bool Intersect(string set);
+        string GetFlagSets();
     }
 }
