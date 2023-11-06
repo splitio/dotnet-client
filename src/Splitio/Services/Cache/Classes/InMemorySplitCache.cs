@@ -166,7 +166,7 @@ namespace Splitio.Services.Cache.Classes
             foreach (var fSet in flagSets)
             {
                 _flagSets.TryGetValue(fSet, out HashSet<string> ffNames);
-                toReturn.Add(fSet, ffNames);
+                toReturn.Add(fSet, ffNames ?? new HashSet<string>());
             }
 
             return toReturn;

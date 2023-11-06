@@ -5,6 +5,7 @@ using Splitio.Services.Cache.Classes;
 using Splitio.Services.Filters;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
@@ -171,15 +172,15 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var result = splitCache.GetNamesByFlagSets(flagSetNames);
 
             // Assert.
-            //Assert.AreEqual(4, result.Count);
-            //var set1 = result["set1"];
-            //Assert.AreEqual(3, set1.Count);
-            //var set2 = result["set2"];
-            //Assert.AreEqual(3, set2.Count);
-            //var set3 = result["set3"];
-            //Assert.AreEqual(3, set3.Count);
-            //var set4 = result["set4"];
-            //Assert.IsFalse(set4.Any());
+            Assert.AreEqual(4, result.Count);
+            var set1 = result["set1"];
+            Assert.AreEqual(2, set1.Count);
+            var set2 = result["set2"];
+            Assert.AreEqual(2, set2.Count);
+            var set3 = result["set3"];
+            Assert.IsFalse(set3.Any());
+            var set4 = result["set4"];
+            Assert.IsFalse(set4.Any());
         }
     }
 }
