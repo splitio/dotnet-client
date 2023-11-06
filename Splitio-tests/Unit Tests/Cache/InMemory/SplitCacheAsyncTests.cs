@@ -2,6 +2,7 @@
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Filters;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,13 +13,15 @@ namespace Splitio_Tests.Unit_Tests.Cache
     [TestClass]
     public class SplitCacheAsyncTests
     {
+        private readonly IFlagSetsFilter _flagSetsFilter;
         private readonly IFeatureFlagCache _cache;
 
         public SplitCacheAsyncTests()
         {
+            _flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
             var splits = new ConcurrentDictionary<string, ParsedSplit>();
 
-            _cache = new InMemorySplitCache(splits);
+            _cache = new InMemorySplitCache(splits, _flagSetsFilter);
         }
 
         [TestMethod]

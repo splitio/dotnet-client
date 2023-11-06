@@ -48,7 +48,9 @@ namespace Splitio.Services.Client.Classes
                 parsedSplits.TryAdd(split.name, _splitParser.Parse(split));
             }
 
-            _featureFlagCache = featureFlagCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits));
+            BuildFlagSetsFilter(new HashSet<string>());
+
+            _featureFlagCache = featureFlagCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits), _flagSetsFilter);
             _impressionsLog = impressionsLog;
             _eventsLog = eventsLog;
             _trafficTypeValidator = trafficTypeValidator;

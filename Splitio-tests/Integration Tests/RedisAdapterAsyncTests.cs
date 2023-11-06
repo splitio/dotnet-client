@@ -252,6 +252,33 @@ namespace Splitio_Tests.Integration_Tests
             Assert.AreEqual(162, count);
         }
 
+        [TestMethod]
+        public async Task ExecturePipelineSMembersAsyncSuccessful()
+        {
+            // Arrange.
+            var keys = new List<RedisKey> { $"{_redisPrefix}.flagset.set1", $"{_redisPrefix}.flagset.set2", $"{_redisPrefix}.flagset.set3" };
+
+            var count = 0;
+            foreach (var item in keys)
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    var kjgkhgj = await _adapter.SAddAsync(item, $"feature-flag-{count}-{i}");
+                }
+
+                count++;
+            }
+
+            keys.Add($"{_redisPrefix}.flagset.set4");
+
+            // Act.
+            var result = await _adapter.PipelineSMembersAsync(keys);
+
+            // Assert.
+            Assert.AreEqual(4, result.Count);
+            Assert.AreEqual(5, result.FirstOrDefault().Value.Length);
+        }
+
         [TestCleanup]
         public async Task CleanKeys()
         {

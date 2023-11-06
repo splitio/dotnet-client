@@ -9,6 +9,7 @@ using Splitio.Services.Parsing.Interfaces;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Cache
@@ -134,6 +135,37 @@ namespace Splitio_Tests.Unit_Tests.Cache
             // Assert.
             _redisAdapterMock.Verify(mock => mock.MGetAsync(It.IsAny<RedisKey[]>()), Times.Once);
             _redisAdapterMock.Verify(mock => mock.GetAsync(It.IsAny<string>()), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task GetNamesByFlagSetsAsync()
+        {
+            // Arrange.
+            var flagSetNames = new List<string> { "set1", "set2", "set3", "set4" };
+
+            _redisAdapterMock
+                .Setup(mock => mock.PipelineSMembersAsync(It.Is<List<RedisKey>>(x => x.Count == 4)))
+                .ReturnsAsync(new Dictionary<string, RedisValue[]>
+                {
+                    { "SPLITIO.flagSet.set1", new RedisValue[3] { "flag-name1" ,"flag-name2", "flag-name3" } },
+                    { "SPLITIO.flagSet.set2", new RedisValue[3] { "flag-name1" ,"flag-name2", "flag-name3" } },
+                    { "SPLITIO.flagSet.set3", new RedisValue[3] { "flag-name1" ,"flag-name2", "flag-name3" } },
+                    { "SPLITIO.flagSet.set4", Array.Empty<RedisValue>() }
+                });
+
+            // Act.
+            var result = await _redisSplitCache.GetNamesByFlagSetsAsync(flagSetNames);
+
+            // Assert.
+            Assert.AreEqual(4, result.Count);
+            var set1 = result["set1"];
+            Assert.AreEqual(3, set1.Count);
+            var set2 = result["set2"];
+            Assert.AreEqual(3, set2.Count);
+            var set3 = result["set3"];
+            Assert.AreEqual(3, set3.Count);
+            var set4 = result["set4"];
+            Assert.IsFalse(set4.Any());
         }
 
         private static Split BuildSplit(string splitName)

@@ -4,6 +4,7 @@ using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
 using StackExchange.Redis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -55,7 +56,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             if (splitValues == null || !splitValues.Any())
                 return new List<ParsedSplit>();
-            
+
             var splits = splitValues
                 .Where(x => !x.IsNull)
                 .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s)));
@@ -112,6 +113,20 @@ namespace Splitio.Redis.Services.Cache.Classes
         public int SplitsCount()
         {
             return 0; // No-op
+        }
+
+        public Dictionary<string, HashSet<string>> GetNamesByFlagSets(List<string> flagSets)
+        {
+            var namesByFlagSets = new Dictionary<string, RedisValue[]>();
+
+            foreach (var flagSet in flagSets)
+            {
+                var key = GetFlagSetKey(flagSet);
+
+                namesByFlagSets.Add(key, _redisAdapter.SMembers(key));
+            }
+
+            return BuildNamesByFlagSetResponse(flagSets, namesByFlagSets);
         }
         #endregion
 
@@ -177,12 +192,48 @@ namespace Splitio.Redis.Services.Cache.Classes
                 .Select(s => s.name)
                 .ToList();
         }
+
+        public async Task<Dictionary<string, HashSet<string>>> GetNamesByFlagSetsAsync(List<string> flagSets)
+        {
+            var keys = new List<RedisKey>();
+
+            foreach (var flagSet in flagSets)
+            {
+                keys.Add(GetFlagSetKey(flagSet));
+            }
+
+            var namesByFlagSets = await _redisAdapter.PipelineSMembersAsync(keys);
+
+            return BuildNamesByFlagSetResponse(flagSets, namesByFlagSets);
+        }
         #endregion
+
+        #region Private Methods
 
         private string GetTrafficTypeKey(string type)
         {
             return $"{RedisKeyPrefix}trafficType.{type}";
         }
+
+        private string GetFlagSetKey(string name)
+        {
+            return $"{RedisKeyPrefix}flagSet.{name}";
+        }
+
+        private Dictionary<string, HashSet<string>> BuildNamesByFlagSetResponse(List<string> flagSets, Dictionary<string, RedisValue[]> namesByFlagSets)
+        {
+            var toReturn = new Dictionary<string, HashSet<string>>();
+
+            foreach (var flagSet in flagSets)
+            {
+                if (!namesByFlagSets.TryGetValue(GetFlagSetKey(flagSet), out var values)) continue;
+
+                toReturn.Add(flagSet, new HashSet<string>(Array.ConvertAll(values, x => (string)x)));
+            }
+
+            return toReturn;
+        }
+        #endregion
     }
 }
  

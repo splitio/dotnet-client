@@ -331,9 +331,9 @@ namespace Splitio.Services.Client.Classes
             _clientExtensionService = new ClientExtensionService(_blockUntilReadyService, _statusManager, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator);
         }
 
-        protected void BuildFlagSetsFilter(BaseConfig config)
+        protected void BuildFlagSetsFilter(HashSet<string> sets)
         {
-            _flagSetsFilter = new FlagSetsFilter(config.FlagSetsFilter);
+            _flagSetsFilter = new FlagSetsFilter(sets);
         }
         #endregion
 

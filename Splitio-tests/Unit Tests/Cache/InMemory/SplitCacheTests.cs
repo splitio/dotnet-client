@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
+using Splitio.Services.Filters;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
@@ -9,12 +11,18 @@ namespace Splitio_Tests.Unit_Tests.Cache
     [TestClass]
     public class SplitCacheTests
     {
+        private readonly Mock<IFlagSetsFilter> _flagSetsFilter;
+
+        public SplitCacheTests()
+        {
+            _flagSetsFilter = new Mock<IFlagSetsFilter>();
+        }
 
         [TestMethod]
         public void AddAndGetSplitTest()
         {
             //Arrange
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object);
             var splitName = "test1";
 
             //Act
@@ -29,7 +37,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public void AddDuplicateSplitTest()
         {
             //Arrange
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object);
             var splitName = "test1";
 
             //Act
@@ -49,7 +57,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public void GetInexistentSplitTest()
         {
             //Arrange
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object);
             var splitName = "test1";
 
             //Act
@@ -66,7 +74,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var splitName = "test1";
             var splits = new ConcurrentDictionary<string, ParsedSplit>();
             splits.TryAdd(splitName, new ParsedSplit() { name = splitName });
-            var splitCache = new InMemorySplitCache(splits);
+            var splitCache = new InMemorySplitCache(splits, _flagSetsFilter.Object);
             
             //Act
             splitCache.Update(new List<ParsedSplit>(), new List<string> { splitName }, -1);
@@ -80,7 +88,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public void SetAndGetChangeNumberTest()
         {
             //Arrange
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object);
             var changeNumber = 1234;
 
             //Act
@@ -95,7 +103,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public void GetAllSplitsTest()
         {
             //Arrange
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object);
             var splitName = "test1";
             var splitName2 = "test2";
 
@@ -114,7 +122,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public void AddOrUpdate_WhenUpdateTraffictType_ReturnsTrue()
         {
             // Arrange 
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object);
 
             var splitName = "split_1";
             var splitName2 = "split_2";
@@ -135,6 +143,43 @@ namespace Splitio_Tests.Unit_Tests.Cache
             Assert.IsFalse(result1);
             Assert.IsFalse(result2);
             Assert.IsTrue(result3);
+        }
+
+        [TestMethod]
+        public void GetNamesByFlagSets()
+        {
+            // Arrange.
+            var featureFlags = new ConcurrentDictionary<string, ParsedSplit>();
+            featureFlags.TryAdd("flag-1", new ParsedSplit
+            {
+                name = "flag-1",
+                defaultTreatment = "off",
+                Sets = new HashSet<string> { "set1", "set2"}
+            });
+
+            featureFlags.TryAdd("flag-2", new ParsedSplit
+            {
+                name = "flag-2",
+                defaultTreatment = "on",
+                Sets = new HashSet<string> { "set1", "set2" }
+            });
+
+            var splitCache = new InMemorySplitCache(featureFlags, new FlagSetsFilter(new HashSet<string>()));
+            var flagSetNames = new List<string> { "set1", "set2", "set3", "set4" };
+
+            // Act.
+            var result = splitCache.GetNamesByFlagSets(flagSetNames);
+
+            // Assert.
+            //Assert.AreEqual(4, result.Count);
+            //var set1 = result["set1"];
+            //Assert.AreEqual(3, set1.Count);
+            //var set2 = result["set2"];
+            //Assert.AreEqual(3, set2.Count);
+            //var set3 = result["set3"];
+            //Assert.AreEqual(3, set3.Count);
+            //var set4 = result["set4"];
+            //Assert.IsFalse(set4.Any());
         }
     }
 }
