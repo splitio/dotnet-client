@@ -147,7 +147,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
-        public void GetNamesByFlagSets()
+        public void GetNamesByFlagSetsWithoutFilter()
         {
             // Arrange.
             var featureFlags = new ConcurrentDictionary<string, ParsedSplit>();
@@ -177,6 +177,50 @@ namespace Splitio_Tests.Unit_Tests.Cache
             Assert.AreEqual(2, set1.Count);
             var set2 = result["set2"];
             Assert.AreEqual(2, set2.Count);
+            var set3 = result["set3"];
+            Assert.IsFalse(set3.Any());
+            var set4 = result["set4"];
+            Assert.IsFalse(set4.Any());
+        }
+
+        [TestMethod]
+        public void GetNamesByFlagSetsWithFilters()
+        {
+            // Arrange.
+            var featureFlags = new ConcurrentDictionary<string, ParsedSplit>();
+            featureFlags.TryAdd("flag-1", new ParsedSplit
+            {
+                name = "flag-1",
+                defaultTreatment = "off",
+                Sets = new HashSet<string> { "set1", "set3" }
+            });
+
+            featureFlags.TryAdd("flag-2", new ParsedSplit
+            {
+                name = "flag-2",
+                defaultTreatment = "on",
+                Sets = new HashSet<string> { "set5", "set4" }
+            });
+
+            featureFlags.TryAdd("flag-3", new ParsedSplit
+            {
+                name = "flag-3",
+                defaultTreatment = "on",
+                Sets = new HashSet<string> { "set1", "set2" }
+            });
+
+            var splitCache = new InMemorySplitCache(featureFlags, new FlagSetsFilter(new HashSet<string>() { "set1", "set2" }));
+            var flagSetNames = new List<string> { "set1", "set2", "set3", "set4" };
+
+            // Act.
+            var result = splitCache.GetNamesByFlagSets(flagSetNames);
+
+            // Assert.
+            Assert.AreEqual(4, result.Count);
+            var set1 = result["set1"];
+            Assert.AreEqual(2, set1.Count);
+            var set2 = result["set2"];
+            Assert.AreEqual(1, set2.Count);
             var set3 = result["set3"];
             Assert.IsFalse(set3.Any());
             var set4 = result["set4"];
