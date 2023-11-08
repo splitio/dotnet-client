@@ -344,16 +344,12 @@ namespace Splitio.Services.Client.Classes
 
             if (controlTreatments != null) return controlTreatments;
 
-            var evaluatorResult = await _evaluator.EvaluateFeaturesAsync(key, features, attributes);
+            var evaluatorResults = await _evaluator.EvaluateFeaturesAsync(method, key, features, attributes);
 
-            if (evaluatorResult.Exception) await _clientExtensionService.RecordExceptionAsync(method);
-
-            await _clientExtensionService.RecordLatencyAsync(method, evaluatorResult.ElapsedMilliseconds);
-
-            if (BuildAndGetImpressions(evaluatorResult, key, out var impressions))
+            if (BuildAndGetImpressions(evaluatorResults, key, out var impressions))
                 await _impressionsManager.TrackAsync(impressions);
 
-            return evaluatorResult.Results;
+            return evaluatorResults;
         }
         #endregion
 
@@ -364,23 +360,19 @@ namespace Splitio.Services.Client.Classes
 
             if (controlTreatments != null) return controlTreatments;
 
-            var evaluatorResult = _evaluator.EvaluateFeatures(key, features, attributes);
+            var evaluatorResults = _evaluator.EvaluateFeatures(method, key, features, attributes);
 
-            if (evaluatorResult.Exception) _clientExtensionService.RecordException(method);
-
-            _clientExtensionService.RecordLatency(method, evaluatorResult.ElapsedMilliseconds);
-
-            if (BuildAndGetImpressions(evaluatorResult, key, out var impressions))
+            if (BuildAndGetImpressions(evaluatorResults, key, out var impressions))
                 _impressionsManager.Track(impressions);
 
-            return evaluatorResult.Results;
+            return evaluatorResults;
         }
 
-        private bool BuildAndGetImpressions(MultipleEvaluatorResult evaluatorResult, Key key, out List<KeyImpression> impressions)
+        private bool BuildAndGetImpressions(List<TreatmentResult> evaluatorResults, Key key, out List<KeyImpression> impressions)
         {
             impressions = new List<KeyImpression>();
 
-            foreach (var treatmentResult in evaluatorResult.Results)
+            foreach (var treatmentResult in evaluatorResults)
             {
                 var impression = _impressionsManager.Build(treatmentResult, key);
 
