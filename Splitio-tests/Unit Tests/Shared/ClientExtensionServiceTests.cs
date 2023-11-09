@@ -193,6 +193,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             // Assert.
             Assert.IsFalse(success);
             Assert.IsNull(result);
+            _logger.Verify(mock => mock.Warn($"GetTreatment: the SDK is not ready, results may be incorrect for feature flag {expected}. Make sure to wait for SDK readiness before using this method"), Times.Once);
         }
     }
 }
