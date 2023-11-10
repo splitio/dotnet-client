@@ -55,8 +55,8 @@ namespace Splitio.Services.Client.Classes
         {
             _config = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
 
+            BuildFlagSetsFilter(_config.FlagSetsFilter);
             BuildSplitCache();
-            BuildFlagSetsFilter(_config);
             BuildSegmentCache();
             BuildTelemetryStorage();
             BuildTelemetrySyncTask();
@@ -85,10 +85,8 @@ namespace Splitio.Services.Client.Classes
         #region Private Methods
         private void BuildSplitCache()
         {
-            _featureFlagCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(_config.ConcurrencyLevel, InitialCapacity));
+            _featureFlagCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(_config.ConcurrencyLevel, InitialCapacity), _flagSetsFilter);
         }
-
-        
 
         private void BuildSegmentCache()
         {
@@ -167,7 +165,7 @@ namespace Splitio.Services.Client.Classes
         private void BuildEvaluator()
         {
             var splitter = new Splitter();
-            _evaluator = new Evaluator.Evaluator(_featureFlagCache, splitter);
+            _evaluator = new Evaluator.Evaluator(_featureFlagCache, splitter, _telemetryEvaluationProducer);
         }
 
         private static int Random(int refreshRate)

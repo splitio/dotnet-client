@@ -34,7 +34,9 @@ namespace Splitio.Services.Client.Classes
 
             var currentFeatureFlags = await _featureFlagCacheConsumer.GetAllSplitsAsync();
 
-            return GetFeatureFlagViewList(currentFeatureFlags);
+            return currentFeatureFlags
+                .Select(x => x.ToSplitView())
+                .ToList();
         }
 
         public async Task<SplitView> SplitAsync(string featureName)
@@ -63,7 +65,9 @@ namespace Splitio.Services.Client.Classes
 
             var currentFeatureFlags = _featureFlagCacheConsumer.GetAllSplits();
 
-            return GetFeatureFlagViewList(currentFeatureFlags);
+            return currentFeatureFlags
+                .Select(x => x.ToSplitView())
+                .ToList();
         }
 
         public SplitView Split(string featureName)
@@ -113,22 +117,6 @@ namespace Splitio.Services.Client.Classes
             return result.Success;
         }
 
-        private static List<SplitView> GetFeatureFlagViewList(List<ParsedSplit> featureFlags)
-        {
-            return featureFlags
-                .Select(x =>
-                new SplitView()
-                {
-                    name = x.name,
-                    killed = x.killed,
-                    changeNumber = x.changeNumber,
-                    treatments = (x.conditions.Where(z => z.conditionType == ConditionType.ROLLOUT).FirstOrDefault() ?? x.conditions.FirstOrDefault())?.partitions.Select(y => y.treatment).ToList(),
-                    trafficType = x.trafficTypeName,
-                    configs = x.configurations
-                })
-                .ToList();
-        }
-
         private static SplitView GetFeatureFlagView(ParsedSplit featureFlag, string featureName)
         {
             if (featureFlag == null)
@@ -138,21 +126,7 @@ namespace Splitio.Services.Client.Classes
                 return null;
             }
 
-            var condition = featureFlag.conditions.Where(x => x.conditionType == ConditionType.ROLLOUT).FirstOrDefault() ?? featureFlag.conditions.FirstOrDefault();
-
-            var treatments = condition != null ? condition.partitions.Select(y => y.treatment).ToList() : new List<string>();
-
-            var lightSplit = new SplitView()
-            {
-                name = featureFlag.name,
-                killed = featureFlag.killed,
-                changeNumber = featureFlag.changeNumber,
-                treatments = treatments,
-                trafficType = featureFlag.trafficTypeName,
-                configs = featureFlag.configurations
-            };
-
-            return lightSplit;
+            return featureFlag.ToSplitView();
         }
         #endregion
     }

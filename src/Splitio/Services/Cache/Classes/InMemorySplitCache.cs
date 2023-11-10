@@ -1,5 +1,6 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Filters;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
@@ -11,17 +12,24 @@ namespace Splitio.Services.Cache.Classes
 {
     public class InMemorySplitCache : IFeatureFlagCache
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemorySplitCache));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemorySplitCache));
+        private readonly IFlagSetsFilter _flagSetsFilter;
 
         private readonly ConcurrentDictionary<string, ParsedSplit> _featureFlags;
         private readonly ConcurrentDictionary<string, int> _trafficTypes;
+        private readonly ConcurrentDictionary<string, HashSet<string>> _flagSets;
+
         private long _changeNumber;
 
-        public InMemorySplitCache(ConcurrentDictionary<string, ParsedSplit> featureFlags, long changeNumber = -1)
+        public InMemorySplitCache(ConcurrentDictionary<string, ParsedSplit> featureFlags,
+            IFlagSetsFilter flagSetsFilter,
+            long changeNumber = -1)
         {
             _featureFlags = featureFlags;
+            _flagSetsFilter = flagSetsFilter;
             _changeNumber = changeNumber;
             _trafficTypes = new ConcurrentDictionary<string, int>();
+            _flagSets = new ConcurrentDictionary<string, HashSet<string>>();
 
             if (!_featureFlags.IsEmpty)
             {
@@ -30,6 +38,7 @@ namespace Splitio.Services.Cache.Classes
                     if (featureFlag.Value != null)
                     {
                         IncreaseTrafficTypeCount(featureFlag.Value.trafficTypeName);
+                        AddToFlagSets(featureFlag.Value);
                     }
                 }
             }
@@ -43,21 +52,24 @@ namespace Splitio.Services.Cache.Classes
                 if (_featureFlags.TryGetValue(featureFlag.name, out ParsedSplit existing))
                 {
                     DecreaseTrafficTypeCount(existing);
+                    RemoveFromFlagSets(existing.name, existing.Sets);
                 }
 
                 _featureFlags.AddOrUpdate(featureFlag.name, featureFlag, (key, oldValue) => featureFlag);
 
                 IncreaseTrafficTypeCount(featureFlag.trafficTypeName);
+                AddToFlagSets(featureFlag);
             }
 
             foreach (var featureFlagName in toRemove)
             {
-                if (_featureFlags.TryGetValue(featureFlagName, out ParsedSplit cached))
-                {
-                    _featureFlags.TryRemove(featureFlagName, out ParsedSplit removedSplit);
+                if (!_featureFlags.TryGetValue(featureFlagName, out ParsedSplit cached))
+                    continue;
 
-                    DecreaseTrafficTypeCount(removedSplit);
-                }
+                _featureFlags.TryRemove(featureFlagName, out ParsedSplit removedSplit);
+
+                DecreaseTrafficTypeCount(removedSplit);
+                RemoveFromFlagSets(removedSplit.name, removedSplit.Sets);
             }
 
             SetChangeNumber(till);
@@ -97,6 +109,7 @@ namespace Splitio.Services.Cache.Classes
         {
             _featureFlags.Clear();            
             _trafficTypes.Clear();
+            _featureFlags.Clear();
         }
 
         public bool TrafficTypeExists(string trafficType)
@@ -145,6 +158,19 @@ namespace Splitio.Services.Cache.Classes
         {
             return GetSplitNames().Count;
         }
+
+        public Dictionary<string, HashSet<string>> GetNamesByFlagSets(List<string> flagSets)
+        {
+            var toReturn = new Dictionary<string, HashSet<string>>();
+
+            foreach (var fSet in flagSets)
+            {
+                _flagSets.TryGetValue(fSet, out HashSet<string> ffNames);
+                toReturn.Add(fSet, ffNames ?? new HashSet<string>());
+            }
+
+            return toReturn;
+        }
         #endregion
 
         #region Async Methods
@@ -166,6 +192,11 @@ namespace Splitio.Services.Cache.Classes
         public Task<List<string>> GetSplitNamesAsync()
         {
             return Task.FromResult(GetSplitNames());
+        }
+
+        public Task<Dictionary<string, HashSet<string>>> GetNamesByFlagSetsAsync(List<string> flagSets)
+        {
+            return Task.FromResult(GetNamesByFlagSets(flagSets));
         }
         #endregion
 
@@ -194,6 +225,44 @@ namespace Splitio.Services.Cache.Classes
 
                 _trafficTypes.TryUpdate(split.trafficTypeName, newQuantity, quantity);
             }
+        }
+
+        private void AddToFlagSets(ParsedSplit featureFlag)
+        {
+            if (featureFlag.Sets == null) return;
+
+            foreach (var fSet in featureFlag.Sets)
+            {
+                if (!_flagSetsFilter.Intersect(fSet))
+                    continue;
+
+                _flagSets.AddOrUpdate(fSet, new HashSet<string>() { featureFlag.name }, (_, ffNames) =>
+                {
+                    ffNames.Add(featureFlag.name);
+                    return ffNames;
+                });
+            }
+        }
+
+        private void RemoveFromFlagSets(string featureFlagName, HashSet<string> sets)
+        {
+            if (sets == null) return;
+
+            foreach (var fSet in sets)
+            {
+                RemoveNames(fSet, featureFlagName);
+            }
+        }
+
+        private void RemoveNames(string key, string name)
+        {
+            var names = _flagSets.AddOrUpdate(key, new HashSet<string>() { name }, (_, ffNames) =>
+            {
+                ffNames.Remove(name);
+                return ffNames;
+            });
+
+            if (names.Count == 0) _flagSets.TryRemove(key, out HashSet<string> _);
         }
         #endregion
     }

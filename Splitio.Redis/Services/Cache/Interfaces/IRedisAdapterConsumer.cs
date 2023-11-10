@@ -1,4 +1,5 @@
 ﻿using StackExchange.Redis;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Cache.Interfaces
@@ -20,5 +21,6 @@ namespace Splitio.Redis.Services.Cache.Interfaces
         Task<HashEntry[]> HashGetAllAsync(RedisKey key);
         Task<RedisValue[]> SMembersAsync(string key);
         Task<bool> SIsMemberAsync(string key, string value);
+        Task<Dictionary<string, RedisValue[]>> PipelineSMembersAsync(List<RedisKey> keys);
     }
 }

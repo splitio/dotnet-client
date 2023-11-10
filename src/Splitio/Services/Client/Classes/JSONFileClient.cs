@@ -48,13 +48,15 @@ namespace Splitio.Services.Client.Classes
                 parsedSplits.TryAdd(split.name, _splitParser.Parse(split));
             }
 
-            _featureFlagCache = featureFlagCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits));
+            BuildFlagSetsFilter(new HashSet<string>());
+
+            _featureFlagCache = featureFlagCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits), _flagSetsFilter);
             _impressionsLog = impressionsLog;
             _eventsLog = eventsLog;
             _trafficTypeValidator = trafficTypeValidator;
             _blockUntilReadyService = new NoopBlockUntilReadyService();
             _manager = new SplitManager(_featureFlagCache, _blockUntilReadyService);
-            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter());
+            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter(), null);
             _uniqueKeysTracker = new NoopUniqueKeysTracker();
             _impressionsCounter = new NoopImpressionsCounter();
             _impressionsObserver = new NoopImpressionsObserver();

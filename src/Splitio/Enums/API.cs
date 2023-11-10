@@ -19,7 +19,11 @@ namespace Splitio.Enums
         
         // Manager
         Split,
-        SplitAsync
+        SplitAsync,
+
+        // Matchers
+        DependecyMatcher,
+        DependecyMatcherAsync
     }
 
     public static class EnumExtensions

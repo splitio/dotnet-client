@@ -63,11 +63,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new MultipleEvaluatorResult
-                {
-                    Results = new List<TreatmentResult> { new TreatmentResult("not_exist", Labels.SplitNotFound, "control", null) }
-                });
+                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("not_exist", Labels.SplitNotFound, "control", null) });
 
             // Act
             var result = await _splitClient.GetTreatmentAsync("key", "not_exist");
@@ -88,11 +85,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Key>(), new List<string>() { "feature_flag_test" }, It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new MultipleEvaluatorResult
-                {
-                    Results = new List<TreatmentResult> { new TreatmentResult("feature_flag_test", Labels.DefaultRule, "on", 1000, null) }
-                });
+                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), new List<string>() { "feature_flag_test" }, It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("feature_flag_test", Labels.DefaultRule, "on", 1000, null) });
 
             _impressionsManager
                 .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>()))
@@ -182,14 +176,11 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .ReturnsAsync(parsedSplitOff);
 
             _evaluator
-                .SetupSequence(mock => mock.EvaluateFeaturesAsync(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new MultipleEvaluatorResult
+                .SetupSequence(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult>
                 {
-                    Results = new List<TreatmentResult>
-                    {
-                        new TreatmentResult(treatmenOff, "label", "off", null, configExpectedOff),
-                        new TreatmentResult(treatmenOn, "label", "on", null, configExpectedOn)
-                    }
+                    new TreatmentResult(treatmenOff, "label", "off", null, configExpectedOff),
+                    new TreatmentResult(treatmenOn, "label", "on", null, configExpectedOn)
                 });
 
             _impressionsManager
@@ -225,14 +216,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluator
-                .SetupSequence(mock => mock.EvaluateFeaturesAsync(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new MultipleEvaluatorResult
-                {
-                    Results = new List<TreatmentResult>
-                    {
-                        new TreatmentResult("control_treatment", Labels.SplitNotFound, "control", null)
-                    }
-                });
+                .SetupSequence(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("control_treatment", Labels.SplitNotFound, "control", null) });
 
             // Act
             var result = await _splitClient.GetTreatmentsWithConfigAsync("key", splitNames);
@@ -289,11 +274,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new MultipleEvaluatorResult
-                {
-                    Results = new List<TreatmentResult> { new TreatmentResult(feature, Labels.DefaultRule, treatmentExpected, null, configExpected) }
-                });
+                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult(feature, Labels.DefaultRule, treatmentExpected, null, configExpected) });
 
             _impressionsManager
                 .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>()))
@@ -334,11 +316,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new MultipleEvaluatorResult
-                {
-                    Results = new List<TreatmentResult> { new TreatmentResult(feature, "label", defaultTreatment, null, configExpected) }
-                });
+                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult(feature, "label", defaultTreatment, null, configExpected) });
 
             _impressionsManager
                 .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>()))
@@ -370,11 +349,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .ReturnsAsync(parsedSplit);
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new MultipleEvaluatorResult
-                 {
-                     Results = new List<TreatmentResult> { new TreatmentResult(feature, "label", treatmentExpected, null) }
-                 });
+                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult(feature, "label", treatmentExpected, null) });
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
@@ -419,11 +395,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new MultipleEvaluatorResult
-                {
-                    Results = new List<TreatmentResult> { new TreatmentResult(feature, "label", defaultTreatment, null, configExpected) }
-                });
+                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult(feature, "label", defaultTreatment, null, configExpected) });
 
             _impressionsManager
                 .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>()))
@@ -464,11 +437,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new MultipleEvaluatorResult
-                {
-                    Results = new List<TreatmentResult> { new TreatmentResult(feature, "label", defaultTreatment, config: configExpected) }
-                });
+                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult(feature, "label", defaultTreatment, config: configExpected) });
 
             _impressionsManager
                 .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>()))
@@ -529,11 +499,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .ReturnsAsync(parsedSplit);
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new MultipleEvaluatorResult
-                {
-                    Results = new List<TreatmentResult> { new TreatmentResult(feature,"label", treatmentExpected, config: configExpected) }
-                });
+                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult(feature, "label", treatmentExpected, config: configExpected) });
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
@@ -570,11 +537,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new MultipleEvaluatorResult
-                {
-                    Results = new List<TreatmentResult> { new TreatmentResult(feature, "label", defaultTreatment, config: configExpected) }
-                });
+                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult(feature, "label", defaultTreatment, config: configExpected) });
 
             // Act
             var result = await _splitClient.GetTreatmentWithConfigAsync("user", feature);
@@ -593,11 +557,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new MultipleEvaluatorResult
-                {
-                    Results = new List<TreatmentResult> { new TreatmentResult("not_exist", Labels.SplitNotFound, "control") }
-                });
+                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("not_exist", Labels.SplitNotFound, "control") });
 
             // Act
             var result = await _splitClient.GetTreatmentWithConfigAsync("key", "not_exist");
@@ -683,14 +644,11 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .ReturnsAsync(parsedSplitOff);
 
             _evaluator
-                .SetupSequence(mock => mock.EvaluateFeaturesAsync(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new MultipleEvaluatorResult
+                .SetupSequence(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult>
                 {
-                    Results = new List<TreatmentResult>
-                    {
-                        new TreatmentResult(treatmenOff, "label", "off", null, configExpectedOff),
-                        new TreatmentResult(treatmenOn, "label", "on", null, configExpectedOn)
-                    }
+                    new TreatmentResult(treatmenOff, "label", "off", null, configExpectedOff),
+                    new TreatmentResult(treatmenOn, "label", "on", null, configExpectedOn)
                 });
 
             _impressionsManager
@@ -728,14 +686,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluator
-                .SetupSequence(mock => mock.EvaluateFeaturesAsync(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
-                .ReturnsAsync(new MultipleEvaluatorResult
-                {
-                    Results = new List<TreatmentResult>
-                    {
-                        new TreatmentResult("control_treatment", Labels.SplitNotFound, "control", null)
-                    }
-                });
+                .SetupSequence(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("control_treatment", Labels.SplitNotFound, "control", null) });
 
             // Act
             var result = await _splitClient.GetTreatmentsWithConfigAsync("key", splitNames);
