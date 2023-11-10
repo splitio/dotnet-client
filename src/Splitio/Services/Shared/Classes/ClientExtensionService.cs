@@ -87,7 +87,7 @@ namespace Splitio.Services.Shared.Classes
         {
             result = null;
 
-            if (!IsClientReady(method, logger) || !_keyValidator.IsValid(key, method))
+            if (!IsClientReady(method, logger, features) || !_keyValidator.IsValid(key, method))
             {
                 result = new List<TreatmentResult>();
                 foreach (var feature in features)
@@ -129,7 +129,7 @@ namespace Splitio.Services.Shared.Classes
             await _telemetryEvaluationProducer.RecordLatencyAsync(method.ConvertToMethodEnum(), Util.Metrics.Bucket(latency));
         }
 
-        private bool IsClientReady(API method, ISplitLogger logger)
+        private bool IsClientReady(API method, ISplitLogger logger, List<string> features)
         {
             if (_statusManager.IsDestroyed())
             {
@@ -139,7 +139,7 @@ namespace Splitio.Services.Shared.Classes
 
             if (!_blockUntilReadyService.IsSdkReady())
             {
-                logger.Error($"{method}: the SDK is not ready, the operation cannot be executed.");
+                logger.Warn($"{method}: the SDK is not ready, results may be incorrect for feature flag {string.Join(",", features)}. Make sure to wait for SDK readiness before using this method");
                 return false;
             }
 

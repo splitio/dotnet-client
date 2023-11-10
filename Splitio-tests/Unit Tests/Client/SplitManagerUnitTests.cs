@@ -65,7 +65,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var splits = new List<ParsedSplit>
             {
-                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, defaultTreatment = "def" },
                 new ParsedSplit { name = "test2", conditions = conditionsWithLogic },
                 new ParsedSplit { name = "test3", conditions = conditionsWithLogic },
                 new ParsedSplit { name = "test4", conditions = conditionsWithLogic },
@@ -94,12 +94,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.IsFalse(firstResult.killed);
             Assert.AreEqual("user", firstResult.trafficType);
             Assert.AreEqual(2, firstResult.treatments.Count);
-
-            var firstTreatment = firstResult.treatments[0];
-            Assert.AreEqual("on", firstTreatment);
-
-            var secondTreatment = firstResult.treatments[1];
-            Assert.AreEqual("off", secondTreatment);
+            Assert.AreEqual("on", firstResult.treatments[0]);
+            Assert.AreEqual("off", firstResult.treatments[1]);
+            Assert.AreEqual("def", firstResult.defaultTreatment);
         }
 
         [TestMethod]
@@ -122,7 +119,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var splits = new List<ParsedSplit>
             {
-                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, defaultTreatment = "def" },
                 new ParsedSplit { name = "test2", conditions = conditionsWithLogic },
                 new ParsedSplit { name = "test3", conditions = conditionsWithLogic },
                 new ParsedSplit { name = "test4", conditions = conditionsWithLogic },
@@ -151,6 +148,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.IsFalse(firstResult.killed);
             Assert.AreEqual("user", firstResult.trafficType);
             Assert.AreEqual(conditionWithLogic.partitions.Count, firstResult.treatments.Count);
+            Assert.AreEqual("def", firstResult.defaultTreatment);
         }
 
         [TestMethod]
@@ -178,7 +176,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             _splitCache
                 .Setup(mock => mock.GetSplit("test1"))
-                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
+                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, defaultTreatment = "def" });
 
             //Act
             var result = _splitManager.Split("test1");
@@ -190,12 +188,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.IsFalse(result.killed);
             Assert.AreEqual("user", result.trafficType);
             Assert.AreEqual(2, result.treatments.Count);
-
-            var firstTreatment = result.treatments[0];
-            Assert.AreEqual("on", firstTreatment);
-
-            var secondTreatment = result.treatments[1];
-            Assert.AreEqual("off", secondTreatment);
+            Assert.AreEqual("on", result.treatments[0]);
+            Assert.AreEqual("off", result.treatments[1]);
+            Assert.AreEqual("def", result.defaultTreatment);
         }
 
         [TestMethod]
@@ -233,7 +228,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             _splitCache
                 .Setup(mock => mock.GetSplit("test1"))
-                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
+                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, defaultTreatment = "def" });
 
             //Act
             var result = _splitManager.Split("test1");
@@ -242,12 +237,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.IsNotNull(result);
             Assert.AreEqual("test1", result.name);
             Assert.AreEqual(2, result.treatments.Count);
-
-            var firstTreatment = result.treatments[0];
-            Assert.AreEqual("on", firstTreatment);
-
-            var secondTreatment = result.treatments[1];
-            Assert.AreEqual("off", secondTreatment);
+            Assert.AreEqual("on", result.treatments[0]);
+            Assert.AreEqual("off", result.treatments[1]);
+            Assert.AreEqual("def", result.defaultTreatment);
         }
 
         [TestMethod]
@@ -274,7 +266,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             _splitCache
                 .Setup(mock => mock.GetSplit("test1"))
-                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
+                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, defaultTreatment = "def" });
 
             //Act
             var result = _splitManager.Split("test1");
@@ -283,6 +275,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.IsNotNull(result);
             Assert.AreEqual("test1", result.name);
             Assert.AreEqual(conditionWithLogic.partitions.Count, result.treatments.Count);
+            Assert.AreEqual("def", result.defaultTreatment);
         }
 
         [TestMethod]
@@ -475,9 +468,9 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var splits = new List<ParsedSplit>
             {
-                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, configurations = configurations },
-                new ParsedSplit { name = "test2", conditions = conditionsWithLogic, configurations = configurations },
-                new ParsedSplit { name = "test3", conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, configurations = configurations, defaultTreatment = "def" },
+                new ParsedSplit { name = "test2", conditions = conditionsWithLogic, configurations = configurations, defaultTreatment = "def2" },
+                new ParsedSplit { name = "test3", conditions = conditionsWithLogic, defaultTreatment = "def3" },
                 new ParsedSplit { name = "test4", conditions = conditionsWithLogic },
                 new ParsedSplit { name = "test5", conditions = conditionsWithLogic },
                 new ParsedSplit { name = "test6", conditions = conditionsWithLogic }
@@ -499,12 +492,18 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(6, result.Count);
+            
             var test1Result = result.Find(res => res.name == "test1");
             Assert.IsNotNull(test1Result.configs);
+            Assert.AreEqual("def", test1Result.defaultTreatment);
+
             var test2Result = result.Find(res => res.name == "test2");
             Assert.IsNotNull(test2Result.configs);
+            Assert.AreEqual("def2", test2Result.defaultTreatment);
+            
             var test3Result = result.Find(res => res.name == "test3");
             Assert.IsNull(test3Result.configs);
+            Assert.AreEqual("def3", test3Result.defaultTreatment);
         }
 
         [TestMethod]
@@ -535,15 +534,15 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             _splitCache
                 .Setup(mock => mock.GetSplit("test1"))
-                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, configurations = configurations });
+                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, configurations = configurations, defaultTreatment = "def" });
 
             _splitCache
                 .Setup(mock => mock.GetSplit("test2"))
-                .Returns(new ParsedSplit { name = "test2", conditions = conditionsWithLogic, configurations = configurations });
+                .Returns(new ParsedSplit { name = "test2", conditions = conditionsWithLogic, configurations = configurations, defaultTreatment = "def2" });
 
             _splitCache
                 .Setup(mock => mock.GetSplit("test3"))
-                .Returns(new ParsedSplit { name = "test3", conditions = conditionsWithLogic });
+                .Returns(new ParsedSplit { name = "test3", conditions = conditionsWithLogic, defaultTreatment = "def3" });
 
             _splitManager.BlockUntilReady(1000);
 
@@ -555,10 +554,13 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Assert
             Assert.IsNotNull(result1);
             Assert.IsNotNull(result1.configs);
+            Assert.AreEqual("def", result1.defaultTreatment);
             Assert.IsNotNull(result2);
             Assert.IsNotNull(result2.configs);
+            Assert.AreEqual("def2", result2.defaultTreatment);
             Assert.IsNotNull(result3);
             Assert.IsNull(result3.configs);
+            Assert.AreEqual("def3", result3.defaultTreatment);
         }
 
         [TestMethod]
