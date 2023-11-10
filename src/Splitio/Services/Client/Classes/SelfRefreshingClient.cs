@@ -88,8 +88,6 @@ namespace Splitio.Services.Client.Classes
             _featureFlagCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(_config.ConcurrencyLevel, InitialCapacity), _flagSetsFilter);
         }
 
-        
-
         private void BuildSegmentCache()
         {
             _segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(_config.ConcurrencyLevel, InitialCapacity));
@@ -167,7 +165,7 @@ namespace Splitio.Services.Client.Classes
         private void BuildEvaluator()
         {
             var splitter = new Splitter();
-            _evaluator = new Evaluator.Evaluator(_featureFlagCache, splitter);
+            _evaluator = new Evaluator.Evaluator(_featureFlagCache, splitter, _telemetryEvaluationProducer);
         }
 
         private static int Random(int refreshRate)

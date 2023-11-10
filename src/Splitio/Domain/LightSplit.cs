@@ -10,5 +10,6 @@ namespace Splitio.Domain
         public List<string> treatments { get; set; }
         public long changeNumber { get; set; }
         public Dictionary<string, string> configs { get; set; }
+        public string defaultTreatment { get; set; }
     }
 }
