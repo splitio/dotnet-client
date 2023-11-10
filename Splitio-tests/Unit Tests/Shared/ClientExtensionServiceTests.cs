@@ -193,6 +193,26 @@ namespace Splitio_Tests.Unit_Tests.Shared
             // Assert.
             Assert.IsFalse(success);
             Assert.IsNull(result);
+            _logger.Verify(mock => mock.Warn($"GetTreatment: the SDK is not ready, results may be incorrect for feature flag {expected}. Make sure to wait for SDK readiness before using this method"), Times.Once);
+        }
+
+        [TestMethod]
+        public void TreatmentValidationsNotReadyWhenNamesIsNull()
+        {
+            // Arrange.
+            string expected = null;
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(false);
+
+            // Act.
+            var success = _service.TreatmentValidations(Splitio.Enums.API.GetTreatment, new Key("matchingKey", "bucketingKey"), expected, _logger.Object, out var result);
+
+            // Assert.
+            Assert.IsFalse(success);
+            Assert.IsNull(result);
+            _logger.Verify(mock => mock.Warn($"GetTreatment: the SDK is not ready, results may be incorrect for feature flag {expected}. Make sure to wait for SDK readiness before using this method"), Times.Once);
         }
     }
 }
