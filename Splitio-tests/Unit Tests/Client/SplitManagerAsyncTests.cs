@@ -721,7 +721,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.IsFalse(splitViewResult.killed);
             Assert.IsNull(splitViewResult.trafficType);
             Assert.AreEqual(splitViewExpected.configs.Count, splitViewResult.configs.Count);
-            Assert.AreEqual(splitViewResult.defaultTreatment, splitViewResult.defaultTreatment);
+            Assert.AreEqual(splitViewExpected.defaultTreatment, splitViewResult.defaultTreatment);
             foreach (var config in splitViewExpected.configs)
             {
                 Assert.AreEqual(expected: config.Value, splitViewResult.configs[config.Key]);
