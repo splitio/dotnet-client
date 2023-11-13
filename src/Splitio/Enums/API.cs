@@ -13,6 +13,7 @@ namespace Splitio.Enums
         GetTreatmentsWithConfigByFlagSets,
         GetTreatmentsByFlagSets,
         GetTreatmentsWithConfigByFlagSet,
+        GetTreatmentsByFlagSet,
         Track,
         GetTreatmentAsync,
         GetTreatmentsAsync,
@@ -21,6 +22,7 @@ namespace Splitio.Enums
         GetTreatmentsWithConfigByFlagSetsAsync,
         GetTreatmentsByFlagSetsAsync,
         GetTreatmentsWithConfigByFlagSetAsync,
+        GetTreatmentsByFlagSetAsync,
         TrackAsync,
         
         // Manager
@@ -61,6 +63,9 @@ namespace Splitio.Enums
                     return MethodEnum.Treatments; // TODO: update this with telemetry implementation
                 case API.GetTreatmentsWithConfigByFlagSet:
                 case API.GetTreatmentsWithConfigByFlagSetAsync:
+                    return MethodEnum.Treatments; // TODO: update this with telemetry implementation
+                case API.GetTreatmentsByFlagSet:
+                case API.GetTreatmentsByFlagSetAsync:
                     return MethodEnum.Treatments; // TODO: update this with telemetry implementation
                 default:
                     throw new Exception("");
