@@ -100,7 +100,7 @@ namespace Splitio.Services.Client.Interfaces
         Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigAsync(Key key, List<string> features, Dictionary<string, object> attributes = null);
 
         /// <summary>
-        /// Same as GetTreatmentsWithConfig but this method evaluate by FlagSets and returns a Dictionary<string, string> containing the resulting treatment for each feature flag evaluated.
+        /// Same as GetTreatmentsWithConfig but this method evaluate by FlagSets and returns a Dictionary<string, SplitResult> containing the resulting treatment for each feature flag evaluated.
         /// </summary>
         /// <param name="key"> a unique key of your customer (e.g. user_id, user_email, account_id, etc.) MUST not be null or empty.</param>
         /// <param name="flagSets"> the names of Flag Sets that you want to evaluate. MUST not be null or empty</param>
@@ -109,7 +109,7 @@ namespace Splitio.Services.Client.Interfaces
         Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigByFlagSetsAsync(string key, List<string> flagSets, Dictionary<string, object> attributes = null);
 
         /// <summary>
-        /// Same as GetTreatmentsWithConfig but this method evaluate by FlagSets and returns a Dictionary<string, string> containing the resulting treatment for each feature flag evaluated.
+        /// Same as GetTreatmentsWithConfig but this method evaluate by FlagSets and returns a Dictionary<string, SplitResult> containing the resulting treatment for each feature flag evaluated.
         /// </summary>
         /// <param name="key">the matching and bucketing keys. MUST NOT be null.</param>
         /// <param name="flagSets"> the names of Flag Sets that you want to evaluate. MUST not be null or empty</param>
