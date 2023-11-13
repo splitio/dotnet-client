@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Integration_tests.Resources;
 using Splitio.Redis.Services.Cache.Classes;
@@ -7,7 +6,6 @@ using Splitio.Redis.Services.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests.Async
@@ -49,7 +47,7 @@ namespace Splitio.Integration_tests.Async
             rootFilePath = @"Resources\";
 #endif
 
-            await LoadSplitsAsync();
+            await RedisHelper.LoadSplitsAsync(rootFilePath, UserPrefix, _redisAdapter);
         }
 
         protected override async Task AssertSentEventsAsync(List<EventBackend> eventsExcpected, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true)
@@ -64,8 +62,7 @@ namespace Splitio.Integration_tests.Async
 
         protected override async Task CleanupAsync()
         {
-            var keys = _redisAdapter.Keys($"{UserPrefix}*");
-            await _redisAdapter.DelAsync(keys);
+            await RedisHelper.CleanupAsync(UserPrefix, _redisAdapter);
         }
 
         protected override async Task DelayAsync()
@@ -95,20 +92,6 @@ namespace Splitio.Integration_tests.Async
                 CacheAdapterConfig = cacheConfig,
                 Mode = Mode.Consumer
             };
-        }
-
-        private async Task LoadSplitsAsync()
-        {
-            await CleanupAsync();
-
-            var splitsJson = File.ReadAllText($"{rootFilePath}split_changes.json");
-
-            var splitResult = JsonConvert.DeserializeObject<SplitChangesResult>(splitsJson);
-
-            foreach (var split in splitResult.splits)
-            {
-                await _redisAdapter.SetAsync($"{UserPrefix}.SPLITIO.split.{split.name}", JsonConvert.SerializeObject(split));
-            }
         }
     }
 }

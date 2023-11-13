@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -40,6 +41,40 @@ namespace Splitio.Integration_tests.Resources
 
                 AssertImpression(actualImp, expectedImpressions.ToList());
             }
+        }
+
+        public static async Task LoadSplitsAsync(string rootFilePath, string userPrefix, RedisAdapterForTests redisAdapter)
+        {
+            await CleanupAsync(userPrefix, redisAdapter);
+
+            var splitsJson = File.ReadAllText($"{rootFilePath}split_changes.json");
+
+            var splitResult = JsonConvert.DeserializeObject<SplitChangesResult>(splitsJson);
+
+            foreach (var split in splitResult.splits)
+            {
+                await redisAdapter.SetAsync($"{userPrefix}.SPLITIO.split.{split.name}", JsonConvert.SerializeObject(split));
+
+                if (split.Sets != null && split.Sets.Any())
+                {
+                    foreach (var fSet in split.Sets)
+                    {
+                        await redisAdapter.SAddAsync($"{userPrefix}.SPLITIO.flagSet.{fSet}", split.name);
+                    }
+                }
+            }
+        }
+
+        public static async Task CleanupAsync(string userPrefix, RedisAdapterForTests redisAdapter)
+        {
+            var keys = redisAdapter.Keys($"{userPrefix}*");
+            await redisAdapter.DelAsync(keys);
+        }
+
+        public static void Cleanup(string userPrefix, RedisAdapterForTests redisAdapter)
+        {
+            var keys = redisAdapter.Keys($"{userPrefix}*");
+            redisAdapter.Del(keys);
         }
 
         private static void AssertImpression(KeyImpressionRedis impressionActual, List<KeyImpression> sentImpressions)

@@ -2,6 +2,7 @@
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Filters;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
@@ -26,6 +27,8 @@ namespace Splitio_Tests.Unit_Tests.Shared
         private readonly IEventTypeValidator _eventTypeValidator;
         private readonly IEventPropertiesValidator _eventPropertiesValidator;
         private readonly ITrafficTypeValidator _trafficTypeValidator;
+        private readonly IFlagSetsValidator _flagSetsValidator;
+        private readonly IFlagSetsFilter _flagSetsFilter;
 
         private readonly IClientExtensionService _service;
 
@@ -41,8 +44,10 @@ namespace Splitio_Tests.Unit_Tests.Shared
             _eventTypeValidator = new EventTypeValidator(_logger.Object);
             _eventPropertiesValidator = new EventPropertiesValidator(_logger.Object);
             _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCacheConsumer.Object, _blockUntilReadyService.Object, _logger.Object);
+            _flagSetsValidator = new FlagSetsValidator();
+            _flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
 
-            _service = new ClientExtensionService(_blockUntilReadyService.Object, _statusManager.Object, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer.Object, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator);
+            _service = new ClientExtensionService(_blockUntilReadyService.Object, _statusManager.Object, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer.Object, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator, _flagSetsValidator, _flagSetsFilter);
         }
 
         [TestMethod]
@@ -194,6 +199,60 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.IsFalse(success);
             Assert.IsNull(result);
             _logger.Verify(mock => mock.Warn($"GetTreatment: the SDK is not ready, results may be incorrect for feature flag {expected}. Make sure to wait for SDK readiness before using this method"), Times.Once);
+        }
+
+        [TestMethod]
+        public void FlagSetsValidationsWithMultipleValuesReturnsFiltered()
+        {
+            // Arrange.
+            var key = new Key("match-key", null);
+            var flagSets = new List<string>
+            {
+                "flag-1",
+                "flag2",
+                "flag2",
+                "flag_set_3",
+                "FLAG4",
+                null,
+                string.Empty,
+                "flagsetlkajsdlkjaslkdjlkasjdklajskldjaskljdlkasjdkljaskldjlkasjdkljaslkjdlkasjdlkjaslkjdlkasjldkjasdsf"
+            };
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            // Act.
+            var result = _service.FlagSetsValidations(Splitio.Enums.API.GetTreatment, key, flagSets, _logger.Object);
+
+            // Assert.
+            Assert.AreEqual(3, result.Count);
+            Assert.IsTrue(result.Contains("flag2"));
+            Assert.IsTrue(result.Contains("flag_set_3"));
+            Assert.IsTrue(result.Contains("flag4"));
+        }
+
+        [TestMethod]
+        public void FlagSetsValidationsWithSetsInConfig()
+        {
+            // Arrange.
+            var flagSetsFilter = new FlagSetsFilter(new HashSet<string> { "set1", "set2" });
+            var service = new ClientExtensionService(_blockUntilReadyService.Object, _statusManager.Object, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer.Object, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator, _flagSetsValidator, flagSetsFilter);
+
+            var key = new Key("match-key", null);
+            var flagSets = new List<string> { "set5", "set4", "set3", "set2", "set1", "set" };
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            // Act.
+            var result = service.FlagSetsValidations(Splitio.Enums.API.GetTreatment, key, flagSets, _logger.Object);
+
+            // Assert.
+            Assert.AreEqual(2, result.Count);
+            Assert.IsTrue(result.Contains("set1"));
+            Assert.IsTrue(result.Contains("set2"));
         }
     }
 }

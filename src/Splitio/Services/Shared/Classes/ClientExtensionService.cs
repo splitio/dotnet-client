@@ -2,6 +2,7 @@
 using Splitio.Domain;
 using Splitio.Enums;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Filters;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
@@ -21,6 +22,8 @@ namespace Splitio.Services.Shared.Classes
         private readonly IEventTypeValidator _eventTypeValidator;
         private readonly IEventPropertiesValidator _eventPropertiesValidator;
         private readonly ITrafficTypeValidator _trafficTypeValidator;
+        private readonly IFlagSetsValidator _flagSetsValidator;
+        private readonly IFlagSetsFilter _flagSetsFilter;
 
         public ClientExtensionService(IBlockUntilReadyService blockUntilReadyService,
             IStatusManager statusManager,
@@ -29,7 +32,9 @@ namespace Splitio.Services.Shared.Classes
             ITelemetryEvaluationProducer telemetryEvaluationProducer,
             IEventTypeValidator eventTypeValidator,
             IEventPropertiesValidator eventPropertiesValidator,
-            ITrafficTypeValidator trafficTypeValidator)
+            ITrafficTypeValidator trafficTypeValidator,
+            IFlagSetsValidator flagSetsValidator,
+            IFlagSetsFilter flagSetsFilter)
         {
             _blockUntilReadyService = blockUntilReadyService;
             _statusManager = statusManager;
@@ -39,6 +44,8 @@ namespace Splitio.Services.Shared.Classes
             _eventTypeValidator = eventTypeValidator;
             _eventPropertiesValidator = eventPropertiesValidator;
             _trafficTypeValidator = trafficTypeValidator;
+            _flagSetsValidator = flagSetsValidator;
+            _flagSetsFilter = flagSetsFilter;
         }
 
         public bool TrackValidations(string key, string trafficType, string eventType, double? value, Dictionary<string, object> properties, out WrappedEvent wrappedEvent)
@@ -81,6 +88,16 @@ namespace Splitio.Services.Shared.Classes
             ffNameSanitized = ffNames.FirstOrDefault();
 
             return true;
+        }
+
+        public List<string> FlagSetsValidations(API method, Key key, List<string> flagSets, ISplitLogger logger)
+        {
+            if (!IsClientReady(method, logger, new List<string>()) || !_flagSetsValidator.AreValid(method.ToString(), flagSets, _flagSetsFilter, out var setsToReturn))
+            {
+                return new List<string>();
+            }
+
+            return setsToReturn.ToList();
         }
 
         public List<string> TreatmentsValidations(API method, Key key, List<string> features, ISplitLogger logger, out List<TreatmentResult> result)

@@ -191,6 +191,42 @@ namespace Splitio.Services.Client.Classes
         }
         #endregion
 
+        #region GetTreatmentsWithConfigByFlagSets
+        public Dictionary<string, SplitResult> GetTreatmentsWithConfigByFlagSets(string key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            return GetTreatmentsWithConfigByFlagSets(new Key(key, null), flagSets, attributes);
+        }
+
+        public Dictionary<string, SplitResult> GetTreatmentsWithConfigByFlagSets(Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            var results = GetTreatmentsByFlagSets(Enums.API.GetTreatmentsWithConfig, key, flagSets, attributes);
+
+            return results
+                .ToDictionary(r => r.FeatureFlagName, r => new SplitResult
+                {
+                    Treatment = r.Treatment,
+                    Config = r.Config
+                });
+        }
+
+        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigByFlagSetsAsync(string key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            return await GetTreatmentsWithConfigByFlagSetsAsync(new Key(key, null), flagSets, attributes);
+        }
+
+        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigByFlagSetsAsync(Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            var results = await GetTreatmentsByFlagSetsAsync(Enums.API.GetTreatmentsWithConfig, key, flagSets, attributes);
+
+            return results
+                .ToDictionary(r => r.FeatureFlagName, r => new SplitResult
+                {
+                    Treatment = r.Treatment,
+                    Config = r.Config
+                });
+        }
+        #endregion
+
         #region Destroy
         public virtual async Task DestroyAsync()
         {
@@ -328,7 +364,7 @@ namespace Splitio.Services.Client.Classes
 
         protected void BuildClientExtension()
         {
-            _clientExtensionService = new ClientExtensionService(_blockUntilReadyService, _statusManager, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator);
+            _clientExtensionService = new ClientExtensionService(_blockUntilReadyService, _statusManager, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator, _flagSetsValidator, _flagSetsFilter);
         }
 
         protected void BuildFlagSetsFilter(HashSet<string> sets)
@@ -344,12 +380,30 @@ namespace Splitio.Services.Client.Classes
 
             if (controlTreatments != null) return controlTreatments;
 
-            var evaluatorResults = await _evaluator.EvaluateFeaturesAsync(method, key, features, attributes);
+            var treatments = await _evaluator.EvaluateFeaturesAsync(method, key, features, attributes);
 
-            if (BuildAndGetImpressions(evaluatorResults, key, out var impressions))
+            await TrackImpressionsAsync(treatments, key);
+
+            return treatments;
+        }
+
+        private async Task<List<TreatmentResult>> GetTreatmentsByFlagSetsAsync(Enums.API method, Key key, List<string> flagSets, Dictionary<string, object> attributes)
+        {
+            flagSets = _clientExtensionService.FlagSetsValidations(method, key, flagSets, _log);
+
+            var treatments = await _evaluator.EvaluateFeaturesByFlagSetsAsync(method, key, flagSets, attributes);
+
+            await TrackImpressionsAsync(treatments, key);
+
+            return treatments;
+        }
+
+        private async Task TrackImpressionsAsync(List<TreatmentResult> evaluatorResults, Key key)
+        {
+            var impressions = BuildAndGetImpressions(evaluatorResults, key);
+
+            if (impressions.Any())
                 await _impressionsManager.TrackAsync(impressions);
-
-            return evaluatorResults;
         }
         #endregion
 
@@ -360,26 +414,44 @@ namespace Splitio.Services.Client.Classes
 
             if (controlTreatments != null) return controlTreatments;
 
-            var evaluatorResults = _evaluator.EvaluateFeatures(method, key, features, attributes);
+            var treatments = _evaluator.EvaluateFeatures(method, key, features, attributes);
 
-            if (BuildAndGetImpressions(evaluatorResults, key, out var impressions))
-                _impressionsManager.Track(impressions);
+            TrackImpressions(treatments, key);
 
-            return evaluatorResults;
+            return treatments;
         }
 
-        private bool BuildAndGetImpressions(List<TreatmentResult> evaluatorResults, Key key, out List<KeyImpression> impressions)
+        private List<TreatmentResult> GetTreatmentsByFlagSets(Enums.API method, Key key, List<string> flagSets, Dictionary<string, object> attributes)
         {
-            impressions = new List<KeyImpression>();
+            flagSets = _clientExtensionService.FlagSetsValidations(method, key, flagSets, _log);
 
-            foreach (var treatmentResult in evaluatorResults)
+            var treatments = _evaluator.EvaluateFeaturesByFlagSets(method, key, flagSets, attributes);
+
+            TrackImpressions(treatments, key);
+
+            return treatments;
+        }
+
+        private List<KeyImpression> BuildAndGetImpressions(List<TreatmentResult> treatments, Key key)
+        {
+            var impressions = new List<KeyImpression>();
+
+            foreach (var treatment in treatments)
             {
-                var impression = _impressionsManager.Build(treatmentResult, key);
+                var impression = _impressionsManager.Build(treatment, key);
 
                 if (impression != null) impressions.Add(impression);
             }
 
-            return impressions.Any();
+            return impressions;
+        }
+
+        private void TrackImpressions(List<TreatmentResult> treatments, Key key)
+        {
+            var impressions = BuildAndGetImpressions(treatments, key);
+            
+            if (impressions.Any())
+                _impressionsManager.Track(impressions);
         }
 
         private static SplitResult TreatmentWithConfig(List<TreatmentResult> results)

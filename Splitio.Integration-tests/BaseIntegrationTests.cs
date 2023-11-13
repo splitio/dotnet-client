@@ -510,6 +510,55 @@ namespace Splitio.Integration_tests
         }
         #endregion
 
+        #region GetTreatmentsWithConfigByFlagSets
+        [TestMethod]
+        public void GetTreatmentsWithConfigByFlagSets_WithoutFlagSetsInConfig()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "GetTreatmentsWithConfigByFlagSets1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = client.GetTreatmentsWithConfigByFlagSets("key", new List<string> { "set_1", "set_2", "set_3", string.Empty, null });
+
+            // Assert.
+            var treatment = result.FirstOrDefault();
+            Assert.AreEqual("FACUNDO_TEST", treatment.Key);
+            Assert.AreEqual("off", treatment.Value.Treatment);
+            Assert.IsNull(treatment.Value.Config);
+        }
+
+        [TestMethod]
+        public void GetTreatmentsWithConfigByFlagSets_WithWrongFlagSets()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "GetTreatmentsWithConfigByFlagSets1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = client.GetTreatmentsWithConfigByFlagSets("key", null);
+            var result2 = client.GetTreatmentsWithConfigByFlagSets("key", new List<string> { string.Empty, null });
+
+            // Assert.
+            Assert.IsFalse(result.Any());
+            Assert.IsFalse(result2.Any());
+        }
+        #endregion
+
         #region Manager
         [TestMethod]
         public void Manager_SplitNames_ReturnsSplitNames()
