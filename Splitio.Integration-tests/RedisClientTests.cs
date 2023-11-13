@@ -8,7 +8,6 @@ using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Telemetry.Domain;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -48,9 +47,9 @@ namespace Splitio.Integration_tests
         }
 
         [TestInitialize]
-        public void Init()
+        public async Task InitAsync()
         {
-            LoadSplits();
+            await RedisHelper.LoadSplitsAsync(rootFilePath, UserPrefix, _redisAdapter);
         }
 
         [TestMethod]
@@ -287,6 +286,31 @@ namespace Splitio.Integration_tests
             Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("MAURO_TEST") && ((string)x).Contains("test_test")));
         }
 
+        [TestMethod]
+        public void GetTreatmentsWithConfigByFlagSets_WithFlagSetsInConfig()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+            configurations.FlagSetsFilter = new List<string> { "set 1", "SET 2", "set3", "seto8787987979uiuyiuiyui@@", null, string.Empty };
+
+            var apikey = "GetTreatmentsWithConfigByFlagSets1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = client.GetTreatmentsWithConfigByFlagSets("key", new List<string> { "set_1", "set_2", "set_3" });
+
+            // Assert.
+            Assert.AreEqual(1, result.Count);
+            var treatment = result.FirstOrDefault();
+            Assert.AreEqual("FACUNDO_TEST", treatment.Key);
+            Assert.AreEqual("off", treatment.Value.Treatment);
+        }
+
         #region Protected Methods
         protected override ConfigurationOptions GetConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)
         {
@@ -326,22 +350,7 @@ namespace Splitio.Integration_tests
         [TestCleanup]
         public void CleanKeys()
         {
-            var keys = _redisAdapter.Keys($"{UserPrefix}*");
-            _redisAdapter.Del(keys);
-        }
-
-        private void LoadSplits()
-        {
-            CleanKeys();
-
-            var splitsJson = File.ReadAllText($"{rootFilePath}split_changes.json");
-
-            var splitResult = JsonConvert.DeserializeObject<SplitChangesResult>(splitsJson);
-
-            foreach (var split in splitResult.splits)
-            {
-                _redisAdapter.Set($"{UserPrefix}.SPLITIO.split.{split.name}", JsonConvert.SerializeObject(split));
-            }
+            RedisHelper.Cleanup(UserPrefix, _redisAdapter);
         }
     }
 }

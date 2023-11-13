@@ -792,6 +792,55 @@ namespace Splitio.Integration_tests.Async
         }
         #endregion
 
+        #region GetTreatmentsWithConfigByFlagSetsAsync
+        [TestMethod]
+        public async Task GetTreatmentsWithConfigByFlagSets_WithoutFlagSetsInConfig()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "GetTreatmentsWithConfigByFlagSets1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = await client.GetTreatmentsWithConfigByFlagSetsAsync("key", new List<string> { "set_1", "set_2", "set_3", string.Empty, null });
+
+            // Assert.
+            var treatment = result.FirstOrDefault();
+            Assert.AreEqual("FACUNDO_TEST", treatment.Key);
+            Assert.AreEqual("off", treatment.Value.Treatment);
+            Assert.IsNull(treatment.Value.Config);
+        }
+
+        [TestMethod]
+        public void GetTreatmentsWithConfigByFlagSets_WithWrongFlagSets()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "GetTreatmentsWithConfigByFlagSets1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = client.GetTreatmentsWithConfigByFlagSets("key", null);
+            var result2 = client.GetTreatmentsWithConfigByFlagSets("key", new List<string> { string.Empty, null });
+
+            // Assert.
+            Assert.IsFalse(result.Any());
+            Assert.IsFalse(result2.Any());
+        }
+        #endregion
+
         #region Protected Methods
         protected abstract ConfigurationOptions GetConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null);
         protected abstract Task AssertSentImpressionsAsync(int sentImpressionsCount, params KeyImpression[] expectedImpressions);

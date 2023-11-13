@@ -20,6 +20,9 @@ namespace Splitio.Services.InputValidation.Classes
 
             foreach (var flagSet in flagSets)
             {
+                if (string.IsNullOrEmpty(flagSet))
+                    continue;
+
                 if (flagSet.Any(char.IsUpper))
                 {
                     _log.Warn($"{method}: Flag Set name <<{flagSet}>> should be all lowercase - converting string to lowercase");
@@ -73,7 +76,7 @@ namespace Splitio.Services.InputValidation.Classes
         {
             setsToReturn = null;
 
-            if (flagSets == null || flagSets.Count == 0)
+            if (flagSets == null || !flagSets.Any())
             {
                 _log.Error($"{method}: FlagSets must be a non-empty list.");
 
@@ -83,7 +86,7 @@ namespace Splitio.Services.InputValidation.Classes
             var sets = Cleanup(method, flagSets);
             setsToReturn = Items(method, sets, flagSetsFilter);
 
-            return setsToReturn != null && setsToReturn.Count > 0;
+            return setsToReturn != null && setsToReturn.Any();
         }
     }
 }
