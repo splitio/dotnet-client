@@ -633,6 +633,68 @@ namespace Splitio.Integration_tests
         }
         #endregion
 
+        #region GetTreatmentsWithConfigByFlagSet
+        [TestMethod]
+        public async Task GetTreatmentsWithConfigByFlagSet_WithoutFlagSetsInConfig()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "GetTreatmentsWithConfigByFlagSet1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = client.GetTreatmentsWithConfigByFlagSet("nico_test", "set_1");
+            client.Destroy();
+
+            // Assert.
+            var treatment = result.FirstOrDefault();
+            Assert.AreEqual("FACUNDO_TEST", treatment.Key);
+            Assert.AreEqual("on", treatment.Value.Treatment);
+            Assert.AreEqual("{\"color\":\"green\"}", treatment.Value.Config);
+
+            await DelayAsync();
+            Assert.AreEqual(1, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+
+            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
+
+            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+
+            //Validate impressions sent to the be.
+            await AssertSentImpressionsAsync(1, impression1);
+        }
+
+        [TestMethod]
+        public void GetTreatmentsWithConfigByFlagSet_WithWrongFlagSets()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "GetTreatmentsWithConfigByFlagSet";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = client.GetTreatmentsWithConfigByFlagSet("key", null);
+            var result2 = client.GetTreatmentsWithConfigByFlagSet("key", string.Empty);
+            client.Destroy();
+
+            // Assert.
+            Assert.IsFalse(result.Any());
+            Assert.IsFalse(result2.Any());
+            Assert.AreEqual(0, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+        }
+        #endregion
+
         #region Manager
         [TestMethod]
         public void Manager_SplitNames_ReturnsSplitNames()

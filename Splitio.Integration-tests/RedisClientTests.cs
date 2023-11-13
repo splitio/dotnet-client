@@ -287,7 +287,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void GetTreatmentsWithConfigByFlagSets_WithFlagSetsInConfig()
+        public async Task GetTreatmentsWithConfigByFlagSets_WithFlagSetsInConfig()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -302,17 +302,28 @@ namespace Splitio.Integration_tests
             client.BlockUntilReady(10000);
 
             // Act.
-            var result = client.GetTreatmentsWithConfigByFlagSets("key", new List<string> { "set_1", "set_2", "set_3" });
+            var result = client.GetTreatmentsWithConfigByFlagSets("nico_test", new List<string> { "set_1", "set_2", "set_3" });
+            client.Destroy();
 
             // Assert.
             Assert.AreEqual(1, result.Count);
             var treatment = result.FirstOrDefault();
             Assert.AreEqual("FACUNDO_TEST", treatment.Key);
-            Assert.AreEqual("off", treatment.Value.Treatment);
+            Assert.AreEqual("on", treatment.Value.Treatment);
+
+            await DelayAsync();
+            Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
+
+            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
+
+            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+
+            //Validate impressions sent to the be.
+            await AssertSentImpressionsAsync(1, impression1);
         }
 
         [TestMethod]
-        public void GetTreatmentsByFlagSets_WithFlagSetsInConfig()
+        public async Task GetTreatmentsByFlagSets_WithFlagSetsInConfig()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -327,13 +338,60 @@ namespace Splitio.Integration_tests
             client.BlockUntilReady(10000);
 
             // Act.
-            var result = client.GetTreatmentsByFlagSets("key", new List<string> { "set_1", "set_2", "set_3" });
+            var result = client.GetTreatmentsByFlagSets("nico_test", new List<string> { "set_1", "set_2", "set_3" });
+            client.Destroy();
 
             // Assert.
             Assert.AreEqual(1, result.Count);
             var treatment = result.FirstOrDefault();
             Assert.AreEqual("FACUNDO_TEST", treatment.Key);
-            Assert.AreEqual("off", treatment.Value);
+            Assert.AreEqual("on", treatment.Value);
+
+            await DelayAsync();
+            Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
+
+            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
+
+            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+
+            //Validate impressions sent to the be.
+            await AssertSentImpressionsAsync(1, impression1);
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentsWithConfigByFlagSet_WithFlagSetsInConfig()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+            configurations.FlagSetsFilter = new List<string> { "set 1", "SET 2", "set3", "seto8787987979uiuyiuiyui@@", null, string.Empty };
+
+            var apikey = "GetTreatmentsWithConfigByFlagSet";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = client.GetTreatmentsWithConfigByFlagSet("nico_test", "set_1");
+            client.Destroy();
+
+            // Assert.
+            Assert.AreEqual(1, result.Count);
+            var treatment = result.FirstOrDefault();
+            Assert.AreEqual("FACUNDO_TEST", treatment.Key);
+            Assert.AreEqual("on", treatment.Value.Treatment);
+
+            await DelayAsync();
+            Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
+
+            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
+
+            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+
+            //Validate impressions sent to the be.
+            await AssertSentImpressionsAsync(1, impression1);
         }
 
         #region Protected Methods
