@@ -133,6 +133,24 @@ namespace Splitio.Services.Client.Interfaces
         Dictionary<string, string> GetTreatmentsByFlagSets(Key key, List<string> flagSets, Dictionary<string, object> attributes = null);
 
         /// <summary>
+        /// Same as GetTreatmentsWithConfig but this method evaluate by FlagSet and returns a Dictionary<string, SplitResult> containing the resulting treatment for each feature flag evaluated.
+        /// </summary>
+        /// <param name="key"> a unique key of your customer (e.g. user_id, user_email, account_id, etc.) MUST not be null or empty.</param>
+        /// <param name="flagSet"> the Flag Set name that you want to evaluate. MUST not be null or empty</param>
+        /// <param name="attributes"> of the customer (user, account etc.) to use in evaluation. Can be null or empty.</param>
+        /// <returns>Dictionary<string, SplitResult> containing for each feature flag the evaluated treatment (the default treatment of this feature flag, or 'control').</returns>
+        Dictionary<string, SplitResult> GetTreatmentsWithConfigByFlagSet(string key, string flagSet, Dictionary<string, object> attributes = null);
+
+        /// <summary>
+        /// Same as GetTreatmentsWithConfig but this method evaluate by FlagSet and returns a Dictionary<string, SplitResult> containing the resulting treatment for each feature flag evaluated.
+        /// </summary>
+        /// <param name="key"> a unique key of your customer (e.g. user_id, user_email, account_id, etc.) MUST not be null or empty.</param>
+        /// <param name="flagSet"> the Flag Set name that you want to evaluate. MUST not be null or empty</param>
+        /// <param name="attributes"> of the customer (user, account etc.) to use in evaluation. Can be null or empty.</param>
+        /// <returns>Dictionary<string, SplitResult> containing for each feature flag the evaluated treatment (the default treatment of this feature flag, or 'control').</returns>
+        Dictionary<string, SplitResult> GetTreatmentsWithConfigByFlagSet(Key key, string flagSet, Dictionary<string, object> attributes = null);
+
+        /// <summary>
         /// Enqueue a new event to be sent to split data collection services.
         /// </summary>
         /// <param name="key">the identifier of the entity.</param>

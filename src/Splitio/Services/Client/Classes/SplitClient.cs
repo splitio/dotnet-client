@@ -253,6 +253,18 @@ namespace Splitio.Services.Client.Classes
         }
         #endregion
 
+        #region GetTreatmentsByFlagSet
+        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigByFlagSetAsync(string key, string flagSet, Dictionary<string, object> attributes = null)
+        {
+            return await GetTreatmentsWithConfigByFlagSetAsync(new Key(key, null), flagSet, attributes);
+        }
+
+        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigByFlagSetAsync(Key key, string flagSet, Dictionary<string, object> attributes = null)
+        {
+
+        }
+        #endregion
+
         #region Destroy
         public virtual async Task DestroyAsync()
         {
