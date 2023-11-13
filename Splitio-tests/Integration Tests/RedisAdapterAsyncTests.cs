@@ -253,7 +253,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async Task ExecturePipelineSMembersAsyncSuccessful()
+        public async Task ExecutePipelineSMembersAsyncSuccessful()
         {
             // Arrange.
             var keys = new List<RedisKey> { $"{_redisPrefix}.flagset.set1", $"{_redisPrefix}.flagset.set2", $"{_redisPrefix}.flagset.set3" };
