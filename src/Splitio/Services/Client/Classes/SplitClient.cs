@@ -192,6 +192,23 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region GetTreatmentsWithConfigByFlagSets
+        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigByFlagSetsAsync(string key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            return await GetTreatmentsWithConfigByFlagSetsAsync(new Key(key, null), flagSets, attributes);
+        }
+
+        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigByFlagSetsAsync(Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            var results = await GetTreatmentsByFlagSetsAsync(Enums.API.GetTreatmentsWithConfig, key, flagSets, attributes);
+
+            return results
+                .ToDictionary(r => r.FeatureFlagName, r => new SplitResult
+                {
+                    Treatment = r.Treatment,
+                    Config = r.Config
+                });
+        }
+
         public Dictionary<string, SplitResult> GetTreatmentsWithConfigByFlagSets(string key, List<string> flagSets, Dictionary<string, object> attributes = null)
         {
             return GetTreatmentsWithConfigByFlagSets(new Key(key, null), flagSets, attributes);
@@ -208,22 +225,31 @@ namespace Splitio.Services.Client.Classes
                     Config = r.Config
                 });
         }
+        #endregion
 
-        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigByFlagSetsAsync(string key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        #region GetTreatmentsByFlagSets
+        public async Task<Dictionary<string, string>> GetTreatmentsByFlagSetsAsync(string key, List<string> flagSets, Dictionary<string, object> attributes = null)
         {
-            return await GetTreatmentsWithConfigByFlagSetsAsync(new Key(key, null), flagSets, attributes);
+            return await GetTreatmentsByFlagSetsAsync(new Key(key, null), flagSets, attributes);
         }
 
-        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigByFlagSetsAsync(Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        public async Task<Dictionary<string, string>> GetTreatmentsByFlagSetsAsync(Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
         {
             var results = await GetTreatmentsByFlagSetsAsync(Enums.API.GetTreatmentsWithConfig, key, flagSets, attributes);
 
-            return results
-                .ToDictionary(r => r.FeatureFlagName, r => new SplitResult
-                {
-                    Treatment = r.Treatment,
-                    Config = r.Config
-                });
+            return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
+        }
+
+        public Dictionary<string, string> GetTreatmentsByFlagSets(string key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            return GetTreatmentsByFlagSets(new Key(key, null), flagSets, attributes);
+        }
+
+        public Dictionary<string, string> GetTreatmentsByFlagSets(Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            var results = GetTreatmentsByFlagSets(Enums.API.GetTreatmentsWithConfig, key, flagSets, attributes);
+
+            return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
         }
         #endregion
 
