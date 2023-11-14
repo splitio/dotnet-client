@@ -259,6 +259,32 @@ namespace Splitio.Services.Client.Classes
         }
         #endregion
 
+        #region GetTreatmentsByFlagSet
+        public async Task<Dictionary<string, string>> GetTreatmentsByFlagSetAsync(string key, string flagSet, Dictionary<string, object> attributes = null)
+        {
+            return await GetTreatmentsByFlagSetAsync(new Key(key, null), flagSet, attributes);
+        }
+
+        public async Task<Dictionary<string, string>> GetTreatmentsByFlagSetAsync(Key key, string flagSet, Dictionary<string, object> attributes = null)
+        {
+            var results = await GetTreatmentsByFlagSetsAsync(Enums.API.GetTreatmentsByFlagSetAsync, key, new List<string> { flagSet }, attributes);
+
+            return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
+        }
+
+        public Dictionary<string, string> GetTreatmentsByFlagSet(string key, string flagSet, Dictionary<string, object> attributes = null)
+        {
+            return GetTreatmentsByFlagSet(new Key(key, null), flagSet, attributes);
+        }
+
+        public Dictionary<string, string> GetTreatmentsByFlagSet(Key key, string flagSet, Dictionary<string, object> attributes = null)
+        {
+            var results = GetTreatmentsByFlagSets(Enums.API.GetTreatmentsByFlagSet, key, new List<string> { flagSet }, attributes);
+
+            return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
+        }
+        #endregion
+
         #region Destroy
         public virtual async Task DestroyAsync()
         {

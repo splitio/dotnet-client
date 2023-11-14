@@ -141,7 +141,7 @@ namespace Splitio.Services.Client.Interfaces
         /// <param name="key"> a unique key of your customer (e.g. user_id, user_email, account_id, etc.) MUST not be null or empty.</param>
         /// <param name="flagSet"> the Flag Set name that you want to evaluate. MUST not be null or empty</param>
         /// <param name="attributes"> of the customer (user, account etc.) to use in evaluation. Can be null or empty.</param>
-        /// <returns>Dictionary<string, SplitResult> containing for each feature flag the evaluated treatment (the default treatment of this feature flag, or 'control').</returns>
+        /// <returns>Dictionary<string, SplitResult> containing for each feature flag the evaluated treatment (the default treatment of this feature flag, or 'control') and a configuration associated to this treatment if set.</returns>
         Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigByFlagSetAsync(string key, string flagSet, Dictionary<string, object> attributes = null);
 
         /// <summary>
@@ -150,8 +150,26 @@ namespace Splitio.Services.Client.Interfaces
         /// <param name="key"> a unique key of your customer (e.g. user_id, user_email, account_id, etc.) MUST not be null or empty.</param>
         /// <param name="flagSet"> the Flag Set name that you want to evaluate. MUST not be null or empty</param>
         /// <param name="attributes"> of the customer (user, account etc.) to use in evaluation. Can be null or empty.</param>
-        /// <returns>Dictionary<string, SplitResult> containing for each feature flag the evaluated treatment (the default treatment of this feature flag, or 'control').</returns>
+        /// <returns>Dictionary<string, SplitResult> containing for each feature flag the evaluated treatment (the default treatment of this feature flag, or 'control') and a configuration associated to this treatment if set.</returns>
         Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigByFlagSetAsync(Key key, string flagSet, Dictionary<string, object> attributes = null);
+
+        /// <summary>
+        /// Same as GetTreatments but this method evalute by Flag Set and returns a Dictionary<string, string> containing the resulting treatment for each feature flag evaluated.
+        /// </summary>
+        /// <param name="key">the matching and bucketing keys. MUST NOT be null.</param>
+        /// <param name="flagSet"> the Flag Set name that you want to evaluate. MUST not be null or empty</param>
+        /// <param name="attributes">of the customer (user, account etc.) to use in evaluation. Can be null or empty.</param>
+        /// <returns>Dictionay<string, string> containing for each feature flag the evaluated treatment, the default treatment for each feature flag, or 'control'.</returns>
+        Task<Dictionary<string, string>> GetTreatmentsByFlagSetAsync(string key, string flagSet, Dictionary<string, object> attributes = null);
+
+        /// <summary>
+        /// Same as GetTreatments but this method evalute by Flag Set and returns a Dictionary<string, string> containing the resulting treatment for each feature flag evaluated.
+        /// </summary>
+        /// <param name="key">the matching and bucketing keys. MUST NOT be null.</param>
+        /// <param name="flagSet"> the Flag Set name that you want to evaluate. MUST not be null or empty</param>
+        /// <param name="attributes">of the customer (user, account etc.) to use in evaluation. Can be null or empty.</param>
+        /// <returns>Dictionay<string, string> containing for each feature flag the evaluated treatment, the default treatment for each feature flag, or 'control'.</returns>
+        Task<Dictionary<string, string>> GetTreatmentsByFlagSetAsync(Key key, string flagSet, Dictionary<string, object> attributes = null);
 
         /// <summary>
         /// Enqueue a new event to be sent to split data collection services.
