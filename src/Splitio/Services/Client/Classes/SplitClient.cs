@@ -1,5 +1,6 @@
 ﻿using Splitio.Constants;
 using Splitio.Domain;
+using Splitio.Enums.Extensions;
 using Splitio.Services.Cache.Filter;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
@@ -434,26 +435,46 @@ namespace Splitio.Services.Client.Classes
         #region Private Async Methods
         private async Task<List<TreatmentResult>> GetTreatmentsAsync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes)
         {
-            features = _clientExtensionService.TreatmentsValidations(method, key, features, _log, out List<TreatmentResult> controlTreatments);
+            try
+            {
+                features = _clientExtensionService.TreatmentsValidations(method, key, features, _log, out List<TreatmentResult> controlTreatments);
 
-            if (controlTreatments != null) return controlTreatments;
+                if (controlTreatments != null) return controlTreatments;
 
-            var treatments = await _evaluator.EvaluateFeaturesAsync(method, key, features, attributes);
+                var treatments = await _evaluator.EvaluateFeaturesAsync(method, key, features, attributes);
 
-            await TrackImpressionsAsync(treatments, key);
+                await TrackImpressionsAsync(treatments, key);
 
-            return treatments;
+                return treatments;
+            }
+            catch (Exception ex)
+            {
+                _telemetryEvaluationProducer.RecordException(method.ConvertToMethodEnum());
+
+                _log.Warn("Something went wrong evaluating features.", ex);
+                return _clientExtensionService.ReturnControl(features);
+            }
         }
 
         private async Task<List<TreatmentResult>> GetTreatmentsByFlagSetsAsync(Enums.API method, Key key, List<string> flagSets, Dictionary<string, object> attributes)
         {
-            flagSets = _clientExtensionService.FlagSetsValidations(method, key, flagSets, _log);
+            try
+            {
+                flagSets = _clientExtensionService.FlagSetsValidations(method, key, flagSets, _log);
 
-            var treatments = await _evaluator.EvaluateFeaturesByFlagSetsAsync(method, key, flagSets, attributes);
+                var treatments = await _evaluator.EvaluateFeaturesByFlagSetsAsync(method, key, flagSets, attributes);
 
-            await TrackImpressionsAsync(treatments, key);
+                await TrackImpressionsAsync(treatments, key);
 
-            return treatments;
+                return treatments;
+            }
+            catch (Exception ex)
+            {
+                _telemetryEvaluationProducer.RecordException(method.ConvertToMethodEnum());
+
+                _log.Warn("Something went wrong evaluating features.", ex);
+                return new List<TreatmentResult>();
+            }
         }
 
         private async Task TrackImpressionsAsync(List<TreatmentResult> evaluatorResults, Key key)
@@ -468,26 +489,46 @@ namespace Splitio.Services.Client.Classes
         #region Private Methods
         private List<TreatmentResult> GetTreatmentsSync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            features = _clientExtensionService.TreatmentsValidations(method, key, features, _log, out List<TreatmentResult> controlTreatments);
+            try
+            {
+                features = _clientExtensionService.TreatmentsValidations(method, key, features, _log, out List<TreatmentResult> controlTreatments);
 
-            if (controlTreatments != null) return controlTreatments;
+                if (controlTreatments != null) return controlTreatments;
 
-            var treatments = _evaluator.EvaluateFeatures(method, key, features, attributes);
+                var treatments = _evaluator.EvaluateFeatures(method, key, features, attributes);
 
-            TrackImpressions(treatments, key);
+                TrackImpressions(treatments, key);
 
-            return treatments;
+                return treatments;
+            }
+            catch (Exception ex)
+            {
+                _telemetryEvaluationProducer.RecordException(method.ConvertToMethodEnum());
+
+                _log.Warn("Something went wrong evaluating features.", ex);
+                return _clientExtensionService.ReturnControl(features);
+            }
         }
 
         private List<TreatmentResult> GetTreatmentsByFlagSets(Enums.API method, Key key, List<string> flagSets, Dictionary<string, object> attributes)
         {
-            flagSets = _clientExtensionService.FlagSetsValidations(method, key, flagSets, _log);
+            try
+            {
+                flagSets = _clientExtensionService.FlagSetsValidations(method, key, flagSets, _log);
 
-            var treatments = _evaluator.EvaluateFeaturesByFlagSets(method, key, flagSets, attributes);
+                var treatments = _evaluator.EvaluateFeaturesByFlagSets(method, key, flagSets, attributes);
 
-            TrackImpressions(treatments, key);
+                TrackImpressions(treatments, key);
 
-            return treatments;
+                return treatments;
+            }
+            catch (Exception ex)
+            {
+                _telemetryEvaluationProducer.RecordException(method.ConvertToMethodEnum());
+
+                _log.Warn("Something went wrong evaluating features.", ex);
+                return new List<TreatmentResult>();
+            }
         }
 
         private List<KeyImpression> BuildAndGetImpressions(List<TreatmentResult> treatments, Key key)
@@ -506,10 +547,17 @@ namespace Splitio.Services.Client.Classes
 
         private void TrackImpressions(List<TreatmentResult> treatments, Key key)
         {
-            var impressions = BuildAndGetImpressions(treatments, key);
-            
-            if (impressions.Any())
-                _impressionsManager.Track(impressions);
+            try
+            {
+                var impressions = BuildAndGetImpressions(treatments, key);
+
+                if (impressions.Any())
+                    _impressionsManager.Track(impressions);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Something went wrong tracking impressions.", ex);
+            }
         }
 
         private static SplitResult TreatmentWithConfig(List<TreatmentResult> results)

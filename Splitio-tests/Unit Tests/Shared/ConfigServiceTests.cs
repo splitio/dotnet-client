@@ -31,6 +31,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
         [TestMethod]
         public void GetInMemoryDefatulConfig()
         {
+            // Arrange.
             _wrapperAdapter
                 .Setup(mock => mock.ReadConfig(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
                 .Returns(new ReadConfigData
@@ -40,8 +41,10 @@ namespace Splitio_Tests.Unit_Tests.Shared
                     SdkVersion = "version-test",
                 });
 
-            var result = (SelfRefreshingConfig)_configService.ReadConfig(new ConfigurationOptions(), ConfingTypes.InMemory);
+            // Act.
+            var result = (SelfRefreshingConfig)_configService.ReadConfig(new ConfigurationOptions(), ConfigTypes.InMemory);
 
+            // Assert.
             Assert.AreEqual(true, result.LabelsEnabled);
             Assert.AreEqual("https://sdk.split.io", result.BaseUrl);
             Assert.AreEqual("https://events.split.io", result.EventsBaseUrl);
@@ -68,6 +71,8 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual("name-test", result.SdkMachineName);
             Assert.AreEqual("version-test", result.SdkVersion);
             Assert.AreEqual(true, result.LabelsEnabled);
+            Assert.IsFalse(result.FlagSetsFilter.Any());
+            Assert.AreEqual(0, result.FlagSetsInvalid);
         }
 
         [TestMethod]
@@ -89,11 +94,12 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 FeaturesRefreshRate = 100, 
                 ImpressionsRefreshRate = 150,
                 SegmentsRefreshRate = 80,
-                StreamingEnabled = false
+                StreamingEnabled = false,
+                FlagSetsFilter = new List<string> { "set1", "set_2", "set-3", "ASDASDASD", "ajdlaisdiaposidopasiopdipaosidoasidpoaisdpoaispodiaspodiaspd", null, string.Empty }
             };
 
             // Act.
-            var result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+            var result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfigTypes.InMemory);
 
             // Assert.
             Assert.AreEqual(true, result.LabelsEnabled);
@@ -122,6 +128,10 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual("name-test", result.SdkMachineName);
             Assert.AreEqual("version-test", result.SdkVersion);
             Assert.AreEqual(true, result.LabelsEnabled);
+            Assert.AreEqual(3, result.FlagSetsFilter.Count);
+            Assert.IsTrue(result.FlagSetsFilter.Contains("set1"));
+            Assert.IsTrue(result.FlagSetsFilter.Contains("set_2"));
+            Assert.AreEqual(4, result.FlagSetsInvalid);
         }
 
         [TestMethod]
@@ -138,7 +148,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 });
 
             // Act.
-            var result = _configService.ReadConfig(new ConfigurationOptions(), ConfingTypes.Redis);
+            var result = _configService.ReadConfig(new ConfigurationOptions(), ConfigTypes.Redis);
 
             // Assert
             Assert.AreEqual("ip-test", result.SdkMachineIP);
@@ -166,19 +176,19 @@ namespace Splitio_Tests.Unit_Tests.Shared
             };
 
             // Act.
-            var result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+            var result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfigTypes.InMemory);
 
             // Assert.
             Assert.AreEqual(300, result.TreatmentLogRefreshRate);
 
             // Should return 60 because is the min allowed.
             config.ImpressionsRefreshRate = 30;
-            result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+            result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfigTypes.InMemory);
             Assert.AreEqual(60, result.TreatmentLogRefreshRate);
 
             // Should return custom value.
             config.ImpressionsRefreshRate = 120;
-            result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+            result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfigTypes.InMemory);
             Assert.AreEqual(120, result.TreatmentLogRefreshRate);
         }
 
@@ -201,19 +211,19 @@ namespace Splitio_Tests.Unit_Tests.Shared
             };
 
             // Act.
-            var result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+            var result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfigTypes.InMemory);
 
             // Assert.
             Assert.AreEqual(60, result.TreatmentLogRefreshRate);
 
             // Should return 60 because is the min allowed.
             config.ImpressionsRefreshRate = 30;
-            result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+            result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfigTypes.InMemory);
             Assert.AreEqual(30, result.TreatmentLogRefreshRate);
 
             // Should return custom value.
             config.ImpressionsRefreshRate = 120;
-            result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+            result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfigTypes.InMemory);
             Assert.AreEqual(120, result.TreatmentLogRefreshRate);
         }
 
@@ -233,7 +243,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             var config = new ConfigurationOptions();
 
             // Act.
-            var result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+            var result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfigTypes.InMemory);
 
             // Assert.
             Assert.IsFalse(result.FlagSetsFilter.Any());
@@ -258,7 +268,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             };
 
             // Act.
-            var result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+            var result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfigTypes.InMemory);
 
             // Assert.
             Assert.AreEqual(1, result.FlagSetsFilter.Count);
@@ -283,10 +293,11 @@ namespace Splitio_Tests.Unit_Tests.Shared
             };
 
             // Act.
-            var result = _configService.ReadConfig(config, ConfingTypes.Redis);
+            var result = _configService.ReadConfig(config, ConfigTypes.Redis);
 
             // Assert.
-            Assert.AreEqual(1, result.FlagSetsFilter.Count);
+            Assert.AreEqual(0, result.FlagSetsFilter.Count);
+            Assert.AreEqual(0, result.FlagSetsInvalid);
         }
     }
 }

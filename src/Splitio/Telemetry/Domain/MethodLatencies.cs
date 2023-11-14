@@ -12,7 +12,15 @@ namespace Splitio.Telemetry.Domain
         [JsonProperty("tc")]
         public IList<long> TreatmentWithConfig { get; set; }
         [JsonProperty("tcs")]
-        public IList<long> TreatmenstWithConfig { get; set; }
+        public IList<long> TreatmentsWithConfig { get; set; }
+        [JsonProperty("tf")]
+        public IList<long> TreatmentsByFlagSet { get; set; }
+        [JsonProperty("tfs")]
+        public IList<long> TreatmentsByFlagSets { get; set; }
+        [JsonProperty("tcf")]
+        public IList<long> TreatmentsWithConfigByFlagSet { get; set; }
+        [JsonProperty("tcfs")]
+        public IList<long> TreatmentsWithConfigByFlagSets { get; set; }
         [JsonProperty("tr")]
         public IList<long> Track { get; set; }
     }

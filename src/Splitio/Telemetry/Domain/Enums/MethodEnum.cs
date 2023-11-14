@@ -6,6 +6,10 @@
         Treatments,
         TreatmentWithConfig,
         TreatmentsWithConfig,
+        TreatmentsWithConfigByFlagSets,
+        TreatmentsByFlagSets,
+        TreatmentsWithConfigByFlagSet,
+        TreatmentsByFlagSet,
         Track
     }
 
@@ -23,6 +27,14 @@
                     return "treatmentWithConfig";
                 case MethodEnum.TreatmentsWithConfig:
                     return "treatmentsWithConfig";
+                case MethodEnum.TreatmentsWithConfigByFlagSets:
+                    return "treatmentsWithConfigByFlagSets";
+                case MethodEnum.TreatmentsByFlagSets:
+                    return "treatmentsByFlagSets";
+                case MethodEnum.TreatmentsWithConfigByFlagSet:
+                    return "treatmentsWithConfigByFlagSet";
+                case MethodEnum.TreatmentsByFlagSet:
+                    return "treatmentsByFlagSet";
                 case MethodEnum.Track:
                     return "track";
                 default:

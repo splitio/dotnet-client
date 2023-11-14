@@ -101,7 +101,9 @@ namespace Splitio.Telemetry.Common
                     RedundantActiveFactories = _factoryInstantiationsService.GetRedundantActiveFactories(),
                     Storage = Constants.StorageType.Memory,
                     SDKNotReadyUsage = _telemetryStorageConsumer.GetNonReadyUsages(),
-                    HTTPProxyDetected = IsHTTPProxyDetected()
+                    HTTPProxyDetected = IsHTTPProxyDetected(),
+                    FlagSetsTotal = _configurationOptions.FlagSetsFilter.Count,
+                    FlagSetsInvalid = _configurationOptions.FlagSetsInvalid
                 };
 
                 await _telemetryAPI.RecordConfigInitAsync(config);

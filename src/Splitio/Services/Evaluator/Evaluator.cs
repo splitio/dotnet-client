@@ -1,5 +1,6 @@
 ﻿using Splitio.Domain;
 using Splitio.Enums;
+using Splitio.Enums.Extensions;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Logger;
@@ -17,8 +18,6 @@ namespace Splitio.Services.Evaluator
     public class Evaluator : IEvaluator
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(Evaluator));
-
-        protected const string Control = "control";
         
         private readonly ISplitter _splitter;
         private readonly IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
@@ -60,7 +59,7 @@ namespace Splitio.Services.Evaluator
                         _log.Error($"{method}: Something went wrong evaluation feature: {feature}", e);
 
                         _telemetryEvaluationProducer?.RecordException(method.ConvertToMethodEnum());
-                        treatmentsForFeatures.Add(new TreatmentResult(feature, Labels.Exception, Control));
+                        treatmentsForFeatures.Add(new TreatmentResult(feature, Labels.Exception, Constants.Gral.Control));
                     }
                 }
 
@@ -132,7 +131,7 @@ namespace Splitio.Services.Evaluator
                         _log.Error($"{method}: Something went wrong evaluation feature: {feature}", e);
 
                         await _telemetryEvaluationProducer?.RecordExceptionAsync(method.ConvertToMethodEnum());
-                        treatmentsForFeatures.Add(new TreatmentResult(feature, Labels.Exception, Control));
+                        treatmentsForFeatures.Add(new TreatmentResult(feature, Labels.Exception, Constants.Gral.Control));
                     }
                 }
 
@@ -327,7 +326,7 @@ namespace Splitio.Services.Evaluator
         {
             _log.Error($"Exception caught getting treatment for feature flag: {featureName}", e);
 
-            return new TreatmentResult(featureName, Labels.Exception, Control, exception: true);
+            return new TreatmentResult(featureName, Labels.Exception, Constants.Gral.Control, exception: true);
         }
 
         private static List<TreatmentResult> EvaluateFeaturesException(Exception e, List<string> featureNames)
@@ -338,7 +337,7 @@ namespace Splitio.Services.Evaluator
 
             foreach (var name in featureNames)
             {
-                toReturn.Add(new TreatmentResult(name, Labels.Exception, Control));
+                toReturn.Add(new TreatmentResult(name, Labels.Exception, Constants.Gral.Control));
             }
 
             return toReturn;
@@ -353,7 +352,7 @@ namespace Splitio.Services.Evaluator
 
             _log.Warn($"{method}: you passed {featureFlagName} that does not exist in this environment, please double check what feature flags exist in the Split user interface.");
 
-            result = new TreatmentResult(featureFlagName, Labels.SplitNotFound, Control);
+            result = new TreatmentResult(featureFlagName, Labels.SplitNotFound, Constants.Gral.Control);
 
             return true;
         }

@@ -53,7 +53,7 @@ namespace Splitio.Services.Client.Classes
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config) : base(apiKey)
         {
-            _config = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+            _config = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfigTypes.InMemory);
 
             BuildFlagSetsFilter(_config.FlagSetsFilter);
             BuildSplitCache();
