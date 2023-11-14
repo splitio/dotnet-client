@@ -15,5 +15,6 @@ namespace Splitio.Services.Shared.Interfaces
         void RecordLatency(Enums.API method, long latency);
         Task RecordExceptionAsync(Enums.API method);
         Task RecordLatencyAsync(Enums.API method, long latency);
+        List<TreatmentResult> ReturnControl(List<string> featureFlagNames);
     }
 }

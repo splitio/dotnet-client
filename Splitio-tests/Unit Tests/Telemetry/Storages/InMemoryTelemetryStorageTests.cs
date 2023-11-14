@@ -27,7 +27,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             Assert.AreEqual(0, result.Treatment.Count);
             Assert.AreEqual(0, result.TreatmentWithConfig.Count);
             Assert.AreEqual(0, result.Treatments.Count);
-            Assert.AreEqual(0, result.TreatmenstWithConfig.Count);
+            Assert.AreEqual(0, result.TreatmentsWithConfig.Count);
             Assert.AreEqual(0, result.Track.Count);
         }
 
@@ -53,7 +53,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             // Assert.
             CollectionAssert.AreEqual(treatmentExpected, result.Treatment.ToArray());
             CollectionAssert.AreEqual(treatmentsExpected, result.Treatments.ToArray());
-            CollectionAssert.AreEqual(treatmentsWithConfigExpected, result.TreatmenstWithConfig.ToArray());
+            CollectionAssert.AreEqual(treatmentsWithConfigExpected, result.TreatmentsWithConfig.ToArray());
             CollectionAssert.AreEqual(trackExpected, result.Track.ToArray());
             Assert.AreEqual(0, result.TreatmentWithConfig.Count);
 
@@ -61,7 +61,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             Assert.AreEqual(0, result.Treatment.Count);
             Assert.AreEqual(0, result.TreatmentWithConfig.Count);
             Assert.AreEqual(0, result.Treatments.Count);
-            Assert.AreEqual(0, result.TreatmenstWithConfig.Count);
+            Assert.AreEqual(0, result.TreatmentsWithConfig.Count);
             Assert.AreEqual(0, result.Track.Count);
 
             _telemetryStorage.RecordLatency(MethodEnum.Treatment, 1);
@@ -81,7 +81,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             // Assert.
             CollectionAssert.AreEqual(treatmentExpected, result.Treatment.ToArray());
             CollectionAssert.AreEqual(treatmentsExpected, result.Treatments.ToArray());
-            CollectionAssert.AreEqual(treatmentsWithConfigExpected, result.TreatmenstWithConfig.ToArray());
+            CollectionAssert.AreEqual(treatmentsWithConfigExpected, result.TreatmentsWithConfig.ToArray());
             CollectionAssert.AreEqual(trackExpected, result.Track.ToArray());
             Assert.AreEqual(0, result.TreatmentWithConfig.Count);
         }

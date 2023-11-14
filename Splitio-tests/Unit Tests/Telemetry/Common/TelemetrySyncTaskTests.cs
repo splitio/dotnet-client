@@ -150,7 +150,8 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
                 EventsBaseUrl = "https://events.split.io",
                 AuthServiceURL = "https://auth.split.io",
                 StreamingServiceURL = "https://streaming.split.io",
-                TelemetryServiceURL = "https://telemetry.split.io"
+                TelemetryServiceURL = "https://telemetry.split.io",
+                FlagSetsFilter = new HashSet<string> { "set_1", "set_2" }
             };
         }
 

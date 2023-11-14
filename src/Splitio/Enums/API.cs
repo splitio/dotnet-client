@@ -33,7 +33,10 @@ namespace Splitio.Enums
         DependecyMatcher,
         DependecyMatcherAsync
     }
+}
 
+namespace Splitio.Enums.Extensions
+{
     public static class EnumExtensions
     {
         public static MethodEnum ConvertToMethodEnum(this API method)
@@ -57,16 +60,16 @@ namespace Splitio.Enums
                     return MethodEnum.Track;
                 case API.GetTreatmentsWithConfigByFlagSets:
                 case API.GetTreatmentsWithConfigByFlagSetsAsync:
-                    return MethodEnum.Treatments; // TODO: update this with telemetry implementation
+                    return MethodEnum.TreatmentsWithConfigByFlagSets;
                 case API.GetTreatmentsByFlagSets:
                 case API.GetTreatmentsByFlagSetsAsync:
-                    return MethodEnum.Treatments; // TODO: update this with telemetry implementation
+                    return MethodEnum.TreatmentsByFlagSets;
                 case API.GetTreatmentsWithConfigByFlagSet:
                 case API.GetTreatmentsWithConfigByFlagSetAsync:
-                    return MethodEnum.Treatments; // TODO: update this with telemetry implementation
+                    return MethodEnum.TreatmentsWithConfigByFlagSet;
                 case API.GetTreatmentsByFlagSet:
                 case API.GetTreatmentsByFlagSetAsync:
-                    return MethodEnum.Treatments; // TODO: update this with telemetry implementation
+                    return MethodEnum.TreatmentsByFlagSet;
                 default:
                     throw new Exception("");
             }

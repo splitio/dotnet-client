@@ -1,6 +1,7 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Enums;
+using Splitio.Enums.Extensions;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Filters;
 using Splitio.Services.InputValidation.Interfaces;
@@ -106,11 +107,7 @@ namespace Splitio.Services.Shared.Classes
 
             if (!IsClientReady(method, logger, features) || !_keyValidator.IsValid(key, method))
             {
-                result = new List<TreatmentResult>();
-                foreach (var feature in features)
-                {
-                    result.Add(new TreatmentResult(feature, string.Empty, Constants.Gral.Control, null));
-                }
+                result = ReturnControl(features);
 
                 return new List<string>();
             }
@@ -144,6 +141,18 @@ namespace Splitio.Services.Shared.Classes
             if (_telemetryEvaluationProducer == null) return;
 
             await _telemetryEvaluationProducer.RecordLatencyAsync(method.ConvertToMethodEnum(), Util.Metrics.Bucket(latency));
+        }
+
+        public List<TreatmentResult> ReturnControl(List<string> featureFlagNames)
+        {
+            var toReturn = new List<TreatmentResult>();
+
+            foreach (var item in featureFlagNames)
+            {
+                toReturn.Add(new TreatmentResult(item, Labels.Exception, Constants.Gral.Control));
+            }
+
+            return toReturn;
         }
 
         private bool IsClientReady(API method, ISplitLogger logger, List<string> features)
