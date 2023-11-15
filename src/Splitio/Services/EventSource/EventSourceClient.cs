@@ -174,7 +174,7 @@ namespace Splitio.Services.EventSource
                             {
                                 if (!timeoutToken.IsCancellationRequested && (ex is IOException || ex is ObjectDisposedException))
                                 {
-                                    _log.Debug($"Streaming read was forced to stop.");
+                                    _log.Debug($"Streaming read was forced to stop.", ex);
                                     _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.FORCED_STOP);
                                     return;
                                 }

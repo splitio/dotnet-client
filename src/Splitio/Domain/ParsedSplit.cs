@@ -25,7 +25,8 @@ namespace Splitio.Domain
                 treatments = treatments,
                 trafficType = trafficTypeName,
                 configs = configurations,
-                defaultTreatment = defaultTreatment
+                defaultTreatment = defaultTreatment,
+                Sets = Sets != null ? Sets.ToList() : new List<string>()
             };
         }
     }
