@@ -66,7 +66,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var splits = new List<ParsedSplit>
             {
-                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, defaultTreatment = "def" },
+                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, defaultTreatment = "def", Sets = new HashSet<string> { "set1", "set2"} },
                 new ParsedSplit { name = "test2", conditions = conditionsWithLogic },
                 new ParsedSplit { name = "test3", conditions = conditionsWithLogic },
                 new ParsedSplit { name = "test4", conditions = conditionsWithLogic },
@@ -98,6 +98,12 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual("on", firstResult.treatments[0]);
             Assert.AreEqual("off", firstResult.treatments[1]);
             Assert.AreEqual("def", firstResult.defaultTreatment);
+            Assert.AreEqual(2, firstResult.Sets.Count);
+            Assert.IsTrue(firstResult.Sets.Contains("set1"));
+            Assert.IsTrue(firstResult.Sets.Contains("set2"));
+            var test5 = result.Find(x => x.name == "test5");
+            Assert.IsFalse(test5.Sets.Any());
+            Assert.IsFalse(test5.Sets.Contains("set1"));
         }
 
         [TestMethod]
@@ -120,7 +126,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var splits = new List<ParsedSplit>
             {
-                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, defaultTreatment = "def" },
+                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, defaultTreatment = "def", Sets = new HashSet<string> { "set1", "set2"} },
                 new ParsedSplit { name = "test2", conditions = conditionsWithLogic },
                 new ParsedSplit { name = "test3", conditions = conditionsWithLogic },
                 new ParsedSplit { name = "test4", conditions = conditionsWithLogic },
@@ -150,6 +156,12 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual("user", firstResult.trafficType);
             Assert.AreEqual(conditionWithLogic.partitions.Count, firstResult.treatments.Count);
             Assert.AreEqual("def", firstResult.defaultTreatment);
+            Assert.AreEqual(2, firstResult.Sets.Count);
+            Assert.IsTrue(firstResult.Sets.Contains("set1"));
+            Assert.IsTrue(firstResult.Sets.Contains("set2"));
+            var test5 = result.Find(x => x.name == "test5");
+            Assert.IsFalse(test5.Sets.Any());
+            Assert.IsFalse(test5.Sets.Contains("set1"));
         }
 
         [TestMethod]
