@@ -109,7 +109,7 @@ namespace Splitio.Services.Cache.Classes
         {
             _featureFlags.Clear();            
             _trafficTypes.Clear();
-            _featureFlags.Clear();
+            _flagSets.Clear();
         }
 
         public bool TrafficTypeExists(string trafficType)

@@ -36,7 +36,7 @@ namespace Splitio.Services.EventSource
         #region Public Methods
         public void HandleSseStatus(SSEClientStatusMessage newStatus)
         {
-            _log.Debug($"New streaming status message received: {newStatus}");
+            _log.Debug($"New streaming status message received: {newStatus}. Current status: {_currentStatus}.");
 
             switch (newStatus)
             {
