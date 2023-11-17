@@ -45,10 +45,12 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
                     Impressions = 2,
                     Segments = 3,
                     Splits = 4
-                }
+                },
+                FlagSetsTotal = 5,
+                FlagSetsInvalid = 3
             };
 
-            var expected = "{\"oM\":1,\"sE\":false,\"rR\":{\"sp\":4,\"se\":3,\"im\":2,\"ev\":1,\"te\":0},\"iQ\":0,\"eQ\":3,\"iM\":0,\"iL\":false,\"hp\":false,\"aF\":1,\"rF\":0,\"tR\":0,\"bT\":2,\"nR\":0}";
+            var expected = "{\"oM\":1,\"sE\":false,\"rR\":{\"sp\":4,\"se\":3,\"im\":2,\"ev\":1,\"te\":0},\"iQ\":0,\"eQ\":3,\"iM\":0,\"iL\":false,\"hp\":false,\"aF\":1,\"rF\":0,\"tR\":0,\"bT\":2,\"nR\":0,\"fsT\":5,\"fsI\":3}";
 
             _splitioHttpClient
                 .Setup(mock => mock.PostAsync("www.fake-url.com/metrics/config", expected))
@@ -84,10 +86,32 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
                     Splits = new Dictionary<int, long> { { 500, 5 }, { 400, 5 } },
                     Events = new Dictionary<int, long> { { 500, 2 }, { 400, 2 } }
                 },
-                UpdatesFromSSE = new UpdatesFromSSE { Splits = 11 }
+                UpdatesFromSSE = new UpdatesFromSSE { Splits = 11 },
+                MethodExceptions = new MethodExceptions
+                {
+                    Treatment = 1,
+                    Treatments = 2,
+                    TreatmentsWithConfig = 11,
+                    TreatmentWithConfig = 12,
+                    TreatmentsByFlagSet = 5,
+                    TreatmentsByFlagSets = 3,
+                    TreatmentsWithConfigByFlagSet = 4,
+                    TreatmentsWithConfigByFlagSets = 10
+                },
+                MethodLatencies = new MethodLatencies
+                {
+                    Treatment = new long[23] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    Treatments = new long[23] { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    TreatmentsWithConfig = new long[23] { 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    TreatmentWithConfig = new long[23] { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    TreatmentsByFlagSet = new long[23] { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    TreatmentsByFlagSets = new long[23] { 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    TreatmentsWithConfigByFlagSet = new long[23] { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    TreatmentsWithConfigByFlagSets = new long[23] { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+                }
             };
 
-            var expected = "{\"hE\":{\"sp\":{\"500\":5,\"400\":5},\"ev\":{\"500\":2,\"400\":2}},\"hL\":{\"se\":[88,22,99],\"ev\":[55,66,77]},\"tR\":0,\"aR\":2,\"iQ\":0,\"iDe\":0,\"iDr\":0,\"spC\":0,\"seC\":0,\"skC\":0,\"sL\":0,\"eQ\":0,\"eD\":0,\"ufs\":{\"sp\":11}}";
+            var expected = "{\"mL\":{\"t\":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"ts\":[0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"tc\":[0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"tcs\":[0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"tf\":[0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"tfs\":[0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"tcf\":[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"tcfs\":[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},\"mE\":{\"t\":1,\"ts\":2,\"tc\":12,\"tcs\":11,\"tf\":5,\"tfs\":3,\"tcf\":4,\"tcfs\":10,\"tr\":0},\"hE\":{\"sp\":{\"500\":5,\"400\":5},\"ev\":{\"500\":2,\"400\":2}},\"hL\":{\"se\":[88,22,99],\"ev\":[55,66,77]},\"tR\":0,\"aR\":2,\"iQ\":0,\"iDe\":0,\"iDr\":0,\"spC\":0,\"seC\":0,\"skC\":0,\"sL\":0,\"eQ\":0,\"eD\":0,\"ufs\":{\"sp\":11}}";
 
             _splitioHttpClient
                 .Setup(mock => mock.PostAsync("www.fake-url.com/metrics/usage", expected))
@@ -95,6 +119,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
                 {
                     StatusCode = System.Net.HttpStatusCode.OK
                 });
+
             // Act.
             await _telemetryAPI.RecordStatsAsync(stats);
 

@@ -792,6 +792,252 @@ namespace Splitio.Integration_tests.Async
         }
         #endregion
 
+        #region GetTreatmentsWithConfigByFlagSetsAsync
+        [TestMethod]
+        public async Task GetTreatmentsWithConfigByFlagSets_WithoutFlagSetsInConfig()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "GetTreatmentsWithConfigByFlagSets1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = await client.GetTreatmentsWithConfigByFlagSetsAsync("nico_test", new List<string> { "set_1", "set_2", "set_3", string.Empty, null });
+            await client.DestroyAsync();
+
+            // Assert.
+            var treatment = result.FirstOrDefault();
+            Assert.AreEqual("FACUNDO_TEST", treatment.Key);
+            Assert.AreEqual("on", treatment.Value.Treatment);
+            Assert.AreEqual("{\"color\":\"green\"}", treatment.Value.Config);
+
+            await DelayAsync();
+            Assert.AreEqual(1, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+
+            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
+
+            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+
+            //Validate impressions sent to the be.
+            await AssertSentImpressionsAsync(1, impression1);
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentsWithConfigByFlagSets_WithWrongFlagSets()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "GetTreatmentsWithConfigByFlagSets1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = await client.GetTreatmentsWithConfigByFlagSetsAsync("key", null);
+            var result2 = await client.GetTreatmentsWithConfigByFlagSetsAsync("key", new List<string> { string.Empty, null });
+            await client.DestroyAsync();
+
+            // Assert.
+            Assert.IsFalse(result.Any());
+            Assert.IsFalse(result2.Any());
+            Assert.AreEqual(0, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+        }
+        #endregion
+
+        #region GetTreatmentsByFlagSetsAsync
+        [TestMethod]
+        public async Task GetTreatmentsByFlagSetsAsync_WithoutFlagSetsInConfig()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "GetTreatmentsByFlagSetsAsync1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = await client.GetTreatmentsByFlagSetsAsync("nico_test", new List<string> { "set_1", "set_2", "set_3", string.Empty, null });
+            await client.DestroyAsync();
+
+            // Assert.
+            var treatment = result.FirstOrDefault();
+            Assert.AreEqual("FACUNDO_TEST", treatment.Key);
+            Assert.AreEqual("on", treatment.Value);
+
+            await DelayAsync();
+            Assert.AreEqual(1, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+
+            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
+
+            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+
+            //Validate impressions sent to the be.
+            await AssertSentImpressionsAsync(1, impression1);
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentsByFlagSetsAsync_WithWrongFlagSets()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "GetTreatmentsByFlagSetsAsync1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = await client.GetTreatmentsByFlagSetsAsync("key", null);
+            var result2 = await client.GetTreatmentsByFlagSetsAsync("key", new List<string> { string.Empty, null });
+            await client.DestroyAsync();
+
+            // Assert.
+            Assert.IsFalse(result.Any());
+            Assert.IsFalse(result2.Any());
+            Assert.AreEqual(0, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+        }
+        #endregion
+
+        #region GetTreatmentsWithConfigByFlagSetAsync
+        [TestMethod]
+        public async Task GetTreatmentsWithConfigByFlagSetAsync_WithoutFlagSetsInConfig()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "GetTreatmentsWithConfigByFlagSetAsync";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = await client.GetTreatmentsWithConfigByFlagSetAsync("nico_test", "set_1");
+            client.Destroy();
+
+            // Assert.
+            var treatment = result.FirstOrDefault();
+            Assert.AreEqual("FACUNDO_TEST", treatment.Key);
+            Assert.AreEqual("on", treatment.Value.Treatment);
+            Assert.AreEqual("{\"color\":\"green\"}", treatment.Value.Config);
+
+            await DelayAsync();
+            Assert.AreEqual(1, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+
+            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
+
+            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+
+            //Validate impressions sent to the be.
+            await AssertSentImpressionsAsync(1, impression1);
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentsWithConfigByFlagSetAsync_WithWrongFlagSets()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "GetTreatmentsWithConfigByFlagSetAsync";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = await client.GetTreatmentsWithConfigByFlagSetAsync("key", null);
+            var result2 = await client.GetTreatmentsWithConfigByFlagSetAsync("key", string.Empty);
+            client.Destroy();
+
+            // Assert.
+            Assert.IsFalse(result.Any());
+            Assert.IsFalse(result2.Any());
+            Assert.AreEqual(0, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+        }
+        #endregion
+
+        #region GetTreatmentsByFlagSet
+        [TestMethod]
+        public async Task GetTreatmentsByFlagSetAsync_WithoutFlagSetsInConfig()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "GetTreatmentsByFlagSetAsync";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = await client.GetTreatmentsByFlagSetAsync("nico_test", "set_1");
+            client.Destroy();
+
+            // Assert.
+            var treatment = result.FirstOrDefault();
+            Assert.AreEqual("FACUNDO_TEST", treatment.Key);
+            Assert.AreEqual("on", treatment.Value);
+
+            await DelayAsync();
+            Assert.AreEqual(1, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+
+            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
+
+            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+
+            //Validate impressions sent to the be.
+            await AssertSentImpressionsAsync(1, impression1);
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentsByFlagSetAsync_WithWrongFlagSets()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "GetTreatmentsByFlagSetAsync";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = await client.GetTreatmentsByFlagSetAsync("key", null);
+            var result2 = await client.GetTreatmentsByFlagSetAsync("key", string.Empty);
+            client.Destroy();
+
+            // Assert.
+            Assert.IsFalse(result.Any());
+            Assert.IsFalse(result2.Any());
+            Assert.AreEqual(0, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+        }
+        #endregion
+
         #region Protected Methods
         protected abstract ConfigurationOptions GetConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null);
         protected abstract Task AssertSentImpressionsAsync(int sentImpressionsCount, params KeyImpression[] expectedImpressions);

@@ -400,7 +400,7 @@ namespace Splitio.Telemetry.Storages
                 {
                     Treatment = _methodLatencies.TryGetValue(MethodEnum.Treatment, out long[] treatment) ? treatment.ToList() : new List<long>(),
                     Treatments = _methodLatencies.TryGetValue(MethodEnum.Treatments, out long[] treatments) ? treatments.ToList() : new List<long>(),
-                    TreatmenstWithConfig = _methodLatencies.TryGetValue(MethodEnum.TreatmentsWithConfig, out long[] treatmentsConfig) ? treatmentsConfig.ToList() : new List<long>(),
+                    TreatmentsWithConfig = _methodLatencies.TryGetValue(MethodEnum.TreatmentsWithConfig, out long[] treatmentsConfig) ? treatmentsConfig.ToList() : new List<long>(),
                     TreatmentWithConfig = _methodLatencies.TryGetValue(MethodEnum.TreatmentWithConfig, out long[] treatmentConfig) ? treatmentConfig.ToList() : new List<long>(),
                     Track = _methodLatencies.TryGetValue(MethodEnum.Track, out long[] track) ? track.ToList() : new List<long>()
                 };

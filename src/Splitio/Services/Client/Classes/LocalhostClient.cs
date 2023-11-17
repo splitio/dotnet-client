@@ -52,12 +52,14 @@ namespace Splitio.Services.Client.Classes
             _watcher.Changed += new FileSystemEventHandler(OnFileChanged);
             _watcher.EnableRaisingEvents = true;
 
+            BuildFlagSetsFilter(new HashSet<string>());
+
             var splits = ParseSplitFile(_fullPath);
-            _featureFlagCache = new InMemorySplitCache(splits);
+            _featureFlagCache = new InMemorySplitCache(splits, _flagSetsFilter);
             _blockUntilReadyService = new NoopBlockUntilReadyService();
             _manager = new SplitManager(_featureFlagCache, _blockUntilReadyService);
             _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCache, _blockUntilReadyService);
-            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter());
+            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter(), null);
             _uniqueKeysTracker = new NoopUniqueKeysTracker();
             _impressionsCounter = new NoopImpressionsCounter();
             _impressionsObserver = new NoopImpressionsObserver();
@@ -104,18 +106,7 @@ namespace Splitio.Services.Client.Classes
                 var namesInCache = _featureFlagCache.GetSplitNames();
                 var featureFlagstoRemove = namesInCache.Except(featureFlagsToAdd.Keys).ToArray();
 
-                foreach (var name in featureFlagstoRemove)
-                {
-                    _featureFlagCache.RemoveSplit(name);
-                }
-
-                foreach (var featureFlag in featureFlagsToAdd)
-                {
-                    if (featureFlag.Value != null)
-                    {
-                        _featureFlagCache.AddOrUpdate(featureFlag.Key, featureFlag.Value);
-                    }
-                }
+                _featureFlagCache.Update(featureFlagsToAdd.Values.ToList(), featureFlagstoRemove.ToList(), -1);
             }
             catch (Exception ex)
             {

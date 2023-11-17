@@ -11,6 +11,10 @@
       "defaultTreatment": "off",
       "changeNumber": 1506703262916,
       "algo": 2,
+      "sets": [
+        "set_1",
+        "set_2"
+      ],
       "configurations": {
         "on": "{\"color\":\"green\"}"
       },

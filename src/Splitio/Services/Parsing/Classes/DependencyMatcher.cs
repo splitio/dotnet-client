@@ -24,8 +24,8 @@ namespace Splitio.Services.Parsing.Classes
                 return false;
             }
 
-            var evaluatorResult = evaluator.EvaluateFeatures(key, new List<string> { _split }, attributes);
-            var result = evaluatorResult.Results.FirstOrDefault();
+            var evaluatorResults = evaluator.EvaluateFeatures(Enums.API.DependecyMatcher, key, new List<string> { _split }, attributes, false);
+            var result = evaluatorResults.FirstOrDefault();
 
             if (result == null) return false;
 
@@ -39,8 +39,8 @@ namespace Splitio.Services.Parsing.Classes
                 return false;
             }
 
-            var evaluatorResult = await evaluator.EvaluateFeaturesAsync(key, new List<string> { _split }, attributes);
-            var result = evaluatorResult.Results.FirstOrDefault();
+            var evaluatorResults = await evaluator.EvaluateFeaturesAsync(Enums.API.DependecyMatcherAsync, key, new List<string> { _split }, attributes, false);
+            var result = evaluatorResults.FirstOrDefault();
 
             if (result == null) return false;
 

@@ -1,4 +1,6 @@
-﻿namespace Splitio.Domain
+﻿using System.Collections.Generic;
+
+namespace Splitio.Domain
 {
     public class BaseConfig
     {
@@ -7,6 +9,8 @@
         public string SdkMachineIP { get; set; }
         public bool LabelsEnabled { get; set; }
         public ImpressionsMode ImpressionsMode { get; set; }
+        public HashSet<string> FlagSetsFilter { get; set; }
+        public int FlagSetsInvalid { get; set; }
 
         // Bloom Filter
         public int BfExpectedElements { get; set; }

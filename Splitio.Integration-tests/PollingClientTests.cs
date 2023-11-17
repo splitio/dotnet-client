@@ -447,6 +447,102 @@ namespace Splitio.Integration_tests
             client.Destroy();
         }
 
+        [TestMethod]
+        public void GetTreatmentsWithConfigByFlagSets_WithFlagSetsInConfig()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+            configurations.FlagSetsFilter = new List<string> { "set 1", "SET 2", "set3", "seto8787987979uiuyiuiyui@@", null, string.Empty };
+
+            var apikey = "GetTreatmentsWithConfigByFlagSets1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = client.GetTreatmentsWithConfigByFlagSets("key", new List<string> { "set_1", "set_2", "set_3", string.Empty, null });
+            client.Destroy();
+
+            // Assert.
+            Assert.IsFalse(result.Any());
+            Assert.AreEqual(0, impressionListener.Count(), "InMemory: Impression Listener not match");
+        }
+
+        [TestMethod]
+        public void GetTreatmentsByFlagSets_WithFlagSetsInConfig()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+            configurations.FlagSetsFilter = new List<string> { "set 1", "SET 2", "set3", "seto8787987979uiuyiuiyui@@", null, string.Empty };
+
+            var apikey = "GetTreatmentsWithConfigByFlagSets1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = client.GetTreatmentsByFlagSets("key", new List<string> { "set_1", "set_2", "set_3", string.Empty, null });
+            client.Destroy();
+
+            // Assert.
+            Assert.IsFalse(result.Any());
+            Assert.AreEqual(0, impressionListener.Count(), "InMemory: Impression Listener not match");
+        }
+
+        [TestMethod]
+        public void GetTreatmentsWithConfigByFlagSet_WithFlagSetsInConfig()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+            configurations.FlagSetsFilter = new List<string> { "set 1", "SET 2", "set3", "seto8787987979uiuyiuiyui@@", null, string.Empty };
+
+            var apikey = "GetTreatmentsWithConfigByFlagSet";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = client.GetTreatmentsWithConfigByFlagSet("key", "set_5");
+            client.Destroy();
+
+            // Assert.
+            Assert.IsFalse(result.Any());
+            Assert.AreEqual(0, impressionListener.Count(), "InMemory: Impression Listener not match");
+        }
+
+        [TestMethod]
+        public void GetTreatmentsByFlagSet_WithFlagSetsInConfig()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+            configurations.FlagSetsFilter = new List<string> { "set 1", "SET 2", "set3", "seto8787987979uiuyiuiyui@@", null, string.Empty };
+
+            var apikey = "GetTreatmentsByFlagSet";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = client.GetTreatmentsByFlagSet("key", "set_5");
+            client.Destroy();
+
+            // Assert.
+            Assert.IsFalse(result.Any());
+            Assert.AreEqual(0, impressionListener.Count(), "InMemory: Impression Listener not match");
+        }
+
         #region Protected Methods
         protected override ConfigurationOptions GetConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)
         {

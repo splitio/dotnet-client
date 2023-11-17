@@ -2,6 +2,7 @@
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Filters;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,13 +13,15 @@ namespace Splitio_Tests.Unit_Tests.Cache
     [TestClass]
     public class SplitCacheAsyncTests
     {
+        private readonly IFlagSetsFilter _flagSetsFilter;
         private readonly IFeatureFlagCache _cache;
 
         public SplitCacheAsyncTests()
         {
+            _flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
             var splits = new ConcurrentDictionary<string, ParsedSplit>();
 
-            _cache = new InMemorySplitCache(splits);
+            _cache = new InMemorySplitCache(splits, _flagSetsFilter);
         }
 
         [TestMethod]
@@ -40,12 +43,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
             // Arrange.
             var ffName = "feature-flag";
 
-            _cache.AddSplit(ffName, new ParsedSplit
+            var split = new ParsedSplit
             {
                 name = ffName,
                 defaultTreatment = "on",
                 changeNumber = 1
-            });
+            };
+
+            _cache.Update(new List<ParsedSplit> { split }, new List<string>(), -1);
 
             // Act.
             var result = await _cache.GetSplitAsync(ffName);
@@ -70,19 +75,21 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public async Task GetAllSplitsAsyncResturnsItems()
         {
             // Arrange.
-            _cache.AddSplit("feature-flag-1", new ParsedSplit
+            var split1 = new ParsedSplit
             {
                 name = "feature-flag-1",
                 defaultTreatment = "on",
                 changeNumber = 1
-            });
+            };
 
-            _cache.AddSplit("feature-flag-2", new ParsedSplit
+            var split2 = new ParsedSplit
             {
                 name = "feature-flag-2",
                 defaultTreatment = "on",
                 changeNumber = 1
-            });
+            };
+
+            _cache.Update(new List<ParsedSplit> { split1, split2 }, new List<string>(), -1);
 
             // Act.
             var result = await _cache.GetAllSplitsAsync();
@@ -105,15 +112,18 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public async Task FetchManyAsyncReturnsItems()
         {
             // Arrange.
+            var toAdd = new List<ParsedSplit>();
             for (int i = 1; i <= 3; i++)
             {
-                _cache.AddSplit($"feature-flag-{i}", new ParsedSplit
+                toAdd.Add(new ParsedSplit
                 {
                     name = $"feature-flag-{i}",
                     defaultTreatment = "on",
                     changeNumber = i
                 });
             }
+
+            _cache.Update(toAdd, new List<string>(), -1);
 
             // Act.
             var result = await _cache.FetchManyAsync(new List<string> { "feature-flag-2" });
@@ -140,15 +150,18 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public async Task GetSplitNamesAsyncReturnsItems()
         {
             // Arrange.
+            var toAdd = new List<ParsedSplit>();
             for (int i = 1; i <= 5; i++)
             {
-                _cache.AddSplit($"feature-flag-{i}", new ParsedSplit
+                toAdd.Add(new ParsedSplit
                 {
                     name = $"feature-flag-{i}",
                     defaultTreatment = "on",
                     changeNumber = i
                 });
             }
+
+            _cache.Update(toAdd, new List<string>(), -1);
 
             // Act.
             var result = await _cache.GetSplitNamesAsync();

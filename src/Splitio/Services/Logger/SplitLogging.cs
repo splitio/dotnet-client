@@ -19,7 +19,7 @@ namespace Splitio.Services.Logger
 
         public void Debug(string message, Exception exception)
         {
-            if (_level == Level.Debug)
+            if (_level <= Level.Debug)
             {
                 WriteLog(message, exception);
             }
@@ -27,7 +27,7 @@ namespace Splitio.Services.Logger
 
         public void Debug(string message)
         {
-            if (_level == Level.Debug)
+            if (_level <= Level.Debug)
             {
                 WriteLog(message);
             }
@@ -35,7 +35,7 @@ namespace Splitio.Services.Logger
 
         public void Error(string message, Exception exception)
         {
-            if (_level == Level.Error)
+            if (_level <= Level.Error)
             {
                 WriteLog(message, exception);
             }
@@ -43,7 +43,7 @@ namespace Splitio.Services.Logger
 
         public void Error(string message)
         {
-            if (_level == Level.Error)
+            if (_level <= Level.Error)
             {
                 WriteLog(message);
             }
@@ -51,7 +51,7 @@ namespace Splitio.Services.Logger
 
         public void Info(string message, Exception exception)
         {
-            if (_level >= Level.Info)
+            if (_level <= Level.Info)
             {
                 WriteLog(message, exception);
             }
@@ -59,7 +59,7 @@ namespace Splitio.Services.Logger
 
         public void Info(string message)
         {
-            if (_level >= Level.Info)
+            if (_level <= Level.Info)
             {
                 WriteLog(message);
             }
@@ -67,17 +67,23 @@ namespace Splitio.Services.Logger
 
         public void Trace(string message, Exception exception)
         {
-            throw new NotImplementedException();
+            if (_level <= Level.Trace)
+            {
+                WriteLog(message, exception);
+            }
         }
 
         public void Trace(string message)
         {
-            throw new NotImplementedException();
+            if (_level <= Level.Trace)
+            {
+                WriteLog(message);
+            }
         }
 
         public void Warn(string message, Exception exception)
         {
-            if (_level >= Level.Warn)
+            if (_level <= Level.Warn)
             {
                 WriteLog(message, exception);
             }
@@ -85,7 +91,7 @@ namespace Splitio.Services.Logger
 
         public void Warn(string message)
         {
-            if (_level >= Level.Warn)
+            if (_level <= Level.Warn)
             {
                 WriteLog(message);
             }

@@ -21,11 +21,20 @@ namespace Splitio.Integration_tests.Resources
 
     public class InMemoryHelper
     {
-        public static Task AssertSentImpressionsAsync(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
+        public static async Task AssertSentImpressionsAsync(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
         {
-            if (sentImpressionsCount <= 0) return Task.FromResult(0);
+            if (sentImpressionsCount <= 0) return;
 
-            var sentImpressions = GetImpressionsSentBackend(httpClientMock);
+            var sentImpressions = new List<KeyImpressionBackend>();
+
+            for (int i = 0; i < 3; i++)
+            {
+                sentImpressions = GetImpressionsSentBackend(httpClientMock);
+
+                if (sentImpressions.Count > 0) break;
+
+                await Task.Delay(1000);
+            }
 
             Assert.AreEqual(sentImpressionsCount, sentImpressions.Sum(si => si.I.Count), "AssertSentImpressions");
 
@@ -46,8 +55,6 @@ namespace Splitio.Integration_tests.Resources
                     .Where(si => expectedImp.treatment == si.T)
                     .Any());
             }
-
-            return Task.FromResult(0);
         }
 
         public static List<KeyImpressionBackend> GetImpressionsSentBackend(HttpClientMock httpClientMock = null)

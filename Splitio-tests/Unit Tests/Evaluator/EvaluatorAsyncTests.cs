@@ -6,6 +6,7 @@ using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Parsing;
 using Splitio.Services.Parsing.Classes;
+using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
     {
         private readonly Mock<ISplitter> _splitter;
         private readonly Mock<IFeatureFlagCacheConsumer> _splitCache;
+        private readonly Mock<ITelemetryEvaluationProducer> _telemetryEvaluationProducer;
 
         private readonly IEvaluator _evaluator;
 
@@ -24,8 +26,9 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
         {
             _splitter = new Mock<ISplitter>();
             _splitCache = new Mock<IFeatureFlagCacheConsumer>();
+            _telemetryEvaluationProducer = new Mock<ITelemetryEvaluationProducer>();
 
-            _evaluator = new Splitio.Services.Evaluator.Evaluator(_splitCache.Object, _splitter.Object);
+            _evaluator = new Splitio.Services.Evaluator.Evaluator(_splitCache.Object, _splitter.Object, _telemetryEvaluationProducer.Object);
         }
 
         #region EvaluateFeature
@@ -42,11 +45,11 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .ReturnsAsync(new List<ParsedSplit> { parsedSplit });
 
             // Act.
-            var result = await _evaluator.EvaluateFeaturesAsync(key, new List<string> { splitName });
+            var results = await _evaluator.EvaluateFeaturesAsync(Splitio.Enums.API.GetTreatmentAsync, key, new List<string> { splitName });
 
             // Assert.
-            Assert.AreEqual("control", result.Results.FirstOrDefault().Treatment);
-            Assert.AreEqual(Labels.SplitNotFound, result.Results.FirstOrDefault().Label);
+            Assert.AreEqual("control", results.FirstOrDefault().Treatment);
+            Assert.AreEqual(Labels.SplitNotFound, results.FirstOrDefault().Label);
         }
 
         [TestMethod]
@@ -70,12 +73,12 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .ReturnsAsync(new List<ParsedSplit> { parsedSplit });
 
             // Act.
-            var result = await _evaluator.EvaluateFeaturesAsync(key, new List<string> { splitName });
+            var results = await _evaluator.EvaluateFeaturesAsync(Splitio.Enums.API.GetTreatmentAsync, key, new List<string> { splitName });
 
             // Assert.
-            Assert.AreEqual(parsedSplit.defaultTreatment, result.Results.FirstOrDefault().Treatment);
-            Assert.AreEqual(parsedSplit.changeNumber, result.Results.FirstOrDefault().ChangeNumber);
-            Assert.AreEqual(Labels.Killed, result.Results.FirstOrDefault().Label);
+            Assert.AreEqual(parsedSplit.defaultTreatment, results.FirstOrDefault().Treatment);
+            Assert.AreEqual(parsedSplit.changeNumber, results.FirstOrDefault().ChangeNumber);
+            Assert.AreEqual(Labels.Killed, results.FirstOrDefault().Label);
         }
 
         [TestMethod]
@@ -99,12 +102,12 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .ReturnsAsync(new List<ParsedSplit> { parsedSplit });
 
             // Act.
-            var result = await _evaluator.EvaluateFeaturesAsync(key, new List<string> { splitName });
+            var results = await _evaluator.EvaluateFeaturesAsync(Splitio.Enums.API.GetTreatmentAsync, key, new List<string> { splitName });
 
             // Assert.
-            Assert.AreEqual(parsedSplit.defaultTreatment, result.Results.FirstOrDefault().Treatment);
-            Assert.AreEqual(parsedSplit.changeNumber, result.Results.FirstOrDefault().ChangeNumber);
-            Assert.AreEqual(Labels.DefaultRule, result.Results.FirstOrDefault().Label);
+            Assert.AreEqual(parsedSplit.defaultTreatment, results.FirstOrDefault().Treatment);
+            Assert.AreEqual(parsedSplit.changeNumber, results.FirstOrDefault().ChangeNumber);
+            Assert.AreEqual(Labels.DefaultRule, results.FirstOrDefault().Label);
         }
 
         [TestMethod]
@@ -156,12 +159,12 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(18);
 
             // Act.
-            var result = await _evaluator.EvaluateFeaturesAsync(key, new List<string> { splitName });
+            var results = await _evaluator.EvaluateFeaturesAsync(Splitio.Enums.API.GetTreatmentAsync, key, new List<string> { splitName });
 
             // Assert.
-            Assert.AreEqual(parsedSplit.defaultTreatment, result.Results.FirstOrDefault().Treatment);
-            Assert.AreEqual(parsedSplit.changeNumber, result.Results.FirstOrDefault().ChangeNumber);
-            Assert.AreEqual(Labels.TrafficAllocationFailed, result.Results.FirstOrDefault().Label);
+            Assert.AreEqual(parsedSplit.defaultTreatment, results.FirstOrDefault().Treatment);
+            Assert.AreEqual(parsedSplit.changeNumber, results.FirstOrDefault().ChangeNumber);
+            Assert.AreEqual(Labels.TrafficAllocationFailed, results.FirstOrDefault().Label);
         }
 
         [TestMethod]
@@ -221,12 +224,12 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns("on");
 
             // Act.
-            var result = await _evaluator.EvaluateFeaturesAsync(key, new List<string> { splitName });
+            var results = await _evaluator.EvaluateFeaturesAsync(Splitio.Enums.API.GetTreatmentAsync, key, new List<string> { splitName });
 
             // Assert.
-            Assert.AreEqual("on", result.Results.FirstOrDefault().Treatment);
-            Assert.AreEqual("labelCondition", result.Results.FirstOrDefault().Label);
-            Assert.AreEqual(parsedSplit.changeNumber, result.Results.FirstOrDefault().ChangeNumber);
+            Assert.AreEqual("on", results.FirstOrDefault().Treatment);
+            Assert.AreEqual("labelCondition", results.FirstOrDefault().Label);
+            Assert.AreEqual(parsedSplit.changeNumber, results.FirstOrDefault().ChangeNumber);
         }
 
         [TestMethod]
@@ -284,12 +287,12 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns("on");
 
             // Act.
-            var result = await _evaluator.EvaluateFeaturesAsync(key, new List<string> { splitName }, attributes);
+            var results = await _evaluator.EvaluateFeaturesAsync(Splitio.Enums.API.GetTreatmentAsync, key, new List<string> { splitName }, attributes);
 
             // Assert.
-            Assert.AreEqual("on", result.Results.FirstOrDefault().Treatment);
-            Assert.AreEqual("label", result.Results.FirstOrDefault().Label);
-            Assert.AreEqual(parsedSplit.changeNumber, result.Results.FirstOrDefault().ChangeNumber);
+            Assert.AreEqual("on", results.FirstOrDefault().Treatment);
+            Assert.AreEqual("label", results.FirstOrDefault().Label);
+            Assert.AreEqual(parsedSplit.changeNumber, results.FirstOrDefault().ChangeNumber);
         }
 
         [TestMethod]
@@ -341,12 +344,12 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .ReturnsAsync(new List<ParsedSplit> { parsedSplit });
 
             // Act.
-            var result = await _evaluator.EvaluateFeaturesAsync(key, new List<string> { splitName });
+            var results = await _evaluator.EvaluateFeaturesAsync(Splitio.Enums.API.GetTreatmentAsync, key, new List<string> { splitName });
 
             // Assert.
-            Assert.AreEqual("off", result.Results.FirstOrDefault().Treatment);
-            Assert.AreEqual(Labels.DefaultRule, result.Results.FirstOrDefault().Label);
-            Assert.AreEqual(parsedSplit.changeNumber, result.Results.FirstOrDefault().ChangeNumber);
+            Assert.AreEqual("off", results.FirstOrDefault().Treatment);
+            Assert.AreEqual(Labels.DefaultRule, results.FirstOrDefault().Label);
+            Assert.AreEqual(parsedSplit.changeNumber, results.FirstOrDefault().ChangeNumber);
         }
 
         [TestMethod]
@@ -426,12 +429,12 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns("on");
 
             // Act.
-            var result = await _evaluator.EvaluateFeaturesAsync(key, new List<string> { splitName });
+            var results = await _evaluator.EvaluateFeaturesAsync(Splitio.Enums.API.GetTreatmentAsync, key, new List<string> { splitName });
 
             // Assert.
-            Assert.AreEqual("on", result.Results.FirstOrDefault().Treatment);
-            Assert.AreEqual("labelEndsWith", result.Results.FirstOrDefault().Label);
-            Assert.AreEqual(parsedSplit.changeNumber, result.Results.FirstOrDefault().ChangeNumber);
+            Assert.AreEqual("on", results.FirstOrDefault().Treatment);
+            Assert.AreEqual("labelEndsWith", results.FirstOrDefault().Label);
+            Assert.AreEqual(parsedSplit.changeNumber, results.FirstOrDefault().ChangeNumber);
         }
         #endregion
 
@@ -442,50 +445,88 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             // Arrange.
             var splitNames = new List<string> { "always_on", "always_off" };
             var key = new Key("test@split.io", "test");
-            var parsedSplitOn = new ParsedSplit
-            {
-                algo = AlgorithmEnum.Murmur,
-                changeNumber = 123123,
-                name = splitNames.First(s => s.Equals("always_on")),
-                defaultTreatment = "off",
-                trafficTypeName = "tt",
-                trafficAllocationSeed = 18,
-                trafficAllocation = 20,
-                seed = 123123133,
-                conditions = new List<ConditionWithLogic>
-                {
-                    new ConditionWithLogic
-                    {
-                        label = "labelEndsWithMatcher",
-                        conditionType = ConditionType.ROLLOUT,
-                        partitions = new List<PartitionDefinition>
-                        {
-                           new PartitionDefinition
-                           {
-                               treatment = "on",
-                               size = 100
-                           }
-                        },
-                        matcher = new CombiningMatcher
-                        {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
-                            {
-                                new AttributeMatcher
-                                {
-                                    matcher = new EndsWithMatcher(new List<string> { "@split.io" })
-                                }
-                            }
-                        }
-                    }
-                }
-            };
+            var parsedSplitOn = FeatureFlagOn();
+            var parsedSplitOff = FeatureFlagOff();
 
-            var parsedSplitOff = new ParsedSplit
+            _splitter
+                .Setup(mock => mock.GetBucket(key.bucketingKey, parsedSplitOn.trafficAllocationSeed, AlgorithmEnum.Murmur))
+                .Returns(18);
+
+            _splitCache
+                .Setup(mock => mock.FetchManyAsync(It.IsAny<List<string>>()))
+                .ReturnsAsync(new List<ParsedSplit>
+                {
+                    parsedSplitOff,
+                    parsedSplitOn
+                });
+
+            _splitter
+                .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplitOn.seed, It.IsAny<List<PartitionDefinition>>(), parsedSplitOn.algo))
+                .Returns("on");
+
+            _splitter
+                .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplitOff.seed, It.IsAny<List<PartitionDefinition>>(), parsedSplitOff.algo))
+                .Returns("off");
+
+            // Act.
+            var results = await _evaluator.EvaluateFeaturesAsync(Splitio.Enums.API.GetTreatmentAsync, key, splitNames);
+
+            // Assert.
+            var resultOn = results.FirstOrDefault(tr => tr.FeatureFlagName.Equals("always_on"));
+            Assert.AreEqual("on", resultOn.Treatment);
+            Assert.AreEqual(parsedSplitOn.changeNumber, resultOn.ChangeNumber);
+            Assert.AreEqual("labelEndsWithMatcher", resultOn.Label);
+
+            var resultOff = results.FirstOrDefault(tr => tr.FeatureFlagName.Equals("always_off"));
+            Assert.AreEqual("off", resultOff.Treatment);
+            Assert.AreEqual(parsedSplitOn.changeNumber, resultOff.ChangeNumber);
+            Assert.AreEqual("labelWhiteList", resultOff.Label);
+        }
+        #endregion
+
+        #region EvaluateFeaturesByFlagSets
+        [TestMethod]
+        public async Task EvaluateFeaturesByFlagSetsAsync()
+        {
+            // Arrange.
+            var key = new Key("test", "test");
+            var sets = new List<string> { "set1", "set2", "set3" };
+
+            _splitCache
+                .Setup(mock => mock.GetNamesByFlagSetsAsync(sets))
+                .ReturnsAsync(new Dictionary<string, HashSet<string>>
+                {
+                    { "set1", new HashSet<string> { "flag1", "flag2", "flag3" } },
+                    { "set2", new HashSet<string> { "flag1", "flag2", "flag3" } },
+                    { "set3", new HashSet<string>() }
+                });
+
+            _splitCache
+                .Setup(mock => mock.FetchManyAsync(It.IsAny<List<string>>()))
+                .ReturnsAsync(new List<ParsedSplit> { FeatureFlagOn("flag1"), FeatureFlagOff("flag2"), FeatureFlagOff("flag3") });
+
+            // Act.
+            var results = await _evaluator.EvaluateFeaturesByFlagSetsAsync(Splitio.Enums.API.GetTreatments, key, sets);
+
+            // Assert.
+            Assert.AreEqual(3, results.Count);
+            var flag1 = results.First(x => x.FeatureFlagName.Equals("flag1"));
+            Assert.AreEqual("on", flag1.Treatment);
+            var flag2 = results.First(x => x.FeatureFlagName.Equals("flag2"));
+            Assert.AreEqual("off", flag2.Treatment);
+            var flag3 = results.First(x => x.FeatureFlagName.Equals("flag3"));
+            Assert.AreEqual("off", flag3.Treatment);
+        }
+        #endregion
+
+        #region Public Methods
+        public static ParsedSplit FeatureFlagOff(string name = "always_off")
+        {
+            return new ParsedSplit
             {
                 algo = AlgorithmEnum.Murmur,
                 changeNumber = 123123,
-                name = splitNames.First(s => s.Equals("always_off")),
+                name = name,
                 defaultTreatment = "off",
                 trafficTypeName = "tt",
                 seed = 5647567,
@@ -541,40 +582,48 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                     }
                 }
             };
+        }
 
-            _splitter
-                .Setup(mock => mock.GetBucket(key.bucketingKey, parsedSplitOn.trafficAllocationSeed, AlgorithmEnum.Murmur))
-                .Returns(18);
-
-            _splitCache
-                .Setup(mock => mock.FetchManyAsync(It.IsAny<List<string>>()))
-                .ReturnsAsync(new List<ParsedSplit>
+        public static ParsedSplit FeatureFlagOn(string name = "always_on")
+        {
+            return  new ParsedSplit
+            {
+                algo = AlgorithmEnum.Murmur,
+                changeNumber = 123123,
+                name = name,
+                defaultTreatment = "on",
+                trafficTypeName = "tt",
+                trafficAllocationSeed = 18,
+                trafficAllocation = 20,
+                seed = 123123133,
+                conditions = new List<ConditionWithLogic>
                 {
-                    parsedSplitOff,
-                    parsedSplitOn
-                });
-
-            _splitter
-                .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplitOn.seed, It.IsAny<List<PartitionDefinition>>(), parsedSplitOn.algo))
-                .Returns("on");
-
-            _splitter
-                .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplitOff.seed, It.IsAny<List<PartitionDefinition>>(), parsedSplitOff.algo))
-                .Returns("off");
-
-            // Act.
-            var result = await _evaluator.EvaluateFeaturesAsync(key, splitNames);
-
-            // Assert.
-            var resultOn = result.Results.FirstOrDefault(tr => tr.FeatureFlagName.Equals("always_on"));
-            Assert.AreEqual("on", resultOn.Treatment);
-            Assert.AreEqual(parsedSplitOn.changeNumber, resultOn.ChangeNumber);
-            Assert.AreEqual("labelEndsWithMatcher", resultOn.Label);
-
-            var resultOff = result.Results.FirstOrDefault(tr => tr.FeatureFlagName.Equals("always_off"));
-            Assert.AreEqual("off", resultOff.Treatment);
-            Assert.AreEqual(parsedSplitOn.changeNumber, resultOff.ChangeNumber);
-            Assert.AreEqual("labelWhiteList", resultOff.Label);
+                    new ConditionWithLogic
+                    {
+                        label = "labelEndsWithMatcher",
+                        conditionType = ConditionType.ROLLOUT,
+                        partitions = new List<PartitionDefinition>
+                        {
+                           new PartitionDefinition
+                           {
+                               treatment = "on",
+                               size = 100
+                           }
+                        },
+                        matcher = new CombiningMatcher
+                        {
+                            combiner = CombinerEnum.AND,
+                            delegates = new List<AttributeMatcher>
+                            {
+                                new AttributeMatcher
+                                {
+                                    matcher = new EndsWithMatcher(new List<string> { "@split.io" })
+                                }
+                            }
+                        }
+                    }
+                }
+            };
         }
         #endregion
     }
