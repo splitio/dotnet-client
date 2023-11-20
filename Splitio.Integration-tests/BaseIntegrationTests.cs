@@ -54,7 +54,7 @@ namespace Splitio.Integration_tests
 
             // Validate impressions in listener.
             await DelayAsync();
-            Assert.AreEqual(4, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+            await AssertImpressionListenerAsync(4, impressionListener);
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("FACUNDO_TEST", "mauro_test");
@@ -100,7 +100,7 @@ namespace Splitio.Integration_tests
 
             // Validate impressions in listener.
             await DelayAsync();
-            Assert.AreEqual(2, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+            await AssertImpressionListenerAsync(2, impressionListener);
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("Test_Save_1", "24");
@@ -180,7 +180,7 @@ namespace Splitio.Integration_tests
 
             // Validate impressions.
             await DelayAsync();
-            Assert.AreEqual(4, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+            await AssertImpressionListenerAsync(4, impressionListener);
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("FACUNDO_TEST", "mauro_test");
@@ -231,7 +231,7 @@ namespace Splitio.Integration_tests
 
             // Validate impressions.
             await DelayAsync();
-            Assert.AreEqual(2, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+            await AssertImpressionListenerAsync(2, impressionListener);
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("MAURO_TEST", "mauro");
@@ -300,7 +300,7 @@ namespace Splitio.Integration_tests
 
             // Validate impressions.
             await DelayAsync();
-            Assert.AreEqual(3, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+            await AssertImpressionListenerAsync(3, impressionListener);
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("MAURO_TEST", "nico_test");
@@ -346,7 +346,7 @@ namespace Splitio.Integration_tests
 
             // Validate impressions.
             await DelayAsync();
-            Assert.AreEqual(4, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+            await AssertImpressionListenerAsync(4, impressionListener);
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("Test_Save_1", "nico_test");
@@ -393,7 +393,7 @@ namespace Splitio.Integration_tests
 
             // Validate impressions.
             await DelayAsync();
-            Assert.AreEqual(3, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+            await AssertImpressionListenerAsync(3, impressionListener);
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("MAURO_TEST", "nico_test");
@@ -447,7 +447,7 @@ namespace Splitio.Integration_tests
 
             // Validate impressions.
             await DelayAsync();
-            Assert.AreEqual(4, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+            await AssertImpressionListenerAsync(4, impressionListener);
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("Test_Save_1", "nico_test");
@@ -495,7 +495,7 @@ namespace Splitio.Integration_tests
 
             // Validate impressions.
             await DelayAsync();
-            Assert.AreEqual(3, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+            await AssertImpressionListenerAsync(3, impressionListener);
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
             var impression2 = impressionListener.Get("MAURO_TEST", "nico_test");
@@ -536,7 +536,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("{\"color\":\"green\"}", treatment.Value.Config);
 
             await DelayAsync();
-            Assert.AreEqual(1, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+            await AssertImpressionListenerAsync(1, impressionListener);
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
 
@@ -597,7 +597,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("on", treatment.Value);
 
             await DelayAsync();
-            Assert.AreEqual(1, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+            await AssertImpressionListenerAsync(1, impressionListener);
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
 
@@ -659,7 +659,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("{\"color\":\"green\"}", treatment.Value.Config);
 
             await DelayAsync();
-            Assert.AreEqual(1, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+            await AssertImpressionListenerAsync(1, impressionListener);
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
 
@@ -720,7 +720,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("on", treatment.Value);
 
             await DelayAsync();
-            Assert.AreEqual(1, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+            await AssertImpressionListenerAsync(1, impressionListener);
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
 
@@ -1072,6 +1072,19 @@ namespace Splitio.Integration_tests
         protected virtual async Task DelayAsync()
         {
             await Task.Delay(0);
+        }
+
+        protected virtual async Task AssertImpressionListenerAsync(int expected, IntegrationTestsImpressionListener impressionListener)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                if (impressionListener.Count() > 0)
+                    break;
+
+                await Task.Delay(1000);
+            }
+
+            Assert.AreEqual(expected, impressionListener.Count(), $"{_mode}: Impression Listener not match");
         }
         #endregion
     }
