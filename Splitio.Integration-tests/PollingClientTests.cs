@@ -60,10 +60,9 @@ namespace Splitio.Integration_tests
             Helper.AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
             Helper.AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
 
-            Assert.AreEqual(3, impressionListener.Count());
-
-            //Validate impressions sent to the be.            
+            //Validate impressions sent to the be.
             await AssertSentImpressionsAsync(3, impression1, impression2, impression3);
+            await AssertImpressionListenerAsync(3, impressionListener);
         }
 
         [TestMethod]

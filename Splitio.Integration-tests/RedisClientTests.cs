@@ -87,7 +87,7 @@ namespace Splitio.Integration_tests
             Helper.AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
             Helper.AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
 
-            Assert.AreEqual(3, impressionListener.Count());
+            await AssertImpressionListenerAsync(3, impressionListener);
 
             //Validate impressions sent to the be.            
             await AssertSentImpressionsAsync(3, impression1, impression2, impression3);
@@ -311,7 +311,6 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("FACUNDO_TEST", treatment.Key);
             Assert.AreEqual("on", treatment.Value.Treatment);
 
-            await DelayAsync();
             Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
@@ -347,7 +346,6 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("FACUNDO_TEST", treatment.Key);
             Assert.AreEqual("on", treatment.Value);
 
-            await DelayAsync();
             Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
@@ -383,7 +381,6 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("FACUNDO_TEST", treatment.Key);
             Assert.AreEqual("on", treatment.Value.Treatment);
 
-            await DelayAsync();
             Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
@@ -419,7 +416,6 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("FACUNDO_TEST", treatment.Key);
             Assert.AreEqual("on", treatment.Value);
 
-            await DelayAsync();
             Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
 
             var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
