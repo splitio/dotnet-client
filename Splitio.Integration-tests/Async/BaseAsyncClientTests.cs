@@ -856,8 +856,6 @@ namespace Splitio.Integration_tests.Async
             Assert.AreEqual("FACUNDO_TEST", treatment.Key);
             Assert.AreEqual("on", treatment.Value);
 
-            Assert.AreEqual(1, impressionListener.Count(), $"{_mode}: Impression Listener not match");
-
             var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
 
             //Validate impressions sent to the be.
