@@ -58,23 +58,21 @@ namespace Splitio.Integration_tests.Async
             Assert.AreEqual("off", result4);
 
             await client.DestroyAsync();
-            await DelayAsync();
 
-            // Validate impressions in listener.
-            Assert.AreEqual(4, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
-
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-            var impression2 = impressionListener.Get("FACUNDO_TEST", "mauro_test");
-            var impression3 = impressionListener.Get("Test_Save_1", "1");
-            var impression4 = impressionListener.Get("Test_Save_1", "24");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            Helper.AssertImpression(impression2, 1506703262916, "FACUNDO_TEST", "mauro_test", "in segment all", "off");
-            Helper.AssertImpression(impression3, 1503956389520, "Test_Save_1", "1", "whitelisted", "on");
-            Helper.AssertImpression(impression4, 1503956389520, "Test_Save_1", "24", "in segment all", "off");
+            var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            var impExpected2 = Helper.GetImpressionExpected("FACUNDO_TEST", "mauro_test");
+            var impExpected3 = Helper.GetImpressionExpected("Test_Save_1", "1");
+            var impExpected4 = Helper.GetImpressionExpected("Test_Save_1", "24");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(4, impression1, impression2, impression3, impression4);
+            await AssertSentImpressionsAsync(4, impExpected1, impExpected2, impExpected3, impExpected4);
+
+            // Validate impressions in listener.
+            await Helper.AssertImpressionListenerAsync(_mode, 4, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "mauro_test"), impExpected2);
+            Helper.AssertImpression(impressionListener.Get("Test_Save_1", "1"), impExpected3);
+            Helper.AssertImpression(impressionListener.Get("Test_Save_1", "24"), impExpected4);
         }
 
         [TestMethod]
@@ -104,21 +102,17 @@ namespace Splitio.Integration_tests.Async
             Assert.AreEqual("off", result4);
 
             await client.DestroyAsync();
-            await DelayAsync();
 
-            // Validate impressions in listener.
-            Assert.AreEqual(2, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
-
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-            var impression2 = impressionListener.Get("Test_Save_1", "24");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            Helper.AssertImpression(impression2, 1503956389520, "Test_Save_1", "24", "in segment all", "off");
+            var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            var impExpected2 = Helper.GetImpressionExpected("Test_Save_1", "24");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(2, impression1, impression2);
+            await AssertSentImpressionsAsync(2, impExpected1, impExpected2);
 
-            client.Destroy();
+            // Validate impressions in listener.
+            await Helper.AssertImpressionListenerAsync(_mode, 2, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
+            Helper.AssertImpression(impressionListener.Get("Test_Save_1", "24"), impExpected2);
         }
 
         [TestMethod]
@@ -173,7 +167,6 @@ namespace Splitio.Integration_tests.Async
             var result4 = await client.GetTreatmentWithConfigAsync("test", "MAURO_TEST");
 
             await client.DestroyAsync();
-            await DelayAsync();
 
             // Assert.
             Assert.AreEqual("on", result1.Treatment);
@@ -186,21 +179,20 @@ namespace Splitio.Integration_tests.Async
             Assert.AreEqual("{\"version\":\"v2\"}", result3.Config);
             Assert.AreEqual("{\"version\":\"v1\"}", result4.Config);
 
-            // Validate impressions.
-            Assert.AreEqual(4, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
-
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-            var impression2 = impressionListener.Get("FACUNDO_TEST", "mauro_test");
-            var impression3 = impressionListener.Get("MAURO_TEST", "mauro");
-            var impression4 = impressionListener.Get("MAURO_TEST", "test");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            Helper.AssertImpression(impression2, 1506703262916, "FACUNDO_TEST", "mauro_test", "in segment all", "off");
-            Helper.AssertImpression(impression3, 1506703262966, "MAURO_TEST", "mauro", "whitelisted", "on");
-            Helper.AssertImpression(impression4, 1506703262966, "MAURO_TEST", "test", "not in split", "off");
+            var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            var impExpected2 = Helper.GetImpressionExpected("FACUNDO_TEST", "mauro_test");
+            var impExpected3 = Helper.GetImpressionExpected("MAURO_TEST", "mauro");
+            var impExpected4 = Helper.GetImpressionExpected("MAURO_TEST", "test");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(4, impression1, impression2, impression3, impression4);
+            await AssertSentImpressionsAsync(4, impExpected1, impExpected2, impExpected3, impExpected4);
+
+            // Validate impressions.
+            await Helper.AssertImpressionListenerAsync(_mode, 4, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "mauro_test"), impExpected2);
+            Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "mauro"), impExpected3);
+            Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "test"), impExpected4);
         }
 
         [TestMethod]
@@ -224,7 +216,6 @@ namespace Splitio.Integration_tests.Async
             var result4 = await client.GetTreatmentWithConfigAsync("mauro", "MAURO_TEST");
 
             await client.DestroyAsync();
-            await DelayAsync();
 
             // Assert.
             Assert.AreEqual("on", result1.Treatment);
@@ -237,17 +228,16 @@ namespace Splitio.Integration_tests.Async
             Assert.IsNull(result3.Config);
             Assert.AreEqual("{\"version\":\"v2\"}", result4.Config);
 
-            // Validate impressions.
-            Assert.AreEqual(2, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
-
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-            var impression2 = impressionListener.Get("MAURO_TEST", "mauro");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            Helper.AssertImpression(impression2, 1506703262966, "MAURO_TEST", "mauro", "whitelisted", "on");
+            var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            var impExpected2 = Helper.GetImpressionExpected("MAURO_TEST", "mauro");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(2, impression1, impression2);
+            await AssertSentImpressionsAsync(2, impExpected1, impExpected2);
+
+            // Validate impressions.
+            await Helper.AssertImpressionListenerAsync(_mode, 2, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
+            Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "mauro"), impExpected2);
         }
 
         [TestMethod]
@@ -304,21 +294,19 @@ namespace Splitio.Integration_tests.Async
             Assert.AreEqual("off", result["Test_Save_1"]);
 
             await client.DestroyAsync();
-            await DelayAsync();
 
-            // Validate impressions.
-            Assert.AreEqual(3, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
-
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-            var impression2 = impressionListener.Get("MAURO_TEST", "nico_test");
-            var impression3 = impressionListener.Get("Test_Save_1", "nico_test");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            Helper.AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
-            Helper.AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
+            var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            var impExpected2 = Helper.GetImpressionExpected("MAURO_TEST", "nico_test");
+            var impExpected3 = Helper.GetImpressionExpected("Test_Save_1", "nico_test");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(3, impression1, impression2, impression3);
+            await AssertSentImpressionsAsync(3, impExpected1, impExpected2, impExpected3);
+
+            // Validate impressions.
+            await Helper.AssertImpressionListenerAsync(_mode, 3, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"),impExpected1);
+            Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "nico_test"), impExpected2);
+            Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impExpected3);
         }
 
         [TestMethod]
@@ -350,23 +338,21 @@ namespace Splitio.Integration_tests.Async
             Assert.AreEqual("control", result3["Test_Save_1"]);
 
             await client.DestroyAsync();
-            await DelayAsync();
 
-            // Validate impressions.
-            Assert.AreEqual(4, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
-
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-            var impression2 = impressionListener.Get("Test_Save_1", "nico_test");
-            var impression3 = impressionListener.Get("MAURO_TEST", "mauro");
-            var impression4 = impressionListener.Get("Test_Save_1", "mauro");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            Helper.AssertImpression(impression2, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
-            Helper.AssertImpression(impression3, 1506703262966, "MAURO_TEST", "mauro", "whitelisted", "on");
-            Helper.AssertImpression(impression4, 1503956389520, "Test_Save_1", "mauro", "in segment all", "off");
+            var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            var impExpected2 = Helper.GetImpressionExpected("Test_Save_1", "nico_test");
+            var impExpected3 = Helper.GetImpressionExpected("MAURO_TEST", "mauro");
+            var impExpected4 = Helper.GetImpressionExpected("Test_Save_1", "mauro");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(4, impression1, impression2, impression3, impression4);
+            await AssertSentImpressionsAsync(4, impExpected1, impExpected2, impExpected3, impExpected4);
+
+            // Validate impressions.
+            await Helper.AssertImpressionListenerAsync(_mode, 4, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
+            Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impExpected2);
+            Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "mauro"), impExpected3);
+            Helper.AssertImpression(impressionListener.Get("Test_Save_1", "mauro"), impExpected4);
         }
         #endregion
 
@@ -388,8 +374,7 @@ namespace Splitio.Integration_tests.Async
             var result = await client.GetTreatmentsWithConfigAsync("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
 
             await client.DestroyAsync();
-            await DelayAsync();
-
+            
             // Assert.
             Assert.AreEqual("on", result["FACUNDO_TEST"].Treatment);
             Assert.AreEqual("off", result["MAURO_TEST"].Treatment);
@@ -399,19 +384,18 @@ namespace Splitio.Integration_tests.Async
             Assert.AreEqual("{\"version\":\"v1\"}", result["MAURO_TEST"].Config);
             Assert.IsNull(result["Test_Save_1"].Config);
 
-            // Validate impressions.
-            Assert.AreEqual(3, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
-
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-            var impression2 = impressionListener.Get("MAURO_TEST", "nico_test");
-            var impression3 = impressionListener.Get("Test_Save_1", "nico_test");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            Helper.AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
-            Helper.AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
+            var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            var impExpected2 = Helper.GetImpressionExpected("MAURO_TEST", "nico_test");
+            var impExpected3 = Helper.GetImpressionExpected("Test_Save_1", "nico_test");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(3, impression1, impression2, impression3);
+            await AssertSentImpressionsAsync(3, impExpected1, impExpected2, impExpected3);
+
+            // Validate impressions.
+            await Helper.AssertImpressionListenerAsync(_mode, 3, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
+            Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "nico_test"), impExpected2);
+            Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impExpected3);
         }
 
         [TestMethod]
@@ -451,23 +435,21 @@ namespace Splitio.Integration_tests.Async
             Assert.IsNull(result3["Test_Save_1"].Config);
 
             await client.DestroyAsync();
-            await DelayAsync();
 
-            // Validate impressions.
-            Assert.AreEqual(4, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
-
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-            var impression2 = impressionListener.Get("Test_Save_1", "nico_test");
-            var impression3 = impressionListener.Get("MAURO_TEST", "mauro");
-            var impression4 = impressionListener.Get("Test_Save_1", "mauro");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            Helper.AssertImpression(impression2, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
-            Helper.AssertImpression(impression3, 1506703262966, "MAURO_TEST", "mauro", "whitelisted", "on");
-            Helper.AssertImpression(impression4, 1503956389520, "Test_Save_1", "mauro", "in segment all", "off");
+            var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            var impExpected2 = Helper.GetImpressionExpected("Test_Save_1", "nico_test");
+            var impExpected3 = Helper.GetImpressionExpected("MAURO_TEST", "mauro");
+            var impExpected4 = Helper.GetImpressionExpected("Test_Save_1", "mauro");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(4, impression1, impression2, impression3, impression4);
+            await AssertSentImpressionsAsync(4, impExpected1, impExpected2, impExpected3, impExpected4);
+
+            // Validate impressions.
+            await Helper.AssertImpressionListenerAsync(_mode, 4, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
+            Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impExpected2);
+            Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "mauro"), impExpected3);
+            Helper.AssertImpression(impressionListener.Get("Test_Save_1", "mauro"), impExpected4);
         }
 
         [TestMethod]
@@ -499,21 +481,19 @@ namespace Splitio.Integration_tests.Async
             Assert.IsNull(result["Test_Save_1"].Config);
 
             await client.DestroyAsync();
-            await DelayAsync();
-
-            // Validate impressions.
-            Assert.AreEqual(3, impressionListener.Count(), $"{_mode}: Impression Listener not match.");
-
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-            var impression2 = impressionListener.Get("MAURO_TEST", "nico_test");
-            var impression3 = impressionListener.Get("Test_Save_1", "nico_test");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            Helper.AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
-            Helper.AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
+            
+            var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            var impExpected2 = Helper.GetImpressionExpected("MAURO_TEST", "nico_test");
+            var impExpected3 = Helper.GetImpressionExpected("Test_Save_1", "nico_test");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(3, impression1, impression2, impression3);
+            await AssertSentImpressionsAsync(3, impExpected1, impExpected2, impExpected3);
+
+            // Validate impressions.
+            await Helper.AssertImpressionListenerAsync(_mode, 3, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
+            Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "nico_test"), impExpected2);
+            Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impExpected3);
         }
         #endregion
 
@@ -786,7 +766,7 @@ namespace Splitio.Integration_tests.Async
             }
 
             //Validate Events sent to the be.
-            await DelayAsync();
+            await Task.Delay(1000);
             await AssertSentEventsAsync(events, sleepTime: 1000, eventsCount: 3, validateEvents: false);
             await client.DestroyAsync();
         }
@@ -817,15 +797,13 @@ namespace Splitio.Integration_tests.Async
             Assert.AreEqual("on", treatment.Value.Treatment);
             Assert.AreEqual("{\"color\":\"green\"}", treatment.Value.Config);
 
-            await DelayAsync();
-            Assert.AreEqual(1, impressionListener.Count(), $"{_mode}: Impression Listener not match");
-
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-
+            var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(1, impression1);
+            await AssertSentImpressionsAsync(1, impExpected1);
+
+            await Helper.AssertImpressionListenerAsync(_mode, 1, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
         }
 
         [TestMethod]
@@ -878,15 +856,15 @@ namespace Splitio.Integration_tests.Async
             Assert.AreEqual("FACUNDO_TEST", treatment.Key);
             Assert.AreEqual("on", treatment.Value);
 
-            await DelayAsync();
             Assert.AreEqual(1, impressionListener.Count(), $"{_mode}: Impression Listener not match");
 
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+            var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(1, impression1);
+            await AssertSentImpressionsAsync(1, impExpected1);
+
+            await Helper.AssertImpressionListenerAsync(_mode, 1, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
         }
 
         [TestMethod]
@@ -940,15 +918,13 @@ namespace Splitio.Integration_tests.Async
             Assert.AreEqual("on", treatment.Value.Treatment);
             Assert.AreEqual("{\"color\":\"green\"}", treatment.Value.Config);
 
-            await DelayAsync();
-            Assert.AreEqual(1, impressionListener.Count(), $"{_mode}: Impression Listener not match");
-
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+            var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(1, impression1);
+            await AssertSentImpressionsAsync(1, impExpected1);
+
+            await Helper.AssertImpressionListenerAsync(_mode, 1, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
         }
 
         [TestMethod]
@@ -1001,15 +977,12 @@ namespace Splitio.Integration_tests.Async
             Assert.AreEqual("FACUNDO_TEST", treatment.Key);
             Assert.AreEqual("on", treatment.Value);
 
-            await DelayAsync();
-            Assert.AreEqual(1, impressionListener.Count(), $"{_mode}: Impression Listener not match");
-
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+            var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(1, impression1);
+            await AssertSentImpressionsAsync(1, impExpected1);
+            await Helper.AssertImpressionListenerAsync(_mode, 1, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
         }
 
         [TestMethod]
@@ -1043,7 +1016,6 @@ namespace Splitio.Integration_tests.Async
         protected abstract Task AssertSentImpressionsAsync(int sentImpressionsCount, params KeyImpression[] expectedImpressions);
         protected abstract Task AssertSentEventsAsync(List<EventBackend> eventsExcpected, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true);
         protected abstract Task CleanupAsync();
-        protected abstract Task DelayAsync();
         #endregion
     }
 }

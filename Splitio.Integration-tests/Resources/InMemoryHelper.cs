@@ -9,13 +9,44 @@ namespace Splitio.Integration_tests.Resources
 {
     public class Helper
     {
-        public static void AssertImpression(KeyImpression impression, long changeNumber, string feature, string keyName, string label, string treatment)
+        private readonly static List<KeyImpression> _impressionsExpected = new List<KeyImpression>
         {
-            Assert.AreEqual(changeNumber, impression.changeNumber);
-            Assert.AreEqual(feature, impression.feature);
-            Assert.AreEqual(keyName, impression.keyName);
-            Assert.AreEqual(label, impression.label);
-            Assert.AreEqual(treatment, impression.treatment);
+            new KeyImpression("nico_test", "FACUNDO_TEST", "on", 0, 1506703262916, "whitelisted", null, null, false),
+            new KeyImpression("mauro_test", "FACUNDO_TEST", "off", 0, 1506703262916, "in segment all", null, null, false),
+            new KeyImpression("1", "Test_Save_1", "on", 0, 1503956389520, "whitelisted", null, null, false),
+            new KeyImpression("24", "Test_Save_1", "off", 0, 1503956389520, "in segment all", null, null, false),
+            new KeyImpression("mauro", "MAURO_TEST", "on", 0, 1506703262966, "whitelisted", null, null, false),
+            new KeyImpression("test", "MAURO_TEST", "off", 0, 1506703262966,"not in split", null, null, false),
+            new KeyImpression("nico_test", "Test_Save_1", "off", 0, 1503956389520, "in segment all", null, null, false),
+            new KeyImpression("nico_test", "MAURO_TEST", "off", 0, 1506703262966, "not in split", null, null, false),
+            new KeyImpression("mauro", "Test_Save_1", "off", 0, 1503956389520, "in segment all", null, null, false)
+        };
+
+        public static KeyImpression GetImpressionExpected(string featureName, string key)
+        {
+            return _impressionsExpected.FirstOrDefault(i => i.feature.Equals(featureName) && i.keyName.Equals(key));
+        }
+
+        public static void AssertImpression(KeyImpression impression, KeyImpression expected)
+        {
+            Assert.AreEqual(expected.changeNumber, expected.changeNumber);
+            Assert.AreEqual(expected.feature, impression.feature);
+            Assert.AreEqual(expected.keyName, impression.keyName);
+            Assert.AreEqual(expected.label, impression.label);
+            Assert.AreEqual(expected.treatment, impression.treatment);
+        }
+
+        public static async Task AssertImpressionListenerAsync(string mode, int expected, IntegrationTestsImpressionListener impressionListener)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                if (impressionListener.Count() > 0)
+                    break;
+
+                await Task.Delay(1000);
+            }
+
+            Assert.AreEqual(expected, impressionListener.Count(), $"{mode}: Impression Listener not match");
         }
     }
 

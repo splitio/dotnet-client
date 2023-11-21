@@ -78,19 +78,17 @@ namespace Splitio.Integration_tests
 
             client.Destroy();
 
-            // Validate impressions.
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-            var impression2 = impressionListener.Get("MAURO_TEST", "nico_test");
-            var impression3 = impressionListener.Get("Test_Save_1", "nico_test");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            Helper.AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
-            Helper.AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
-
-            await AssertImpressionListenerAsync(3, impressionListener);
+            // Validate impressions
+            var impressionExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            var impressionExpected2 = GetImpressionExpected("MAURO_TEST", "nico_test");
+            var impressionExpected3 = GetImpressionExpected("Test_Save_1", "nico_test");
 
             //Validate impressions sent to the be.            
-            await AssertSentImpressionsAsync(3, impression1, impression2, impression3);
+            await AssertSentImpressionsAsync(3, impressionExpected1, impressionExpected2, impressionExpected3);
+            await AssertImpressionListenerAsync(3, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
+            Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "nico_test"), impressionExpected2);
+            Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impressionExpected3);
         }
 
         [TestMethod]
@@ -311,14 +309,12 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("FACUNDO_TEST", treatment.Key);
             Assert.AreEqual("on", treatment.Value.Treatment);
 
-            Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
-
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+            var impressionExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(1, impression1);
+            await AssertSentImpressionsAsync(1, impressionExpected1);
+            Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
         }
 
         [TestMethod]
@@ -346,14 +342,13 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("FACUNDO_TEST", treatment.Key);
             Assert.AreEqual("on", treatment.Value);
 
-            Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
-
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+            var impressionExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(1, impression1);
+            await AssertSentImpressionsAsync(1, impressionExpected1);
+
+            Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
         }
 
         [TestMethod]
@@ -381,14 +376,13 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("FACUNDO_TEST", treatment.Key);
             Assert.AreEqual("on", treatment.Value.Treatment);
 
-            Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
-
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+            var impressionExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(1, impression1);
+            await AssertSentImpressionsAsync(1, impressionExpected1);
+
+            Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
         }
 
         [TestMethod]
@@ -416,14 +410,13 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("FACUNDO_TEST", treatment.Key);
             Assert.AreEqual("on", treatment.Value);
 
-            Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
-
-            var impression1 = impressionListener.Get("FACUNDO_TEST", "nico_test");
-
-            Helper.AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+            var impressionExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(1, impression1);
+            await AssertSentImpressionsAsync(1, impressionExpected1);
+
+            Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
         }
 
         #region Protected Methods

@@ -65,11 +65,6 @@ namespace Splitio.Integration_tests.Async
             await RedisHelper.CleanupAsync(UserPrefix, _redisAdapter);
         }
 
-        protected override async Task DelayAsync()
-        {
-            await Task.Delay(1000);
-        }
-
         protected override ConfigurationOptions GetConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)
         {
             var cacheConfig = new CacheAdapterConfigurationOptions

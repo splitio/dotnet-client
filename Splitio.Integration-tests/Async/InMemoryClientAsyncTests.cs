@@ -45,10 +45,5 @@ namespace Splitio.Integration_tests.Async
 
             await Task.FromResult(0);
         }
-
-        protected override async Task DelayAsync()
-        {
-            await Task.Delay(1000);
-        }
     }
 }
