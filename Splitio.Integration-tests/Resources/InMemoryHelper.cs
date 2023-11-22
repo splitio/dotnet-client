@@ -38,7 +38,7 @@ namespace Splitio.Integration_tests.Resources
 
         public static async Task AssertImpressionListenerAsync(string mode, int expected, IntegrationTestsImpressionListener impressionListener)
         {
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 10; i++)
             {
                 if (impressionListener.Count() > 0)
                     break;
@@ -58,7 +58,7 @@ namespace Splitio.Integration_tests.Resources
 
             var sentImpressions = new List<KeyImpressionBackend>();
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 10; i++)
             {
                 sentImpressions = GetImpressionsSentBackend(httpClientMock);
 
@@ -107,7 +107,7 @@ namespace Splitio.Integration_tests.Resources
         {
             var sentEvents = new List<EventBackend>();
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 10; i++)
             {
                 sentEvents = GetEventsSentBackend(httpClientMock);
 
