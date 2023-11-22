@@ -1,4 +1,5 @@
-﻿using Splitio.Integration_tests.Resources;
+﻿using Castle.Core.Resource;
+using Splitio.Integration_tests.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;

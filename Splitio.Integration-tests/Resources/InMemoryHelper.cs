@@ -103,11 +103,18 @@ namespace Splitio.Integration_tests.Resources
             return impressions;
         }
 
-        public static async Task AssertSentEventsAsync(List<EventBackend> eventsExpected, HttpClientMock httpClientMock = null, int sleepTime = 5000, int? eventsCount = null, bool validateEvents = true)
+        public static async Task AssertSentEventsAsync(List<EventBackend> eventsExpected, HttpClientMock httpClientMock = null, int? eventsCount = null, bool validateEvents = true)
         {
-            await Task.Delay(sleepTime);
+            var sentEvents = new List<EventBackend>();
 
-            var sentEvents = GetEventsSentBackend(httpClientMock);
+            for (int i = 0; i < 5; i++)
+            {
+                sentEvents = GetEventsSentBackend(httpClientMock);
+
+                if (sentEvents.Count > 0) break;
+
+                await Task.Delay(1000);
+            }
 
             Assert.AreEqual(eventsCount ?? eventsExpected.Count, sentEvents.Count);
 

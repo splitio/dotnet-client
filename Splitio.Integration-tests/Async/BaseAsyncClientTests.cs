@@ -767,7 +767,7 @@ namespace Splitio.Integration_tests.Async
 
             //Validate Events sent to the be.
             await Task.Delay(1000);
-            await AssertSentEventsAsync(events, sleepTime: 1000, eventsCount: 3, validateEvents: false);
+            await AssertSentEventsAsync(events, eventsCount: 3, validateEvents: false);
             await client.DestroyAsync();
         }
         #endregion
@@ -1012,7 +1012,7 @@ namespace Splitio.Integration_tests.Async
         #region Protected Methods
         protected abstract ConfigurationOptions GetConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null);
         protected abstract Task AssertSentImpressionsAsync(int sentImpressionsCount, params KeyImpression[] expectedImpressions);
-        protected abstract Task AssertSentEventsAsync(List<EventBackend> eventsExcpected, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true);
+        protected abstract Task AssertSentEventsAsync(List<EventBackend> eventsExcpected, int? eventsCount = null, bool validateEvents = true);
         protected abstract Task CleanupAsync();
         #endregion
     }
