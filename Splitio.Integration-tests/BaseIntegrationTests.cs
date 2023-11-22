@@ -51,7 +51,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("on", result3);
             Assert.AreEqual("off", result4);
 
-            client.Destroy();
+            await client.DestroyAsync();
 
             var impressionExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
             var impressionExpected2 = GetImpressionExpected("FACUNDO_TEST", "mauro_test");
@@ -95,7 +95,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("control", result3);
             Assert.AreEqual("off", result4);
 
-            client.Destroy();
+            await client.DestroyAsync();
 
             var impressionExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
             var impressionExpected2 = GetImpressionExpected("Test_Save_1", "24");
@@ -135,7 +135,7 @@ namespace Splitio.Integration_tests
             //Validate impressions sent to the be.
             await AssertSentImpressionsAsync(0);
 
-            client.Destroy();
+            await client.DestroyAsync();
         }
         #endregion
 
@@ -160,7 +160,7 @@ namespace Splitio.Integration_tests
             var result3 = client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
             var result4 = client.GetTreatmentWithConfig("test", "MAURO_TEST");
 
-            client.Destroy();
+            await client.DestroyAsync();
 
             // Assert.
             Assert.AreEqual("on", result1.Treatment);
@@ -209,7 +209,7 @@ namespace Splitio.Integration_tests
             var result3 = client.GetTreatmentWithConfig("test", string.Empty);
             var result4 = client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
 
-            client.Destroy();
+            await client.DestroyAsync();
 
             // Assert.
             Assert.AreEqual("on", result1.Treatment);
@@ -260,7 +260,7 @@ namespace Splitio.Integration_tests
             //Validate impressions sent to the be.
             await AssertSentImpressionsAsync(0);
 
-            client.Destroy();
+            await client.DestroyAsync();
         }
         #endregion
 
@@ -287,7 +287,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("off", result["MAURO_TEST"]);
             Assert.AreEqual("off", result["Test_Save_1"]);
 
-            client.Destroy();
+            await client.DestroyAsync();
 
             var impExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
             var impExpected2 = GetImpressionExpected("MAURO_TEST", "nico_test");
@@ -331,7 +331,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("control", result3["MAURO_TEST"]);
             Assert.AreEqual("control", result3["Test_Save_1"]);
 
-            client.Destroy();
+            await client.DestroyAsync();
 
             var impExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
             var impExpected2 = GetImpressionExpected("Test_Save_1", "nico_test");
@@ -367,7 +367,7 @@ namespace Splitio.Integration_tests
             // Act.
             var result = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
 
-            client.Destroy();
+            await client.DestroyAsync();
 
             // Assert.
             Assert.AreEqual("on", result["FACUNDO_TEST"].Treatment);
@@ -428,7 +428,7 @@ namespace Splitio.Integration_tests
             Assert.IsNull(result3["MAURO_TEST"].Config);
             Assert.IsNull(result3["Test_Save_1"].Config);
 
-            client.Destroy();
+            await client.DestroyAsync();
 
             var impExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
             var impExpected2 = GetImpressionExpected("Test_Save_1", "nico_test");
@@ -474,7 +474,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("{\"version\":\"v1\"}", result["MAURO_TEST"].Config);
             Assert.IsNull(result["Test_Save_1"].Config);
 
-            client.Destroy();
+            await client.DestroyAsync();
 
             var impExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
             var impExpected2 = GetImpressionExpected("MAURO_TEST", "nico_test");
@@ -508,7 +508,7 @@ namespace Splitio.Integration_tests
 
             // Act.
             var result = client.GetTreatmentsWithConfigByFlagSets("nico_test", new List<string> { "set_1", "set_2", "set_3", string.Empty, null });
-            client.Destroy();
+            await client.DestroyAsync();
 
             // Assert.
             var treatment = result.FirstOrDefault();
@@ -525,7 +525,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void GetTreatmentsWithConfigByFlagSets_WithWrongFlagSets()
+        public async Task GetTreatmentsWithConfigByFlagSets_WithWrongFlagSets()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -541,7 +541,7 @@ namespace Splitio.Integration_tests
             // Act.
             var result = client.GetTreatmentsWithConfigByFlagSets("key", null);
             var result2 = client.GetTreatmentsWithConfigByFlagSets("key", new List<string> { string.Empty, null });
-            client.Destroy();
+            await client.DestroyAsync();
 
             // Assert.
             Assert.IsFalse(result.Any());
@@ -567,7 +567,7 @@ namespace Splitio.Integration_tests
 
             // Act.
             var result = client.GetTreatmentsByFlagSets("nico_test", new List<string> { "set_1", "set_2", "set_3", string.Empty, null });
-            client.Destroy();
+            await client.DestroyAsync();
 
             // Assert.
             var treatment = result.FirstOrDefault();
@@ -583,7 +583,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void GetTreatmentsByFlagSets_WithWrongFlagSets()
+        public async Task GetTreatmentsByFlagSets_WithWrongFlagSets()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -599,7 +599,7 @@ namespace Splitio.Integration_tests
             // Act.
             var result = client.GetTreatmentsByFlagSets("key", null);
             var result2 = client.GetTreatmentsByFlagSets("key", new List<string> { string.Empty, null });
-            client.Destroy();
+            await client.DestroyAsync();
 
             // Assert.
             Assert.IsFalse(result.Any());
@@ -625,7 +625,7 @@ namespace Splitio.Integration_tests
 
             // Act.
             var result = client.GetTreatmentsWithConfigByFlagSet("nico_test", "set_1");
-            client.Destroy();
+            await client.DestroyAsync();
 
             // Assert.
             var treatment = result.FirstOrDefault();
@@ -642,7 +642,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void GetTreatmentsWithConfigByFlagSet_WithWrongFlagSets()
+        public async Task GetTreatmentsWithConfigByFlagSet_WithWrongFlagSets()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -658,7 +658,7 @@ namespace Splitio.Integration_tests
             // Act.
             var result = client.GetTreatmentsWithConfigByFlagSet("key", null);
             var result2 = client.GetTreatmentsWithConfigByFlagSet("key", string.Empty);
-            client.Destroy();
+            await client.DestroyAsync();
 
             // Assert.
             Assert.IsFalse(result.Any());
@@ -684,7 +684,7 @@ namespace Splitio.Integration_tests
 
             // Act.
             var result = client.GetTreatmentsByFlagSet("nico_test", "set_1");
-            client.Destroy();
+            await client.DestroyAsync();
 
             // Assert.
             var treatment = result.FirstOrDefault();
@@ -700,7 +700,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void GetTreatmentsByFlagSet_WithWrongFlagSets()
+        public async Task GetTreatmentsByFlagSet_WithWrongFlagSets()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -716,7 +716,7 @@ namespace Splitio.Integration_tests
             // Act.
             var result = client.GetTreatmentsByFlagSet("key", null);
             var result2 = client.GetTreatmentsByFlagSet("key", string.Empty);
-            client.Destroy();
+            await client.DestroyAsync();
 
             // Assert.
             Assert.IsFalse(result.Any());
@@ -727,7 +727,7 @@ namespace Splitio.Integration_tests
 
         #region Manager
         [TestMethod]
-        public void Manager_SplitNames_ReturnsSplitNames()
+        public async Task Manager_SplitNames_ReturnsSplitNames()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -748,7 +748,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual(30, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<string>));
 
-            client.Destroy();
+            await client.DestroyAsync();
         }
 
         [TestMethod]
@@ -861,7 +861,7 @@ namespace Splitio.Integration_tests
 
             //Validate Events sent to the be.
             await AssertSentEventsAsync(events);
-            client.Destroy();
+            await client.DestroyAsync();
         }
 
         [TestMethod]
@@ -902,7 +902,7 @@ namespace Splitio.Integration_tests
 
             //Validate Events sent to the be.
             await AssertSentEventsAsync(events);
-            client.Destroy();
+            await client.DestroyAsync();
         }
 
         [TestMethod]
@@ -951,7 +951,7 @@ namespace Splitio.Integration_tests
 
             //Validate Events sent to the be.
             await AssertSentEventsAsync(events);
-            client.Destroy();
+            await client.DestroyAsync();
         }
 
         [TestMethod]
@@ -993,7 +993,7 @@ namespace Splitio.Integration_tests
 
             //Validate Events sent to the be.
             await AssertSentEventsAsync(events, eventsCount: 3, validateEvents: false);
-            client.Destroy();
+            await client.DestroyAsync();
         }
         #endregion
 
