@@ -11,9 +11,9 @@ namespace Splitio.Integration_tests.Resources
 {
     public class RedisHelper
     {
-        public static async Task AssertSentEventsAsync(IRedisAdapter redisAdapter, string userPrefix, List<EventBackend> eventsExcpected, int sleepTime = 15000, int? eventsCount = null, bool validateEvents = true)
+        public static async Task AssertSentEventsAsync(IRedisAdapter redisAdapter, string userPrefix, List<EventBackend> eventsExcpected, int? eventsCount = null, bool validateEvents = true)
         {
-            await Task.Delay(sleepTime);
+            await Task.Delay(1500);
 
             var redisEvents = redisAdapter.ListRange($"{userPrefix}.SPLITIO.events");
 
