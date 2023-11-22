@@ -579,7 +579,6 @@ namespace Splitio.Integration_tests
             //Validate impressions sent to the be.
             await AssertSentImpressionsAsync(1, impExpected1);
             await AssertImpressionListenerAsync(1, impressionListener);
-
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
         }
 

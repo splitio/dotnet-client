@@ -353,27 +353,27 @@ namespace Splitio.Integration_tests
             return _mockServer.LogEntries.ToList();
         }
 
-        public List<ILogEntry> GetImpressionLogs()
+        public List<LogEntry> GetImpressionLogs()
         {
             return FindLogs("api/testImpressions/bulk");
         }
 
-        public List<ILogEntry> GetImpressionCountsLogs()
+        public List<LogEntry> GetImpressionCountsLogs()
         {
             return FindLogs("api/testImpressions/count");
         }
 
-        public List<ILogEntry> GetEventsLog()
+        public List<LogEntry> GetEventsLog()
         {
             return FindLogs("api/events/bulk");
         }
 
-        public List<ILogEntry> GetMetricsConfigLog()
+        public List<LogEntry> GetMetricsConfigLog()
         {
             return FindLogs("metrics/config");
         }
 
-        public List<ILogEntry> GetMetricsUsageLog()
+        public List<LogEntry> GetMetricsUsageLog()
         {
             return FindLogs("metrics/usage");
         }
@@ -389,11 +389,10 @@ namespace Splitio.Integration_tests
             _mockServer.Dispose();
         }
 
-        private List<ILogEntry> FindLogs(string url)
+        private List<LogEntry> FindLogs(string url)
         {
             return _mockServer
-                .LogEntries
-                .Where(l => l.RequestMessage.AbsolutePath.Contains(url))
+                .FindLogEntries(Request.Create().WithPath($"*{url}*").UsingPost())
                 .ToList();
         }
     }

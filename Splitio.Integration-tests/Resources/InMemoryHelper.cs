@@ -58,7 +58,7 @@ namespace Splitio.Integration_tests.Resources
 
             var sentImpressions = new List<KeyImpressionBackend>();
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 5; i++)
             {
                 sentImpressions = GetImpressionsSentBackend(httpClientMock);
 
@@ -95,9 +95,9 @@ namespace Splitio.Integration_tests.Resources
 
             foreach (var log in logs)
             {
-                var _impressions = JsonConvert.DeserializeObject<List<KeyImpressionBackend>>(log.RequestMessage.Body);
+                var imps = JsonConvert.DeserializeObject<List<KeyImpressionBackend>>(log.RequestMessage.Body);
 
-                impressions.AddRange(_impressions);
+                impressions.AddRange(imps);
             }
 
             return impressions;
