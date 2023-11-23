@@ -11,7 +11,7 @@ namespace Splitio.Integration_tests.Async
     [TestClass]
     public class InMemoryClientAsyncTests : BaseAsyncClientTests
     {
-        private static readonly HttpClientMock httpClientMock = new HttpClientMock("async");
+        private readonly HttpClientMock httpClientMock = new HttpClientMock("async");
 
         public InMemoryClientAsyncTests() : base("InMemory")
         {

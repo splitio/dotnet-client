@@ -14,7 +14,7 @@ namespace Splitio.Integration_tests
     [TestClass]
     public class PollingClientTests : BaseIntegrationTests
     {
-        private static readonly HttpClientMock httpClientMock = new HttpClientMock("test");
+        private readonly HttpClientMock httpClientMock = new HttpClientMock("test");
 
         public PollingClientTests() : base("Polling")
         { }
@@ -41,6 +41,7 @@ namespace Splitio.Integration_tests
 
             // Act.
             var result = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", "Random_Treatment", "MAURO_TEST", "Test_Save_1", "Random_Treatment_2", });
+            await client.DestroyAsync();
 
             // Assert.
             Assert.AreEqual("on", result["FACUNDO_TEST"]);
@@ -48,8 +49,6 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("off", result["MAURO_TEST"]);
             Assert.AreEqual("off", result["Test_Save_1"]);
             Assert.AreEqual("control", result["Random_Treatment_2"]);
-
-            await client.DestroyAsync();
 
             var impressionExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
             var impressionExpected2 = GetImpressionExpected("MAURO_TEST", "nico_test");
@@ -334,7 +333,6 @@ namespace Splitio.Integration_tests
             client.GetTreatments("admin", new List<string> { "FACUNDO_TEST", "Test_Save_1" });
             client.GetTreatment("admin", "FACUNDO_TEST");
             client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
-
             await client.DestroyAsync();
 
             // Assert.
@@ -549,8 +547,6 @@ namespace Splitio.Integration_tests
                 Endpoint = httpClientMock.GetUrl(),
                 EventsEndpoint = httpClientMock.GetUrl(),
                 TelemetryServiceURL = httpClientMock.GetUrl(),
-                //ReadTimeout = 20000,
-                //ConnectionTimeout = 20000,
                 ImpressionListener = impressionListener,
                 FeaturesRefreshRate = featuresRefreshRate ?? 1,
                 SegmentsRefreshRate = 1,

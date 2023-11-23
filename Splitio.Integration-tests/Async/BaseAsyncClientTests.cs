@@ -50,14 +50,13 @@ namespace Splitio.Integration_tests.Async
             var result2 = await client.GetTreatmentAsync("mauro_test", "FACUNDO_TEST");
             var result3 = await client.GetTreatmentAsync("1", "Test_Save_1");
             var result4 = await client.GetTreatmentAsync("24", "Test_Save_1");
+            await client.DestroyAsync();
 
             // Assert.
             Assert.AreEqual("on", result1);
             Assert.AreEqual("off", result2);
             Assert.AreEqual("on", result3);
             Assert.AreEqual("off", result4);
-
-            await client.DestroyAsync();
 
             var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
             var impExpected2 = Helper.GetImpressionExpected("FACUNDO_TEST", "mauro_test");
@@ -94,14 +93,13 @@ namespace Splitio.Integration_tests.Async
             var result2 = await client.GetTreatmentAsync(string.Empty, "FACUNDO_TEST");
             var result3 = await client.GetTreatmentAsync("1", string.Empty);
             var result4 = await client.GetTreatmentAsync("24", "Test_Save_1");
+            await client.DestroyAsync();
 
             // Assert.
             Assert.AreEqual("on", result1);
             Assert.AreEqual("control", result2);
             Assert.AreEqual("control", result3);
             Assert.AreEqual("off", result4);
-
-            await client.DestroyAsync();
 
             var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
             var impExpected2 = Helper.GetImpressionExpected("Test_Save_1", "24");
@@ -165,7 +163,6 @@ namespace Splitio.Integration_tests.Async
             var result2 = await client.GetTreatmentWithConfigAsync("mauro_test", "FACUNDO_TEST");
             var result3 = await client.GetTreatmentWithConfigAsync("mauro", "MAURO_TEST");
             var result4 = await client.GetTreatmentWithConfigAsync("test", "MAURO_TEST");
-
             await client.DestroyAsync();
 
             // Assert.
@@ -214,7 +211,6 @@ namespace Splitio.Integration_tests.Async
             var result2 = await client.GetTreatmentWithConfigAsync(string.Empty, "FACUNDO_TEST");
             var result3 = await client.GetTreatmentWithConfigAsync("test", string.Empty);
             var result4 = await client.GetTreatmentWithConfigAsync("mauro", "MAURO_TEST");
-
             await client.DestroyAsync();
 
             // Assert.
@@ -287,13 +283,12 @@ namespace Splitio.Integration_tests.Async
 
             // Act.
             var result = await client.GetTreatmentsAsync("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+            await client.DestroyAsync();
 
             // Assert.
             Assert.AreEqual("on", result["FACUNDO_TEST"]);
             Assert.AreEqual("off", result["MAURO_TEST"]);
             Assert.AreEqual("off", result["Test_Save_1"]);
-
-            await client.DestroyAsync();
 
             var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
             var impExpected2 = Helper.GetImpressionExpected("MAURO_TEST", "nico_test");
@@ -327,6 +322,7 @@ namespace Splitio.Integration_tests.Async
             var result1 = await client.GetTreatmentsAsync("nico_test", new List<string> { "FACUNDO_TEST", string.Empty, "Test_Save_1" });
             var result2 = await client.GetTreatmentsAsync("mauro", new List<string> { string.Empty, "MAURO_TEST", "Test_Save_1" });
             var result3 = await client.GetTreatmentsAsync(string.Empty, new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+            await client.DestroyAsync();
 
             // Assert.
             Assert.AreEqual("on", result1["FACUNDO_TEST"]);
@@ -336,8 +332,6 @@ namespace Splitio.Integration_tests.Async
             Assert.AreEqual("control", result3["FACUNDO_TEST"]);
             Assert.AreEqual("control", result3["MAURO_TEST"]);
             Assert.AreEqual("control", result3["Test_Save_1"]);
-
-            await client.DestroyAsync();
 
             var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
             var impExpected2 = Helper.GetImpressionExpected("Test_Save_1", "nico_test");
@@ -372,7 +366,6 @@ namespace Splitio.Integration_tests.Async
 
             // Act.
             var result = await client.GetTreatmentsWithConfigAsync("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
-
             await client.DestroyAsync();
             
             // Assert.
@@ -416,7 +409,6 @@ namespace Splitio.Integration_tests.Async
             var result1 = await client.GetTreatmentsWithConfigAsync("nico_test", new List<string> { "FACUNDO_TEST", string.Empty, "Test_Save_1" });
             var result2 = await client.GetTreatmentsWithConfigAsync("mauro", new List<string> { string.Empty, "MAURO_TEST", "Test_Save_1" });
             var result3 = await client.GetTreatmentsWithConfigAsync(string.Empty, new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
-
             await client.DestroyAsync();
 
             // Assert.
@@ -468,6 +460,7 @@ namespace Splitio.Integration_tests.Async
 
             // Act.
             var result = await client.GetTreatmentsWithConfigAsync("nico_test", new List<string> { "FACUNDO_TEST", "Random_Treatment", "MAURO_TEST", "Test_Save_1", "Random_Treatment_1" });
+            await client.DestroyAsync();
 
             // Assert.
             Assert.AreEqual("on", result["FACUNDO_TEST"].Treatment);
@@ -479,8 +472,6 @@ namespace Splitio.Integration_tests.Async
             Assert.AreEqual("{\"color\":\"green\"}", result["FACUNDO_TEST"].Config);
             Assert.AreEqual("{\"version\":\"v1\"}", result["MAURO_TEST"].Config);
             Assert.IsNull(result["Test_Save_1"].Config);
-
-            await client.DestroyAsync();
             
             var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
             var impExpected2 = Helper.GetImpressionExpected("MAURO_TEST", "nico_test");
@@ -723,7 +714,7 @@ namespace Splitio.Integration_tests.Async
 
             //Validate Events sent to the be.
             await AssertSentEventsAsync(events);
-            client.Destroy();
+            await client.DestroyAsync();
         }
 
         [TestMethod]
@@ -908,7 +899,7 @@ namespace Splitio.Integration_tests.Async
 
             // Act.
             var result = await client.GetTreatmentsWithConfigByFlagSetAsync("nico_test", "set_1");
-            client.Destroy();
+            await client.DestroyAsync();
 
             // Assert.
             var treatment = result.FirstOrDefault();
@@ -942,7 +933,7 @@ namespace Splitio.Integration_tests.Async
             // Act.
             var result = await client.GetTreatmentsWithConfigByFlagSetAsync("key", null);
             var result2 = await client.GetTreatmentsWithConfigByFlagSetAsync("key", string.Empty);
-            client.Destroy();
+            await client.DestroyAsync();
 
             // Assert.
             Assert.IsFalse(result.Any());
@@ -968,7 +959,7 @@ namespace Splitio.Integration_tests.Async
 
             // Act.
             var result = await client.GetTreatmentsByFlagSetAsync("nico_test", "set_1");
-            client.Destroy();
+            await client.DestroyAsync();
 
             // Assert.
             var treatment = result.FirstOrDefault();
@@ -1000,7 +991,7 @@ namespace Splitio.Integration_tests.Async
             // Act.
             var result = await client.GetTreatmentsByFlagSetAsync("key", null);
             var result2 = await client.GetTreatmentsByFlagSetAsync("key", string.Empty);
-            client.Destroy();
+            await client.DestroyAsync();
 
             // Assert.
             Assert.IsFalse(result.Any());

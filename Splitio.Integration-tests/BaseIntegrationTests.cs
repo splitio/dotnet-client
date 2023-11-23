@@ -44,14 +44,13 @@ namespace Splitio.Integration_tests
             var result2 = client.GetTreatment("mauro_test", "FACUNDO_TEST");
             var result3 = client.GetTreatment("1", "Test_Save_1");
             var result4 = client.GetTreatment("24", "Test_Save_1");
+            await client.DestroyAsync();
 
             // Assert.
             Assert.AreEqual("on", result1);
             Assert.AreEqual("off", result2);
             Assert.AreEqual("on", result3);
             Assert.AreEqual("off", result4);
-
-            await client.DestroyAsync();
 
             var impressionExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
             var impressionExpected2 = GetImpressionExpected("FACUNDO_TEST", "mauro_test");
@@ -88,14 +87,13 @@ namespace Splitio.Integration_tests
             var result2 = client.GetTreatment(string.Empty, "FACUNDO_TEST");
             var result3 = client.GetTreatment("1", string.Empty);
             var result4 = client.GetTreatment("24", "Test_Save_1");
+            await client.DestroyAsync();
 
             // Assert.
             Assert.AreEqual("on", result1);
             Assert.AreEqual("control", result2);
             Assert.AreEqual("control", result3);
             Assert.AreEqual("off", result4);
-
-            await client.DestroyAsync();
 
             var impressionExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
             var impressionExpected2 = GetImpressionExpected("Test_Save_1", "24");
@@ -159,7 +157,6 @@ namespace Splitio.Integration_tests
             var result2 = client.GetTreatmentWithConfig("mauro_test", "FACUNDO_TEST");
             var result3 = client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
             var result4 = client.GetTreatmentWithConfig("test", "MAURO_TEST");
-
             await client.DestroyAsync();
 
             // Assert.
@@ -208,7 +205,6 @@ namespace Splitio.Integration_tests
             var result2 = client.GetTreatmentWithConfig(string.Empty, "FACUNDO_TEST");
             var result3 = client.GetTreatmentWithConfig("test", string.Empty);
             var result4 = client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
-
             await client.DestroyAsync();
 
             // Assert.
@@ -410,7 +406,6 @@ namespace Splitio.Integration_tests
             var result1 = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", string.Empty, "Test_Save_1" });
             var result2 = client.GetTreatmentsWithConfig("mauro", new List<string> { string.Empty, "MAURO_TEST", "Test_Save_1" });
             var result3 = client.GetTreatmentsWithConfig(string.Empty, new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
-
             await client.DestroyAsync();
 
             // Assert.
@@ -462,6 +457,7 @@ namespace Splitio.Integration_tests
 
             // Act.
             var result = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "Random_Treatment", "MAURO_TEST", "Test_Save_1", "Random_Treatment_1" });
+            await client.DestroyAsync();
 
             // Assert.
             Assert.AreEqual("on", result["FACUNDO_TEST"].Treatment);
@@ -473,8 +469,6 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("{\"color\":\"green\"}", result["FACUNDO_TEST"].Config);
             Assert.AreEqual("{\"version\":\"v1\"}", result["MAURO_TEST"].Config);
             Assert.IsNull(result["Test_Save_1"].Config);
-
-            await client.DestroyAsync();
 
             var impExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
             var impExpected2 = GetImpressionExpected("MAURO_TEST", "nico_test");
@@ -752,7 +746,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public void Manager_Splits_ReturnsSplitList()
+        public async Task Manager_Splits_ReturnsSplitList()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -771,11 +765,11 @@ namespace Splitio.Integration_tests
             Assert.AreEqual(30, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<SplitView>));
 
-            splitFactory.Client().Destroy();
+            await splitFactory.Client().DestroyAsync();
         }
 
         [TestMethod]
-        public void Manager_Split_ReturnsSplit()
+        public async Task Manager_Split_ReturnsSplit()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -795,11 +789,11 @@ namespace Splitio.Integration_tests
             Assert.IsNotNull(result);
             Assert.AreEqual(splitName, result.name);
 
-            splitFactory.Client().Destroy();
+            await splitFactory.Client().DestroyAsync();
         }
 
         [TestMethod]
-        public void Manager_Split_WhenNameDoesntExist_ReturnsSplit()
+        public async Task Manager_Split_WhenNameDoesntExist_ReturnsSplit()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -818,7 +812,7 @@ namespace Splitio.Integration_tests
             // Assert.
             Assert.IsNull(result);
 
-            splitFactory.Client().Destroy();
+            await splitFactory.Client().DestroyAsync();
         }
         #endregion
 
