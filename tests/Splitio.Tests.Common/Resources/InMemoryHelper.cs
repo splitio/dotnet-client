@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Splitio.Domain;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace Splitio.Tests.Common.Resources
 {
@@ -36,14 +36,14 @@ namespace Splitio.Tests.Common.Resources
             Assert.AreEqual(expected.treatment, impression.treatment);
         }
 
-        public static async Task AssertImpressionListenerAsync(string mode, int expected, IntegrationTestsImpressionListener impressionListener)
+        public static void AssertImpressionListener(string mode, int expected, IntegrationTestsImpressionListener impressionListener)
         {
             for (int i = 0; i < 10; i++)
             {
                 if (impressionListener.Count() > 0)
                     break;
 
-                await Task.Delay(1000);
+                Thread.Sleep(1000);
             }
 
             Assert.AreEqual(expected, impressionListener.Count(), $"{mode}: Impression Listener not match");
@@ -52,7 +52,7 @@ namespace Splitio.Tests.Common.Resources
 
     public class InMemoryHelper
     {
-        public static async Task AssertSentImpressionsAsync(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
+        public static void AssertSentImpressions(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
         {
             if (sentImpressionsCount <= 0) return;
 
@@ -64,7 +64,7 @@ namespace Splitio.Tests.Common.Resources
 
                 if (sentImpressions.Count > 0) break;
 
-                await Task.Delay(1000);
+                Thread.Sleep(1000);
             }
 
             Assert.AreEqual(sentImpressionsCount, sentImpressions.Sum(si => si.I.Count), "AssertSentImpressions Count");
@@ -103,7 +103,7 @@ namespace Splitio.Tests.Common.Resources
             return impressions;
         }
 
-        public static async Task AssertSentEventsAsync(List<EventBackend> eventsExpected, HttpClientMock httpClientMock = null, int? eventsCount = null, bool validateEvents = true)
+        public static void AssertSentEvents(List<EventBackend> eventsExpected, HttpClientMock httpClientMock = null, int? eventsCount = null, bool validateEvents = true)
         {
             var sentEvents = new List<EventBackend>();
 
@@ -113,7 +113,7 @@ namespace Splitio.Tests.Common.Resources
 
                 if (sentEvents.Count > 0) break;
 
-                await Task.Delay(1000);
+                Thread.Sleep(1000);
             }
 
             Assert.AreEqual(eventsCount ?? eventsExpected.Count, sentEvents.Count);

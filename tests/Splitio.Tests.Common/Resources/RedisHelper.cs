@@ -5,6 +5,7 @@ using Splitio.Redis.Services.Cache.Interfaces;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Tests.Common.Resources
@@ -13,7 +14,23 @@ namespace Splitio.Tests.Common.Resources
     {
         public static async Task AssertSentEventsAsync(IRedisAdapter redisAdapter, string userPrefix, List<EventBackend> eventsExcpected, int? eventsCount = null, bool validateEvents = true)
         {
-            await Task.Delay(1500);
+            await Task.Delay(1000);
+
+            var redisEvents = await redisAdapter.ListRangeAsync($"{userPrefix}.SPLITIO.events");
+
+            Assert.AreEqual(eventsExcpected.Count, redisEvents.Length);
+
+            foreach (var item in redisEvents)
+            {
+                var actualEvent = JsonConvert.DeserializeObject<EventRedis>(item);
+
+                AssertEvent(actualEvent, eventsExcpected);
+            }
+        }
+
+        public static void AssertSentEvents(IRedisAdapter redisAdapter, string userPrefix, List<EventBackend> eventsExcpected, int? eventsCount = null, bool validateEvents = true)
+        {
+            Thread.Sleep(1000);
 
             var redisEvents = redisAdapter.ListRange($"{userPrefix}.SPLITIO.events");
 
@@ -29,7 +46,23 @@ namespace Splitio.Tests.Common.Resources
 
         public static async Task AssertSentImpressionsAsync(IRedisAdapter redisAdapter, string userPrefix, int sentImpressionsCount, params KeyImpression[] expectedImpressions)
         {
-            await Task.Delay(1500);
+            await Task.Delay(1000);
+
+            var redisImpressions = await redisAdapter.ListRangeAsync($"{userPrefix}.SPLITIO.impressions");
+
+            Assert.AreEqual(sentImpressionsCount, redisImpressions.Length);
+
+            foreach (var item in redisImpressions)
+            {
+                var actualImp = JsonConvert.DeserializeObject<KeyImpressionRedis>(item);
+
+                AssertImpression(actualImp, expectedImpressions.ToList());
+            }
+        }
+
+        public static void AssertSentImpressions(IRedisAdapter redisAdapter, string userPrefix, int sentImpressionsCount, params KeyImpression[] expectedImpressions)
+        {
+            Thread.Sleep(1000);
 
             var redisImpressions = redisAdapter.ListRange($"{userPrefix}.SPLITIO.impressions");
 

@@ -60,7 +60,7 @@ namespace Splitio.Integration_redis_tests
         }
 
         [TestMethod]
-        public async Task GetTreatments_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
+        public void GetTreatments_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -91,8 +91,8 @@ namespace Splitio.Integration_redis_tests
             var impressionExpected3 = GetImpressionExpected("Test_Save_1", "nico_test");
 
             //Validate impressions sent to the be.            
-            await AssertSentImpressionsAsync(3, impressionExpected1, impressionExpected2, impressionExpected3);
-            await AssertImpressionListenerAsync(3, impressionListener);
+            AssertSentImpressions(3, impressionExpected1, impressionExpected2, impressionExpected3);
+            AssertImpressionListener(3, impressionListener);
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
             Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "nico_test"), impressionExpected2);
             Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impressionExpected3);
@@ -292,7 +292,7 @@ namespace Splitio.Integration_redis_tests
         }
 
         [TestMethod]
-        public async Task GetTreatmentsWithConfigByFlagSets_WithFlagSetsInConfig()
+        public void GetTreatmentsWithConfigByFlagSets_WithFlagSetsInConfig()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -319,13 +319,13 @@ namespace Splitio.Integration_redis_tests
             var impressionExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(1, impressionExpected1);
+            AssertSentImpressions(1, impressionExpected1);
             Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
         }
 
         [TestMethod]
-        public async Task GetTreatmentsByFlagSets_WithFlagSetsInConfig()
+        public void GetTreatmentsByFlagSets_WithFlagSetsInConfig()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -352,14 +352,14 @@ namespace Splitio.Integration_redis_tests
             var impressionExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(1, impressionExpected1);
+            AssertSentImpressions(1, impressionExpected1);
 
             Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
         }
 
         [TestMethod]
-        public async Task GetTreatmentsWithConfigByFlagSet_WithFlagSetsInConfig()
+        public void GetTreatmentsWithConfigByFlagSet_WithFlagSetsInConfig()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -386,14 +386,14 @@ namespace Splitio.Integration_redis_tests
             var impressionExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(1, impressionExpected1);
+            AssertSentImpressions(1, impressionExpected1);
 
             Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
         }
 
         [TestMethod]
-        public async Task GetTreatmentsByFlagSet_WithFlagSetsInConfig()
+        public void GetTreatmentsByFlagSet_WithFlagSetsInConfig()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -420,7 +420,7 @@ namespace Splitio.Integration_redis_tests
             var impressionExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(1, impressionExpected1);
+            AssertSentImpressions(1, impressionExpected1);
 
             Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
@@ -451,14 +451,14 @@ namespace Splitio.Integration_redis_tests
             };
         }
 
-        protected override async Task AssertSentImpressionsAsync(int sentImpressionsCount, params KeyImpression[] expectedImpressions)
+        protected override void AssertSentImpressions(int sentImpressionsCount, params KeyImpression[] expectedImpressions)
         {
-            await RedisHelper.AssertSentImpressionsAsync(_redisAdapter, UserPrefix, sentImpressionsCount, expectedImpressions);
+            RedisHelper.AssertSentImpressions(_redisAdapter, UserPrefix, sentImpressionsCount, expectedImpressions);
         }
 
-        protected override async Task AssertSentEventsAsync(List<EventBackend> eventsExcpected, int? eventsCount = null, bool validateEvents = true)
+        protected override void AssertSentEvents(List<EventBackend> eventsExcpected, int? eventsCount = null, bool validateEvents = true)
         {
-            await RedisHelper.AssertSentEventsAsync(_redisAdapter, UserPrefix, eventsExcpected, eventsCount, validateEvents);
+            RedisHelper.AssertSentEvents(_redisAdapter, UserPrefix, eventsExcpected, eventsCount, validateEvents);
         }
         #endregion
     }

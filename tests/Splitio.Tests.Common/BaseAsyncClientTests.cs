@@ -67,7 +67,7 @@ namespace Splitio.Tests.Common
             await AssertSentImpressionsAsync(4, impExpected1, impExpected2, impExpected3, impExpected4);
 
             // Validate impressions in listener.
-            await Helper.AssertImpressionListenerAsync(_mode, 4, impressionListener);
+            Helper.AssertImpressionListener(_mode, 4, impressionListener);
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "mauro_test"), impExpected2);
             Helper.AssertImpression(impressionListener.Get("Test_Save_1", "1"), impExpected3);
@@ -108,7 +108,7 @@ namespace Splitio.Tests.Common
             await AssertSentImpressionsAsync(2, impExpected1, impExpected2);
 
             // Validate impressions in listener.
-            await Helper.AssertImpressionListenerAsync(_mode, 2, impressionListener);
+            Helper.AssertImpressionListener(_mode, 2, impressionListener);
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
             Helper.AssertImpression(impressionListener.Get("Test_Save_1", "24"), impExpected2);
         }
@@ -185,7 +185,7 @@ namespace Splitio.Tests.Common
             await AssertSentImpressionsAsync(4, impExpected1, impExpected2, impExpected3, impExpected4);
 
             // Validate impressions.
-            await Helper.AssertImpressionListenerAsync(_mode, 4, impressionListener);
+            Helper.AssertImpressionListener(_mode, 4, impressionListener);
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "mauro_test"), impExpected2);
             Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "mauro"), impExpected3);
@@ -231,7 +231,7 @@ namespace Splitio.Tests.Common
             await AssertSentImpressionsAsync(2, impExpected1, impExpected2);
 
             // Validate impressions.
-            await Helper.AssertImpressionListenerAsync(_mode, 2, impressionListener);
+            Helper.AssertImpressionListener(_mode, 2, impressionListener);
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
             Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "mauro"), impExpected2);
         }
@@ -298,7 +298,7 @@ namespace Splitio.Tests.Common
             await AssertSentImpressionsAsync(3, impExpected1, impExpected2, impExpected3);
 
             // Validate impressions.
-            await Helper.AssertImpressionListenerAsync(_mode, 3, impressionListener);
+            Helper.AssertImpressionListener(_mode, 3, impressionListener);
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"),impExpected1);
             Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "nico_test"), impExpected2);
             Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impExpected3);
@@ -342,7 +342,7 @@ namespace Splitio.Tests.Common
             await AssertSentImpressionsAsync(4, impExpected1, impExpected2, impExpected3, impExpected4);
 
             // Validate impressions.
-            await Helper.AssertImpressionListenerAsync(_mode, 4, impressionListener);
+            Helper.AssertImpressionListener(_mode, 4, impressionListener);
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
             Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impExpected2);
             Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "mauro"), impExpected3);
@@ -385,7 +385,7 @@ namespace Splitio.Tests.Common
             await AssertSentImpressionsAsync(3, impExpected1, impExpected2, impExpected3);
 
             // Validate impressions.
-            await Helper.AssertImpressionListenerAsync(_mode, 3, impressionListener);
+            Helper.AssertImpressionListener(_mode, 3, impressionListener);
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
             Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "nico_test"), impExpected2);
             Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impExpected3);
@@ -437,7 +437,7 @@ namespace Splitio.Tests.Common
             await AssertSentImpressionsAsync(4, impExpected1, impExpected2, impExpected3, impExpected4);
 
             // Validate impressions.
-            await Helper.AssertImpressionListenerAsync(_mode, 4, impressionListener);
+            Helper.AssertImpressionListener(_mode, 4, impressionListener);
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
             Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impExpected2);
             Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "mauro"), impExpected3);
@@ -481,7 +481,7 @@ namespace Splitio.Tests.Common
             await AssertSentImpressionsAsync(3, impExpected1, impExpected2, impExpected3);
 
             // Validate impressions.
-            await Helper.AssertImpressionListenerAsync(_mode, 3, impressionListener);
+            Helper.AssertImpressionListener(_mode, 3, impressionListener);
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
             Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "nico_test"), impExpected2);
             Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impExpected3);
@@ -793,7 +793,7 @@ namespace Splitio.Tests.Common
             //Validate impressions sent to the be.
             await AssertSentImpressionsAsync(1, impExpected1);
 
-            await Helper.AssertImpressionListenerAsync(_mode, 1, impressionListener);
+            Helper.AssertImpressionListener(_mode, 1, impressionListener);
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
         }
 
@@ -852,7 +852,7 @@ namespace Splitio.Tests.Common
             //Validate impressions sent to the be.
             await AssertSentImpressionsAsync(1, impExpected1);
 
-            await Helper.AssertImpressionListenerAsync(_mode, 1, impressionListener);
+            Helper.AssertImpressionListener(_mode, 1, impressionListener);
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
         }
 
@@ -912,7 +912,7 @@ namespace Splitio.Tests.Common
             //Validate impressions sent to the be.
             await AssertSentImpressionsAsync(1, impExpected1);
 
-            await Helper.AssertImpressionListenerAsync(_mode, 1, impressionListener);
+            Helper.AssertImpressionListener(_mode, 1, impressionListener);
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
         }
 
@@ -970,7 +970,7 @@ namespace Splitio.Tests.Common
 
             //Validate impressions sent to the be.
             await AssertSentImpressionsAsync(1, impExpected1);
-            await Helper.AssertImpressionListenerAsync(_mode, 1, impressionListener);
+            Helper.AssertImpressionListener(_mode, 1, impressionListener);
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
         }
 

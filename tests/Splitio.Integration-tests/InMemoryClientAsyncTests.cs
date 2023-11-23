@@ -32,12 +32,16 @@ namespace Splitio.Integration_tests
 
         protected override async Task AssertSentImpressionsAsync(int sentImpressionsCount, params KeyImpression[] expectedImpressions)
         {
-            await InMemoryHelper.AssertSentImpressionsAsync(sentImpressionsCount, httpClientMock, expectedImpressions);
+            InMemoryHelper.AssertSentImpressions(sentImpressionsCount, httpClientMock, expectedImpressions);
+
+            await Task.FromResult(0);
         }
 
         protected override async Task AssertSentEventsAsync(List<EventBackend> eventsExcpected, int? eventsCount = null, bool validateEvents = true)
         {
-            await InMemoryHelper.AssertSentEventsAsync(eventsExcpected, httpClientMock, eventsCount, validateEvents);
+            InMemoryHelper.AssertSentEvents(eventsExcpected, httpClientMock, eventsCount, validateEvents);
+            
+            await Task.FromResult(0);
         }
 
         protected override async Task CleanupAsync()

@@ -56,8 +56,8 @@ namespace Splitio.Integration_tests
             var impressionExpected3 = GetImpressionExpected("Test_Save_1", "nico_test");
 
             //Validate impressions sent to the be.
-            await AssertSentImpressionsAsync(3, impressionExpected1, impressionExpected2, impressionExpected3);
-            await AssertImpressionListenerAsync(3, impressionListener);
+            AssertSentImpressions(3, impressionExpected1, impressionExpected2, impressionExpected3);
+            AssertImpressionListener(3, impressionListener);
 
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
             Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "nico_test"), impressionExpected2);
@@ -558,14 +558,14 @@ namespace Splitio.Integration_tests
             };
         }
 
-        protected override async Task AssertSentImpressionsAsync(int sentImpressionsCount, params KeyImpression[] expectedImpressions)
+        protected override void AssertSentImpressions(int sentImpressionsCount, params KeyImpression[] expectedImpressions)
         {
-            await InMemoryHelper.AssertSentImpressionsAsync(sentImpressionsCount, httpClientMock, expectedImpressions);
+            InMemoryHelper.AssertSentImpressions(sentImpressionsCount, httpClientMock, expectedImpressions);
         }
 
-        protected override async Task AssertSentEventsAsync(List<EventBackend> eventsExpected, int? eventsCount = null, bool validateEvents = true)
+        protected override void AssertSentEvents(List<EventBackend> eventsExpected, int? eventsCount = null, bool validateEvents = true)
         {
-            await InMemoryHelper.AssertSentEventsAsync(eventsExpected, httpClientMock, eventsCount, validateEvents);
+            InMemoryHelper.AssertSentEvents(eventsExpected, httpClientMock, eventsCount, validateEvents);
         }
         #endregion
 
