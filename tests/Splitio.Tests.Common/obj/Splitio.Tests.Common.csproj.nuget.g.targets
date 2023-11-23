@@ -1,6 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <ImportGroup Condition=" '$(TargetFramework)' == 'net7.0' AND '$(ExcludeRestorePackageImports)' != 'true' ">
-    <Import Project="$(NuGetPackageRoot)mstest.testframework\2.2.10\build\net5.0\MSTest.TestFramework.targets" Condition="Exists('$(NuGetPackageRoot)mstest.testframework\2.2.10\build\net5.0\MSTest.TestFramework.targets')" />
-  </ImportGroup>
-</Project>
