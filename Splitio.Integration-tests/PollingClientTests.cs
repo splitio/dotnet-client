@@ -19,12 +19,6 @@ namespace Splitio.Integration_tests
         public PollingClientTests() : base("Polling")
         { }
 
-        [TestCleanup]
-        public void Cleanup()
-        {
-            httpClientMock.ResetLogEntries();
-        }
-
         [TestMethod]
         public async Task GetTreatments_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
         {

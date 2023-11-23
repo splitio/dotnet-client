@@ -41,7 +41,7 @@ namespace Splitio.Integration_tests.Async
 
         protected override async Task CleanupAsync()
         {
-            httpClientMock.ResetLogEntries();
+            // httpClientMock.ResetLogEntries();
 
             await Task.FromResult(0);
         }
