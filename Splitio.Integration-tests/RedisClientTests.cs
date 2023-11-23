@@ -52,6 +52,12 @@ namespace Splitio.Integration_tests
             await RedisHelper.LoadSplitsAsync(rootFilePath, UserPrefix, _redisAdapter);
         }
 
+        [TestCleanup]
+        public void CleanKeys()
+        {
+            RedisHelper.Cleanup(UserPrefix, _redisAdapter);
+        }
+
         [TestMethod]
         public async Task GetTreatments_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
         {
@@ -454,11 +460,5 @@ namespace Splitio.Integration_tests
             await RedisHelper.AssertSentEventsAsync(_redisAdapter, UserPrefix, eventsExcpected, eventsCount, validateEvents);
         }
         #endregion
-
-        [TestCleanup]
-        public void CleanKeys()
-        {
-            RedisHelper.Cleanup(UserPrefix, _redisAdapter);
-        }
     }
 }

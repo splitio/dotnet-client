@@ -465,7 +465,6 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("off", result["MAURO_TEST"].Treatment);
             Assert.AreEqual("off", result["Test_Save_1"].Treatment);
             Assert.AreEqual("control", result["Random_Treatment_1"].Treatment);
-
             Assert.AreEqual("{\"color\":\"green\"}", result["FACUNDO_TEST"].Config);
             Assert.AreEqual("{\"version\":\"v1\"}", result["MAURO_TEST"].Config);
             Assert.IsNull(result["Test_Save_1"].Config);

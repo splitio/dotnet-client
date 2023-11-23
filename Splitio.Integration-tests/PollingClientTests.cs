@@ -14,7 +14,7 @@ namespace Splitio.Integration_tests
     [TestClass]
     public class PollingClientTests : BaseIntegrationTests
     {
-        private readonly HttpClientMock httpClientMock = new HttpClientMock("test");
+        private readonly HttpClientMock httpClientMock = new HttpClientMock("PollingClientTests");
 
         public PollingClientTests() : base("Polling")
         { }
