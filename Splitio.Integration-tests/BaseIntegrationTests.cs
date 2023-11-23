@@ -411,6 +411,8 @@ namespace Splitio.Integration_tests
             var result2 = client.GetTreatmentsWithConfig("mauro", new List<string> { string.Empty, "MAURO_TEST", "Test_Save_1" });
             var result3 = client.GetTreatmentsWithConfig(string.Empty, new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
 
+            await client.DestroyAsync();
+
             // Assert.
             Assert.AreEqual("on", result1["FACUNDO_TEST"].Treatment);
             Assert.AreEqual("off", result1["Test_Save_1"].Treatment);
@@ -427,8 +429,6 @@ namespace Splitio.Integration_tests
             Assert.IsNull(result3["FACUNDO_TEST"].Config);
             Assert.IsNull(result3["MAURO_TEST"].Config);
             Assert.IsNull(result3["Test_Save_1"].Config);
-
-            await client.DestroyAsync();
 
             var impExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
             var impExpected2 = GetImpressionExpected("Test_Save_1", "nico_test");

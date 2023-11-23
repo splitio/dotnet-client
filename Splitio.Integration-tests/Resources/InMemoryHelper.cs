@@ -67,7 +67,7 @@ namespace Splitio.Integration_tests.Resources
                 await Task.Delay(1000);
             }
 
-            Assert.AreEqual(sentImpressionsCount, sentImpressions.Sum(si => si.I.Count), "AssertSentImpressions");
+            Assert.AreEqual(sentImpressionsCount, sentImpressions.Sum(si => si.I.Count), "AssertSentImpressions Count");
 
             foreach (var expectedImp in expectedImpressions)
             {
