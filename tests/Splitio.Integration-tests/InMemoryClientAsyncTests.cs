@@ -12,7 +12,7 @@ namespace Splitio.Integration_tests
     [TestClass]
     public class InMemoryClientAsyncTests : BaseAsyncClientTests
     {
-        private readonly HttpClientMock httpClientMock = new HttpClientMock("async");
+        private static readonly HttpClientMock httpClientMock = new HttpClientMock("async");
 
         public InMemoryClientAsyncTests() : base("InMemory")
         {
@@ -42,7 +42,7 @@ namespace Splitio.Integration_tests
 
         protected override async Task CleanupAsync()
         {
-            // httpClientMock.ResetLogEntries();
+            httpClientMock.ResetLogEntries();
 
             await Task.FromResult(0);
         }

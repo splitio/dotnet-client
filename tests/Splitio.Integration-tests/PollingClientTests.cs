@@ -15,10 +15,16 @@ namespace Splitio.Integration_tests
     [TestClass]
     public class PollingClientTests : BaseIntegrationTests
     {
-        private readonly HttpClientMock httpClientMock = new HttpClientMock("PollingClientTests");
+        private static readonly HttpClientMock httpClientMock = new HttpClientMock("PollingClientTests");
 
         public PollingClientTests() : base("Polling")
         { }
+
+        [TestCleanup]
+        public void Cleanup()
+        {
+            httpClientMock.ResetLogEntries();
+        }
 
         [TestMethod]
         public async Task GetTreatments_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
@@ -417,7 +423,7 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("memory", sentConfig.Storage);
             Assert.AreEqual(configurations.FeaturesRefreshRate, (int)sentConfig.Rates.Splits);
             Assert.AreEqual(configurations.SegmentsRefreshRate, (int)sentConfig.Rates.Events);
-            Assert.AreEqual(60, (int)sentConfig.Rates.Impressions);
+            Assert.AreEqual(300, (int)sentConfig.Rates.Impressions);
             Assert.AreEqual(3600, (int)sentConfig.Rates.Telemetry);
             Assert.IsTrue(sentConfig.UrlOverrides.Telemetry);
             Assert.IsTrue(sentConfig.UrlOverrides.Sdk);
@@ -545,7 +551,6 @@ namespace Splitio.Integration_tests
                 ImpressionListener = impressionListener,
                 FeaturesRefreshRate = featuresRefreshRate ?? 1,
                 SegmentsRefreshRate = 1,
-                ImpressionsRefreshRate = 1,
                 EventsPushRate = eventsPushRate ?? 1,
                 EventsQueueSize = eventsQueueSize,
                 IPAddressesEnabled = ipAddressesEnabled,

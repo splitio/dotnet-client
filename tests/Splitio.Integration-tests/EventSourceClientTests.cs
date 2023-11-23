@@ -11,13 +11,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Splitio.Integration_tests.EventSource
+namespace Splitio.Integration_tests
 {
     [TestClass]
     public class EventSourceClientTests
     {
         [TestMethod]
-        public void  EventSourceClient_FullBuffer_ShouldProcessAllNotifications()
+        public void EventSourceClient_FullBuffer_ShouldProcessAllNotifications()
         {
             using (var httpClientMock = new HttpClientMock())
             {
@@ -63,13 +63,13 @@ namespace Splitio.Integration_tests.EventSource
         {
             using (var httpClientMock = new HttpClientMock())
             {
-                var notification  = "id: 234234432\nevent: message\ndata: {\"id\":\"jSOE7oGJWo:0:0\",\"clientId\":\"pri:ODc1NjQyNzY1\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"xxxx_xxxx_splits\",\"data\":\"{\\\"type\\\":\\\"SPLIT_UPDATE\\\",\\\"changeNumber\\\":1585867723838}\"}\n\n";
+                var notification = "id: 234234432\nevent: message\ndata: {\"id\":\"jSOE7oGJWo:0:0\",\"clientId\":\"pri:ODc1NjQyNzY1\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"xxxx_xxxx_splits\",\"data\":\"{\\\"type\\\":\\\"SPLIT_UPDATE\\\",\\\"changeNumber\\\":1585867723838}\"}\n\n";
                 httpClientMock.SSE_Channels_Response(notification);
 
                 var result = GetEventSourceClient();
                 var eventSourceClient = result.Item1;
                 var eventsReceived = result.Item2;
-                var streamingStatusQueue  = result.Item3;
+                var streamingStatusQueue = result.Item3;
 
                 var connected = eventSourceClient.Connect(httpClientMock.GetUrl());
                 Assert.IsTrue(connected);
@@ -81,7 +81,7 @@ namespace Splitio.Integration_tests.EventSource
                 Assert.AreEqual(StreamingStatus.STREAMING_READY, action);
             }
         }
-        
+
         [TestMethod]
         public void EventSourceClient_SplitKillEvent_ShouldReceiveEvent()
         {
@@ -154,8 +154,8 @@ namespace Splitio.Integration_tests.EventSource
                 Assert.AreEqual(StreamingStatus.STREAMING_READY, action);
             }
         }
-        
-        
+
+
         [TestMethod]
         public void EventSourceClient_ControlEvent_StreamingResumed_ShouldReceiveEvent()
         {
@@ -178,7 +178,7 @@ namespace Splitio.Integration_tests.EventSource
                 Assert.AreEqual(StreamingStatus.STREAMING_READY, action);
             }
         }
-        
+
         [TestMethod]
         public void EventSourceClient_ControlEvent_StreamingDisabled_ShouldReceiveEvent()
         {
