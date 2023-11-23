@@ -1,0 +1,3 @@
+is_global = true
+build_property.RootNamespace = Splitio.Integration_redis_tests
+build_property.ProjectDir = C:\Users\mauroantoniosanz\Desktop\Split\sdk\dotnet-client\Splitio.Integration-redis-tests\
