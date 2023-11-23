@@ -26,9 +26,9 @@ build_script:
 
 after_build:
  - Redis-64\tools\redis-server.exe --service-start
+ - dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj --configuration Release
+ - dotnet test .\tests\Splitio.Integration-redis-tests.\Splitio.Integration-redis-tests.csproj --configuration Release
  - dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj --configuration Release
- - dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-redis-tests.csproj --configuration Release
- - dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-events-tests.csproj --configuration Release
  - Redis-64\tools\redis-server.exe --service-stop
  - Redis-64\tools\redis-server.exe --service-start
  - dotnet test .\tests\Splitio-tests\Splitio-tests.csproj --configuration Release
