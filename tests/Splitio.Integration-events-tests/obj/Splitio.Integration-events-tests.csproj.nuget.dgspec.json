@@ -1,0 +1,784 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\tests\\Splitio.Integration-events-tests\\Splitio.Integration-events-tests.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\Splitio.Redis\\Splitio.Redis.csproj": {
+      "version": "7.7.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\Splitio.Redis\\Splitio.Redis.csproj",
+        "projectName": "Splitio.Redis",
+        "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\Splitio.Redis\\Splitio.Redis.csproj",
+        "packagesPath": "C:\\Users\\mauroantoniosanz\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\Splitio.Redis\\obj\\",
+        "projectStyle": "PackageReference",
+        "crossTargeting": true,
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\mauroantoniosanz\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net45",
+          "net461",
+          "net5.0",
+          "net6.0",
+          "net7.0",
+          "netstandard2.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Users\\mauroantoniosanz\\Documents\\nuget-local": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {
+              "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj": {
+                "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj"
+              }
+            }
+          },
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj": {
+                "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj"
+              }
+            }
+          },
+          "net7.0": {
+            "targetAlias": "net7.0",
+            "projectReferences": {
+              "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj": {
+                "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj"
+              }
+            }
+          },
+          "net45": {
+            "targetAlias": "net45",
+            "projectReferences": {
+              "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj": {
+                "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj"
+              }
+            }
+          },
+          "net461": {
+            "targetAlias": "net461",
+            "projectReferences": {
+              "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj": {
+                "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj"
+              }
+            }
+          },
+          "netstandard2.0": {
+            "targetAlias": "netstandard2.0",
+            "projectReferences": {
+              "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj": {
+                "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "StackExchange.Redis": {
+              "target": "Package",
+              "version": "[2.6.70, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.201\\RuntimeIdentifierGraph.json"
+        },
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "StackExchange.Redis": {
+              "target": "Package",
+              "version": "[2.6.70, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.201\\RuntimeIdentifierGraph.json"
+        },
+        "net7.0": {
+          "targetAlias": "net7.0",
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "StackExchange.Redis": {
+              "target": "Package",
+              "version": "[2.6.70, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.201\\RuntimeIdentifierGraph.json"
+        },
+        "net45": {
+          "targetAlias": "net45",
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "StackExchange.Redis.StrongName": {
+              "target": "Package",
+              "version": "[1.2.6, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.201\\RuntimeIdentifierGraph.json"
+        },
+        "net461": {
+          "targetAlias": "net461",
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "StackExchange.Redis": {
+              "target": "Package",
+              "version": "[2.6.70, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.201\\RuntimeIdentifierGraph.json"
+        },
+        "netstandard2.0": {
+          "targetAlias": "netstandard2.0",
+          "dependencies": {
+            "NETStandard.Library": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.3, )",
+              "autoReferenced": true
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "StackExchange.Redis": {
+              "target": "Package",
+              "version": "[2.6.70, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.201\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj": {
+      "version": "7.7.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj",
+        "projectName": "Splitio",
+        "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj",
+        "packagesPath": "C:\\Users\\mauroantoniosanz\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\obj\\",
+        "projectStyle": "PackageReference",
+        "crossTargeting": true,
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\mauroantoniosanz\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net45",
+          "net461",
+          "net5.0",
+          "net6.0",
+          "net7.0",
+          "netstandard2.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Users\\mauroantoniosanz\\Documents\\nuget-local": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {}
+          },
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {}
+          },
+          "net7.0": {
+            "targetAlias": "net7.0",
+            "projectReferences": {}
+          },
+          "net45": {
+            "targetAlias": "net45",
+            "projectReferences": {}
+          },
+          "net461": {
+            "targetAlias": "net461",
+            "projectReferences": {}
+          },
+          "netstandard2.0": {
+            "targetAlias": "netstandard2.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[3.1.32, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "System.IO.FileSystem.Watcher": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
+            "System.Net.NameResolution": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
+            "YamlDotNet": {
+              "target": "Package",
+              "version": "[8.1.1, )"
+            },
+            "murmurhash-signed": {
+              "target": "Package",
+              "version": "[1.0.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.201\\RuntimeIdentifierGraph.json"
+        },
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[3.1.32, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "System.IO.FileSystem.Watcher": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
+            "System.Net.NameResolution": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
+            "YamlDotNet": {
+              "target": "Package",
+              "version": "[8.1.1, )"
+            },
+            "murmurhash-signed": {
+              "target": "Package",
+              "version": "[1.0.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.201\\RuntimeIdentifierGraph.json"
+        },
+        "net7.0": {
+          "targetAlias": "net7.0",
+          "dependencies": {
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[3.1.32, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "System.IO.FileSystem.Watcher": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
+            "System.Net.NameResolution": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
+            "YamlDotNet": {
+              "target": "Package",
+              "version": "[8.1.1, )"
+            },
+            "murmurhash-signed": {
+              "target": "Package",
+              "version": "[1.0.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.201\\RuntimeIdentifierGraph.json"
+        },
+        "net45": {
+          "targetAlias": "net45",
+          "dependencies": {
+            "Common.Logging": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Common.Logging.Core": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "YamlDotNet": {
+              "target": "Package",
+              "version": "[8.1.1, )"
+            },
+            "murmurhash-signed": {
+              "target": "Package",
+              "version": "[1.0.3, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.201\\RuntimeIdentifierGraph.json"
+        },
+        "net461": {
+          "targetAlias": "net461",
+          "dependencies": {
+            "Common.Logging": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Common.Logging.Core": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "YamlDotNet": {
+              "target": "Package",
+              "version": "[8.1.1, )"
+            },
+            "murmurhash-signed": {
+              "target": "Package",
+              "version": "[1.0.3, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.201\\RuntimeIdentifierGraph.json"
+        },
+        "netstandard2.0": {
+          "targetAlias": "netstandard2.0",
+          "dependencies": {
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[3.1.32, )"
+            },
+            "NETStandard.Library": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.3, )",
+              "autoReferenced": true
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "System.IO.FileSystem.Watcher": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
+            "System.Net.NameResolution": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
+            "YamlDotNet": {
+              "target": "Package",
+              "version": "[8.1.1, )"
+            },
+            "murmurhash-signed": {
+              "target": "Package",
+              "version": "[1.0.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.201\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\tests\\Splitio.Integration-events-tests\\Splitio.Integration-events-tests.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\tests\\Splitio.Integration-events-tests\\Splitio.Integration-events-tests.csproj",
+        "projectName": "Splitio.Integration-events-tests",
+        "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\tests\\Splitio.Integration-events-tests\\Splitio.Integration-events-tests.csproj",
+        "packagesPath": "C:\\Users\\mauroantoniosanz\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\tests\\Splitio.Integration-events-tests\\obj\\",
+        "projectStyle": "PackageReference",
+        "crossTargeting": true,
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\mauroantoniosanz\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net472",
+          "net7.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Users\\mauroantoniosanz\\Documents\\nuget-local": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net7.0": {
+            "targetAlias": "net7.0",
+            "projectReferences": {
+              "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\Splitio.Redis\\Splitio.Redis.csproj": {
+                "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\Splitio.Redis\\Splitio.Redis.csproj"
+              },
+              "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj": {
+                "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj"
+              },
+              "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\tests\\Splitio.Tests.Common\\Splitio.Tests.Common.csproj": {
+                "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\tests\\Splitio.Tests.Common\\Splitio.Tests.Common.csproj"
+              }
+            }
+          },
+          "net472": {
+            "targetAlias": "net472",
+            "projectReferences": {
+              "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\Splitio.Redis\\Splitio.Redis.csproj": {
+                "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\Splitio.Redis\\Splitio.Redis.csproj"
+              },
+              "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj": {
+                "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj"
+              },
+              "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\tests\\Splitio.Tests.Common\\Splitio.Tests.Common.csproj": {
+                "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\tests\\Splitio.Tests.Common\\Splitio.Tests.Common.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net7.0": {
+          "targetAlias": "net7.0",
+          "dependencies": {
+            "MSTest.TestAdapter": {
+              "target": "Package",
+              "version": "[2.2.10, )"
+            },
+            "MSTest.TestFramework": {
+              "target": "Package",
+              "version": "[2.2.10, )"
+            },
+            "Microsoft.NET.Test.Sdk": {
+              "target": "Package",
+              "version": "[17.3.2, )"
+            },
+            "Moq": {
+              "target": "Package",
+              "version": "[4.18.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.201\\RuntimeIdentifierGraph.json"
+        },
+        "net472": {
+          "targetAlias": "net472",
+          "dependencies": {
+            "MSTest.TestAdapter": {
+              "target": "Package",
+              "version": "[2.2.10, )"
+            },
+            "MSTest.TestFramework": {
+              "target": "Package",
+              "version": "[2.2.10, )"
+            },
+            "Microsoft.NET.Test.Sdk": {
+              "target": "Package",
+              "version": "[17.3.2, )"
+            },
+            "Moq": {
+              "target": "Package",
+              "version": "[4.18.0, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.201\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\tests\\Splitio.Tests.Common\\Splitio.Tests.Common.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\tests\\Splitio.Tests.Common\\Splitio.Tests.Common.csproj",
+        "projectName": "Splitio.Tests.Common",
+        "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\tests\\Splitio.Tests.Common\\Splitio.Tests.Common.csproj",
+        "packagesPath": "C:\\Users\\mauroantoniosanz\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\tests\\Splitio.Tests.Common\\obj\\",
+        "projectStyle": "PackageReference",
+        "crossTargeting": true,
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\mauroantoniosanz\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net472",
+          "net7.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Users\\mauroantoniosanz\\Documents\\nuget-local": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net7.0": {
+            "targetAlias": "net7.0",
+            "projectReferences": {
+              "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\Splitio.Redis\\Splitio.Redis.csproj": {
+                "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\Splitio.Redis\\Splitio.Redis.csproj"
+              },
+              "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj": {
+                "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj"
+              }
+            }
+          },
+          "net472": {
+            "targetAlias": "net472",
+            "projectReferences": {
+              "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\Splitio.Redis\\Splitio.Redis.csproj": {
+                "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\Splitio.Redis\\Splitio.Redis.csproj"
+              },
+              "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj": {
+                "projectPath": "C:\\Users\\mauroantoniosanz\\Desktop\\Split\\sdk\\dotnet-client\\src\\Splitio\\Splitio.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net7.0": {
+          "targetAlias": "net7.0",
+          "dependencies": {
+            "MSTest.TestFramework": {
+              "target": "Package",
+              "version": "[2.2.10, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
+            "WireMock.Net": {
+              "target": "Package",
+              "version": "[1.5.35, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.201\\RuntimeIdentifierGraph.json"
+        },
+        "net472": {
+          "targetAlias": "net472",
+          "dependencies": {
+            "MSTest.TestFramework": {
+              "target": "Package",
+              "version": "[2.2.10, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
+            "WireMock.Net": {
+              "target": "Package",
+              "version": "[1.5.35, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.201\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
