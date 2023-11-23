@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26228.9
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{79B9E308-3F0F-441F-92B6-18C73B5CA3ED}"
 EndProject
@@ -13,6 +13,12 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio.Redis", "Splitio.Redis\Splitio.Redis.csproj", "{BD7CCDE8-225B-4AAE-A47D-F202714D9608}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio", "src\Splitio\Splitio.csproj", "{EA4C2A75-88E9-4A66-AC15-EBB5CB3718E8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio.Tests.Common", "Splitio.Tests.Common\Splitio.Tests.Common.csproj", "{1303D5B7-0661-4B8E-A8C3-C5136027C10C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio.Integration-redis-tests", "Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj", "{F525AF94-B3D7-4296-9F14-92DE2671D18A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Splitio.Integration-events-tests", "Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj", "{8E99A750-87FC-49BF-B998-5C5C8539FC52}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,6 +46,18 @@ Global
 		{EA4C2A75-88E9-4A66-AC15-EBB5CB3718E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA4C2A75-88E9-4A66-AC15-EBB5CB3718E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA4C2A75-88E9-4A66-AC15-EBB5CB3718E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1303D5B7-0661-4B8E-A8C3-C5136027C10C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1303D5B7-0661-4B8E-A8C3-C5136027C10C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1303D5B7-0661-4B8E-A8C3-C5136027C10C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1303D5B7-0661-4B8E-A8C3-C5136027C10C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F525AF94-B3D7-4296-9F14-92DE2671D18A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F525AF94-B3D7-4296-9F14-92DE2671D18A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F525AF94-B3D7-4296-9F14-92DE2671D18A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F525AF94-B3D7-4296-9F14-92DE2671D18A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E99A750-87FC-49BF-B998-5C5C8539FC52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E99A750-87FC-49BF-B998-5C5C8539FC52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E99A750-87FC-49BF-B998-5C5C8539FC52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E99A750-87FC-49BF-B998-5C5C8539FC52}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

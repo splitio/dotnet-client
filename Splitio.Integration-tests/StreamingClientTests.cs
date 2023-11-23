@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Client.Interfaces;
+using Splitio.Tests.Common;
 using System.Threading;
 
 namespace Splitio.Integration_tests

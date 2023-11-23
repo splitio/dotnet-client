@@ -1,9 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Splitio.Domain;
-using Splitio.Integration_tests.Resources;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Tests.Common;
+using Splitio.Tests.Common.Resources;
 using System;
 using System.Collections.Generic;
 using System.Linq;

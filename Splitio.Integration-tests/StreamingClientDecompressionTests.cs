@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
+using Splitio.Tests.Common;
 
 namespace Splitio.Integration_tests
 {
