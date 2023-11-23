@@ -362,7 +362,6 @@ namespace Splitio.Integration_tests
 
             // Act.
             var result = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
-
             await client.DestroyAsync();
 
             // Assert.
