@@ -38,7 +38,7 @@ namespace Splitio.Tests.Common.Resources
 
         public static void AssertImpressionListener(string mode, int expected, IntegrationTestsImpressionListener impressionListener)
         {
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 5; i++)
             {
                 if (impressionListener.Count() > 0)
                     break;
@@ -58,7 +58,7 @@ namespace Splitio.Tests.Common.Resources
 
             var sentImpressions = new List<KeyImpressionBackend>();
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 5; i++)
             {
                 sentImpressions = GetImpressionsSentBackend(httpClientMock);
 
@@ -107,7 +107,7 @@ namespace Splitio.Tests.Common.Resources
         {
             var sentEvents = new List<EventBackend>();
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 5; i++)
             {
                 sentEvents = GetEventsSentBackend(httpClientMock);
 
