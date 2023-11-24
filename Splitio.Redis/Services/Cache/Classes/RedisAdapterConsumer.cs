@@ -2,6 +2,7 @@
 using Splitio.Redis.Services.Domain;
 using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -217,6 +218,37 @@ namespace Splitio.Redis.Services.Cache.Classes
                 return false;
             }
             finally { FinishProfiling(nameof(SIsMemberAsync), key); }
+        }
+
+        public async Task<Dictionary<string, RedisValue[]>> PipelineSMembersAsync(List<RedisKey> keys)
+        {
+            try
+            {
+                var pipeline = new List<Task<RedisValue[]>>();
+
+                var db = GetDatabase();
+                foreach (var key in keys)
+                {
+                    pipeline.Add(db.SetMembersAsync(key));
+                }
+
+                var result = await Task.WhenAll(pipeline);
+
+                var toReturn =  new Dictionary<string, RedisValue[]>();
+
+                for (int i = 0; i < result.Length; i++)
+                {
+                    toReturn.Add(keys[i], result[i]);
+                }
+
+                return toReturn;
+            }
+            catch (Exception e)
+            {
+                LogError(nameof(PipelineSMembersAsync), string.Empty, e);
+                return new Dictionary<string, RedisValue[]>();
+            }
+            finally { FinishProfiling(nameof(PipelineSMembersAsync), string.Empty); }
         }
 #endregion
     }

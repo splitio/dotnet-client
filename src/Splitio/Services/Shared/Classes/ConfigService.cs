@@ -1,31 +1,36 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Splitio.Services.Shared.Classes
 {
     public class ConfigService : IConfigService
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(ConfigService));
-
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(ConfigService));
         private readonly IWrapperAdapter _wrapperAdapter;
+        private readonly IFlagSetsValidator _flagSetsValidator;
 
-        public ConfigService(IWrapperAdapter wrapperAdapter)
+        public ConfigService(IWrapperAdapter wrapperAdapter,
+            IFlagSetsValidator flagSetsValidator)
         {
             _wrapperAdapter = wrapperAdapter;
+            _flagSetsValidator = flagSetsValidator;
         }
 
         #region Public Methods
-        public BaseConfig ReadConfig(ConfigurationOptions config, ConfingTypes configType)
+        public BaseConfig ReadConfig(ConfigurationOptions config, ConfigTypes configType)
         {
             switch (configType)
             {
-                case ConfingTypes.Redis:
+                case ConfigTypes.Redis:
                     return ReadRedisConfig(config);
-                case ConfingTypes.InMemory:
+                case ConfigTypes.InMemory:
                 default:
                     return ReadInMemoryConfig(config);
             }
@@ -33,7 +38,7 @@ namespace Splitio.Services.Shared.Classes
         
         public BaseConfig ReadRedisConfig(ConfigurationOptions config)
         {
-            var baseConfig = ReadBaseConfig(config);
+            var baseConfig = ReadBaseConfig(config, ConfigTypes.Redis);
 
             baseConfig.ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Debug;
             baseConfig.UniqueKeysRefreshRate = 300;
@@ -46,7 +51,7 @@ namespace Splitio.Services.Shared.Classes
 
         public SelfRefreshingConfig ReadInMemoryConfig(ConfigurationOptions config)
         {
-            var baseConfig = ReadBaseConfig(config);
+            var baseConfig = ReadBaseConfig(config, ConfigTypes.InMemory);
 
             var selfRefreshingConfig = new SelfRefreshingConfig
             {
@@ -59,6 +64,8 @@ namespace Splitio.Services.Shared.Classes
                 BfExpectedElements = baseConfig.BfExpectedElements,
                 UniqueKeysCacheMaxSize = baseConfig.UniqueKeysCacheMaxSize,
                 ImpressionsCounterCacheMaxSize = baseConfig.ImpressionsCounterCacheMaxSize,
+                FlagSetsFilter = baseConfig.FlagSetsFilter,
+                FlagSetsInvalid = baseConfig.FlagSetsInvalid,
                 UniqueKeysBulkSize = 30000,
                 ImpressionsCountBulkSize = 30000,
                 UniqueKeysRefreshRate = 3600,
@@ -101,9 +108,10 @@ namespace Splitio.Services.Shared.Classes
         #endregion
 
         #region Private Methods
-        private BaseConfig ReadBaseConfig(ConfigurationOptions config)
+        private BaseConfig ReadBaseConfig(ConfigurationOptions config, ConfigTypes type)
         {
             var data = _wrapperAdapter.ReadConfig(config, _log);
+            var flagSetsResult = FlagSetsValidations(config.FlagSetsFilter, type);
 
             return new BaseConfig
             {
@@ -114,8 +122,27 @@ namespace Splitio.Services.Shared.Classes
                 BfExpectedElements = 10000000,
                 BfErrorRate = 0.01,
                 UniqueKeysCacheMaxSize = 50000,
-                ImpressionsCounterCacheMaxSize = 50000
+                ImpressionsCounterCacheMaxSize = 50000,
+                FlagSetsFilter = flagSetsResult.FlagSets,
+                FlagSetsInvalid = flagSetsResult.Invalid
             };
+        }
+
+        private FlagSetsValidationResult FlagSetsValidations(List<string> flagSets, ConfigTypes type)
+        {
+            if (flagSets == null) return new FlagSetsValidationResult();
+
+            if (type == ConfigTypes.Redis && flagSets.Any())
+            {
+                _log.Warn("SDK Config: FlagSets filter is not applicable for Consumer modes where the SDK does not keep rollout data in sync. FlagSet filter was discarded.");
+
+                return new FlagSetsValidationResult();
+            }
+
+            var cleanup = _flagSetsValidator.Cleanup("SDK Config", flagSets);
+            var toReturn = _flagSetsValidator.Items("SDK Config", cleanup);
+
+            return new FlagSetsValidationResult(toReturn, flagSets.Count - toReturn.Count);
         }
 
         private int GetMinimunAllowed(int value, int minAllowed, string configName)
@@ -130,7 +157,7 @@ namespace Splitio.Services.Shared.Classes
             return value;
         }
 
-        private int GetImpressionRefreshRate(ImpressionsMode impressionsMode, int? impressionsRefreshRate)
+        private static int GetImpressionRefreshRate(ImpressionsMode impressionsMode, int? impressionsRefreshRate)
         {
             switch (impressionsMode)
             {
@@ -144,9 +171,27 @@ namespace Splitio.Services.Shared.Classes
         #endregion
     }
 
-    public enum ConfingTypes
+    public enum ConfigTypes
     {
         InMemory,
         Redis
+    }
+
+    public class FlagSetsValidationResult
+    {
+        public HashSet<string> FlagSets { get; }
+        public int Invalid { get; }
+
+        public FlagSetsValidationResult(HashSet<string> flagSets, int invalid)
+        {
+            FlagSets = flagSets;
+            Invalid = invalid;
+        }
+
+        public FlagSetsValidationResult()
+        {
+            FlagSets = new HashSet<string>();
+            Invalid = 0;
+        }
     }
 }

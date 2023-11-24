@@ -56,7 +56,7 @@ namespace Splitio.Redis.Services.Client.Classes
         #region Private Methods
         private void ReadConfig(ConfigurationOptions config)
         {            
-            var baseConfig = _configService.ReadConfig(config, ConfingTypes.Redis);
+            var baseConfig = _configService.ReadConfig(config, ConfigTypes.Redis);
             _config.SdkVersion = baseConfig.SdkVersion;
             _config.SdkMachineName = baseConfig.SdkMachineName;
             _config.SdkMachineIP = baseConfig.SdkMachineIP;
@@ -70,6 +70,8 @@ namespace Splitio.Redis.Services.Client.Classes
             _config.ImpressionsCounterCacheMaxSize = baseConfig.ImpressionsCounterCacheMaxSize;
             _config.ImpressionsCountBulkSize = baseConfig.ImpressionsCountBulkSize;
             _config.LabelsEnabled = baseConfig.LabelsEnabled;
+            _config.FlagSetsFilter = baseConfig.FlagSetsFilter;
+            _config.FlagSetsInvalid = baseConfig.FlagSetsInvalid;
             _config.Mode = config.Mode;
             _config.FromCacheAdapterConfig(config.CacheAdapterConfig);
     }
@@ -132,7 +134,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private void BuildEvaluator()
         {
             var splitter = new Splitter();
-            _evaluator = new Evaluator(_featureFlagCacheConsumer, splitter);
+            _evaluator = new Evaluator(_featureFlagCacheConsumer, splitter, _telemetryEvaluationProducer);
         }
 
         private void BuildTelemetryStorage()

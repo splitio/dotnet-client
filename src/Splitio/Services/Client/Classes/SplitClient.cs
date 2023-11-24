@@ -1,12 +1,13 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Constants;
+﻿using Splitio.Constants;
 using Splitio.Domain;
+using Splitio.Enums.Extensions;
 using Splitio.Services.Cache.Filter;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
+using Splitio.Services.Filters;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
@@ -36,6 +37,7 @@ namespace Splitio.Services.Client.Classes
         protected readonly IEventPropertiesValidator _eventPropertiesValidator;
         protected readonly IWrapperAdapter _wrapperAdapter;
         protected readonly IConfigService _configService;
+        protected readonly IFlagSetsValidator _flagSetsValidator;
         protected readonly string ApiKey;
 
         protected ISplitManager _manager;
@@ -58,6 +60,7 @@ namespace Splitio.Services.Client.Classes
         protected IImpressionsCounter _impressionsCounter;
         protected IImpressionsObserver _impressionsObserver;
         protected IClientExtensionService _clientExtensionService;
+        protected IFlagSetsFilter _flagSetsFilter;
 
         public SplitClient(string apikey)
         {
@@ -69,7 +72,8 @@ namespace Splitio.Services.Client.Classes
             _eventTypeValidator = new EventTypeValidator();
             _eventPropertiesValidator = new EventPropertiesValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
-            _configService = new ConfigService(_wrapperAdapter);
+            _flagSetsValidator = new FlagSetsValidator();
+            _configService = new ConfigService(_wrapperAdapter, _flagSetsValidator);
             _statusManager = new InMemoryReadinessGatesCache();
             _tasksManager = new TasksManager(_statusManager);
         }
@@ -157,12 +161,7 @@ namespace Splitio.Services.Client.Classes
         {
             var results = await GetTreatmentsAsync(Enums.API.GetTreatmentsWithConfigAsync, key, features, attributes);
 
-            return results
-                .ToDictionary(r => r.FeatureFlagName, r => new SplitResult
-                {
-                    Treatment = r.Treatment,
-                    Config = r.Config
-                });
+            return results.ToDictionary(r => r.FeatureFlagName, r => new SplitResult(r.Treatment, r.Config));
         }
 
         public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigAsync(string key, List<string> features, Dictionary<string, object> attributes = null)
@@ -174,17 +173,116 @@ namespace Splitio.Services.Client.Classes
         {
             var results = GetTreatmentsSync(Enums.API.GetTreatmentsWithConfig, key, features, attributes);
 
-            return results
-                .ToDictionary(r => r.FeatureFlagName, r => new SplitResult
-                {
-                    Treatment = r.Treatment,
-                    Config = r.Config
-                });
+            return results.ToDictionary(r => r.FeatureFlagName, r => new SplitResult(r.Treatment, r.Config));
         }
 
         public Dictionary<string, SplitResult> GetTreatmentsWithConfig(string key, List<string> features, Dictionary<string, object> attributes = null)
         {
             return GetTreatmentsWithConfig(new Key(key, null), features, attributes);
+        }
+        #endregion
+
+        #region GetTreatmentsWithConfigByFlagSets
+        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigByFlagSetsAsync(string key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            return await GetTreatmentsWithConfigByFlagSetsAsync(new Key(key, null), flagSets, attributes);
+        }
+
+        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigByFlagSetsAsync(Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            var results = await GetTreatmentsByFlagSetsAsync(Enums.API.GetTreatmentsWithConfigByFlagSetsAsync, key, flagSets, attributes);
+
+            return results.ToDictionary(r => r.FeatureFlagName, r => new SplitResult(r.Treatment, r.Config));
+        }
+
+        public Dictionary<string, SplitResult> GetTreatmentsWithConfigByFlagSets(string key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            return GetTreatmentsWithConfigByFlagSets(new Key(key, null), flagSets, attributes);
+        }
+
+        public Dictionary<string, SplitResult> GetTreatmentsWithConfigByFlagSets(Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            var results = GetTreatmentsByFlagSets(Enums.API.GetTreatmentsWithConfigByFlagSets, key, flagSets, attributes);
+
+            return results.ToDictionary(r => r.FeatureFlagName, r => new SplitResult(r.Treatment, r.Config));
+        }
+        #endregion
+
+        #region GetTreatmentsByFlagSets
+        public async Task<Dictionary<string, string>> GetTreatmentsByFlagSetsAsync(string key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            return await GetTreatmentsByFlagSetsAsync(new Key(key, null), flagSets, attributes);
+        }
+
+        public async Task<Dictionary<string, string>> GetTreatmentsByFlagSetsAsync(Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            var results = await GetTreatmentsByFlagSetsAsync(Enums.API.GetTreatmentsByFlagSetsAsync, key, flagSets, attributes);
+
+            return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
+        }
+
+        public Dictionary<string, string> GetTreatmentsByFlagSets(string key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            return GetTreatmentsByFlagSets(new Key(key, null), flagSets, attributes);
+        }
+
+        public Dictionary<string, string> GetTreatmentsByFlagSets(Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        {
+            var results = GetTreatmentsByFlagSets(Enums.API.GetTreatmentsByFlagSets, key, flagSets, attributes);
+
+            return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
+        }
+        #endregion
+
+        #region GetTreatmentsWithConfigByFlagSet
+        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigByFlagSetAsync(string key, string flagSet, Dictionary<string, object> attributes = null)
+        {
+            return await GetTreatmentsWithConfigByFlagSetAsync(new Key(key, null), flagSet, attributes);
+        }
+
+        public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigByFlagSetAsync(Key key, string flagSet, Dictionary<string, object> attributes = null)
+        {
+            var results = await GetTreatmentsByFlagSetsAsync(Enums.API.GetTreatmentsWithConfigByFlagSetAsync, key, new List<string> { flagSet }, attributes);
+
+            return results.ToDictionary(r => r.FeatureFlagName, r => new SplitResult(r.Treatment, r.Config));
+        }
+
+        public Dictionary<string, SplitResult> GetTreatmentsWithConfigByFlagSet(string key, string flagSet, Dictionary<string, object> attributes = null)
+        {
+            return GetTreatmentsWithConfigByFlagSet(new Key(key, null), flagSet, attributes);
+        }
+
+        public Dictionary<string, SplitResult> GetTreatmentsWithConfigByFlagSet(Key key, string flagSet, Dictionary<string, object> attributes = null)
+        {
+            var results = GetTreatmentsByFlagSets(Enums.API.GetTreatmentsWithConfigByFlagSet, key, new List<string> { flagSet }, attributes);
+
+            return results.ToDictionary(r => r.FeatureFlagName, r => new SplitResult(r.Treatment, r.Config));
+        }
+        #endregion
+
+        #region GetTreatmentsByFlagSet
+        public async Task<Dictionary<string, string>> GetTreatmentsByFlagSetAsync(string key, string flagSet, Dictionary<string, object> attributes = null)
+        {
+            return await GetTreatmentsByFlagSetAsync(new Key(key, null), flagSet, attributes);
+        }
+
+        public async Task<Dictionary<string, string>> GetTreatmentsByFlagSetAsync(Key key, string flagSet, Dictionary<string, object> attributes = null)
+        {
+            var results = await GetTreatmentsByFlagSetsAsync(Enums.API.GetTreatmentsByFlagSetAsync, key, new List<string> { flagSet }, attributes);
+
+            return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
+        }
+
+        public Dictionary<string, string> GetTreatmentsByFlagSet(string key, string flagSet, Dictionary<string, object> attributes = null)
+        {
+            return GetTreatmentsByFlagSet(new Key(key, null), flagSet, attributes);
+        }
+
+        public Dictionary<string, string> GetTreatmentsByFlagSet(Key key, string flagSet, Dictionary<string, object> attributes = null)
+        {
+            var results = GetTreatmentsByFlagSets(Enums.API.GetTreatmentsByFlagSet, key, new List<string> { flagSet }, attributes);
+
+            return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
         }
         #endregion
 
@@ -325,61 +423,141 @@ namespace Splitio.Services.Client.Classes
 
         protected void BuildClientExtension()
         {
-            _clientExtensionService = new ClientExtensionService(_blockUntilReadyService, _statusManager, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator);
+            _clientExtensionService = new ClientExtensionService(_blockUntilReadyService, _statusManager, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator, _flagSetsValidator, _flagSetsFilter);
+        }
+
+        protected void BuildFlagSetsFilter(HashSet<string> sets)
+        {
+            _flagSetsFilter = new FlagSetsFilter(sets);
         }
         #endregion
 
         #region Private Async Methods
         private async Task<List<TreatmentResult>> GetTreatmentsAsync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes)
         {
-            features = _clientExtensionService.TreatmentsValidations(method, key, features, _log, out List<TreatmentResult> controlTreatments);
+            try
+            {
+                features = _clientExtensionService.TreatmentsValidations(method, key, features, _log, out List<TreatmentResult> controlTreatments);
 
-            if (controlTreatments != null) return controlTreatments;
+                if (controlTreatments != null) return controlTreatments;
 
-            var evaluatorResult = await _evaluator.EvaluateFeaturesAsync(key, features, attributes);
+                var treatments = await _evaluator.EvaluateFeaturesAsync(method, key, features, attributes);
 
-            if (evaluatorResult.Exception) await _clientExtensionService.RecordExceptionAsync(method);
+                await TrackImpressionsAsync(treatments, key);
 
-            await _clientExtensionService.RecordLatencyAsync(method, evaluatorResult.ElapsedMilliseconds);
+                return treatments;
+            }
+            catch (Exception ex)
+            {
+                _telemetryEvaluationProducer.RecordException(method.ConvertToMethodEnum());
 
-            if (BuildAndGetImpressions(evaluatorResult, key, out var impressions))
+                _log.Warn("Something went wrong evaluating features.", ex);
+                return _clientExtensionService.ReturnControl(features);
+            }
+        }
+
+        private async Task<List<TreatmentResult>> GetTreatmentsByFlagSetsAsync(Enums.API method, Key key, List<string> flagSets, Dictionary<string, object> attributes)
+        {
+            try
+            {
+                flagSets = _clientExtensionService.FlagSetsValidations(method, key, flagSets, _log);
+
+                var treatments = await _evaluator.EvaluateFeaturesByFlagSetsAsync(method, key, flagSets, attributes);
+
+                await TrackImpressionsAsync(treatments, key);
+
+                return treatments;
+            }
+            catch (Exception ex)
+            {
+                _telemetryEvaluationProducer.RecordException(method.ConvertToMethodEnum());
+
+                _log.Warn("Something went wrong evaluating features.", ex);
+                return new List<TreatmentResult>();
+            }
+        }
+
+        private async Task TrackImpressionsAsync(List<TreatmentResult> evaluatorResults, Key key)
+        {
+            var impressions = BuildAndGetImpressions(evaluatorResults, key);
+
+            if (impressions.Any())
                 await _impressionsManager.TrackAsync(impressions);
-
-            return evaluatorResult.Results;
         }
         #endregion
 
         #region Private Methods
         private List<TreatmentResult> GetTreatmentsSync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            features = _clientExtensionService.TreatmentsValidations(method, key, features, _log, out List<TreatmentResult> controlTreatments);
+            try
+            {
+                features = _clientExtensionService.TreatmentsValidations(method, key, features, _log, out List<TreatmentResult> controlTreatments);
 
-            if (controlTreatments != null) return controlTreatments;
+                if (controlTreatments != null) return controlTreatments;
 
-            var evaluatorResult = _evaluator.EvaluateFeatures(key, features, attributes);
+                var treatments = _evaluator.EvaluateFeatures(method, key, features, attributes);
 
-            if (evaluatorResult.Exception) _clientExtensionService.RecordException(method);
+                TrackImpressions(treatments, key);
 
-            _clientExtensionService.RecordLatency(method, evaluatorResult.ElapsedMilliseconds);
+                return treatments;
+            }
+            catch (Exception ex)
+            {
+                _telemetryEvaluationProducer.RecordException(method.ConvertToMethodEnum());
 
-            if (BuildAndGetImpressions(evaluatorResult, key, out var impressions))
-                _impressionsManager.Track(impressions);
-
-            return evaluatorResult.Results;
+                _log.Warn("Something went wrong evaluating features.", ex);
+                return _clientExtensionService.ReturnControl(features);
+            }
         }
 
-        private bool BuildAndGetImpressions(MultipleEvaluatorResult evaluatorResult, Key key, out List<KeyImpression> impressions)
+        private List<TreatmentResult> GetTreatmentsByFlagSets(Enums.API method, Key key, List<string> flagSets, Dictionary<string, object> attributes)
         {
-            impressions = new List<KeyImpression>();
-
-            foreach (var treatmentResult in evaluatorResult.Results)
+            try
             {
-                var impression = _impressionsManager.Build(treatmentResult, key);
+                flagSets = _clientExtensionService.FlagSetsValidations(method, key, flagSets, _log);
+
+                var treatments = _evaluator.EvaluateFeaturesByFlagSets(method, key, flagSets, attributes);
+
+                TrackImpressions(treatments, key);
+
+                return treatments;
+            }
+            catch (Exception ex)
+            {
+                _telemetryEvaluationProducer.RecordException(method.ConvertToMethodEnum());
+
+                _log.Warn("Something went wrong evaluating features.", ex);
+                return new List<TreatmentResult>();
+            }
+        }
+
+        private List<KeyImpression> BuildAndGetImpressions(List<TreatmentResult> treatments, Key key)
+        {
+            var impressions = new List<KeyImpression>();
+
+            foreach (var treatment in treatments)
+            {
+                var impression = _impressionsManager.Build(treatment, key);
 
                 if (impression != null) impressions.Add(impression);
             }
 
-            return impressions.Any();
+            return impressions;
+        }
+
+        private void TrackImpressions(List<TreatmentResult> treatments, Key key)
+        {
+            try
+            {
+                var impressions = BuildAndGetImpressions(treatments, key);
+
+                if (impressions.Any())
+                    _impressionsManager.Track(impressions);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Something went wrong tracking impressions.", ex);
+            }
         }
 
         private static SplitResult TreatmentWithConfig(List<TreatmentResult> results)

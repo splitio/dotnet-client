@@ -173,7 +173,7 @@ namespace Splitio.Services.Impressions.Classes
                 default:
                     impressionsToTrack.AddRange(impressions.Where(i => i.Optimized).ToList());
                     var deduped = impressions.Count - impressionsToTrack.Count;
-                    _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, deduped);
+                    _telemetryRuntimeProducer?.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, deduped);
                     break;
             }
 

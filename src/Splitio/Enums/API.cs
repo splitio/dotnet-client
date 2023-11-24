@@ -10,18 +10,33 @@ namespace Splitio.Enums
         GetTreatments,
         GetTreatmentWithConfig,
         GetTreatmentsWithConfig,
+        GetTreatmentsWithConfigByFlagSets,
+        GetTreatmentsByFlagSets,
+        GetTreatmentsWithConfigByFlagSet,
+        GetTreatmentsByFlagSet,
         Track,
         GetTreatmentAsync,
         GetTreatmentsAsync,
         GetTreatmentWithConfigAsync,
         GetTreatmentsWithConfigAsync,
+        GetTreatmentsWithConfigByFlagSetsAsync,
+        GetTreatmentsByFlagSetsAsync,
+        GetTreatmentsWithConfigByFlagSetAsync,
+        GetTreatmentsByFlagSetAsync,
         TrackAsync,
         
         // Manager
         Split,
-        SplitAsync
-    }
+        SplitAsync,
 
+        // Matchers
+        DependecyMatcher,
+        DependecyMatcherAsync
+    }
+}
+
+namespace Splitio.Enums.Extensions
+{
     public static class EnumExtensions
     {
         public static MethodEnum ConvertToMethodEnum(this API method)
@@ -43,6 +58,18 @@ namespace Splitio.Enums
                 case API.Track:
                 case API.TrackAsync:
                     return MethodEnum.Track;
+                case API.GetTreatmentsWithConfigByFlagSets:
+                case API.GetTreatmentsWithConfigByFlagSetsAsync:
+                    return MethodEnum.TreatmentsWithConfigByFlagSets;
+                case API.GetTreatmentsByFlagSets:
+                case API.GetTreatmentsByFlagSetsAsync:
+                    return MethodEnum.TreatmentsByFlagSets;
+                case API.GetTreatmentsWithConfigByFlagSet:
+                case API.GetTreatmentsWithConfigByFlagSetAsync:
+                    return MethodEnum.TreatmentsWithConfigByFlagSet;
+                case API.GetTreatmentsByFlagSet:
+                case API.GetTreatmentsByFlagSetAsync:
+                    return MethodEnum.TreatmentsByFlagSet;
                 default:
                     throw new Exception("");
             }

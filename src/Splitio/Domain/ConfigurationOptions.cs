@@ -2,6 +2,7 @@
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using System;
+using System.Collections.Generic;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -30,6 +31,7 @@ namespace Splitio.Services.Client.Classes
         public ImpressionsMode? ImpressionsMode { get; set; }
         public bool RandomizeRefreshRates { get; set; }
         public ISplitLogger Logger { get; set; }
+        public List<string> FlagSetsFilter { get; set; }
 
         // Urls.
         public string Endpoint { get; set; }
