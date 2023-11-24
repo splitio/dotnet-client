@@ -27,10 +27,7 @@ build_script:
 after_build:
  - Redis-64\tools\redis-server.exe --service-start
 
-test:
-  categories:
-    only:
-    - Integration
+test: on
 
 after_test:
  - dotnet pack .\src\Splitio --configuration Release
