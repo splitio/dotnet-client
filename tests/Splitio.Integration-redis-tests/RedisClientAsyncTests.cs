@@ -51,14 +51,14 @@ namespace Splitio.Integration_redis_tests
             await RedisHelper.LoadSplitsAsync(rootFilePath, UserPrefix, _redisAdapter);
         }
 
-        protected override async Task AssertSentEventsAsync(List<EventBackend> eventsExcpected, int? eventsCount = null, bool validateEvents = true)
+        protected override void AssertSentEvents(List<EventBackend> eventsExcpected, int? eventsCount = null, bool validateEvents = true)
         {
-            await RedisHelper.AssertSentEventsAsync(_redisAdapter, UserPrefix, eventsExcpected, eventsCount, validateEvents);
+            RedisHelper.AssertSentEvents(_redisAdapter, UserPrefix, eventsExcpected, eventsCount, validateEvents);
         }
 
-        protected override async Task AssertSentImpressionsAsync(int sentImpressionsCount, params KeyImpression[] expectedImpressions)
+        protected override void AssertSentImpressions(int sentImpressionsCount, params KeyImpression[] expectedImpressions)
         {
-            await RedisHelper.AssertSentImpressionsAsync(_redisAdapter, UserPrefix, sentImpressionsCount, expectedImpressions);
+            RedisHelper.AssertSentImpressions(_redisAdapter, UserPrefix, sentImpressionsCount, expectedImpressions);
         }
 
         protected override async Task CleanupAsync()
