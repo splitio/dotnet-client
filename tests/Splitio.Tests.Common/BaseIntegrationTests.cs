@@ -5,15 +5,9 @@ using Splitio.Services.Impressions.Interfaces;
 using Splitio.Tests.Common.Resources;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Splitio.Tests.Common
 {
-    [DeploymentItem(@"Resources\split_changes.json")]
-    [DeploymentItem(@"Resources\split_changes_1.json")]
-    [DeploymentItem(@"Resources\split_segment1.json")]
-    [DeploymentItem(@"Resources\split_segment2.json")]
-    [DeploymentItem(@"Resources\split_segment3.json")]
     [TestClass]
     public abstract class BaseIntegrationTests
     {

@@ -8,14 +8,6 @@ using System.Threading;
 
 namespace Splitio.Integration_tests
 {
-    [DeploymentItem(@"Resources\splits_push.json")]
-    [DeploymentItem(@"Resources\splits_push2.json")]
-    [DeploymentItem(@"Resources\splits_push3.json")]
-    [DeploymentItem(@"Resources\splits_push4.json")]
-    [DeploymentItem(@"Resources\split_segment4.json")]
-    [DeploymentItem(@"Resources\split_segment4_empty.json")]
-    [DeploymentItem(@"Resources\split_segment4_updated.json")]
-    [DeploymentItem(@"Resources\split_segment4_updated_empty.json")]
     [TestClass]
     public class StreamingClientTests
     {
