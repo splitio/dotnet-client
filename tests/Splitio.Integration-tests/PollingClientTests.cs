@@ -8,6 +8,7 @@ using Splitio.Tests.Common.Resources;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests
@@ -27,7 +28,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public async Task GetTreatments_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
+        public void GetTreatments_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -42,7 +43,7 @@ namespace Splitio.Integration_tests
 
             // Act.
             var result = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", "Random_Treatment", "MAURO_TEST", "Test_Save_1", "Random_Treatment_2", });
-            await client.DestroyAsync();
+            client.Destroy();
 
             // Assert.
             Assert.AreEqual("on", result["FACUNDO_TEST"]);
@@ -65,7 +66,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public async Task GetTreatment_WithoutBUR_ReturnsControl()
+        public void GetTreatment_WithoutBUR_ReturnsControl()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -81,11 +82,11 @@ namespace Splitio.Integration_tests
             // Assert.
             Assert.AreEqual("control", treatmentResult);
 
-            await client.DestroyAsync();
+            client.Destroy();
         }
 
         [TestMethod]
-        public async Task GetTreatmentWithConfig_WithoutBUR_ReturnsControl()
+        public void GetTreatmentWithConfig_WithoutBUR_ReturnsControl()
         {
             // Arrange
             var configurations = GetConfigurationOptions();
@@ -103,11 +104,11 @@ namespace Splitio.Integration_tests
             Assert.IsNull(treatmentResult.Config);
 
             client.BlockUntilReady(10000);
-            await client.DestroyAsync();
+            client.Destroy();
         }
 
         [TestMethod]
-        public async Task GetTreatments_WithoutBUR_ReturnsControl()
+        public void GetTreatments_WithoutBUR_ReturnsControl()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -124,11 +125,11 @@ namespace Splitio.Integration_tests
             Assert.AreEqual("control", treatmentResults["FACUNDO_TEST"]);
             Assert.AreEqual("control", treatmentResults["MAURO_TEST"]);
 
-            await client.DestroyAsync();
+            client.Destroy();
         }
 
         [TestMethod]
-        public async Task GetTreatmentsWithConfig_WithoutBUR_ReturnsControl()
+        public void GetTreatmentsWithConfig_WithoutBUR_ReturnsControl()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -147,11 +148,11 @@ namespace Splitio.Integration_tests
             Assert.IsNull(treatmentResults["FACUNDO_TEST"].Config);
             Assert.IsNull(treatmentResults["MAURO_TEST"].Config);
 
-            await client.DestroyAsync();
+            client.Destroy();
         }
 
         [TestMethod]
-        public async Task GetTreatment_WithtBUR_ReturnsTimeOutException()
+        public void GetTreatment_WithtBUR_ReturnsTimeOutException()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -179,11 +180,11 @@ namespace Splitio.Integration_tests
             Assert.IsFalse(isSdkReady);
             Assert.AreEqual("SDK was not ready in 0 milliseconds", exceptionMessage);
 
-            await client.DestroyAsync();
+            client.Destroy();
         }
 
         [TestMethod]
-        public async Task Manager_SplitNames_WithoutBUR_ReturnsNull()
+        public void Manager_SplitNames_WithoutBUR_ReturnsNull()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -199,11 +200,11 @@ namespace Splitio.Integration_tests
             // Assert.
             Assert.IsNull(result);
 
-            await splitFactory.Client().DestroyAsync();
+            splitFactory.Client().Destroy();
         }
 
         [TestMethod]
-        public async Task CheckingHeaders_WithIPAddressesEnabled_ReturnsWithIpAndName()
+        public void CheckingHeaders_WithIPAddressesEnabled_ReturnsWithIpAndName()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -221,7 +222,7 @@ namespace Splitio.Integration_tests
             // Assert.
             Assert.AreEqual("on", treatmentResult);
 
-            await Task.Delay(5000);
+            Thread.Sleep(5000);
 
             var requests = httpClientMock.GetLogs();
 
@@ -233,11 +234,11 @@ namespace Splitio.Integration_tests
                     .Any(h => h.Key.Equals("SplitSDKMachineIP") || h.Key.Equals("SplitSDKMachineName")));
             }
 
-            await client.DestroyAsync();
+            client.Destroy();
         }
 
         [TestMethod]
-        public async Task CheckingHeaders_WithIPAddressesDisabled_ReturnsWithoutIpAndName()
+        public void CheckingHeaders_WithIPAddressesDisabled_ReturnsWithoutIpAndName()
         {
             // Arrange.
             var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
@@ -255,7 +256,7 @@ namespace Splitio.Integration_tests
             // Assert.
             Assert.AreEqual("on", treatmentResult);
 
-            await Task.Delay(5000);
+            Thread.Sleep(5000);
 
             var requests = httpClientMock.GetLogs();
 
@@ -267,11 +268,11 @@ namespace Splitio.Integration_tests
                     .Any(h => h.Key.Equals("SplitSDKMachineIP") || h.Key.Equals("SplitSDKMachineName")));
             }
 
-            await client.DestroyAsync();
+            client.Destroy();
         }
 
         [TestMethod]
-        public async Task GetTreatments_ValidateDedupeImpressions_Optimized()
+        public void GetTreatments_ValidateDedupeImpressions_Optimized()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -294,7 +295,7 @@ namespace Splitio.Integration_tests
             client.GetTreatment("admin", "Test_Save_1");
             client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
 
-            await client.DestroyAsync();
+            client.Destroy();
 
             // Assert.
             var sentImpressions = InMemoryHelper.GetImpressionsSentBackend(httpClientMock);
@@ -313,7 +314,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public async Task GetTreatments_ValidateDedupeImpressions_Debug()
+        public void GetTreatments_ValidateDedupeImpressions_Debug()
         {
             // Arrange.
             var configurations = GetConfigurationOptions();
@@ -334,7 +335,7 @@ namespace Splitio.Integration_tests
             client.GetTreatments("admin", new List<string> { "FACUNDO_TEST", "Test_Save_1" });
             client.GetTreatment("admin", "FACUNDO_TEST");
             client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
-            await client.DestroyAsync();
+            client.Destroy();
 
             // Assert.
             var sentImpressions = InMemoryHelper.GetImpressionsSentBackend(httpClientMock);
@@ -388,7 +389,7 @@ namespace Splitio.Integration_tests
         }
 
         [TestMethod]
-        public async Task Telemetry_ValidatesConfigInitAndStats()
+        public void Telemetry_ValidatesConfigInitAndStats()
         {
             // Arrange.
             var impressionListener = new IntegrationTestsImpressionListener(50);
@@ -411,8 +412,6 @@ namespace Splitio.Integration_tests
 
             // Act.
             var result = client.GetTreatment("nico_test", "FACUNDO_TEST");
-
-            await Task.Delay(5000);
 
             // Assert.
             Assert.AreEqual("on", result);
@@ -441,7 +440,7 @@ namespace Splitio.Integration_tests
             var sentStats = GetMetricsStatsSentBackend(httpClientMock);
             Assert.AreEqual(0, sentStats.Count);
 
-            await client.DestroyAsync();
+            client.Destroy();
         }
 
         [TestMethod]
