@@ -575,7 +575,8 @@ namespace Splitio.Integration_tests
 
             var logs = httpClientMock.GetMetricsConfigLog();
 
-            if (logs.FirstOrDefault() == null) return null;
+            if (logs.FirstOrDefault() == null)
+                return null;
 
             return JsonConvert.DeserializeObject<Telemetry.Domain.Config>(logs.FirstOrDefault().RequestMessage.Body);
         }
