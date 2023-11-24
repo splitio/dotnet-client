@@ -35,8 +35,6 @@ after_test:
  - dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -c Release -f net7.0
  - dotnet test .\tests\Splitio-tests\Splitio-tests.csproj -c Release -f net7.0
  - dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net7.0
-
-after_test:
  - dotnet pack .\src\Splitio --configuration Release
  - dotnet pack .\Splitio.Redis --configuration Release
 
