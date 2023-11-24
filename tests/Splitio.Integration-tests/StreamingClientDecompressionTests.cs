@@ -6,7 +6,7 @@ using Splitio.Tests.Common;
 
 namespace Splitio.Integration_tests
 {
-    [TestClass]
+    [TestClass, TestCategory("Integration")]
     public class StreamingClientDecompressionTests
     {
         private const string TreatmentExpected = "v5";

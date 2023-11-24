@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Splitio.Integration_redis_tests
 {
-    [TestClass]
+    [TestClass, TestCategory("Integration")]
     public class RedisClientTests : BaseIntegrationTests
     {
         private const string Host = "localhost";

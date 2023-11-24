@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Splitio.Integration_events_tests
 {
-    [TestClass]
+    [TestClass, TestCategory("Integration")]
     public class ImpressionsSdkApiClientTests
     {
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;

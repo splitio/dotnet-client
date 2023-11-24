@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Splitio.Integration_events_tests
 {
-    [TestClass]
+    [TestClass, TestCategory("Integration")]
     public class EventsLogTests
     {
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;

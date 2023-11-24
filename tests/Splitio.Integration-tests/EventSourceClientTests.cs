@@ -13,7 +13,7 @@ using System.Threading;
 
 namespace Splitio.Integration_tests
 {
-    [TestClass]
+    [TestClass, TestCategory("Integration")]
     public class EventSourceClientTests
     {
         [TestMethod]

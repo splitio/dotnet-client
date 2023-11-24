@@ -37,7 +37,10 @@ after_build:
  - dotnet pack .\Splitio.Redis --configuration Release
  - dotnet pack .\tests\Splitio.TestSupport --configuration Release
 
-test: off
+test:
+  categories:
+    only:
+    - Integration
 
 artifacts:
  - path: '**\Splitio*.nupkg'

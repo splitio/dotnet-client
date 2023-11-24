@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests
 {
-    [TestClass]
+    [TestClass, TestCategory("Integration")]
     public class PollingClientTests : BaseIntegrationTests
     {
         private static readonly HttpClientMock httpClientMock = new HttpClientMock("PollingClientTests");

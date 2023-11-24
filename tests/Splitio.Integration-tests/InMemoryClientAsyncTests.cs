@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Splitio.Integration_tests
 {
-    [TestClass]
+    [TestClass, TestCategory("Integration")]
     public class InMemoryClientAsyncTests : BaseAsyncClientTests
     {
         private static readonly HttpClientMock httpClientMock = new HttpClientMock("async");

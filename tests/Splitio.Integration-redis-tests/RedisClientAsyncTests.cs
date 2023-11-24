@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Splitio.Integration_redis_tests
 {
-    [TestClass]
+    [TestClass, TestCategory("Integration")]
     public class RedisClientAsyncTests : BaseAsyncClientTests
     {
         private const string Host = "localhost";
