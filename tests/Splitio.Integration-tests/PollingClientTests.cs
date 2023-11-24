@@ -571,6 +571,8 @@ namespace Splitio.Integration_tests
         #region Private Methods
         private static Telemetry.Domain.Config GetMetricsConfigSentBackend(HttpClientMock httpClientMock)
         {
+            Thread.Sleep(1000);
+
             var logs = httpClientMock.GetMetricsConfigLog();
 
             if (logs.FirstOrDefault() == null) return null;
