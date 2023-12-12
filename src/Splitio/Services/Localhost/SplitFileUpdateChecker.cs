@@ -2,6 +2,7 @@
 using Splitio.Services.Tasks;
 using System;
 using System.IO;
+using System.Threading;
 
 namespace Splitio.Services.Localhost
 {
@@ -22,7 +23,7 @@ namespace Splitio.Services.Localhost
                 // Check if the file exists
                 if (!File.Exists(_fullPath))
                 {
-                    Console.WriteLine($"File {_fullPath} does not exist.");
+                    _log.Debug($"File {_fullPath} does not exist.");
                     return;
                 }
 
@@ -30,7 +31,7 @@ namespace Splitio.Services.Localhost
 
                 if (_fileLastUpdatedDateTime == lastUpdated)
                 {
-                    Console.WriteLine($"File {_fullPath} was last updated at {_fileLastUpdatedDateTime}");
+                    _log.Debug($"File {_fullPath} was last updated at {_fileLastUpdatedDateTime}");
                     return;
                 }
 
@@ -40,7 +41,9 @@ namespace Splitio.Services.Localhost
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error checking file updates: {ex.Message}");
+                if (ex is ThreadAbortException) return;
+
+                _log.Warn("Somenting went wrong processing SplitFileUpdate.", ex);
             }
         }
     }

@@ -1,4 +1,6 @@
 ﻿using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.Tasks;
 using System;
 using System.Linq;
@@ -9,6 +11,8 @@ namespace Splitio.Services.Localhost
 {
     public abstract class BaseSplitFileWatcher : ISplitFileWatcher
     {
+        protected static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger("SplitFileWatcher");
+
         private readonly ILocalhostFileService _localhostFileService;
         private readonly IFeatureFlagCache _featureFlagCache;
         private readonly ISplitTask _worker;
@@ -34,7 +38,7 @@ namespace Splitio.Services.Localhost
             _worker.Start();
         }
 
-        public async Task StopAsync()
+        public virtual async Task StopAsync()
         {
             try
             {
@@ -44,7 +48,7 @@ namespace Splitio.Services.Localhost
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"#2: {ex.ToString()} ");
+                _log.Debug("Somenting went wrong stopping SplitFileWatcher.", ex);
             }
         }
 

@@ -3,6 +3,8 @@ using Splitio.Services.Tasks;
 using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Localhost
 {
@@ -37,8 +39,16 @@ namespace Splitio.Services.Localhost
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"#1: {ex.ToString()} ");
+                if (ex is ThreadAbortException) return;
+                
+                _log.Warn("Somenting went wrong processing SplitFileUpdate.", ex);
             }
+        }
+
+        public override async Task StopAsync()
+        {
+            await base.StopAsync();
+            _watcher.Dispose();
         }
     }
 }
