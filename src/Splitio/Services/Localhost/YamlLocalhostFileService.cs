@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using YamlDotNet.RepresentationModel;
 
-namespace Splitio.Services.Shared.Classes
+namespace Splitio.Services.Localhost
 {
     public class YamlLocalhostFileService : AbstractLocalhostFileService
     {

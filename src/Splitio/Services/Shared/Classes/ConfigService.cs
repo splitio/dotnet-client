@@ -30,12 +30,31 @@ namespace Splitio.Services.Shared.Classes
             {
                 case ConfigTypes.Redis:
                     return ReadRedisConfig(config);
+                case ConfigTypes.Localhost:
+                    return ReadLocalhostConfig(config);
                 case ConfigTypes.InMemory:
                 default:
                     return ReadInMemoryConfig(config);
             }
         }
-        
+
+        public LocalhostClientConfigurations ReadLocalhostConfig(ConfigurationOptions config)
+        {
+            var localhostClientConfigurations = new LocalhostClientConfigurations
+            {
+                Polling = config.LocalhostPolling,
+                FilePath = config.LocalhostFilePath,
+                
+            };
+
+            if (localhostClientConfigurations.Polling)
+            {
+                localhostClientConfigurations.FileWatcherRate = GetMinimunAllowed(config.FeaturesRefreshRate ?? 0, 1, "FeaturesRefreshRate");
+            }
+
+            return localhostClientConfigurations;            
+        }
+
         public BaseConfig ReadRedisConfig(ConfigurationOptions config)
         {
             var baseConfig = ReadBaseConfig(config, ConfigTypes.Redis);
@@ -174,7 +193,8 @@ namespace Splitio.Services.Shared.Classes
     public enum ConfigTypes
     {
         InMemory,
-        Redis
+        Redis,
+        Localhost
     }
 
     public class FlagSetsValidationResult

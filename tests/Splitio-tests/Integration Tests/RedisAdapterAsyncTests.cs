@@ -207,7 +207,7 @@ namespace Splitio_Tests.Integration_Tests
         public async Task ExecuteHashIncrementAsyncSuccessful()
         {
             // Arrange
-            var key = $"{_redisPrefix}test_key1";
+            var key = $"{_redisPrefix}test_key100";
             var field = "field1";
 
             // Act & Assert

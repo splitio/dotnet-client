@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace Splitio.Services.Shared.Classes
+namespace Splitio.Services.Localhost
 {
     public class LocalhostFileService : AbstractLocalhostFileService
     {

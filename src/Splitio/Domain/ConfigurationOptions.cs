@@ -8,15 +8,14 @@ namespace Splitio.Services.Client.Classes
 {
     public class ConfigurationOptions
     {
-        public Mode Mode { get; set; }        
-        public string LocalhostFilePath { get; set; }        
+        public Mode Mode { get; set; }
         public int? MaxImpressionsLogSize { get; set; }
         public int? EventsFirstPushWindow { get; set; }
         public int? EventsQueueSize { get; set; }
         public long? ConnectionTimeout { get; set; }
         public long? ReadTimeout { get; set; }
         [Obsolete]
-        public int? MaxMetricsCountCallsBeforeFlush { get; set; }        
+        public int? MaxMetricsCountCallsBeforeFlush { get; set; }
         public int? SplitsStorageConcurrencyLevel { get; set; }
         public string SdkMachineName { get; set; }
         public string SdkMachineIP { get; set; }
@@ -35,7 +34,7 @@ namespace Splitio.Services.Client.Classes
 
         // Urls.
         public string Endpoint { get; set; }
-        public string EventsEndpoint { get; set; }        
+        public string EventsEndpoint { get; set; }
         public string AuthServiceURL { get; set; }
         public string StreamingServiceURL { get; set; }
         public string TelemetryServiceURL { get; set; }
@@ -52,5 +51,9 @@ namespace Splitio.Services.Client.Classes
         // Proxy
         public string ProxyHost { get; set; }
         public int ProxyPort { get; set; }
+
+        // Localhost
+        public string LocalhostFilePath { get; set; }
+        public bool LocalhostPolling { get; set; }
     }
 }

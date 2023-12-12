@@ -27,7 +27,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentSuccessfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}test.splits");
+            var client = new LocalhostClient(new ConfigurationOptions { LocalhostFilePath = $"{rootFilePath}test.splits" });
 
             client.BlockUntilReady(1000);
 
@@ -51,7 +51,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange
             var filePath = $"{rootFilePath}test2.splits";
-            var client = new LocalhostClient(filePath);
+            var client = new LocalhostClient(new ConfigurationOptions { LocalhostFilePath = filePath });
 
             client.BlockUntilReady(1000);
 
@@ -80,12 +80,41 @@ namespace Splitio_Tests.Integration_Tests
             Assert.AreEqual("on", client.GetTreatment("id", "always_on"));
         }
 
+        [TestMethod]
+        public void GetTreatmentSuccessfullyWhenUpdatingSplitsFileSameFile()
+        {
+            // Arrange
+            var filePath = $"{rootFilePath}test2.splits";
+            using (var fs = File.Open(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            {
+                fs.SetLength(0);
+            }
+            File.AppendAllText(filePath, Environment.NewLine);
+            Thread.Sleep(1000);
+
+            var client = new LocalhostClient(new ConfigurationOptions { LocalhostFilePath = filePath });
+
+            client.BlockUntilReady(1000);
+
+            File.AppendAllText(filePath, Environment.NewLine + "other_test_feature2     off" + Environment.NewLine);
+            Thread.Sleep(1000);
+
+            // Act & Assert
+            Assert.AreEqual("off", client.GetTreatment("id", "other_test_feature2"), "5"); //default treatment
+            Assert.AreEqual("control", client.GetTreatment("id", "double_writes_to_cassandra"), "1");
+
+            File.AppendAllText(filePath, Environment.NewLine + "always_on on" + Environment.NewLine);
+            Thread.Sleep(500);
+
+            Assert.AreEqual("on", client.GetTreatment("id", "always_on"));
+        }
+
         [DeploymentItem(@"Resources\test.splits")]
         [TestMethod]
         public void ClientDestroySuccessfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}test.splits");
+            var client = new LocalhostClient(new ConfigurationOptions { LocalhostFilePath = $"{rootFilePath}test.splits" });
 
             client.BlockUntilReady(1000);
 
@@ -107,7 +136,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatment_WhenIsYamlFile_Successfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}split.yaml");
+            var client = new LocalhostClient(new ConfigurationOptions { LocalhostFilePath = $"{rootFilePath}split.yaml" });
 
             client.BlockUntilReady(1000);
 
@@ -139,7 +168,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentWithConfig_WhenIsYamlFile_Successfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}split.yaml");
+            var client = new LocalhostClient(new ConfigurationOptions { LocalhostFilePath = $"{rootFilePath}split.yaml" });
 
             client.BlockUntilReady(1000);
 
@@ -178,7 +207,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatment_WhenIsYmlFile_Successfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}split.yml");
+            var client = new LocalhostClient(new ConfigurationOptions { LocalhostFilePath = $"{rootFilePath}split.yml" });
 
             client.BlockUntilReady(1000);
 
@@ -210,7 +239,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentWithConfig_WhenIsYmlFile_Successfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}split.yml");
+            var client = new LocalhostClient(new ConfigurationOptions { LocalhostFilePath = $"{rootFilePath}split.yml" });
 
             client.BlockUntilReady(1000);
 
@@ -249,7 +278,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatments_WhenIsYamlFile_Successfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}split.yaml");
+            var client = new LocalhostClient(new ConfigurationOptions { LocalhostFilePath = $"{rootFilePath}split.yaml" });
 
             client.BlockUntilReady(1000);
 
@@ -286,7 +315,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentsWithConfig_WhenIsYamlFile_Successfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}split.yaml");
+            var client = new LocalhostClient(new ConfigurationOptions { LocalhostFilePath = $"{rootFilePath}split.yaml" });
 
             client.BlockUntilReady(1000);
 
@@ -337,7 +366,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatments_WhenIsYmlFile_Successfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}split.yml");
+            var client = new LocalhostClient(new ConfigurationOptions { LocalhostFilePath = $"{rootFilePath}split.yml" });
 
             client.BlockUntilReady(1000);
 
@@ -374,7 +403,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentsWithConfig_WhenIsYmlFile_Successfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}split.yml");
+            var client = new LocalhostClient(new ConfigurationOptions { LocalhostFilePath = $"{rootFilePath}split.yml" });
 
             client.BlockUntilReady(1000);
 
