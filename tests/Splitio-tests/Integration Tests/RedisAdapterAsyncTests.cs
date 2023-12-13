@@ -6,6 +6,7 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Integration_Tests
@@ -14,10 +15,9 @@ namespace Splitio_Tests.Integration_Tests
     public class RedisAdapterAsyncTests
     {
         private readonly string _redisPrefix = "async-tests";
-        private RedisAdapterForTests _adapter;
+        private readonly RedisAdapterForTests _adapter;
 
-        [TestInitialize]
-        public async Task Initialization()
+        public RedisAdapterAsyncTests()
         {
             var config = new RedisConfig
             {
@@ -28,14 +28,19 @@ namespace Splitio_Tests.Integration_Tests
                 RedisConnectTimeout = 1000,
                 RedisConnectRetry = 5,
                 RedisSyncTimeout = 1000,
-                PoolSize = 1,
+                PoolSize = 5,
                 RedisUserPrefix = _redisPrefix
             };
 
             var pool = new ConnectionPoolManager(config);
             _adapter = new RedisAdapterForTests(config, pool);
 
-            await CleanKeys();
+            for (var i = 0; i < 10; i++)
+            {
+                if (_adapter.IsConnected()) break;
+
+                Thread.Sleep(1000);
+            }
         }
 
         [TestMethod]
