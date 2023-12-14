@@ -49,7 +49,7 @@ namespace Splitio.Services.Client.Classes
 
             if (configs.Polling)
             {
-                var worker = new SplitPeriodicTask(_statusManager, Enums.Task.LocalhostFileWatcher, configs.FileWatcherRate * 1000);
+                var worker = new SplitPeriodicTask(_statusManager, Enums.Task.LocalhostFileWatcher, configs.FileWatcherIntervalMs);
                 _splitFileWatcher = new SplitFileUpdateChecker(_localhostFileService, _featureFlagCache, worker, _fullPath);
             }
             else
@@ -93,10 +93,14 @@ namespace Splitio.Services.Client.Classes
             _featureFlagCache.Clear();
         }
 
-        public override Task DestroyAsync()
+        public override async Task DestroyAsync()
         {
-            Destroy();
-            return Task.FromResult(0);
+            if (_statusManager.IsDestroyed()) return;
+
+            _factoryInstantiationsService.Decrease(ApiKey);
+            _statusManager.SetDestroy();
+            await _splitFileWatcher.StopAsync();
+            _featureFlagCache.Clear();
         }
         #endregion
 

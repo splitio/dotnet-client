@@ -55,5 +55,6 @@ namespace Splitio.Services.Client.Classes
         // Localhost
         public string LocalhostFilePath { get; set; }
         public bool LocalhostPolling { get; set; }
+        public int? LocalhostIntervalMs { get; set; }
     }
 }

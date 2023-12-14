@@ -2,7 +2,7 @@
 {
     public class LocalhostClientConfigurations : BaseConfig
     {
-        public int FileWatcherRate { get; set; }
+        public int FileWatcherIntervalMs { get; set; }
         public string FilePath { get; set; }
         public bool Polling { get; set; }
     }

@@ -4,9 +4,9 @@ using Splitio.Services.Client.Classes;
 namespace Splitio_Tests.Integration_Tests
 {
     [TestClass]
-    public class LocalhostClientTests : BaseLocalhostClientTests
+    public class LocalhostClientPollingTests : BaseLocalhostClientTests
     {
-        public LocalhostClientTests() : base("watcher")
+        public LocalhostClientPollingTests() : base("polling")
         {
         }
 
@@ -15,6 +15,8 @@ namespace Splitio_Tests.Integration_Tests
             return new ConfigurationOptions
             {
                 LocalhostFilePath = fileName,
+                LocalhostPolling = true,
+                LocalhostIntervalMs = 5
             };
         }
     }

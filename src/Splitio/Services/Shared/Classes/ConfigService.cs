@@ -43,13 +43,12 @@ namespace Splitio.Services.Shared.Classes
             var localhostClientConfigurations = new LocalhostClientConfigurations
             {
                 Polling = config.LocalhostPolling,
-                FilePath = config.LocalhostFilePath,
-                
+                FilePath = config.LocalhostFilePath
             };
 
             if (localhostClientConfigurations.Polling)
             {
-                localhostClientConfigurations.FileWatcherRate = GetMinimunAllowed(config.FeaturesRefreshRate ?? 0, 1, "FeaturesRefreshRate");
+                localhostClientConfigurations.FileWatcherIntervalMs = GetMinimunAllowed(config.LocalhostIntervalMs ?? 0, 1, "LocalhostIntervalMs");
             }
 
             return localhostClientConfigurations;            
