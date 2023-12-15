@@ -1,19 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0;net5.0;netstandard2.0;net461;net45</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0;net6.0;net5.0;netstandard2.0;net461;net45</TargetFrameworks>
     <AssemblyName>Splitio</AssemblyName>
     <PackageId>Splitio</PackageId>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>7.7.1</Version>
+    <Version>7.7.1-localtest</Version>
     <RootNamespace>Splitio</RootNamespace>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Splitio.snk</AssemblyOriginatorKeyFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/splitio/dotnet-client</PackageProjectUrl>
     <RepositoryUrl>https://github.com/splitio/dotnet-client</RepositoryUrl>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net8.0' Or '$(TargetFramework)' == 'net7.0' Or '$(TargetFramework)' == 'net6.0' Or '$(TargetFramework)' == 'net5.0'">
