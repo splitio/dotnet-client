@@ -26,9 +26,9 @@ namespace Splitio.Services.Shared.Classes
         }
 
         #region Public Methods
-        public BaseConfig ReadConfig(ConfigurationOptions config, ConfigTypes configType, IStatusManager statusManager = null)
+        public BaseConfig ReadConfig(ConfigurationOptions config, ConfigTypes configTypes, IStatusManager statusManager = null)
         {
-            switch (configType)
+            switch (configTypes)
             {
                 case ConfigTypes.Redis:
                     return ReadRedisConfig(config);
@@ -49,7 +49,7 @@ namespace Splitio.Services.Shared.Classes
 
             var fileSync = config.LocalhostFileSync;
 
-            if (fileSync != null && fileSync is FileSyncPolling)
+            if (fileSync is FileSyncPolling)
             {
                 ((FileSyncPolling)fileSync).SetStatusManager(statusManager);
             }

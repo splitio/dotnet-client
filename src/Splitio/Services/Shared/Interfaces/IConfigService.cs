@@ -7,6 +7,6 @@ namespace Splitio.Services.Shared.Interfaces
 {
     public interface IConfigService
     {
-        BaseConfig ReadConfig(ConfigurationOptions config, ConfigTypes confingType, IStatusManager statusManager = null);
+        BaseConfig ReadConfig(ConfigurationOptions config, ConfigTypes confingTypes, IStatusManager statusManager = null);
     }
 }

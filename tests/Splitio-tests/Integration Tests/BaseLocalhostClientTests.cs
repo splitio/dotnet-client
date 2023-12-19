@@ -64,9 +64,9 @@ namespace Splitio_Tests.Integration_Tests
             Thread.Sleep(500);
 
             // Act & Assert
-            Assert.AreEqual("off", client.GetTreatment("id", "double_writes_to_cassandra"), "1"); //default treatment
-            Assert.AreEqual("on", client.GetTreatment("id", "other_test_feature"), "3"); //default treatment
-            Assert.AreEqual("off", client.GetTreatment("id", "other_test_feature2"), "5"); //default treatment
+            Assert.AreEqual("off", client.GetTreatment("id", "double_writes_to_cassandra"), $"1 - {_mode}"); //default treatment
+            Assert.AreEqual("on", client.GetTreatment("id", "other_test_feature"), $"2 - {_mode}"); //default treatment
+            Assert.AreEqual("off", client.GetTreatment("id", "other_test_feature2"), $"3 - {_mode}"); //default treatment
 
             using (var fs = File.Open(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
             {
@@ -75,9 +75,9 @@ namespace Splitio_Tests.Integration_Tests
             File.AppendAllText(filePath, Environment.NewLine);
             Thread.Sleep(500);
 
-            Assert.AreEqual("control", client.GetTreatment("id", "double_writes_to_cassandra"), "1");
-            Assert.AreEqual("control", client.GetTreatment("id", "other_test_feature"), "3");
-            Assert.AreEqual("control", client.GetTreatment("id", "other_test_feature2"), "5");
+            Assert.AreEqual("control", client.GetTreatment("id", "double_writes_to_cassandra"), $"4 - {_mode}");
+            Assert.AreEqual("control", client.GetTreatment("id", "other_test_feature"), $"5 - {_mode}");
+            Assert.AreEqual("control", client.GetTreatment("id", "other_test_feature2"), $"6 - {_mode}");
 
             File.AppendAllText(filePath, Environment.NewLine + "always_on on" + Environment.NewLine);
             Thread.Sleep(1000);
@@ -106,13 +106,13 @@ namespace Splitio_Tests.Integration_Tests
             Thread.Sleep(1000);
 
             // Act & Assert
-            Assert.AreEqual("off", client.GetTreatment("id", "other_test_feature2"), "5"); //default treatment
-            Assert.AreEqual("control", client.GetTreatment("id", "double_writes_to_cassandra"), "1");
+            Assert.AreEqual("off", client.GetTreatment("id", "other_test_feature2"), $"1 - {_mode}"); //default treatment
+            Assert.AreEqual("control", client.GetTreatment("id", "double_writes_to_cassandra"), $"2 - {_mode}");
 
             File.AppendAllText(filePath, Environment.NewLine + "always_on on" + Environment.NewLine);
             Thread.Sleep(1000);
 
-            Assert.AreEqual("on", client.GetTreatment("id", "always_on"));
+            Assert.AreEqual("on", client.GetTreatment("id", "always_on"), $"3 - {_mode}");
         }
 
         [TestMethod]

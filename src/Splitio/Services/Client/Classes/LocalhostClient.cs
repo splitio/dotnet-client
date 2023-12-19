@@ -26,6 +26,8 @@ namespace Splitio.Services.Client.Classes
         private readonly ILocalhostFileSync _localhostFileSync;
         private readonly string _fullPath;
 
+        private readonly object _lock = new object();
+
         public LocalhostClient(ConfigurationOptions configurationOptions) : base("localhost")
         {
             var configs = (LocalhostClientConfigurations)_configService.ReadConfig(configurationOptions, ConfigTypes.Localhost, _statusManager);
@@ -55,8 +57,7 @@ namespace Splitio.Services.Client.Classes
             }
             else
             {
-                var task = new SplitPeriodicTask(_statusManager, Enums.Task.LocalhostFileWatcher, 0);
-                _localhostFileSync = new FileSyncWatcher(_fullPath, task);
+                _localhostFileSync = new FileSyncWatcher(_fullPath);
             }
 
             _blockUntilReadyService = new NoopBlockUntilReadyService();
@@ -109,7 +110,7 @@ namespace Splitio.Services.Client.Classes
         #region Private Methods
         private void OnFileChanged()
         {
-            lock (this)
+            lock (_lock)
             {
                 try
                 {
