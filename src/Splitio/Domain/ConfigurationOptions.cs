@@ -3,6 +3,7 @@ using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using System;
 using System.Collections.Generic;
+using Splitio.Services.Localhost;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -54,7 +55,6 @@ namespace Splitio.Services.Client.Classes
 
         // Localhost
         public string LocalhostFilePath { get; set; }
-        public bool LocalhostPolling { get; set; }
-        public int? LocalhostIntervalMs { get; set; }
+        public ILocalhostFileSync LocalhostFileSync { get; set; }
     }
 }

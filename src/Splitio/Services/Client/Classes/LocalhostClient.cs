@@ -10,6 +10,7 @@ using Splitio.Services.Tasks;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
@@ -22,12 +23,12 @@ namespace Splitio.Services.Client.Classes
 
         private readonly ILocalhostFileService _localhostFileService;
         private readonly IFeatureFlagCache _featureFlagCache;
-        private readonly ISplitFileWatcher _splitFileWatcher;
+        private readonly ILocalhostFileSync _localhostFileSync;
         private readonly string _fullPath;
 
         public LocalhostClient(ConfigurationOptions configurationOptions) : base("localhost")
         {
-            var configs = (LocalhostClientConfigurations)_configService.ReadConfig(configurationOptions, ConfigTypes.Localhost);
+            var configs = (LocalhostClientConfigurations)_configService.ReadConfig(configurationOptions, ConfigTypes.Localhost, _statusManager);
 
             _fullPath = LookupFilePath(configs.FilePath);
 
@@ -47,15 +48,15 @@ namespace Splitio.Services.Client.Classes
             var splits = _localhostFileService.ParseSplitFile(_fullPath);
             _featureFlagCache = new InMemorySplitCache(splits, _flagSetsFilter);
 
-            if (configs.Polling)
+
+            if (configs.FileSync != null)
             {
-                var worker = new SplitPeriodicTask(_statusManager, Enums.Task.LocalhostFileWatcher, configs.FileWatcherIntervalMs);
-                _splitFileWatcher = new SplitFileUpdateChecker(_localhostFileService, _featureFlagCache, worker, _fullPath);
+                _localhostFileSync = configs.FileSync;
             }
             else
             {
-                var worker = new SplitPeriodicTask(_statusManager, Enums.Task.LocalhostFileWatcher, 0);
-                _splitFileWatcher = new SplitFileSystemWatcher(_localhostFileService, _featureFlagCache, worker, _fullPath);
+                var task = new SplitPeriodicTask(_statusManager, Enums.Task.LocalhostFileWatcher, 0);
+                _localhostFileSync = new FileSyncWatcher(_fullPath, task);
             }
 
             _blockUntilReadyService = new NoopBlockUntilReadyService();
@@ -69,7 +70,8 @@ namespace Splitio.Services.Client.Classes
 
             BuildClientExtension();
 
-            _splitFileWatcher.Start();
+            _localhostFileSync.SetOnFileChangedAction(OnFileChanged);
+            _localhostFileSync.Start(_fullPath);
         }
 
         #region Public Methods
@@ -89,7 +91,7 @@ namespace Splitio.Services.Client.Classes
 
             _factoryInstantiationsService.Decrease(ApiKey);
             _statusManager.SetDestroy();
-            _splitFileWatcher.StopAsync().Wait();
+            _localhostFileSync.StopAsync().Wait();
             _featureFlagCache.Clear();
         }
 
@@ -99,12 +101,30 @@ namespace Splitio.Services.Client.Classes
 
             _factoryInstantiationsService.Decrease(ApiKey);
             _statusManager.SetDestroy();
-            await _splitFileWatcher.StopAsync();
+            await _localhostFileSync.StopAsync();
             _featureFlagCache.Clear();
         }
         #endregion
 
         #region Private Methods
+        private void OnFileChanged()
+        {
+            lock (this)
+            {
+                try
+                {
+                    var featureFlagsToAdd = _localhostFileService.ParseSplitFile(_fullPath);
+                    var namesInCache = _featureFlagCache.GetSplitNames();
+                    var featureFlagstoRemove = namesInCache.Except(featureFlagsToAdd.Keys).ToArray();
+
+                    _featureFlagCache.Update(featureFlagsToAdd.Values.ToList(), featureFlagstoRemove.ToList(), -1);
+                }
+                catch (Exception ex)
+                {
+                    _log.Error("Something went wrong parsing SplitFile.", ex);
+                }
+            }
+        }
         private static string LookupFilePath(string filePath)
         {
             filePath = filePath ?? DefaultSplitFileName;

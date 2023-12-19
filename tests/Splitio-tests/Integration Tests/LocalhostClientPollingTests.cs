@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Localhost;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -15,8 +16,7 @@ namespace Splitio_Tests.Integration_Tests
             return new ConfigurationOptions
             {
                 LocalhostFilePath = fileName,
-                LocalhostPolling = true,
-                LocalhostIntervalMs = 5
+                LocalhostFileSync = LocalhostFileSync.FileSyncPolling(intervalMs: 5)
             };
         }
     }

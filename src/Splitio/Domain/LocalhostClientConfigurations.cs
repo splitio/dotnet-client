@@ -1,9 +1,10 @@
-﻿namespace Splitio.Domain
+﻿using Splitio.Services.Localhost;
+
+namespace Splitio.Domain
 {
     public class LocalhostClientConfigurations : BaseConfig
     {
-        public int FileWatcherIntervalMs { get; set; }
         public string FilePath { get; set; }
-        public bool Polling { get; set; }
+        public ILocalhostFileSync FileSync { get; set; }
     }
 }
