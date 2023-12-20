@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Logger;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -15,6 +16,7 @@ namespace Splitio_Tests.Integration_Tests
             return new ConfigurationOptions
             {
                 LocalhostFilePath = fileName,
+                Logger = SplitLogger.Console(Level.Debug)
             };
         }
     }
