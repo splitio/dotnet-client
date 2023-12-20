@@ -1,7 +1,9 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.InputValidation.Interfaces;
+using Splitio.Services.Localhost;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 using System;
@@ -24,32 +26,35 @@ namespace Splitio.Services.Shared.Classes
         }
 
         #region Public Methods
-        public BaseConfig ReadConfig(ConfigurationOptions config, ConfigTypes configType)
+        public BaseConfig ReadConfig(ConfigurationOptions config, ConfigTypes configTypes, IStatusManager statusManager = null)
         {
-            switch (configType)
+            switch (configTypes)
             {
                 case ConfigTypes.Redis:
                     return ReadRedisConfig(config);
                 case ConfigTypes.Localhost:
-                    return ReadLocalhostConfig(config);
+                    return ReadLocalhostConfig(config, statusManager);
                 case ConfigTypes.InMemory:
                 default:
                     return ReadInMemoryConfig(config);
             }
         }
 
-        public LocalhostClientConfigurations ReadLocalhostConfig(ConfigurationOptions config)
+        public static LocalhostClientConfigurations ReadLocalhostConfig(ConfigurationOptions config, IStatusManager statusManager)
         {
             var localhostClientConfigurations = new LocalhostClientConfigurations
             {
-                Polling = config.LocalhostPolling,
-                FilePath = config.LocalhostFilePath
+                FilePath = config.LocalhostFilePath,
             };
 
-            if (localhostClientConfigurations.Polling)
+            var fileSync = config.LocalhostFileSync;
+
+            if (fileSync is FileSyncPolling)
             {
-                localhostClientConfigurations.FileWatcherIntervalMs = GetMinimunAllowed(config.LocalhostIntervalMs ?? 0, 1, "LocalhostIntervalMs");
+                ((FileSyncPolling)fileSync).SetStatusManager(statusManager);
             }
+
+            localhostClientConfigurations.FileSync = fileSync;
 
             return localhostClientConfigurations;            
         }
