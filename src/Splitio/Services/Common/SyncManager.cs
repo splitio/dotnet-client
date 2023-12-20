@@ -185,6 +185,7 @@ namespace Splitio.Services.Common
         {
             try
             {
+                _log.Debug("SDK initialization - Step 1");
                 var clock = new Stopwatch();
                 clock.Start();
 
@@ -193,13 +194,19 @@ namespace Splitio.Services.Common
                     await Task.Delay(500);
                 }
 
+                _log.Debug("SDK initialization - Step 2");
+
                 if (_statusManager.IsDestroyed()) return;
+
+                _log.Debug("SDK initialization - Step 3");
 
                 _statusManager.SetReady();
                 clock.Stop();
                 _log.Debug($"Time until SDK ready: {clock.ElapsedMilliseconds} ms.");
                 _telemetrySyncTask.RecordConfigInit(clock.ElapsedMilliseconds);
                 _synchronizer.StartPeriodicDataRecording();
+
+                _log.Debug("SDK initialization - Step 4");
 
                 if (_streamingEnabled)
                     await StartStreamingModeAsync();
