@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.Logger;
 using Splitio.Tests.Common;
 using Splitio.Tests.Common.Resources;
 using System;
@@ -554,6 +555,7 @@ namespace Splitio.Integration_tests
                 EventsQueueSize = eventsQueueSize,
                 IPAddressesEnabled = ipAddressesEnabled,
                 StreamingEnabled = false,
+                Logger = SplitLogger.Console(Level.Debug)
             };
         }
 
