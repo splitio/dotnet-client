@@ -16,7 +16,7 @@ namespace Splitio_Tests.Integration_Tests
             return new ConfigurationOptions
             {
                 LocalhostFilePath = fileName,
-                LocalhostFileSync = LocalhostFileSync.FileSyncPolling(intervalMs: 5)
+                LocalhostFileSync = LocalhostFileSync.FileSyncPolling(intervalMs: 2)
             };
         }
     }

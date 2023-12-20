@@ -42,7 +42,7 @@ namespace Splitio.Services.Localhost
         {
             if (_task == null)
             {
-                _task = new SplitPeriodicTask(_statusManager, Enums.Task.LocalhostFileWatcher, _intervalMs);
+                _task = new SplitPeriodicTask(_statusManager, Enums.Task.LocalhostFileSync, _intervalMs);
             }
 
             _path = filePath;

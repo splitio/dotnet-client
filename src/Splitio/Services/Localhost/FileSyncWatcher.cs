@@ -31,7 +31,7 @@ namespace Splitio.Services.Localhost
 
         public Task StopAsync()
         {
-            // no-op
+            _watcher.Dispose();
             return Task.FromResult(0);
         }
     }

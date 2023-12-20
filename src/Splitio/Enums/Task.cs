@@ -25,6 +25,6 @@
         ImpressionCounterSendBulkData,
         MtkSendBulkData,
         EventsSendBulkData,
-        LocalhostFileWatcher
+        LocalhostFileSync
     }
 }
