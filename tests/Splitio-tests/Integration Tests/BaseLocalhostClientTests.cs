@@ -7,9 +7,10 @@ using System.Threading;
 
 namespace Splitio_Tests.Integration_Tests
 {
+    [DeploymentItem(@"Resources\test1-polling.splits")]
+    [DeploymentItem(@"Resources\test1-watcher.splits")]
     [DeploymentItem(@"Resources\test2-polling.splits")]
     [DeploymentItem(@"Resources\test2-watcher.splits")]
-    [DeploymentItem(@"Resources\test.splits")]
     [DeploymentItem(@"Resources\split.yaml")]
     [TestClass]
     public abstract class BaseLocalhostClientTests
@@ -90,7 +91,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentSuccessfullyWhenUpdatingSplitsFileSameFile()
         {
             // Arrange
-            var filePath = $"{rootFilePath}test2-{_mode}.splits";
+            var filePath = $"{rootFilePath}test1-{_mode}.splits";
             using (var fs = File.Open(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
             {
                 fs.SetLength(0);

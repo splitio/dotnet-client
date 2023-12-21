@@ -305,13 +305,12 @@ namespace Splitio.Integration_tests
             Assert.AreEqual(3, sentImpressions.Where(x => x.F.Equals("MAURO_TEST")).Sum(x => x.I.Count), "3");
             Assert.AreEqual(1, sentImpressions.Where(x => x.F.Equals("Test_Save_1")).Sum(x => x.I.Count), "4");
 
-            var impressionCounts = GetImpressionsCountsSentBackend(httpClientMock);
+            var impressionCounts = GetImpressionsCountsSentBackend(httpClientMock).FirstOrDefault();
             var names = new List<string>();
-            impressionCounts.ForEach(item => names.AddRange(item.Pf.Select(x => x.F)));
-            Assert.AreEqual(3, names.Distinct().Count(), "5");
-            Assert.AreEqual(3, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("FACUNDO_TEST")).Sum(z => z.Rc)), "6");
-            Assert.AreEqual(1, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("MAURO_TEST")).Sum(z => z.Rc)), "7");
-            Assert.AreEqual(1, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("Test_Save_1")).Sum(z => z.Rc)), "8");
+            Assert.AreEqual(3, impressionCounts.Pf.Count, "5");
+            Assert.AreEqual(3, impressionCounts.Pf.Where(i => i.F.Equals("FACUNDO_TEST")).Sum(z => z.Rc), "6");
+            Assert.AreEqual(1, impressionCounts.Pf.Where(i => i.F.Equals("MAURO_TEST")).Sum(z => z.Rc), "7");
+            Assert.AreEqual(1, impressionCounts.Pf.Where(i => i.F.Equals("Test_Save_1")).Sum(z => z.Rc), "8");
         }
 
         [TestMethod]
