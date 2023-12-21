@@ -7,6 +7,7 @@ using System.Threading;
 
 namespace Splitio_Tests.Integration_Tests
 {
+    [DeploymentItem(@"Resources\test.splits")]
     [DeploymentItem(@"Resources\test1-polling.splits")]
     [DeploymentItem(@"Resources\test1-watcher.splits")]
     [DeploymentItem(@"Resources\test2-polling.splits")]

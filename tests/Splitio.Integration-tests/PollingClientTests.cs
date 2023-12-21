@@ -306,7 +306,6 @@ namespace Splitio.Integration_tests
             Assert.AreEqual(1, sentImpressions.Where(x => x.F.Equals("Test_Save_1")).Sum(x => x.I.Count), "4");
 
             var impressionCounts = GetImpressionsCountsSentBackend(httpClientMock).FirstOrDefault();
-            var names = new List<string>();
             Assert.AreEqual(3, impressionCounts.Pf.Count, "5");
             Assert.AreEqual(3, impressionCounts.Pf.Where(i => i.F.Equals("FACUNDO_TEST")).Sum(z => z.Rc), "6");
             Assert.AreEqual(1, impressionCounts.Pf.Where(i => i.F.Equals("MAURO_TEST")).Sum(z => z.Rc), "7");
