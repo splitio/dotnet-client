@@ -95,6 +95,9 @@
     <None Update="Resources\splits_staging_6.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\test.splits">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\test1-watcher.splits">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
