@@ -67,7 +67,7 @@ namespace Splitio.Services.Client.Classes
                     }
                     if (_apiKey == "localhost")
                     {
-                        _client = new LocalhostClient(_options.LocalhostFilePath);
+                        _client = new LocalhostClient(_options);
                     }
                     else
                     {

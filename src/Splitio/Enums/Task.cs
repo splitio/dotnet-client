@@ -24,6 +24,7 @@
         Destroy,
         ImpressionCounterSendBulkData,
         MtkSendBulkData,
-        EventsSendBulkData
+        EventsSendBulkData,
+        LocalhostFileSync
     }
 }

@@ -4,7 +4,7 @@ image:
 nuget:
   account_feed: true
 
-version: 7.7.0
+version: 7.7.1-rc{build}
 dotnet_csproj:
   patch: true
   file: '**\*.csproj'
@@ -30,11 +30,11 @@ after_build:
 test: on
 
 after_test:
- - dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj -c Release -f net7.0
- - dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -c Release -f net7.0
- - dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -c Release -f net7.0
- - dotnet test .\tests\Splitio-tests\Splitio-tests.csproj -c Release -f net7.0
- - dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net7.0
+ - dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj -c Release -f net8.0
+ - dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -c Release -f net8.0
+ - dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -c Release -f net8.0
+ - dotnet test .\tests\Splitio-tests\Splitio-tests.csproj -c Release -f net8.0
+ - dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net8.0
  - dotnet pack .\src\Splitio --configuration Release
  - dotnet pack .\Splitio.Redis --configuration Release
 

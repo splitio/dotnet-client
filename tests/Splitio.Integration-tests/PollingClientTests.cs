@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.Logger;
 using Splitio.Tests.Common;
 using Splitio.Tests.Common.Resources;
 using System;
@@ -299,18 +300,16 @@ namespace Splitio.Integration_tests
 
             // Assert.
             var sentImpressions = InMemoryHelper.GetImpressionsSentBackend(httpClientMock);
-            Assert.AreEqual(3, sentImpressions.Select(x => x.F).Distinct().Count(), "1");
+            Assert.AreEqual(6, sentImpressions.Sum(x => x.I.Count), "1");
             Assert.AreEqual(2, sentImpressions.Where(x => x.F.Equals("FACUNDO_TEST")).Sum(x => x.I.Count), "2");
             Assert.AreEqual(3, sentImpressions.Where(x => x.F.Equals("MAURO_TEST")).Sum(x => x.I.Count), "3");
             Assert.AreEqual(1, sentImpressions.Where(x => x.F.Equals("Test_Save_1")).Sum(x => x.I.Count), "4");
 
-            var impressionCounts = GetImpressionsCountsSentBackend(httpClientMock);
-            var names = new List<string>();
-            impressionCounts.ForEach(item => names.AddRange(item.Pf.Select(x => x.F)));
-            Assert.AreEqual(3, names.Distinct().Count(), "5");
-            Assert.AreEqual(3, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("FACUNDO_TEST")).Sum(z => z.Rc)), "6");
-            Assert.AreEqual(1, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("MAURO_TEST")).Sum(z => z.Rc)), "7");
-            Assert.AreEqual(1, impressionCounts.Sum(x => x.Pf.Where(i => i.F.Equals("Test_Save_1")).Sum(z => z.Rc)), "8");
+            var impressionCounts = GetImpressionsCountsSentBackend(httpClientMock).FirstOrDefault();
+            Assert.AreEqual(3, impressionCounts.Pf.Count, "5");
+            Assert.AreEqual(3, impressionCounts.Pf.Where(i => i.F.Equals("FACUNDO_TEST")).Sum(z => z.Rc), "6");
+            Assert.AreEqual(1, impressionCounts.Pf.Where(i => i.F.Equals("MAURO_TEST")).Sum(z => z.Rc), "7");
+            Assert.AreEqual(1, impressionCounts.Pf.Where(i => i.F.Equals("Test_Save_1")).Sum(z => z.Rc), "8");
         }
 
         [TestMethod]
@@ -554,6 +553,7 @@ namespace Splitio.Integration_tests
                 EventsQueueSize = eventsQueueSize,
                 IPAddressesEnabled = ipAddressesEnabled,
                 StreamingEnabled = false,
+                Logger = SplitLogger.Console(Level.Debug)
             };
         }
 

@@ -1,11 +1,11 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Parsing;
-using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-namespace Splitio.Services.Shared.Classes
+namespace Splitio.Services.Localhost
 {
     public abstract class AbstractLocalhostFileService : ILocalhostFileService
     {

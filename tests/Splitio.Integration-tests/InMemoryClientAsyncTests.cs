@@ -2,6 +2,7 @@
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.Logger;
 using Splitio.Tests.Common;
 using Splitio.Tests.Common.Resources;
 using System.Collections.Generic;
@@ -26,7 +27,8 @@ namespace Splitio.Integration_tests
                 EventsEndpoint = httpClientMock.GetUrl(),
                 TelemetryServiceURL = httpClientMock.GetUrl(),
                 ImpressionListener = impressionListener,
-                EventsPushRate = 1
+                EventsPushRate = 1,
+                Logger = SplitLogger.Console(Level.Debug)
             };
         }
 

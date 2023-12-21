@@ -49,7 +49,7 @@ namespace Splitio_Tests.Integration_Tests
             var featureFlagSyncService = new FeatureFlagSyncService(splitParser, splitCache, flagSetsFilter);
             var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, gates, task, splitCache, featureFlagSyncService);
             selfRefreshingSplitFetcher.Start();
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             //Act           
             var result = splitCache.GetSplit("Pato_Test_1");

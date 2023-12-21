@@ -42,6 +42,8 @@ namespace Splitio.Services.Impressions.Classes
 
         public int Log(IList<KeyImpression> impressions)
         {
+            _log.Debug($"Adding impressions: {impressions.Count}");
+
             return _impressionsCache.AddItems(impressions);
         }
 
@@ -60,6 +62,8 @@ namespace Splitio.Services.Impressions.Classes
                 }
 
                 var impressions = _impressionsCache.FetchAllAndClear();
+
+                _log.Debug($"Impressions to post: {impressions.Count}");
 
                 if (impressions.Count <= 0) return;
 

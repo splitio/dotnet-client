@@ -11,7 +11,7 @@ namespace Splitio.Services.Impressions.Classes
 {
     public class ImpressionsCounter : TrackerComponent, IImpressionsCounter
     {
-        private readonly ISplitLogger Logger = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsCounter));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsCounter));
         private const int DefaultAmount = 1;
 
         private readonly IImpressionsSenderAdapter _senderAdapter;
@@ -29,6 +29,8 @@ namespace Splitio.Services.Impressions.Classes
         public void Inc(string splitName, long timeFrame)
         {
             var key = new KeyCache(splitName, timeFrame);
+
+            _log.Debug($"Impressions Count Inc: {splitName} - {timeFrame}");
 
             _cache.AddOrUpdate(key, DefaultAmount, (keyCache, cacheAmount) => cacheAmount + DefaultAmount);
 
@@ -67,7 +69,7 @@ namespace Splitio.Services.Impressions.Classes
             }
             catch (Exception e)
             {
-                Logger.Error("Exception caught sending impressions count.", e);
+                _log.Error("Exception caught sending impressions count.", e);
             }
         }
     }
