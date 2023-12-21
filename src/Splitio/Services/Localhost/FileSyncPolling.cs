@@ -16,9 +16,9 @@ namespace Splitio.Services.Localhost
         private readonly int _intervalMs;
         private readonly CancellationTokenSource _cts;
 
-        private ISplitTask _task;
         private string _path;
         private Action _onFileChanged;
+        private SplitPeriodicTask _task;
         private DateTime? _fileLastUpdatedDateTime;
         private IStatusManager _statusManager;
 
