@@ -300,7 +300,7 @@ namespace Splitio.Integration_tests
 
             // Assert.
             var sentImpressions = InMemoryHelper.GetImpressionsSentBackend(httpClientMock);
-            Assert.AreEqual(3, sentImpressions.Select(x => x.F).Distinct().Count(), "1");
+            Assert.AreEqual(6, sentImpressions.Sum(x => x.I.Count), "1");
             Assert.AreEqual(2, sentImpressions.Where(x => x.F.Equals("FACUNDO_TEST")).Sum(x => x.I.Count), "2");
             Assert.AreEqual(3, sentImpressions.Where(x => x.F.Equals("MAURO_TEST")).Sum(x => x.I.Count), "3");
             Assert.AreEqual(1, sentImpressions.Where(x => x.F.Equals("Test_Save_1")).Sum(x => x.I.Count), "4");

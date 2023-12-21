@@ -61,7 +61,7 @@ namespace Splitio_Tests.Integration_Tests
             client.BlockUntilReady(1000);
 
             File.AppendAllText(filePath, Environment.NewLine + "other_test_feature2     off" + Environment.NewLine);
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             // Act & Assert
             Assert.AreEqual("off", client.GetTreatment("id", "double_writes_to_cassandra"), $"1 - {_mode}");
@@ -73,7 +73,7 @@ namespace Splitio_Tests.Integration_Tests
                 fs.SetLength(0);
             }
             File.AppendAllText(filePath, Environment.NewLine);
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             Assert.AreEqual("control", client.GetTreatment("id", "double_writes_to_cassandra"), $"4 - {_mode}");
             Assert.AreEqual("control", client.GetTreatment("id", "other_test_feature"), $"5 - {_mode}");
@@ -83,6 +83,7 @@ namespace Splitio_Tests.Integration_Tests
             Thread.Sleep(1000);
 
             Assert.AreEqual("on", client.GetTreatment("id", "always_on"), $"7 - {_mode}");
+            Thread.Sleep(1000);
         }
 
         [TestMethod]
@@ -113,6 +114,7 @@ namespace Splitio_Tests.Integration_Tests
             Thread.Sleep(1000);
 
             Assert.AreEqual("on", client.GetTreatment("id", "always_on"), $"3 - {_mode}");
+            Thread.Sleep(1000);
         }
 
         [TestMethod]
