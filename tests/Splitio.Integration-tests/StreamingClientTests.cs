@@ -3,7 +3,9 @@ using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Client.Interfaces;
+using Splitio.Services.Logger;
 using Splitio.Tests.Common;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Splitio.Integration_tests
@@ -120,7 +122,7 @@ namespace Splitio.Integration_tests
                 client.Destroy();
             }
         }
-        
+
         [Ignore]
         [TestMethod]
         public void GetTreatment_SplitKill_ShouldFetch()
@@ -318,7 +320,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                
+
                 var result = EvaluateWithDelay("admin", "push_test", "after_fetch", client);
                 Assert.AreEqual("after_fetch", result);
 
@@ -470,7 +472,7 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                
+
                 var result = client.GetTreatment("admin", "push_test");
 
                 Assert.AreEqual("on", result);
@@ -491,7 +493,7 @@ namespace Splitio.Integration_tests
                 httpClientMock.SegmentChangesOk("1470947453878", "segment4", "split_segment4_empty");
                 httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
                 httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
-                
+
                 var notification = "d4\r\nevent: message\ndata: {\"id\":\"123\",\"clientId\":\"emptyClientId\",\"timestamp\":1582056812285,\"encoding\":\"json\",\"channel\":\"[?occupancy=metrics.publishers]control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_DISABLED\\\"}\"}\n\n\r\n";
                 httpClientMock.SSE_Channels_Response_WithPath(EventSourcePath, notification);
 
@@ -521,10 +523,161 @@ namespace Splitio.Integration_tests
                 var client = splitFactory.Client();
 
                 client.BlockUntilReady(10000);
-                
+
                 var result = client.GetTreatment("admin", "push_test");
 
                 Assert.AreEqual("on", result);
+
+                client.Destroy();
+            }
+        }
+
+        [TestMethod]
+        public void GetTreatment_WithAuthBadReques_ShouldFallbackToPolling()
+        {
+            using (var httpClientMock = new HttpClientMock())
+            {
+                // Arrange.
+                var changes1 = new SplitChangesResult
+                {
+                    since = -1,
+                    till = 10,
+                    splits = new List<Split>()
+                    {
+                        new Split
+                        {
+                            name = "split-name-1",
+                            changeNumber = 10,
+                            conditions = new List<ConditionDefinition>
+                            {
+                                new ConditionDefinition
+                                {
+                                    conditionType = "ROLLOUT",
+                                    partitions = new List<PartitionDefinition>
+                                    {
+                                        new PartitionDefinition
+                                        {
+                                            size = 100,
+                                            treatment = "on"
+                                        }
+                                    },
+                                    matcherGroup = new MatcherGroupDefinition
+                                    {
+                                        matchers = new List<MatcherDefinition>
+                                        {
+                                            new MatcherDefinition
+                                            {
+                                                whitelistMatcherData = new WhitelistData
+                                                {
+                                                    whitelist = new List<string>{ "mauro" }
+                                                },
+                                                matcherType = "WHITELIST"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            defaultTreatment = "on",
+                            killed = false,
+                            status = "ACTIVE"
+                        }
+                    }
+                };
+                var changes2 = new SplitChangesResult
+                {
+                    since = 10,
+                    till = 10,
+                    splits = new List<Split>()
+                };
+
+                var changes3 = new SplitChangesResult
+                {
+                    since = 10,
+                    till = 11,
+                    splits = new List<Split>()
+                    {
+                        new Split
+                        {
+                            name = "split-name-1",
+                            changeNumber = 11,
+                            conditions = new List<ConditionDefinition>
+                            {
+                                new ConditionDefinition
+                                {
+                                    conditionType = "ROLLOUT",
+                                    partitions = new List<PartitionDefinition>
+                                    {
+                                        new PartitionDefinition
+                                        {
+                                            size = 100,
+                                            treatment = "off"
+                                        }
+                                    },
+                                    matcherGroup = new MatcherGroupDefinition
+                                    {
+                                        matchers = new List<MatcherDefinition>
+                                        {
+                                            new MatcherDefinition
+                                            {
+                                                whitelistMatcherData = new WhitelistData
+                                                {
+                                                    whitelist = new List<string>{ "mauro" }
+                                                },
+                                                matcherType = "WHITELIST"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            defaultTreatment = "off",
+                            killed = false,
+                            status = "ACTIVE"
+                        }
+                    }
+                };
+
+                var changes4 = new SplitChangesResult
+                {
+                    since = 11,
+                    till = 11,
+                    splits = new List<Split>()
+                };
+
+                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes1), "-1");
+                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes2), "10");
+                httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
+                httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
+
+                httpClientMock.AuthService_Response_BadRequest();
+
+                var url = httpClientMock.GetUrl();
+                var config = new ConfigurationOptions
+                {
+                    Endpoint = url,
+                    EventsEndpoint = url,
+                    AuthServiceURL = $"{url}/api/auth",
+                    StreamingServiceURL = $"{url}{EventSourcePath}",
+                    StreamingEnabled = true,
+                    Logger = SplitLogger.Console(Level.Debug),
+                    FeaturesRefreshRate = 1
+                };
+
+                var splitFactory = new SplitFactory("api-key-fallback", config);
+                var client = splitFactory.Client();
+
+                client.BlockUntilReady(10000);
+
+                // Act and Assert.
+                var result = client.GetTreatment("admin", "split-name-1");
+                Assert.AreEqual("on", result);
+
+                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes3), "10");
+                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes4), "11");
+
+                Thread.Sleep(3000);
+
+                result = client.GetTreatment("admin", "split-name-1");
+                Assert.AreEqual("off", result);
 
                 client.Destroy();
             }

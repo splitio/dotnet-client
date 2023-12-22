@@ -18,8 +18,7 @@ namespace Splitio.Services.SplitFetcher.Classes
         {
             var fetchResult = await _apiClient.FetchSplitChangesAsync(since, fetchOptions);
 
-            var splitChangesResult = JsonConvert.DeserializeObject<SplitChangesResult>(fetchResult);
-            return splitChangesResult;
+            return JsonConvert.DeserializeObject<SplitChangesResult>(fetchResult);
         }
     }
 }
