@@ -7,7 +7,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>7.7.1</Version>
+    <Version>7.8.0</Version>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>SplitioRedis.snk</AssemblyOriginatorKeyFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>

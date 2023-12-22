@@ -1,6 +1,6 @@
 CHANGES
 
-7.7.1 (Dec 22, 2023)
+7.8.0 (Dec 22, 2023)
 - Added support for .NET 8.
 - Improved localhost implementation to support polling to check if the file was updated.
 
