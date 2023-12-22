@@ -120,7 +120,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             // Assert.
             _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Once);
             _sseHandler.Verify(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _notificationManagerKeeper.Verify(mock => mock.HandleSseStatus(It.IsAny<SSEClientStatusMessage>()), Times.Never);
+            _notificationManagerKeeper.Verify(mock => mock.HandleSseStatus(SSEClientStatusMessage.FORCED_STOP), Times.Once);
         }
 
         [TestMethod]

@@ -38,6 +38,8 @@ namespace Splitio.Services.Common
 
                 try
                 {
+                    return new AuthenticationResponse { PushEnabled = false, Retry = false };
+
                     var response = await _splitioHttpClient.GetAsync(_url).ConfigureAwait(false);
 
                     Util.Helper.RecordTelemetrySync(nameof(AuthenticateAsync), response, ResourceEnum.TokenSync, clock, _telemetryRuntimeProducer, _log);
