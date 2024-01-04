@@ -60,15 +60,15 @@ namespace Splitio.Services.Tasks
         {
             try
             {
+                if (_onStop != null)
+                    await _onStop.Invoke();
+
                 if (!IsRunning())
                     return;
 
                 _cts.Cancel();
                 _running = false;
                 _cts.Dispose();
-
-                if (_onStop != null)
-                    await _onStop.Invoke();
             }
             catch (Exception ex)
             {

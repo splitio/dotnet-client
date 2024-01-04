@@ -297,7 +297,7 @@ namespace Splitio.Tests.Common
         #endregion
 
         #region Auth Service
-        public void AuthService_Response(string bodyExoected)
+        public void AuthService_Response(string bodyExpected)
         {
             _mockServer
                 .Given(
@@ -308,7 +308,20 @@ namespace Splitio.Tests.Common
                 .RespondWith(
                     Response.Create()
                     .WithStatusCode(200)
-                    .WithBody(bodyExoected));
+                    .WithBody(bodyExpected));
+        }
+
+        public void AuthService_Response_BadRequest()
+        {
+            _mockServer
+                .Given(
+                    Request.Create()
+                    .WithPath("/api/auth")
+                    .UsingGet()
+                )
+                .RespondWith(
+                    Response.Create()
+                    .WithStatusCode(400));
         }
         #endregion
 

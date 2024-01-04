@@ -1,7 +1,7 @@
 ﻿using Splitio.Domain;
 using System.Collections.Concurrent;
 
-namespace Splitio.Services.Shared.Interfaces
+namespace Splitio.Services.Localhost
 {
     public interface ILocalhostFileService
     {
