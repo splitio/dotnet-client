@@ -54,6 +54,12 @@ namespace Splitio.Services.Common
 
                 _log.Debug($"Auth service response pushEnabled: {response.PushEnabled}.");
 
+                if (!response.PushEnabled.Value && !response.Retry.Value)
+                {
+                    _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.FORCED_STOP);
+                    return;
+                }
+
                 if (response.PushEnabled.Value && _sseHandler.Start(response.Token, response.Channels))
                 {
                     _intervalToken = response.Expiration.Value;
@@ -62,9 +68,7 @@ namespace Splitio.Services.Common
                 }
 
                 if (!_statusManager.IsDestroyed() && response.Retry.Value)
-                {
                     _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
-                }
             }
             catch (Exception ex)
             {
