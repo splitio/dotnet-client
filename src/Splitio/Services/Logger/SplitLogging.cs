@@ -21,7 +21,7 @@ namespace Splitio.Services.Logger
         {
             if (_level <= Level.Debug)
             {
-                WriteLog(message, exception);
+                WriteLog(Level.Debug, message, exception);
             }
         }
 
@@ -29,7 +29,7 @@ namespace Splitio.Services.Logger
         {
             if (_level <= Level.Debug)
             {
-                WriteLog(message);
+                WriteLog(Level.Debug, message);
             }
         }
 
@@ -37,7 +37,7 @@ namespace Splitio.Services.Logger
         {
             if (_level <= Level.Error)
             {
-                WriteLog(message, exception);
+                WriteLog(Level.Error, message, exception);
             }
         }
 
@@ -45,7 +45,7 @@ namespace Splitio.Services.Logger
         {
             if (_level <= Level.Error)
             {
-                WriteLog(message);
+                WriteLog(Level.Error, message);
             }
         }
 
@@ -53,7 +53,7 @@ namespace Splitio.Services.Logger
         {
             if (_level <= Level.Info)
             {
-                WriteLog(message, exception);
+                WriteLog(Level.Info, message, exception);
             }
         }
 
@@ -61,7 +61,7 @@ namespace Splitio.Services.Logger
         {
             if (_level <= Level.Info)
             {
-                WriteLog(message);
+                WriteLog(Level.Info, message);
             }
         }
 
@@ -69,7 +69,7 @@ namespace Splitio.Services.Logger
         {
             if (_level <= Level.Trace)
             {
-                WriteLog(message, exception);
+                WriteLog(Level.Trace, message, exception);
             }
         }
 
@@ -77,7 +77,7 @@ namespace Splitio.Services.Logger
         {
             if (_level <= Level.Trace)
             {
-                WriteLog(message);
+                WriteLog(Level.Trace, message);
             }
         }
 
@@ -85,7 +85,7 @@ namespace Splitio.Services.Logger
         {
             if (_level <= Level.Warn)
             {
-                WriteLog(message, exception);
+                WriteLog(Level.Warn, message, exception);
             }
         }
 
@@ -93,14 +93,14 @@ namespace Splitio.Services.Logger
         {
             if (_level <= Level.Warn)
             {
-                WriteLog(message);
+                WriteLog(Level.Warn, message);
             }
         }
 
-        private void WriteLog(string message, Exception exception = null)
+        private void WriteLog(Level level, string message, Exception exception = null)
         {
             var sb = new StringBuilder();
-            sb.AppendLine(DateTime.Now.ToString()).Append(" [").Append(_level.ToString()).Append("] ").Append(message).Append(exception);
+            sb.AppendLine(DateTime.Now.ToString()).Append(" [").Append(level).Append("] ").Append(message).Append(exception);
 
             _textWriter.WriteLine(sb.ToString());
         }

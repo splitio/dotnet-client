@@ -1,5 +1,4 @@
 ﻿using Splitio.CommonLibraries;
-using Splitio.Domain;
 using Splitio.Services.Logger;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
@@ -39,6 +38,16 @@ namespace Splitio.Util
             }
 
             log.Debug($"Http status executing {method}: {response.StatusCode}");
+        }
+
+        public static bool HasNonASCIICharacters(string input)
+        {
+            foreach (var c in input)
+            {
+                if (c > 127) return true;
+            }
+
+            return false;
         }
     }
 }

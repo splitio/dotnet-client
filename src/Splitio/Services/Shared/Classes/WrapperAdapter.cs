@@ -108,21 +108,30 @@ namespace Splitio.Services.Shared.Classes
         }
 
         #region Private Methods
-        private string GetSdkMachineName(ConfigurationOptions config, bool ipAddressesEnabled, ISplitLogger log)
+        private static string GetSdkMachineName(ConfigurationOptions config, bool ipAddressesEnabled, ISplitLogger log)
         {
             if (ipAddressesEnabled)
             {
                 try
                 {
-                    return config.SdkMachineName ?? Environment.MachineName;
+                    var name = config.SdkMachineName ?? Environment.MachineName;
+
+                    if (Util.Helper.HasNonASCIICharacters(name))
+                    {
+                        throw new Exception($"Machine name contains non-ASCII characters.");
+                    }
+
+                    return name;
                 }
                 catch (Exception e)
                 {
                     log.Warn("Exception retrieving machine name.", e);
+
                     return Constants.Gral.Unknown;
                 }
             }
-            else if(config.CacheAdapterConfig?.Type == AdapterType.Redis)
+            
+            if(config.CacheAdapterConfig?.Type == AdapterType.Redis)
             {
                 return Constants.Gral.NA;
             }
