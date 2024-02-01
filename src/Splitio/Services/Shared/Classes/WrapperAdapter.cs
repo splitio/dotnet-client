@@ -118,7 +118,9 @@ namespace Splitio.Services.Shared.Classes
 
                     if (Util.Helper.HasNonASCIICharacters(name))
                     {
-                        throw new Exception($"Machine name contains non-ASCII characters.");
+                        log.Warn($"Machine name contains non-ASCII characters.");
+
+                        return Constants.Gral.Unknown;
                     }
 
                     return name;
@@ -130,8 +132,7 @@ namespace Splitio.Services.Shared.Classes
                     return Constants.Gral.Unknown;
                 }
             }
-            
-            if(config.CacheAdapterConfig?.Type == AdapterType.Redis)
+            else if (config.CacheAdapterConfig?.Type == AdapterType.Redis)
             {
                 return Constants.Gral.NA;
             }
