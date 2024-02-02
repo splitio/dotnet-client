@@ -18,13 +18,13 @@ before_build:
  - Redis-64\tools\redis-server.exe --service-install
  - dotnet restore -s https://www.nuget.org/api/v2/
  - cmd: set BUILD_VERSION=%APPVEYOR_BUILD_NUMBER%
+ - dotnet tool install --global dotnet-coverage
 
 build_script:
- - sonar-scanner.bat
- - dotnet build --configuration Release
- - Redis-64\tools\redis-server.exe --service-start
- - dotnet test -c Release -f net8.0 --collect "Code Coverage"
- - SonarScanner.MSBuild.exe end /d:sonar.login=%SONAR_LOGIN%
+ - dotnet sonarscanner begin /n:"dotnet-client" /k:"dotnet-client" /d:sonar.host.url="https://sonarqube.split-internal.com" /d:sonar.login=%SONAR_LOGIN% /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
+ - dotnet build --configuration Release --no-incremental
+ - dotnet-coverage collect 'dotnet test' -f xml  -o 'coverage.xml'
+ - dotnet sonarscanner end /d:sonar.login=%SONAR_LOGIN%
 
 test: on
 
