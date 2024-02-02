@@ -14,18 +14,17 @@ configuration: Release
 
 before_build:
  - choco install "sonarscanner-msbuild-net46" -y
+ - choco install codecov --no-progress
  - nuget install redis-64 -excludeversion -source http://www.nuget.org/api/v2/
  - Redis-64\tools\redis-server.exe --service-install
  - dotnet restore -s https://www.nuget.org/api/v2/
  - cmd: set BUILD_VERSION=%APPVEYOR_BUILD_NUMBER%
- - dotnet new tool-manifest
- - dotnet tool install --local coverlet.console
 
 build_script:
  - sonar-scanner.bat
  - dotnet build -c Release
  - Redis-64\tools\redis-server.exe --service-start
- - dotnet test .\tests\Splitio-tests\Splitio-tests.csproj -c Release -f net8.0 --collect "Code Coverage" CodeCoverage.exe analyze
+ - dotnet test .\tests\Splitio-tests\Splitio-tests.csproj -c Release -f net8.0 --no-build --collect "Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
  - SonarScanner.MSBuild.exe end /d:sonar.login=%SONAR_LOGIN%
 
 test: on
