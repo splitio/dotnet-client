@@ -18,6 +18,7 @@ before_build:
  - Redis-64\tools\redis-server.exe --service-install
  - dotnet restore -s https://www.nuget.org/api/v2/
  - cmd: set BUILD_VERSION=%APPVEYOR_BUILD_NUMBER%
+ - dotnet new tool-manifest
  - dotnet tool install --local coverlet.console
 
 build_script:
