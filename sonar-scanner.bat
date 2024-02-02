@@ -12,6 +12,7 @@ SonarScanner.MSBuild.exe begin ^
   /d:sonar.host.url="https://sonarqube.split-internal.com" ^
   /d:sonar.login="%SONAR_LOGIN%" ^
   /d:sonar.ws.timeout="300" ^
+  /d:sonar.cs.vscoveragexml.reportsPaths="**\TestResults\*\*.coverage" ^
   /d:sonar.links.ci="https://ci.appveyor.com/project/SplitDevOps/dotnet-client" ^
   /d:sonar.links.scm="https://github.com/splitio/dotnet-client" ^
   %*
