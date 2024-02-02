@@ -25,7 +25,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             _wrapperAdapter = new Mock<IWrapperAdapter>();
             _flagSetsValidator = new FlagSetsValidator();
 
-            _configService = new ConfigService(_wrapperAdapter.Object, _flagSetsValidator);
+            _configService = new ConfigService(_wrapperAdapter.Object, _flagSetsValidator, new SdkMetadataValidator());
         }
 
         [TestMethod]
@@ -33,12 +33,12 @@ namespace Splitio_Tests.Unit_Tests.Shared
         {
             // Arrange.
             _wrapperAdapter
-                .Setup(mock => mock.ReadConfig(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
-                .Returns(new ReadConfigData
+                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Returns(new SdkMetadata
                 {
-                    SdkMachineIP = "ip-test",
-                    SdkMachineName = "name-test",
-                    SdkVersion = "version-test",
+                    MachineIP = "ip-test",
+                    MachineName = "name-test",
+                    Version = "version-test",
                 });
 
             // Act.
@@ -80,12 +80,12 @@ namespace Splitio_Tests.Unit_Tests.Shared
         {
             // Arrange.
             _wrapperAdapter
-                .Setup(mock => mock.ReadConfig(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
-                .Returns(new ReadConfigData
+                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Returns(new SdkMetadata
                 {
-                    SdkMachineIP = "ip-test",
-                    SdkMachineName = "name-test",
-                    SdkVersion = "version-test",
+                    MachineIP = "ip-test",
+                    MachineName = "name-test",
+                    Version = "version-test",
                 });
 
             var config = new ConfigurationOptions
@@ -139,12 +139,12 @@ namespace Splitio_Tests.Unit_Tests.Shared
         {
             // Arrange.
             _wrapperAdapter
-                .Setup(mock => mock.ReadConfig(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
-                .Returns(new ReadConfigData
+                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Returns(new SdkMetadata
                 {
-                    SdkMachineIP = "ip-test",
-                    SdkMachineName = "name-test",
-                    SdkVersion = "version-test",
+                    MachineIP = "ip-test",
+                    MachineName = "name-test",
+                    Version = "version-test",
                 });
 
             // Act.
@@ -162,12 +162,12 @@ namespace Splitio_Tests.Unit_Tests.Shared
         {
             // Arrange.
             _wrapperAdapter
-                .Setup(mock => mock.ReadConfig(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
-                .Returns(new ReadConfigData
+                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Returns(new SdkMetadata
                 {
-                    SdkMachineIP = "ip-test",
-                    SdkMachineName = "name-test",
-                    SdkVersion = "version-test",
+                    MachineIP = "ip-test",
+                    MachineName = "name-test",
+                    Version = "version-test",
                 });
 
             var config = new ConfigurationOptions
@@ -197,12 +197,12 @@ namespace Splitio_Tests.Unit_Tests.Shared
         {
             // Arrange.
             _wrapperAdapter
-                .Setup(mock => mock.ReadConfig(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
-                .Returns(new ReadConfigData
+                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Returns(new SdkMetadata
                 {
-                    SdkMachineIP = "ip-test",
-                    SdkMachineName = "name-test",
-                    SdkVersion = "version-test",
+                    MachineIP = "ip-test",
+                    MachineName = "name-test",
+                    Version = "version-test",
                 });
 
             var config = new ConfigurationOptions
@@ -232,12 +232,12 @@ namespace Splitio_Tests.Unit_Tests.Shared
         {
             // Arrange.
             _wrapperAdapter
-                .Setup(mock => mock.ReadConfig(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
-                .Returns(new ReadConfigData
+                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Returns(new SdkMetadata
                 {
-                    SdkMachineIP = "ip-test",
-                    SdkMachineName = "name-test",
-                    SdkVersion = "version-test",
+                    MachineIP = "ip-test",
+                    MachineName = "name-test",
+                    Version = "version-test",
                 });
 
             var config = new ConfigurationOptions();
@@ -254,12 +254,12 @@ namespace Splitio_Tests.Unit_Tests.Shared
         {
             // Arrange.
             _wrapperAdapter
-                .Setup(mock => mock.ReadConfig(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
-                .Returns(new ReadConfigData
+                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Returns(new SdkMetadata
                 {
-                    SdkMachineIP = "ip-test",
-                    SdkMachineName = "name-test",
-                    SdkVersion = "version-test",
+                    MachineIP = "ip-test",
+                    MachineName = "name-test",
+                    Version = "version-test",
                 });
 
             var config = new ConfigurationOptions
@@ -279,12 +279,12 @@ namespace Splitio_Tests.Unit_Tests.Shared
         {
             // Arrange.
             _wrapperAdapter
-                .Setup(mock => mock.ReadConfig(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
-                .Returns(new ReadConfigData
+                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Returns(new SdkMetadata
                 {
-                    SdkMachineIP = "ip-test",
-                    SdkMachineName = "name-test",
-                    SdkVersion = "version-test",
+                    MachineIP = "ip-test",
+                    MachineName = "name-test",
+                    Version = "version-test",
                 });
 
             var config = new ConfigurationOptions

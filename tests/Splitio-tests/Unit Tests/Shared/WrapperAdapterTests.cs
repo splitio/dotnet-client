@@ -23,12 +23,12 @@ namespace Splitio_Tests.Unit_Tests.Shared
         public void ReadConfigReturnsMachineName()
         {
             // Act.
-            var result = _adapter.ReadConfig(new ConfigurationOptions(), _log.Object);
+            var result = _adapter.BuildSdkMetadata(new ConfigurationOptions(), _log.Object);
 
             // Assert.
-            Assert.IsFalse(string.IsNullOrEmpty(result.SdkMachineName));
-            Assert.AreNotEqual(Splitio.Constants.Gral.NA, result.SdkMachineName);
-            Assert.AreNotEqual(Splitio.Constants.Gral.Unknown, result.SdkMachineName);
+            Assert.IsFalse(string.IsNullOrEmpty(result.MachineName));
+            Assert.AreNotEqual(Splitio.Constants.Gral.NA, result.MachineName);
+            Assert.AreNotEqual(Splitio.Constants.Gral.Unknown, result.MachineName);
         }
 
         [TestMethod]
@@ -41,10 +41,10 @@ namespace Splitio_Tests.Unit_Tests.Shared
             };
 
             // Act.
-            var result = _adapter.ReadConfig(config, _log.Object);
+            var result = _adapter.BuildSdkMetadata(config, _log.Object);
 
             // Assert.
-            Assert.IsTrue(string.IsNullOrEmpty(result.SdkMachineName));
+            Assert.AreEqual(Splitio.Constants.Gral.Unknown, result.MachineName);
         }
 
         [TestMethod]
@@ -61,26 +61,10 @@ namespace Splitio_Tests.Unit_Tests.Shared
             };
 
             // Act.
-            var result = _adapter.ReadConfig(config, _log.Object);
+            var result = _adapter.BuildSdkMetadata(config, _log.Object);
 
             // Assert.
-            Assert.AreEqual(Splitio.Constants.Gral.NA, result.SdkMachineName);
-        }
-
-        [TestMethod]
-        public void ReadConfigWithNonASCIICharactesReturnsUnknown()
-        {
-            // Arrange.
-            var config = new ConfigurationOptions
-            {
-                SdkMachineName = "TEST-志"
-            };
-
-            // Act.
-            var result = _adapter.ReadConfig(config, _log.Object);
-
-            // Assert.
-            Assert.AreEqual(Splitio.Constants.Gral.Unknown, result.SdkMachineName);
+            Assert.AreEqual(Splitio.Constants.Gral.NA, result.MachineName);
         }
     }
 }
