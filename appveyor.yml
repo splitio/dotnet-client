@@ -24,7 +24,9 @@ build_script:
  - dotnet build -c Release
  - Redis-64\tools\redis-server.exe --service-start
  - dotnet test .\tests\Splitio-tests\Splitio-tests.csproj -c Release -f net8.0 --no-build --collect "Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
- - SonarScanner.MSBuild.exe end /d:sonar.login=%SONAR_LOGIN%
+ - dotnet sonarscanner begin /k:"dotnet-client" /d:sonar.login="%SONAR_LOGIN%" /d:sonar.host.url=https://sonarqube.split-internal.com /d:sonar.cs.opencover.reportsPaths="**\TestResults\*\*.xml" /d:sonar.links.scm="https://github.com/splitio/dotnet-client" /d:sonar.links.ci="https://ci.appveyor.com/project/SplitDevOps/dotnet-client" /d:sonar.ws.timeout="300"
+ - dotnet build
+ - dotnet sonarscanner end
 
 test: on
 
