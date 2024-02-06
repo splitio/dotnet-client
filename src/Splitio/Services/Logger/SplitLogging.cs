@@ -100,7 +100,7 @@ namespace Splitio.Services.Logger
         private void WriteLog(Level level, string message, Exception exception = null)
         {
             var sb = new StringBuilder();
-            sb.AppendLine(DateTime.Now.ToString()).Append(" [").Append(level).Append("] ").Append(message).Append(exception);
+            sb.AppendLine(DateTime.Now.ToString()).Append(" [").Append(level).Append("] ").Append(message).Append(". ").Append(exception);
 
             _textWriter.WriteLine(sb.ToString());
         }
