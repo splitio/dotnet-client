@@ -280,7 +280,7 @@ namespace Splitio.Services.Client.Classes
                 { Constants.Http.SplitSDKImpressionsMode, _config.ImpressionsMode.ToString() }
             };
 
-            if (!string.IsNullOrEmpty(_config.SdkMachineName) && !_config.SdkMachineName.Equals(Constants.Gral.Unknown))
+            if (!_config.SdkMachineName.Equals(Constants.Gral.Unknown))
             {
                 headers.Add(Constants.Http.SplitSDKMachineName, _config.SdkMachineName);
             }
