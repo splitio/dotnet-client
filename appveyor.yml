@@ -23,7 +23,7 @@ build_script:
  - sonar-scanner.bat
  - dotnet build -c Release
  - Redis-64\tools\redis-server.exe --service-start
- - dotnet test .\tests\Splitio-tests\Splitio-tests.csproj -c Release -f net472 --no-build --collect:"XPlat Code Coverage;Format=opencover"
+ - dotnet test -c Release -f net8.0 --no-build --collect:"XPlat Code Coverage;Format=opencover"
  - SonarScanner.MSBuild.exe end /d:sonar.login=%SONAR_LOGIN%
 
 test: on
