@@ -1,6 +1,6 @@
 CHANGES
 
-7.8.1 (Feb x, 2024)
+7.8.1 (Feb 7, 2024)
 - Updated StackExchange.Redis dependecy to 2.6.122 fixing vulnerabilities. Issue ref: https://github.com/splitio/dotnet-client/issues/211.
 - Fixed initialization fail if machine name contains non-ASCII characters. Issue ref: https://github.com/splitio/dotnet-client/issues/185.
 
