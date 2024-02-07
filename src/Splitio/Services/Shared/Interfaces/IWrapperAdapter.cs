@@ -8,7 +8,7 @@ namespace Splitio.Services.Shared.Interfaces
 {
     public interface IWrapperAdapter
     {
-        ReadConfigData ReadConfig(ConfigurationOptions config, ISplitLogger log);
+        SdkMetadata BuildSdkMetadata(ConfigurationOptions config, ISplitLogger log);
         Task<Task> WhenAnyAsync(params Task[] tasks);
         ISplitLogger GetLogger(string type);
         ISplitLogger GetLogger(Type type);

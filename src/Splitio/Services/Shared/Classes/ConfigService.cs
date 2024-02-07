@@ -2,6 +2,7 @@
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Localhost;
 using Splitio.Services.Logger;
@@ -17,12 +18,15 @@ namespace Splitio.Services.Shared.Classes
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(ConfigService));
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly IFlagSetsValidator _flagSetsValidator;
+        private readonly ISdkMetadataValidator _sdkMetadataValidator;
 
         public ConfigService(IWrapperAdapter wrapperAdapter,
-            IFlagSetsValidator flagSetsValidator)
+            IFlagSetsValidator flagSetsValidator,
+            SdkMetadataValidator sdkMetadataValidator)
         {
             _wrapperAdapter = wrapperAdapter;
             _flagSetsValidator = flagSetsValidator;
+            _sdkMetadataValidator = sdkMetadataValidator;
         }
 
         #region Public Methods
@@ -133,14 +137,14 @@ namespace Splitio.Services.Shared.Classes
         #region Private Methods
         private BaseConfig ReadBaseConfig(ConfigurationOptions config, ConfigTypes type)
         {
-            var data = _wrapperAdapter.ReadConfig(config, _log);
+            var metadata = _wrapperAdapter.BuildSdkMetadata(config, _log);
             var flagSetsResult = FlagSetsValidations(config.FlagSetsFilter, type);
 
             return new BaseConfig
             {
-                SdkVersion = data.SdkVersion,
-                SdkMachineName = data.SdkMachineName,
-                SdkMachineIP = data.SdkMachineIP,
+                SdkVersion = metadata.Version,
+                SdkMachineName = _sdkMetadataValidator.MachineNameValidation("SDK Config", metadata.MachineName),
+                SdkMachineIP = metadata.MachineIP,
                 LabelsEnabled = config.LabelsEnabled ?? true,
                 BfExpectedElements = 10000000,
                 BfErrorRate = 0.01,

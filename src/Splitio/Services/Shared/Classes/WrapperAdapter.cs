@@ -38,20 +38,20 @@ namespace Splitio.Services.Shared.Classes
             return _instance;
         }
 
-        public ReadConfigData ReadConfig(ConfigurationOptions config, ISplitLogger log)
+        public SdkMetadata BuildSdkMetadata(ConfigurationOptions config, ISplitLogger log)
         {
-            var data = new ReadConfigData();
+            var metadata = new SdkMetadata();
             var ipAddressesEnabled = config.IPAddressesEnabled ?? true;
 
 #if NET_LATEST
-            data.SdkVersion = ".NET_CORE-" + SplitSdkVersion();
+            metadata.Version = ".NET_CORE-" + SplitSdkVersion();
 #else
-            data.SdkVersion = ".NET-" + SplitSdkVersion();
+            metadata.Version = ".NET-" + SplitSdkVersion();
 #endif
-            data.SdkMachineName = GetSdkMachineName(config, ipAddressesEnabled, log);
-            data.SdkMachineIP = GetSdkMachineIP(config, ipAddressesEnabled, log);
+            metadata.MachineName = GetSdkMachineName(config, ipAddressesEnabled, log);
+            metadata.MachineIP = GetSdkMachineIP(config, ipAddressesEnabled, log);
 
-            return data;
+            return metadata;
         }
 
         public Task<Task> WhenAnyAsync(params Task[] tasks)
@@ -108,26 +108,25 @@ namespace Splitio.Services.Shared.Classes
         }
 
         #region Private Methods
-        private string GetSdkMachineName(ConfigurationOptions config, bool ipAddressesEnabled, ISplitLogger log)
+        private static string GetSdkMachineName(ConfigurationOptions config, bool ipAddressesEnabled, ISplitLogger log)
         {
-            if (ipAddressesEnabled)
+            try
             {
-                try
+                if (ipAddressesEnabled)
                 {
                     return config.SdkMachineName ?? Environment.MachineName;
                 }
-                catch (Exception e)
+                else if (config.CacheAdapterConfig?.Type == AdapterType.Redis)
                 {
-                    log.Warn("Exception retrieving machine name.", e);
-                    return Constants.Gral.Unknown;
+                    return Constants.Gral.NA;
                 }
             }
-            else if(config.CacheAdapterConfig?.Type == AdapterType.Redis)
+            catch (Exception e)
             {
-                return Constants.Gral.NA;
+                log.Warn("Exception retrieving machine name.", e);
             }
 
-            return string.Empty;
+            return Constants.Gral.Unknown;
         }
 
         private static string GetSdkMachineIP(ConfigurationOptions config, bool ipAddressesEnabled, ISplitLogger log)

@@ -4,7 +4,7 @@ image:
 nuget:
   account_feed: true
 
-version: 7.8.0
+version: 7.8.1
 dotnet_csproj:
   patch: true
   file: '**\*.csproj'
@@ -21,20 +21,18 @@ before_build:
 
 build_script:
  - sonar-scanner.bat
- - dotnet build --configuration Release
- - SonarScanner.MSBuild.exe end /d:sonar.login=%SONAR_LOGIN%
-
-after_build:
+ - dotnet build -c Release
  - Redis-64\tools\redis-server.exe --service-start
+ - dotnet test .\tests\Splitio-tests\Splitio-tests.csproj -c Release -f net8.0 --no-build --collect:"XPlat Code Coverage;Format=opencover"
+ - SonarScanner.MSBuild.exe end /d:sonar.login=%SONAR_LOGIN%
 
 test: on
 
 after_test:
- - dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj -c Release -f net8.0
- - dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -c Release -f net8.0
- - dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -c Release -f net8.0
- - dotnet test .\tests\Splitio-tests\Splitio-tests.csproj -c Release -f net8.0
- - dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net8.0
+ - dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj -c Release -f net8.0 --no-build
+ - dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -c Release -f net8.0 --no-build
+ - dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -c Release -f net8.0 --no-build
+ - dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net8.0 --no-build
  - dotnet pack .\src\Splitio --configuration Release
  - dotnet pack .\Splitio.Redis --configuration Release
 
