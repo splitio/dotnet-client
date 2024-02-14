@@ -11,10 +11,10 @@ namespace Splitio.Services.Parsing.Classes
         private readonly string _split;
         private readonly List<string> _treatments;
 
-        public DependencyMatcher(string split, List<string> treatments)
+        public DependencyMatcher(DependencyData dependencyData)
         {
-            _split = split;
-            _treatments = treatments;
+            _split = dependencyData.split;
+            _treatments = dependencyData.treatments;
         }
 
         public override bool Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)

@@ -10,11 +10,11 @@ namespace Splitio.Services.Parsing
     {
         private readonly HashSet<string> _itemsToCompare = new HashSet<string>();
 
-        public ContainsStringMatcher(List<string> compareTo)
+        public ContainsStringMatcher(WhitelistData whitelistData)
         {
-            if (compareTo != null)
+            if (whitelistData.whitelist != null)
             {
-                _itemsToCompare.UnionWith(compareTo);
+                _itemsToCompare.UnionWith(whitelistData.whitelist);
             }
         }
 

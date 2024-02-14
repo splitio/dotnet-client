@@ -8,12 +8,11 @@ namespace Splitio.Services.Parsing
 {
     public class BetweenMatcher : CompareMatcher
     {
-
-        public BetweenMatcher(DataTypeEnum? dataType, long start, long end)
+        public BetweenMatcher(BetweenData betweenData)
         {
-            _dataType = dataType;
-            _start = start;
-            _end = end;
+            _dataType = betweenData.dataType;
+            _start = betweenData.start;
+            _end = betweenData.end;
         }
 
         public override bool Match(long key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)

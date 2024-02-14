@@ -3,8 +3,6 @@ using Splitio.Domain;
 using Splitio.Services.Parsing;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Matchers
@@ -17,7 +15,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new EqualToSetMatcher(toCompare);
+            var matcher = new EqualToSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var keys = new List<string> { "test1", "test2" };
@@ -33,7 +31,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new EqualToSetMatcher(toCompare);
+            var matcher = new EqualToSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var keys = new List<string>
@@ -54,7 +52,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new EqualToSetMatcher(toCompare);
+            var matcher = new EqualToSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var keys = new List<string>
@@ -74,7 +72,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new EqualToSetMatcher(toCompare);
+            var matcher = new EqualToSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var keys = new List<string>
@@ -94,7 +92,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string>();
-            var matcher = new EqualToSetMatcher(toCompare);
+            var matcher = new EqualToSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var keys = new List<string>
@@ -114,7 +112,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new EqualToSetMatcher(toCompare);
+            var matcher = new EqualToSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             List<string> key = null;
@@ -129,7 +127,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new EqualToSetMatcher(toCompare);
+            var matcher = new EqualToSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             List<string> key = new List<string>();
@@ -144,7 +142,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new EqualToSetMatcher(toCompare);
+            var matcher = new EqualToSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(123);
@@ -158,7 +156,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new EqualToSetMatcher(toCompare);
+            var matcher = new EqualToSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(DateTime.UtcNow);
@@ -172,7 +170,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new EqualToSetMatcher(toCompare);
+            var matcher = new EqualToSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(new Key("test", "test"));
@@ -186,7 +184,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new EqualToSetMatcher(toCompare);
+            var matcher = new EqualToSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync("test");
@@ -200,7 +198,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new EqualToSetMatcher(toCompare);
+            var matcher = new EqualToSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(true);

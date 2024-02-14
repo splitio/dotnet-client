@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Evaluator;
+﻿using Splitio.Domain;
+using Splitio.Services.Evaluator;
 using Splitio.Services.Parsing.Classes;
 using System.Collections.Generic;
 
@@ -8,11 +9,11 @@ namespace Splitio.Services.Parsing
     {
         private readonly HashSet<string> _itemsToCompare = new HashSet<string>();
 
-        public EqualToSetMatcher(List<string> compareTo)
+        public EqualToSetMatcher(WhitelistData whitelistData)
         {
-            if (compareTo != null)
+            if (whitelistData.whitelist != null)
             {
-                _itemsToCompare.UnionWith(compareTo);
+                _itemsToCompare.UnionWith(whitelistData.whitelist);
             }
         }
 

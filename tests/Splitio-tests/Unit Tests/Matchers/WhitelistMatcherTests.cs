@@ -18,7 +18,7 @@ namespace Splitio_Tests.Unit_Tests
                 "test1",
                 "test2"
             };
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = matcher.Match(new Key("test2", "test2"));
@@ -36,7 +36,7 @@ namespace Splitio_Tests.Unit_Tests
                 "test1",
                 "test2"
             };
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = matcher.Match(new Key("test3", "test3"));
@@ -50,7 +50,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             var keys = new List<string>();
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = matcher.Match(new Key("test2", "test2"));
@@ -64,7 +64,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             var keys = new List<string>();
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = matcher.Match(123);
@@ -78,7 +78,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             var keys = new List<string>();
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = matcher.Match(DateTime.UtcNow);
@@ -96,7 +96,7 @@ namespace Splitio_Tests.Unit_Tests
                 "test1",
                 "test2"
             };
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = matcher.Match("test2");
@@ -110,7 +110,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             var keys = new List<string> { "test1", "test2" };
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = matcher.Match("test3");
@@ -124,7 +124,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             var keys = new List<string>();
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = matcher.Match("test2");
@@ -138,7 +138,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             var keys = new List<string>();
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = matcher.Match(true);

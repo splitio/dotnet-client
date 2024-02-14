@@ -3,8 +3,6 @@ using Splitio.Domain;
 using Splitio.Services.Parsing;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Matchers
@@ -21,7 +19,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = await matcher.MatchAsync(new Key("test2", "test2"));
@@ -39,7 +37,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = await matcher.MatchAsync(new Key("test3", "test3"));
@@ -53,7 +51,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var keys = new List<string>();
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = await matcher.MatchAsync(new Key("test2", "test2"));
@@ -67,7 +65,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var keys = new List<string>();
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = await matcher.MatchAsync(123);
@@ -81,7 +79,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var keys = new List<string>();
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = await matcher.MatchAsync(DateTime.UtcNow);
@@ -99,7 +97,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = await matcher.MatchAsync("test2");
@@ -113,7 +111,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var keys = new List<string> { "test1", "test2" };
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = await matcher.MatchAsync("test3");
@@ -127,7 +125,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var keys = new List<string>();
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = await matcher.MatchAsync("test2");
@@ -141,7 +139,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var keys = new List<string>();
-            var matcher = new WhitelistMatcher(keys);
+            var matcher = new WhitelistMatcher(new WhitelistData { whitelist = keys });
 
             //Act
             var result = await matcher.MatchAsync(true);

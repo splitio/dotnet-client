@@ -9,9 +9,9 @@ namespace Splitio.Services.Parsing.Classes
     {
         private readonly Regex _regex;
 
-        public MatchesStringMatcher(string pattern)
+        public MatchesStringMatcher(string data)
         {
-            _regex = new Regex(pattern);
+            _regex = new Regex(data);
         }
 
         public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)

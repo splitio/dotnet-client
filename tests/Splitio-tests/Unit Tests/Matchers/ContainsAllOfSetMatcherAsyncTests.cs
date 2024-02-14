@@ -19,7 +19,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAllOfSetMatcher(toCompare);
+            var matcher = new ContainsAllOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var keys = new List<string>
@@ -44,7 +44,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAllOfSetMatcher(toCompare);
+            var matcher = new ContainsAllOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var keys = new List<string>
@@ -68,7 +68,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAllOfSetMatcher(toCompare);
+            var matcher = new ContainsAllOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var keys = new List<string>
@@ -88,7 +88,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string>();
-            var matcher = new ContainsAllOfSetMatcher(toCompare);
+            var matcher = new ContainsAllOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var keys = new List<string>
@@ -112,7 +112,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAllOfSetMatcher(toCompare);
+            var matcher = new ContainsAllOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             List<string> key = null;
@@ -131,7 +131,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAllOfSetMatcher(toCompare);
+            var matcher = new ContainsAllOfSetMatcher(new WhitelistData { whitelist = toCompare }   );
 
             //Act
             var key = new List<string>();
@@ -150,7 +150,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAllOfSetMatcher(toCompare);
+            var matcher = new ContainsAllOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(123);
@@ -168,7 +168,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAllOfSetMatcher(toCompare);
+            var matcher = new ContainsAllOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(DateTime.UtcNow);
@@ -186,7 +186,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAllOfSetMatcher(toCompare);
+            var matcher = new ContainsAllOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(new Key("test", "test"));
@@ -204,7 +204,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAllOfSetMatcher(toCompare);
+            var matcher = new ContainsAllOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync("test");
@@ -222,7 +222,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAllOfSetMatcher(toCompare);
+            var matcher = new ContainsAllOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(true);

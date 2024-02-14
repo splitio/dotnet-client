@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
-using System;
-using System.Threading.Tasks;
-using Splitio.Services.Parsing;
 using Splitio.Domain;
+using Splitio.Services.Parsing;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Matchers
 {
@@ -19,7 +19,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAnyOfSetMatcher(toCompare);
+            var matcher = new ContainsAnyOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var keys = new List<string>
@@ -44,7 +44,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAnyOfSetMatcher(toCompare);
+            var matcher = new ContainsAnyOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var keys = new List<string>
@@ -68,7 +68,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test0",
                 "test2"
             };
-            var matcher = new ContainsAnyOfSetMatcher(toCompare);
+            var matcher = new ContainsAnyOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var keys = new List<string>
@@ -88,7 +88,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string>();
-            var matcher = new ContainsAnyOfSetMatcher(toCompare);
+            var matcher = new ContainsAnyOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var keys = new List<string>
@@ -112,7 +112,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAnyOfSetMatcher(toCompare);
+            var matcher = new ContainsAnyOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             List<string> key = null;
@@ -131,7 +131,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAnyOfSetMatcher(toCompare);
+            var matcher = new ContainsAnyOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             List<string> key = new List<string>();
@@ -150,7 +150,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAnyOfSetMatcher(toCompare);
+            var matcher = new ContainsAnyOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(123);
@@ -168,7 +168,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAnyOfSetMatcher(toCompare);
+            var matcher = new ContainsAnyOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(DateTime.UtcNow);
@@ -186,7 +186,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAnyOfSetMatcher(toCompare);
+            var matcher = new ContainsAnyOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(new Key("test", "test"));
@@ -204,7 +204,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAnyOfSetMatcher(toCompare);
+            var matcher = new ContainsAnyOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync("test");
@@ -222,7 +222,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new ContainsAnyOfSetMatcher(toCompare);
+            var matcher = new ContainsAnyOfSetMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(true);

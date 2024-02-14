@@ -105,39 +105,41 @@ namespace Splitio.Services.Parsing
                     switch (result)
                     {
                         case MatcherTypeEnum.ALL_KEYS:
-                            matcher = GetAllKeysMatcher(); break;
+                            matcher = new AllKeysMatcher(); break;
                         case MatcherTypeEnum.BETWEEN:
-                            matcher = GetBetweenMatcher(matcherDefinition); break;
+                            matcher = new BetweenMatcher(matcherDefinition.betweenMatcherData); break;
                         case MatcherTypeEnum.EQUAL_TO:
-                            matcher = GetEqualToMatcher(matcherDefinition); break;
+                            matcher = new EqualToMatcher(matcherDefinition.unaryNumericMatcherData); break;
                         case MatcherTypeEnum.GREATER_THAN_OR_EQUAL_TO:
-                            matcher = GetGreaterThanOrEqualToMatcher(matcherDefinition); break;
+                            matcher = new GreaterOrEqualToMatcher(matcherDefinition.unaryNumericMatcherData); break;
                         case MatcherTypeEnum.IN_SEGMENT:
                             matcher = GetInSegmentMatcher(matcherDefinition, parsedSplit); break;
                         case MatcherTypeEnum.LESS_THAN_OR_EQUAL_TO:
-                            matcher = GetLessThanOrEqualToMatcher(matcherDefinition); break;
+                            matcher = new LessOrEqualToMatcher(matcherDefinition.unaryNumericMatcherData); break;
                         case MatcherTypeEnum.WHITELIST:
-                            matcher = GetWhitelistMatcher(matcherDefinition); break;
+                            matcher = new WhitelistMatcher(matcherDefinition.whitelistMatcherData); break;
                         case MatcherTypeEnum.EQUAL_TO_SET:
-                            matcher = GetEqualToSetMatcher(matcherDefinition); break;
+                            matcher = new EqualToSetMatcher(matcherDefinition.whitelistMatcherData); break;
                         case MatcherTypeEnum.CONTAINS_ANY_OF_SET:
-                            matcher = GetContainsAnyOfSetMatcher(matcherDefinition); break;
+                            matcher = new ContainsAnyOfSetMatcher(matcherDefinition.whitelistMatcherData); break;
                         case MatcherTypeEnum.CONTAINS_ALL_OF_SET:
-                            matcher = GetContainsAllOfSetMatcher(matcherDefinition); break;
+                            matcher = new ContainsAllOfSetMatcher(matcherDefinition.whitelistMatcherData); break;
                         case MatcherTypeEnum.PART_OF_SET:
-                            matcher = GetPartOfSetMatcher(matcherDefinition); break;
+                            matcher = new PartOfSetMatcher(matcherDefinition.whitelistMatcherData); break;
                         case MatcherTypeEnum.STARTS_WITH:
-                            matcher = GetStartsWithMatcher(matcherDefinition); break;
+                            matcher = new StartsWithMatcher(matcherDefinition.whitelistMatcherData); break;
                         case MatcherTypeEnum.ENDS_WITH:
-                            matcher = GetEndsWithMatcher(matcherDefinition); break;
+                            matcher = new EndsWithMatcher(matcherDefinition.whitelistMatcherData); break;
                         case MatcherTypeEnum.CONTAINS_STRING:
-                            matcher = GetContainsStringMatcher(matcherDefinition); break;
+                            matcher = new ContainsStringMatcher(matcherDefinition.whitelistMatcherData); break;
                         case MatcherTypeEnum.IN_SPLIT_TREATMENT:
-                            matcher = GetDependencyMatcher(matcherDefinition); break;
+                            matcher = new DependencyMatcher(matcherDefinition.dependencyMatcherData); break;
                         case MatcherTypeEnum.EQUAL_TO_BOOLEAN:
-                            matcher = GetEqualToBooleanMatcher(matcherDefinition); break;
+                            matcher = new EqualToBooleanMatcher(matcherDefinition.booleanMatcherData); break;
                         case MatcherTypeEnum.MATCHES_STRING:
-                            matcher = GetMatchesStringMatcher(matcherDefinition); break;
+                            matcher = new MatchesStringMatcher(matcherDefinition.stringMatcherData); break;
+                        case MatcherTypeEnum.SEMVER:
+                            break;
                     }
                 }
             }
@@ -163,102 +165,6 @@ namespace Splitio.Services.Parsing
             }
 
             return attributeMatcher;
-        }
-
-        private static IMatcher GetMatchesStringMatcher(MatcherDefinition matcherDefinition)
-        {
-            var matcherData = matcherDefinition.stringMatcherData;
-            return new MatchesStringMatcher(matcherData);
-        }
-
-        private static IMatcher GetEqualToBooleanMatcher(MatcherDefinition matcherDefinition)
-        {
-            var matcherData = matcherDefinition.booleanMatcherData;
-            return new EqualToBooleanMatcher(matcherData.Value);
-        }
-
-
-        private static IMatcher GetDependencyMatcher(MatcherDefinition matcherDefinition)
-        {
-            var matcherData = matcherDefinition.dependencyMatcherData;
-            return new DependencyMatcher(matcherData.split, matcherData.treatments);
-        }
-
-        private static IMatcher GetBetweenMatcher(MatcherDefinition matcherDefinition)
-        {
-            var matcherData = matcherDefinition.betweenMatcherData;
-            return new BetweenMatcher(matcherData.dataType, matcherData.start, matcherData.end);
-        }
-
-        private static IMatcher GetLessThanOrEqualToMatcher(MatcherDefinition matcherDefinition)
-        {
-            var matcherData = matcherDefinition.unaryNumericMatcherData;
-            return new LessOrEqualToMatcher(matcherData.dataType, matcherData.value);
-        }
-
-        private static IMatcher GetGreaterThanOrEqualToMatcher(MatcherDefinition matcherDefinition)
-        {
-            var matcherData = matcherDefinition.unaryNumericMatcherData;
-            return new GreaterOrEqualToMatcher(matcherData.dataType, matcherData.value);
-        }
-
-        private static IMatcher GetEqualToMatcher(MatcherDefinition matcherDefinition)
-        {
-            var matcherData = matcherDefinition.unaryNumericMatcherData;
-            return new EqualToMatcher(matcherData.dataType, matcherData.value);
-        }
-
-        private static IMatcher GetWhitelistMatcher(MatcherDefinition matcherDefinition)
-        {
-            var matcherData = matcherDefinition.whitelistMatcherData;
-            return new WhitelistMatcher(matcherData.whitelist);
-        }
-
-        private static IMatcher GetEqualToSetMatcher(MatcherDefinition matcherDefinition)
-        {
-            var matcherData = matcherDefinition.whitelistMatcherData;
-            return new EqualToSetMatcher(matcherData.whitelist);
-        }
-
-        private static IMatcher GetContainsAnyOfSetMatcher(MatcherDefinition matcherDefinition)
-        {
-            var matcherData = matcherDefinition.whitelistMatcherData;
-            return new ContainsAnyOfSetMatcher(matcherData.whitelist);
-        }
-
-        private static IMatcher GetContainsStringMatcher(MatcherDefinition matcherDefinition)
-        {
-            var matcherData = matcherDefinition.whitelistMatcherData;
-            return new ContainsStringMatcher(matcherData.whitelist);
-        }
-
-        private static IMatcher GetEndsWithMatcher(MatcherDefinition matcherDefinition)
-        {
-            var matcherData = matcherDefinition.whitelistMatcherData;
-            return new EndsWithMatcher(matcherData.whitelist);
-        }
-
-        private static IMatcher GetStartsWithMatcher(MatcherDefinition matcherDefinition)
-        {
-            var matcherData = matcherDefinition.whitelistMatcherData;
-            return new StartsWithMatcher(matcherData.whitelist);
-        }
-
-        private static IMatcher GetPartOfSetMatcher(MatcherDefinition matcherDefinition)
-        {
-            var matcherData = matcherDefinition.whitelistMatcherData;
-            return new PartOfSetMatcher(matcherData.whitelist);
-        }
-
-        private static IMatcher GetContainsAllOfSetMatcher(MatcherDefinition matcherDefinition)
-        {
-            var matcherData = matcherDefinition.whitelistMatcherData;
-            return new ContainsAllOfSetMatcher(matcherData.whitelist);
-        }
-
-        private static IMatcher GetAllKeysMatcher()
-        {
-            return new AllKeysMatcher();
         }
 
         private static CombinerEnum ParseCombiner(string combinerEnum)

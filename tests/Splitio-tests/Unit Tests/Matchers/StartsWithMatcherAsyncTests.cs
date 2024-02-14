@@ -19,7 +19,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new StartsWithMatcher(toCompare);
+            var matcher = new StartsWithMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(new Key("test1end", "test1end"));
@@ -37,7 +37,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new StartsWithMatcher(toCompare);
+            var matcher = new StartsWithMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(new Key("test3end", "test3end"));
@@ -51,7 +51,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string>();
-            var matcher = new StartsWithMatcher(toCompare);
+            var matcher = new StartsWithMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(new Key("test1", "test1"));
@@ -69,7 +69,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new StartsWithMatcher(toCompare);
+            var matcher = new StartsWithMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             string key = null;
@@ -84,7 +84,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new StartsWithMatcher(toCompare);
+            var matcher = new StartsWithMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             string key = "";
@@ -99,7 +99,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new StartsWithMatcher(toCompare);
+            var matcher = new StartsWithMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(123);
@@ -113,7 +113,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new StartsWithMatcher(toCompare);
+            var matcher = new StartsWithMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(DateTime.UtcNow);
@@ -131,7 +131,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 "test1",
                 "test2"
             };
-            var matcher = new StartsWithMatcher(toCompare);
+            var matcher = new StartsWithMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var keys = new List<string>();
@@ -147,7 +147,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new StartsWithMatcher(toCompare);
+            var matcher = new StartsWithMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync(true);
@@ -161,7 +161,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new StartsWithMatcher(toCompare);
+            var matcher = new StartsWithMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync("test1end");
@@ -175,7 +175,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new StartsWithMatcher(toCompare);
+            var matcher = new StartsWithMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync("test3end");
@@ -189,7 +189,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string>();
-            var matcher = new StartsWithMatcher(toCompare);
+            var matcher = new StartsWithMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             var result = await matcher.MatchAsync("test1");
@@ -203,7 +203,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new StartsWithMatcher(toCompare);
+            var matcher = new StartsWithMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             string key = null;
@@ -218,7 +218,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var toCompare = new List<string> { "test1", "test2" };
-            var matcher = new StartsWithMatcher(toCompare);
+            var matcher = new StartsWithMatcher(new WhitelistData { whitelist = toCompare });
 
             //Act
             string key = "";

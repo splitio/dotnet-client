@@ -13,7 +13,12 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncNumberSuccesfully()
         {
             //Arrange
-            var matcher = new BetweenMatcher(DataTypeEnum.NUMBER, 1000001, 10540001);
+            var matcher = new BetweenMatcher(new BetweenData
+            {
+                dataType = DataTypeEnum.NUMBER,
+                start = 1000001,
+                end = 10540001
+            });
 
             //Act
             var result1 = await matcher.MatchAsync(1700000);
@@ -30,7 +35,12 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncNumberShouldReturnFalseOnInvalidNumber()
         {
             //Arrange
-            var matcher = new BetweenMatcher(DataTypeEnum.NUMBER, 1000001, 10540001);
+            var matcher = new BetweenMatcher(new BetweenData
+            {
+                dataType = DataTypeEnum.NUMBER,
+                start = 1000001,
+                end = 10540001
+            });
 
             //Act
             var result = await matcher.MatchAsync(new Key("1aaaaa0", "1aaaaa0"));
@@ -43,7 +53,12 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncDateSuccesfully()
         {
             //Arrange
-            var matcher = new BetweenMatcher(DataTypeEnum.DATETIME, 1470960000000, 1480960000000);
+            var matcher = new BetweenMatcher(new BetweenData
+            {
+                dataType = DataTypeEnum.DATETIME,
+                start = 1470960000000,
+                end = 1480960000000
+            });
 
             //Act
             var result = await matcher.MatchAsync("1470970000000".ToDateTime().Value);
@@ -60,7 +75,12 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncDateTruncateToMinutesSuccesfully()
         {
             //Arrange
-            var matcher = new BetweenMatcher(DataTypeEnum.DATETIME, 1482207323000, 1482207503000);
+            var matcher = new BetweenMatcher(new BetweenData
+            {
+                dataType = DataTypeEnum.DATETIME,
+                start = 1482207323000,
+                end = 1482207503000
+            });
 
             //Act
             var date1 = "1482207383000".ToDateTime().Value;
@@ -86,7 +106,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncDateShouldReturnFalseOnInvalidDate()
         {
             //Arrange
-            var matcher = new BetweenMatcher(DataTypeEnum.DATETIME, 1470960000000, 1480960000000);
+            var matcher = new BetweenMatcher(new BetweenData { dataType = DataTypeEnum.DATETIME, start = 1470960000000, end = 1480960000000 });
 
             //Act
             var result = await matcher.MatchAsync(new Key("1aaa0000000", "1aaa0000000"));
@@ -100,7 +120,12 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncShouldReturnFalseOnInvalidDataTypeString()
         {
             //Arrange
-            var matcher = new BetweenMatcher(DataTypeEnum.STRING, 1470960000000, 1480960000000);
+            var matcher = new BetweenMatcher(new BetweenData
+            {
+                dataType = DataTypeEnum.STRING,
+                start = 1470960000000,
+                end = 1480960000000
+            });
 
             //Act
             var result = await matcher.MatchAsync(new Key("abcd", "abcd"));
@@ -113,7 +138,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncShouldReturnFalseOnBooleanParameter()
         {
             //Arrange
-            var matcher = new BetweenMatcher(DataTypeEnum.DATETIME, 1470960000000, 1480960000000);
+            var matcher = new BetweenMatcher(new BetweenData { dataType = DataTypeEnum.DATETIME, start = 1470960000000, end = 1480960000000 });
 
             //Act
             var result = await matcher.MatchAsync(true);
@@ -126,7 +151,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncShouldReturnFalseIfNullOrEmpty()
         {
             //Arrange
-            var matcher = new BetweenMatcher(DataTypeEnum.DATETIME, 1470960000000, 1480960000000);
+            var matcher = new BetweenMatcher(new BetweenData { dataType = DataTypeEnum.DATETIME, start = 1470960000000, end = 1480960000000 });
 
             //Act
             var result = await matcher.MatchAsync(new Key("", ""));
@@ -141,7 +166,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncNumberShouldReturnFalseOnInvalidNumberWithStringKey()
         {
             //Arrange
-            var matcher = new BetweenMatcher(DataTypeEnum.NUMBER, 1000001, 10540001);
+            var matcher = new BetweenMatcher(new BetweenData { dataType = DataTypeEnum.NUMBER, start = 1000001, end = 10540001 });
 
             //Act
             var result = await matcher.MatchAsync("1aaaaa0");
@@ -154,7 +179,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncDateShouldReturnFalseOnInvalidDateWithStringKey()
         {
             //Arrange
-            var matcher = new BetweenMatcher(DataTypeEnum.DATETIME, 1470960000000, 1480960000000);
+            var matcher = new BetweenMatcher(new BetweenData { dataType = DataTypeEnum.DATETIME, start = 1470960000000, end = 1480960000000 });
 
             //Act
             var result = await matcher.MatchAsync("1aaa0000000");
@@ -168,7 +193,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncShouldReturnFalseOnInvalidDataTypeWithStringKey()
         {
             //Arrange
-            var matcher = new BetweenMatcher(DataTypeEnum.STRING, 1470960000000, 1480960000000);
+            var matcher = new BetweenMatcher(new BetweenData { dataType = DataTypeEnum.STRING, start = 1470960000000, end = 1480960000000 });
 
             //Act
             var result = await matcher.MatchAsync("abcd");
@@ -181,7 +206,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncShouldReturnFalseIfNullOrEmptyWithStringKey()
         {
             //Arrange
-            var matcher = new BetweenMatcher(DataTypeEnum.DATETIME, 1470960000000, 1480960000000);
+            var matcher = new BetweenMatcher(new BetweenData { dataType = DataTypeEnum.DATETIME, start = 1470960000000, end = 1480960000000 });
 
             //Act
             var result = await matcher.MatchAsync("");

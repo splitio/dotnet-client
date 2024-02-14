@@ -8,10 +8,10 @@ namespace Splitio.Services.Parsing
 {
     public class GreaterOrEqualToMatcher : CompareMatcher
     {
-        public GreaterOrEqualToMatcher(DataTypeEnum? dataType, long value)
+        public GreaterOrEqualToMatcher(UnaryNumericData unaryNumericData)
         {
-            _dataType = dataType;
-            _value = value;
+            _dataType = unaryNumericData.dataType;
+            _value = unaryNumericData.value;
         }
 
         public override bool Match(long key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)

@@ -7,9 +7,9 @@ namespace Splitio.Services.Parsing.Classes
     {
         private readonly bool _value;
 
-        public EqualToBooleanMatcher(bool value)
+        public EqualToBooleanMatcher(bool? data)
         {
-            _value = value;
+            _value = data.Value;
         }
 
         public override bool Match(bool key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)

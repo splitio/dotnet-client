@@ -13,7 +13,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncNumberSuccesfully()
         {
             //Arrange
-            var matcher = new EqualToMatcher(DataTypeEnum.NUMBER, 1000001);
+            var matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.NUMBER, value = 1000001 });
 
             //Act
             var result1 = await matcher.MatchAsync(1000001);
@@ -28,7 +28,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncNumberShouldReturnFalseOnKey()
         {
             //Arrange
-            var matcher = new EqualToMatcher(DataTypeEnum.NUMBER, 1000001);
+            var matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.NUMBER, value = 1000001 });
 
             //Act
             var result = await matcher.MatchAsync(new Key("1aaaaa0", "1aaaaa0"));
@@ -41,7 +41,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncDateSuccesfully()
         {
             //Arrange
-            var matcher = new EqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
+            var matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.DATETIME, value = 1470960000000 });
 
             //Act
             var result = await matcher.MatchAsync("1470960000000".ToDateTime().Value);
@@ -64,7 +64,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             date1 = date1.AddSeconds(14);
             date1 = date1.AddMilliseconds(324);
 
-            var matcher = new EqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
+            var matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.DATETIME, value = 1470960000000 });
 
             //Act
             var result = await matcher.MatchAsync(date1);
@@ -79,7 +79,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncDateShouldReturnFalseOnInvalidDateKey()
         {
             //Arrange
-            var matcher = new EqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
+            var matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.DATETIME, value = 1470960000000 });
 
             //Act
             var result = await matcher.MatchAsync(new Key("1aaa0000000", "1aaa0000000"));
@@ -92,7 +92,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncShouldReturnFalseOnInvalidDataTypeKey()
         {
             //Arrange
-            var matcher = new EqualToMatcher(DataTypeEnum.STRING, 1470960000000);
+            var matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.STRING, value = 1470960000000 });
 
             //Act
             var result = await matcher.MatchAsync(new Key("abcd", "abcd"));
@@ -105,7 +105,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncShouldReturnFalseIfNullOrEmptyKey()
         {
             //Arrange
-            var matcher = new EqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
+            var matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.DATETIME, value = 1470960000000 });
 
             //Act
             var result = await matcher.MatchAsync(new Key("", ""));
@@ -120,7 +120,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncNumberShouldReturnFalseOnInvalidNumber()
         {
             //Arrange
-            var matcher = new EqualToMatcher(DataTypeEnum.NUMBER, 1000001);
+            var matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.NUMBER, value = 1000001 });
 
             //Act
             var result = await matcher.MatchAsync("1aaaaa0");
@@ -133,7 +133,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncDateShouldReturnFalseOnInvalidDate()
         {
             //Arrange
-            var matcher = new EqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
+            var matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.DATETIME, value = 1470960000000 });
 
             //Act
             var result = await matcher.MatchAsync("1aaa0000000");
@@ -146,7 +146,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncShouldReturnFalseOnInvalidDataTypeString()
         {
             //Arrange
-            var matcher = new EqualToMatcher(DataTypeEnum.STRING, 1470960000000);
+            var matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.STRING, value = 1470960000000 });
 
             //Act
             var result = await matcher.MatchAsync("abcd");
@@ -159,7 +159,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncShouldReturnFalseOnBooleanParameter()
         {
             //Arrange
-            var matcher = new EqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
+            var matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.DATETIME, value = 1470960000000 });
 
             //Act
             var result = await matcher.MatchAsync(true);
@@ -172,7 +172,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchAsyncShouldReturnFalseIfNullOrEmpty()
         {
             //Arrange
-            var matcher = new EqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
+            var matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.DATETIME, value = 1470960000000 });
 
             //Act
             var result = await matcher.MatchAsync("");

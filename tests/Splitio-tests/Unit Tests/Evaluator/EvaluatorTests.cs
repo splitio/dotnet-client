@@ -202,7 +202,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                             {
                                 new AttributeMatcher
                                 {
-                                    matcher = new EndsWithMatcher(new List<string> { "@split.io" })
+                                    matcher = new EndsWithMatcher(new WhitelistData { whitelist = new List < string > { "@split.io" } })
                                 }
                             }
                         }
@@ -411,7 +411,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                             {
                                 new AttributeMatcher
                                 {
-                                    matcher = new EndsWithMatcher(new List<string> { "@split.io" })
+                                    matcher = new EndsWithMatcher(new WhitelistData { whitelist = new List < string > { "@split.io" } })
                                 }
                             }
                         }
@@ -475,7 +475,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                             {
                                 new AttributeMatcher
                                 {
-                                    matcher = new EndsWithMatcher(new List<string> { "@split.io" })
+                                    matcher = new EndsWithMatcher(new WhitelistData { whitelist = new List < string > { "@split.io" } })
                                 }
                             }
                         }
@@ -512,7 +512,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                             {
                                 new AttributeMatcher
                                 {
-                                    matcher = new EndsWithMatcher(new List<string> { "@split.io" })
+                                    matcher = new EndsWithMatcher(new WhitelistData { whitelist = new List < string > { "@split.io" } })
                                 }
                             }
                         }
@@ -536,7 +536,10 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                             {
                                 new AttributeMatcher
                                 {
-                                    matcher = new EqualToMatcher(DataTypeEnum.NUMBER, 123)
+                                    matcher = new EqualToMatcher(new UnaryNumericData
+                                    {
+                                        dataType = DataTypeEnum.NUMBER, value = 123
+                                    })
                                 }
                             }
                         }

@@ -17,7 +17,7 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new AttributeMatcher()
             {
                 attribute = "card_number",
-                matcher = new EqualToMatcher(DataTypeEnum.NUMBER, 12012),
+                matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.NUMBER, value = 12012 }),
                 negate = false
             };
 
@@ -41,7 +41,7 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new AttributeMatcher()
             {
                 attribute = "card_number",
-                matcher = new EqualToMatcher(DataTypeEnum.NUMBER, 12012),
+                matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.NUMBER, value = 12012 }),
                 negate = true
             };
 
@@ -66,7 +66,7 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new AttributeMatcher()
             {
                 attribute = "card_number",
-                matcher = new EqualToMatcher(DataTypeEnum.NUMBER, 12012),
+                matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.NUMBER, value = 12012 }),
                 negate = false
             };
 
@@ -84,7 +84,7 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new AttributeMatcher()
             {
                 attribute = null,
-                matcher = new EqualToMatcher(DataTypeEnum.NUMBER, 12012),
+                matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.NUMBER, value = 12012 }),
                 negate = false
             };
 
@@ -108,7 +108,7 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new AttributeMatcher()
             {
                 attribute = null,
-                matcher = new EqualToMatcher(DataTypeEnum.NUMBER, 12012),
+                matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.NUMBER, value = 12012 }),
                 negate = false
             };
 
@@ -132,7 +132,7 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new AttributeMatcher()
             {
                 attribute = null,
-                matcher = new EqualToMatcher(DataTypeEnum.NUMBER, 12012),
+                matcher = new EqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.NUMBER, value = 12012 }),
                 negate = false
             };
 

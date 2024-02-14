@@ -16,7 +16,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             var treatments = new List<string>() { "on" };
-            var matcher = new DependencyMatcher("test1", treatments);
+            var matcher = new DependencyMatcher(new DependencyData { split = "test1", treatments = treatments });
             var key = new Key("test", "test");
             var evaluatorMock = new Mock<IEvaluator>();
 
@@ -36,7 +36,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             var treatments = new List<string>() { "off" };
-            var matcher = new DependencyMatcher("test1", treatments);
+            var matcher = new DependencyMatcher(new DependencyData { split = "test1", treatments = treatments });
             var key = new Key("test", "test");
             var evaluatorMock = new Mock<IEvaluator>();
 
@@ -56,7 +56,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             var treatments = new List<string>();
-            var matcher = new DependencyMatcher("test1", treatments);
+            var matcher = new DependencyMatcher(new DependencyData { split = "test1", treatments = treatments });
             IEvaluator evaluator = null;
 
             //Act
@@ -71,7 +71,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             var treatments = new List<string>();
-            var matcher = new DependencyMatcher("test1", treatments);
+            var matcher = new DependencyMatcher(new DependencyData { split = "test1", treatments = treatments });
             var key = new Key("test2", "test2");
             var evaluatorMock = new Mock<IEvaluator>();
 
@@ -91,7 +91,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             var treatments = new List<string>() { "on" };
-            var matcher = new DependencyMatcher("test1", treatments);
+            var matcher = new DependencyMatcher(new DependencyData { split = "test1", treatments = treatments });
             var key = new Key("test2", "test2");
             var evaluatorMock = new Mock<IEvaluator>();
 
@@ -111,7 +111,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             var treatments = new List<string>() { "on" };
-            var matcher = new DependencyMatcher("test1", treatments);
+            var matcher = new DependencyMatcher(new DependencyData { split = "test1", treatments = treatments });
             var key = new Key("test2", "test2");
             var evaluatorMock = new Mock<IEvaluator>();
 
@@ -132,7 +132,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             var treatments = new List<string>() { "on" };
-            var matcher = new DependencyMatcher("test1", treatments);
+            var matcher = new DependencyMatcher(new DependencyData { split = "test1", treatments = treatments });
             var key = new Key("test2", "test2");
             var evaluatorMock = new Mock<IEvaluator>();
 
@@ -152,7 +152,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             var treatments = new List<string>() { "on" };
-            var matcher = new DependencyMatcher("test1", treatments);
+            var matcher = new DependencyMatcher(new DependencyData { split = "test1", treatments = treatments });
             var key = new Key("test2", "test2");
             var evaluatorMock = new Mock<IEvaluator>();
 
@@ -172,7 +172,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             var treatments = new List<string>() { "on" };
-            var matcher = new DependencyMatcher("test1", treatments);
+            var matcher = new DependencyMatcher(new DependencyData { split = "test1", treatments = treatments });
             var key = new Key("test2", "test2");
             var evaluatorMock = new Mock<IEvaluator>();
 

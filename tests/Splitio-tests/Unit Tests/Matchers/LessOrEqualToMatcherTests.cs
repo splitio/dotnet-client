@@ -12,7 +12,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchNumberSuccesfully()
         {
             //Arrange
-            var matcher = new LessOrEqualToMatcher(DataTypeEnum.NUMBER, 1000001);
+            var matcher = new LessOrEqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.NUMBER, value = 1000001 });
 
             //Act
             var result1 = matcher.Match(170000990);
@@ -29,7 +29,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchNumberShouldReturnFalseOnInvalidNumberKey()
         {
             //Arrange
-            var matcher = new LessOrEqualToMatcher(DataTypeEnum.NUMBER, 1000001);
+            var matcher = new LessOrEqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.NUMBER, value = 1000001 });
 
             //Act
             var result = matcher.Match(new Key("1aaaaa0", "1aaaaa0"));
@@ -42,7 +42,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchDateSuccesfully()
         {
             //Arrange
-            var matcher = new LessOrEqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
+            var matcher = new LessOrEqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.DATETIME, value = 1470960000000 });
 
             //Act
             var result = matcher.Match("1470970000000".ToDateTime().Value);
@@ -71,7 +71,7 @@ namespace Splitio_Tests.Unit_Tests
             date3 = date3.AddSeconds(11);
             date3 = date3.AddMilliseconds(456);
 
-            var matcher = new LessOrEqualToMatcher(DataTypeEnum.DATETIME, 1482207323000);
+            var matcher = new LessOrEqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.DATETIME, value = 1482207323000 });
 
             //Act
             var result = matcher.Match(date1);
@@ -88,7 +88,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchDateShouldReturnFalseOnInvalidDateKey()
         {
             //Arrange
-            var matcher = new LessOrEqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
+            var matcher = new LessOrEqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.DATETIME, value = 1470960000000 });
 
             //Act
             var result = matcher.Match(new Key("1aaa0000000", "1aaa0000000"));
@@ -102,7 +102,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseOnInvalidDataTypeKey()
         {
             //Arrange
-            var matcher = new LessOrEqualToMatcher(DataTypeEnum.STRING, 1470960000000);
+            var matcher = new LessOrEqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.STRING, value = 1470960000000 });
 
             //Act
             var result = matcher.Match(new Key("abcd", "abcd"));
@@ -115,7 +115,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseIfNullOrEmptyKey()
         {
             //Arrange
-            var matcher = new LessOrEqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
+            var matcher = new LessOrEqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.DATETIME, value = 1470960000000 });
 
             //Act
             var result = matcher.Match(new Key("", ""));
@@ -130,7 +130,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchNumberShouldReturnFalseOnInvalidNumber()
         {
             //Arrange
-            var matcher = new LessOrEqualToMatcher(DataTypeEnum.NUMBER, 1000001);
+            var matcher = new LessOrEqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.NUMBER, value = 1000001 });
 
             //Act
             var result = matcher.Match("1aaaaa0");
@@ -143,7 +143,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchDateShouldReturnFalseOnInvalidDate()
         {
             //Arrange
-            var matcher = new LessOrEqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
+            var matcher = new LessOrEqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.DATETIME, value = 1470960000000 });
 
             //Act
             var result = matcher.Match("1aaa0000000");
@@ -157,7 +157,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseOnInvalidDataType()
         {
             //Arrange
-            var matcher = new LessOrEqualToMatcher(DataTypeEnum.STRING, 1470960000000);
+            var matcher = new LessOrEqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.STRING, value = 1470960000000 });
 
             //Act
             var result = matcher.Match("abcd");
@@ -170,7 +170,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseOnBooleanParameter()
         {
             //Arrange
-            var matcher = new LessOrEqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
+            var matcher = new LessOrEqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.DATETIME, value = 1470960000000 });
 
             //Act
             var result = matcher.Match(true);
@@ -183,7 +183,7 @@ namespace Splitio_Tests.Unit_Tests
         public void MatchShouldReturnFalseIfNullOrEmpty()
         {
             //Arrange
-            var matcher = new LessOrEqualToMatcher(DataTypeEnum.DATETIME, 1470960000000);
+            var matcher = new LessOrEqualToMatcher(new UnaryNumericData { dataType = DataTypeEnum.DATETIME, value = 1470960000000 });
 
             //Act
             var result = matcher.Match("");

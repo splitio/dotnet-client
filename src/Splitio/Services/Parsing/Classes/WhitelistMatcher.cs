@@ -9,9 +9,9 @@ namespace Splitio.Services.Parsing
     {
         private readonly List<string> _list;
 
-        public WhitelistMatcher(List<string> list)
+        public WhitelistMatcher(WhitelistData whitelistData)
         {
-            _list = list ?? new List<string>();
+            _list = whitelistData.whitelist ?? new List<string>();
         }
         public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {

@@ -45,7 +45,10 @@ namespace Splitio.Services.Localhost
                             new AttributeMatcher
                             {
                                 negate = false,
-                                matcher = new WhitelistMatcher(keys)
+                                matcher = new WhitelistMatcher(new WhitelistData
+                                {
+                                    whitelist = keys
+                                })
                             }
                         }
                     },
