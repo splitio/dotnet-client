@@ -10,12 +10,18 @@ using System.Linq;
 
 namespace Splitio.Services.Parsing
 {
-    public abstract class SplitParser : ISplitParser
+    public class SplitParser : ISplitParser
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitParser));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitParser));
 
-        protected ISegmentCacheConsumer _segmentsCache;
+        private readonly ISegmentCacheConsumer _segmentsCache;
 
+        public SplitParser(ISegmentCacheConsumer segmentsCache)
+        {
+            _segmentsCache = segmentsCache;
+        }
+
+        #region Public Methods
         public ParsedSplit Parse(Split split)
         {
             try
@@ -51,9 +57,16 @@ namespace Splitio.Services.Parsing
                 return null;
             }
         }
+        #endregion
 
-        protected abstract IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit);
+        #region Protected Methods
+        protected virtual IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit)
+        {
+            return new UserDefinedSegmentMatcher(matcherDefinition.userDefinedSegmentMatcherData.segmentName, _segmentsCache);
+        }
+        #endregion
 
+        #region Private Methods
         private ParsedSplit ParseConditions(Split split, ParsedSplit parsedSplit)
         {
             foreach (var condition in split.conditions)
@@ -173,5 +186,6 @@ namespace Splitio.Services.Parsing
 
             return result;
         }
+        #endregion
     }
 }
