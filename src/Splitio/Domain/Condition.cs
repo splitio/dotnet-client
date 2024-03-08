@@ -2,10 +2,10 @@
 
 namespace Splitio.Domain
 {
-    public class ConditionWithLogic
+    public class Condition
     {
-        public ConditionType ConditionType { get; set; }
-        public CombiningMatcher Matcher { get; set; }
+        public string ConditionType { get; set; }
+        public MatcherGroup MatcherGroup { get; set; }
         public List<Partition> Partitions { get; set; }
         public string Label { get; set; }
     }

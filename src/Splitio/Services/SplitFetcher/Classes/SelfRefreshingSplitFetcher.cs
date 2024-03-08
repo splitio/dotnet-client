@@ -70,16 +70,16 @@ namespace Splitio.Services.SplitFetcher.Classes
                         break;
                     }
 
-                    if (changeNumber >= result.till)
+                    if (changeNumber >= result.Till)
                     {
                         success = true;
                         //There are no new split changes
                         break;
                     }
 
-                    if (result.splits != null && result.splits.Count > 0)
+                    if (result.Splits != null && result.Splits.Count > 0)
                     {
-                        var sNames = _featureFlagSyncService.UpdateFeatureFlagsFromChanges(result.splits, result.till);
+                        var sNames = _featureFlagSyncService.UpdateFeatureFlagsFromChanges(result.Splits, result.Till);
                         segmentNames.AddRange(sNames);
                     }
                 }

@@ -109,7 +109,7 @@ namespace Splitio.Services.EventSource.Workers
 
                 _telemetryRuntimeProducer.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits);
 
-                _log.Debug($"IFFU, Feature Flag updated successfully: {scn.FeatureFlag.name}");
+                _log.Debug($"IFFU, Feature Flag updated successfully: {scn.FeatureFlag.Name}");
             }
             catch (Exception ex)
             {

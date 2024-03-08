@@ -92,9 +92,9 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             var splitter = new Splitter();
-            var partitions = new List<PartitionDefinition>();
-            partitions.Add(new PartitionDefinition() { size = 10, treatment = "on" });
-            partitions.Add(new PartitionDefinition() { size = 90, treatment = "off" });
+            var partitions = new List<Partition>();
+            partitions.Add(new Partition() { Size = 10, Treatment = "on" });
+            partitions.Add(new Partition() { Size = 90, Treatment = "off" });
 
             //Act
             var result1 = splitter.GetTreatment("aUfEsdPN1twuEjff9Sl", 467569525, partitions, AlgorithmEnum.LegacyHash);

@@ -52,15 +52,15 @@ namespace Splitio.Tests.Common.Resources
 
             var splitResult = JsonConvert.DeserializeObject<SplitChangesResult>(splitsJson);
 
-            foreach (var split in splitResult.splits)
+            foreach (var split in splitResult.Splits)
             {
-                await redisAdapter.SetAsync($"{userPrefix}.SPLITIO.split.{split.name}", JsonConvert.SerializeObject(split));
+                await redisAdapter.SetAsync($"{userPrefix}.SPLITIO.split.{split.Name}", JsonConvert.SerializeObject(split));
 
                 if (split.Sets != null && split.Sets.Any())
                 {
                     foreach (var fSet in split.Sets)
                     {
-                        await redisAdapter.SAddAsync($"{userPrefix}.SPLITIO.flagSet.{fSet}", split.name);
+                        await redisAdapter.SAddAsync($"{userPrefix}.SPLITIO.flagSet.{fSet}", split.Name);
                     }
                 }
             }

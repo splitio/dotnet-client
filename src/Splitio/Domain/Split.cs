@@ -4,22 +4,22 @@ namespace Splitio.Domain
 {
     public class Split : SplitBase
     {        
-        public string status { get; set; }
-        public List<ConditionDefinition> conditions { get; set; }
-        public int? algo { get; set; }
-        public int? trafficAllocationSeed { get; set; }
+        public string Status { get; set; }
+        public List<Condition> Conditions { get; set; }
+        public int? Algo { get; set; }
+        public int? TrafficAllocationSeed { get; set; }
 
         public List<string> GetSegments()
         {
             var segments = new List<string>();
 
-            foreach (var condition in conditions)
+            foreach (var condition in Conditions)
             {
-                foreach (var matcher in condition.matcherGroup.matchers)
+                foreach (var matcher in condition.MatcherGroup.Matchers)
                 {
-                    if (matcher.userDefinedSegmentMatcherData != null)
+                    if (matcher.UserDefinedSegmentMatcherData != null)
                     {
-                        segments.Add(matcher.userDefinedSegmentMatcherData.segmentName);
+                        segments.Add(matcher.UserDefinedSegmentMatcherData.segmentName);
                     }
                 }
             }

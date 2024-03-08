@@ -191,9 +191,9 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             Assert.AreEqual(1684265694505, changeNotification.ChangeNumber);
             Assert.AreEqual(111, changeNotification.PreviousChangeNumber);
             Assert.AreEqual(CompressionType.Gzip, changeNotification.CompressionType);
-            Assert.AreEqual("mauro_java", changeNotification.FeatureFlag.name);
-            Assert.AreEqual("ACTIVE", changeNotification.FeatureFlag.status);
-            Assert.AreEqual("off", changeNotification.FeatureFlag.defaultTreatment);
+            Assert.AreEqual("mauro_java", changeNotification.FeatureFlag.Name);
+            Assert.AreEqual("ACTIVE", changeNotification.FeatureFlag.Status);
+            Assert.AreEqual("off", changeNotification.FeatureFlag.DefaultTreatment);
         }
 
         [TestMethod]
@@ -212,9 +212,9 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             Assert.AreEqual(1684265694505, changeNotification.ChangeNumber);
             Assert.AreEqual(111, changeNotification.PreviousChangeNumber);
             Assert.AreEqual(CompressionType.Zlib, changeNotification.CompressionType);
-            Assert.AreEqual("mauro_java", changeNotification.FeatureFlag.name);
-            Assert.AreEqual("ACTIVE", changeNotification.FeatureFlag.status);
-            Assert.AreEqual("off", changeNotification.FeatureFlag.defaultTreatment);
+            Assert.AreEqual("mauro_java", changeNotification.FeatureFlag.Name);
+            Assert.AreEqual("ACTIVE", changeNotification.FeatureFlag.Status);
+            Assert.AreEqual("off", changeNotification.FeatureFlag.DefaultTreatment);
         }
 
         [TestMethod]
@@ -234,9 +234,9 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             Assert.AreEqual(1684265694505, changeNotification.ChangeNumber);
             Assert.AreEqual(111, changeNotification.PreviousChangeNumber);
             Assert.AreEqual(CompressionType.NotCompressed, changeNotification.CompressionType);
-            Assert.AreEqual("mauro_java", changeNotification.FeatureFlag.name);
-            Assert.AreEqual("ACTIVE", changeNotification.FeatureFlag.status);
-            Assert.AreEqual("off", changeNotification.FeatureFlag.defaultTreatment);
+            Assert.AreEqual("mauro_java", changeNotification.FeatureFlag.Name);
+            Assert.AreEqual("ACTIVE", changeNotification.FeatureFlag.Status);
+            Assert.AreEqual("off", changeNotification.FeatureFlag.DefaultTreatment);
         }
     }
 }

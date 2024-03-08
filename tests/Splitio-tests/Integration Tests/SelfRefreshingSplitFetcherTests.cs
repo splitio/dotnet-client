@@ -56,8 +56,8 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.name == "Pato_Test_1");
-            Assert.IsTrue(result.conditions.Count > 0);
+            Assert.IsTrue(result.Name == "Pato_Test_1");
+            Assert.IsTrue(result.Conditions.Count > 0);
 
             await selfRefreshingSplitFetcher.StopAsync();
             selfRefreshingSplitFetcher.Clear();
@@ -87,11 +87,11 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.name == "Traffic_Allocation_UI");
-            Assert.IsTrue(result.trafficAllocation == 100);
-            Assert.IsTrue(result.trafficAllocationSeed == 0);
-            Assert.IsTrue(result.conditions.Count > 0);
-            Assert.IsNotNull(result.conditions.Find(x => x.conditionType == ConditionType.ROLLOUT));
+            Assert.IsTrue(result.Name == "Traffic_Allocation_UI");
+            Assert.IsTrue(result.TrafficAllocation == 100);
+            Assert.IsTrue(result.TrafficAllocationSeed == 0);
+            Assert.IsTrue(result.Conditions.Count > 0);
+            Assert.IsNotNull(result.Conditions.Find(x => x.ConditionType == ConditionType.ROLLOUT));
 
             await selfRefreshingSplitFetcher.StopAsync();
             selfRefreshingSplitFetcher.Clear();

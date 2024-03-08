@@ -53,27 +53,27 @@ namespace Splitio.Services.Localhost
                         }
                     }
 
-                    splitToAdd.conditions.Add(CreateCondition(treatment, keys));
+                    splitToAdd.Conditions.Add(CreateCondition(treatment, keys));
 
                     if (!string.IsNullOrEmpty(config))
                     {
-                        splitToAdd.configurations = new Dictionary<string, string> { { treatment, config } };
+                        splitToAdd.Configurations = new Dictionary<string, string> { { treatment, config } };
                     }
 
                     if (splits.ContainsKey(splitName))
                     {
                         var oldSplit = splits[splitName];
 
-                        if (oldSplit.configurations != null)
+                        if (oldSplit.Configurations != null)
                         {
-                            splitToAdd.configurations = splitToAdd.configurations ?? new Dictionary<string, string>();
+                            splitToAdd.Configurations = splitToAdd.Configurations ?? new Dictionary<string, string>();
 
-                            foreach (var conf in oldSplit.configurations)
-                                splitToAdd.configurations.Add(conf.Key, conf.Value);
+                            foreach (var conf in oldSplit.Configurations)
+                                splitToAdd.Configurations.Add(conf.Key, conf.Value);
                         }
 
-                        splitToAdd.conditions.AddRange(oldSplit.conditions);
-                        splitToAdd.conditions = splitToAdd.conditions.OrderBy(c => c.conditionType).ToList();
+                        splitToAdd.Conditions.AddRange(oldSplit.Conditions);
+                        splitToAdd.Conditions = splitToAdd.Conditions.OrderBy(c => c.ConditionType).ToList();
                         splits.TryUpdate(splitName, splitToAdd, oldSplit);
                     }
                     else

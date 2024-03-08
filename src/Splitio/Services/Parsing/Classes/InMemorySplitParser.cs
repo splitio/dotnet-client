@@ -14,9 +14,10 @@ namespace Splitio.Services.Parsing.Classes
             _segmentFetcher = segmentFetcher;
         }
 
-        protected override IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit)
+        protected override IMatcher GetInSegmentMatcher(Matcher matcherDefinition, ParsedSplit parsedSplit)
         {
-            _segmentFetcher.InitializeSegment(matcherDefinition.userDefinedSegmentMatcherData.segmentName);
+            var matcherData = matcherDefinition.userDefinedSegmentMatcherData;
+            _segmentFetcher.InitializeSegment(matcherData.segmentName);
 
             return base.GetInSegmentMatcher(matcherDefinition, parsedSplit);
         }

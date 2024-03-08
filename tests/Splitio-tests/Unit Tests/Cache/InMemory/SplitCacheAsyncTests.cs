@@ -45,9 +45,9 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             var split = new ParsedSplit
             {
-                name = ffName,
-                defaultTreatment = "on",
-                changeNumber = 1
+                Name = ffName,
+                DefaultTreatment = "on",
+                ChangeNumber = 1
             };
 
             _cache.Update(new List<ParsedSplit> { split }, new List<string>(), -1);
@@ -56,9 +56,9 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var result = await _cache.GetSplitAsync(ffName);
 
             // Assert.
-            Assert.AreEqual(ffName, result.name);
-            Assert.AreEqual("on", result.defaultTreatment);
-            Assert.AreEqual(1, result.changeNumber);
+            Assert.AreEqual(ffName, result.Name);
+            Assert.AreEqual("on", result.DefaultTreatment);
+            Assert.AreEqual(1, result.ChangeNumber);
         }
 
         [TestMethod]
@@ -77,16 +77,16 @@ namespace Splitio_Tests.Unit_Tests.Cache
             // Arrange.
             var split1 = new ParsedSplit
             {
-                name = "feature-flag-1",
-                defaultTreatment = "on",
-                changeNumber = 1
+                Name = "feature-flag-1",
+                DefaultTreatment = "on",
+                ChangeNumber = 1
             };
 
             var split2 = new ParsedSplit
             {
-                name = "feature-flag-2",
-                defaultTreatment = "on",
-                changeNumber = 1
+                Name = "feature-flag-2",
+                DefaultTreatment = "on",
+                ChangeNumber = 1
             };
 
             _cache.Update(new List<ParsedSplit> { split1, split2 }, new List<string>(), -1);
@@ -117,9 +117,9 @@ namespace Splitio_Tests.Unit_Tests.Cache
             {
                 toAdd.Add(new ParsedSplit
                 {
-                    name = $"feature-flag-{i}",
-                    defaultTreatment = "on",
-                    changeNumber = i
+                    Name = $"feature-flag-{i}",
+                    DefaultTreatment = "on",
+                    ChangeNumber = i
                 });
             }
 
@@ -131,9 +131,9 @@ namespace Splitio_Tests.Unit_Tests.Cache
             // Assert.
             Assert.AreEqual(1, result.Count);
             var ff = result.FirstOrDefault();
-            Assert.AreEqual("feature-flag-2", ff.name);
-            Assert.AreEqual("on", ff.defaultTreatment);
-            Assert.AreEqual(2, ff.changeNumber);
+            Assert.AreEqual("feature-flag-2", ff.Name);
+            Assert.AreEqual("on", ff.DefaultTreatment);
+            Assert.AreEqual(2, ff.ChangeNumber);
         }
 
         [TestMethod]
@@ -155,9 +155,9 @@ namespace Splitio_Tests.Unit_Tests.Cache
             {
                 toAdd.Add(new ParsedSplit
                 {
-                    name = $"feature-flag-{i}",
-                    defaultTreatment = "on",
-                    changeNumber = i
+                    Name = $"feature-flag-{i}",
+                    DefaultTreatment = "on",
+                    ChangeNumber = i
                 });
             }
 

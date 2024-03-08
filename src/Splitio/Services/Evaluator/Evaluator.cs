@@ -48,7 +48,7 @@ namespace Splitio.Services.Evaluator
                 {
                     try
                     {
-                        var split = splits.FirstOrDefault(s => feature.Equals(s?.name));
+                        var split = splits.FirstOrDefault(s => feature.Equals(s?.Name));
 
                         var result = EvaluateTreatment(method, key, split, feature, attributes: attributes);
 
@@ -120,7 +120,7 @@ namespace Splitio.Services.Evaluator
                 {
                     try
                     {
-                        var split = splits.FirstOrDefault(s => feature.Equals(s?.name));
+                        var split = splits.FirstOrDefault(s => feature.Equals(s?.Name));
 
                         var result = await EvaluateTreatmentAsync(method, key, split, feature, attributes: attributes);
 
@@ -201,13 +201,13 @@ namespace Splitio.Services.Evaluator
             var inRollout = false;
 
             // use the first matching condition
-            foreach (var condition in split.conditions)
+            foreach (var condition in split.Conditions)
             {
                 inRollout = IsInRollout(inRollout, condition, key, split, out TreatmentResult rResult);
 
                 if (rResult != null) return rResult;
 
-                var matched = condition.matcher.Match(key, attributes, this);
+                var matched = condition.Matcher.Match(key, attributes, this);
                 var treatment = IfConditionMatched(matched, key, split, condition);
 
                 if (treatment != null) return treatment;
@@ -227,16 +227,16 @@ namespace Splitio.Services.Evaluator
         {
             result = null;
 
-            if (!inRollout && condition.conditionType == ConditionType.ROLLOUT)
+            if (!inRollout && condition.ConditionType == ConditionType.ROLLOUT)
             {
-                if (split.trafficAllocation < 100)
+                if (split.TrafficAllocation < 100)
                 {
                     // bucket ranges from 1-100.
-                    var bucket = _splitter.GetBucket(key.bucketingKey, split.trafficAllocationSeed, split.algo);
+                    var bucket = _splitter.GetBucket(key.bucketingKey, split.TrafficAllocationSeed, split.Algo);
 
-                    if (bucket > split.trafficAllocation)
+                    if (bucket > split.TrafficAllocation)
                     {
-                        result = new TreatmentResult(split.name, Labels.TrafficAllocationFailed, split.defaultTreatment, split.changeNumber);
+                        result = new TreatmentResult(split.Name, Labels.TrafficAllocationFailed, split.DefaultTreatment, split.ChangeNumber);
                     }
                 }
 
@@ -250,9 +250,9 @@ namespace Splitio.Services.Evaluator
         {
             if (!matched) return null;
 
-            var treatment = _splitter.GetTreatment(key.bucketingKey, split.seed, condition.partitions, split.algo);
+            var treatment = _splitter.GetTreatment(key.bucketingKey, split.Seed, condition.Partitions, split.Algo);
 
-            return new TreatmentResult(split.name, condition.label, treatment, split.changeNumber);
+            return new TreatmentResult(split.Name, condition.Label, treatment, split.ChangeNumber);
         }
         #endregion
 
@@ -280,13 +280,13 @@ namespace Splitio.Services.Evaluator
             var inRollout = false;
 
             // use the first matching condition
-            foreach (var condition in split.conditions)
+            foreach (var condition in split.Conditions)
             {
                 inRollout = IsInRollout(inRollout, condition, key, split, out TreatmentResult rResult);
 
                 if (rResult != null) return rResult;
 
-                var matched = await condition.matcher.MatchAsync(key, attributes, this);
+                var matched = await condition.Matcher.MatchAsync(key, attributes, this);
                 var treatment = IfConditionMatched(matched, key, split, condition);
 
                 if (treatment != null) return treatment;
@@ -308,9 +308,9 @@ namespace Splitio.Services.Evaluator
         {
             result = null;
 
-            if (split.killed)
+            if (split.Killed)
             {
-                result = new TreatmentResult(split.name, Labels.Killed, split.defaultTreatment, split.changeNumber);
+                result = new TreatmentResult(split.Name, Labels.Killed, split.DefaultTreatment, split.ChangeNumber);
                 return true;
             }
 
@@ -319,7 +319,7 @@ namespace Splitio.Services.Evaluator
 
         private static TreatmentResult ReturnDefaultTreatment(ParsedSplit split)
         {
-            return new TreatmentResult(split.name, Labels.DefaultRule, split.defaultTreatment, split.changeNumber);
+            return new TreatmentResult(split.Name, Labels.DefaultRule, split.DefaultTreatment, split.ChangeNumber);
         }
 
         private static TreatmentResult EvaluateFeatureException(Exception e, string featureName)
@@ -359,9 +359,9 @@ namespace Splitio.Services.Evaluator
 
         private static TreatmentResult ParseConfigurationAndReturnTreatment(ParsedSplit parsedSplit, TreatmentResult treatmentResult)
         {
-            if (parsedSplit.configurations != null && parsedSplit.configurations.ContainsKey(treatmentResult.Treatment))
+            if (parsedSplit.Configurations != null && parsedSplit.Configurations.ContainsKey(treatmentResult.Treatment))
             {
-                treatmentResult.Config = parsedSplit.configurations[treatmentResult.Treatment];
+                treatmentResult.Config = parsedSplit.Configurations[treatmentResult.Treatment];
             }
 
             return treatmentResult;

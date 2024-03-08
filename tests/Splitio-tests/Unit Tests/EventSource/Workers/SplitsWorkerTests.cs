@@ -60,9 +60,9 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
                 PreviousChangeNumber = 1,
                 FeatureFlag = new Split
                 {
-                    status = "ARCHIVED",
-                    name = "mauro_ff",
-                    defaultTreatment = "off"
+                    Status = "ARCHIVED",
+                    Name = "mauro_ff",
+                    DefaultTreatment = "off"
                 }
             });
 
@@ -94,21 +94,21 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
                 PreviousChangeNumber = 5,
                 FeatureFlag = new Split
                 {
-                    status = "ACTIVE",
-                    name = "mauro_ff",
-                    defaultTreatment = "off",
-                    conditions = new List<ConditionDefinition>()
+                    Status = "ACTIVE",
+                    Name = "mauro_ff",
+                    DefaultTreatment = "off",
+                    Conditions = new List<Condition>()
                     { 
-                        new ConditionDefinition()
+                        new Condition()
                         {
-                            conditionType = "",
-                            matcherGroup = new MatcherGroupDefinition()
+                            ConditionType = "",
+                            MatcherGroup = new MatcherGroup()
                             {
-                                matchers = new List<MatcherDefinition>
+                                Matchers = new List<Matcher>
                                 {
-                                    new MatcherDefinition()
+                                    new Matcher()
                                     {
-                                        userDefinedSegmentMatcherData = new UserDefinedSegmentData()
+                                        UserDefinedSegmentMatcherData = new UserDefinedSegmentData()
                                         {
                                             segmentName = "segment-test"
                                         }
@@ -147,10 +147,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
                 PreviousChangeNumber = 5,
                 FeatureFlag = new Split
                 {
-                    status = "ACTIVE",
-                    name = "mauro_ff",
-                    defaultTreatment = "off",
-                    conditions = new List<ConditionDefinition>()
+                    Status = "ACTIVE",
+                    Name = "mauro_ff",
+                    DefaultTreatment = "off",
+                    Conditions = new List<Condition>()
                 }
             });
 
@@ -184,9 +184,9 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
                 PreviousChangeNumber = 1,
                 FeatureFlag = new Split
                 {
-                    status = "ARCHIVED",
-                    name = "mauro_ff",
-                    defaultTreatment = "off"
+                    Status = "ARCHIVED",
+                    Name = "mauro_ff",
+                    DefaultTreatment = "off"
                 }
             });
 

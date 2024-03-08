@@ -172,14 +172,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
         {
             return new Split
             {
-                name = splitName,
-                changeNumber = 121291,
-                killed = false,
-                seed = 4324324,
-                defaultTreatment = "on",
-                conditions = new List<ConditionDefinition>(),
-                status = "ACTIVE",
-                trafficTypeName = "test"
+                Name = splitName,
+                ChangeNumber = 121291,
+                Killed = false,
+                Seed = 4324324,
+                DefaultTreatment = "on",
+                Conditions = new List<Splitio.Domain.Condition>(),
+                Status = "ACTIVE",
+                TrafficTypeName = "test"
             };
         }
     }

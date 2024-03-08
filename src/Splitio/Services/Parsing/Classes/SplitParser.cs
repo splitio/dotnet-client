@@ -16,16 +16,13 @@ namespace Splitio.Services.Parsing
 
         private readonly ISegmentCacheConsumer _segmentsCache;
 
-        public SplitParser(ISegmentCacheConsumer segmentsCache)
-        {
-            _segmentsCache = segmentsCache;
-        }
+        protected abstract IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit);
 
         public ParsedSplit Parse(Split split)
         {
             try
             {
-                var isValidStatus = Enum.TryParse(split.status, out StatusEnum result);
+                var isValidStatus = Enum.TryParse(split.Status, out StatusEnum result);
 
                 if (!isValidStatus || result != StatusEnum.ACTIVE)
                 {
@@ -34,21 +31,21 @@ namespace Splitio.Services.Parsing
 
                 var parsedSplit = new ParsedSplit
                 {
-                    name = split.name,
-                    killed = split.killed,
-                    defaultTreatment = split.defaultTreatment,
-                    seed = split.seed,
-                    conditions = new List<ConditionWithLogic>(),
-                    changeNumber = split.changeNumber,
-                    trafficTypeName = split.trafficTypeName,
-                    algo = split.algo == 0 || split.algo == null ? AlgorithmEnum.LegacyHash : (AlgorithmEnum)split.algo,
-                    trafficAllocation = split.trafficAllocation,
-                    trafficAllocationSeed = split.trafficAllocationSeed ?? 0,
-                    configurations = split.configurations,
+                    Name = split.Name,
+                    Killed = split.Killed,
+                    DefaultTreatment = split.DefaultTreatment,
+                    Seed = split.Seed,
+                    Conditions = new List<ConditionWithLogic>(),
+                    ChangeNumber = split.ChangeNumber,
+                    TrafficTypeName = split.TrafficTypeName,
+                    Algo = split.Algo == 0 || split.Algo == null ? AlgorithmEnum.LegacyHash : (AlgorithmEnum)split.Algo,
+                    TrafficAllocation = split.TrafficAllocation,
+                    TrafficAllocationSeed = split.TrafficAllocationSeed ?? 0,
+                    Configurations = split.Configurations,
                     Sets = split.Sets
                 };
 
-                return ParseConditions(split.conditions, parsedSplit);
+                return ParseConditions(split.Conditions, parsedSplit);
             }
             catch (Exception e)
             {
@@ -57,39 +54,34 @@ namespace Splitio.Services.Parsing
             }
         }
 
-        protected virtual IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit)
-        {
-            return new UserDefinedSegmentMatcher(matcherDefinition.userDefinedSegmentMatcherData.segmentName, _segmentsCache);
-        }
-
         private ParsedSplit ParseConditions(List<ConditionDefinition> conditions, ParsedSplit parsedSplit)
         {
             foreach (var condition in conditions)
             {
                 try
                 {
-                    parsedSplit.conditions.Add(new ConditionWithLogic()
+                    parsedSplit.Conditions.Add(new ConditionWithLogic()
                     {
-                        conditionType = Enum.TryParse(condition.conditionType, out ConditionType result) ? result : ConditionType.WHITELIST,
-                        partitions = condition.partitions,
-                        matcher = ParseMatcherGroup(parsedSplit, condition.matcherGroup),
-                        label = condition.label
+                        ConditionType = Enum.TryParse(condition.ConditionType, out ConditionType result) ? result : ConditionType.WHITELIST,
+                        Partitions = condition.Partitions,
+                        Matcher = ParseMatcherGroup(parsedSplit, condition.MatcherGroup),
+                        Label = condition.Label
                     });
                 }
                 catch (UnsupportedMatcherException ex)
                 {
                     _log.Error(ex.Message);
 
-                    parsedSplit.conditions = Helper.GetDefaultConditions();
+                    parsedSplit.conditions = GetDefaultConditions();
                 }
             }
 
             return parsedSplit;
         }
 
-        private CombiningMatcher ParseMatcherGroup(ParsedSplit parsedSplit, MatcherGroupDefinition matcherGroupDefinition)
+        private CombiningMatcher ParseMatcherGroup(ParsedSplit parsedSplit, MatcherGroup matcherGroupDefinition)
         {
-            if (matcherGroupDefinition.matchers == null || matcherGroupDefinition.matchers.Count == 0)
+            if (matcherGroupDefinition.Matchers == null || matcherGroupDefinition.Matchers.Count == 0)
             {
                 throw new Exception("Missing or empty matchers");
             }
@@ -97,13 +89,13 @@ namespace Splitio.Services.Parsing
             return new CombiningMatcher()
             {
                 delegates = matcherGroupDefinition.matchers.Select(x => ParseMatcher(parsedSplit, x)).ToList(),
-                combiner = Helper.ParseCombiner(matcherGroupDefinition.combiner)
+                combiner = ParseCombiner(matcherGroupDefinition.combiner)
             };
         }
 
-        private AttributeMatcher ParseMatcher(ParsedSplit parsedSplit, MatcherDefinition mDefinition)
+        private AttributeMatcher ParseMatcher(ParsedSplit parsedSplit, Matcher mGroup)
         {
-            if (mDefinition.matcherType == null)
+            if (mGroup.MatcherType == null)
             {
                 throw new Exception("Missing matcher type value");
             }
@@ -111,7 +103,7 @@ namespace Splitio.Services.Parsing
             IMatcher matcher = null;
             try
             {
-                if (Enum.TryParse(mDefinition.matcherType, out MatcherTypeEnum result))
+                if (Enum.TryParse(mGroup.MatcherType, out MatcherTypeEnum result))
                 {
                     switch (result)
                     {
@@ -119,57 +111,57 @@ namespace Splitio.Services.Parsing
                             matcher = new AllKeysMatcher();
                             break;
                         case MatcherTypeEnum.BETWEEN:
-                            var betweenData = mDefinition.betweenMatcherData;
+                            var betweenData = mGroup.BetweenMatcherData;
                             matcher = new BetweenMatcher(betweenData.dataType, betweenData.start, betweenData.end);
                             break;
                         case MatcherTypeEnum.EQUAL_TO:
-                            var equalToData = mDefinition.unaryNumericMatcherData;
+                            var equalToData = mGroup.UnaryNumericMatcherData;
                             matcher = new EqualToMatcher(equalToData.dataType, equalToData.value);
                             break;
                         case MatcherTypeEnum.GREATER_THAN_OR_EQUAL_TO:
-                            var gtoetData = mDefinition.unaryNumericMatcherData;
+                            var gtoetData = mGroup.UnaryNumericMatcherData;
                             matcher = new GreaterOrEqualToMatcher(gtoetData.dataType, gtoetData.value);
                             break;
                         case MatcherTypeEnum.IN_SEGMENT:
-                            matcher = GetInSegmentMatcher(mDefinition, parsedSplit);
+                            matcher = GetInSegmentMatcher(mGroup, parsedSplit);
                             break;
                         case MatcherTypeEnum.LESS_THAN_OR_EQUAL_TO:
-                            var ltoetData = mDefinition.unaryNumericMatcherData;
+                            var ltoetData = mGroup.UnaryNumericMatcherData;
                             matcher = new LessOrEqualToMatcher(ltoetData.dataType, ltoetData.value);
                             break;
                         case MatcherTypeEnum.WHITELIST:
-                            matcher = new WhitelistMatcher(mDefinition.whitelistMatcherData.whitelist);
+                            matcher = new WhitelistMatcher(mGroup.WhitelistMatcherData.whitelist);
                             break;
                         case MatcherTypeEnum.EQUAL_TO_SET:
-                            matcher = new EqualToSetMatcher(mDefinition.whitelistMatcherData.whitelist);
+                            matcher = new EqualToSetMatcher(mGroup.WhitelistMatcherData.whitelist);
                             break;
                         case MatcherTypeEnum.CONTAINS_ANY_OF_SET:
-                            matcher = new ContainsAnyOfSetMatcher(mDefinition.whitelistMatcherData.whitelist);
+                            matcher = new ContainsAnyOfSetMatcher(mGroup.WhitelistMatcherData.whitelist);
                             break;
                         case MatcherTypeEnum.CONTAINS_ALL_OF_SET:
-                            matcher = new ContainsAllOfSetMatcher(mDefinition.whitelistMatcherData.whitelist);
+                            matcher = new ContainsAllOfSetMatcher(mGroup.WhitelistMatcherData.whitelist);
                             break;
                         case MatcherTypeEnum.PART_OF_SET:
-                            matcher = new PartOfSetMatcher(mDefinition.whitelistMatcherData.whitelist);
+                            matcher = new PartOfSetMatcher(mGroup.WhitelistMatcherData.whitelist);
                             break;
                         case MatcherTypeEnum.STARTS_WITH:
-                            matcher = new StartsWithMatcher(mDefinition.whitelistMatcherData.whitelist);
+                            matcher = new StartsWithMatcher(mGroup.WhitelistMatcherData.whitelist);
                             break;
                         case MatcherTypeEnum.ENDS_WITH:
-                            matcher = new EndsWithMatcher(mDefinition.whitelistMatcherData.whitelist);
+                            matcher = new EndsWithMatcher(mGroup.WhitelistMatcherData.whitelist);
                             break;
                         case MatcherTypeEnum.CONTAINS_STRING:
-                            matcher = new ContainsStringMatcher(mDefinition.whitelistMatcherData.whitelist);
+                            matcher = new ContainsStringMatcher(mGroup.WhitelistMatcherData.whitelist);
                             break;
                         case MatcherTypeEnum.IN_SPLIT_TREATMENT:
-                            var dependecyData = mDefinition.dependencyMatcherData;
+                            var dependecyData = mGroup.DependencyMatcherData;
                             matcher = new DependencyMatcher(dependecyData.split, dependecyData.treatments);
                             break;
                         case MatcherTypeEnum.EQUAL_TO_BOOLEAN:
-                            matcher = new EqualToBooleanMatcher(mDefinition.booleanMatcherData.Value);
+                            matcher = new EqualToBooleanMatcher(mGroup.BooleanMatcherData.Value);
                             break;
                         case MatcherTypeEnum.MATCHES_STRING:
-                            matcher = new MatchesStringMatcher(mDefinition.stringMatcherData);
+                            matcher = new MatchesStringMatcher(mGroup.StringMatcherData);
                             break;
                     }
                 }
@@ -181,21 +173,59 @@ namespace Splitio.Services.Parsing
 
             if (matcher == null)
             {
-                throw new UnsupportedMatcherException($"Unable to create matcher for matcher type: {mDefinition.matcherType}");
+                throw new UnsupportedMatcherException($"Unable to create matcher for matcher type: {mGroup.MatcherType}");
             }
 
             var attributeMatcher = new AttributeMatcher()
             {
                 matcher = matcher,
-                negate = mDefinition.negate
+                negate = mGroup.Negate
             };
 
-            if (mDefinition.keySelector != null && mDefinition.keySelector.attribute != null)
+            if (mGroup.KeySelector != null && mGroup.KeySelector.attribute != null)
             {
-                attributeMatcher.attribute = mDefinition.keySelector.attribute;
+                attributeMatcher.attribute = mGroup.KeySelector.attribute;
             }
 
             return attributeMatcher;
+        }
+
+        private static CombinerEnum ParseCombiner(string combinerEnum)
+        {
+            _ = Enum.TryParse(combinerEnum, out CombinerEnum result);
+
+            return result;
+        }
+
+        private static List<ConditionWithLogic> GetDefaultConditions()
+        {
+            return new List<ConditionWithLogic>
+            {
+                new ConditionWithLogic()
+                {
+                    conditionType = ConditionType.WHITELIST,
+                    label = "unsupported matcher type",
+                    partitions = new List<PartitionDefinition>
+                    {
+                        new PartitionDefinition
+                        {
+                            size = 100,
+                            treatment = "control"
+                        }
+                    },
+                    matcher = new CombiningMatcher
+                    {
+                        combiner = CombinerEnum.AND,
+                        delegates = new List<AttributeMatcher>
+                        {
+                            new AttributeMatcher
+                            {
+                                matcher = new AllKeysMatcher(),
+                            }
+                        }
+                    }
+                }
+            };
         }
     }
 }

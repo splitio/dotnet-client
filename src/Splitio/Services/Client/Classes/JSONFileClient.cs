@@ -43,9 +43,9 @@ namespace Splitio.Services.Client.Classes
 
             _splitParser = new InMemorySplitParser(segmentFetcher, _segmentCache);
 
-            foreach (var split in splitChangesResult.splits)
+            foreach (var split in splitChangesResult.Splits)
             {
-                parsedSplits.TryAdd(split.name, _splitParser.Parse(split));
+                parsedSplits.TryAdd(split.Name, _splitParser.Parse(split));
             }
 
             BuildFlagSetsFilter(new HashSet<string>());

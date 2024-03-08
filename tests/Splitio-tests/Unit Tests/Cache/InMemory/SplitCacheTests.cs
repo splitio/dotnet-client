@@ -27,7 +27,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var splitName = "test1";
 
             //Act
-            splitCache.Update(new List<ParsedSplit> { new ParsedSplit() { name = splitName } }, new List<string>(), -1);
+            splitCache.Update(new List<ParsedSplit> { new ParsedSplit() { Name = splitName } }, new List<string>(), -1);
             var result = splitCache.GetSplit(splitName);
 
             //Assert
@@ -42,8 +42,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var splitName = "test1";
 
             //Act
-            var parsedSplit1 = new ParsedSplit() { name = splitName, defaultTreatment = "on" };
-            var parsedSplit2 = new ParsedSplit() { name = splitName, defaultTreatment = "off" };
+            var parsedSplit1 = new ParsedSplit() { Name = splitName, DefaultTreatment = "on" };
+            var parsedSplit2 = new ParsedSplit() { Name = splitName, DefaultTreatment = "off" };
             splitCache.Update(new List<ParsedSplit> { parsedSplit1, parsedSplit2 }, new List<string>(), -1);
             
             var result = splitCache.GetAllSplits();
@@ -51,7 +51,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
-            Assert.AreEqual("off", result[0].defaultTreatment);
+            Assert.AreEqual("off", result[0].DefaultTreatment);
         }
 
         [TestMethod]
@@ -74,7 +74,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Arrange
             var splitName = "test1";
             var splits = new ConcurrentDictionary<string, ParsedSplit>();
-            splits.TryAdd(splitName, new ParsedSplit() { name = splitName });
+            splits.TryAdd(splitName, new ParsedSplit() { Name = splitName });
             var splitCache = new InMemorySplitCache(splits, _flagSetsFilter.Object);
             
             //Act
@@ -109,8 +109,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var splitName2 = "test2";
 
             //Act
-            var split1 = new ParsedSplit() { name = splitName };
-            var split2 = new ParsedSplit() { name = splitName2 };
+            var split1 = new ParsedSplit() { Name = splitName };
+            var split2 = new ParsedSplit() { Name = splitName2 };
             splitCache.Update(new List<ParsedSplit> { split1, split2 }, new List<string>(), -1);
 
             var result = splitCache.GetAllSplits();
@@ -128,10 +128,10 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var splitName = "split_1";
             var splitName2 = "split_2";
 
-            var split = new ParsedSplit { name = splitName, trafficTypeName = "traffic_type_1" };
-            var split2 = new ParsedSplit { name = splitName, trafficTypeName = "traffic_type_2" };
-            var split3 = new ParsedSplit { name = splitName, trafficTypeName = "traffic_type_3" };
-            var split4 = new ParsedSplit { name = splitName2, trafficTypeName = "traffic_type_4" };
+            var split = new ParsedSplit { Name = splitName, TrafficTypeName = "traffic_type_1" };
+            var split2 = new ParsedSplit { Name = splitName, TrafficTypeName = "traffic_type_2" };
+            var split3 = new ParsedSplit { Name = splitName, TrafficTypeName = "traffic_type_3" };
+            var split4 = new ParsedSplit { Name = splitName2, TrafficTypeName = "traffic_type_4" };
 
             splitCache.Update(new List<ParsedSplit> { split, split2, split3, split4 }, new List<string>(), -1);
 
@@ -153,15 +153,15 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var featureFlags = new ConcurrentDictionary<string, ParsedSplit>();
             featureFlags.TryAdd("flag-1", new ParsedSplit
             {
-                name = "flag-1",
-                defaultTreatment = "off",
+                Name = "flag-1",
+                DefaultTreatment = "off",
                 Sets = new HashSet<string> { "set1", "set2"}
             });
 
             featureFlags.TryAdd("flag-2", new ParsedSplit
             {
-                name = "flag-2",
-                defaultTreatment = "on",
+                Name = "flag-2",
+                DefaultTreatment = "on",
                 Sets = new HashSet<string> { "set1", "set2" }
             });
 
@@ -190,22 +190,22 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var featureFlags = new ConcurrentDictionary<string, ParsedSplit>();
             featureFlags.TryAdd("flag-1", new ParsedSplit
             {
-                name = "flag-1",
-                defaultTreatment = "off",
+                Name = "flag-1",
+                DefaultTreatment = "off",
                 Sets = new HashSet<string> { "set1", "set3" }
             });
 
             featureFlags.TryAdd("flag-2", new ParsedSplit
             {
-                name = "flag-2",
-                defaultTreatment = "on",
+                Name = "flag-2",
+                DefaultTreatment = "on",
                 Sets = new HashSet<string> { "set5", "set4" }
             });
 
             featureFlags.TryAdd("flag-3", new ParsedSplit
             {
-                name = "flag-3",
-                defaultTreatment = "on",
+                Name = "flag-3",
+                DefaultTreatment = "on",
                 Sets = new HashSet<string> { "set1", "set2" }
             });
 
