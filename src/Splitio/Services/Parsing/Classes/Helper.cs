@@ -12,20 +12,20 @@ namespace Splitio.Services.Parsing.Classes
             {
                 new ConditionWithLogic()
                 {
-                    conditionType = ConditionType.WHITELIST,
-                    label = Labels.UnsupportedMatcherType,
-                    partitions = new List<PartitionDefinition>
+                    ConditionType = ConditionType.WHITELIST,
+                    Label = Labels.UnsupportedMatcherType,
+                    Partitions = new List<Partition>
                     {
-                        new PartitionDefinition
+                        new Partition
                         {
-                            size = 100,
-                            treatment = Constants.Gral.Control
+                            Size = 100,
+                            Treatment = Constants.Gral.Control
                         }
                     },
-                    matcher = new CombiningMatcher
+                    Matcher = new CombiningMatcher
                     {
-                        combiner = CombinerEnum.AND,
-                        delegates = new List<AttributeMatcher>
+                        Combiner = CombinerEnum.AND,
+                        Delegates = new List<AttributeMatcher>
                         {
                             new AttributeMatcher
                             {

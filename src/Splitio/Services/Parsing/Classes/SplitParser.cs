@@ -12,11 +12,13 @@ namespace Splitio.Services.Parsing
 {
     public class SplitParser : ISplitParser
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitParser));
-
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitParser));
         private readonly ISegmentCacheConsumer _segmentsCache;
 
-        protected abstract IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit);
+        public SplitParser(ISegmentCacheConsumer segmentsCache)
+        {
+            _segmentsCache = segmentsCache;
+        }
 
         public ParsedSplit Parse(Split split)
         {
@@ -54,7 +56,12 @@ namespace Splitio.Services.Parsing
             }
         }
 
-        private ParsedSplit ParseConditions(List<ConditionDefinition> conditions, ParsedSplit parsedSplit)
+        protected virtual IMatcher GetInSegmentMatcher(Matcher matcher, ParsedSplit parsedSplit)
+        {
+            return new UserDefinedSegmentMatcher(matcher.UserDefinedSegmentMatcherData.segmentName, _segmentsCache);
+        }
+
+        private ParsedSplit ParseConditions(List<Condition> conditions, ParsedSplit parsedSplit)
         {
             foreach (var condition in conditions)
             {
@@ -64,7 +71,7 @@ namespace Splitio.Services.Parsing
                     {
                         ConditionType = Enum.TryParse(condition.ConditionType, out ConditionType result) ? result : ConditionType.WHITELIST,
                         Partitions = condition.Partitions,
-                        Matcher = ParseMatcherGroup(parsedSplit, condition.MatcherGroup),
+                        Matcher = ParseMatcherWithCombiner(parsedSplit, condition.MatcherGroup),
                         Label = condition.Label
                     });
                 }
@@ -72,24 +79,24 @@ namespace Splitio.Services.Parsing
                 {
                     _log.Error(ex.Message);
 
-                    parsedSplit.conditions = GetDefaultConditions();
+                    parsedSplit.Conditions = Helper.GetDefaultConditions();
                 }
             }
 
             return parsedSplit;
         }
 
-        private CombiningMatcher ParseMatcherGroup(ParsedSplit parsedSplit, MatcherGroup matcherGroupDefinition)
+        private CombiningMatcher ParseMatcherWithCombiner(ParsedSplit parsedSplit, MatcherGroup matcherGroup)
         {
-            if (matcherGroupDefinition.Matchers == null || matcherGroupDefinition.Matchers.Count == 0)
+            if (matcherGroup.Matchers == null || matcherGroup.Matchers.Count == 0)
             {
                 throw new Exception("Missing or empty matchers");
             }
 
             return new CombiningMatcher()
             {
-                delegates = matcherGroupDefinition.matchers.Select(x => ParseMatcher(parsedSplit, x)).ToList(),
-                combiner = ParseCombiner(matcherGroupDefinition.combiner)
+                Delegates = matcherGroup.Matchers.Select(x => ParseMatcher(parsedSplit, x)).ToList(),
+                Combiner = Helper.ParseCombiner(matcherGroup.Combiner)
             };
         }
 
@@ -188,44 +195,6 @@ namespace Splitio.Services.Parsing
             }
 
             return attributeMatcher;
-        }
-
-        private static CombinerEnum ParseCombiner(string combinerEnum)
-        {
-            _ = Enum.TryParse(combinerEnum, out CombinerEnum result);
-
-            return result;
-        }
-
-        private static List<ConditionWithLogic> GetDefaultConditions()
-        {
-            return new List<ConditionWithLogic>
-            {
-                new ConditionWithLogic()
-                {
-                    conditionType = ConditionType.WHITELIST,
-                    label = "unsupported matcher type",
-                    partitions = new List<PartitionDefinition>
-                    {
-                        new PartitionDefinition
-                        {
-                            size = 100,
-                            treatment = "control"
-                        }
-                    },
-                    matcher = new CombiningMatcher
-                    {
-                        combiner = CombinerEnum.AND,
-                        delegates = new List<AttributeMatcher>
-                        {
-                            new AttributeMatcher
-                            {
-                                matcher = new AllKeysMatcher(),
-                            }
-                        }
-                    }
-                }
-            };
         }
     }
 }
