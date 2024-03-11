@@ -145,22 +145,22 @@ namespace Splitio_Tests.Unit_Tests.Client
             {
                 new  ConditionWithLogic
                 {
-                    conditionType = ConditionType.ROLLOUT,
-                    label = "default rule",
-                    partitions = new List<PartitionDefinition>
+                    ConditionType = ConditionType.ROLLOUT,
+                    Label = "default rule",
+                    Partitions = new List<Partition>
                     {
-                        new PartitionDefinition
+                        new Partition
                         {
-                            size = 100,
-                            treatment = "off"
+                            Size = 100,
+                            Treatment = "off"
                         },
-                        new PartitionDefinition
+                        new Partition
                         {
-                            size = 0,
-                            treatment = "on"
+                            Size = 0,
+                            Treatment = "on"
                         }
                     },
-                    matcher = new CombiningMatcher()
+                    Matcher = new CombiningMatcher()
                 }
             };
 
@@ -195,10 +195,10 @@ namespace Splitio_Tests.Unit_Tests.Client
             var result = await _splitClient.GetTreatmentsAsync("user", new List<string> { treatmenOff, treatmenOn });
 
             // Assert
-            var resultOn = result[parsedSplitOn.name];
+            var resultOn = result[parsedSplitOn.Name];
             Assert.AreEqual("on", resultOn);
 
-            var resultOff = result[parsedSplitOff.name];
+            var resultOff = result[parsedSplitOff.Name];
             Assert.AreEqual("off", resultOff);
 
             _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>()), Times.Exactly(2));
@@ -473,22 +473,22 @@ namespace Splitio_Tests.Unit_Tests.Client
             {
                 new  ConditionWithLogic
                 {
-                    conditionType = ConditionType.WHITELIST,
-                    label = "default rule",
-                    partitions = new List<PartitionDefinition>
+                    ConditionType = ConditionType.WHITELIST,
+                    Label = "default rule",
+                    Partitions = new List<Partition>
                     {
-                        new PartitionDefinition
+                        new Partition
                         {
-                            size = 100,
-                            treatment = "on"
+                            Size = 100,
+                            Treatment = "on"
                         },
-                        new PartitionDefinition
+                        new Partition
                         {
-                            size = 0,
-                            treatment = "off"
+                            Size = 0,
+                            Treatment = "off"
                         }
                     },
-                    matcher = new CombiningMatcher()
+                    Matcher = new CombiningMatcher()
                 }
             };
 
@@ -613,22 +613,22 @@ namespace Splitio_Tests.Unit_Tests.Client
             {
                 new  ConditionWithLogic
                 {
-                    conditionType = ConditionType.ROLLOUT,
-                    label = "default rule",
-                    partitions = new List<PartitionDefinition>
+                    ConditionType = ConditionType.ROLLOUT,
+                    Label = "default rule",
+                    Partitions = new List<Partition>
                     {
-                        new PartitionDefinition
+                        new Partition
                         {
-                            size = 100,
-                            treatment = "off"
+                            Size = 100,
+                            Treatment = "off"
                         },
-                        new PartitionDefinition
+                        new Partition
                         {
-                            size = 0,
-                            treatment = "on"
+                            Size = 0,
+                            Treatment = "on"
                         }
                     },
-                    matcher = new CombiningMatcher()
+                    Matcher = new CombiningMatcher()
                 }
             };
 
@@ -663,11 +663,11 @@ namespace Splitio_Tests.Unit_Tests.Client
             var result = await _splitClient.GetTreatmentsWithConfigAsync("user", new List<string> { treatmenOff, treatmenOn });
 
             // Assert
-            var resultOn = result[parsedSplitOn.name];
+            var resultOn = result[parsedSplitOn.Name];
             Assert.AreEqual("on", resultOn.Treatment);
             Assert.AreEqual(configExpectedOn, resultOn.Config);
 
-            var resultOff = result[parsedSplitOff.name];
+            var resultOff = result[parsedSplitOff.Name];
             Assert.AreEqual("off", resultOff.Treatment);
             Assert.AreEqual(configExpectedOff, resultOff.Config);
 

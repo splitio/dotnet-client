@@ -106,7 +106,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         public List<string> GetSplitNames()
         {
             return GetAllSplits()
-                .Select(s => s.name)
+                .Select(s => s.Name)
                 .ToList();
         }
 
@@ -189,7 +189,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             var splits = await GetAllSplitsAsync();
 
             return splits
-                .Select(s => s.name)
+                .Select(s => s.Name)
                 .ToList();
         }
 

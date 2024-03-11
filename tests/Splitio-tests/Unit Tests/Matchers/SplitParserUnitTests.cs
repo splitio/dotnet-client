@@ -14,14 +14,14 @@ namespace Splitio_Tests.Unit_Tests
             //Arrange
             Split split = new Split
             {
-                name = "test1",
-                seed = 2323,
-                status = "ACTIVE",
-                killed = false,
-                defaultTreatment = "off",
-                changeNumber = 232323,
-                trafficTypeName = "user",
-                conditions = new List<ConditionDefinition>()
+                Name = "test1",
+                Seed = 2323,
+                Status = "ACTIVE",
+                Killed = false,
+                DefaultTreatment = "off",
+                ChangeNumber = 232323,
+                TrafficTypeName = "user",
+                Conditions = new List<Condition>()
             };
 
             var parser = new InMemorySplitParser(null, null);
@@ -31,13 +31,13 @@ namespace Splitio_Tests.Unit_Tests
 
             //Assert
             Assert.IsNotNull(parsedSplit);
-            Assert.AreEqual(split.name, parsedSplit.name);
-            Assert.AreEqual(split.seed, parsedSplit.seed);
-            Assert.AreEqual(split.killed, parsedSplit.killed);
-            Assert.AreEqual(split.defaultTreatment, parsedSplit.defaultTreatment);
-            Assert.AreEqual(split.changeNumber, parsedSplit.changeNumber);
-            Assert.AreEqual(AlgorithmEnum.LegacyHash, parsedSplit.algo);
-            Assert.AreEqual(split.trafficTypeName, parsedSplit.trafficTypeName);
+            Assert.AreEqual(split.Name, parsedSplit.Name);
+            Assert.AreEqual(split.Seed, parsedSplit.Seed);
+            Assert.AreEqual(split.Killed, parsedSplit.Killed);
+            Assert.AreEqual(split.DefaultTreatment, parsedSplit.DefaultTreatment);
+            Assert.AreEqual(split.ChangeNumber, parsedSplit.ChangeNumber);
+            Assert.AreEqual(AlgorithmEnum.LegacyHash, parsedSplit.Algo);
+            Assert.AreEqual(split.TrafficTypeName, parsedSplit.TrafficTypeName);
         }
 
         [TestMethod]
@@ -46,15 +46,15 @@ namespace Splitio_Tests.Unit_Tests
             //Arrange
             Split split = new Split
             {
-                name = "test1",
-                seed = 2323,
-                status = "ACTIVE",
-                killed = false,
-                defaultTreatment = "off",
-                changeNumber = 232323,
-                algo = 1,
-                trafficTypeName = "user",
-                conditions = new List<ConditionDefinition>()
+                Name = "test1",
+                Seed = 2323,
+                Status = "ACTIVE",
+                Killed = false,
+                DefaultTreatment = "off",
+                ChangeNumber = 232323,
+                Algo = 1,
+                TrafficTypeName = "user",
+                Conditions = new List<Condition>()
             };
 
             var parser = new InMemorySplitParser(null, null);
@@ -64,13 +64,13 @@ namespace Splitio_Tests.Unit_Tests
 
             //Assert
             Assert.IsNotNull(parsedSplit);
-            Assert.AreEqual(split.name, parsedSplit.name);
-            Assert.AreEqual(split.seed, parsedSplit.seed);
-            Assert.AreEqual(split.killed, parsedSplit.killed);
-            Assert.AreEqual(split.defaultTreatment, parsedSplit.defaultTreatment);
-            Assert.AreEqual(split.changeNumber, parsedSplit.changeNumber);
-            Assert.AreEqual(AlgorithmEnum.LegacyHash, parsedSplit.algo);
-            Assert.AreEqual(split.trafficTypeName, parsedSplit.trafficTypeName);
+            Assert.AreEqual(split.Name, parsedSplit.Name);
+            Assert.AreEqual(split.Seed, parsedSplit.Seed);
+            Assert.AreEqual(split.Killed, parsedSplit.Killed);
+            Assert.AreEqual(split.DefaultTreatment, parsedSplit.DefaultTreatment);
+            Assert.AreEqual(split.ChangeNumber, parsedSplit.ChangeNumber);
+            Assert.AreEqual(AlgorithmEnum.LegacyHash, parsedSplit.Algo);
+            Assert.AreEqual(split.TrafficTypeName, parsedSplit.TrafficTypeName);
         }
 
         [TestMethod]
@@ -79,15 +79,15 @@ namespace Splitio_Tests.Unit_Tests
             //Arrange
             Split split = new Split
             {
-                name = "test1",
-                seed = 2323,
-                status = "ACTIVE",
-                killed = false,
-                defaultTreatment = "off",
-                changeNumber = 232323,
-                algo = 2,
-                trafficTypeName = "user",
-                conditions = new List<ConditionDefinition>()
+                Name = "test1",
+                Seed = 2323,
+                Status = "ACTIVE",
+                Killed = false,
+                DefaultTreatment = "off",
+                ChangeNumber = 232323,
+                Algo = 2,
+                TrafficTypeName = "user",
+                Conditions = new List<Condition>()
             };
 
             var parser = new InMemorySplitParser(null, null);
@@ -97,13 +97,13 @@ namespace Splitio_Tests.Unit_Tests
 
             //Assert
             Assert.IsNotNull(parsedSplit);
-            Assert.AreEqual(split.name, parsedSplit.name);
-            Assert.AreEqual(split.seed, parsedSplit.seed);
-            Assert.AreEqual(split.killed, parsedSplit.killed);
-            Assert.AreEqual(split.defaultTreatment, parsedSplit.defaultTreatment);
-            Assert.AreEqual(split.changeNumber, parsedSplit.changeNumber);
-            Assert.AreEqual(AlgorithmEnum.Murmur, parsedSplit.algo);
-            Assert.AreEqual(split.trafficTypeName, parsedSplit.trafficTypeName);
+            Assert.AreEqual(split.Name, parsedSplit.Name);
+            Assert.AreEqual(split.Seed, parsedSplit.Seed);
+            Assert.AreEqual(split.Killed, parsedSplit.Killed);
+            Assert.AreEqual(split.DefaultTreatment, parsedSplit.DefaultTreatment);
+            Assert.AreEqual(split.ChangeNumber, parsedSplit.ChangeNumber);
+            Assert.AreEqual(AlgorithmEnum.Murmur, parsedSplit.Algo);
+            Assert.AreEqual(split.TrafficTypeName, parsedSplit.TrafficTypeName);
         }
     }
 }

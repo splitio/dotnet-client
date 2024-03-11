@@ -59,12 +59,12 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             var key = new Key("test", "test");
             var parsedSplit = new ParsedSplit
             {
-                algo = AlgorithmEnum.Murmur,
-                changeNumber = 123123,
-                name = splitName,
-                defaultTreatment = "off",
-                trafficTypeName = "tt",
-                killed = true
+                Algo = AlgorithmEnum.Murmur,
+                ChangeNumber = 123123,
+                Name = splitName,
+                DefaultTreatment = "off",
+                TrafficTypeName = "tt",
+                Killed = true
             };
 
             _splitCache
@@ -75,8 +75,8 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             var results = _evaluator.EvaluateFeatures(Splitio.Enums.API.GetTreatmentAsync, key, new List<string> { splitName });
 
             // Assert.
-            Assert.AreEqual(parsedSplit.defaultTreatment, results.FirstOrDefault().Treatment);
-            Assert.AreEqual(parsedSplit.changeNumber, results.FirstOrDefault().ChangeNumber);
+            Assert.AreEqual(parsedSplit.DefaultTreatment, results.FirstOrDefault().Treatment);
+            Assert.AreEqual(parsedSplit.ChangeNumber, results.FirstOrDefault().ChangeNumber);
             Assert.AreEqual(Labels.Killed, results.FirstOrDefault().Label);
         }
 
@@ -88,12 +88,12 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             var key = new Key("test", "test");
             var parsedSplit = new ParsedSplit
             {
-                algo = AlgorithmEnum.Murmur,
-                changeNumber = 123123,
-                name = splitName,
-                defaultTreatment = "off",
-                trafficTypeName = "tt",
-                conditions = new List<ConditionWithLogic>()
+                Algo = AlgorithmEnum.Murmur,
+                ChangeNumber = 123123,
+                Name = splitName,
+                DefaultTreatment = "off",
+                TrafficTypeName = "tt",
+                Conditions = new List<ConditionWithLogic>()
             };
 
             _splitCache
@@ -104,8 +104,8 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             var results = _evaluator.EvaluateFeatures(Splitio.Enums.API.GetTreatmentAsync, key, new List<string> { splitName });
 
             // Assert.
-            Assert.AreEqual(parsedSplit.defaultTreatment, results.FirstOrDefault().Treatment);
-            Assert.AreEqual(parsedSplit.changeNumber, results.FirstOrDefault().ChangeNumber);
+            Assert.AreEqual(parsedSplit.DefaultTreatment, results.FirstOrDefault().Treatment);
+            Assert.AreEqual(parsedSplit.ChangeNumber, results.FirstOrDefault().ChangeNumber);
             Assert.AreEqual(Labels.DefaultRule, results.FirstOrDefault().Label);
         }
 
@@ -117,30 +117,30 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             var key = new Key("test", "test");
             var parsedSplit = new ParsedSplit
             {
-                algo = AlgorithmEnum.Murmur,
-                changeNumber = 123123,
-                name = splitName,
-                defaultTreatment = "off",
-                trafficTypeName = "tt",
-                trafficAllocationSeed = 12,
-                trafficAllocation = 10,
-                conditions = new List<ConditionWithLogic>
+                Algo = AlgorithmEnum.Murmur,
+                ChangeNumber = 123123,
+                Name = splitName,
+                DefaultTreatment = "off",
+                TrafficTypeName = "tt",
+                TrafficAllocationSeed = 12,
+                TrafficAllocation = 10,
+                Conditions = new List<ConditionWithLogic>
                 {
                     new ConditionWithLogic
                     {
-                        conditionType = ConditionType.ROLLOUT,
-                        partitions = new List<PartitionDefinition>
+                        ConditionType = ConditionType.ROLLOUT,
+                        Partitions = new List<Partition>
                         {
-                           new PartitionDefinition
+                           new Partition
                            {
-                               treatment = "on",
-                               size = 100
+                               Treatment = "on",
+                               Size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher()
                             }
@@ -154,15 +154,15 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(new List<ParsedSplit> { parsedSplit });
 
             _splitter
-                .Setup(mock => mock.GetBucket(key.bucketingKey, parsedSplit.trafficAllocationSeed, AlgorithmEnum.Murmur))
+                .Setup(mock => mock.GetBucket(key.bucketingKey, parsedSplit.TrafficAllocationSeed, AlgorithmEnum.Murmur))
                 .Returns(18);
 
             // Act.
             var results = _evaluator.EvaluateFeatures(Splitio.Enums.API.GetTreatmentAsync, key, new List<string> { splitName });
 
             // Assert.
-            Assert.AreEqual(parsedSplit.defaultTreatment, results.FirstOrDefault().Treatment);
-            Assert.AreEqual(parsedSplit.changeNumber, results.FirstOrDefault().ChangeNumber);
+            Assert.AreEqual(parsedSplit.DefaultTreatment, results.FirstOrDefault().Treatment);
+            Assert.AreEqual(parsedSplit.ChangeNumber, results.FirstOrDefault().ChangeNumber);
             Assert.AreEqual(Labels.TrafficAllocationFailed, results.FirstOrDefault().Label);
         }
 
@@ -174,31 +174,31 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             var key = new Key("test@split.io", "test@split.io");
             var parsedSplit = new ParsedSplit
             {
-                algo = AlgorithmEnum.Murmur,
-                changeNumber = 123123,
-                name = splitName,
-                defaultTreatment = "off",
-                trafficTypeName = "tt",
-                trafficAllocationSeed = 18,
-                trafficAllocation = 20,
-                conditions = new List<ConditionWithLogic>
+                Algo = AlgorithmEnum.Murmur,
+                ChangeNumber = 123123,
+                Name = splitName,
+                DefaultTreatment = "off",
+                TrafficTypeName = "tt",
+                TrafficAllocationSeed = 18,
+                TrafficAllocation = 20,
+                Conditions = new List<ConditionWithLogic>
                 {
                     new ConditionWithLogic
                     {
-                        label = "labelCondition",
-                        conditionType = ConditionType.ROLLOUT,
-                        partitions = new List<PartitionDefinition>
+                        Label = "labelCondition",
+                        ConditionType = ConditionType.ROLLOUT,
+                        Partitions = new List<Partition>
                         {
-                           new PartitionDefinition
+                           new Partition
                            {
-                               treatment = "on",
-                               size = 100
+                               Treatment = "on",
+                               Size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher
                                 {
@@ -215,11 +215,11 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(new List<ParsedSplit> { parsedSplit });
 
             _splitter
-                .Setup(mock => mock.GetBucket(key.bucketingKey, parsedSplit.trafficAllocationSeed, AlgorithmEnum.Murmur))
+                .Setup(mock => mock.GetBucket(key.bucketingKey, parsedSplit.TrafficAllocationSeed, AlgorithmEnum.Murmur))
                 .Returns(18);
 
             _splitter
-                .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplit.seed, It.IsAny<List<PartitionDefinition>>(), parsedSplit.algo))
+                .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplit.Seed, It.IsAny<List<Partition>>(), parsedSplit.Algo))
                 .Returns("on");
 
             // Act.
@@ -228,7 +228,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             // Assert.
             Assert.AreEqual("on", results.FirstOrDefault().Treatment);
             Assert.AreEqual("labelCondition", results.FirstOrDefault().Label);
-            Assert.AreEqual(parsedSplit.changeNumber, results.FirstOrDefault().ChangeNumber);
+            Assert.AreEqual(parsedSplit.ChangeNumber, results.FirstOrDefault().ChangeNumber);
         }
 
         [TestMethod]
@@ -240,31 +240,31 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             var attributes = new Dictionary<string, object> { { "true", true } };
             var parsedSplit = new ParsedSplit
             {
-                algo = AlgorithmEnum.Murmur,
-                changeNumber = 123123,
-                name = splitName,
-                defaultTreatment = "off",
-                trafficTypeName = "tt",
-                trafficAllocationSeed = 18,
-                trafficAllocation = 20,
-                conditions = new List<ConditionWithLogic>
+                Algo = AlgorithmEnum.Murmur,
+                ChangeNumber = 123123,
+                Name = splitName,
+                DefaultTreatment = "off",
+                TrafficTypeName = "tt",
+                TrafficAllocationSeed = 18,
+                TrafficAllocation = 20,
+                Conditions = new List<ConditionWithLogic>
                 {
                     new ConditionWithLogic
                     {
-                        label = "label",
-                        conditionType = ConditionType.WHITELIST,
-                        partitions = new List<PartitionDefinition>
+                        Label = "label",
+                        ConditionType = ConditionType.WHITELIST,
+                        Partitions = new List<Partition>
                         {
-                           new PartitionDefinition
+                           new Partition
                            {
-                               treatment = "on",
-                               size = 100
+                               Treatment = "on",
+                               Size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher
                                 {
@@ -282,7 +282,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(new List<ParsedSplit> { parsedSplit });
 
             _splitter
-                .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplit.seed, It.IsAny<List<PartitionDefinition>>(), parsedSplit.algo))
+                .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplit.Seed, It.IsAny<List<Partition>>(), parsedSplit.Algo))
                 .Returns("on");
 
             // Act.
@@ -291,7 +291,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             // Assert.
             Assert.AreEqual("on", results.FirstOrDefault().Treatment);
             Assert.AreEqual("label", results.FirstOrDefault().Label);
-            Assert.AreEqual(parsedSplit.changeNumber, results.FirstOrDefault().ChangeNumber);
+            Assert.AreEqual(parsedSplit.ChangeNumber, results.FirstOrDefault().ChangeNumber);
         }
 
         [TestMethod]
@@ -302,31 +302,31 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             var key = new Key("true", "true");
             var parsedSplit = new ParsedSplit
             {
-                algo = AlgorithmEnum.Murmur,
-                changeNumber = 123123,
-                name = splitName,
-                defaultTreatment = "off",
-                trafficTypeName = "tt",
-                trafficAllocationSeed = 18,
-                trafficAllocation = 20,
-                conditions = new List<ConditionWithLogic>
+                Algo = AlgorithmEnum.Murmur,
+                ChangeNumber = 123123,
+                Name = splitName,
+                DefaultTreatment = "off",
+                TrafficTypeName = "tt",
+                TrafficAllocationSeed = 18,
+                TrafficAllocation = 20,
+                Conditions = new List<ConditionWithLogic>
                 {
                     new ConditionWithLogic
                     {
-                        label = "label",
-                        conditionType = ConditionType.WHITELIST,
-                        partitions = new List<PartitionDefinition>
+                        Label = "label",
+                        ConditionType = ConditionType.WHITELIST,
+                        Partitions = new List<Partition>
                         {
-                           new PartitionDefinition
+                           new Partition
                            {
-                               treatment = "on",
-                               size = 100
+                               Treatment = "on",
+                               Size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher
                                 {
@@ -348,7 +348,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             // Assert.
             Assert.AreEqual("off", results.FirstOrDefault().Treatment);
             Assert.AreEqual(Labels.DefaultRule, results.FirstOrDefault().Label);
-            Assert.AreEqual(parsedSplit.changeNumber, results.FirstOrDefault().ChangeNumber);
+            Assert.AreEqual(parsedSplit.ChangeNumber, results.FirstOrDefault().ChangeNumber);
         }
 
         [TestMethod]
@@ -359,31 +359,31 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             var key = new Key("mauro@split.io", "true");
             var parsedSplit = new ParsedSplit
             {
-                algo = AlgorithmEnum.Murmur,
-                changeNumber = 123123,
-                name = splitName,
-                defaultTreatment = "off",
-                trafficTypeName = "tt",
-                trafficAllocationSeed = 18,
-                trafficAllocation = 20,
-                conditions = new List<ConditionWithLogic>
+                Algo = AlgorithmEnum.Murmur,
+                ChangeNumber = 123123,
+                Name = splitName,
+                DefaultTreatment = "off",
+                TrafficTypeName = "tt",
+                TrafficAllocationSeed = 18,
+                TrafficAllocation = 20,
+                Conditions = new List<ConditionWithLogic>
                 {
                     new ConditionWithLogic
                     {
-                        label = "label",
-                        conditionType = ConditionType.WHITELIST,
-                        partitions = new List<PartitionDefinition>
+                        Label = "label",
+                        ConditionType = ConditionType.WHITELIST,
+                        Partitions = new List<Partition>
                         {
-                           new PartitionDefinition
+                           new Partition
                            {
-                               treatment = "on",
-                               size = 100
+                               Treatment = "on",
+                               Size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher
                                 {
@@ -394,20 +394,20 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                     },
                     new ConditionWithLogic
                     {
-                        label = "labelEndsWith",
-                        conditionType = ConditionType.WHITELIST,
-                        partitions = new List<PartitionDefinition>
+                        Label = "labelEndsWith",
+                        ConditionType = ConditionType.WHITELIST,
+                        Partitions = new List<Partition>
                         {
-                           new PartitionDefinition
+                           new Partition
                            {
-                               treatment = "on",
-                               size = 100
+                               Treatment = "on",
+                               Size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher
                                 {
@@ -424,7 +424,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(new List<ParsedSplit> { parsedSplit });
 
             _splitter
-                .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplit.seed, It.IsAny<List<PartitionDefinition>>(), parsedSplit.algo))
+                .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplit.Seed, It.IsAny<List<Partition>>(), parsedSplit.Algo))
                 .Returns("on");
 
             // Act.
@@ -433,7 +433,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             // Assert.
             Assert.AreEqual("on", results.FirstOrDefault().Treatment);
             Assert.AreEqual("labelEndsWith", results.FirstOrDefault().Label);
-            Assert.AreEqual(parsedSplit.changeNumber, results.FirstOrDefault().ChangeNumber);
+            Assert.AreEqual(parsedSplit.ChangeNumber, results.FirstOrDefault().ChangeNumber);
         }
         #endregion
 
@@ -446,32 +446,32 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             var key = new Key("test@split.io", "test");
             var parsedSplitOn = new ParsedSplit
             {
-                algo = AlgorithmEnum.Murmur,
-                changeNumber = 123123,
-                name = splitNames.First(s => s.Equals("always_on")),
-                defaultTreatment = "off",
-                trafficTypeName = "tt",
-                trafficAllocationSeed = 18,
-                trafficAllocation = 20,
-                seed = 123123133,
-                conditions = new List<ConditionWithLogic>
+                Algo = AlgorithmEnum.Murmur,
+                ChangeNumber = 123123,
+                Name = splitNames.First(s => s.Equals("always_on")),
+                DefaultTreatment = "off",
+                TrafficTypeName = "tt",
+                TrafficAllocationSeed = 18,
+                TrafficAllocation = 20,
+                Seed = 123123133,
+                Conditions = new List<ConditionWithLogic>
                 {
                     new ConditionWithLogic
                     {
-                        label = "labelEndsWithMatcher",
-                        conditionType = ConditionType.ROLLOUT,
-                        partitions = new List<PartitionDefinition>
+                        Label = "labelEndsWithMatcher",
+                        ConditionType = ConditionType.ROLLOUT,
+                        Partitions = new List<Partition>
                         {
-                           new PartitionDefinition
+                           new Partition
                            {
-                               treatment = "on",
-                               size = 100
+                               Treatment = "on",
+                               Size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher
                                 {
@@ -485,30 +485,30 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
 
             var parsedSplitOff = new ParsedSplit
             {
-                algo = AlgorithmEnum.Murmur,
-                changeNumber = 123123,
-                name = splitNames.First(s => s.Equals("always_off")),
-                defaultTreatment = "off",
-                trafficTypeName = "tt",
-                seed = 5647567,
-                conditions = new List<ConditionWithLogic>
+                Algo = AlgorithmEnum.Murmur,
+                ChangeNumber = 123123,
+                Name = splitNames.First(s => s.Equals("always_off")),
+                DefaultTreatment = "off",
+                TrafficTypeName = "tt",
+                Seed = 5647567,
+                Conditions = new List<ConditionWithLogic>
                 {
                     new ConditionWithLogic
                     {
-                        label = "labelWhiteList",
-                        conditionType = ConditionType.WHITELIST,
-                        partitions = new List<PartitionDefinition>
+                        Label = "labelWhiteList",
+                        ConditionType = ConditionType.WHITELIST,
+                        Partitions = new List<Partition>
                         {
-                           new PartitionDefinition
+                           new Partition
                            {
-                               treatment = "off",
-                               size = 100
+                               Treatment = "off",
+                               Size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher
                                 {
@@ -519,20 +519,20 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                     },
                     new ConditionWithLogic
                     {
-                        label = "labelRollout",
-                        conditionType = ConditionType.ROLLOUT,
-                        partitions = new List<PartitionDefinition>
+                        Label = "labelRollout",
+                        ConditionType = ConditionType.ROLLOUT,
+                        Partitions = new List<Partition>
                         {
-                           new PartitionDefinition
+                           new Partition
                            {
-                               treatment = "off",
-                               size = 100
+                               Treatment = "off",
+                               Size = 100
                            }
                         },
-                        matcher = new CombiningMatcher
+                        Matcher = new CombiningMatcher
                         {
-                            combiner = CombinerEnum.AND,
-                            delegates = new List<AttributeMatcher>
+                            Combiner = CombinerEnum.AND,
+                            Delegates = new List<AttributeMatcher>
                             {
                                 new AttributeMatcher
                                 {
@@ -545,7 +545,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             };
 
             _splitter
-                .Setup(mock => mock.GetBucket(key.bucketingKey, parsedSplitOn.trafficAllocationSeed, AlgorithmEnum.Murmur))
+                .Setup(mock => mock.GetBucket(key.bucketingKey, parsedSplitOn.TrafficAllocationSeed, AlgorithmEnum.Murmur))
                 .Returns(18);
 
             _splitCache
@@ -557,11 +557,11 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 });
 
             _splitter
-                .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplitOn.seed, It.IsAny<List<PartitionDefinition>>(), parsedSplitOn.algo))
+                .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplitOn.Seed, It.IsAny<List<Partition>>(), parsedSplitOn.Algo))
                 .Returns("on");
 
             _splitter
-                .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplitOff.seed, It.IsAny<List<PartitionDefinition>>(), parsedSplitOff.algo))
+                .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplitOff.Seed, It.IsAny<List<Partition>>(), parsedSplitOff.Algo))
                 .Returns("off");
 
             // Act.
@@ -570,12 +570,12 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             // Assert.
             var resultOn = results.FirstOrDefault(tr => tr.FeatureFlagName.Equals("always_on"));
             Assert.AreEqual("on", resultOn.Treatment);
-            Assert.AreEqual(parsedSplitOn.changeNumber, resultOn.ChangeNumber);
+            Assert.AreEqual(parsedSplitOn.ChangeNumber, resultOn.ChangeNumber);
             Assert.AreEqual("labelEndsWithMatcher", resultOn.Label);
 
             var resultOff = results.FirstOrDefault(tr => tr.FeatureFlagName.Equals("always_off"));
             Assert.AreEqual("off", resultOff.Treatment);
-            Assert.AreEqual(parsedSplitOn.changeNumber, resultOff.ChangeNumber);
+            Assert.AreEqual(parsedSplitOn.ChangeNumber, resultOff.ChangeNumber);
             Assert.AreEqual("labelWhiteList", resultOff.Label);
         }
         #endregion

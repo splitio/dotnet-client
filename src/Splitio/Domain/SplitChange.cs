@@ -4,8 +4,8 @@ namespace Splitio.Domain
 {
     public class SplitChangesResult
     {
-        public long since { get; set; }
-        public long till { get; set; }
-        public List<Split> splits { get; set; }
+        public long Since { get; set; }
+        public long Till { get; set; }
+        public List<Split> Splits { get; set; }
     }
 }

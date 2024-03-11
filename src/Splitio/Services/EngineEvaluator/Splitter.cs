@@ -12,27 +12,27 @@ namespace Splitio.Services.EngineEvaluator
     {
         private const string Control = "control";
 
-        public string GetTreatment(string key, int seed, List<PartitionDefinition> partitions, AlgorithmEnum algorithm)
+        public string GetTreatment(string key, int seed, List<Partition> partitions, AlgorithmEnum algorithm)
         {
             if (string.IsNullOrEmpty(key))
             {
                 return Control;
             }
 
-            if (partitions.Count() == 1 && partitions.First().size == 100)
+            if (partitions.Count() == 1 && partitions.First().Size == 100)
             {
-                return partitions.First().treatment;
+                return partitions.First().Treatment;
             }
 
             var bucket = GetBucket(key, seed, algorithm);
 
             var covered = 0;
-            foreach (PartitionDefinition partition in partitions)
+            foreach (Partition partition in partitions)
             {
-                covered += partition.size;
+                covered += partition.Size;
                 if (covered >= bucket)
                 {
-                    return partition.treatment;
+                    return partition.Treatment;
                 }
             }
 

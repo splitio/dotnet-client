@@ -36,9 +36,9 @@ namespace Splitio_Tests.Unit_Tests.Shared
             var till = 10;
             var changes = new List<Split>
             {
-                new Split { name = "feature-flag-name-1", defaultTreatment = "off", conditions = new List<ConditionDefinition>() },
-                new Split { name = "feature-flag-name-2", defaultTreatment = "on", conditions = new List<ConditionDefinition>() },
-                new Split { name = "feature-flag-name-3", defaultTreatment = "v1", conditions = new List<ConditionDefinition>() }
+                new Split { Name = "feature-flag-name-1", DefaultTreatment = "off", Conditions = new List<Condition>() },
+                new Split { Name = "feature-flag-name-2", DefaultTreatment = "on", Conditions = new List<Condition>() },
+                new Split { Name = "feature-flag-name-3", DefaultTreatment = "v1", Conditions = new List<Condition>() }
             };
 
             _featureFlagParser
@@ -65,9 +65,9 @@ namespace Splitio_Tests.Unit_Tests.Shared
             var till = 10;
             var changes = new List<Split>
             {
-                new Split { name = "feature-flag-name-1", defaultTreatment = "off", conditions = new List<ConditionDefinition>() },
-                new Split { name = "feature-flag-name-2", defaultTreatment = "on", conditions = new List<ConditionDefinition>() },
-                new Split { name = "feature-flag-name-3", defaultTreatment = "v1", conditions = new List<ConditionDefinition>() }
+                new Split { Name = "feature-flag-name-1", DefaultTreatment = "off", Conditions = new List<Condition>() },
+                new Split { Name = "feature-flag-name-2", DefaultTreatment = "on", Conditions = new List<Condition>() },
+                new Split { Name = "feature-flag-name-3", DefaultTreatment = "v1", Conditions = new List<Condition>() }
             };
 
             _featureFlagParser
@@ -96,9 +96,9 @@ namespace Splitio_Tests.Unit_Tests.Shared
             var till = 10;
             var changes = new List<Split>
             {
-                new Split { name = "feature-flag-name-1", defaultTreatment = "off", conditions = new List<ConditionDefinition>() },
-                new Split { name = "feature-flag-name-2", defaultTreatment = "on", conditions = new List<ConditionDefinition>() },
-                new Split { name = "feature-flag-name-3", defaultTreatment = "v1", conditions = new List<ConditionDefinition>() }
+                new Split { Name = "feature-flag-name-1", DefaultTreatment = "off", Conditions = new List<Condition>() },
+                new Split { Name = "feature-flag-name-2", DefaultTreatment = "on", Conditions = new List<Condition>() },
+                new Split { Name = "feature-flag-name-3", DefaultTreatment = "v1", Conditions = new List<Condition>() }
             };
 
             _featureFlagParser

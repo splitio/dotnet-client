@@ -328,22 +328,22 @@ namespace Splitio_Tests.Unit_Tests.Client
             {
                 new  ConditionWithLogic
                 {
-                    conditionType = ConditionType.WHITELIST,
-                    label = "default rule",
-                    partitions = new List<PartitionDefinition>
+                    ConditionType = ConditionType.WHITELIST,
+                    Label = "default rule",
+                    Partitions = new List<Partition>
                     {
-                        new PartitionDefinition
+                        new Partition
                         {
-                            size = 100,
-                            treatment = "on"
+                            Size = 100,
+                            Treatment = "on"
                         },
-                        new PartitionDefinition
+                        new Partition
                         {
-                            size = 0,
-                            treatment = "off"
+                            Size = 0,
+                            Treatment = "off"
                         }
                     },
-                    matcher = new CombiningMatcher()
+                    Matcher = new CombiningMatcher()
                 }
             };
 
@@ -484,22 +484,22 @@ namespace Splitio_Tests.Unit_Tests.Client
             {
                 new  ConditionWithLogic
                 {
-                    conditionType = ConditionType.ROLLOUT,
-                    label = "default rule",
-                    partitions = new List<PartitionDefinition>
+                    ConditionType = ConditionType.ROLLOUT,
+                    Label = "default rule",
+                    Partitions = new List<Partition>
                     {
-                        new PartitionDefinition
+                        new Partition
                         {
-                            size = 100,
-                            treatment = "off"
+                            Size = 100,
+                            Treatment = "off"
                         },
-                        new PartitionDefinition
+                        new Partition
                         {
-                            size = 0,
-                            treatment = "on"
+                            Size = 0,
+                            Treatment = "on"
                         }
                     },
-                    matcher = new CombiningMatcher()
+                    Matcher = new CombiningMatcher()
                 }
             };
 
@@ -530,11 +530,11 @@ namespace Splitio_Tests.Unit_Tests.Client
             var result = _splitClientForTesting.GetTreatmentsWithConfig("user", new List<string> { treatmenOff, treatmenOn });
 
             // Assert
-            var resultOn = result[parsedSplitOn.name];
+            var resultOn = result[parsedSplitOn.Name];
             Assert.AreEqual("on", resultOn.Treatment);
             Assert.AreEqual(configExpectedOn, resultOn.Config);
 
-            var resultOff = result[parsedSplitOff.name];
+            var resultOff = result[parsedSplitOff.Name];
             Assert.AreEqual("off", resultOff.Treatment);
             Assert.AreEqual(configExpectedOff, resultOff.Config);
         }
@@ -756,36 +756,36 @@ namespace Splitio_Tests.Unit_Tests.Client
         {
             return new ParsedSplit
             {
-                algo = AlgorithmEnum.Murmur,
-                changeNumber = 1556063594549,
-                defaultTreatment = defaultTreatment,
-                killed = killed,
-                name = name,
-                seed = seed ?? 2095087412,
-                trafficAllocation = trafficAllocation ?? 100,
-                trafficAllocationSeed = -1953939473,
-                trafficTypeName = "user",
-                configurations = configurations,
-                conditions = conditions ?? new List<ConditionWithLogic>
+                Algo = AlgorithmEnum.Murmur,
+                ChangeNumber = 1556063594549,
+                DefaultTreatment = defaultTreatment,
+                Killed = killed,
+                Name = name,
+                Seed = seed ?? 2095087412,
+                TrafficAllocation = trafficAllocation ?? 100,
+                TrafficAllocationSeed = -1953939473,
+                TrafficTypeName = "user",
+                Configurations = configurations,
+                Conditions = conditions ?? new List<ConditionWithLogic>
                 {
                     new  ConditionWithLogic
                     {
-                        conditionType = ConditionType.ROLLOUT,
-                        label = "default rule",
-                        partitions = new List<PartitionDefinition>
+                        ConditionType = ConditionType.ROLLOUT,
+                        Label = "default rule",
+                        Partitions = new List<Partition>
                         {
-                            new PartitionDefinition
+                            new Partition
                             {
-                                size = 100,
-                                treatment = "on"
+                                Size = 100,
+                                Treatment = "on"
                             },
-                            new PartitionDefinition
+                            new Partition
                             {
-                                size = 0,
-                                treatment = "off"
+                                Size = 0,
+                                Treatment = "off"
                             }
                         },
-                        matcher = new CombiningMatcher()
+                        Matcher = new CombiningMatcher()
                     }
                 }
             };

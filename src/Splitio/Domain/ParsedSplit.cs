@@ -5,27 +5,27 @@ namespace Splitio.Domain
 {
     public class ParsedSplit : SplitBase
     {
-        public List<ConditionWithLogic> conditions { get; set; }
-        public AlgorithmEnum algo { get; set; }
-        public int trafficAllocationSeed { get; set; }
+        public List<ConditionWithLogic> Conditions { get; set; }
+        public AlgorithmEnum Algo { get; set; }
+        public int TrafficAllocationSeed { get; set; }
 
         public SplitView ToSplitView()
         {
-            var condition = conditions
-                .Where(x => x.conditionType == ConditionType.ROLLOUT)
-                .FirstOrDefault() ?? conditions.FirstOrDefault();
+            var condition = Conditions
+                .Where(x => x.ConditionType == ConditionType.ROLLOUT)
+                .FirstOrDefault() ?? Conditions.FirstOrDefault();
 
-            var treatments = condition != null ? condition.partitions.Select(y => y.treatment).ToList() : new List<string>();
+            var treatments = condition != null ? condition.Partitions.Select(y => y.Treatment).ToList() : new List<string>();
 
             return new SplitView
             {
-                name = name,
-                killed = killed,
-                changeNumber = changeNumber,
+                name = Name,
+                killed = Killed,
+                changeNumber = ChangeNumber,
                 treatments = treatments,
-                trafficType = trafficTypeName,
-                configs = configurations,
-                defaultTreatment = defaultTreatment,
+                trafficType = TrafficTypeName,
+                configs = Configurations,
+                defaultTreatment = DefaultTreatment,
                 sets = Sets != null ? Sets.ToList() : new List<string>()
             };
         }

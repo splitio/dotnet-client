@@ -19,12 +19,12 @@ namespace Splitio.Services.Localhost
         {
             var split = new ParsedSplit()
             {
-                name = name,
-                seed = 0,
-                defaultTreatment = treatment,
-                conditions = codnitions,
-                algo = AlgorithmEnum.Murmur,
-                trafficAllocation = 100
+                Name = name,
+                Seed = 0,
+                DefaultTreatment = treatment,
+                Conditions = codnitions,
+                Algo = AlgorithmEnum.Murmur,
+                TrafficAllocation = 100
             };
 
             return split;
@@ -36,11 +36,11 @@ namespace Splitio.Services.Localhost
             {
                 return new ConditionWithLogic
                 {
-                    conditionType = ConditionType.WHITELIST,
-                    matcher = new CombiningMatcher
+                    ConditionType = ConditionType.WHITELIST,
+                    Matcher = new CombiningMatcher
                     {
-                        combiner = CombinerEnum.AND,
-                        delegates = new List<AttributeMatcher>
+                        Combiner = CombinerEnum.AND,
+                        Delegates = new List<AttributeMatcher>
                         {
                             new AttributeMatcher
                             {
@@ -49,25 +49,25 @@ namespace Splitio.Services.Localhost
                             }
                         }
                     },
-                    partitions = new List<PartitionDefinition>
+                    Partitions = new List<Partition>
                     {
-                        new PartitionDefinition
+                        new Partition
                         {
-                            size = 100,
-                            treatment = treatment
+                            Size = 100,
+                            Treatment = treatment
                         }
                     },
-                    label = $"whitelisted {string.Join(", ", keys)}"
+                    Label = $"whitelisted {string.Join(", ", keys)}"
                 };
             }
 
             return new ConditionWithLogic
             {
-                conditionType = ConditionType.ROLLOUT,
-                matcher = new CombiningMatcher
+                ConditionType = ConditionType.ROLLOUT,
+                Matcher = new CombiningMatcher
                 {
-                    combiner = CombinerEnum.AND,
-                    delegates = new List<AttributeMatcher>
+                    Combiner = CombinerEnum.AND,
+                    Delegates = new List<AttributeMatcher>
                     {
                         new AttributeMatcher
                         {
@@ -76,15 +76,15 @@ namespace Splitio.Services.Localhost
                         }
                     }
                 },
-                partitions = new List<PartitionDefinition>
+                Partitions = new List<Partition>
                 {
-                    new PartitionDefinition
+                    new Partition
                     {
-                        size = 100,
-                        treatment = treatment
+                        Size = 100,
+                        Treatment = treatment
                     }
                 },
-                label = "Default rule"
+                Label = "Default rule"
             };
         }
     }

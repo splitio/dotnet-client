@@ -41,20 +41,20 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Arrange            
             var conditionWithLogic = new ConditionWithLogic()
             {
-                conditionType = ConditionType.WHITELIST,
-                partitions = new List<PartitionDefinition>()
+                ConditionType = ConditionType.WHITELIST,
+                Partitions = new List<Partition>()
                 {
-                    new PartitionDefinition(){size = 100, treatment = "off"}
+                    new Partition(){Size = 100, Treatment = "off"}
                 }
             };
 
             var conditionWithLogic2 = new ConditionWithLogic()
             {
-                conditionType = ConditionType.ROLLOUT,
-                partitions = new List<PartitionDefinition>()
+                ConditionType = ConditionType.ROLLOUT,
+                Partitions = new List<Partition>()
                 {
-                    new PartitionDefinition {size = 90, treatment = "on"},
-                    new PartitionDefinition {size = 10, treatment = "off"}
+                    new Partition {Size = 90, Treatment = "on"},
+                    new Partition {Size = 10, Treatment = "off"}
                 }
             };
 
@@ -66,12 +66,12 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var splits = new List<ParsedSplit>
             {
-                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, defaultTreatment = "def", Sets = new HashSet<string> { "set1", "set2"} },
-                new ParsedSplit { name = "test2", conditions = conditionsWithLogic },
-                new ParsedSplit { name = "test3", conditions = conditionsWithLogic },
-                new ParsedSplit { name = "test4", conditions = conditionsWithLogic },
-                new ParsedSplit { name = "test5", conditions = conditionsWithLogic },
-                new ParsedSplit { name = "test6", conditions = conditionsWithLogic }
+                new ParsedSplit { Name = "test1", ChangeNumber = 10000, Killed = false, TrafficTypeName = "user", Seed = -1, Conditions = conditionsWithLogic, DefaultTreatment = "def", Sets = new HashSet<string> { "set1", "set2"} },
+                new ParsedSplit { Name = "test2", Conditions = conditionsWithLogic },
+                new ParsedSplit { Name = "test3", Conditions = conditionsWithLogic },
+                new ParsedSplit { Name = "test4", Conditions = conditionsWithLogic },
+                new ParsedSplit { Name = "test5", Conditions = conditionsWithLogic },
+                new ParsedSplit { Name = "test6", Conditions = conditionsWithLogic }
             };
 
             _blockUntilReadyService
@@ -112,10 +112,10 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Arrange            
             var conditionWithLogic = new ConditionWithLogic()
             {
-                conditionType = ConditionType.WHITELIST,
-                partitions = new List<PartitionDefinition>()
+                ConditionType = ConditionType.WHITELIST,
+                Partitions = new List<Partition>()
                 {
-                    new PartitionDefinition(){size = 100, treatment = "on"}
+                    new Partition(){Size = 100, Treatment = "on"}
                 }
             };
 
@@ -126,12 +126,12 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var splits = new List<ParsedSplit>
             {
-                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, defaultTreatment = "def", Sets = new HashSet<string> { "set1", "set2"} },
-                new ParsedSplit { name = "test2", conditions = conditionsWithLogic },
-                new ParsedSplit { name = "test3", conditions = conditionsWithLogic },
-                new ParsedSplit { name = "test4", conditions = conditionsWithLogic },
-                new ParsedSplit { name = "test5", conditions = conditionsWithLogic },
-                new ParsedSplit { name = "test6", conditions = conditionsWithLogic }
+                new ParsedSplit { Name = "test1", ChangeNumber = 10000, Killed = false, TrafficTypeName = "user", Seed = -1, Conditions = conditionsWithLogic, DefaultTreatment = "def", Sets = new HashSet<string> { "set1", "set2"} },
+                new ParsedSplit { Name = "test2", Conditions = conditionsWithLogic },
+                new ParsedSplit { Name = "test3", Conditions = conditionsWithLogic },
+                new ParsedSplit { Name = "test4", Conditions = conditionsWithLogic },
+                new ParsedSplit { Name = "test5", Conditions = conditionsWithLogic },
+                new ParsedSplit { Name = "test6", Conditions = conditionsWithLogic }
             };
 
             _blockUntilReadyService
@@ -154,7 +154,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(10000, firstResult.changeNumber);
             Assert.IsFalse(firstResult.killed);
             Assert.AreEqual("user", firstResult.trafficType);
-            Assert.AreEqual(conditionWithLogic.partitions.Count, firstResult.treatments.Count);
+            Assert.AreEqual(conditionWithLogic.Partitions.Count, firstResult.treatments.Count);
             Assert.AreEqual("def", firstResult.defaultTreatment);
             Assert.AreEqual(2, firstResult.sets.Count);
             Assert.IsTrue(firstResult.sets.Contains("set1"));
@@ -170,11 +170,11 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Arrange            
             var conditionWithLogic = new ConditionWithLogic()
             {
-                conditionType = ConditionType.ROLLOUT,
-                partitions = new List<PartitionDefinition>()
+                ConditionType = ConditionType.ROLLOUT,
+                Partitions = new List<Partition>()
                 {
-                    new PartitionDefinition(){size = 90, treatment = "on"},
-                    new PartitionDefinition(){size = 10, treatment = "off"}
+                    new Partition(){Size = 90, Treatment = "on"},
+                    new Partition(){Size = 10, Treatment = "off"}
                 }
             };
 
@@ -189,7 +189,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             _splitCache
                 .Setup(mock => mock.GetSplitAsync("test1"))
-                .ReturnsAsync(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, defaultTreatment = "def" });
+                .ReturnsAsync(new ParsedSplit { Name = "test1", ChangeNumber = 10000, Killed = false, TrafficTypeName = "user", Seed = -1, Conditions = conditionsWithLogic, DefaultTreatment = "def" });
 
             //Act
             var result = await _splitManager.SplitAsync("test1");
@@ -212,20 +212,20 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Arrange
             var conditionWithLogic = new ConditionWithLogic()
             {
-                conditionType = ConditionType.WHITELIST,
-                partitions = new List<PartitionDefinition>()
+                ConditionType = ConditionType.WHITELIST,
+                Partitions = new List<Partition>()
                 {
-                    new PartitionDefinition(){size = 100, treatment = "on"},
+                    new Partition(){Size = 100, Treatment = "on"},
                 }
             };
 
             var conditionWithLogic2 = new ConditionWithLogic()
             {
-                conditionType = ConditionType.ROLLOUT,
-                partitions = new List<PartitionDefinition>()
+                ConditionType = ConditionType.ROLLOUT,
+                Partitions = new List<Partition>()
                 {
-                    new PartitionDefinition(){size = 90, treatment = "on"},
-                    new PartitionDefinition(){size = 10, treatment = "off"},
+                    new Partition(){Size = 90, Treatment = "on"},
+                    new Partition(){Size = 10, Treatment = "off"},
                 }
             };
 
@@ -241,7 +241,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             _splitCache
                 .Setup(mock => mock.GetSplitAsync("test1"))
-                .ReturnsAsync(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, defaultTreatment = "def" });
+                .ReturnsAsync(new ParsedSplit { Name = "test1", ChangeNumber = 10000, Killed = false, TrafficTypeName = "user", Seed = -1, Conditions = conditionsWithLogic, DefaultTreatment = "def" });
 
             //Act
             var result = await _splitManager.SplitAsync("test1");
@@ -261,10 +261,10 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Arrange
             var conditionWithLogic = new ConditionWithLogic()
             {
-                conditionType = ConditionType.WHITELIST,
-                partitions = new List<PartitionDefinition>()
+                ConditionType = ConditionType.WHITELIST,
+                Partitions = new List<Partition>()
                 {
-                    new PartitionDefinition(){size = 100, treatment = "on"},
+                    new Partition(){Size = 100, Treatment = "on"},
                 }
             };
 
@@ -279,7 +279,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             _splitCache
                 .Setup(mock => mock.GetSplitAsync("test1"))
-                .ReturnsAsync(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, defaultTreatment = "def" });
+                .ReturnsAsync(new ParsedSplit { Name = "test1", ChangeNumber = 10000, Killed = false, TrafficTypeName = "user", Seed = -1, Conditions = conditionsWithLogic, DefaultTreatment = "def" });
 
             //Act
             var result = await _splitManager.SplitAsync("test1");
@@ -287,7 +287,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual("test1", result.name);
-            Assert.AreEqual(conditionWithLogic.partitions.Count, result.treatments.Count);
+            Assert.AreEqual(conditionWithLogic.Partitions.Count, result.treatments.Count);
             Assert.AreEqual("def", result.defaultTreatment);
         }
 
@@ -415,9 +415,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Arrange
             var conditionWithLogic = new ConditionWithLogic()
             {
-                partitions = new List<PartitionDefinition>()
+                Partitions = new List<Partition>()
                 {
-                    new PartitionDefinition(){size = 100, treatment = "on"}
+                    new Partition(){Size = 100, Treatment = "on"}
                 }
             };
 
@@ -468,9 +468,9 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var conditionWithLogic = new ConditionWithLogic()
             {
-                partitions = new List<PartitionDefinition>()
+                Partitions = new List<Partition>()
                 {
-                    new PartitionDefinition(){size = 100, treatment = "on"}
+                    new Partition(){Size = 100, Treatment = "on"}
                 }
             };
 
@@ -481,12 +481,12 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var splits = new List<ParsedSplit>
             {
-                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, configurations = configurations, defaultTreatment = "def" },
-                new ParsedSplit { name = "test2", conditions = conditionsWithLogic, configurations = configurations, defaultTreatment = "def2" },
-                new ParsedSplit { name = "test3", conditions = conditionsWithLogic, defaultTreatment = "def3" },
-                new ParsedSplit { name = "test4", conditions = conditionsWithLogic },
-                new ParsedSplit { name = "test5", conditions = conditionsWithLogic },
-                new ParsedSplit { name = "test6", conditions = conditionsWithLogic }
+                new ParsedSplit { Name = "test1", ChangeNumber = 10000, Killed = false, TrafficTypeName = "user", Seed = -1, Conditions = conditionsWithLogic, Configurations = configurations, DefaultTreatment = "def" },
+                new ParsedSplit { Name = "test2", Conditions = conditionsWithLogic, Configurations = configurations, DefaultTreatment = "def2" },
+                new ParsedSplit { Name = "test3", Conditions = conditionsWithLogic, DefaultTreatment = "def3" },
+                new ParsedSplit { Name = "test4", Conditions = conditionsWithLogic },
+                new ParsedSplit { Name = "test5", Conditions = conditionsWithLogic },
+                new ParsedSplit { Name = "test6", Conditions = conditionsWithLogic }
             };
 
             _blockUntilReadyService
@@ -527,9 +527,9 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var conditionWithLogic = new ConditionWithLogic()
             {
-                partitions = new List<PartitionDefinition>()
+                Partitions = new List<Partition>()
                 {
-                    new PartitionDefinition(){size = 100, treatment = "on"}
+                    new Partition(){Size = 100, Treatment = "on"}
                 }
             };
 
@@ -544,15 +544,15 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             _splitCache
                 .Setup(mock => mock.GetSplitAsync("test1"))
-                .ReturnsAsync(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, configurations = configurations, defaultTreatment = "def" });
+                .ReturnsAsync(new ParsedSplit { Name = "test1", ChangeNumber = 10000, Killed = false, TrafficTypeName = "user", Seed = -1, Conditions = conditionsWithLogic, Configurations = configurations, DefaultTreatment = "def" });
 
             _splitCache
                 .Setup(mock => mock.GetSplitAsync("test2"))
-                .ReturnsAsync(new ParsedSplit { name = "test2", conditions = conditionsWithLogic, configurations = configurations, defaultTreatment = "def2" });
+                .ReturnsAsync(new ParsedSplit { Name = "test2", Conditions = conditionsWithLogic, Configurations = configurations, DefaultTreatment = "def2" });
 
             _splitCache
                 .Setup(mock => mock.GetSplitAsync("test3"))
-                .ReturnsAsync(new ParsedSplit { name = "test3", conditions = conditionsWithLogic, defaultTreatment = "def3" });
+                .ReturnsAsync(new ParsedSplit { Name = "test3", Conditions = conditionsWithLogic, DefaultTreatment = "def3" });
 
             _splitManager.BlockUntilReady(1000);
 

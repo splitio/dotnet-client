@@ -7,36 +7,36 @@ namespace Splitio.Domain
 {
     public class CombiningMatcher
     {
-        public CombinerEnum combiner { get; set; }
-        public List<AttributeMatcher> delegates { get; set; }
+        public CombinerEnum Combiner { get; set; }
+        public List<AttributeMatcher> Delegates { get; set; }
         
         public virtual bool Match(Key key, Dictionary<string, object> attributes, IEvaluator evaluator = null)
         {
-            if (delegates == null || delegates.Count() == 0)
+            if (Delegates == null || Delegates.Count() == 0)
             {
                 return false;
             }
 
-            switch (combiner)
+            switch (Combiner)
             {
                 case CombinerEnum.AND:
                 default:
-                    return delegates.All(matcher => matcher.Match(key, attributes, evaluator));
+                    return Delegates.All(matcher => matcher.Match(key, attributes, evaluator));
             }
         }
 
         public virtual async Task<bool> MatchAsync(Key key, Dictionary<string, object> attributes, IEvaluator evaluator = null)
         {
-            if (delegates == null || delegates.Count() == 0)
+            if (Delegates == null || Delegates.Count() == 0)
             {
                 return false;
             }
 
-            switch (combiner)
+            switch (Combiner)
             {
                 case CombinerEnum.AND:
                 default:
-                    foreach (var matcher in delegates)
+                    foreach (var matcher in Delegates)
                     {
                         var matched = await matcher.MatchAsync(key, attributes, evaluator);
 

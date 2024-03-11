@@ -37,7 +37,7 @@ namespace Splitio.Services.Cache.Classes
                 {
                     if (featureFlag.Value != null)
                     {
-                        IncreaseTrafficTypeCount(featureFlag.Value.trafficTypeName);
+                        IncreaseTrafficTypeCount(featureFlag.Value.TrafficTypeName);
                         AddToFlagSets(featureFlag.Value);
                     }
                 }
@@ -49,15 +49,15 @@ namespace Splitio.Services.Cache.Classes
         {
             foreach (var featureFlag in toAdd)
             {
-                if (_featureFlags.TryGetValue(featureFlag.name, out ParsedSplit existing))
+                if (_featureFlags.TryGetValue(featureFlag.Name, out ParsedSplit existing))
                 {
                     DecreaseTrafficTypeCount(existing);
-                    RemoveFromFlagSets(existing.name, existing.Sets);
+                    RemoveFromFlagSets(existing.Name, existing.Sets);
                 }
 
-                _featureFlags.AddOrUpdate(featureFlag.name, featureFlag, (key, oldValue) => featureFlag);
+                _featureFlags.AddOrUpdate(featureFlag.Name, featureFlag, (key, oldValue) => featureFlag);
 
-                IncreaseTrafficTypeCount(featureFlag.trafficTypeName);
+                IncreaseTrafficTypeCount(featureFlag.TrafficTypeName);
                 AddToFlagSets(featureFlag);
             }
 
@@ -69,7 +69,7 @@ namespace Splitio.Services.Cache.Classes
                 _featureFlags.TryRemove(featureFlagName, out ParsedSplit removedSplit);
 
                 DecreaseTrafficTypeCount(removedSplit);
-                RemoveFromFlagSets(removedSplit.name, removedSplit.Sets);
+                RemoveFromFlagSets(removedSplit.Name, removedSplit.Sets);
             }
 
             SetChangeNumber(till);
@@ -139,11 +139,11 @@ namespace Splitio.Services.Cache.Classes
 
             if (featureFlag == null) return;
 
-            featureFlag.defaultTreatment = defaultTreatment;
-            featureFlag.killed = true;
-            featureFlag.changeNumber = changeNumber;
+            featureFlag.DefaultTreatment = defaultTreatment;
+            featureFlag.Killed = true;
+            featureFlag.ChangeNumber = changeNumber;
 
-            _featureFlags.AddOrUpdate(featureFlag.name, featureFlag, (key, oldValue) => featureFlag);
+            _featureFlags.AddOrUpdate(featureFlag.Name, featureFlag, (key, oldValue) => featureFlag);
         }
 
         public List<string> GetSplitNames()
@@ -210,20 +210,20 @@ namespace Splitio.Services.Cache.Classes
 
         private void DecreaseTrafficTypeCount(ParsedSplit split)
         {
-            if (split == null || string.IsNullOrEmpty(split.trafficTypeName)) return;
+            if (split == null || string.IsNullOrEmpty(split.TrafficTypeName)) return;
 
-            if (_trafficTypes.TryGetValue(split.trafficTypeName, out int quantity))
+            if (_trafficTypes.TryGetValue(split.TrafficTypeName, out int quantity))
             {
                 if (quantity <= 1)
                 {
-                    _trafficTypes.TryRemove(split.trafficTypeName, out _);
+                    _trafficTypes.TryRemove(split.TrafficTypeName, out _);
 
                     return;
                 }
 
                 var newQuantity = quantity - 1;
 
-                _trafficTypes.TryUpdate(split.trafficTypeName, newQuantity, quantity);
+                _trafficTypes.TryUpdate(split.TrafficTypeName, newQuantity, quantity);
             }
         }
 
@@ -236,9 +236,9 @@ namespace Splitio.Services.Cache.Classes
                 if (!_flagSetsFilter.Intersect(fSet))
                     continue;
 
-                _flagSets.AddOrUpdate(fSet, new HashSet<string>() { featureFlag.name }, (_, ffNames) =>
+                _flagSets.AddOrUpdate(fSet, new HashSet<string>() { featureFlag.Name }, (_, ffNames) =>
                 {
-                    ffNames.Add(featureFlag.name);
+                    ffNames.Add(featureFlag.Name);
                     return ffNames;
                 });
             }

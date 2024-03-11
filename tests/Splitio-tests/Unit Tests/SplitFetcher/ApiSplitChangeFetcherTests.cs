@@ -38,7 +38,7 @@ namespace Splitio_Tests.Unit_Tests
 
             //Assert
             Assert.IsTrue(result != null);
-            Assert.IsTrue(result.splits.Count > 0);
+            Assert.IsTrue(result.Splits.Count > 0);
         }
 
         [TestMethod]
@@ -99,16 +99,16 @@ namespace Splitio_Tests.Unit_Tests
 
             //Assert
             Assert.IsNotNull(result);
-            var split = result.splits.First();
-            Assert.AreEqual("Test_1", split.name);
-            Assert.AreEqual(false, split.killed);
-            Assert.AreEqual("ACTIVE", split.status);
-            Assert.AreEqual("user", split.trafficTypeName);
-            Assert.AreEqual("off", split.defaultTreatment);
-            Assert.IsNotNull(split.conditions);
-            Assert.AreEqual(-1, result.since);
-            Assert.AreEqual(1470855828956, result.till);
-            Assert.AreEqual(null, split.algo);
+            var split = result.Splits.First();
+            Assert.AreEqual("Test_1", split.Name);
+            Assert.AreEqual(false, split.Killed);
+            Assert.AreEqual("ACTIVE", split.Status);
+            Assert.AreEqual("user", split.TrafficTypeName);
+            Assert.AreEqual("off", split.DefaultTreatment);
+            Assert.IsNotNull(split.Conditions);
+            Assert.AreEqual(-1, result.Since);
+            Assert.AreEqual(1470855828956, result.Till);
+            Assert.AreEqual(null, split.Algo);
         }
 
         [TestMethod]
@@ -170,8 +170,8 @@ namespace Splitio_Tests.Unit_Tests
 
             //Assert
             Assert.IsNotNull(result);
-            var split = result.splits.First();
-            Assert.AreEqual(AlgorithmEnum.LegacyHash, (AlgorithmEnum)split.algo);
+            var split = result.Splits.First();
+            Assert.AreEqual(AlgorithmEnum.LegacyHash, (AlgorithmEnum)split.Algo);
         }
 
         [TestMethod]
@@ -233,8 +233,8 @@ namespace Splitio_Tests.Unit_Tests
 
             //Assert
             Assert.IsNotNull(result);
-            var split = result.splits.First();
-            Assert.AreEqual(AlgorithmEnum.Murmur, (AlgorithmEnum)split.algo);
+            var split = result.Splits.First();
+            Assert.AreEqual(AlgorithmEnum.Murmur, (AlgorithmEnum)split.Algo);
         }
 
         [TestMethod]
@@ -317,9 +317,9 @@ namespace Splitio_Tests.Unit_Tests
 
             //Assert
             Assert.IsNotNull(result);
-            var split = result.splits.First();
-            Assert.AreEqual(AlgorithmEnum.Murmur, (AlgorithmEnum)split.algo);
-            Assert.IsNotNull(split.configurations);
+            var split = result.Splits.First();
+            Assert.AreEqual(AlgorithmEnum.Murmur, (AlgorithmEnum)split.Algo);
+            Assert.IsNotNull(split.Configurations);
         }
 
         [TestMethod]
@@ -385,7 +385,7 @@ namespace Splitio_Tests.Unit_Tests
             var result = await _apiFetcher.FetchAsync(-1, new FetchOptions());
 
             // Assert.
-            var split = result.splits.First();
+            var split = result.Splits.First();
             Assert.AreEqual(4, split.Sets.Count);
             Assert.IsTrue(split.Sets.Contains("set_a"));
             Assert.IsTrue(split.Sets.Contains("set_b"));

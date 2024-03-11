@@ -19,14 +19,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var splitName = "test_split";
             var split = new Split
             {
-                name = splitName,
-                changeNumber = 121291,
-                killed = false,
-                seed = 4324324,
-                defaultTreatment = "on",
-                conditions = new List<ConditionDefinition>(),
-                status = "ACTIVE",
-                trafficTypeName = "test"
+                Name = splitName,
+                ChangeNumber = 121291,
+                Killed = false,
+                Seed = 4324324,
+                DefaultTreatment = "on",
+                Conditions = new List<Condition>(),
+                Status = "ACTIVE",
+                TrafficTypeName = "test"
             };
 
             var splitParser = new Mock<ISplitParser>();
@@ -41,12 +41,12 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 .Setup(mock => mock.Parse(It.IsAny<Split>()))
                 .Returns(new ParsedSplit
                 {
-                    name = split.name,
-                    changeNumber = split.changeNumber,
-                    killed = split.killed,
-                    seed = split.seed,
-                    defaultTreatment = split.defaultTreatment,
-                    trafficTypeName = split.trafficTypeName
+                    Name = split.Name,
+                    ChangeNumber = split.ChangeNumber,
+                    Killed = split.Killed,
+                    Seed = split.Seed,
+                    DefaultTreatment = split.DefaultTreatment,
+                    TrafficTypeName = split.TrafficTypeName
                 });
 
             //Act
@@ -54,12 +54,12 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             //Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(split.name, result.name);
-            Assert.AreEqual(split.changeNumber, result.changeNumber);
-            Assert.AreEqual(split.killed, result.killed);
-            Assert.AreEqual(split.seed, result.seed);
-            Assert.AreEqual(split.defaultTreatment, result.defaultTreatment);
-            Assert.AreEqual(split.trafficTypeName, result.trafficTypeName);
+            Assert.AreEqual(split.Name, result.Name);
+            Assert.AreEqual(split.ChangeNumber, result.ChangeNumber);
+            Assert.AreEqual(split.Killed, result.Killed);
+            Assert.AreEqual(split.Seed, result.Seed);
+            Assert.AreEqual(split.DefaultTreatment, result.DefaultTreatment);
+            Assert.AreEqual(split.TrafficTypeName, result.TrafficTypeName);
         }
 
         [TestMethod]
@@ -69,14 +69,14 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var splitName = "test_split";
             var split = new Split
             {
-                name = splitName,
-                changeNumber = 121291,
-                killed = false,
-                seed = 4324324,
-                defaultTreatment = "on",
-                conditions = new List<ConditionDefinition>(),
-                status = "ACTIVE",
-                trafficTypeName = "test"
+                Name = splitName,
+                ChangeNumber = 121291,
+                Killed = false,
+                Seed = 4324324,
+                DefaultTreatment = "on",
+                Conditions = new List<Condition>(),
+                Status = "ACTIVE",
+                TrafficTypeName = "test"
             };
 
             var splitParser = new Mock<ISplitParser>();
@@ -91,12 +91,12 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 .Setup(mock => mock.Parse(It.IsAny<Split>()))
                 .Returns(new ParsedSplit
                 {
-                    name = split.name,
-                    changeNumber = split.changeNumber,
-                    killed = split.killed,
-                    seed = split.seed,
-                    defaultTreatment = split.defaultTreatment,
-                    trafficTypeName = split.trafficTypeName
+                    Name = split.Name,
+                    ChangeNumber = split.ChangeNumber,
+                    Killed = split.Killed,
+                    Seed = split.Seed,
+                    DefaultTreatment = split.DefaultTreatment,
+                    TrafficTypeName = split.TrafficTypeName
                 });
 
             //Act
@@ -104,12 +104,12 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             //Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(split.name, result.name);
-            Assert.AreEqual(split.changeNumber, result.changeNumber);
-            Assert.AreEqual(split.killed, result.killed);
-            Assert.AreEqual(split.seed, result.seed);
-            Assert.AreEqual(split.defaultTreatment, result.defaultTreatment);
-            Assert.AreEqual(split.trafficTypeName, result.trafficTypeName);
+            Assert.AreEqual(split.Name, result.Name);
+            Assert.AreEqual(split.ChangeNumber, result.ChangeNumber);
+            Assert.AreEqual(split.Killed, result.Killed);
+            Assert.AreEqual(split.Seed, result.Seed);
+            Assert.AreEqual(split.DefaultTreatment, result.DefaultTreatment);
+            Assert.AreEqual(split.TrafficTypeName, result.TrafficTypeName);
         }
     }
 }

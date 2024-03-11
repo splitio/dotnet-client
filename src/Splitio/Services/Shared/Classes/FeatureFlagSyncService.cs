@@ -38,7 +38,7 @@ namespace Splitio.Services.Shared.Classes
 
                 if (ffParsed == null || !_flagSetsFilter.Intersect(featureFlag.Sets))
                 {
-                    toRemove.Add(featureFlag.name);
+                    toRemove.Add(featureFlag.Name);
                     continue;
                 }
 
@@ -50,7 +50,7 @@ namespace Splitio.Services.Shared.Classes
 
             if (_log.IsDebugEnabled && toAdd.Count > 0)
             {
-                _log.Debug($"Added feature flags: {string.Join(" - ", toAdd.Select(s => s.name).ToList())}");
+                _log.Debug($"Added feature flags: {string.Join(" - ", toAdd.Select(s => s.Name).ToList())}");
             }
 
             if (_log.IsDebugEnabled && toRemove.Count > 0)
