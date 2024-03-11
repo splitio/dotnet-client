@@ -10,13 +10,16 @@ using System.Linq;
 
 namespace Splitio.Services.Parsing
 {
-    public abstract class SplitParser : ISplitParser
+    public class SplitParser : ISplitParser
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitParser));
 
-        protected ISegmentCacheConsumer _segmentsCache;
+        private readonly ISegmentCacheConsumer _segmentsCache;
 
-        protected abstract IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit);
+        public SplitParser(ISegmentCacheConsumer segmentsCache)
+        {
+            _segmentsCache = segmentsCache;
+        }
 
         public ParsedSplit Parse(Split split)
         {
@@ -54,6 +57,11 @@ namespace Splitio.Services.Parsing
             }
         }
 
+        protected virtual IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit)
+        {
+            return new UserDefinedSegmentMatcher(matcherDefinition.userDefinedSegmentMatcherData.segmentName, _segmentsCache);
+        }
+
         private ParsedSplit ParseConditions(List<ConditionDefinition> conditions, ParsedSplit parsedSplit)
         {
             foreach (var condition in conditions)
@@ -72,7 +80,7 @@ namespace Splitio.Services.Parsing
                 {
                     _log.Error(ex.Message);
 
-                    parsedSplit.conditions = GetDefaultConditions();
+                    parsedSplit.conditions = Helper.GetDefaultConditions();
                 }
             }
 
@@ -89,7 +97,7 @@ namespace Splitio.Services.Parsing
             return new CombiningMatcher()
             {
                 delegates = matcherGroupDefinition.matchers.Select(x => ParseMatcher(parsedSplit, x)).ToList(),
-                combiner = ParseCombiner(matcherGroupDefinition.combiner)
+                combiner = Helper.ParseCombiner(matcherGroupDefinition.combiner)
             };
         }
 
@@ -188,44 +196,6 @@ namespace Splitio.Services.Parsing
             }
 
             return attributeMatcher;
-        }
-
-        private static CombinerEnum ParseCombiner(string combinerEnum)
-        {
-            _ = Enum.TryParse(combinerEnum, out CombinerEnum result);
-
-            return result;
-        }
-
-        private static List<ConditionWithLogic> GetDefaultConditions()
-        {
-            return new List<ConditionWithLogic>
-            {
-                new ConditionWithLogic()
-                {
-                    conditionType = ConditionType.WHITELIST,
-                    label = "unsupported matcher type",
-                    partitions = new List<PartitionDefinition>
-                    {
-                        new PartitionDefinition
-                        {
-                            size = 100,
-                            treatment = "control"
-                        }
-                    },
-                    matcher = new CombiningMatcher
-                    {
-                        combiner = CombinerEnum.AND,
-                        delegates = new List<AttributeMatcher>
-                        {
-                            new AttributeMatcher
-                            {
-                                matcher = new AllKeysMatcher(),
-                            }
-                        }
-                    }
-                }
-            };
         }
     }
 }
