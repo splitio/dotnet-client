@@ -5,7 +5,6 @@ using Splitio.Redis.Services.Common;
 using Splitio.Redis.Services.Domain;
 using Splitio.Redis.Services.Events.Classes;
 using Splitio.Redis.Services.Impressions.Classes;
-using Splitio.Redis.Services.Parsing.Classes;
 using Splitio.Redis.Services.Shared;
 using Splitio.Redis.Telemetry.Storages;
 using Splitio.Services.Cache.Interfaces;
@@ -15,6 +14,7 @@ using Splitio.Services.Evaluator;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
+using Splitio.Services.Parsing;
 using Splitio.Services.Shared.Classes;
 
 namespace Splitio.Redis.Services.Client.Classes
@@ -83,7 +83,7 @@ namespace Splitio.Redis.Services.Client.Classes
             BuildTelemetryStorage();
 
             _segmentCacheConsumer = new RedisSegmentCache(_redisAdapter, _config.RedisUserPrefix);
-            _splitParser = new RedisSplitParser(_segmentCacheConsumer);
+            _splitParser = new SplitParser(_segmentCacheConsumer);
             _featureFlagCacheConsumer = new RedisSplitCache(_redisAdapter, _splitParser, _config.RedisUserPrefix);
             _blockUntilReadyService = new RedisBlockUntilReadyService(_redisAdapter);
             _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCacheConsumer, _blockUntilReadyService);

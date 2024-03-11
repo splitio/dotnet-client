@@ -8,5 +8,6 @@
         public static string Exception => "exception";
         public static string TrafficAllocationFailed => "not in split";
         public static string ClientNotReady => "not ready";
+        public static string UnsupportedMatcherType => "unsupported matcher type";
     }
 }
