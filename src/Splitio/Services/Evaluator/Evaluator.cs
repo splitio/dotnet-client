@@ -1,4 +1,5 @@
-﻿using Splitio.Domain;
+﻿using Splitio.CommonLibraries;
+using Splitio.Domain;
 using Splitio.Enums;
 using Splitio.Enums.Extensions;
 using Splitio.Services.Cache.Interfaces;
@@ -11,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Evaluator
@@ -35,6 +37,7 @@ namespace Splitio.Services.Evaluator
         #region Public Sync Methods
         public List<TreatmentResult> EvaluateFeatures(API method, Key key, List<string> featureNames, Dictionary<string, object> attributes = null, bool trackLatency = true)
         {
+            LogsToTrackLatency("Starting Evaluator", "");
             var treatmentsForFeatures = new List<TreatmentResult>();
 
             try
@@ -43,6 +46,7 @@ namespace Splitio.Services.Evaluator
                 clock.Start();
 
                 var splits = _featureFlagCacheConsumer.FetchMany(featureNames);
+                LogsToTrackLatency("Feature Flag fetched from cache passed", "");
 
                 foreach (var feature in featureNames)
                 {
@@ -51,6 +55,7 @@ namespace Splitio.Services.Evaluator
                         var split = splits.FirstOrDefault(s => feature.Equals(s?.name));
 
                         var result = EvaluateTreatment(method, key, split, feature, attributes: attributes);
+                        LogsToTrackLatency($"Evaluated treatment passed", split.name);
 
                         treatmentsForFeatures.Add(result);
                     }
@@ -107,6 +112,7 @@ namespace Splitio.Services.Evaluator
         #region Public Async Methods
         public async Task<List<TreatmentResult>> EvaluateFeaturesAsync(API method, Key key, List<string> featureNames, Dictionary<string, object> attributes = null, bool trackLatency = true)
         {
+            LogsToTrackLatency("Starting Evaluator", "");
             var treatmentsForFeatures = new List<TreatmentResult>();
 
             try
@@ -115,6 +121,7 @@ namespace Splitio.Services.Evaluator
                 clock.Start();
 
                 var splits = await _featureFlagCacheConsumer.FetchManyAsync(featureNames);
+                LogsToTrackLatency("Feature Flag fetched from cache passed", "");
 
                 foreach (var feature in featureNames)
                 {
@@ -123,6 +130,7 @@ namespace Splitio.Services.Evaluator
                         var split = splits.FirstOrDefault(s => feature.Equals(s?.name));
 
                         var result = await EvaluateTreatmentAsync(method, key, split, feature, attributes: attributes);
+                        LogsToTrackLatency($"Evaluated treatment passed", split.name);
 
                         treatmentsForFeatures.Add(result);
                     }
@@ -382,6 +390,11 @@ namespace Splitio.Services.Evaluator
             }
 
             return ffNamesToReturn.ToList();
+        }
+
+        private void LogsToTrackLatency(string message, string flagName)
+        {
+            _log.Info($"[SDKL][{Thread.CurrentThread.ManagedThreadId}][Evalutor][{flagName}] {message} at {CurrentTimeHelper.CurrentTimeMillis()} ");
         }
         #endregion
     }

@@ -1,4 +1,5 @@
-﻿using Splitio.Domain;
+﻿using Splitio.CommonLibraries;
+using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
@@ -8,6 +9,7 @@ using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
@@ -188,5 +190,10 @@ namespace Splitio.Services.Impressions.Classes
             _telemetryRuntimeProducer.RecordImpressionsStats(ImpressionsEnum.ImpressionsQueued, total - dropped);
         }
         #endregion
+
+        private void LogsToTrackLatency(string message, string flagName)
+        {
+            _logger.Info($"[SDKL][{Thread.CurrentThread.ManagedThreadId}][IM][{flagName}] {message} at {CurrentTimeHelper.CurrentTimeMillis()} ");
+        }
     }
 }

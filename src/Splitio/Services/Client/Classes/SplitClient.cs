@@ -1,4 +1,5 @@
-﻿using Splitio.Constants;
+﻿using Splitio.CommonLibraries;
+using Splitio.Constants;
 using Splitio.Domain;
 using Splitio.Enums.Extensions;
 using Splitio.Services.Cache.Filter;
@@ -23,6 +24,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
@@ -435,15 +437,24 @@ namespace Splitio.Services.Client.Classes
         #region Private Async Methods
         private async Task<List<TreatmentResult>> GetTreatmentsAsync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes)
         {
+            var namesString = string.Join(",", features);
             try
             {
+                LogsToTrackLatency("Starting evaluation", namesString);
+
                 features = _clientExtensionService.TreatmentsValidations(method, key, features, _log, out List<TreatmentResult> controlTreatments);
 
                 if (controlTreatments != null) return controlTreatments;
 
+                LogsToTrackLatency("Validations passed", namesString);
+
                 var treatments = await _evaluator.EvaluateFeaturesAsync(method, key, features, attributes);
 
+                LogsToTrackLatency("Evaluator passed", namesString);
+
                 await TrackImpressionsAsync(treatments, key);
+
+                LogsToTrackLatency("Track Imp passed", namesString);
 
                 return treatments;
             }
@@ -453,6 +464,10 @@ namespace Splitio.Services.Client.Classes
 
                 _log.Warn("Something went wrong evaluating features.", ex);
                 return _clientExtensionService.ReturnControl(features);
+            }
+            finally
+            {
+                LogsToTrackLatency("Evaluation finished", namesString);
             }
         }
 
@@ -489,15 +504,25 @@ namespace Splitio.Services.Client.Classes
         #region Private Methods
         private List<TreatmentResult> GetTreatmentsSync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
+            var namesString = string.Join(",", features);
+            var start = CurrentTimeHelper.CurrentTimeMillis();
             try
             {
+                LogsToTrackLatency("Starting evaluation", namesString, start);
+
                 features = _clientExtensionService.TreatmentsValidations(method, key, features, _log, out List<TreatmentResult> controlTreatments);
 
                 if (controlTreatments != null) return controlTreatments;
 
+                LogsToTrackLatency("Validations passed", namesString);
+
                 var treatments = _evaluator.EvaluateFeatures(method, key, features, attributes);
 
+                LogsToTrackLatency("Evaluator passed", namesString);
+
                 TrackImpressions(treatments, key);
+
+                LogsToTrackLatency("Track Imp passed", namesString);
 
                 return treatments;
             }
@@ -507,6 +532,11 @@ namespace Splitio.Services.Client.Classes
 
                 _log.Warn("Something went wrong evaluating features.", ex);
                 return _clientExtensionService.ReturnControl(features);
+            }
+            finally
+            {
+                var end = CurrentTimeHelper.CurrentTimeMillis();
+                LogsToTrackLatency($"This evaluation took {end - start} and passed", namesString, end);
             }
         }
 
@@ -569,6 +599,11 @@ namespace Splitio.Services.Client.Classes
             if (result == null) return new SplitResult(Gral.Control, null);
 
             return new SplitResult(result.Treatment, result.Config);
+        }
+
+        private void LogsToTrackLatency(string message, string flagName, long? timestamp = null)
+        {
+            _log.Info($"[SDKL][{Thread.CurrentThread.ManagedThreadId}][Client][{flagName}] {message} at {timestamp ?? CurrentTimeHelper.CurrentTimeMillis()} ");
         }
         #endregion
     }
