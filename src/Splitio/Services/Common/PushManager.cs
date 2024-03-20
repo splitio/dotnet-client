@@ -56,19 +56,19 @@ namespace Splitio.Services.Common
 
                 if (!response.PushEnabled.Value && !response.Retry.Value)
                 {
-                    _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.FORCED_STOP);
+                    await _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.FORCED_STOP);
                     return;
                 }
 
-                if (response.PushEnabled.Value && _sseHandler.Start(response.Token, response.Channels))
+                if (response.PushEnabled.Value)
                 {
+                    _sseHandler.Start(response.Token, response.Channels);
                     _intervalToken = response.Expiration.Value;
-                    _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.TokenRefresh, CalcularteNextTokenExpiration(_intervalToken)));
                     return;
                 }
 
                 if (!_statusManager.IsDestroyed() && response.Retry.Value)
-                    _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
+                    await _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
             }
             catch (Exception ex)
             {
@@ -96,7 +96,8 @@ namespace Splitio.Services.Common
                 _log.Debug("ScheduleConnectionReset task is running. Stoping and creating a new one.");
                 await _refreshTokenTask.StopAsync();
             }
-
+            
+            _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.TokenRefresh, CalcularteNextTokenExpiration(_intervalToken)));
             var intervalTime = Convert.ToInt32(_intervalToken) * 1000;
             _log.Debug($"ScheduleNextTokenRefresh interval time : {intervalTime} milliseconds.");
 

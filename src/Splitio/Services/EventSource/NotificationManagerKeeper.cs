@@ -3,7 +3,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
-using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource
 {
@@ -11,8 +11,7 @@ namespace Splitio.Services.EventSource
     {
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly ISplitLogger _log;
-        private readonly BlockingCollection<StreamingStatus> _streamingStatusQueue;
-        private readonly object _eventOccupancyLock = new object();
+        private readonly SplitQueue<StreamingStatus> _streamingStatusQueue;
         private readonly object _getAndSetStreaming = new object();
         private readonly object _getAndSetControl = new object();
 
@@ -23,10 +22,10 @@ namespace Splitio.Services.EventSource
         private SSEClientStatusMessage _currentStatus;
         private ControlType _backendStatus;
 
-        public NotificationManagerKeeper(ITelemetryRuntimeProducer telemetryRuntimeProducer, BlockingCollection<StreamingStatus> streamingStatusQueue)
+        public NotificationManagerKeeper(ITelemetryRuntimeProducer telemetryRuntimeProducer, SplitQueue<StreamingStatus> streamingStatusQueue)
         {
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
-            _streamingStatusQueue = streamingStatusQueue;
+            _streamingStatusQueue = streamingStatusQueue; 
             _log = WrapperAdapter.Instance().GetLogger(typeof(NotificationManagerKeeper));
             _publisherAvailable = true;
             _currentStatus = SSEClientStatusMessage.INITIALIZATION_IN_PROGRESS;
@@ -34,7 +33,7 @@ namespace Splitio.Services.EventSource
         }
 
         #region Public Methods
-        public void HandleSseStatus(SSEClientStatusMessage newStatus)
+        public async Task HandleSseStatus(SSEClientStatusMessage newStatus)
         {
             _log.Debug($"New streaming status message received: {newStatus}. Current status: {_currentStatus}.");
 
@@ -49,8 +48,8 @@ namespace Splitio.Services.EventSource
                 case SSEClientStatusMessage.FIRST_EVENT:
                     if (_currentStatus.Equals(SSEClientStatusMessage.CONNECTED))
                     {
-                        _streamingStatusQueue.Add(StreamingStatus.STREAMING_READY);
                         _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SSEConnectionEstablished));
+                        await _streamingStatusQueue.EnqueueAsync(StreamingStatus.STREAMING_READY);
                     }
                     break;
                 case SSEClientStatusMessage.RETRYABLE_ERROR:
@@ -59,14 +58,14 @@ namespace Splitio.Services.EventSource
                         CompareAndSet(SSEClientStatusMessage.RETRYABLE_ERROR, newStatus) ||
                         CompareAndSet(SSEClientStatusMessage.FORCED_STOP, newStatus))
                     {
-                        _streamingStatusQueue.Add(StreamingStatus.STREAMING_BACKOFF);
+                        await _streamingStatusQueue.EnqueueAsync(StreamingStatus.STREAMING_BACKOFF);
                     }
                     break;
                 case SSEClientStatusMessage.NONRETRYABLE_ERROR:
                     if (CompareAndSet(SSEClientStatusMessage.CONNECTED, newStatus) ||
                         CompareAndSet(SSEClientStatusMessage.RETRYABLE_ERROR, newStatus))
                     {
-                        _streamingStatusQueue.Add(StreamingStatus.STREAMING_OFF);
+                        await _streamingStatusQueue.EnqueueAsync(StreamingStatus.STREAMING_OFF);
                     }
                     break;
                 case SSEClientStatusMessage.FORCED_STOP:
@@ -74,7 +73,7 @@ namespace Splitio.Services.EventSource
                         CompareAndSet(SSEClientStatusMessage.CONNECTED, newStatus) ||
                         CompareAndSet(SSEClientStatusMessage.RETRYABLE_ERROR, newStatus))
                     {
-                        _streamingStatusQueue.Add(StreamingStatus.STREAMING_DOWN);
+                        await _streamingStatusQueue.EnqueueAsync(StreamingStatus.STREAMING_DOWN);
                     }
                     break;
                 default:
@@ -83,15 +82,15 @@ namespace Splitio.Services.EventSource
             }
         }
 
-        public void HandleIncomingEvent(IncomingNotification notification)
+        public async Task HandleIncomingEvent(IncomingNotification notification)
         {
             switch (notification.Type)
             {
                 case NotificationType.CONTROL:
-                    ProcessEventControl(notification);
+                    await ProcessEventControlAsync(notification);
                     break;
                 case NotificationType.OCCUPANCY:
-                    ProcessEventOccupancy(notification);
+                    await ProcessEventOccupancyAsync(notification);
                     break;
                 default:
                     _log.Error($"Incorrect notification type: {notification.Type}");
@@ -101,7 +100,7 @@ namespace Splitio.Services.EventSource
         #endregion
 
         #region Private Methods
-        private void ProcessEventControl(IncomingNotification notification)
+        private async Task ProcessEventControlAsync(IncomingNotification notification)
         {
             if (_backendStatus.Equals(ControlType.STREAMING_DISABLED)) return;
 
@@ -114,7 +113,7 @@ namespace Splitio.Services.EventSource
 
                     if (CompareAndSet(ControlType.STREAMING_RESUMED, controlEvent.ControlType) && _publisherAvailable) // If there are no publishers online, the STREAMING_DOWN message should have already been sent
                     {
-                        _streamingStatusQueue.Add(StreamingStatus.STREAMING_DOWN);
+                        await _streamingStatusQueue.EnqueueAsync(StreamingStatus.STREAMING_DOWN);
                     }
                     break;
                 case ControlType.STREAMING_RESUMED:
@@ -122,14 +121,14 @@ namespace Splitio.Services.EventSource
 
                     if (CompareAndSet(ControlType.STREAMING_PAUSED, controlEvent.ControlType) && _publisherAvailable)
                     {
-                        _streamingStatusQueue.Add(StreamingStatus.STREAMING_READY);
+                        await _streamingStatusQueue.EnqueueAsync(StreamingStatus.STREAMING_READY);
                     }
                     break;
                 case ControlType.STREAMING_DISABLED:
                     _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.StreamingStatus, (int)StreamingStatusEnum.Disabled));
 
                     _backendStatus = ControlType.STREAMING_DISABLED;
-                    _streamingStatusQueue.Add(StreamingStatus.STREAMING_OFF);
+                    await _streamingStatusQueue.EnqueueAsync(StreamingStatus.STREAMING_OFF);
                     break;
                 default:
                     _log.Error($"Incorrect control type. {controlEvent.ControlType}");
@@ -137,24 +136,21 @@ namespace Splitio.Services.EventSource
             }
         }
 
-        private void ProcessEventOccupancy(IncomingNotification notification)
+        private async Task ProcessEventOccupancyAsync(IncomingNotification notification)
         {
-            lock (_eventOccupancyLock)
+            var occupancyEvent = (OccupancyNotification)notification;
+
+            UpdatePublishers(occupancyEvent.Channel, occupancyEvent.Metrics.Publishers);
+
+            if (!ArePublishersAvailable() && _publisherAvailable && _backendStatus.Equals(ControlType.STREAMING_RESUMED))
             {
-                var occupancyEvent = (OccupancyNotification)notification;
-
-                UpdatePublishers(occupancyEvent.Channel, occupancyEvent.Metrics.Publishers);
-
-                if (!ArePublishersAvailable() && _publisherAvailable && _backendStatus.Equals(ControlType.STREAMING_RESUMED))
-                {
-                    _publisherAvailable = false;
-                    _streamingStatusQueue.Add(StreamingStatus.STREAMING_DOWN);
-                }
-                else if (ArePublishersAvailable() && !_publisherAvailable && _backendStatus.Equals(ControlType.STREAMING_RESUMED))
-                {
-                    _publisherAvailable = true;
-                    _streamingStatusQueue.Add(StreamingStatus.STREAMING_READY);
-                }
+                _publisherAvailable = false;
+                await _streamingStatusQueue.EnqueueAsync(StreamingStatus.STREAMING_DOWN);
+            }
+            else if (ArePublishersAvailable() && !_publisherAvailable && _backendStatus.Equals(ControlType.STREAMING_RESUMED))
+            {
+                _publisherAvailable = true;
+                await _streamingStatusQueue.EnqueueAsync(StreamingStatus.STREAMING_READY);
             }
         }
 

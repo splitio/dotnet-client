@@ -1,54 +1,39 @@
 ﻿using Splitio.Services.Logger;
-using Splitio.Services.Tasks;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource.Workers
 {
     public abstract class BaseWorker : IWorker
     {
         protected readonly string _name;
-        protected readonly ISplitTask _task;
         protected readonly ISplitLogger _log;
+        protected bool _running;
 
-        protected CancellationTokenSource _cts;
-
-        public BaseWorker(string name, ISplitLogger log, ISplitTask task)
+        public BaseWorker(string name, ISplitLogger log)
         {
             _name = name;
             _log = log;
-            _task = task;
-            _task.SetFunction(ExecuteAsync);
         }
 
         public void Start()
         {
-            try
+            if (_running)
             {
-                _cts = new CancellationTokenSource();
-                _task.Start();
+                _log.Debug($"{_name} is already running.");
+                return;
             }
-            catch (Exception ex)
-            {
-                _log.Debug($"{_name}.Start threw an Exception", ex);
-            }
+
+            _running = true;
         }
 
-        public async Task StopAsync()
+        public void Stop()
         {
-            try
+            if (!_running)
             {
-                _cts?.Cancel();
-                await _task.StopAsync();
-                _cts?.Dispose();
+                _log.Debug($"{_name} is not running.");
+                return;
             }
-            catch (Exception ex)
-            {
-                _log.Debug($"{_name}.Stop threw an Exception: {ex.Message}");
-            }
-        }
 
-        protected abstract Task ExecuteAsync();
+            _running = false;
+        }
     }
 }

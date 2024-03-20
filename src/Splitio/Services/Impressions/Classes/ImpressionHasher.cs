@@ -15,7 +15,7 @@ namespace Splitio.Services.Impressions.Classes
             return Hash(key, 0);
         }
 
-        public ulong Hash(string key, uint seed)
+        public static ulong Hash(string key, uint seed)
         {
             Murmur128 murmur128 = MurmurHash.Create128(seed: seed, preference: AlgorithmPreference.X64);
             byte[] keyToBytes = Encoding.ASCII.GetBytes(key);
@@ -24,12 +24,12 @@ namespace Splitio.Services.Impressions.Classes
             return BitConverter.ToUInt64(seedResult, 0);
         }
 
-        private string UnknowIfNull(string value)
+        private static string UnknowIfNull(string value)
         {
             return string.IsNullOrEmpty(value) ? "UNKNOWN" : value;
         }
 
-        private long ZeroIfNull(long? value)
+        private static long ZeroIfNull(long? value)
         {
             return value == null ? 0 : value.Value;
         }

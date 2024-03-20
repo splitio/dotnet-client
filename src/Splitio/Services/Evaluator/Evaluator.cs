@@ -17,7 +17,7 @@ namespace Splitio.Services.Evaluator
 {
     public class Evaluator : IEvaluator
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(Evaluator));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(Evaluator));
         
         private readonly ISplitter _splitter;
         private readonly IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
@@ -322,14 +322,14 @@ namespace Splitio.Services.Evaluator
             return new TreatmentResult(split.name, Labels.DefaultRule, split.defaultTreatment, split.changeNumber);
         }
 
-        private static TreatmentResult EvaluateFeatureException(Exception e, string featureName)
+        private TreatmentResult EvaluateFeatureException(Exception e, string featureName)
         {
             _log.Error($"Exception caught getting treatment for feature flag: {featureName}", e);
 
             return new TreatmentResult(featureName, Labels.Exception, Constants.Gral.Control, exception: true);
         }
 
-        private static List<TreatmentResult> EvaluateFeaturesException(Exception e, List<string> featureNames)
+        private List<TreatmentResult> EvaluateFeaturesException(Exception e, List<string> featureNames)
         {
             var toReturn = new List<TreatmentResult>();
 
@@ -343,7 +343,7 @@ namespace Splitio.Services.Evaluator
             return toReturn;
         }
 
-        private static bool IsSplitNotFound(API method, string featureFlagName, ParsedSplit parsedSplit, out TreatmentResult result)
+        private bool IsSplitNotFound(API method, string featureFlagName, ParsedSplit parsedSplit, out TreatmentResult result)
         {
             result = null;
 
@@ -367,7 +367,7 @@ namespace Splitio.Services.Evaluator
             return treatmentResult;
         }
 
-        private static List<string> GetAndValidateFeatureFlagNamesByFlagSets(API method, Dictionary<string, HashSet<string>> namesByFlagSets)
+        private List<string> GetAndValidateFeatureFlagNamesByFlagSets(API method, Dictionary<string, HashSet<string>> namesByFlagSets)
         {
             var ffNamesToReturn = new HashSet<string>();
             foreach (var item in namesByFlagSets)

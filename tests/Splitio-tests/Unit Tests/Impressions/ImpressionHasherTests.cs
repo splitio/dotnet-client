@@ -103,8 +103,6 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         [TestMethod]
         public void TestingMurmur128WithCsv()
         {
-            var impressionHasher = new ImpressionHasher();
-
             var fileContent = File.ReadAllText($"{rootFilePath}murmur3-64-128.csv");
             var contents = fileContent.Split(new string[] { "\n" }, StringSplitOptions.None);
             var csv = contents.Select(x => x.Split(',')).ToArray();
@@ -118,7 +116,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 var seed = uint.Parse(item[1]);
                 var expected = ulong.Parse(item[2]);
 
-                Assert.AreEqual(expected, impressionHasher.Hash(key, seed));
+                Assert.AreEqual(expected, ImpressionHasher.Hash(key, seed));
             }
         }
     }

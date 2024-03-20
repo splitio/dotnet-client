@@ -5,7 +5,7 @@ namespace Splitio.Services.EventSource
 {
     public interface IEventSourceClient
     {
-        bool Connect(string url);
+        void Connect(string url);
         Task DisconnectAsync();
 
         event EventHandler<EventReceivedEventArgs> EventReceived;
