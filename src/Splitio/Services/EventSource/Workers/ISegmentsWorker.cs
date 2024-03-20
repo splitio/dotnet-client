@@ -1,7 +1,9 @@
-﻿namespace Splitio.Services.EventSource.Workers
+﻿using System.Threading.Tasks;
+
+namespace Splitio.Services.EventSource.Workers
 {
     public interface ISegmentsWorker : IWorker
     {
-        void AddToQueue(long changeNumber, string segmentName);
+        Task AddToQueue(long changeNumber, string segmentName);
     }
 }

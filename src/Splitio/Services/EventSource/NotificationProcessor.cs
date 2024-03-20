@@ -2,6 +2,7 @@
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource
 {
@@ -18,7 +19,7 @@ namespace Splitio.Services.EventSource
             _segmentsWorker = segmentsWorker;
         }
 
-        public void Proccess(IncomingNotification notification)
+        public async Task Proccess(IncomingNotification notification)
         {
             try
             {

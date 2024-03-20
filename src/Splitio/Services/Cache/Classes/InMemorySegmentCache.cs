@@ -10,7 +10,7 @@ namespace Splitio.Services.Cache.Classes
 {
     public class InMemorySegmentCache : ISegmentCache
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemorySegmentCache));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemorySegmentCache));
 
         private readonly ConcurrentDictionary<string, Segment> _segments;
 

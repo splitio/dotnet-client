@@ -14,7 +14,7 @@ namespace Splitio.Services.Client.Classes
 {
     public class SplitManager : ISplitManager
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitManager));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitManager));
 
         private readonly IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
         private readonly ISplitNameValidator _splitNameValidator;
@@ -117,7 +117,7 @@ namespace Splitio.Services.Client.Classes
             return result.Success;
         }
 
-        private static SplitView GetFeatureFlagView(ParsedSplit featureFlag, string featureName)
+        private SplitView GetFeatureFlagView(ParsedSplit featureFlag, string featureName)
         {
             if (featureFlag == null)
             {
