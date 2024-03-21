@@ -1,7 +1,7 @@
-﻿#if NET_LATEST
-using BitFaster.Caching.Lru;
-#else
+﻿#if NET45
 using Splitio.Services.Cache.Lru;
+#else
+using BitFaster.Caching.Lru;
 #endif
 using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
@@ -17,10 +17,10 @@ namespace Splitio.Services.Impressions.Classes
 
         private const int DefaultCacheSize = 500000;
 
-#if NET_LATEST
-        private readonly ConcurrentLru<ulong, long> _cache;
-#else
+#if NET45
         private readonly LruCache<ulong, long> _cache;
+#else
+        private readonly ConcurrentLru<ulong, long> _cache;
 #endif
 
         private readonly IImpressionHasher _impressionHasher;
@@ -28,10 +28,10 @@ namespace Splitio.Services.Impressions.Classes
         public ImpressionsObserver(IImpressionHasher impressionHasher)
         {
             _impressionHasher = impressionHasher;
-#if NET_LATEST
-            _cache = new ConcurrentLru<ulong, long>(DefaultCacheSize);
-#else
+#if NET45
             _cache = new LruCache<ulong, long>(DefaultCacheSize);
+#else
+            _cache = new ConcurrentLru<ulong, long>(DefaultCacheSize);
 #endif
         }
 
@@ -48,15 +48,15 @@ namespace Splitio.Services.Impressions.Classes
 
                 ulong hash = _impressionHasher.Process(impression);
 
-#if NET_LATEST
-                if (_cache.TryGet(hash, out long previous))
+#if NET45
+                if (_cache.TryGetValue(hash, out long previous))
                 {
                     toReturn = Math.Min(previous, impression.time);
                 }
 
                 _cache.AddOrUpdate(hash, impression.time);
 #else
-                if (_cache.TryGetValue(hash, out long previous))
+                if (_cache.TryGet(hash, out long previous))
                 {
                     toReturn = Math.Min(previous, impression.time);
                 }
