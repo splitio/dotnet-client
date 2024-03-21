@@ -34,6 +34,10 @@
     <PackageReference Include="BitFaster.Caching" Version="2.4.1" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <PackageReference Include="BitFaster.Caching" Version="2.4.1" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'net45' Or '$(TargetFramework)' == 'net461'">
     <PackageReference Include="Common.Logging" version="3.3.1" />
     <PackageReference Include="Common.Logging.Core" version="3.3.1" />
