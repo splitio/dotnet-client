@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Shared.Classes
@@ -17,6 +18,16 @@ namespace Splitio.Services.Shared.Classes
         public SplitQueue()
         {
             _queue = new ConcurrentQueue<T>();
+        }
+
+        public async Task EnqueueAsync(List<T> items)
+        {
+            foreach (var item in items)
+            {
+                _queue.Enqueue(item);
+            }
+
+            await NotifyAsync();
         }
 
         public async Task EnqueueAsync(T item)
