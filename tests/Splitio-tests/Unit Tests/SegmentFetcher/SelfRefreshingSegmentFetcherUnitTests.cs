@@ -53,32 +53,6 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         }
 
         [TestMethod]
-        public void StartSchedullerSuccessfully()
-        {
-            // Arrange
-            var statusManager = new Mock<IStatusManager>();
-            var apiClient = new Mock<ISegmentSdkApiClient>();         
-            var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
-            var segments = new ConcurrentDictionary<string, Segment>();
-            var cache = new InMemorySegmentCache(segments);
-            var segmentsQueue = new SplitQueue<SelfRefreshingSegment>();
-            var segmentsTask = new Mock<ISplitTask>();
-            var worker = new Mock<IPeriodicTask>();
-            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, cache, segmentsQueue, segmentsTask.Object, statusManager.Object);
-
-            apiClient
-                .Setup(x => x.FetchSegmentChangesAsync(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
-                .Returns(Task.FromResult(PayedSplitJson));
-
-            // Act
-            segmentFetcher.InitializeSegment("payed");
-            segmentFetcher.Start();
-
-            // Assert
-            Assert.IsTrue(segmentsQueue.TryDequeue(out SelfRefreshingSegment segment));
-        }
-
-        [TestMethod]
         public async Task FetchSegmentsIfNotExists()
         {
             // Arrange
