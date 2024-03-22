@@ -10,30 +10,40 @@ namespace Splitio.Services.EventSource
 {
     public class NotificationParser : INotificationParser
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(NotificationParser));
         private static readonly string EventMessageType = "event: message";
+        private static readonly string EventMessageWsType = "event:message";
         private static readonly string EventErrorType = "event: error";
+        private static readonly string EventErrorWsType = "event:error";
 
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(NotificationParser));
+        
         public IncomingNotification Parse(string notification)
         {
-            if (notification.Contains(EventMessageType))
+            try
             {
-                if (notification.Contains(Constants.Push.OccupancyPrefix))
+                if (notification.Contains(EventMessageType) || notification.Contains(EventMessageWsType))
                 {
-                    return ParseControlChannelMessage(notification);
-                }
+                    if (notification.Contains(Constants.Push.OccupancyPrefix))
+                    {
+                        return ParseControlChannelMessage(notification);
+                    }
 
-                return ParseMessage(notification);
+                    return ParseMessage(notification);
+                }
+                else if (notification.Contains(EventErrorType) || notification.Contains(EventErrorWsType))
+                {
+                    return ParseError(notification);
+                }
             }
-            else if (notification.Contains(EventErrorType))
+            catch (Exception ex)
             {
-                return ParseError(notification);
+                _log.Warn($"Something went wrong parsing the notification: {notification}.", ex);
             }
 
             return null;
         }
 
-        private static IncomingNotification ParseMessage(string notificationString)
+        private IncomingNotification ParseMessage(string notificationString)
         {
             var notificationData = GetNotificationData<NotificationData>(notificationString);
             var data = JsonConvert.DeserializeObject<IncomingNotification>(notificationData.Data);
@@ -105,12 +115,13 @@ namespace Splitio.Services.EventSource
         private static T GetNotificationData<T>(string notificationString)
         {
             var notificationArray = notificationString.Split('\n');
-            var index = Array.FindIndex(notificationArray, row => row.Contains("data: "));
+            var index = Array.FindIndex(notificationArray, row => row.Contains("data:"));
+            var data = notificationArray[index].Replace("data:", string.Empty);
 
-            return JsonConvert.DeserializeObject<T>(notificationArray[index].Replace("data: ", string.Empty));
+            return JsonConvert.DeserializeObject<T>(data.Trim());
         }
 
-        private static IncomingNotification DecompressData(SplitChangeNotification notification)
+        private IncomingNotification DecompressData(SplitChangeNotification notification)
         {
             try
             {
