@@ -61,8 +61,6 @@ namespace Splitio.Services.SegmentFetcher.Classes
             var segment = new SelfRefreshingSegment(name, _segmentChangeFetcher, _segmentCache, _statusManager);
 
             if (!_segments.TryAdd(name, segment)) return;
-            
-            _segmentsQueue.EnqueueAsync(segment);
 
             if (_log.IsDebugEnabled)
             {
