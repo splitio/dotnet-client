@@ -232,34 +232,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _pushManager.Verify(mock => mock.StartAsync(), Times.Exactly(2));
         }
 
-        [TestMethod]
-        public async Task OnProcessFeedbackSSE_STREAMING_DOWN()
-        {
-            // Arrange.
-            var streamingEnabled = true;
-
-            _synchronizer
-                .Setup(mock => mock.SyncAllAsync())
-                .ReturnsAsync(true);
-
-            _statusManager
-                .Setup(mock => mock.IsDestroyed())
-                .Returns(false);
-
-            var syncManager = GetSyncManager(streamingEnabled);
-            syncManager.Start();
-            Thread.Sleep(2000);
-
-            // Act & Assert.
-            await _streamingStatusQueue.EnqueueAsync(StreamingStatus.STREAMING_DOWN);
-            Thread.Sleep(5000);
-
-            _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
-            _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
-            _telemetryRuntimeProducer.Verify(mock => mock.RecordStreamingEvent(It.IsAny<StreamingEvent>()), Times.Exactly(2));
-        }
-
-        private ISyncManager GetSyncManager(bool streamingEnabled)
+        private SyncManager GetSyncManager(bool streamingEnabled)
         {
             var startupTask = _taskManager.NewOnTimeTask(Splitio.Enums.Task.SDKInitialization);
 

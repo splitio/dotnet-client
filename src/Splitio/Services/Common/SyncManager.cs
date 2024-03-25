@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using YamlDotNet.Serialization.NodeTypeResolvers;
 
 namespace Splitio.Services.Common
 {
@@ -28,12 +29,12 @@ namespace Splitio.Services.Common
         private readonly ITasksManager _tasksManager;
 
         private readonly ITelemetrySyncTask _telemetrySyncTask;
-        private readonly CancellationTokenSource _ctsStreaming;
         private readonly IBackOff _backOff;
         private readonly ISplitTask _startupTask;
         private readonly SplitQueue<StreamingStatus> _streamingStatusQueue;
 
         private long _startSessionMs;
+        private bool _streamingOff;
 
         public SyncManager(bool streamingEnabled,
             ISynchronizer synchronizer,
@@ -56,7 +57,6 @@ namespace Splitio.Services.Common
             _statusManager = statusManager;
             _tasksManager = tasksManager;
             _telemetrySyncTask = telemetrySyncTask;
-            _ctsStreaming = new CancellationTokenSource();
             _backOff = backOff;
             _streamingStatusQueue = streamingStatusQueue;
             _streamingStatusQueue.AddObserver(this);
@@ -109,7 +109,7 @@ namespace Splitio.Services.Common
 
         public async Task Notify()
         {
-            if (!_streamingStatusQueue.TryDequeue(out StreamingStatus status)) return;
+            if (_streamingOff || !_streamingStatusQueue.TryDequeue(out StreamingStatus status)) return;
 
             _log.Debug($"Streaming status received: {status}");
 
@@ -146,8 +146,7 @@ namespace Splitio.Services.Common
                     await _pushManager.StopAsync();
                     _synchronizer.StartPeriodicFetching();
                     _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Polling));
-                    _ctsStreaming.Cancel();
-                    _ctsStreaming.Dispose();
+                    _streamingOff = true;
                     break;
                 default:
                     _log.Info($"OnStreamingStatus: Unrecognized status - {status}");
@@ -205,8 +204,6 @@ namespace Splitio.Services.Common
         private List<Task> GetShutdownTasks()
         {
             _telemetryRuntimeProducer.RecordSessionLength(CurrentTimeHelper.CurrentTimeMillis() - _startSessionMs);
-            _ctsStreaming.Cancel();
-            _ctsStreaming.Dispose();
 
             return new List<Task>
             {
