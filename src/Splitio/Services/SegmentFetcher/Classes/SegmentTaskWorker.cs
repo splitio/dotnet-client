@@ -1,6 +1,7 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,15 +10,14 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class SegmentTaskWorker : IQueueObserver
     {
-        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SegmentTaskWorker));
-        
+        private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("SegmentTaskWorker");
         private readonly int _numberOfParallelTasks;
         private readonly SplitQueue<SelfRefreshingSegment> _queue;
 
         public SegmentTaskWorker(int numberOfParallelTasks,
             SplitQueue<SelfRefreshingSegment> queue)
         {
-            _numberOfParallelTasks = 2;
+            _numberOfParallelTasks = numberOfParallelTasks;
             _queue = queue;
         }
 
@@ -40,6 +40,10 @@ namespace Splitio.Services.SegmentFetcher.Classes
             try
             {
                 await segment.FetchSegmentAsync(new FetchOptions());
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Something went wrong fetching {segment.Name} segment.", ex);
             }
             finally
             {
