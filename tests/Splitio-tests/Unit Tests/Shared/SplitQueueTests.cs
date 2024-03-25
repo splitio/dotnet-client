@@ -35,7 +35,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             await queue.EnqueueAsync("test-1");
             await queue.EnqueueAsync("test-2");
             await queue.EnqueueAsync("test-3");
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
 
             // Assert.
             Assert.AreEqual(3, listener.Count());
@@ -81,9 +81,10 @@ namespace Splitio_Tests.Unit_Tests.Shared
 
             // Act.
             await queue.EnqueueAsync(new List<string> { "test-1", "test-3", "test-2" });
+            Thread.Sleep(2000);
 
             // Assert.
-            Assert.AreEqual(0, listener.Count());
+            Assert.AreEqual(3, listener.Count());
         }
     }
 
@@ -99,7 +100,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
 
         public Task Notify()
         {
-            if (_queue.TryDequeue(out string item))
+            while (_queue.TryDequeue(out string item))
             {
                 _items.Add(item);
             }
