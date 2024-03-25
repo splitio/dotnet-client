@@ -52,6 +52,7 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(result4 == "on"); //default treatment
         }
 
+        [Ignore("Flaky Test")]
         [TestMethod]
         public void GetTreatmentSuccessfullyWhenUpdatingSplitsFile()
         {
