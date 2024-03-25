@@ -160,7 +160,6 @@ namespace Splitio.Services.Common
         private async Task StartStreamingModeAsync()
         {
             _log.Debug("Starting streaming mode...");
-            //_onStreamingStatusTask.Start();
             await _pushManager.StartAsync();
             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.SyncMode, (int)SyncModeEnum.Streaming));
         }

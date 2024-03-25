@@ -26,16 +26,16 @@ namespace Splitio.Services.EventSource
                 switch (notification.Type)
                 {
                     case NotificationType.SPLIT_UPDATE:
-                        _featureFlagsWorker.AddToQueue((SplitChangeNotification)notification);
+                        await _featureFlagsWorker.AddToQueue((SplitChangeNotification)notification);
                         break;
                     case NotificationType.SPLIT_KILL:
                         var skn = (SplitKillNotification)notification;
                         _featureFlagsWorker.Kill(skn);
-                        _featureFlagsWorker.AddToQueue(new SplitChangeNotification { ChangeNumber = skn.ChangeNumber });
+                        await _featureFlagsWorker.AddToQueue(new SplitChangeNotification { ChangeNumber = skn.ChangeNumber });
                         break;
                     case NotificationType.SEGMENT_UPDATE:
                         var sc = (SegmentChangeNotification)notification;
-                        _segmentsWorker.AddToQueue(sc.ChangeNumber, sc.SegmentName);
+                        await _segmentsWorker.AddToQueue(sc.ChangeNumber, sc.SegmentName);
                         break;
                     default:
                         _log.Debug($"Incorrect Event type: {notification}");
