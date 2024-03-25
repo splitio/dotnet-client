@@ -9,7 +9,7 @@ namespace Splitio.Services.Shared.Classes
         private static FactoryInstantiationsService _instance;
         private static readonly object _instanceLock = new object();
         private static readonly object _lock = new object();
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(FactoryInstantiationsService));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(FactoryInstantiationsService));
 
         private readonly ConcurrentDictionary<string, int> _factoryInstantiations;
 

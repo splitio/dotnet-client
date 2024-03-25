@@ -14,7 +14,7 @@ namespace Splitio.Services.Common
 {
     public class AuthApiClient : IAuthApiClient
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(AuthApiClient));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(AuthApiClient));
 
         private readonly ISplitioHttpClient _splitioHttpClient;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;

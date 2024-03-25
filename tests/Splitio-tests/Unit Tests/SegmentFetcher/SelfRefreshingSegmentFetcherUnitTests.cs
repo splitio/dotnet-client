@@ -6,6 +6,7 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.SegmentFetcher.Interfaces;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Services.Tasks;
@@ -31,12 +32,12 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments = new ConcurrentDictionary<string, Segment>();
             var cache = new InMemorySegmentCache(segments);
-            var segmentTaskQueue = new BlockingCollection<SelfRefreshingSegment>(new ConcurrentQueue<SelfRefreshingSegment>());
+            var segmentsQueue = new SplitQueue<SelfRefreshingSegment>();
             var taskManager = new TasksManager(gates);
-            var workerTask = taskManager.NewPeriodicTask(Splitio.Enums.Task.SegmentsWorkerFetcher, 0);
-            var worker = new SegmentTaskWorker(5, segmentTaskQueue, gates, workerTask, taskManager);
+            var worker = new SegmentTaskWorker(5, segmentsQueue);
+            segmentsQueue.AddObserver(worker);
             var segmentsTask = taskManager.NewPeriodicTask(Splitio.Enums.Task.SegmentsFetcher, 10);
-            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, cache, segmentTaskQueue, segmentsTask, worker, gates);
+            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, cache, segmentsQueue, segmentsTask, gates);
             segmentFetcher.Start();
 
             apiClient
@@ -52,42 +53,15 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         }
 
         [TestMethod]
-        public void StartSchedullerSuccessfully()
-        {
-            // Arrange
-            var statusManager = new Mock<IStatusManager>();
-            var apiClient = new Mock<ISegmentSdkApiClient>();         
-            var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
-            var segments = new ConcurrentDictionary<string, Segment>();
-            var cache = new InMemorySegmentCache(segments);
-            var segmentTaskQueue = new BlockingCollection<SelfRefreshingSegment>(new ConcurrentQueue<SelfRefreshingSegment>());
-            var segmentsTask = new Mock<ISplitTask>();
-            var worker = new Mock<IPeriodicTask>();
-            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, cache, segmentTaskQueue, segmentsTask.Object, worker.Object, statusManager.Object);
-
-            apiClient
-                .Setup(x => x.FetchSegmentChangesAsync(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FetchOptions>()))
-                .Returns(Task.FromResult(PayedSplitJson));
-
-            // Act
-            segmentFetcher.InitializeSegment("payed");
-            segmentFetcher.Start();
-
-            // Assert
-            Assert.IsTrue(segmentTaskQueue.TryTake(out SelfRefreshingSegment segment, -1));
-        }
-
-        [TestMethod]
         public async Task FetchSegmentsIfNotExists()
         {
             // Arrange
             var statusManager = new Mock<IStatusManager>();
             var apiFetcher = new Mock<ISegmentChangeFetcher>();
             var cache = new Mock<ISegmentCache>();
-            var segmentTaskQueue = new Mock<BlockingCollection<SelfRefreshingSegment>>();
+            var segmentsQueue = new Mock<SplitQueue<SelfRefreshingSegment>>();
             var segmentsTask = new Mock<ISplitTask>();
-            var worker = new Mock<IPeriodicTask>();
-            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher.Object, cache.Object, segmentTaskQueue.Object, segmentsTask.Object, worker.Object, statusManager.Object);
+            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher.Object, cache.Object, segmentsQueue.Object, segmentsTask.Object, statusManager.Object);
             var segment1 = "segment-1";
             var segment2 = "segment-2";
             var segment3 = "segment-3";

@@ -106,12 +106,12 @@ namespace Splitio.Services.Client.Classes
         private void BuildSplitFetcher()
         {
             var segmentChangeFetcher = new ApiSegmentChangeFetcher(_segmentSdkApiClient);
-            var segmentTaskQueue = new BlockingCollection<SelfRefreshingSegment>(new ConcurrentQueue<SelfRefreshingSegment>());
             var segmentRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SegmentRefreshRate) : _config.SegmentRefreshRate;
-            var workerTask = _tasksManager.NewPeriodicTask(Enums.Task.SegmentsWorkerFetcher, 0);
-            var segmentFetcherWorkerPool = new SegmentTaskWorker(_config.NumberOfParalellSegmentTasks, segmentTaskQueue, _statusManager, workerTask, _tasksManager);
+            var segmentsQueue = new SplitQueue<SelfRefreshingSegment>();
+            var segmentFetcherWorkerPool = new SegmentTaskWorker(_config.NumberOfParalellSegmentTasks, segmentsQueue);
+            segmentsQueue.AddObserver(segmentFetcherWorkerPool);
             var segmentsFetcherTask = _tasksManager.NewPeriodicTask(Enums.Task.SegmentsFetcher, segmentRefreshRate * 1000);
-            _selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, _segmentCache, segmentTaskQueue, segmentsFetcherTask, segmentFetcherWorkerPool, _statusManager);
+            _selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, _segmentCache, segmentsQueue, segmentsFetcherTask, _statusManager);
 
             var splitChangeFetcher = new ApiSplitChangeFetcher(_splitSdkApiClient);
             _splitParser = new InMemorySplitParser((SelfRefreshingSegmentFetcher)_selfRefreshingSegmentFetcher, _segmentCache);
@@ -223,11 +223,8 @@ namespace Splitio.Services.Client.Classes
                 var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _impressionsCounter, _statusManager, _telemetrySyncTask, _featureFlagCache, backOffFeatureFlags, backOffSegments, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs, _segmentCache, _uniqueKeysTracker);
 
                 // Workers
-                var queue = new BlockingCollection<SplitChangeNotification>(new ConcurrentQueue<SplitChangeNotification>());
-                var featureFlagsWorkerTask = _tasksManager.NewPeriodicTask(Enums.Task.FeatureFlagsWorker, 0);
-                var splitsWorker = new SplitsWorker(synchronizer, _featureFlagCache, queue, _telemetryRuntimeProducer, _selfRefreshingSegmentFetcher, featureFlagsWorkerTask, _featureFlagSyncService);
-                var segmentsWorkerTask = _tasksManager.NewPeriodicTask(Enums.Task.SegmentsWorker, 0);
-                var segmentsWorker = new SegmentsWorker(synchronizer, segmentsWorkerTask);
+                var splitsWorker = new SplitsWorker(synchronizer, _featureFlagCache, _telemetryRuntimeProducer, _selfRefreshingSegmentFetcher, _featureFlagSyncService);
+                var segmentsWorker = new SegmentsWorker(synchronizer);
 
                 // NotificationProcessor
                 var notificationProcessor = new NotificationProcessor(splitsWorker, segmentsWorker);
@@ -236,7 +233,7 @@ namespace Splitio.Services.Client.Classes
                 var notificationParser = new NotificationParser();
 
                 // SSEClient Status actions queue
-                var streamingStatusQueue = new BlockingCollection<StreamingStatus>(new ConcurrentQueue<StreamingStatus>());
+                var streamingStatusQueue = new SplitQueue<StreamingStatus>();
 
                 // NotificationManagerKeeper
                 var notificationManagerKeeper = new NotificationManagerKeeper(_telemetryRuntimeProducer, streamingStatusQueue);
@@ -263,8 +260,7 @@ namespace Splitio.Services.Client.Classes
                 // SyncManager
                 var streamingbackoff = new BackOff(_config.StreamingReconnectBackoffBase, attempt: 1);
                 var startupTask = _tasksManager.NewOnTimeTask(Enums.Task.SDKInitialization);
-                var streamingStatusTask = _tasksManager.NewPeriodicTask(Enums.Task.OnStreamingStatusTask, 0);
-                _syncManager = new SyncManager(_config.StreamingEnabled, synchronizer, pushManager, sseHandler, _telemetryRuntimeProducer, _statusManager, _tasksManager, _telemetrySyncTask, streamingStatusQueue, streamingbackoff, startupTask, streamingStatusTask);
+                _syncManager = new SyncManager(_config.StreamingEnabled, synchronizer, pushManager, sseHandler, _telemetryRuntimeProducer, _statusManager, _tasksManager, _telemetrySyncTask, streamingbackoff, streamingStatusQueue, startupTask);
             }
             catch (Exception ex)
             {

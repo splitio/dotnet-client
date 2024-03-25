@@ -34,15 +34,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             var token = "fake-test";
             var channels = "channel-test";
 
-            _eventSourceClient
-                .Setup(mock => mock.Connect(It.IsAny<string>()))
-                .Returns(true);
-
             // Act.
-            var result = _sseHandler.Start(token, channels);
+            _sseHandler.Start(token, channels);
 
             // Assert.
-            Assert.IsTrue(result);
             _eventSourceClient.Verify(mock => mock.Connect(It.IsAny<string>()), Times.Once);
         }
 
@@ -53,16 +48,11 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             var token = "fake-test";
             var channels = "channel-test";
 
-            _eventSourceClient
-                .Setup(mock => mock.Connect(It.IsAny<string>()))
-                .Returns(true);
-
             // Act.
-            var result = _sseHandler.Start(token, channels);
+            _sseHandler.Start(token, channels);
             await _sseHandler.StopAsync();
 
             // Assert.
-            Assert.IsTrue(result);
             _eventSourceClient.Verify(mock => mock.DisconnectAsync(), Times.Once);
         }
     }
