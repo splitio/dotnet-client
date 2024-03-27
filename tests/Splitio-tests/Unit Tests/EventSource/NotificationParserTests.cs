@@ -14,6 +14,23 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationParser = new NotificationParser();
         }
 
+        #region WithoutSpace
+        [TestMethod]
+        public void Parse_Control_StreamingDisabledShouldReturnParsedEvent_WithoutSpace()
+        {
+            // Arrange.
+            var text = "event:message\ndata:{\"id\":\"2222\",\"clientId\":\"3333\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"[?occupancy=metrics.publishers]control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_DISABLED\\\"}\"}";
+
+            // Act.
+            var result = _notificationParser.Parse(text);
+
+            // Assert.
+            Assert.AreEqual(NotificationType.CONTROL, result.Type);
+            Assert.AreEqual(ControlType.STREAMING_DISABLED, ((ControlNotification)result).ControlType);
+            Assert.AreEqual("control_pri", result.Channel);
+        }
+        #endregion
+
         [TestMethod]
         public void Parse_SlitUpdate_ShouldReturnParsedEvent()
         {
