@@ -179,6 +179,9 @@ namespace Splitio.Services.Parsing
                         case MatcherTypeEnum.LESS_THAN_OR_EQUAL_TO_SEMVER:
                             matcher = new LessThanOrEqualToSemverMatcher(mDefinition.stringMatcherData);
                             break;
+                        case MatcherTypeEnum.BETWEEN_SEMVER:
+                            matcher = new BetweenSemverMatcher(mDefinition.BetweenStringMatcherData.start, mDefinition.BetweenStringMatcherData.end);
+                            break;
                     }
                 }
             }
