@@ -6,6 +6,7 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing;
 using Splitio.Services.Parsing.Classes;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Splitio_Tests.Unit_Tests
 {
@@ -171,6 +172,70 @@ namespace Splitio_Tests.Unit_Tests
             var partition = condition.partitions[0];
             Assert.AreEqual(Gral.Control, partition.treatment);
             Assert.AreEqual(100, partition.size);
+        }
+
+        [TestMethod]
+        public void ParseWithEqualToSemver()
+        {
+            // Arrange.
+            var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
+            var parser = new SplitParser(segmentCacheConsumer.Object);
+
+            var split = new Split
+            {
+                name = "test1",
+                seed = 2323,
+                status = "ACTIVE",
+                killed = false,
+                defaultTreatment = "off",
+                changeNumber = 232323,
+                trafficTypeName = "user",
+                conditions = new List<ConditionDefinition>
+                {
+                    new ConditionDefinition
+                    {
+                        conditionType = "ROLLOUT",
+                        label = "new label",
+                        partitions = new List<PartitionDefinition>
+                        {
+                            new PartitionDefinition
+                            {
+                                size = 50,
+                                treatment = "on"
+                            },
+                            new PartitionDefinition
+                            {
+                                size = 50,
+                                treatment = "0ff"
+                            }
+                        },
+                        matcherGroup = new MatcherGroupDefinition
+                        {
+                            matchers = new List<MatcherDefinition>
+                            {
+                                new MatcherDefinition
+                                {
+                                    matcherType = "EQUAL_TO_SEMVER",
+                                    stringMatcherData = "2.2.2"
+                                }
+                            }
+                        },
+                    }
+                }
+            };
+
+            // Act.
+            var result = parser.Parse(split);
+
+            // Assert.
+            Assert.AreEqual("test1", result.name);
+            Assert.AreEqual("off", result.defaultTreatment);
+            Assert.AreEqual(1, result.conditions.Count);
+            var condition = result.conditions[0];
+            Assert.AreEqual("new label", condition.label);
+            Assert.AreEqual(ConditionType.ROLLOUT, condition.conditionType);
+            Assert.AreEqual(2, condition.partitions.Count);
+            Assert.IsInstanceOfType(condition.matcher.delegates.FirstOrDefault().matcher, typeof(EqualToSemverMatcher));
         }
     }
 }
