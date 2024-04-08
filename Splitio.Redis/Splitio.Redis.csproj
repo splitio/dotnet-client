@@ -36,4 +36,8 @@
     <ProjectReference Include="..\src\Splitio\Splitio.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\Parsing\Classes\" />
+  </ItemGroup>
+
 </Project>

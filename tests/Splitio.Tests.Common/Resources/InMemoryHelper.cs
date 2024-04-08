@@ -19,7 +19,8 @@ namespace Splitio.Tests.Common.Resources
             new KeyImpression("test", "MAURO_TEST", "off", 0, 1506703262966,"not in split", null, null, false),
             new KeyImpression("nico_test", "Test_Save_1", "off", 0, 1503956389520, "in segment all", null, null, false),
             new KeyImpression("nico_test", "MAURO_TEST", "off", 0, 1506703262966, "not in split", null, null, false),
-            new KeyImpression("mauro", "Test_Save_1", "off", 0, 1503956389520, "in segment all", null, null, false)
+            new KeyImpression("mauro", "Test_Save_1", "off", 0, 1503956389520, "in segment all", null, null, false),
+            new KeyImpression("nico_test", "feature_flag_for_test", "control", 0, 1709843458770, "unsupported matcher type", null, null, false)
         };
 
         public static KeyImpression GetImpressionExpected(string featureName, string key)
