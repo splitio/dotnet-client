@@ -1,10 +1,14 @@
 ﻿using Splitio.Services.Evaluator;
+using Splitio.Services.Logger;
+using Splitio.Services.SemverImp;
+using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Parsing.Classes
 {
     public class LessThanOrEqualToSemverMatcher : BaseMatcher
     {
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(LessThanOrEqualToSemverMatcher));
         private readonly Semver _target;
 
         public LessThanOrEqualToSemverMatcher(string target)
@@ -25,7 +29,10 @@ namespace Splitio.Services.Parsing.Classes
                 return false;
             }
 
-            return keySemver.LessThanOrEqualTo(_target);
+            var result = keySemver.Compare(_target) <= 0;
+            _log.Debug($"{keySemver} <= {_target} | Result: {result}");
+
+            return result;
         }
     }
 }
