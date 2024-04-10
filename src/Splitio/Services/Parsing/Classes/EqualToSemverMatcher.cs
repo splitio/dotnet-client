@@ -1,15 +1,19 @@
 ﻿using Splitio.Services.Evaluator;
+using Splitio.Services.Logger;
+using Splitio.Services.SemverImp;
+using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Parsing.Classes
 {
     public class EqualToSemverMatcher : BaseMatcher
     {
-        private readonly string _target;
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(EqualToSemverMatcher));
+        private readonly Semver _target;
 
         public EqualToSemverMatcher(string target)
         {
-            _target = target;
+            _target = Semver.Build(target);
         }
 
         public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
@@ -19,7 +23,16 @@ namespace Splitio.Services.Parsing.Classes
                 return false;
             }
 
-            return key == _target;
+            var keySemver = Semver.Build(key);
+            if (keySemver == null)
+            {
+                return false;
+            }
+
+            var result = keySemver.Version.Equals(_target.Version);
+            _log.Debug($"{keySemver.Version} == {_target.Version} | Result: {result}");
+
+            return result;
         }
     }
 }
