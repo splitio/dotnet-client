@@ -30,10 +30,9 @@ namespace Splitio.Integration_tests
                 var eventsReceived = result.Item2;
                 var streamingStatusQueue = result.Item3;
 
-                var connected = eventSourceClient.Connect(httpClientMock.GetUrl());
-                Assert.IsTrue(connected);
-
-                streamingStatusQueue.TryTake(out StreamingStatus action, 10000);
+                eventSourceClient.Connect(httpClientMock.GetUrl());
+                Thread.Sleep(1000);
+                streamingStatusQueue.TryDequeue(out StreamingStatus action);
                 Assert.AreEqual(StreamingStatus.STREAMING_OFF, action);
             }
         }
@@ -64,10 +63,9 @@ namespace Splitio.Integration_tests
                     nList.Add((SplitChangeNotification)e.Event);
                 };
 
-                var connected = eventSourceClient.Connect(httpClientMock.GetUrl());
-                Assert.IsTrue(connected);
+                eventSourceClient.Connect(httpClientMock.GetUrl());
 
-                streamingStatusQueue.TryTake(out StreamingStatus action, 10000);
+                streamingStatusQueue.TryDequeue(out StreamingStatus action);
                 Assert.AreEqual(StreamingStatus.STREAMING_READY, action);
 
                 Thread.Sleep(2000);
@@ -107,10 +105,9 @@ namespace Splitio.Integration_tests
                     nList.Add((SplitChangeNotification)e.Event);
                 };
 
-                var connected = eventSourceClient.Connect(httpClientMock.GetUrl());
-                Assert.IsTrue(connected);
+                eventSourceClient.Connect(httpClientMock.GetUrl());
 
-                streamingStatusQueue.TryTake(out StreamingStatus action, 10000);
+                streamingStatusQueue.TryDequeue(out StreamingStatus action);
                 Assert.AreEqual(StreamingStatus.STREAMING_READY, action);
 
                 Thread.Sleep(2000);
@@ -136,13 +133,12 @@ namespace Splitio.Integration_tests
                 var eventsReceived = result.Item2;
                 var streamingStatusQueue = result.Item3;
 
-                var connected = eventSourceClient.Connect(httpClientMock.GetUrl());
-                Assert.IsTrue(connected);
+                eventSourceClient.Connect(httpClientMock.GetUrl());
 
                 eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
                 Assert.AreEqual(NotificationType.SPLIT_UPDATE, ev.Event.Type);
                 Assert.AreEqual(1585867723838, ((SplitChangeNotification)ev.Event).ChangeNumber);
-                streamingStatusQueue.TryTake(out StreamingStatus action, 10000);
+                streamingStatusQueue.TryDequeue(out StreamingStatus action);
                 Assert.AreEqual(StreamingStatus.STREAMING_READY, action);
             }
         }
@@ -160,15 +156,14 @@ namespace Splitio.Integration_tests
                 var eventsReceived = result.Item2;
                 var streamingStatusQueue = result.Item3;
 
-                var connected = eventSourceClient.Connect(httpClientMock.GetUrl());
-                Assert.IsTrue(connected);
+                eventSourceClient.Connect(httpClientMock.GetUrl());
 
                 eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
                 Assert.AreEqual(NotificationType.SPLIT_KILL, ev.Event.Type);
                 Assert.AreEqual(1585868246622, ((SplitKillNotification)ev.Event).ChangeNumber);
                 Assert.AreEqual("off", ((SplitKillNotification)ev.Event).DefaultTreatment);
                 Assert.AreEqual("test-split", ((SplitKillNotification)ev.Event).SplitName);
-                streamingStatusQueue.TryTake(out StreamingStatus action, 10000);
+                streamingStatusQueue.TryDequeue(out StreamingStatus action);
                 Assert.AreEqual(StreamingStatus.STREAMING_READY, action);
             }
         }
@@ -192,7 +187,7 @@ namespace Splitio.Integration_tests
                 Assert.AreEqual(NotificationType.SEGMENT_UPDATE, ev.Event.Type);
                 Assert.AreEqual(1585868933303, ((SegmentChangeNotification)ev.Event).ChangeNumber);
                 Assert.AreEqual("test-segment", ((SegmentChangeNotification)ev.Event).SegmentName);
-                streamingStatusQueue.TryTake(out StreamingStatus action, 10000);
+                streamingStatusQueue.TryDequeue(out StreamingStatus action);
                 Assert.AreEqual(StreamingStatus.STREAMING_READY, action);
             }
         }
@@ -215,7 +210,7 @@ namespace Splitio.Integration_tests
                 eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
                 Assert.AreEqual(NotificationType.CONTROL, ev.Event.Type);
                 Assert.AreEqual(ControlType.STREAMING_PAUSED, ((ControlNotification)ev.Event).ControlType);
-                streamingStatusQueue.TryTake(out StreamingStatus action, 10000);
+                streamingStatusQueue.TryDequeue(out StreamingStatus action);
                 Assert.AreEqual(StreamingStatus.STREAMING_READY, action);
             }
         }
@@ -239,7 +234,7 @@ namespace Splitio.Integration_tests
                 eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
                 Assert.AreEqual(NotificationType.CONTROL, ev.Event.Type);
                 Assert.AreEqual(ControlType.STREAMING_RESUMED, ((ControlNotification)ev.Event).ControlType);
-                streamingStatusQueue.TryTake(out StreamingStatus action, 10000);
+                streamingStatusQueue.TryDequeue(out StreamingStatus action);
                 Assert.AreEqual(StreamingStatus.STREAMING_READY, action);
             }
         }
@@ -262,7 +257,7 @@ namespace Splitio.Integration_tests
                 eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
                 Assert.AreEqual(NotificationType.CONTROL, ev.Event.Type);
                 Assert.AreEqual(ControlType.STREAMING_DISABLED, ((ControlNotification)ev.Event).ControlType);
-                streamingStatusQueue.TryTake(out StreamingStatus action, 10000);
+                streamingStatusQueue.TryDequeue(out StreamingStatus action);
                 Assert.AreEqual(StreamingStatus.STREAMING_READY, action);
             }
         }
@@ -292,7 +287,7 @@ namespace Splitio.Integration_tests
 
                 eventSourceClient.Connect(httpClientMock.GetUrl());
 
-                streamingStatusQueue.TryTake(out StreamingStatus action, 10000);
+                streamingStatusQueue.TryDequeue(out StreamingStatus action);
                 Assert.AreEqual(StreamingStatus.STREAMING_READY, action);
                 Assert.AreEqual(0, eventsReceived.Count);
             }
@@ -311,10 +306,10 @@ namespace Splitio.Integration_tests
                 var eventsReceived = result.Item2;
                 var streamingStatusQueue = result.Item3;
 
-                var connected = eventSourceClient.Connect(httpClientMock.GetUrl());
-                Assert.IsTrue(connected);
+                eventSourceClient.Connect(httpClientMock.GetUrl());
 
-                streamingStatusQueue.TryTake(out StreamingStatus action, 10000);
+                Thread.Sleep(1000);
+                streamingStatusQueue.TryDequeue(out StreamingStatus action);
                 Assert.AreEqual(StreamingStatus.STREAMING_BACKOFF, action);
             }
         }
@@ -332,10 +327,9 @@ namespace Splitio.Integration_tests
                 var eventsReceived = result.Item2;
                 var streamingStatusQueue = result.Item3;
 
-                var connected = eventSourceClient.Connect(httpClientMock.GetUrl());
-                Assert.IsTrue(connected);
-
-                streamingStatusQueue.TryTake(out StreamingStatus action, 10000);
+                eventSourceClient.Connect(httpClientMock.GetUrl());
+                Thread.Sleep(1000);
+                streamingStatusQueue.TryDequeue(out StreamingStatus action);
                 Assert.AreEqual(StreamingStatus.STREAMING_OFF, action);
             }
         }
@@ -352,20 +346,19 @@ namespace Splitio.Integration_tests
                 var eventsReceived = result.Item2;
                 var streamingStatusQueue = result.Item3;
 
-                var connected = eventSourceClient.Connect(httpClientMock.GetUrl());
-                Assert.IsTrue(connected);
+                eventSourceClient.Connect(httpClientMock.GetUrl());
 
-                streamingStatusQueue.TryTake(out StreamingStatus action, 10000);
+                streamingStatusQueue.TryDequeue(out StreamingStatus action);
                 Assert.AreEqual(StreamingStatus.STREAMING_READY, action);
                 Thread.Sleep(1000);
                 Assert.AreEqual(0, eventsReceived.Count);
             }
         }
 
-        private static (IEventSourceClient, BlockingCollection<EventReceivedEventArgs>, BlockingCollection<StreamingStatus>) GetEventSourceClient()
+        private static (IEventSourceClient, BlockingCollection<EventReceivedEventArgs>, SplitQueue<StreamingStatus>) GetEventSourceClient()
         {
             var eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
-            var streamingStatusQueue = new BlockingCollection<StreamingStatus>(new ConcurrentQueue<StreamingStatus>());
+            var streamingStatusQueue = new SplitQueue<StreamingStatus>();
 
             var notificationParser = new NotificationParser();
             var wrapperAdapter = WrapperAdapter.Instance();

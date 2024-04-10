@@ -141,6 +141,37 @@ namespace Splitio.Tests.Common
 
             await client.DestroyAsync();
         }
+
+        [TestMethod]
+        public async Task GetTreatmentAsync_WithUnsupportedMatcher_ReturnsControl()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "base-apikey333";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(5000);
+
+            // Act.
+            var result = await client.GetTreatmentAsync("nico_test", "feature_flag_for_test");
+            await client.DestroyAsync();
+
+            // Assert.
+            Assert.AreEqual("control", result);
+
+            var impExpected1 = Helper.GetImpressionExpected("feature_flag_for_test", "nico_test");
+
+            //Validate impressions sent to the be.
+            AssertSentImpressions(1, impExpected1);
+
+            // Validate impressions in listener.
+            Helper.AssertImpressionListener(_mode, 1, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("feature_flag_for_test", "nico_test"), impExpected1);
+        }
         #endregion
 
         #region GetTreatmentWithConfigAsync
@@ -348,6 +379,40 @@ namespace Splitio.Tests.Common
             Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "mauro"), impExpected3);
             Helper.AssertImpression(impressionListener.Get("Test_Save_1", "mauro"), impExpected4);
         }
+
+        [TestMethod]
+        public async Task GetTreatmentsAsync_WithUnsupportedMatcher_ReturnsControl()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "base-apikey333";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(5000);
+
+            // Act.
+            var result = await client.GetTreatmentsAsync("nico_test", new List<string> { "FACUNDO_TEST", "feature_flag_for_test" });
+            await client.DestroyAsync();
+
+            // Assert.
+            Assert.AreEqual("on", result["FACUNDO_TEST"]);
+            Assert.AreEqual("control", result["feature_flag_for_test"]);
+
+            var impExpected1 = Helper.GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            var impExpected2 = Helper.GetImpressionExpected("feature_flag_for_test", "nico_test");
+
+            //Validate impressions sent to the be.
+            AssertSentImpressions(2, impExpected1, impExpected2);
+
+            // Validate impressions.
+            Helper.AssertImpressionListener(_mode, 2, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impExpected1);
+            Helper.AssertImpression(impressionListener.Get("feature_flag_for_test", "nico_test"), impExpected2);
+        }
         #endregion
 
         #region GetTreatmentsWithConfigAsync
@@ -508,7 +573,7 @@ namespace Splitio.Tests.Common
             var result = await manager.SplitNamesAsync();
 
             // Assert.
-            Assert.AreEqual(30, result.Count);
+            Assert.AreEqual(31, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<string>));
 
             await client.DestroyAsync();
@@ -531,7 +596,7 @@ namespace Splitio.Tests.Common
             var result = await manager.SplitsAsync();
 
             // Assert.
-            Assert.AreEqual(30, result.Count);
+            Assert.AreEqual(31, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<SplitView>));
 
             await splitFactory.Client().DestroyAsync();

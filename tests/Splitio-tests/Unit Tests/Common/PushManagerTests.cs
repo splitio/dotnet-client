@@ -35,33 +35,6 @@ namespace Splitio_Tests.Unit_Tests.Common
         }
 
         [TestMethod]
-        public async Task Start_WithSSEError_ShouldRetry()
-        {
-            _authApiClient
-                .Setup(mock => mock.AuthenticateAsync())
-                .ReturnsAsync(new AuthenticationResponse
-                {
-                    PushEnabled = true,
-                    Channels = "channel-test",
-                    Token = "token-test",
-                    Retry = true,
-                    Expiration = 10000000
-                });
-
-            _sseHandler
-                .SetupSequence(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(false);
-
-            // Act.
-            await _pushManager.StartAsync();
-
-            // Assert.
-            _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Once);
-            _sseHandler.Verify(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-            _notificationManagerKeeper.Verify(mock => mock.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR), Times.Once);
-        }
-
-        [TestMethod]
         public async Task Start_WithPushEnabled_ShouldConnect()
         {
             // Arrange.
@@ -86,10 +59,6 @@ namespace Splitio_Tests.Unit_Tests.Common
             _authApiClient
                 .SetupSequence(mock => mock.AuthenticateAsync())
                 .ReturnsAsync(response);
-
-            _sseHandler
-                .Setup(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(true);
 
             // Act.
             await _pushManager.StartAsync();

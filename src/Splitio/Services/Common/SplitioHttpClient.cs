@@ -15,7 +15,7 @@ namespace Splitio.Services.Common
 {
     public class SplitioHttpClient : ISplitioHttpClient
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitioHttpClient));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitioHttpClient));
         
         private readonly HttpClient _httpClient;
 

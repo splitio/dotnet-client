@@ -14,7 +14,7 @@ namespace Splitio.Services.Impressions.Classes
 {
     public class ImpressionsManager : IImpressionsManager
     {
-        private static readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsManager));
+        private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsManager));
 
         private readonly IImpressionsObserver _impressionsObserver;
         private readonly IImpressionsLog _impressionsLog;
