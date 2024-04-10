@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Parsing.Classes;
+using Splitio.Services.SemverImp;
 using System.IO;
 
 namespace Splitio_Tests.Unit_Tests.Parsing
@@ -32,10 +32,10 @@ namespace Splitio_Tests.Unit_Tests.Parsing
                     var version1 = Semver.Build(items[0]);
                     var version2 = Semver.Build(items[1]);
 
-                    Assert.IsTrue(version1.GreaterThanOrEqualTo(version2));
-                    Assert.IsFalse(version2.GreaterThanOrEqualTo(version1));
-                    Assert.IsTrue(version1.GreaterThanOrEqualTo(version1));
-                    Assert.IsTrue(version2.GreaterThanOrEqualTo(version2));
+                    Assert.IsTrue(version1.Compare(version2) >= 0);
+                    Assert.IsFalse(version2.Compare(version1) >= 0);
+                    Assert.IsTrue(version1.Compare(version1) == 0);
+                    Assert.IsTrue(version2.Compare(version2) == 0);
                 }
             }
         }
@@ -54,10 +54,10 @@ namespace Splitio_Tests.Unit_Tests.Parsing
                     var version1 = Semver.Build(items[0]);
                     var version2 = Semver.Build(items[1]);
 
-                    Assert.IsFalse(version1.LessThanOrEqualTo(version2));
-                    Assert.IsTrue(version2.LessThanOrEqualTo(version1));
-                    Assert.IsTrue(version1.LessThanOrEqualTo(version1));
-                    Assert.IsTrue(version2.LessThanOrEqualTo(version2));
+                    Assert.IsFalse(version1.Compare(version2) <= 0);
+                    Assert.IsTrue(version2.Compare(version1) <= 0);
+                    Assert.IsTrue(version1.Compare(version1) == 0);
+                    Assert.IsTrue(version2.Compare(version2) == 0);
                 }
             }
         }
@@ -72,7 +72,7 @@ namespace Splitio_Tests.Unit_Tests.Parsing
                 {
                     var line = reader.ReadLine();
 
-                    Assert.IsNull(Semver.Build(line));
+                    Assert.IsNull(Semver.Build(line), line);
                 }
             }
         }
@@ -88,10 +88,10 @@ namespace Splitio_Tests.Unit_Tests.Parsing
                     var line = reader.ReadLine();
                     var items = line.Split(',');
 
-                    var version1 = Semver.Build(items[0]);
-                    var version2 = Semver.Build(items[1]);
+                    var semver1 = Semver.Build(items[0]);
+                    var semver2 = Semver.Build(items[1]);
 
-                    Assert.AreEqual(bool.Parse(items[2]), version1.EqualTo(version2));
+                    Assert.AreEqual(bool.Parse(items[2]), semver1.Version.Equals(semver2.Version));
                 }
             }
         }
@@ -111,7 +111,9 @@ namespace Splitio_Tests.Unit_Tests.Parsing
                     var version2 = Semver.Build(items[1]);
                     var version3 = Semver.Build(items[2]);
 
-                    Assert.AreEqual(bool.Parse(items[3]), version2.Between(version1, version3));
+                    var result = version2.Compare(version1) >= 0 && version2.Compare(version3) <= 0;
+
+                    Assert.AreEqual(bool.Parse(items[3]), result);
                 }
             }
         }
