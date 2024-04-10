@@ -1,10 +1,14 @@
 ﻿using Splitio.Services.Evaluator;
+using Splitio.Services.Logger;
+using Splitio.Services.SemverImp;
+using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Parsing.Classes
 {
     public  class BetweenSemverMatcher : BaseMatcher
     {
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(BetweenSemverMatcher));
         private readonly Semver _startTarget;
         private readonly Semver _endTarget;
 
@@ -27,7 +31,10 @@ namespace Splitio.Services.Parsing.Classes
                 return false;
             }
 
-            return keySemver.Between(_startTarget, _endTarget);
+            var result = keySemver.Compare(_startTarget) >= 0 && keySemver.Compare(_endTarget) <= 0;
+            _log.Debug($"{_startTarget} <= {keySemver} <= {_endTarget} | Result: {result}");
+
+            return result;
         }
     }
 }
