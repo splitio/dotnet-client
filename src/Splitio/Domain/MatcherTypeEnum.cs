@@ -20,6 +20,7 @@ namespace Splitio.Domain
         IN_SPLIT_TREATMENT,
         EQUAL_TO_BOOLEAN,
         MATCHES_STRING,
-        EQUAL_TO_SEMVER
+        EQUAL_TO_SEMVER,
+        GREATER_THAN_OR_EQUAL_TO_SEMVER
     }
 }
