@@ -182,6 +182,9 @@ namespace Splitio.Services.Parsing
                         case MatcherTypeEnum.BETWEEN_SEMVER:
                             matcher = new BetweenSemverMatcher(mDefinition.BetweenStringMatcherData.start, mDefinition.BetweenStringMatcherData.end);
                             break;
+                        case MatcherTypeEnum.IN_LIST_SEMVER:
+                            matcher = new InListSemverMatcher(mDefinition.whitelistMatcherData.whitelist);
+                            break;
                     }
                 }
             }

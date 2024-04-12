@@ -20,7 +20,17 @@ namespace Splitio.Tests.Common.Resources
             new KeyImpression("nico_test", "Test_Save_1", "off", 0, 1503956389520, "in segment all", null, null, false),
             new KeyImpression("nico_test", "MAURO_TEST", "off", 0, 1506703262966, "not in split", null, null, false),
             new KeyImpression("mauro", "Test_Save_1", "off", 0, 1503956389520, "in segment all", null, null, false),
-            new KeyImpression("nico_test", "feature_flag_for_test", "control", 0, 1709843458770, "unsupported matcher type", null, null, false)
+            new KeyImpression("nico_test", "feature_flag_for_test", "control", 0, 1709843458770, "unsupported matcher type", null, null, false),
+            new KeyImpression("mauro_test", "semver_between", "on", 0, 1675259356568, "between semver", null, null, false),
+            new KeyImpression("mauro_test2", "semver_between", "off", 0, 1675259356568, "default rule", null, null, false),
+            new KeyImpression("test_eq", "semver_equalto", "on", 0, 1675259356568, "equal to semver", null, null, false),
+            new KeyImpression("test_eq2", "semver_equalto", "off", 0, 1675259356568, "default rule", null, null, false),
+            new KeyImpression("test_gtet", "semver_greater_or_equalto", "on", 0, 1675259356568, "greater than or equal to semver", null, null, false),
+            new KeyImpression("test_gtet2", "semver_greater_or_equalto", "off", 0, 1675259356568, "default rule", null, null, false),
+            new KeyImpression("test_ltet", "semver_less_or_equalto", "on", 0, 1675259356568, "less than or equal to semver", null, null, false),
+            new KeyImpression("test_ltet2", "semver_less_or_equalto", "off", 0, 1675259356568, "default rule", null, null, false),
+            new KeyImpression("test_list", "semver_inlist", "on", 0, 1675259356568, "in list semver", null, null, false),
+            new KeyImpression("test_list2", "semver_inlist", "off", 0, 1675259356568, "default rule", null, null, false)
         };
 
         public static KeyImpression GetImpressionExpected(string featureName, string key)
