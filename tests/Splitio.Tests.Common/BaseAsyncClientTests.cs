@@ -30,6 +30,183 @@ namespace Splitio.Tests.Common
             await CleanupAsync();
         }
 
+        #region Semver
+        [TestMethod]
+        public async Task GetTreatment_BetweenSemverMatcher()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "base-apikey1000";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result1 = await client.GetTreatmentAsync("mauro_test", "semver_between", new Dictionary<string, object> { { "version", "2.0.0" } });
+            var result2 = await client.GetTreatmentAsync("mauro_test2", "semver_between", new Dictionary<string, object> { { "version", "3.0.0" } });
+            client.Destroy();
+
+            // Assert.
+            Assert.AreEqual("on", result1);
+            Assert.AreEqual("off", result2);
+
+            var impressionExpected1 = Helper.GetImpressionExpected("semver_between", "mauro_test");
+            var impressionExpected2 = Helper.GetImpressionExpected("semver_between", "mauro_test2");
+
+            //Validate impressions sent to the be.
+            AssertSentImpressions(2, impressionExpected1, impressionExpected2);
+
+            // Validate impressions in listener.
+            Helper.AssertImpressionListener(_mode, 2, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("semver_between", "mauro_test"), impressionExpected1);
+            Helper.AssertImpression(impressionListener.Get("semver_between", "mauro_test2"), impressionExpected2);
+        }
+
+        [TestMethod]
+        public async Task GetTreatment_EqualToSemverMatcher()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "base-apikey1001";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result1 = await client.GetTreatmentAsync("test_eq", "semver_equalto", new Dictionary<string, object> { { "version", "1.22.9" } });
+            var result2 = await client.GetTreatmentAsync("test_eq2", "semver_equalto", new Dictionary<string, object> { { "version", "3.0.1" } });
+            client.Destroy();
+
+            // Assert.
+            Assert.AreEqual("on", result1);
+            Assert.AreEqual("off", result2);
+
+            var impressionExpected1 = Helper.GetImpressionExpected("semver_equalto", "test_eq");
+            var impressionExpected2 = Helper.GetImpressionExpected("semver_equalto", "test_eq2");
+
+            //Validate impressions sent to the be.
+            AssertSentImpressions(2, impressionExpected1, impressionExpected2);
+
+            // Validate impressions in listener.
+            Helper.AssertImpressionListener(_mode, 2, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("semver_equalto", "test_eq"), impressionExpected1);
+            Helper.AssertImpression(impressionListener.Get("semver_equalto", "test_eq2"), impressionExpected2);
+        }
+
+        [TestMethod]
+        public async Task GetTreatment_GreaterThanOrEqualToSemverMatcher()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "base-apikey10015";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result1 = await client.GetTreatmentAsync("test_gtet", "semver_greater_or_equalto", new Dictionary<string, object> { { "version", "3.0.0" } });
+            var result2 = await client.GetTreatmentAsync("test_gtet2", "semver_greater_or_equalto", new Dictionary<string, object> { { "version", "2.21.9" } });
+            client.Destroy();
+
+            // Assert.
+            Assert.AreEqual("on", result1);
+            Assert.AreEqual("off", result2);
+
+            var impressionExpected1 = Helper.GetImpressionExpected("semver_greater_or_equalto", "test_gtet");
+            var impressionExpected2 = Helper.GetImpressionExpected("semver_greater_or_equalto", "test_gtet2");
+
+            //Validate impressions sent to the be.
+            AssertSentImpressions(2, impressionExpected1, impressionExpected2);
+
+            // Validate impressions in listener.
+            Helper.AssertImpressionListener(_mode, 2, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("semver_greater_or_equalto", "test_gtet"), impressionExpected1);
+            Helper.AssertImpression(impressionListener.Get("semver_greater_or_equalto", "test_gtet2"), impressionExpected2);
+        }
+
+        [TestMethod]
+        public async Task GetTreatment_LessThanOrEqualToSemverMatcher()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "base-apikey10014";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result1 = await client.GetTreatmentAsync("test_ltet", "semver_less_or_equalto", new Dictionary<string, object> { { "version", "3.0.0" } });
+            var result2 = await client.GetTreatmentAsync("test_ltet2", "semver_less_or_equalto", new Dictionary<string, object> { { "version", "5.500.20" } });
+            client.Destroy();
+
+            // Assert.
+            Assert.AreEqual("on", result1);
+            Assert.AreEqual("off", result2);
+
+            var impressionExpected1 = Helper.GetImpressionExpected("semver_less_or_equalto", "test_ltet");
+            var impressionExpected2 = Helper.GetImpressionExpected("semver_less_or_equalto", "test_ltet2");
+
+            //Validate impressions sent to the be.
+            AssertSentImpressions(2, impressionExpected1, impressionExpected2);
+
+            // Validate impressions in listener.
+            Helper.AssertImpressionListener(_mode, 2, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("semver_less_or_equalto", "test_ltet"), impressionExpected1);
+            Helper.AssertImpression(impressionListener.Get("semver_less_or_equalto", "test_ltet2"), impressionExpected2);
+        }
+
+        [TestMethod]
+        public async Task GetTreatment_InListSemverMatcher()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "base-apikey10013";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result1 = await client.GetTreatmentAsync("test_list", "semver_inlist", new Dictionary<string, object> { { "version", "2.1.0" } });
+            var result2 = await client.GetTreatmentAsync("test_list2", "semver_inlist", new Dictionary<string, object> { { "version", "5.500.20" } });
+            client.Destroy();
+
+            // Assert.
+            Assert.AreEqual("on", result1);
+            Assert.AreEqual("off", result2);
+
+            var impressionExpected1 = Helper.GetImpressionExpected("semver_inlist", "test_list");
+            var impressionExpected2 = Helper.GetImpressionExpected("semver_inlist", "test_list2");
+
+            //Validate impressions sent to the be.
+            AssertSentImpressions(2, impressionExpected1, impressionExpected2);
+
+            // Validate impressions in listener.
+            Helper.AssertImpressionListener(_mode, 2, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("semver_inlist", "test_list"), impressionExpected1);
+            Helper.AssertImpression(impressionListener.Get("semver_inlist", "test_list2"), impressionExpected2);
+        }
+        #endregion
+
         #region GetTreatmentAsync
         [TestMethod]
         public async Task GetTreatmentAsync_WithtBUR_WithMultipleCalls_ReturnsTreatments()
@@ -573,7 +750,7 @@ namespace Splitio.Tests.Common
             var result = await manager.SplitNamesAsync();
 
             // Assert.
-            Assert.AreEqual(31, result.Count);
+            Assert.AreEqual(36, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<string>));
 
             await client.DestroyAsync();
@@ -596,7 +773,7 @@ namespace Splitio.Tests.Common
             var result = await manager.SplitsAsync();
 
             // Assert.
-            Assert.AreEqual(31, result.Count);
+            Assert.AreEqual(36, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<SplitView>));
 
             await splitFactory.Client().DestroyAsync();
