@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 namespace Splitio_Tests.Unit_Tests.Matchers
 {
     [TestClass]
-    public class GreaterThanOrEqualToSemverMatcherTests
+    public class InListSemverMatcherTests
     {
         #region Sync
         [TestMethod]
         public void MatchShouldReturnTrue()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("1.1.1");
+            var matcher = new InListSemverMatcher(new List<string> { "1.1.1", "2.2.2+beta", "3.3.3-rc1" });
 
             // Act.
-            var result = matcher.Match("1.1.2");
+            var result = matcher.Match("2.2.2+beta");
 
             // Assert.
             Assert.IsTrue(result);
@@ -27,10 +27,10 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public void MatchShouldReturnFalse()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("1.1.2");
+            var matcher = new InListSemverMatcher(new List<string> { "1.1.1", "2.2.2+beta", "3.3.3-rc1" });
 
             // Act.
-            var result = matcher.Match("1.1.1");
+            var result = matcher.Match("2.2.2");
 
             // Assert.
             Assert.IsFalse(result);
@@ -40,10 +40,10 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public void MatchWithPreReleaseToShouldReturnTrue()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("1.2.3----RC-SNAPSHOT.12.9.1--.12.88");
+            var matcher = new InListSemverMatcher(new List<string> { "1.1.1-rc.1", "2.2.2-rc.3+beta", "3.3.3-rc.11" });
 
             // Act.
-            var result = matcher.Match("1.2.3----RC-SNAPSHOT.12.9.2--.12.88");
+            var result = matcher.Match("1.1.1-rc.1");
 
             // Assert.
             Assert.IsTrue(result);
@@ -53,10 +53,10 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public void MatchWithPreReleaseToShouldReturnFalse()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("1.2.3----RC-SNAPSHOT.12.9.1--.12.89");
+            var matcher = new InListSemverMatcher(new List<string> { "1.1.1-rc.1", "2.2.2-rc.3+beta", "3.3.3-rc.11" });
 
             // Act.
-            var result = matcher.Match("1.2.3----RC-SNAPSHOT.12.9.1--.12.88");
+            var result = matcher.Match("1.1.1-rc.10");
 
             // Assert.
             Assert.IsFalse(result);
@@ -66,10 +66,10 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public void MatchWithMetadataShouldReturnTrue()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata-lalala");
+            var matcher = new InListSemverMatcher(new List<string> { "1.1.1+meta", "2.2.2-rc.3+beta", "3.3.3+meta.2" });
 
             // Act.
-            var result = matcher.Match("2.2.2-rc.2+metadata");
+            var result = matcher.Match("3.3.3+meta.2");
 
             // Assert.
             Assert.IsTrue(result);
@@ -79,10 +79,10 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public void MatchWithMetadataShouldReturnFalse()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2-rc.3+metadata-lalala");
+            var matcher = new InListSemverMatcher(new List<string> { "1.1.1+meta", "2.2.2-rc.3+beta", "3.3.3+meta.2" });
 
             // Act.
-            var result = matcher.Match("2.2.2-rc.2+metadata");
+            var result = matcher.Match("3.3.3+metadata.2");
 
             // Assert.
             Assert.IsFalse(result);
@@ -92,10 +92,23 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public void MatchWithTargetNullReturnFalse()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher(null);
+            var matcher = new InListSemverMatcher(null);
 
             // Act.
-            var result = matcher.Match("2.2.2-rc.2+metadata");
+            var result = matcher.Match("3.3.3+metadata.2");
+
+            // Assert.
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void MatchWithEmptyListReturnFalse()
+        {
+            // Arrange.
+            var matcher = new InListSemverMatcher(new List<string>());
+
+            // Act.
+            var result = matcher.Match("3.3.3+metadata.2");
 
             // Assert.
             Assert.IsFalse(result);
@@ -105,7 +118,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public void MatchWithKeyNullReturnFalse()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata");
+            var matcher = new InListSemverMatcher(new List<string> { "1.1.1+meta", "2.2.2-rc.3+beta", "3.3.3+meta.2" });
 
             // Act.
             var result = matcher.Match((string)null);
@@ -118,7 +131,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public void MatchReturnFalse()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata");
+            var matcher = new InListSemverMatcher(new List<string> { "1.1.1+meta", "2.2.2-rc.3+beta", "3.3.3+meta.2" });
 
             // Act and Assert.
             Assert.IsFalse(matcher.Match(10));
@@ -138,7 +151,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             object boolean = false;
             object str2 = "2.2.2-rc.1";
 
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2");
+            var matcher = new InListSemverMatcher(new List<string> { str.ToString(), "2.2.2-rc.3+beta", "3.3.3+meta.2" });
 
             // Act and Assert.
             Assert.IsTrue(matcher.Match(str));
@@ -155,10 +168,10 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchShouldReturnTrueAsync()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("1.1.1");
+            var matcher = new InListSemverMatcher(new List<string> { "1.1.1", "2.2.2+beta", "3.3.3-rc1" });
 
             // Act.
-            var result = await matcher.MatchAsync("1.1.2");
+            var result = await matcher.MatchAsync("2.2.2+beta");
 
             // Assert.
             Assert.IsTrue(result);
@@ -168,10 +181,10 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchShouldReturnFalseAsync()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("1.1.2");
+            var matcher = new InListSemverMatcher(new List<string> { "1.1.1", "2.2.2+beta", "3.3.3-rc1" });
 
             // Act.
-            var result = await matcher.MatchAsync("1.1.1");
+            var result = await matcher.MatchAsync("2.2.2");
 
             // Assert.
             Assert.IsFalse(result);
@@ -181,10 +194,10 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchWithPreReleaseToShouldReturnTrueAsync()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("1.2.3----RC-SNAPSHOT.12.9.1--.12.88");
+            var matcher = new InListSemverMatcher(new List<string> { "1.1.1-rc.1", "2.2.2-rc.3+beta", "3.3.3-rc.11" });
 
             // Act.
-            var result = await matcher.MatchAsync("1.2.3----RC-SNAPSHOT.12.9.2--.12.88");
+            var result = await matcher.MatchAsync("1.1.1-rc.1");
 
             // Assert.
             Assert.IsTrue(result);
@@ -194,10 +207,10 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchWithPreReleaseToShouldReturnFalseAsync()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("1.2.3----RC-SNAPSHOT.12.9.1--.12.89");
+            var matcher = new InListSemverMatcher(new List<string> { "1.1.1-rc.1", "2.2.2-rc.3+beta", "3.3.3-rc.11" });
 
             // Act.
-            var result = await matcher.MatchAsync("1.2.3----RC-SNAPSHOT.12.9.1--.12.88");
+            var result = await matcher.MatchAsync("1.1.1-rc.10");
 
             // Assert.
             Assert.IsFalse(result);
@@ -207,10 +220,10 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchWithMetadataShouldReturnTrueAsync()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata-lalala");
+            var matcher = new InListSemverMatcher(new List<string> { "1.1.1+meta", "2.2.2-rc.3+beta", "3.3.3+meta.2" });
 
             // Act.
-            var result = await matcher.MatchAsync("2.2.2-rc.2+metadata");
+            var result = await matcher.MatchAsync("3.3.3+meta.2");
 
             // Assert.
             Assert.IsTrue(result);
@@ -220,10 +233,10 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchWithMetadataShouldReturnFalseAsync()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2-rc.3+metadata-lalala");
+            var matcher = new InListSemverMatcher(new List<string> { "1.1.1+meta", "2.2.2-rc.3+beta", "3.3.3+meta.2" });
 
             // Act.
-            var result = await matcher.MatchAsync("2.2.2-rc.2+metadata");
+            var result = await matcher.MatchAsync("3.3.3+metadata.2");
 
             // Assert.
             Assert.IsFalse(result);
@@ -233,10 +246,23 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchWithTargetNullReturnFalseAsync()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher(null);
+            var matcher = new InListSemverMatcher(null);
 
             // Act.
-            var result = await matcher.MatchAsync("2.2.2-rc.2+metadata");
+            var result = await matcher.MatchAsync("3.3.3+metadata.2");
+
+            // Assert.
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task MatchWithEmptyListReturnFalseAsync()
+        {
+            // Arrange.
+            var matcher = new InListSemverMatcher(new List<string>());
+
+            // Act.
+            var result = await matcher.MatchAsync("3.3.3+metadata.2");
 
             // Assert.
             Assert.IsFalse(result);
@@ -246,7 +272,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchWithKeyNullReturnFalseAsync()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata");
+            var matcher = new InListSemverMatcher(new List<string> { "1.1.1+meta", "2.2.2-rc.3+beta", "3.3.3+meta.2" });
 
             // Act.
             var result = await matcher.MatchAsync((string)null);
@@ -259,12 +285,12 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchReturnFalseAsync()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata");
+            var matcher = new InListSemverMatcher(new List<string> { "1.1.1+meta", "2.2.2-rc.3+beta", "3.3.3+meta.2" });
 
             // Act and Assert.
             Assert.IsFalse(await matcher.MatchAsync(10));
             Assert.IsFalse(await matcher.MatchAsync(true));
-            Assert.IsFalse(await matcher.MatchAsync(new List<string> { "value" }));
+            Assert.IsFalse(await matcher.MatchAsync(new List<string> { "2.2.2" }));
             Assert.IsFalse(await matcher.MatchAsync(DateTime.Now));
         }
 
@@ -279,7 +305,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             object boolean = false;
             object str2 = "2.2.2-rc.1";
 
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2");
+            var matcher = new InListSemverMatcher(new List<string> { str.ToString(), "2.2.2-rc.3+beta", "3.3.3+meta.2" });
 
             // Act and Assert.
             Assert.IsTrue(await matcher.MatchAsync(str));

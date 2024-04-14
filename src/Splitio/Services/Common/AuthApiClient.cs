@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Splitio.Constants;
 using Splitio.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
@@ -24,7 +25,7 @@ namespace Splitio.Services.Common
             ISplitioHttpClient splitioHttpClient,
             ITelemetryRuntimeProducer telemetryRuntimeProducer)
         {
-            _url = url;
+            _url = $"{url}?s={ApiVersions.FlagsSpec}";
             _splitioHttpClient = splitioHttpClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
         }

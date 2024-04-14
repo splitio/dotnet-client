@@ -7,43 +7,30 @@ using System.Threading.Tasks;
 namespace Splitio_Tests.Unit_Tests.Matchers
 {
     [TestClass]
-    public class GreaterThanOrEqualToSemverMatcherTests
+    public class LessThanOrEqualToSemverMatcherTests
     {
         #region Sync
-        [TestMethod]
-        public void MatchShouldReturnTrue()
-        {
-            // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("1.1.1");
-
-            // Act.
-            var result = matcher.Match("1.1.2");
-
-            // Assert.
-            Assert.IsTrue(result);
-        }
-
         [TestMethod]
         public void MatchShouldReturnFalse()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("1.1.2");
+            var matcher = new LessThanOrEqualToSemverMatcher("1.1.1");
 
             // Act.
-            var result = matcher.Match("1.1.1");
+            var result = matcher.Match("1.1.2");
 
             // Assert.
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void MatchWithPreReleaseToShouldReturnTrue()
+        public void MatchShouldReturnTrue()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("1.2.3----RC-SNAPSHOT.12.9.1--.12.88");
+            var matcher = new LessThanOrEqualToSemverMatcher("1.1.2");
 
             // Act.
-            var result = matcher.Match("1.2.3----RC-SNAPSHOT.12.9.2--.12.88");
+            var result = matcher.Match("1.1.1");
 
             // Assert.
             Assert.IsTrue(result);
@@ -53,20 +40,33 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public void MatchWithPreReleaseToShouldReturnFalse()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("1.2.3----RC-SNAPSHOT.12.9.1--.12.89");
+            var matcher = new LessThanOrEqualToSemverMatcher("1.2.3----RC-SNAPSHOT.12.9.1--.12.88");
 
             // Act.
-            var result = matcher.Match("1.2.3----RC-SNAPSHOT.12.9.1--.12.88");
+            var result = matcher.Match("1.2.3----RC-SNAPSHOT.12.9.2--.12.88");
 
             // Assert.
             Assert.IsFalse(result);
         }
 
         [TestMethod]
+        public void MatchWithPreReleaseToShouldReturnTrue()
+        {
+            // Arrange.
+            var matcher = new LessThanOrEqualToSemverMatcher("1.2.3----RC-SNAPSHOT.12.9.1--.12.89");
+
+            // Act.
+            var result = matcher.Match("1.2.3----RC-SNAPSHOT.12.9.1--.12.88");
+
+            // Assert.
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
         public void MatchWithMetadataShouldReturnTrue()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata-lalala");
+            var matcher = new LessThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata-lalala");
 
             // Act.
             var result = matcher.Match("2.2.2-rc.2+metadata");
@@ -79,10 +79,10 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public void MatchWithMetadataShouldReturnFalse()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2-rc.3+metadata-lalala");
+            var matcher = new LessThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata-lalala");
 
             // Act.
-            var result = matcher.Match("2.2.2-rc.2+metadata");
+            var result = matcher.Match("2.2.2-rc.3+metadata");
 
             // Assert.
             Assert.IsFalse(result);
@@ -92,7 +92,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public void MatchWithTargetNullReturnFalse()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher(null);
+            var matcher = new LessThanOrEqualToSemverMatcher(null);
 
             // Act.
             var result = matcher.Match("2.2.2-rc.2+metadata");
@@ -105,7 +105,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public void MatchWithKeyNullReturnFalse()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata");
+            var matcher = new LessThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata");
 
             // Act.
             var result = matcher.Match((string)null);
@@ -118,12 +118,12 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public void MatchReturnFalse()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata");
+            var matcher = new LessThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata");
 
             // Act and Assert.
             Assert.IsFalse(matcher.Match(10));
             Assert.IsFalse(matcher.Match(true));
-            Assert.IsFalse(matcher.Match(new List<string> { "2.2.2" }));
+            Assert.IsFalse(matcher.Match(new List<string> { "value" }));
             Assert.IsFalse(matcher.Match(DateTime.Now));
         }
 
@@ -138,53 +138,53 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             object boolean = false;
             object str2 = "2.2.2-rc.1";
 
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2");
+            var matcher = new LessThanOrEqualToSemverMatcher("2.2.2");
 
             // Act and Assert.
-            Assert.IsTrue(matcher.Match(str));
+            Assert.IsFalse(matcher.Match(str));
             Assert.IsFalse(matcher.Match(num));
             Assert.IsFalse(matcher.Match(list));
             Assert.IsFalse(matcher.Match(dt));
             Assert.IsFalse(matcher.Match(boolean));
-            Assert.IsFalse(matcher.Match(str2));
+            Assert.IsTrue(matcher.Match(str2));
         }
         #endregion
 
         #region Async
         [TestMethod]
-        public async Task MatchShouldReturnTrueAsync()
-        {
-            // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("1.1.1");
-
-            // Act.
-            var result = await matcher.MatchAsync("1.1.2");
-
-            // Assert.
-            Assert.IsTrue(result);
-        }
-
-        [TestMethod]
         public async Task MatchShouldReturnFalseAsync()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("1.1.2");
+            var matcher = new LessThanOrEqualToSemverMatcher("1.1.1");
 
             // Act.
-            var result = await matcher.MatchAsync("1.1.1");
+            var result = await matcher.MatchAsync("1.1.2");
 
             // Assert.
             Assert.IsFalse(result);
         }
 
         [TestMethod]
+        public async Task MatchShouldReturnTrueAsync()
+        {
+            // Arrange.
+            var matcher = new LessThanOrEqualToSemverMatcher("1.1.2");
+
+            // Act.
+            var result = await matcher.MatchAsync("1.1.1");
+
+            // Assert.
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
         public async Task MatchWithPreReleaseToShouldReturnTrueAsync()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("1.2.3----RC-SNAPSHOT.12.9.1--.12.88");
+            var matcher = new LessThanOrEqualToSemverMatcher("1.2.3----RC-SNAPSHOT.12.9.2--.12.88");
 
             // Act.
-            var result = await matcher.MatchAsync("1.2.3----RC-SNAPSHOT.12.9.2--.12.88");
+            var result = await matcher.MatchAsync("1.2.3----RC-SNAPSHOT.12.9.1--.12.88");
 
             // Assert.
             Assert.IsTrue(result);
@@ -194,10 +194,10 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchWithPreReleaseToShouldReturnFalseAsync()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("1.2.3----RC-SNAPSHOT.12.9.1--.12.89");
+            var matcher = new LessThanOrEqualToSemverMatcher("1.2.3----RC-SNAPSHOT.12.9.1--.12.88");
 
             // Act.
-            var result = await matcher.MatchAsync("1.2.3----RC-SNAPSHOT.12.9.1--.12.88");
+            var result = await matcher.MatchAsync("1.2.3----RC-SNAPSHOT.12.9.2--.12.88");
 
             // Assert.
             Assert.IsFalse(result);
@@ -207,7 +207,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchWithMetadataShouldReturnTrueAsync()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata-lalala");
+            var matcher = new LessThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata-lalala");
 
             // Act.
             var result = await matcher.MatchAsync("2.2.2-rc.2+metadata");
@@ -220,10 +220,10 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchWithMetadataShouldReturnFalseAsync()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2-rc.3+metadata-lalala");
+            var matcher = new LessThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata-lalala");
 
             // Act.
-            var result = await matcher.MatchAsync("2.2.2-rc.2+metadata");
+            var result = await matcher.MatchAsync("2.2.2-rc.3+metadata");
 
             // Assert.
             Assert.IsFalse(result);
@@ -233,7 +233,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchWithTargetNullReturnFalseAsync()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher(null);
+            var matcher = new LessThanOrEqualToSemverMatcher(null);
 
             // Act.
             var result = await matcher.MatchAsync("2.2.2-rc.2+metadata");
@@ -246,7 +246,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchWithKeyNullReturnFalseAsync()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata");
+            var matcher = new LessThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata");
 
             // Act.
             var result = await matcher.MatchAsync((string)null);
@@ -259,7 +259,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         public async Task MatchReturnFalseAsync()
         {
             // Arrange.
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata");
+            var matcher = new LessThanOrEqualToSemverMatcher("2.2.2-rc.2+metadata");
 
             // Act and Assert.
             Assert.IsFalse(await matcher.MatchAsync(10));
@@ -279,15 +279,15 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             object boolean = false;
             object str2 = "2.2.2-rc.1";
 
-            var matcher = new GreaterThanOrEqualToSemverMatcher("2.2.2");
+            var matcher = new LessThanOrEqualToSemverMatcher("2.2.2");
 
             // Act and Assert.
-            Assert.IsTrue(await matcher.MatchAsync(str));
+            Assert.IsFalse(await matcher.MatchAsync(str));
             Assert.IsFalse(await matcher.MatchAsync(num));
             Assert.IsFalse(await matcher.MatchAsync(list));
             Assert.IsFalse(await matcher.MatchAsync(dt));
             Assert.IsFalse(await matcher.MatchAsync(boolean));
-            Assert.IsFalse(await matcher.MatchAsync(str2));
+            Assert.IsTrue(await matcher.MatchAsync(str2));
         }
         #endregion
     }

@@ -301,5 +301,204 @@ namespace Splitio_Tests.Unit_Tests
             Assert.AreEqual(2, condition.partitions.Count);
             Assert.IsInstanceOfType(condition.matcher.delegates.FirstOrDefault().matcher, typeof(GreaterThanOrEqualToSemverMatcher));
         }
+
+        [TestMethod]
+        public void ParseWithLessThanOrEqualToSemver()
+        {
+            // Arrange.
+            var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
+            var parser = new SplitParser(segmentCacheConsumer.Object);
+
+            var split = new Split
+            {
+                name = "test1",
+                seed = 2323,
+                status = "ACTIVE",
+                killed = false,
+                defaultTreatment = "off",
+                changeNumber = 232323,
+                trafficTypeName = "user",
+                conditions = new List<ConditionDefinition>
+                {
+                    new ConditionDefinition
+                    {
+                        conditionType = "ROLLOUT",
+                        label = "new label",
+                        partitions = new List<PartitionDefinition>
+                        {
+                            new PartitionDefinition
+                            {
+                                size = 50,
+                                treatment = "on"
+                            },
+                            new PartitionDefinition
+                            {
+                                size = 50,
+                                treatment = "0ff"
+                            }
+                        },
+                        matcherGroup = new MatcherGroupDefinition
+                        {
+                            matchers = new List<MatcherDefinition>
+                            {
+                                new MatcherDefinition
+                                {
+                                    matcherType = "LESS_THAN_OR_EQUAL_TO_SEMVER",
+                                    stringMatcherData = "2.2.2"
+                                }
+                            }
+                        },
+                    }
+                }
+            };
+
+            // Act.
+            var result = parser.Parse(split);
+
+            // Assert.
+            Assert.AreEqual("test1", result.name);
+            Assert.AreEqual("off", result.defaultTreatment);
+            Assert.AreEqual(1, result.conditions.Count);
+            var condition = result.conditions[0];
+            Assert.AreEqual("new label", condition.label);
+            Assert.AreEqual(ConditionType.ROLLOUT, condition.conditionType);
+            Assert.AreEqual(2, condition.partitions.Count);
+            Assert.IsInstanceOfType(condition.matcher.delegates.FirstOrDefault().matcher, typeof(LessThanOrEqualToSemverMatcher));
+        }
+
+        [TestMethod]
+        public void ParseWithBetweenSemver()
+        {
+            // Arrange.
+            var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
+            var parser = new SplitParser(segmentCacheConsumer.Object);
+
+            var split = new Split
+            {
+                name = "test1",
+                seed = 2323,
+                status = "ACTIVE",
+                killed = false,
+                defaultTreatment = "off",
+                changeNumber = 232323,
+                trafficTypeName = "user",
+                conditions = new List<ConditionDefinition>
+                {
+                    new ConditionDefinition
+                    {
+                        conditionType = "ROLLOUT",
+                        label = "new label",
+                        partitions = new List<PartitionDefinition>
+                        {
+                            new PartitionDefinition
+                            {
+                                size = 50,
+                                treatment = "on"
+                            },
+                            new PartitionDefinition
+                            {
+                                size = 50,
+                                treatment = "0ff"
+                            }
+                        },
+                        matcherGroup = new MatcherGroupDefinition
+                        {
+                            matchers = new List<MatcherDefinition>
+                            {
+                                new MatcherDefinition
+                                {
+                                    matcherType = "BETWEEN_SEMVER",
+                                    BetweenStringMatcherData = new BetweenStringData
+                                    {
+                                        start = "1.1.1",
+                                        end = "3.3.3"
+                                    }
+                                }
+                            }
+                        },
+                    }
+                }
+            };
+
+            // Act.
+            var result = parser.Parse(split);
+
+            // Assert.
+            Assert.AreEqual("test1", result.name);
+            Assert.AreEqual("off", result.defaultTreatment);
+            Assert.AreEqual(1, result.conditions.Count);
+            var condition = result.conditions[0];
+            Assert.AreEqual("new label", condition.label);
+            Assert.AreEqual(ConditionType.ROLLOUT, condition.conditionType);
+            Assert.AreEqual(2, condition.partitions.Count);
+            Assert.IsInstanceOfType(condition.matcher.delegates.FirstOrDefault().matcher, typeof(BetweenSemverMatcher));
+        }
+
+        [TestMethod]
+        public void ParseWithInListSemver()
+        {
+            // Arrange.
+            var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
+            var parser = new SplitParser(segmentCacheConsumer.Object);
+
+            var split = new Split
+            {
+                name = "test1",
+                seed = 2323,
+                status = "ACTIVE",
+                killed = false,
+                defaultTreatment = "off",
+                changeNumber = 232323,
+                trafficTypeName = "user",
+                conditions = new List<ConditionDefinition>
+                {
+                    new ConditionDefinition
+                    {
+                        conditionType = "ROLLOUT",
+                        label = "new label",
+                        partitions = new List<PartitionDefinition>
+                        {
+                            new PartitionDefinition
+                            {
+                                size = 50,
+                                treatment = "on"
+                            },
+                            new PartitionDefinition
+                            {
+                                size = 50,
+                                treatment = "0ff"
+                            }
+                        },
+                        matcherGroup = new MatcherGroupDefinition
+                        {
+                            matchers = new List<MatcherDefinition>
+                            {
+                                new MatcherDefinition
+                                {
+                                    matcherType = "IN_LIST_SEMVER",
+                                    whitelistMatcherData = new WhitelistData
+                                    {
+                                        whitelist = new List<string>()
+                                    }
+                                }
+                            }
+                        },
+                    }
+                }
+            };
+
+            // Act.
+            var result = parser.Parse(split);
+
+            // Assert.
+            Assert.AreEqual("test1", result.name);
+            Assert.AreEqual("off", result.defaultTreatment);
+            Assert.AreEqual(1, result.conditions.Count);
+            var condition = result.conditions[0];
+            Assert.AreEqual("new label", condition.label);
+            Assert.AreEqual(ConditionType.ROLLOUT, condition.conditionType);
+            Assert.AreEqual(2, condition.partitions.Count);
+            Assert.IsInstanceOfType(condition.matcher.delegates.FirstOrDefault().matcher, typeof(InListSemverMatcher));
+        }
     }
 }
