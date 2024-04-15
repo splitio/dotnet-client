@@ -29,7 +29,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             var authResponse = "{\"pushEnabled\":true,\"token\":\"khdkjdahs987498217.eyJ4LWFibHktY2FwYWJpbGl0eSI6IntcInh4eHhfeHh4eF9zZWdtZW50c1wiOltcInN1YnNjcmliZVwiXSxcInh4eHhfeHh4eF9zcGxpdHNcIjpbXCJzdWJzY3JpYmVcIl0sXCJjb250cm9sXCI6W1wic3Vic2NyaWJlXCJdfSJ9\"}";
 
             _splitioHttpClientMock
-                .Setup(mock => mock.GetAsync(It.IsAny<string>(), It.IsAny<bool>()))
+                .Setup(mock => mock.GetAsync("https://auth.fake.io/auth?s=1.1", false))
                 .ReturnsAsync(new HTTPResult
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -45,6 +45,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             Assert.AreEqual("xxxx_xxxx_segments,xxxx_xxxx_splits,control", result.Channels);
             Assert.IsFalse(string.IsNullOrEmpty(result.Token));
             Assert.IsTrue(result.Retry.Value);
+            _splitioHttpClientMock.Verify(mock => mock.GetAsync("https://auth.fake.io/auth?s=1.1", false), Times.Once);
         }
 
         [TestMethod]
@@ -54,7 +55,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             var authResponse = "{\"pushEnabled\":false}";
 
             _splitioHttpClientMock
-                .Setup(mock => mock.GetAsync(It.IsAny<string>(), It.IsAny<bool>()))
+                .Setup(mock => mock.GetAsync("https://auth.fake.io/auth?s=1.1", false))
                 .ReturnsAsync(new HTTPResult
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -70,6 +71,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             Assert.IsTrue(string.IsNullOrEmpty(result.Channels));
             Assert.IsFalse(result.Retry.Value);
             Assert.IsTrue(string.IsNullOrEmpty(result.Token));
+            _splitioHttpClientMock.Verify(mock => mock.GetAsync("https://auth.fake.io/auth?s=1.1", false), Times.Once);
         }
 
         [TestMethod]
@@ -77,7 +79,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             //Arrange
             _splitioHttpClientMock
-                .Setup(mock => mock.GetAsync(It.IsAny<string>(), It.IsAny<bool>()))
+                .Setup(mock => mock.GetAsync("https://auth.fake.io/auth?s=1.1", false))
                 .ReturnsAsync(new HTTPResult
                 {
                     StatusCode = System.Net.HttpStatusCode.InternalServerError,
@@ -92,6 +94,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             Assert.IsTrue(string.IsNullOrEmpty(result.Channels));
             Assert.IsTrue(result.Retry.Value);
             Assert.IsTrue(string.IsNullOrEmpty(result.Token));
+            _splitioHttpClientMock.Verify(mock => mock.GetAsync("https://auth.fake.io/auth?s=1.1", false), Times.Once);
         }
 
         [TestMethod]
@@ -99,7 +102,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             //Arrange
             _splitioHttpClientMock
-                .Setup(mock => mock.GetAsync(It.IsAny<string>(), It.IsAny<bool>()))
+                .Setup(mock => mock.GetAsync("https://auth.fake.io/auth?s=1.1", false))
                 .ReturnsAsync(new HTTPResult
                 {
                     StatusCode = System.Net.HttpStatusCode.BadRequest,
@@ -114,6 +117,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             Assert.IsFalse(result.PushEnabled.Value);
             Assert.IsTrue(string.IsNullOrEmpty(result.Channels));            
             Assert.IsTrue(string.IsNullOrEmpty(result.Token));
+            _splitioHttpClientMock.Verify(mock => mock.GetAsync("https://auth.fake.io/auth?s=1.1", false), Times.Once);
         }
 
         [TestMethod]
@@ -121,7 +125,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             //Arrange
             _splitioHttpClientMock
-                .Setup(mock => mock.GetAsync(It.IsAny<string>(), It.IsAny<bool>()))
+                .Setup(mock => mock.GetAsync("https://auth.fake.io/auth?s=1.1", It.IsAny<bool>()))
                 .ReturnsAsync(new HTTPResult
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -135,6 +139,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             Assert.IsFalse(result.PushEnabled.Value);
             Assert.IsTrue(string.IsNullOrEmpty(result.Channels));
             Assert.IsTrue(string.IsNullOrEmpty(result.Token));
+            _splitioHttpClientMock.Verify(mock => mock.GetAsync("https://auth.fake.io/auth?s=1.1", false), Times.Once);
         }
     }
 }

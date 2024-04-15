@@ -1,4 +1,5 @@
-﻿using Splitio.Domain;
+﻿using Splitio.Constants;
+using Splitio.Domain;
 using Splitio.Services.Common;
 using Splitio.Services.Filters;
 using Splitio.Services.Logger;
@@ -68,7 +69,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
         private string GetRequestUri(long since, long? till = null)
         {
-            var uri = $"{_baseUrl}/api/splitChanges?since={Uri.EscapeDataString(since.ToString())}";
+            var uri = $"{_baseUrl}/api/splitChanges?s={ApiVersions.FlagsSpec}&since={Uri.EscapeDataString(since.ToString())}";
 
             if (till.HasValue)
                 uri = $"{uri}&till={Uri.EscapeDataString(till.Value.ToString())}";
