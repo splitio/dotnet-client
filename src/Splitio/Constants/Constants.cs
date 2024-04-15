@@ -54,4 +54,9 @@
         public static string InitDestroy => "Initialization SDK destroy.";
         public static string Destroyed => "SDK has been destroyed.";
     }
+
+    public static class ApiVersions
+    {
+        public static string FlagsSpec => "1.1";
+    }
 }
