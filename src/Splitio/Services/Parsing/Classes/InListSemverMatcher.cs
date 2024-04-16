@@ -38,7 +38,7 @@ namespace Splitio.Services.Parsing.Classes
 
             foreach (var item in _targetList)
             {
-                if (keySemver.Version.Equals(item.Version))
+                if (keySemver.Equals(item))
                     return true;
             }
 
