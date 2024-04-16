@@ -27,9 +27,7 @@ namespace Splitio.Services.EventSource
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _streamingStatusQueue = streamingStatusQueue; 
             _log = WrapperAdapter.Instance().GetLogger(typeof(NotificationManagerKeeper));
-            _publisherAvailable = true;
-            _currentStatus = SSEClientStatusMessage.INITIALIZATION_IN_PROGRESS;
-            _backendStatus = ControlType.STREAMING_RESUMED;
+            Reset();
         }
 
         #region Public Methods
@@ -182,10 +180,13 @@ namespace Splitio.Services.EventSource
             {
                 _currentStatus = SSEClientStatusMessage.INITIALIZATION_IN_PROGRESS;
             }
+
             lock (_getAndSetControl)
             {
                 _publisherAvailable = true;
                 _backendStatus = ControlType.STREAMING_RESUMED;
+                _publishersPri = 2;
+                _publishersSec = 2;
             }
         }
 

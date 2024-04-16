@@ -3,6 +3,7 @@ CHANGES
 7.8.3 (Apr 15, 2024)
 - Fixed Sync over Async implementation.
 - Added the logic to handle correctly when the SDK receives an unsupported Matcher type.
+- Fixed NotificationManagerKeeper to start with publishers in both regions by default. 
 
 7.8.2 (Mar 25, 2024)
 - Fixed streaming notification parser.

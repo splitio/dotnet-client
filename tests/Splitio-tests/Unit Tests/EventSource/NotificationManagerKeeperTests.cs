@@ -64,7 +64,14 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         public void HandleIncominEvent_ControlStreamingResumed_ShouldNotDispatchEvent()
         {
             // Arrange.
-            var occupancyNoti = new OccupancyNotification
+            var occupancyNotiSec = new OccupancyNotification
+            {
+                Channel = "control_sec",
+                Metrics = new OccupancyMetricsData { Publishers = 0 },
+                Type = NotificationType.OCCUPANCY
+            };
+
+            var occupancyNotiPri = new OccupancyNotification
             {
                 Channel = "control_pri",
                 Metrics = new OccupancyMetricsData { Publishers = 0 },
@@ -79,7 +86,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             };
 
             // Act & Assert.
-            _notificationManagerKeeper.HandleIncomingEvent(occupancyNoti);
+            _notificationManagerKeeper.HandleIncomingEvent(occupancyNotiSec);
+            Assert.AreEqual(0, _streamingStatusQueue.Count());
+
+            _notificationManagerKeeper.HandleIncomingEvent(occupancyNotiPri);
             _streamingStatusQueue.TryDequeue(out StreamingStatus action);
             Assert.AreEqual(StreamingStatus.STREAMING_DOWN, action);
 
@@ -146,6 +156,12 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             notificationPri.Metrics.Publishers = 0;
 
             // Act.
+            _notificationManagerKeeper.HandleIncomingEvent(new OccupancyNotification
+            {
+                Channel = "control_sec",
+                Type = NotificationType.OCCUPANCY,
+                Metrics = new OccupancyMetricsData { Publishers = 0 }
+            });
             _notificationManagerKeeper.HandleIncomingEvent(notificationPri);
 
             // Assert.
