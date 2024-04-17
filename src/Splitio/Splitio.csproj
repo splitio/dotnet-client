@@ -7,7 +7,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>7.8.2</Version>
+    <Version>7.8.3</Version>
     <RootNamespace>Splitio</RootNamespace>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Splitio.snk</AssemblyOriginatorKeyFile>
@@ -31,6 +31,11 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.32" />
     <PackageReference Include="System.IO.FileSystem.Watcher" Version="4.3.0" />
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
+    <PackageReference Include="BitFaster.Caching" Version="2.4.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <PackageReference Include="BitFaster.Caching" Version="2.4.1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net45' Or '$(TargetFramework)' == 'net461'">

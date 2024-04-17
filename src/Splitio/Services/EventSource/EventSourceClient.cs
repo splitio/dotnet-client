@@ -28,7 +28,6 @@ namespace Splitio.Services.EventSource
         private readonly byte[] _buffer = new byte[BufferSize];
         private readonly UTF8Encoding _encoder = new UTF8Encoding();
         private readonly CountdownEvent _disconnectSignal = new CountdownEvent(1);
-        private readonly CountdownEvent _initializationSignal = new CountdownEvent(1);
 
         private readonly INotificationParser _notificationParser;   
         private readonly ISplitioHttpClient _splitHttpClient;
@@ -64,15 +63,15 @@ namespace Splitio.Services.EventSource
         public event EventHandler<EventReceivedEventArgs> EventReceived;
 
         #region Public Methods
-        public bool Connect(string url)
+        public void Connect(string url)
         {
-            if (_statusManager.IsDestroyed()) return false;
+            if (_statusManager.IsDestroyed()) return;
 
             if (_connected)
             {
                 _log.Debug("Event source Client already connected.");
 
-                return false;
+                return;
             }
 
             _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.INITIALIZATION_IN_PROGRESS);
@@ -80,13 +79,7 @@ namespace Splitio.Services.EventSource
             _firstEvent = true;
             _url = url;
             _disconnectSignal.Reset();
-            _initializationSignal.Reset();
-
             _connectTask.Start();
-
-            _initializationSignal.Wait(ConnectTimeoutMs);
-
-            return _connected;
         }
 
         public async Task DisconnectAsync()
@@ -124,7 +117,7 @@ namespace Splitio.Services.EventSource
                     catch (Exception ex)
                     {
                         _log.Debug($"Error reading stream: {ex.Message}");
-                        _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
+                        await _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
                     }
                     finally
                     {
@@ -138,9 +131,6 @@ namespace Splitio.Services.EventSource
             }
             finally
             {
-                if (!_initializationSignal.IsSet)
-                    _initializationSignal.Signal();
-
                 _disconnectSignal.Signal();
 
                 _log.Debug("Finished Event Source client ConnectAsync.");
@@ -153,8 +143,7 @@ namespace Splitio.Services.EventSource
             {
                 _lineBuffer = string.Empty;
                 _connected = true;
-                _initializationSignal.Signal();
-                _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.CONNECTED);
+                await _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.CONNECTED);
 
                 while (_ongoindStream.CanRead && _connected && !_statusManager.IsDestroyed())
                 {
@@ -175,7 +164,7 @@ namespace Splitio.Services.EventSource
                                 if (!_connected && (ex is IOException || ex is ObjectDisposedException))
                                 {
                                     _log.Debug($"Streaming read was forced to stop.", ex);
-                                    _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.FORCED_STOP);
+                                    await _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.FORCED_STOP);
 
                                     return;
                                 }
@@ -185,7 +174,7 @@ namespace Splitio.Services.EventSource
                                 else
                                     _log.Debug($"Streaming IOException", ex);
 
-                                _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
+                                await _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
                                 return;
                             }
 
@@ -195,19 +184,19 @@ namespace Splitio.Services.EventSource
                                 if (_url.StartsWith("http://localhost"))
                                 {
                                     _log.Debug("Streaming end of the file - for tests.");
-                                    _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.CONNECTED);
+                                    await _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.CONNECTED);
                                     return;
                                 }
 
                                 _log.Debug("Streaming end of the file.");
-                                _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
+                                await _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
                                 return;
                             }
 
                             var notificationString = _encoder.GetString(_buffer, 0, len);
                             _log.Debug($"Read stream encoder buffer: {notificationString}");
 
-                            if (_firstEvent) ProcessFirtsEvent(notificationString);
+                            if (_firstEvent) await ProcessFirtsEvent(notificationString);
 
                             if (notificationString == KeepAliveResponse || !_connected) continue;
 
@@ -225,7 +214,7 @@ namespace Splitio.Services.EventSource
                                 {
                                     case NotificationType.ERROR:
                                         var notificationError = (NotificationError)eventData;
-                                        ProcessErrorNotification(notificationError);
+                                        await ProcessErrorNotification(notificationError);
                                         break;
                                     default:
                                         DispatchEvent(eventData);
@@ -241,26 +230,26 @@ namespace Splitio.Services.EventSource
                 if (_connected && !_statusManager.IsDestroyed())
                 {
                     _log.Debug("Stream ended abruptly, proceeding to reconnect.", ex);
-                    _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
+                    await _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
                     return;
                 }
             }
         }
 
-        private void ProcessErrorNotification(NotificationError notificationError)
+        private async Task ProcessErrorNotification(NotificationError notificationError)
         {
             _log.Debug($"Ably Notification error: {notificationError.Message}.\nStatus Server: {notificationError.StatusCode}.\n AblyCode: {notificationError.Code}");
             _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.AblyError, notificationError.Code));
 
             if (notificationError.Code >= 40140 && notificationError.Code <= 40149)
             {
-                _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
+                await _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
                 return;
             }
 
             if (notificationError.Code >= 40000 && notificationError.Code <= 49999)
             {
-                _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.NONRETRYABLE_ERROR);
+                await _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.NONRETRYABLE_ERROR);
                 return;
             }            
         }
@@ -270,7 +259,7 @@ namespace Splitio.Services.EventSource
             EventReceived?.Invoke(this, new EventReceivedEventArgs(incomingNotification));
         }
 
-        private void ProcessFirtsEvent(string notification)
+        private async Task ProcessFirtsEvent(string notification)
         {
             _firstEvent = false;
             var eventData = _notificationParser.Parse(notification);
@@ -278,7 +267,7 @@ namespace Splitio.Services.EventSource
             // This case is when in the first event received an error notification, mustn't dispatch connected.
             if (eventData != null && eventData.Type == NotificationType.ERROR) return;
 
-            _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.FIRST_EVENT);
+            await _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.FIRST_EVENT);
         }
 
         private List<string> ReadLines(string message)

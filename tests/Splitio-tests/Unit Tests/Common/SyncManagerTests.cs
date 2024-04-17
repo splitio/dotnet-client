@@ -3,12 +3,13 @@ using Moq;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.Tasks;
 using Splitio.Telemetry.Common;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Storages;
-using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Common
 {
@@ -24,7 +25,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<ITelemetrySyncTask> _telemetrySyncTask;
         private readonly Mock<IBackOff> _backoff;
 
-        private readonly BlockingCollection<StreamingStatus> _streamingStatusQueue;
+        private readonly SplitQueue<StreamingStatus> _streamingStatusQueue;
 
         public SyncManagerTests()
         {
@@ -36,7 +37,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _telemetrySyncTask = new Mock<ITelemetrySyncTask>();
             _backoff = new Mock<IBackOff>();
-            _streamingStatusQueue = new BlockingCollection<StreamingStatus>(new ConcurrentQueue<StreamingStatus>());
+            _streamingStatusQueue = new SplitQueue<StreamingStatus>();
         }
 
         [TestMethod]
@@ -135,7 +136,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         }
 
         [TestMethod]
-        public void OnProcessFeedbackSSE_STREAMING_READY()
+        public async Task OnProcessFeedbackSSE_STREAMING_READY()
         {
             // Arrange.
             _synchronizer
@@ -156,7 +157,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _telemetryRuntimeProducer.Verify(mock => mock.RecordStreamingEvent(It.IsAny<StreamingEvent>()), Times.Exactly(1));
             _pushManager.Verify(mock => mock.StartAsync(), Times.Once);
 
-            _streamingStatusQueue.Add(StreamingStatus.STREAMING_READY);
+            await _streamingStatusQueue.EnqueueAsync(StreamingStatus.STREAMING_READY);
             Thread.Sleep(3000);
 
             _sseHandler.Verify(mock => mock.StartWorkers(), Times.Once);
@@ -168,7 +169,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         }
 
         [TestMethod]
-        public void OnProcessFeedbackSSE_STREAMING_OFF()
+        public async Task OnProcessFeedbackSSE_STREAMING_OFF()
         {
             // Arrange.
             _synchronizer
@@ -189,7 +190,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _telemetryRuntimeProducer.Verify(mock => mock.RecordStreamingEvent(It.IsAny<StreamingEvent>()), Times.Exactly(1));
             _pushManager.Verify(mock => mock.StartAsync(), Times.Once);
 
-            _streamingStatusQueue.Add(StreamingStatus.STREAMING_OFF);
+            await _streamingStatusQueue.EnqueueAsync(StreamingStatus.STREAMING_OFF);
             Thread.Sleep(3000);
 
             _pushManager.Verify(mock => mock.StopAsync(), Times.Once);
@@ -198,7 +199,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         }
 
         [TestMethod]
-        public void OnProcessFeedbackSSE_STREAMING_BACKOFF()
+        public async Task OnProcessFeedbackSSE_STREAMING_BACKOFF()
         {
             // Arrange.
             var streamingEnabled = true;
@@ -220,48 +221,20 @@ namespace Splitio_Tests.Unit_Tests.Common
             _telemetryRuntimeProducer.Verify(mock => mock.RecordStreamingEvent(It.IsAny<StreamingEvent>()), Times.Exactly(1));
             _pushManager.Verify(mock => mock.StartAsync(), Times.Once);
 
-            _streamingStatusQueue.Add(StreamingStatus.STREAMING_BACKOFF);
+            await _streamingStatusQueue.EnqueueAsync(StreamingStatus.STREAMING_BACKOFF);
             Thread.Sleep(3000);
 
             _backoff.Verify(mock => mock.GetInterval(true), Times.Once);
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordStreamingEvent(It.IsAny<StreamingEvent>()), Times.Exactly(2));
-            _sseHandler.Verify(mock => mock.StopWorkersAsync(), Times.Once);
+            _sseHandler.Verify(mock => mock.StopWorkers(), Times.Once);
             _pushManager.Verify(mock => mock.StopAsync(), Times.Once);
             _pushManager.Verify(mock => mock.StartAsync(), Times.Exactly(2));
         }
 
-        [TestMethod]
-        public void OnProcessFeedbackSSE_STREAMING_DOWN()
-        {
-            // Arrange.
-            var streamingEnabled = true;
-
-            _synchronizer
-                .Setup(mock => mock.SyncAllAsync())
-                .ReturnsAsync(true);
-
-            _statusManager
-                .Setup(mock => mock.IsDestroyed())
-                .Returns(false);
-
-            var syncManager = GetSyncManager(streamingEnabled);
-            syncManager.Start();
-            Thread.Sleep(2000);
-
-            // Act & Assert.
-            _streamingStatusQueue.Add(StreamingStatus.STREAMING_DOWN);
-            Thread.Sleep(5000);
-
-            _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
-            _sseHandler.Verify(mock => mock.StopWorkersAsync(), Times.Once);
-            _telemetryRuntimeProducer.Verify(mock => mock.RecordStreamingEvent(It.IsAny<StreamingEvent>()), Times.Exactly(2));
-        }
-
-        private ISyncManager GetSyncManager(bool streamingEnabled)
+        private SyncManager GetSyncManager(bool streamingEnabled)
         {
             var startupTask = _taskManager.NewOnTimeTask(Splitio.Enums.Task.SDKInitialization);
-            var streamingStatusTask = _taskManager.NewPeriodicTask(Splitio.Enums.Task.OnStreamingStatusTask, 0);
 
             return new SyncManager(streamingEnabled,
                 _synchronizer.Object,
@@ -271,10 +244,9 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _statusManager.Object,
                 _taskManager,
                 _telemetrySyncTask.Object,
-                _streamingStatusQueue,
                 _backoff.Object,
-                startupTask,
-                streamingStatusTask);
+                _streamingStatusQueue,
+                startupTask);
         }
     }
 }

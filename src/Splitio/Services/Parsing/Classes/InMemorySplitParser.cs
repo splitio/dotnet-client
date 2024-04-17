@@ -8,18 +8,16 @@ namespace Splitio.Services.Parsing.Classes
     {
         private readonly ISegmentFetcher _segmentFetcher;
 
-        public InMemorySplitParser(ISegmentFetcher segmentFetcher, ISegmentCacheConsumer segmentsCache)
+        public InMemorySplitParser(ISegmentFetcher segmentFetcher, ISegmentCacheConsumer segmentsCache) : base(segmentsCache)
         {
             _segmentFetcher = segmentFetcher;
-            _segmentsCache = segmentsCache;
         }
 
         protected override IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit)
         {
-            var matcherData = matcherDefinition.userDefinedSegmentMatcherData;
-            _segmentFetcher.InitializeSegment(matcherData.segmentName);
+            _segmentFetcher.InitializeSegment(matcherDefinition.userDefinedSegmentMatcherData.segmentName);
 
-            return new UserDefinedSegmentMatcher(matcherData.segmentName, _segmentsCache);
+            return base.GetInSegmentMatcher(matcherDefinition, parsedSplit);
         }
     }
 }

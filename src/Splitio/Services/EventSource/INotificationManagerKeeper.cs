@@ -1,10 +1,10 @@
-﻿using System;
+﻿using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource
 {
     public interface INotificationManagerKeeper
     {
-        void HandleSseStatus(SSEClientStatusMessage newStatus);
-        void HandleIncomingEvent(IncomingNotification notification);
+        Task HandleSseStatus(SSEClientStatusMessage newStatus);
+        Task HandleIncomingEvent(IncomingNotification notification);
     }
 }

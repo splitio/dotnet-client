@@ -4,48 +4,51 @@ using Splitio.Services.Common;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
-using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource.Workers
 {
-    public class SplitsWorker : BaseWorker, ISplitsWorker
+    public class SplitsWorker : BaseWorker, ISplitsWorker, IQueueObserver
     {
         private readonly ISynchronizer _synchronizer;
         private readonly IFeatureFlagCache _featureFlagCache;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly ISelfRefreshingSegmentFetcher _segmentFetcher;
         private readonly IFeatureFlagSyncService _featureFlagSyncService;
-        private readonly BlockingCollection<SplitChangeNotification> _queue;
+        private readonly SplitQueue<SplitChangeNotification> _queue;
 
         public SplitsWorker(ISynchronizer synchronizer,
             IFeatureFlagCache featureFlagCache,
-            BlockingCollection<SplitChangeNotification> queue,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
             ISelfRefreshingSegmentFetcher segmentFetcher,
-            ISplitTask task,
-            IFeatureFlagSyncService featureFlagSyncService) : base("FeatureFlagsWorker", WrapperAdapter.Instance().GetLogger(typeof(SplitsWorker)), task)
+            IFeatureFlagSyncService featureFlagSyncService) : base("FeatureFlagsWorker", WrapperAdapter.Instance().GetLogger(typeof(SplitsWorker)))
         {
             _synchronizer = synchronizer;
             _featureFlagCache = featureFlagCache;
-            _queue = queue;
+            _queue = new SplitQueue<SplitChangeNotification>();
+            _queue.AddObserver(this);
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _segmentFetcher = segmentFetcher;
             _featureFlagSyncService = featureFlagSyncService;
         }
 
         #region Public Methods
-        public void AddToQueue(SplitChangeNotification scn)
+        public async Task AddToQueue(SplitChangeNotification scn)
         {
+            if (!_running)
+            {
+                _log.Debug("FeatureFlagsWorker is not running and the SDK is trying to process a new notification.");
+                return;
+            }
+
             try
             {
                 _log.Debug($"Add to queue: {scn.ChangeNumber}");
-                _queue.TryAdd(scn);
+                await _queue.EnqueueAsync(scn);
             }
             catch (Exception ex)
             {
@@ -68,22 +71,18 @@ namespace Splitio.Services.EventSource.Workers
                 _log.Error($"Error killing the following feature flag: {skn.SplitName}", ex);
             }
         }
-        #endregion
 
-        #region Protected Methods
-        protected override async Task ExecuteAsync()
+        public async Task Notify()
         {
-            _log.Debug($"FeatureFlags Worker, Token: {_cts.IsCancellationRequested}; Running: {_task.IsRunning()}.");
             try
             {
-                if (_queue.TryTake(out SplitChangeNotification scn, -1, _cts.Token))
-                {
-                    _log.Debug($"ChangeNumber dequeue: {scn.ChangeNumber}");
+                if (!_queue.TryDequeue(out SplitChangeNotification scn)) return;
 
-                    var success = await ProcessSplitChangeNotificationAsync(scn);
+                _log.Debug($"ChangeNumber dequeue: {scn.ChangeNumber}");
 
-                    if (!success) await _synchronizer.SynchronizeSplitsAsync(scn.ChangeNumber);
-                }
+                var success = await ProcessSplitChangeNotificationAsync(scn);
+
+                if (!success) await _synchronizer.SynchronizeSplitsAsync(scn.ChangeNumber);
             }
             catch (Exception ex)
             {
@@ -92,7 +91,9 @@ namespace Splitio.Services.EventSource.Workers
                 _log.Warn($"FeatureFlags ExecuteAsync exception.", ex);
             }
         }
+        #endregion
 
+        #region Private Methods
         private async Task<bool> ProcessSplitChangeNotificationAsync(SplitChangeNotification scn)
         {
             try
@@ -104,7 +105,7 @@ namespace Splitio.Services.EventSource.Workers
                     return false;
 
                 var sNames = _featureFlagSyncService.UpdateFeatureFlagsFromChanges(new List<Split> { scn.FeatureFlag }, scn.ChangeNumber);
-                
+
                 if (sNames.Count > 0) await _segmentFetcher.FetchSegmentsIfNotExistsAsync(sNames);
 
                 _telemetryRuntimeProducer.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits);
@@ -114,7 +115,7 @@ namespace Splitio.Services.EventSource.Workers
             catch (Exception ex)
             {
                 _log.Error($"Somenthing went wrong processing a Feature Flag notification", ex);
-                
+
                 return false;
             }
 

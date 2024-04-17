@@ -35,21 +35,19 @@ namespace Splitio.Services.EventSource
         }
 
         #region Public Methods
-        public bool Start(string token, string channels)
+        public void Start(string token, string channels)
         {
             try
             {
                 _log.Debug($"SSE Handler starting...");
                 var url = $"{_streaminServiceUrl}?channels={channels}&v=1.1&accessToken={token}";
 
-                return _eventSourceClient.Connect(url);
+                _eventSourceClient.Connect(url);
             }
             catch (Exception ex)
             {
                 _log.Error($"SSE Handler Start: {ex.Message}");
             }
-
-            return false;
         }
 
         public async Task StopAsync()
@@ -74,10 +72,10 @@ namespace Splitio.Services.EventSource
             _segmentsWorker.Start();
         }
 
-        public async Task StopWorkersAsync()
+        public void StopWorkers()
         {
-            await _splitsWorker.StopAsync();
-            await _segmentsWorker.StopAsync();
+            _splitsWorker.Stop();
+            _segmentsWorker.Stop();
         }
         #endregion
 

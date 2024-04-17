@@ -1,54 +1,50 @@
 ﻿using Splitio.Services.Common;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Tasks;
 using System;
-using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource.Workers
 {
-    public class SegmentsWorker : BaseWorker, ISegmentsWorker
+    public class SegmentsWorker : BaseWorker, ISegmentsWorker, IQueueObserver
     {
         private readonly ISynchronizer _synchronizer;
-        private readonly BlockingCollection<SegmentQueueDto> _queue;
+        private readonly SplitQueue<SegmentQueueDto> _queue;
 
-        public SegmentsWorker(ISynchronizer synchronizer, ISplitTask task) : base("SegmentsWorker", WrapperAdapter.Instance().GetLogger(typeof(SegmentsWorker)), task)
+        public SegmentsWorker(ISynchronizer synchronizer) : base("SegmentsWorker", WrapperAdapter.Instance().GetLogger(typeof(SegmentsWorker)))
         {
             _synchronizer = synchronizer;
-            _queue = new BlockingCollection<SegmentQueueDto>(new ConcurrentQueue<SegmentQueueDto>());
+            _queue = new SplitQueue<SegmentQueueDto>();
+            _queue.AddObserver(this);
         }
 
         #region Public Methods
-        public void AddToQueue(long changeNumber, string segmentName)
+        public async Task AddToQueue(long changeNumber, string segmentName)
         {
             try
             {
-                if (!_task.IsRunning())
+                if (!_running)
                 {
                     _log.Error("Segments Worker not running.");
                     return;
                 }
 
                 _log.Debug($"Add to queue: {segmentName} - {changeNumber}");
-                _queue.TryAdd(new SegmentQueueDto { ChangeNumber = changeNumber, SegmentName = segmentName });
+                await _queue.EnqueueAsync(new SegmentQueueDto { ChangeNumber = changeNumber, SegmentName = segmentName });
             }
             catch (Exception ex)
             {
                 _log.Error($"AddToQueue: {ex.Message}");
             }
         }
-        #endregion
 
-        #region Protected Methods
-        protected override async Task ExecuteAsync()
+        public async Task Notify()
         {
             try
             {
-                if (_queue.TryTake(out SegmentQueueDto segment, -1, _cts.Token))
-                {
-                    _log.Debug($"Segment dequeue: {segment.SegmentName}");
-                    await _synchronizer.SynchronizeSegmentAsync(segment.SegmentName, segment.ChangeNumber);
-                }
+                if (!_queue.TryDequeue(out SegmentQueueDto segment)) return;
+
+                _log.Debug($"Segment dequeue: {segment.SegmentName}");
+                await _synchronizer.SynchronizeSegmentAsync(segment.SegmentName, segment.ChangeNumber);
             }
             catch (Exception ex)
             {

@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Services.EventSource;
+using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Storages;
-using System.Collections.Concurrent;
 
 namespace Splitio_Tests.Unit_Tests.EventSource
 {
@@ -10,14 +10,14 @@ namespace Splitio_Tests.Unit_Tests.EventSource
     public class NotificationManagerKeeperTests
     {
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
-        private readonly BlockingCollection<StreamingStatus> _streamingStatusQueue;
+        private readonly SplitQueue<StreamingStatus> _streamingStatusQueue;
 
         private readonly INotificationManagerKeeper _notificationManagerKeeper;
 
         public NotificationManagerKeeperTests()
         {
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
-            _streamingStatusQueue = new BlockingCollection<StreamingStatus>();
+            _streamingStatusQueue = new SplitQueue<StreamingStatus>();
 
             _notificationManagerKeeper = new NotificationManagerKeeper(_telemetryRuntimeProducer.Object, _streamingStatusQueue);
         }
@@ -37,7 +37,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notification);
 
             // Assert.
-            _streamingStatusQueue.TryTake(out StreamingStatus action, 1000);
+            _streamingStatusQueue.TryDequeue(out StreamingStatus action);
             Assert.AreEqual(StreamingStatus.STREAMING_DOWN, action);
         }
 
@@ -56,7 +56,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notification);
 
             // Assert.
-            _streamingStatusQueue.TryTake(out StreamingStatus action, 1000);
+            _streamingStatusQueue.TryDequeue(out StreamingStatus action);
             Assert.AreEqual(StreamingStatus.STREAMING_READY, action);
         }
 
@@ -64,7 +64,14 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         public void HandleIncominEvent_ControlStreamingResumed_ShouldNotDispatchEvent()
         {
             // Arrange.
-            var occupancyNoti = new OccupancyNotification
+            var occupancyNotiSec = new OccupancyNotification
+            {
+                Channel = "control_sec",
+                Metrics = new OccupancyMetricsData { Publishers = 0 },
+                Type = NotificationType.OCCUPANCY
+            };
+
+            var occupancyNotiPri = new OccupancyNotification
             {
                 Channel = "control_pri",
                 Metrics = new OccupancyMetricsData { Publishers = 0 },
@@ -79,12 +86,15 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             };
 
             // Act & Assert.
-            _notificationManagerKeeper.HandleIncomingEvent(occupancyNoti);
-            _streamingStatusQueue.TryTake(out StreamingStatus action, 1000);
+            _notificationManagerKeeper.HandleIncomingEvent(occupancyNotiSec);
+            Assert.AreEqual(0, _streamingStatusQueue.Count());
+
+            _notificationManagerKeeper.HandleIncomingEvent(occupancyNotiPri);
+            _streamingStatusQueue.TryDequeue(out StreamingStatus action);
             Assert.AreEqual(StreamingStatus.STREAMING_DOWN, action);
 
             _notificationManagerKeeper.HandleIncomingEvent(notification);
-            Assert.AreEqual(0, _streamingStatusQueue.Count);
+            Assert.AreEqual(0, _streamingStatusQueue.Count());
         }
 
         [TestMethod]
@@ -102,7 +112,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notification);
 
             // Assert.
-            _streamingStatusQueue.TryTake(out StreamingStatus action, 1000);
+            _streamingStatusQueue.TryDequeue(out StreamingStatus action);
             Assert.AreEqual(StreamingStatus.STREAMING_OFF, action);
         }
 
@@ -121,7 +131,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notification);
 
             // Assert.
-            Assert.AreEqual(0, _streamingStatusQueue.Count);
+            Assert.AreEqual(0, _streamingStatusQueue.Count());
         }
 
         [TestMethod]
@@ -139,17 +149,23 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notificationPri);
 
             // Assert.
-            Assert.AreEqual(0, _streamingStatusQueue.Count);
+            Assert.AreEqual(0, _streamingStatusQueue.Count());
 
             // Event control_pri with 0 publishers - should return false
             // Arrange.
             notificationPri.Metrics.Publishers = 0;
 
             // Act.
+            _notificationManagerKeeper.HandleIncomingEvent(new OccupancyNotification
+            {
+                Channel = "control_sec",
+                Type = NotificationType.OCCUPANCY,
+                Metrics = new OccupancyMetricsData { Publishers = 0 }
+            });
             _notificationManagerKeeper.HandleIncomingEvent(notificationPri);
 
             // Assert.
-            _streamingStatusQueue.TryTake(out StreamingStatus action, 1000);
+            _streamingStatusQueue.TryDequeue(out StreamingStatus action);
             Assert.AreEqual(StreamingStatus.STREAMING_DOWN, action);
 
             // Event control_sec with 2 publishers - should return true
@@ -165,7 +181,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notificationSec);
 
             // Assert.
-            _streamingStatusQueue.TryTake(out StreamingStatus action2, 1000);
+            _streamingStatusQueue.TryDequeue(out StreamingStatus action2);
             Assert.AreEqual(StreamingStatus.STREAMING_READY, action2);
 
             // Event control_pri with 2 publishers - should return null
@@ -176,7 +192,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notificationPri);
 
             // Assert.
-            Assert.AreEqual(0, _streamingStatusQueue.Count);
+            Assert.AreEqual(0, _streamingStatusQueue.Count());
 
             // Event control_pri with 0 publishers - should return null
             // Arrange.
@@ -186,7 +202,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notificationPri);
 
             // Assert.
-            Assert.AreEqual(0, _streamingStatusQueue.Count);
+            Assert.AreEqual(0, _streamingStatusQueue.Count());
 
             // Event control_sec with 0 publishers - should return false
             // Arrange.
@@ -196,7 +212,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notificationSec);
 
             // Assert.
-            _streamingStatusQueue.TryTake(out StreamingStatus action3, 1000);
+            _streamingStatusQueue.TryDequeue(out StreamingStatus action3);
             Assert.AreEqual(StreamingStatus.STREAMING_DOWN, action3);
 
             // Event control_sec with 0 publishers - should return null
@@ -207,7 +223,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notificationSec);
 
             // Assert.
-            Assert.AreEqual(0, _streamingStatusQueue.Count);
+            Assert.AreEqual(0, _streamingStatusQueue.Count());
 
             // Event control_sec with 1 publishers - should return true
             // Arrange.
@@ -217,7 +233,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notificationSec);
 
             // Assert.
-            _streamingStatusQueue.TryTake(out StreamingStatus action4, 1000);
+            _streamingStatusQueue.TryDequeue(out StreamingStatus action4);
             Assert.AreEqual(StreamingStatus.STREAMING_READY, action4);
         }
     }
