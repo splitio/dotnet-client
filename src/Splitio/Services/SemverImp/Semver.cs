@@ -96,15 +96,18 @@ namespace Splitio.Services.SemverImp
         private void SetMajorMinorAndPatch(string version)
         {
             var vParts = version.Split(ValueDelimiter);
-            if (vParts.Length != 3)
+            if (vParts.Length != 3 ||
+                !ulong.TryParse(vParts[0], out ulong major) ||
+                !ulong.TryParse(vParts[1], out ulong minor) ||
+                !ulong.TryParse(vParts[2], out ulong patch))
             {
                 _log.Error($"Unable to convert to Semver, incorrect format: {version}");
                 throw new SemverParseException($"Unable to convert to Semver, incorrect format: {version}");
             }
 
-            Major = ulong.Parse(vParts[0]);
-            Minor = ulong.Parse(vParts[1]);
-            Patch = ulong.Parse(vParts[2]);
+            Major = major;
+            Minor = minor;
+            Patch = patch;
         }
 
         private string SetVersion()

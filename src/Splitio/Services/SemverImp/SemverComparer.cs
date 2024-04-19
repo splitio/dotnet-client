@@ -54,7 +54,7 @@ namespace Splitio.Services.SemverImp
             {
                 if (semver.PreRelease[i].Equals(toCompare.PreRelease[i])) continue;
 
-                if (int.TryParse(semver.PreRelease[i], out int num1) && int.TryParse(toCompare.PreRelease[i], out int num2))
+                if (ulong.TryParse(semver.PreRelease[i], out ulong num1) && ulong.TryParse(toCompare.PreRelease[i], out ulong num2))
                 {
                     return num1.CompareTo(num2);
                 }
