@@ -1,5 +1,6 @@
 ﻿using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using System;
 using System.Linq;
 
 namespace Splitio.Services.SemverImp
@@ -116,6 +117,14 @@ namespace Splitio.Services.SemverImp
 
             if (PreRelease != null && PreRelease.Length != 0)
             {
+                for (int i = 0; i < PreRelease.Length; i++)
+                {
+                    if (ulong.TryParse(PreRelease[i], out ulong component))
+                    {
+                        PreRelease[i] = component.ToString();
+                    }
+                }
+
                 toReturn += $"{PreReleaseDelimiter}{string.Join(ValueDelimiter.ToString(), PreRelease)}";
             }
 
