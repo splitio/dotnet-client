@@ -1,5 +1,9 @@
 CHANGES
 
+7.9.0 (coming soon)
+- Added support for Semver Matchers.
+- Fixed async methods for LocalhostClient.
+
 7.8.3 (Apr 17, 2024)
 - Fixed Sync over Async implementation.
 - Added the logic to handle correctly when the SDK receives an unsupported Matcher type.
