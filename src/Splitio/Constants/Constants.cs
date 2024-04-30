@@ -38,7 +38,7 @@
     {
         public static string BaseUrl => "https://sdk.split.io";
         public static string EventsBaseUrl => "https://events.split.io";
-        public static string AuthServiceURL => "https://auth.split.io/api/auth";
+        public static string AuthServiceURL => "https://auth.split.io/api/v2/auth";
         public static string StreamingServiceURL => "https://streaming.split.io/sse";
         public static string TelemetryServiceURL => "https://telemetry.split.io/api/v1";
     }

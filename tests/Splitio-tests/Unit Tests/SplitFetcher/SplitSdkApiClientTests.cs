@@ -109,7 +109,7 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
             var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter);
 
             _httpClient
-                .Setup(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?s=1.1&since=-1&till=11&sets=set_a,set_b,set_c", false))
+                .Setup(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?s=1.1&since=-1&sets=set_a,set_b,set_c&till=11", false))
                 .ReturnsAsync(new HTTPResult
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -122,7 +122,7 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
 
             // Assert.
             Assert.AreEqual("ok", result);
-            _httpClient.Verify(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?s=1.1&since=-1&till=11&sets=set_a,set_b,set_c", false), Times.Once);
+            _httpClient.Verify(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?s=1.1&since=-1&sets=set_a,set_b,set_c&till=11", false), Times.Once);
         }
     }
 }
