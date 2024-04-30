@@ -64,7 +64,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual(true, result.StreamingEnabled);
             Assert.AreEqual(1, result.AuthRetryBackoffBase);
             Assert.AreEqual(1, result.StreamingReconnectBackoffBase);
-            Assert.AreEqual("https://auth.split.io/api/auth", result.AuthServiceURL);
+            Assert.AreEqual("https://auth.split.io/api/v2/auth", result.AuthServiceURL);
             Assert.AreEqual("https://streaming.split.io/sse", result.StreamingServiceURL);
             Assert.AreEqual(ImpressionsMode.Optimized, result.ImpressionsMode);
             Assert.AreEqual("ip-test", result.SdkMachineIP);
@@ -121,7 +121,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual(false, result.StreamingEnabled);
             Assert.AreEqual(1, result.AuthRetryBackoffBase);
             Assert.AreEqual(1, result.StreamingReconnectBackoffBase);
-            Assert.AreEqual("https://auth.split.io/api/auth", result.AuthServiceURL);
+            Assert.AreEqual("https://auth.split.io/api/v2/auth", result.AuthServiceURL);
             Assert.AreEqual("https://streaming.split.io/sse", result.StreamingServiceURL);
             Assert.AreEqual(ImpressionsMode.Debug, result.ImpressionsMode);
             Assert.AreEqual("ip-test", result.SdkMachineIP);

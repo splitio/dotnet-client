@@ -71,11 +71,11 @@ namespace Splitio.Services.SplitFetcher.Classes
         {
             var uri = $"{_baseUrl}/api/splitChanges?s={ApiVersions.FlagsSpec}&since={Uri.EscapeDataString(since.ToString())}";
 
-            if (till.HasValue)
-                uri = $"{uri}&till={Uri.EscapeDataString(till.Value.ToString())}";
-
             if (!string.IsNullOrEmpty(_flagSets))
                 uri = $"{uri}&sets={_flagSets}";
+
+            if (till.HasValue)
+                uri = $"{uri}&till={Uri.EscapeDataString(till.Value.ToString())}";
 
             return uri;
         }
