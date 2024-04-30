@@ -34,21 +34,6 @@ namespace Splitio.Services.SemverImp
                 return null;
             }
         }
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is Semver))
-            {
-                return false;
-            }
-
-            return Version.Equals(((Semver)obj).Version);
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
         #endregion
 
         #region Private Methods

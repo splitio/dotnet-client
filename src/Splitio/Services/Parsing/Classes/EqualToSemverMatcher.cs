@@ -29,7 +29,7 @@ namespace Splitio.Services.Parsing.Classes
                 return false;
             }
             
-            var result = keySemver.Equals(_target);
+            var result = keySemver.EqualTo(_target);
             _log.Debug($"{keySemver.Version} == {_target.Version} | Result: {result}");
 
             return result;

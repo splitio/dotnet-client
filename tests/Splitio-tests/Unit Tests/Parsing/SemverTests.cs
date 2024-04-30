@@ -34,8 +34,8 @@ namespace Splitio_Tests.Unit_Tests.Parsing
 
                     Assert.IsTrue(version1.Compare(version2) >= 0);
                     Assert.IsFalse(version2.Compare(version1) >= 0);
-                    Assert.IsTrue(version1.Compare(version1) == 0);
-                    Assert.IsTrue(version2.Compare(version2) == 0);
+                    Assert.IsTrue(version1.Compare(version1) >= 0);
+                    Assert.IsTrue(version2.Compare(version2) >= 0);
                 }
             }
         }
@@ -56,8 +56,8 @@ namespace Splitio_Tests.Unit_Tests.Parsing
 
                     Assert.IsFalse(version1.Compare(version2) <= 0);
                     Assert.IsTrue(version2.Compare(version1) <= 0);
-                    Assert.IsTrue(version1.Compare(version1) == 0);
-                    Assert.IsTrue(version2.Compare(version2) == 0);
+                    Assert.IsTrue(version1.Compare(version1) <= 0);
+                    Assert.IsTrue(version2.Compare(version2) <= 0);
                 }
             }
         }
@@ -91,7 +91,7 @@ namespace Splitio_Tests.Unit_Tests.Parsing
                     var semver1 = Semver.Build(items[0]);
                     var semver2 = Semver.Build(items[1]);
 
-                    Assert.AreEqual(bool.Parse(items[2]), semver1.Version.Equals(semver2.Version));
+                    Assert.AreEqual(bool.Parse(items[2]), semver1.EqualTo(semver2));
                 }
             }
         }

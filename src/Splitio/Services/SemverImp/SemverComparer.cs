@@ -6,6 +6,11 @@ namespace Splitio.Services.SemverImp
     public static class SemverComparer
     {
 
+        public static bool EqualTo(this Semver semver, Semver obj)
+        {
+            return semver.Version.Equals(obj.Version);
+        }
+
         /*
          * Precedence comparision between 2 Semver objects.
          * 
@@ -15,7 +20,7 @@ namespace Splitio.Services.SemverImp
          */
         public static int Compare(this Semver semver, Semver toCompare)
         {
-            if (semver.Version.Equals(toCompare.Version))
+            if (semver.EqualTo(toCompare))
             {
                 return 0;
             }
