@@ -3,7 +3,9 @@ using Splitio.Services.Client.Classes;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -28,6 +30,45 @@ namespace Splitio_Tests.Integration_Tests
 #if NET_LATEST
             rootFilePath = @"Resources\";
 #endif
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentAsync()
+        {
+            // Arrange.
+            var config = GetConfiguration($"{rootFilePath}test.splits");
+            var client = new LocalhostClient(config);
+
+            client.BlockUntilReady(1000);
+
+            // Act.
+            var result1 = await client.GetTreatmentAsync("id", "double_writes_to_cassandra");
+            var result2 = await client.GetTreatmentAsync("id", "double_writes_to_cassandra");
+            var result3 = await client.GetTreatmentAsync("id", "other_test_feature");
+            var result4 = await client.GetTreatmentAsync("id", "other_test_feature");
+
+            var result5 = await client.GetTreatmentsAsync("id", new List<string> { "other_test_feature", "double_writes_to_cassandra" });
+            var result6 = await client.GetTreatmentsWithConfigAsync("id", new List<string> { "double_writes_to_cassandra" });
+            var result7 = await client.GetTreatmentWithConfigAsync("id", "other_test_feature");
+
+            // Assert.
+            Assert.AreEqual("off", result1);
+            Assert.AreEqual("off", result2);
+            Assert.AreEqual("on", result3);
+            Assert.AreEqual("on", result4);
+            Assert.AreEqual("on", result7.Treatment);
+
+            Assert.AreEqual(2, result5.Count);
+            foreach (var item in result5)
+            {
+                Assert.AreNotEqual("control", item.Value);
+            }
+
+            Assert.AreEqual(1, result6.Count);
+            foreach (var item in result6)
+            {
+                Assert.AreNotEqual("control", item.Value);
+            }
         }
 
         [TestMethod]
