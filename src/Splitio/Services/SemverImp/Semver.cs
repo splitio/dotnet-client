@@ -1,6 +1,5 @@
 ﻿using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
-using System;
 using System.Linq;
 
 namespace Splitio.Services.SemverImp
@@ -44,6 +43,11 @@ namespace Splitio.Services.SemverImp
             }
 
             return Version.Equals(((Semver)obj).Version);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
         #endregion
 
