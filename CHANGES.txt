@@ -1,7 +1,7 @@
 CHANGES
 
 7.9.0 (coming soon)
-- Added support for Semver Matchers.
+- Added support for targeting rules based on semantic versions (https://semver.org/).
 - Fixed async methods for LocalhostClient.
 
 7.8.3 (Apr 17, 2024)
