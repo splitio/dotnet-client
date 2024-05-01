@@ -13,5 +13,6 @@ namespace Splitio.Domain
         public DependencyData dependencyMatcherData { get; set; }
         public bool? booleanMatcherData { get; set; }
         public string stringMatcherData { get; set; }
+        public BetweenStringData BetweenStringMatcherData { get; set; }
     }
 }

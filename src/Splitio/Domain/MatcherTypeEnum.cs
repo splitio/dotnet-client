@@ -1,5 +1,4 @@
-﻿
-namespace Splitio.Domain
+﻿namespace Splitio.Domain
 {
     public enum MatcherTypeEnum
     {
@@ -19,6 +18,11 @@ namespace Splitio.Domain
         CONTAINS_STRING,
         IN_SPLIT_TREATMENT,
         EQUAL_TO_BOOLEAN,
-        MATCHES_STRING
+        MATCHES_STRING,
+        EQUAL_TO_SEMVER,
+        GREATER_THAN_OR_EQUAL_TO_SEMVER,
+        LESS_THAN_OR_EQUAL_TO_SEMVER,
+        BETWEEN_SEMVER,
+        IN_LIST_SEMVER
     }
 }

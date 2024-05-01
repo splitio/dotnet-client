@@ -170,6 +170,21 @@ namespace Splitio.Services.Parsing
                         case MatcherTypeEnum.MATCHES_STRING:
                             matcher = new MatchesStringMatcher(mDefinition.stringMatcherData);
                             break;
+                        case MatcherTypeEnum.EQUAL_TO_SEMVER:
+                            matcher = new EqualToSemverMatcher(mDefinition.stringMatcherData);
+                            break;
+                        case MatcherTypeEnum.GREATER_THAN_OR_EQUAL_TO_SEMVER:
+                            matcher = new GreaterThanOrEqualToSemverMatcher(mDefinition.stringMatcherData);
+                            break;
+                        case MatcherTypeEnum.LESS_THAN_OR_EQUAL_TO_SEMVER:
+                            matcher = new LessThanOrEqualToSemverMatcher(mDefinition.stringMatcherData);
+                            break;
+                        case MatcherTypeEnum.BETWEEN_SEMVER:
+                            matcher = new BetweenSemverMatcher(mDefinition.BetweenStringMatcherData.start, mDefinition.BetweenStringMatcherData.end);
+                            break;
+                        case MatcherTypeEnum.IN_LIST_SEMVER:
+                            matcher = new InListSemverMatcher(mDefinition.whitelistMatcherData.whitelist);
+                            break;
                     }
                 }
             }
