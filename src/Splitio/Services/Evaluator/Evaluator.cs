@@ -130,21 +130,24 @@ namespace Splitio.Services.Evaluator
                     {
                         _log.Error($"{method}: Something went wrong evaluation feature: {feature}", e);
 
-                        await _telemetryEvaluationProducer?.RecordExceptionAsync(method.ConvertToMethodEnum());
+                        if (_telemetryEvaluationProducer != null)
+                            await _telemetryEvaluationProducer.RecordExceptionAsync(method.ConvertToMethodEnum());
+
                         treatmentsForFeatures.Add(new TreatmentResult(feature, Labels.Exception, Constants.Gral.Control));
                     }
                 }
 
                 clock.Stop();
 
-                if (trackLatency)
-                    await _telemetryEvaluationProducer?.RecordLatencyAsync(method.ConvertToMethodEnum(), Metrics.Bucket(clock.ElapsedMilliseconds));
+                if (trackLatency && _telemetryEvaluationProducer != null)
+                    await _telemetryEvaluationProducer.RecordLatencyAsync(method.ConvertToMethodEnum(), Metrics.Bucket(clock.ElapsedMilliseconds));
             }
             catch (Exception ex)
             {
                 treatmentsForFeatures = EvaluateFeaturesException(ex, featureNames);
 
-                _telemetryEvaluationProducer?.RecordException(method.ConvertToMethodEnum());
+                if (_telemetryEvaluationProducer != null)
+                    await _telemetryEvaluationProducer.RecordExceptionAsync(method.ConvertToMethodEnum());
             }
 
             return treatmentsForFeatures;
@@ -166,11 +169,13 @@ namespace Splitio.Services.Evaluator
 
                 clock.Stop();
 
-                await _telemetryEvaluationProducer?.RecordLatencyAsync(method.ConvertToMethodEnum(), Metrics.Bucket(clock.ElapsedMilliseconds));
+                if (_telemetryEvaluationProducer != null)
+                    await _telemetryEvaluationProducer.RecordLatencyAsync(method.ConvertToMethodEnum(), Metrics.Bucket(clock.ElapsedMilliseconds));
             }
             catch
             {
-                _telemetryEvaluationProducer?.RecordException(method.ConvertToMethodEnum());
+                if (_telemetryEvaluationProducer != null)
+                    await _telemetryEvaluationProducer.RecordExceptionAsync(method.ConvertToMethodEnum());
             }
 
             return evaluations;
