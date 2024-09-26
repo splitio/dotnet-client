@@ -12,13 +12,13 @@ namespace Splitio_Tests.Unit_Tests.Cache
     {
         private const string SegmentKeyPrefix = "SPLITIO.segment.";
 
-        private readonly Mock<IRedisAdapter> _redisAdapter;
+        private readonly Mock<IRedisAdapterConsumer> _redisAdapter;
 
         private readonly ISegmentCacheConsumer _cache;
 
         public RedisSegmentCacheAsyncTests()
         {
-            _redisAdapter = new Mock<IRedisAdapter>();
+            _redisAdapter = new Mock<IRedisAdapterConsumer>();
 
             _cache = new RedisSegmentCache(_redisAdapter.Object);
         }

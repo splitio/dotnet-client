@@ -9,7 +9,7 @@ namespace Splitio.Redis.Telemetry.Storages
 {
     public class RedisTelemetryStorage : ITelemetryInitProducer, ITelemetryEvaluationProducer
     {
-        private readonly IRedisAdapter _redisAdapter;
+        private readonly IRedisAdapterProducer _redisAdapterProducer;
         private readonly string _userPrefix;
         private readonly string _sdkVersion;
         private readonly string _machineIp;
@@ -24,13 +24,13 @@ namespace Splitio.Redis.Telemetry.Storages
         private string TelemetryInitKey => "{prefix}.SPLITIO.telemetry.init"
             .Replace("{prefix}.", string.IsNullOrEmpty(_userPrefix) ? string.Empty : $"{_userPrefix}.");
 
-        public RedisTelemetryStorage(IRedisAdapter redisAdapter,
+        public RedisTelemetryStorage(IRedisAdapterProducer redisAdapterProducer,
             string userPrefix,
             string sdkVersion,
             string machineIp,
             string machineName)
         {
-            _redisAdapter = redisAdapter;
+            _redisAdapterProducer = redisAdapterProducer;
             _userPrefix = userPrefix;
             _sdkVersion = sdkVersion;
             _machineIp = machineIp;
@@ -45,27 +45,27 @@ namespace Splitio.Redis.Telemetry.Storages
                 m = new { i = _machineIp, n = _machineName, s = _sdkVersion }
             });
 
-            await _redisAdapter.HashSetAsync(TelemetryInitKey, $"{_sdkVersion}/{_machineName}/{_machineIp}", jsonData);
+            await _redisAdapterProducer.HashSetAsync(TelemetryInitKey, $"{_sdkVersion}/{_machineName}/{_machineIp}", jsonData);
         }
 
         public void RecordLatency(MethodEnum method, int bucket)
         {
-            _redisAdapter.HashIncrement(TelemetryLatencyKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}/{bucket}", 1);
+            _redisAdapterProducer.HashIncrement(TelemetryLatencyKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}/{bucket}", 1);
         }
 
         public async Task RecordLatencyAsync(MethodEnum method, int bucket)
         {
-            await _redisAdapter.HashIncrementAsync(TelemetryLatencyKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}/{bucket}", 1);
+            await _redisAdapterProducer.HashIncrementAsync(TelemetryLatencyKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}/{bucket}", 1);
         }
 
         public void RecordException(MethodEnum method)
         {
-            _redisAdapter.HashIncrement(TelemetryExceptionKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}", 1);
+            _redisAdapterProducer.HashIncrement(TelemetryExceptionKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}", 1);
         }
 
         public async Task RecordExceptionAsync(MethodEnum method)
         {
-            await _redisAdapter.HashIncrementAsync(TelemetryExceptionKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}", 1);
+            await _redisAdapterProducer.HashIncrementAsync(TelemetryExceptionKey, $"{_sdkVersion}/{_machineName}/{_machineIp}/{method.GetString()}", 1);
         }
 
         public void RecordNonReadyUsages()

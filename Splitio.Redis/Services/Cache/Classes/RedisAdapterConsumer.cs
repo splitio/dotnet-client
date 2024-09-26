@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
-    public class RedisAdapterConsumer : RedisAdapterProducer, IRedisAdapterConsumer
+    public class RedisAdapterConsumer : BaseAdapter, IRedisAdapterConsumer
     {
         public RedisAdapterConsumer(RedisConfig config, IConnectionPoolManager connectionPoolManager) : base(config, connectionPoolManager)
         {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Domain;
-using Splitio_Tests.Resources;
+using Splitio.Tests.Common.Resources;
 using StackExchange.Redis;
 using System;
 using System.Linq;
@@ -12,7 +12,8 @@ namespace Splitio_Tests.Integration_Tests
     public class RedisAdapterTests
     {
         private readonly string _userPrefix = "adapter-test";
-        RedisAdapterForTests adapter;
+        RedisAdapterForTests _adapter;
+        RedisAdapterProducer _producer;
 
         [TestInitialize]
         public void Initialization()
@@ -31,7 +32,8 @@ namespace Splitio_Tests.Integration_Tests
             };
 
             var pool = new ConnectionPoolManager(config);
-            adapter = new RedisAdapterForTests(config, pool);
+            _adapter = new RedisAdapterForTests(config, pool);
+            _producer = new RedisAdapterProducer(config, pool);
 
             CleanKeys();
         }
@@ -40,10 +42,10 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteSetAndGetSuccessful()
         {
             //Arrange
-            var isSet = adapter.Set($"{_userPrefix}-test_key", "test_value");
+            var isSet = _adapter.Set($"{_userPrefix}-test_key", "test_value");
 
             //Act
-            var result = adapter.Get($"{_userPrefix}-test_key");
+            var result = _adapter.Get($"{_userPrefix}-test_key");
 
             //Assert
             Assert.IsTrue(isSet);
@@ -73,7 +75,7 @@ namespace Splitio_Tests.Integration_Tests
             var config = new RedisConfig();
             var pool = new ConnectionPoolManager(config);
 
-            var adapter = new RedisAdapter(config, pool);
+            var adapter = new RedisAdapterConsumer(config, pool);
 
             //Act
             var result = adapter.Get($"{_userPrefix}-test_key");
@@ -86,12 +88,12 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteMultipleSetAndMultipleGetSuccessful()
         {
             //Arrange
-            var isSet1 = adapter.Set($"{_userPrefix}-test_key", "test_value");
-            var isSet2 = adapter.Set($"{_userPrefix}-test_key2", "test_value2");
-            var isSet3 = adapter.Set($"{_userPrefix}-test_key3", "test_value3");
+            var isSet1 = _adapter.Set($"{_userPrefix}-test_key", "test_value");
+            var isSet2 = _adapter.Set($"{_userPrefix}-test_key2", "test_value2");
+            var isSet3 = _adapter.Set($"{_userPrefix}-test_key3", "test_value3");
 
             //Act
-            var result = adapter.MGet(new RedisKey[]{$"{_userPrefix}-test_key", $"{_userPrefix}-test_key2", $"{_userPrefix}-test_key3" });
+            var result = _adapter.MGet(new RedisKey[]{$"{_userPrefix}-test_key", $"{_userPrefix}-test_key2", $"{_userPrefix}-test_key3" });
 
             //Assert
             Assert.IsNotNull(result);
@@ -109,7 +111,7 @@ namespace Splitio_Tests.Integration_Tests
             var config = new RedisConfig();
             var pool = new ConnectionPoolManager(config);
 
-            var adapter = new RedisAdapter(config, pool);
+            var adapter = new RedisAdapterConsumer(config, pool);
 
             //Act
             var result = adapter.MGet(new RedisKey[] { $"{_userPrefix}-test_key", $"{_userPrefix}-test_key2", $"{_userPrefix}-test_key3" });
@@ -122,12 +124,12 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteMultipleSetAndGetAllKeysWithFilterSuccessful()
         {
             //Arrange
-            var isSet1 = adapter.Set($"{_userPrefix}-test.test_key", "test_value");
-            var isSet2 = adapter.Set($"{_userPrefix}-test.test_key2", "test_value2");
-            var isSet3 = adapter.Set($"{_userPrefix}-test.test_key3", "test_value3");
+            var isSet1 = _adapter.Set($"{_userPrefix}-test.test_key", "test_value");
+            var isSet2 = _adapter.Set($"{_userPrefix}-test.test_key2", "test_value2");
+            var isSet3 = _adapter.Set($"{_userPrefix}-test.test_key3", "test_value3");
 
             //Act
-            var result = adapter.Keys($"{_userPrefix}*");
+            var result = _adapter.Keys($"{_userPrefix}*");
 
             //Assert
             Assert.IsNotNull(result);
@@ -145,7 +147,7 @@ namespace Splitio_Tests.Integration_Tests
             var config = new RedisConfig();
             var pool = new ConnectionPoolManager(config);
 
-            var adapter = new RedisAdapter(config, pool);
+            var adapter = new RedisAdapterConsumer(config, pool);
 
             //Act
             var result = adapter.Keys($"{_userPrefix}*");
@@ -159,11 +161,11 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteSetAndDelSuccessful()
         {
             //Arrange
-            var isSet1 = adapter.Set($"{_userPrefix}-testdel.test_key", "test_value");
+            var isSet1 = _adapter.Set($"{_userPrefix}-testdel.test_key", "test_value");
 
             //Act
-            var isDel = adapter.Del(new RedisKey[] { $"{_userPrefix}-testdel.test_key" });
-            var result = adapter.Get($"{_userPrefix}-testdel.test_key");
+            var isDel = _adapter.Del(new RedisKey[] { $"{_userPrefix}-testdel.test_key" });
+            var result = _adapter.Get($"{_userPrefix}-testdel.test_key");
 
             //Assert
             Assert.IsTrue(isSet1);
@@ -191,12 +193,12 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteSetAndFlushSuccessful()
         {
             //Arrange
-            var isSet1 = adapter.Set($"{_userPrefix}-testflush.test_key", "test_value");
+            var isSet1 = _adapter.Set($"{_userPrefix}-testflush.test_key", "test_value");
 
             //Act
-            var result = adapter.Keys($"{_userPrefix}*");
-            adapter.Del(result);
-            result = adapter.Keys($"{_userPrefix}*");
+            var result = _adapter.Keys($"{_userPrefix}*");
+            _adapter.Del(result);
+            result = _adapter.Keys($"{_userPrefix}*");
 
             //Assert
             Assert.IsTrue(isSet1);
@@ -207,10 +209,10 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteSAddAndSMemberSuccessful()
         {
             //Arrange
-            var setCount = adapter.SAdd($"{_userPrefix}-test_key_set", "test_value_1");
+            var setCount = _adapter.SAdd($"{_userPrefix}-test_key_set", "test_value_1");
 
             //Act
-            var result = adapter.SMembers($"{_userPrefix}-test_key_set");
+            var result = _adapter.SMembers($"{_userPrefix}-test_key_set");
 
             //Assert
             Assert.AreEqual(true, setCount);
@@ -241,7 +243,7 @@ namespace Splitio_Tests.Integration_Tests
             var config = new RedisConfig();
             var pool = new ConnectionPoolManager(config);
 
-            var adapter = new RedisAdapter(config, pool);
+            var adapter = new RedisAdapterConsumer(config, pool);
 
             //Act
             var result = adapter.SMembers($"{_userPrefix}-test_key_set");
@@ -254,10 +256,10 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteSAddAndSMembersSuccessful()
         {
             //Arrange
-            var setCount = adapter.SAdd($"{_userPrefix}-test_key_set_multiple", new RedisValue[]{ "test_value", "test_value2"});
+            var setCount = _adapter.SAdd($"{_userPrefix}-test_key_set_multiple", new RedisValue[]{ "test_value", "test_value2"});
 
             //Act
-            var result = adapter.SMembers($"{_userPrefix}-test_key_set_multiple");
+            var result = _adapter.SMembers($"{_userPrefix}-test_key_set_multiple");
 
             //Assert
             Assert.AreEqual(2, setCount);
@@ -286,13 +288,13 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteSAddAndSRemSuccessful()
         {
             //Arrange
-            var setCount = adapter.SAdd($"{_userPrefix}-test_key_set", new RedisValue[] { "test_value", "test_value2" });
+            _adapter.SAdd($"{_userPrefix}-test_key_set", new RedisValue[] { "test_value", "test_value2" });
 
             //Act
-            var remCount = adapter.SRem($"{_userPrefix}-test_key_set", new RedisValue[] { "test_value2" });
-            var result = adapter.SIsMember($"{_userPrefix}-test_key_set", "test_value");
-            var result2 = adapter.SIsMember($"{_userPrefix}-test_key_set", "test_value2");
-            var result3 = adapter.SIsMember($"{_userPrefix}-test_key_set", "test_value3");
+            _adapter.SRem($"{_userPrefix}-test_key_set", new RedisValue[] { "test_value2" });
+            var result = _adapter.SIsMember($"{_userPrefix}-test_key_set", "test_value");
+            var result2 = _adapter.SIsMember($"{_userPrefix}-test_key_set", "test_value2");
+            var result3 = _adapter.SIsMember($"{_userPrefix}-test_key_set", "test_value3");
             
             //Assert
             Assert.IsTrue(result);
@@ -320,10 +322,10 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteIncrBySuccessful()
         {
             //Arrange
-            adapter.IcrBy($"{_userPrefix}-test_count", 1);
+            _adapter.IcrBy($"{_userPrefix}-test_count", 1);
 
             //Act
-            var result = adapter.IcrBy($"{_userPrefix}-test_count", 2);
+            var result = _adapter.IcrBy($"{_userPrefix}-test_count", 2);
 
             //Assert
             Assert.AreEqual(3, result);
@@ -349,25 +351,25 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteHashIncrementShouldReturnValue()
         {
             //Act & Assert
-            var result = adapter.HashIncrement($"{_userPrefix}-test_count", "hashField", 2);
+            var result = _producer.HashIncrement($"{_userPrefix}-test_count", "hashField", 2);
             Assert.AreEqual(2, result);
 
-            result = adapter.HashIncrement($"{_userPrefix}-test_count", "hashField", 2);
+            result = _producer.HashIncrement($"{_userPrefix}-test_count", "hashField", 2);
             Assert.AreEqual(4, result);
 
-            result = adapter.HashIncrement($"{_userPrefix}-test_count", "hashField", 3);
+            result = _producer.HashIncrement($"{_userPrefix}-test_count", "hashField", 3);
             Assert.AreEqual(7, result);
 
-            result = adapter.HashIncrement($"{_userPrefix}-test", "hashField", 1);
+            result = _producer.HashIncrement($"{_userPrefix}-test", "hashField", 1);
             Assert.AreEqual(1, result);
         }
 
         [TestCleanup]
         public void CleanKeys()
         {
-            var keys = adapter.Keys($"{_userPrefix}*");
+            var keys = _adapter.Keys($"{_userPrefix}*");
 
-            adapter.Del(keys);
+            _adapter.Del(keys);
         }
     }
 }

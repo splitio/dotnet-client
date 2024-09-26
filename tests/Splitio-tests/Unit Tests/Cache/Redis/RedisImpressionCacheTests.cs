@@ -16,7 +16,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         {
             //Arrange
             var key = "SPLITIO.impressions";
-            var redisAdapterMock = new Mock<IRedisAdapter>();
+            var redisAdapterMock = new Mock<IRedisAdapterProducer>();
             var cache = new RedisImpressionsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2", "machine_name_test");
             var impressions = new List<KeyImpression>
             {

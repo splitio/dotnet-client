@@ -15,7 +15,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         {
             //Arrange
             var segmentName = "segment_test";
-            var redisAdapterMock = new Mock<IRedisAdapter>();
+            var redisAdapterMock = new Mock<IRedisAdapterConsumer>();
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
             redisAdapterMock
@@ -33,7 +33,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public void IsInSegmentWithInexistentSegmentTest()
         {
             //Arrange
-            var redisAdapterMock = new Mock<IRedisAdapter>();
+            var redisAdapterMock = new Mock<IRedisAdapterConsumer>();
             var segmentCache = new RedisSegmentCache(redisAdapterMock.Object);
 
             redisAdapterMock

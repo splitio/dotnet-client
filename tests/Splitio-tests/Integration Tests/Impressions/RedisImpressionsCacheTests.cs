@@ -3,7 +3,7 @@ using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Telemetry.Domain;
-using Splitio_Tests.Resources;
+using Splitio.Tests.Common.Resources;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -34,7 +34,8 @@ namespace Splitio_Tests.Integration_Tests.Impressions
             var connectionPoolManager = new ConnectionPoolManager(config);
 
             _redisAdapter = new RedisAdapterForTests(config, connectionPoolManager);
-            _impressionsCache = new RedisImpressionsCache(_redisAdapter, "ip", "version", "mm", RedisPrefix);
+            var redisProducer = new RedisAdapterProducer(config, connectionPoolManager);
+            _impressionsCache = new RedisImpressionsCache(redisProducer, "ip", "version", "mm", RedisPrefix);
         }
 
         [TestMethod]

@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Redis.Services.Cache.Classes;
+using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
+using Splitio.Tests.Common.Resources;
 using Splitio_Tests.Resources;
 using StackExchange.Redis;
 using System;
@@ -16,6 +18,7 @@ namespace Splitio_Tests.Integration_Tests
     {
         private readonly string _redisPrefix = "async-tests";
         private readonly RedisAdapterForTests _adapter;
+        private readonly RedisAdapterProducer _redisProducer;
 
         public RedisAdapterAsyncTests()
         {
@@ -34,6 +37,7 @@ namespace Splitio_Tests.Integration_Tests
 
             var pool = new ConnectionPoolManager(config);
             _adapter = new RedisAdapterForTests(config, pool);
+            _redisProducer = new RedisAdapterProducer(config, pool);
 
             for (var i = 0; i < 10; i++)
             {
@@ -129,9 +133,9 @@ namespace Splitio_Tests.Integration_Tests
             var value = "value1";
 
             // Act
-            var count = await _adapter.ListRightPushAsync(key, value);
+            var count = await _redisProducer.ListRightPushAsync(key, value);
             Assert.AreEqual(1, count);
-            count = await _adapter.ListRightPushAsync(key, value);
+            count = await _redisProducer.ListRightPushAsync(key, value);
             Assert.AreEqual(2, count);
 
             // Assert
@@ -148,7 +152,7 @@ namespace Splitio_Tests.Integration_Tests
             var values = new RedisValue[] { "value1", "value2", "value3" };
 
             // Act
-            var count = await _adapter.ListRightPushAsync(key, values);
+            var count = await _redisProducer.ListRightPushAsync(key, values);
             Assert.AreEqual(3, count);
 
             // Assert
@@ -201,7 +205,7 @@ namespace Splitio_Tests.Integration_Tests
 
             // Act && Assert
 
-            var success = await _adapter.KeyExpireAsync(key, new TimeSpan(0, 0, 3600));
+            var success = await _redisProducer.KeyExpireAsync(key, new TimeSpan(0, 0, 3600));
             Assert.IsTrue(success);
 
             var result = await _adapter.KeyTimeToLiveAsync(key);
@@ -216,10 +220,10 @@ namespace Splitio_Tests.Integration_Tests
             var field = "field1";
 
             // Act & Assert
-            var count = await _adapter.HashIncrementAsync(key, field, 100);
+            var count = await _redisProducer.HashIncrementAsync(key, field, 100);
             Assert.AreEqual(100, count);
 
-            count = await _adapter.HashIncrementAsync(key, field, 50);
+            count = await _redisProducer.HashIncrementAsync(key, field, 50);
             Assert.AreEqual(150, count);
 
             var hashEntries = await _adapter.HashGetAllAsync(key);
@@ -236,7 +240,7 @@ namespace Splitio_Tests.Integration_Tests
             var field = "field1";
 
             // Act & Assert
-            var added = await _adapter.HashSetAsync(key, field, 100);
+            var added = await _redisProducer.HashSetAsync(key, field, 100);
             Assert.IsTrue(added);
 
             var hashEntries = await _adapter.HashGetAllAsync(key);
@@ -253,7 +257,7 @@ namespace Splitio_Tests.Integration_Tests
             var values = new Dictionary<string, int> { { "field1", 100 }, { "field2", 60 } };
 
             // Act & Assert
-            var count = await _adapter.HashIncrementBatchAsync(key, values);
+            var count = await _redisProducer.HashIncrementBatchAsync(key, values);
             Assert.AreEqual(162, count);
         }
 

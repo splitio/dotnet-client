@@ -19,13 +19,13 @@ namespace Splitio_Tests.Unit_Tests.Cache
     {
         private const string SplitKeyPrefix = "SPLITIO.split.";
 
-        private readonly Mock<IRedisAdapter> _redisAdapterMock;
+        private readonly Mock<IRedisAdapterConsumer> _redisAdapterMock;
         private readonly Mock<ISplitParser> _splitParserMock;
         private readonly IFeatureFlagCacheConsumer _redisSplitCache;
 
         public RedisSplitCacheAsyncTests()
         {
-            _redisAdapterMock = new Mock<IRedisAdapter>();
+            _redisAdapterMock = new Mock<IRedisAdapterConsumer>();
             _splitParserMock = new Mock<ISplitParser>();
 
             _redisSplitCache = new RedisSplitCache(_redisAdapterMock.Object, _splitParserMock.Object);

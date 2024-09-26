@@ -11,7 +11,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 {
     public class ConnectionPoolManager : IConnectionPoolManager
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(RedisAdapter));
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(ConnectionPoolManager));
         private readonly object _lock = new object();
 
         private readonly IConnectionMultiplexer[] _connections;
