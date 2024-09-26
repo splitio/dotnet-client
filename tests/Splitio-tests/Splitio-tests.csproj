@@ -32,6 +32,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Splitio.Redis\Splitio.Redis.csproj" />
     <ProjectReference Include="..\..\src\Splitio\Splitio.csproj" />
+    <ProjectReference Include="..\Splitio.Tests.Common\Splitio.Tests.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

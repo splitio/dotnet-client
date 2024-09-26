@@ -3,6 +3,7 @@ using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Client.Classes;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Client.Classes;
+using Splitio.Tests.Common.Resources;
 using Splitio_Tests.Resources;
 using System.Collections.Generic;
 

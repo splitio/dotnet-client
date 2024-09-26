@@ -12,7 +12,7 @@ namespace Splitio.Tests.Common.Resources
 {
     public class RedisHelper
     {
-        public static void AssertSentEvents(IRedisAdapter redisAdapter, string userPrefix, List<EventBackend> eventsExcpected, int? eventsCount = null, bool validateEvents = true)
+        public static void AssertSentEvents(IRedisAdapterConsumer redisAdapter, string userPrefix, List<EventBackend> eventsExcpected, int? eventsCount = null, bool validateEvents = true)
         {
             Thread.Sleep(1000);
 
@@ -28,7 +28,7 @@ namespace Splitio.Tests.Common.Resources
             }
         }
 
-        public static void AssertSentImpressions(IRedisAdapter redisAdapter, string userPrefix, int sentImpressionsCount, params KeyImpression[] expectedImpressions)
+        public static void AssertSentImpressions(IRedisAdapterConsumer redisAdapter, string userPrefix, int sentImpressionsCount, params KeyImpression[] expectedImpressions)
         {
             Thread.Sleep(1000);
 

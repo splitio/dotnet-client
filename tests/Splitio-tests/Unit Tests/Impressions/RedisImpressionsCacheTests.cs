@@ -12,14 +12,14 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     [TestClass]
     public class RedisImpressionsCacheTests
     {
-        private Mock<IRedisAdapter> _redisAdapter;
+        private Mock<IRedisAdapterProducer> _redisAdapter;
         
         private IImpressionsCache _cache;
 
         [TestInitialize]
         public void Initialization()
         {
-            _redisAdapter = new Mock<IRedisAdapter>();
+            _redisAdapter = new Mock<IRedisAdapterProducer>();
 
             _cache = new RedisImpressionsCache(_redisAdapter.Object, "ip", "version", "mm", "test-pre:");
         }

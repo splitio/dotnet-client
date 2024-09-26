@@ -14,7 +14,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
     [TestClass]
     public class RedisTelemetryStorageTests
     {
-        private Mock<IRedisAdapter> _redisAdapter;
+        private Mock<IRedisAdapterProducer> _redisAdapter;
         private string _userPrefix;
         private string _sdkVersion;
         private string _machineIp;
@@ -25,7 +25,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
         [TestInitialize]
         public void Initialization()
         {
-            _redisAdapter = new Mock<IRedisAdapter>();
+            _redisAdapter = new Mock<IRedisAdapterProducer>();
             _userPrefix = "user-prefix-test";
             _sdkVersion = "sdk-version-test";
             _machineIp = "10.0.0.1";
