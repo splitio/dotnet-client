@@ -91,7 +91,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             var config = new ConfigurationOptions
             {
                 ImpressionsMode = ImpressionsMode.Debug,
-                FeaturesRefreshRate = 100, 
+                FeaturesRefreshRate = 100,
                 ImpressionsRefreshRate = 150,
                 SegmentsRefreshRate = 80,
                 StreamingEnabled = false,
@@ -298,6 +298,28 @@ namespace Splitio_Tests.Unit_Tests.Shared
             // Assert.
             Assert.AreEqual(0, result.FlagSetsFilter.Count);
             Assert.AreEqual(0, result.FlagSetsInvalid);
+        }
+        [TestMethod]
+        public void GetRedisClusterConfig()
+        {
+            var cacheAdapter = new CacheAdapterConfigurationOptions();
+            cacheAdapter.KeyHashTag = "{SPLITIO}";
+            cacheAdapter.UserPrefix = "myprefix";
+            List<string> nodes = new List<string>() { 
+                "node1:port1",
+                "node2:port2"
+            };
+            cacheAdapter.ClusterNodes = nodes;
+            var config = new ConfigurationOptions
+            {
+                CacheAdapterConfig = cacheAdapter
+            };
+
+            // Assert.
+            Assert.AreEqual(nodes, config.CacheAdapterConfig.ClusterNodes);
+            Assert.AreEqual("{SPLITIO}", config.CacheAdapterConfig.KeyHashTag);
+            Assert.AreEqual("myprefix", config.CacheAdapterConfig.UserPrefix);
+
         }
     }
 }
