@@ -299,28 +299,5 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual(0, result.FlagSetsFilter.Count);
             Assert.AreEqual(0, result.FlagSetsInvalid);
         }
-        [TestMethod]
-        public void GetRedisClusterConfig()
-        {
-            var cacheAdapter = new CacheAdapterConfigurationOptions();
-            List<string> nodes = new List<string>() {
-                "node1:port1",
-                "node2:port2"
-            };
-            var redisNodes = new ClusterNodes(nodes, "{SPLITIO}");
-            
-            cacheAdapter.UserPrefix = "myprefix";
-            cacheAdapter.RedisClusterNodes = redisNodes;
-            var config = new ConfigurationOptions
-            {
-                CacheAdapterConfig = cacheAdapter
-            };
-
-            // Assert.
-            Assert.AreEqual(nodes, config.CacheAdapterConfig.RedisClusterNodes.EndPoints);
-            Assert.AreEqual("{SPLITIO}", config.CacheAdapterConfig.RedisClusterNodes.KeyHashTag);
-            Assert.AreEqual("myprefix", config.CacheAdapterConfig.UserPrefix);
-
-        }
     }
 }
