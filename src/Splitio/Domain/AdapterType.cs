@@ -3,6 +3,5 @@
     public enum AdapterType
     {
         Redis, //Redis by default
-        RedisCluster
     }
 }

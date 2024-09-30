@@ -303,21 +303,22 @@ namespace Splitio_Tests.Unit_Tests.Shared
         public void GetRedisClusterConfig()
         {
             var cacheAdapter = new CacheAdapterConfigurationOptions();
-            cacheAdapter.KeyHashTag = "{SPLITIO}";
-            cacheAdapter.UserPrefix = "myprefix";
-            List<string> nodes = new List<string>() { 
+            List<string> nodes = new List<string>() {
                 "node1:port1",
                 "node2:port2"
             };
-            cacheAdapter.ClusterNodes = nodes;
+            var redisNodes = new ClusterNodes(nodes, "{SPLITIO}");
+            
+            cacheAdapter.UserPrefix = "myprefix";
+            cacheAdapter.RedisClusterNodes = redisNodes;
             var config = new ConfigurationOptions
             {
                 CacheAdapterConfig = cacheAdapter
             };
 
             // Assert.
-            Assert.AreEqual(nodes, config.CacheAdapterConfig.ClusterNodes);
-            Assert.AreEqual("{SPLITIO}", config.CacheAdapterConfig.KeyHashTag);
+            Assert.AreEqual(nodes, config.CacheAdapterConfig.RedisClusterNodes.EndPoints);
+            Assert.AreEqual("{SPLITIO}", config.CacheAdapterConfig.RedisClusterNodes.KeyHashTag);
             Assert.AreEqual("myprefix", config.CacheAdapterConfig.UserPrefix);
 
         }
