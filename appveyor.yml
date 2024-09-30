@@ -10,10 +10,7 @@ dotnet_csproj:
   file: '**\*.csproj'
   package_version: '{version}'
 
-branches:
-  only:
-    - main
-    - development
+skip_branch_with_pr: true
 
 configuration: Release
 
