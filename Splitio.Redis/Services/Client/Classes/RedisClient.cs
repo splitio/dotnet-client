@@ -22,7 +22,7 @@ namespace Splitio.Redis.Services.Client.Classes
     public class RedisClient : SplitClient
     {
         private readonly RedisConfig _config;
-
+        private string _prefix;
         private IRedisAdapterConsumer _redisAdapterConsumer;
         private IRedisAdapterProducer _redisAdapterProducer;
         
@@ -34,6 +34,11 @@ namespace Splitio.Redis.Services.Client.Classes
         public RedisClient(ConfigurationOptions config, string apiKey) : base(apiKey)
         {
             _config = new RedisConfig();
+            _prefix = _config.RedisUserPrefix;
+            if (_config.ClusterMode)
+            {
+                _prefix = _config.KeyHashTag + _prefix;
+            }
 
             ReadConfig(config);
             BuildRedisCache();

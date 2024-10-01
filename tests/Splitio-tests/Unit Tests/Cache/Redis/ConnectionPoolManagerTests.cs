@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Domain;
+using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
@@ -48,6 +49,33 @@ namespace Splitio_Tests.Unit_Tests.Cache
             {
                 RedisHost = "localhost",
                 RedisPort = "6379",
+                RedisPassword = "",
+                RedisDatabase = 0,
+                RedisConnectTimeout = 1000,
+                RedisConnectRetry = 5,
+                RedisSyncTimeout = 1000,
+                PoolSize = 0,
+            };
+            var pool = new ConnectionPoolManager(config);
+
+
+            // Act.
+            var conn1 = pool.GetConnection();
+            var conn2 = pool.GetConnection();
+
+            // Assert.
+            Assert.IsNull(conn1);
+            Assert.IsNull(conn2);
+        }
+
+        [TestMethod]
+        public void GetRedisClusterConnectionSuccess()
+        {
+            // Arrange.
+            var config = new RedisConfig
+            {
+                ClusterNodes = new List<string>() { "localhost:6379" },
+                ClusterMode = true,
                 RedisPassword = "",
                 RedisDatabase = 0,
                 RedisConnectTimeout = 1000,

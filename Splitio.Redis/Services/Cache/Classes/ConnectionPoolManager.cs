@@ -96,16 +96,23 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             var config = new ConfigurationOptions
             {
-                EndPoints = { redisCfg.HostAndPort },
                 Password = redisCfg.RedisPassword,
                 AllowAdmin = true,
                 KeepAlive = 1
+            };
+            if (redisCfg.ClusterMode)
+            {
+                foreach (string host in redisCfg.ClusterNodes)
+                {
+                    config.EndPoints.Add(host);
+                };
+            } else {
+                config.EndPoints.Add(redisCfg.HostAndPort);
             };
 
             if (redisCfg.TlsConfig != null && redisCfg.TlsConfig.Ssl)
             {
                 config.Ssl = redisCfg.TlsConfig.Ssl;
-                config.SslHost = redisCfg.RedisHost;
 
                 if (redisCfg.TlsConfig.CertificateValidationFunc != null)
                 {

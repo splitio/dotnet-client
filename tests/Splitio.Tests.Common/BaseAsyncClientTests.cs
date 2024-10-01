@@ -6,6 +6,7 @@ using Splitio.Tests.Common.Resources;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Splitio.Redis;
 
 namespace Splitio.Tests.Common
 {

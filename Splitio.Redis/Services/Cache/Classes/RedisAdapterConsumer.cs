@@ -3,7 +3,6 @@ using Splitio.Redis.Services.Domain;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Cache.Classes
@@ -55,9 +54,15 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                var server = GetServer();
-                var keys = server.Keys(_config.RedisDatabase, pattern);
-
+                List<RedisKey> keys = new List<RedisKey>();
+                foreach (var server in GetServers())
+                {
+                    foreach (var key in server.Keys(pattern: pattern))
+                    {
+                        Console.WriteLine($"{key}");
+                        keys.Add(key);
+                    }
+                }
                 return keys.ToArray();
             }
             catch (Exception e)

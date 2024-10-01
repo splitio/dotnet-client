@@ -4,6 +4,7 @@ using Splitio.Redis.Services.Domain;
 using Splitio.Tests.Common.Resources;
 using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Splitio_Tests.Integration_Tests
@@ -50,6 +51,15 @@ namespace Splitio_Tests.Integration_Tests
             //Assert
             Assert.IsTrue(isSet);
             Assert.AreEqual("test_value", result);
+
+            var clusterAdapter = GetRedisClusterAdapter();
+            isSet = clusterAdapter.Set($"{{SPLITIO}}{_userPrefix}-test_key", "test_value");
+            result = clusterAdapter.Get($"{{SPLITIO}}{_userPrefix}-test_key");
+
+            //Assert
+            Assert.IsTrue(isSet);
+            Assert.AreEqual("test_value", result);
+
         }
 
         [TestMethod]
@@ -102,6 +112,23 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(result.Contains("test_value"));
             Assert.IsTrue(result.Contains("test_value2"));
             Assert.IsTrue(result.Contains("test_value3"));
+
+            var clusterAdapter = GetRedisClusterAdapter();
+            isSet1 = clusterAdapter.Set($"{{SPLITIO}}{_userPrefix}-test_key", "test_value");
+            isSet2 = clusterAdapter.Set($"{{SPLITIO}}{_userPrefix}-test_key2", "test_value2");
+            isSet3 = clusterAdapter.Set($"{{SPLITIO}}{_userPrefix}-test_key3", "test_value3");
+
+            //Act
+            result = clusterAdapter.MGet(new RedisKey[] { $"{{SPLITIO}}{_userPrefix}-test_key", $"{_userPrefix}-test_key2", $"{_userPrefix}-test_key3" });
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.IsTrue(isSet1 & isSet2 & isSet3);
+            Assert.AreEqual(3, result.Length);
+            Assert.IsTrue(result.Contains("test_value"));
+            Assert.IsTrue(result.Contains("test_value2"));
+            Assert.IsTrue(result.Contains("test_value3"));
+
         }
 
         [TestMethod]
@@ -138,6 +165,22 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(result.Contains($"{_userPrefix}-test.test_key"));
             Assert.IsTrue(result.Contains($"{_userPrefix}-test.test_key2"));
             Assert.IsTrue(result.Contains($"{_userPrefix}-test.test_key3"));
+
+            var clusterAdapter = GetRedisClusterAdapter();
+            isSet1 = clusterAdapter.Set($"{{SPLITIO}}{_userPrefix}-test.test_key", "test_value");
+            isSet2 = clusterAdapter.Set($"{{SPLITIO}}{_userPrefix}-test.test_key2", "test_value2");
+            isSet3 = clusterAdapter.Set($"{{SPLITIO}}{_userPrefix}-test.test_key3", "test_value3");
+
+            //Act
+            result = clusterAdapter.Keys($"{{SPLITIO}}{_userPrefix}*");
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.IsTrue(isSet1 & isSet2 & isSet3);
+            Assert.AreEqual(3, result.Length);
+            Assert.IsTrue(result.Contains($"{{SPLITIO}}{_userPrefix}-test.test_key"));
+            Assert.IsTrue(result.Contains($"{{SPLITIO}}{_userPrefix}-test.test_key2"));
+            Assert.IsTrue(result.Contains($"{{SPLITIO}}{_userPrefix}-test.test_key3"));
         }
 
         [TestMethod]
@@ -171,6 +214,18 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(isSet1);
             Assert.AreEqual(1, isDel);
             Assert.IsNull(result);
+
+            var clusterAdapter = GetRedisClusterAdapter();
+            isSet1 = clusterAdapter.Set($"{{SPLITIO}}{_userPrefix}-testdel.test_key", "test_value");
+
+            //Act
+            isDel = clusterAdapter.Del(new RedisKey[] { $"{{SPLITIO}}{_userPrefix}-testdel.test_key" });
+            result = clusterAdapter.Get($"{{SPLITIO}}{_userPrefix}-testdel.test_key");
+
+            //Assert
+            Assert.IsTrue(isSet1);
+            Assert.AreEqual(1, isDel);
+            Assert.IsNull(result);
         }
 
         [TestMethod]
@@ -199,6 +254,18 @@ namespace Splitio_Tests.Integration_Tests
             var result = _adapter.Keys($"{_userPrefix}*");
             _adapter.Del(result);
             result = _adapter.Keys($"{_userPrefix}*");
+
+            //Assert
+            Assert.IsTrue(isSet1);
+            Assert.AreEqual(0, result.Length);
+
+            var clusterAdapter = GetRedisClusterAdapter();
+            isSet1 = clusterAdapter.Set($"{{SPLITIO}}{_userPrefix}-testflush.test_key", "test_value");
+
+            //Act
+            result = clusterAdapter.Keys($"{{SPLITIO}}{_userPrefix}*");
+            clusterAdapter.Del(result);
+            result = clusterAdapter.Keys($"{{SPLITIO}}{_userPrefix}*");
 
             //Assert
             Assert.IsTrue(isSet1);
@@ -300,6 +367,20 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(result);
             Assert.IsFalse(result2);
             Assert.IsFalse(result3);
+
+            var clusterAdapter = GetRedisClusterAdapter();
+            clusterAdapter.SAdd($"{{SPLITIO}}{_userPrefix}-test_key_set", new RedisValue[] { "test_value", "test_value2" });
+
+            //Act
+            clusterAdapter.SRem($"{{SPLITIO}}{_userPrefix}-test_key_set", new RedisValue[] { "test_value2" });
+            result = clusterAdapter.SIsMember($"{{SPLITIO}}{_userPrefix}-test_key_set", "test_value");
+            result2 = clusterAdapter.SIsMember($"{{SPLITIO}}{_userPrefix}-test_key_set", "test_value2");
+            result3 = clusterAdapter.SIsMember($"{{SPLITIO}}{_userPrefix}-test_key_set", "test_value3");
+
+            //Assert
+            Assert.IsTrue(result);
+            Assert.IsFalse(result2);
+            Assert.IsFalse(result3);
         }
 
         [TestMethod]
@@ -326,6 +407,15 @@ namespace Splitio_Tests.Integration_Tests
 
             //Act
             var result = _adapter.IcrBy($"{_userPrefix}-test_count", 2);
+
+            //Assert
+            Assert.AreEqual(3, result);
+
+            var clusterAdapter = GetRedisClusterAdapter();
+            clusterAdapter.IcrBy($"{{SPLITIO}}{_userPrefix}-test_count", 1);
+
+            //Act
+            result = clusterAdapter.IcrBy($"{{SPLITIO}}{_userPrefix}-test_count", 2);
 
             //Assert
             Assert.AreEqual(3, result);
@@ -362,13 +452,69 @@ namespace Splitio_Tests.Integration_Tests
 
             result = _producer.HashIncrement($"{_userPrefix}-test", "hashField", 1);
             Assert.AreEqual(1, result);
+
+            var clusterAdapter = GetRedisClusterAdapterProducer();
+            //Act & Assert
+            result = clusterAdapter.HashIncrement($"{{SPLITIO}}{_userPrefix}-test_count", "hashField", 2);
+            Assert.AreEqual(2, result);
+
+            result = clusterAdapter.HashIncrement($"{{SPLITIO}}{_userPrefix}-test_count", "hashField", 2);
+            Assert.AreEqual(4, result);
+
+            result = clusterAdapter.HashIncrement($"{{SPLITIO}}{_userPrefix}-test_count", "hashField", 3);
+            Assert.AreEqual(7, result);
+
+            result = clusterAdapter.HashIncrement($"{{SPLITIO}}{_userPrefix}-test", "hashField", 1);
+            Assert.AreEqual(1, result);
+        }
+
+        private RedisAdapterForTests GetRedisClusterAdapter()
+        {
+            var config = new RedisConfig
+            {
+                ClusterNodes = new List<string>() { "localhost:6379" },
+                KeyHashTag = "{SPLITIO}",
+                ClusterMode = true,
+                RedisPassword = "",
+                RedisDatabase = 0,
+                RedisConnectTimeout = 1000,
+                RedisConnectRetry = 5,
+                RedisSyncTimeout = 1000,
+                PoolSize = 1,
+                RedisUserPrefix = _userPrefix
+            };
+
+            var pool = new ConnectionPoolManager(config);
+            return new RedisAdapterForTests(config, pool);
+        }
+
+        private RedisAdapterProducer GetRedisClusterAdapterProducer()
+        {
+            var config = new RedisConfig
+            {
+                ClusterNodes = new List<string>() { "localhost:6379" },
+                KeyHashTag = "{SPLITIO}",
+                ClusterMode = true,
+                RedisPassword = "",
+                RedisDatabase = 0,
+                RedisConnectTimeout = 1000,
+                RedisConnectRetry = 5,
+                RedisSyncTimeout = 1000,
+                PoolSize = 1,
+                RedisUserPrefix = _userPrefix
+            };
+
+            var pool = new ConnectionPoolManager(config);
+            return new RedisAdapterProducer(config, pool);
         }
 
         [TestCleanup]
         public void CleanKeys()
         {
             var keys = _adapter.Keys($"{_userPrefix}*");
+            _adapter.Del(keys);
 
+            keys = _adapter.Keys($"{{SPLITIO}}{_userPrefix}*");
             _adapter.Del(keys);
         }
     }

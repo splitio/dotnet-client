@@ -63,9 +63,81 @@ namespace Splitio_Tests.Integration_Tests.Impressions
             Clean();
         }
 
+        [TestMethod]
+        public async Task RecordUniqueKeysAndExpireRedisCluster()
+        {
+            var redisAdapter = GetRedisClusterAdapter();
+            var impressionsCache = GetRedisClusterImpressionsCache();
+
+            await impressionsCache.RecordUniqueKeysAsync(new List<Mtks>
+            {
+                new Mtks("Feature1", new HashSet<string>{ "key-1", "key-2" }),
+                new Mtks("Feature2", new HashSet<string>{ "key-1", "key-2" })
+            });
+
+            await impressionsCache.RecordUniqueKeysAsync(new List<Mtks>
+            {
+                new Mtks("Feature1", new HashSet<string>{ "key-1", "key-2" }),
+                new Mtks("Feature2", new HashSet<string>{ "key-1", "key-2" })
+            });
+
+            var key = $"{{SPLITIO}}{RedisPrefix}.SPLITIO.uniquekeys";
+            var keys = redisAdapter.ListRange(key);
+            var keyTimeToLive = redisAdapter.KeyTimeToLive(key);
+
+            Assert.AreEqual(4, keys.Length);
+            Assert.IsNotNull(keyTimeToLive);
+
+            Clean();
+        }
+
+        private RedisAdapterForTests GetRedisClusterAdapter()
+        {
+            var config = new RedisConfig
+            {
+                ClusterNodes = new List<string>() { "localhost:6379" },
+                KeyHashTag = "{SPLITIO}",
+                ClusterMode = true,
+                RedisPassword = "",
+                RedisDatabase = 0,
+                RedisConnectTimeout = 1000,
+                RedisConnectRetry = 5,
+                RedisSyncTimeout = 1000,
+                PoolSize = 1,
+                RedisUserPrefix = RedisPrefix
+            };
+
+            var pool = new ConnectionPoolManager(config);
+            return new RedisAdapterForTests(config, pool);
+        }
+
+        private RedisImpressionsCache GetRedisClusterImpressionsCache()
+        {
+            var config = new RedisConfig
+            {
+                ClusterNodes = new List<string>() { "localhost:6379" },
+                KeyHashTag = "{SPLITIO}",
+                ClusterMode = true,
+                RedisPassword = "",
+                RedisDatabase = 0,
+                RedisConnectTimeout = 1000,
+                RedisConnectRetry = 5,
+                RedisSyncTimeout = 1000,
+                PoolSize = 1,
+                RedisUserPrefix = RedisPrefix
+            };
+
+            var pool = new ConnectionPoolManager(config);
+            var redisProducer = new RedisAdapterProducer(config, pool);
+            return new RedisImpressionsCache(redisProducer, "ip", "version", "mm", "{SPLITIO}" + RedisPrefix);
+        }
+
         private void Clean()
         { 
             var keys = _redisAdapter.Keys(RedisPrefix+"*");
+            _redisAdapter.Del(keys);
+
+            keys = _redisAdapter.Keys("{{SPLITIO}}" + RedisPrefix + "*");
             _redisAdapter.Del(keys);
         }
     }

@@ -4,6 +4,7 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
@@ -46,6 +47,16 @@ namespace Splitio.Redis.Services.Cache.Classes
             var conn = _pool.GetConnection();
 
             return conn?.GetServer(_config.HostAndPort);
+        }
+        protected List<IServer> GetServers()
+        {
+            var conn = _pool.GetConnection();
+            List<IServer> servers = new List<IServer>();
+            foreach (System.Net.EndPoint endpoint in conn?.GetEndPoints())
+            {
+                servers.Add(conn.GetServer(endpoint));
+            }
+            return servers;
         }
 
         protected IDatabase GetDatabase()
