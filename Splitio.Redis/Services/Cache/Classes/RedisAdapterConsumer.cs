@@ -59,7 +59,6 @@ namespace Splitio.Redis.Services.Cache.Classes
                 {
                     foreach (var key in server.Keys(pattern: pattern))
                     {
-                        Console.WriteLine($"{key}");
                         keys.Add(key);
                     }
                 }

@@ -48,6 +48,6 @@ namespace Splitio.Redis.Services.Domain
             if (options.ProfilingEnabled)
                 LocalProfiler = new AsyncLocalProfiler();
 #endif
+        }
     }
-}
 }
