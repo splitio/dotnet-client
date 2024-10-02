@@ -100,8 +100,7 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsNotNull(result);
             Assert.AreEqual("off", result);
 
-            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(),
-                API_KEY);
+            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(), API_KEY);
 
             client2.BlockUntilReady(5000);
             result = client2.GetTreatment("test", "always_off", null);
