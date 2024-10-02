@@ -74,9 +74,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             // Arrange.
             var config = new RedisConfig
             {
-                ClusterNodes = new List<string>() { "localhost:6379" },
-                ClusterMode = true,
-                RedisPassword = "",
+                ClusterNodes = new Splitio.Domain.ClusterNodes(new List<string>() { "localhost:6379" }, "{SPLITIO}"),
                 RedisDatabase = 0,
                 RedisConnectTimeout = 1000,
                 RedisConnectRetry = 5,

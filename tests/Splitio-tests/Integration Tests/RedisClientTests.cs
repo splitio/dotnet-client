@@ -124,8 +124,7 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsNotNull(result);
             Assert.AreEqual("control", result);
 
-            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(),
-                API_KEY);
+            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(), API_KEY);
 
             client2.BlockUntilReady(5000);
             result = client2.GetTreatment("test", "always_control", null);
@@ -297,8 +296,7 @@ API_KEY);
                 Assert.AreEqual("control", res.Value);
             }
 
-            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(),
-API_KEY);
+            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(), API_KEY);
 
             client2.BlockUntilReady(5000);
             result = client2.GetTreatments("key", new List<string>());

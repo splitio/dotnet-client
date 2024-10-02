@@ -42,13 +42,6 @@ namespace Splitio.Redis.Services.Cache.Classes
             _log.Error($"Exception calling Redis Adapter {command}.\nKey: {key}.\nMessage: {ex.Message}.\nStackTrace: {ex.StackTrace}.\n InnerExection: {ex.InnerException}.", ex);
         }
 
-        protected IServer GetServer()
-        {
-            var conn = _pool.GetConnection();
-
-            return conn?.GetServer(_config.HostAndPort);
-        }
-
         protected List<IServer> GetServers()
         {
             var conn = _pool.GetConnection();

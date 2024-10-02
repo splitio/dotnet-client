@@ -16,7 +16,14 @@ namespace Splitio.Redis.Services.Cache.Classes
         #region Sync Methods
         public bool IsConnected()
         {
-            try { return GetServer()?.IsConnected ?? false; }
+            try
+            {
+                foreach (IServer server in GetServers())
+                {
+                    if (server.IsConnected) return true;
+                }
+                return false;
+            }
             catch { return false; }
         }
 

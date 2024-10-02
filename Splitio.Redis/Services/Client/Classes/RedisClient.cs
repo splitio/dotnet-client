@@ -36,9 +36,9 @@ namespace Splitio.Redis.Services.Client.Classes
             _config = new RedisConfig();
 
             ReadConfig(config);
-            if (_config.ClusterMode)
+            if (_config.ClusterNodes != null)
             {
-                _prefix = _config.KeyHashTag + _config.RedisUserPrefix;
+                _prefix = _config.ClusterNodes.KeyHashTag + _config.RedisUserPrefix;
             }
             else
             {
@@ -85,7 +85,7 @@ namespace Splitio.Redis.Services.Client.Classes
             _config.FlagSetsInvalid = baseConfig.FlagSetsInvalid;
             _config.Mode = config.Mode;
             _config.FromCacheAdapterConfig(config.CacheAdapterConfig);
-    }
+        }
 
         private void BuildRedisCache()
         {
