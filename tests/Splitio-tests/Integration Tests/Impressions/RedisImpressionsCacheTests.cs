@@ -66,7 +66,6 @@ namespace Splitio_Tests.Integration_Tests.Impressions
         [TestMethod]
         public async Task RecordUniqueKeysAndExpireRedisCluster()
         {
-            
             var redisAdapter = GetRedisClusterAdapter();
             var impressionsCache = GetRedisClusterImpressionsCache();
             Clean();
