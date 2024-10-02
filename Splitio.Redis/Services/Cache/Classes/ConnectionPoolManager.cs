@@ -105,10 +105,10 @@ namespace Splitio.Redis.Services.Cache.Classes
                 foreach (string host in redisCfg.ClusterNodes)
                 {
                     config.EndPoints.Add(host);
-                };
+                }
             } else {
                 config.EndPoints.Add(redisCfg.HostAndPort);
-            };
+            }
 
             if (redisCfg.TlsConfig != null && redisCfg.TlsConfig.Ssl)
             {

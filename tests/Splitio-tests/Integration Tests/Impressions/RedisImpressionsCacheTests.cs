@@ -91,7 +91,7 @@ namespace Splitio_Tests.Integration_Tests.Impressions
             Clean();
         }
 
-        private RedisAdapterForTests GetRedisClusterAdapter()
+        private static RedisAdapterForTests GetRedisClusterAdapter()
         {
             var config = new RedisConfig
             {
@@ -111,7 +111,7 @@ namespace Splitio_Tests.Integration_Tests.Impressions
             return new RedisAdapterForTests(config, pool);
         }
 
-        private RedisImpressionsCache GetRedisClusterImpressionsCache()
+        private static RedisImpressionsCache GetRedisClusterImpressionsCache()
         {
             var config = new RedisConfig
             {
