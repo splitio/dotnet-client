@@ -38,9 +38,7 @@ namespace Splitio.Redis.Services.Domain
             RedisUserPrefix = options.UserPrefix;
             TlsConfig = options.TlsConfig;
             PoolSize = options.PoolSize ?? 1;
-            ClusterNodes = options.RedisClusterNodes != null ? options.RedisClusterNodes.EndPoints : null;
-            KeyHashTag = options.RedisClusterNodes != null ? options.RedisClusterNodes.KeyHashTag : null;
-            ClusterMode = ClusterNodes != null;
+    ClusterNodes = options.RedisClusterNodes;
 
 #if NET_LATEST
             if (options.ProfilingEnabled)
