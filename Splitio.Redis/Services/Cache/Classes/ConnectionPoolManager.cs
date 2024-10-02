@@ -100,13 +100,16 @@ namespace Splitio.Redis.Services.Cache.Classes
                 AllowAdmin = true,
                 KeepAlive = 1
             };
-            if (redisCfg.ClusterMode)
+
+            if (redisCfg.ClusterNodes != null)
             {
-                foreach (string host in redisCfg.ClusterNodes)
+                foreach (var host in redisCfg.ClusterNodes.EndPoints)
                 {
                     config.EndPoints.Add(host);
                 }
-            } else {
+            }
+            else
+            {
                 config.EndPoints.Add(redisCfg.HostAndPort);
             }
 
