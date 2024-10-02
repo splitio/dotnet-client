@@ -66,10 +66,10 @@ namespace Splitio_Tests.Integration_Tests.Impressions
         [TestMethod]
         public async Task RecordUniqueKeysAndExpireRedisCluster()
         {
-            Clean();
+            
             var redisAdapter = GetRedisClusterAdapter();
             var impressionsCache = GetRedisClusterImpressionsCache();
-
+            Clean();
             await impressionsCache.RecordUniqueKeysAsync(new List<Mtks>
             {
                 new Mtks("Feature1", new HashSet<string>{ "key-1", "key-2" }),
@@ -138,7 +138,7 @@ namespace Splitio_Tests.Integration_Tests.Impressions
             var keys = _redisAdapter.Keys(RedisPrefix+"*");
             _redisAdapter.Del(keys);
 
-            keys = _redisAdapter.Keys("{{SPLITIO}}" + RedisPrefix + "*");
+            keys = _redisAdapter.Keys("{SPLITIO}" + RedisPrefix + "*");
             _redisAdapter.Del(keys);
         }
     }
