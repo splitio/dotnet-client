@@ -48,14 +48,18 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             return conn?.GetServer(_config.HostAndPort);
         }
+
         protected List<IServer> GetServers()
         {
             var conn = _pool.GetConnection();
-            List<IServer> servers = new List<IServer>();
-            foreach (System.Net.EndPoint endpoint in conn?.GetEndPoints())
+            var servers = new List<IServer>();
+            var endpoints = conn?.GetEndPoints();
+        
+            foreach (var endpoint in endpoints)
             {
                 servers.Add(conn.GetServer(endpoint));
             }
+        
             return servers;
         }
 
