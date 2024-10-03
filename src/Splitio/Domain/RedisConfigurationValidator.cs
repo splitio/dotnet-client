@@ -13,13 +13,13 @@ namespace Splitio.Domain
         {
             if ((string.IsNullOrEmpty(options.CacheAdapterConfig.Host) || string.IsNullOrEmpty(options.CacheAdapterConfig.Port)) && options.CacheAdapterConfig.RedisClusterNodes == null)
             {
-                throw new ArgumentNullException("CacheAdapterConfig.Host", "Redis Host and Port or Cluster Nodes should be set to initialize Split SDK in Redis Mode.");
+                throw new ArgumentNullException(nameof(options), "Redis Host and Port or Cluster Nodes should be set to initialize Split SDK in Redis Mode.");
             }
             if (options.CacheAdapterConfig.RedisClusterNodes != null)
             {
                 if (options.CacheAdapterConfig.RedisClusterNodes.EndPoints.Count == 0)
                 {
-                    throw new ArgumentNullException("CacheAdapterConfig.RedisClusterNodes.EndPoints", "Redis Cluster Nodes should have at least one host to initialize Split SDK in Redis Mode.");
+                    throw new ArgumentNullException(nameof(options), "Redis Cluster Nodes should have at least one host to initialize Split SDK in Redis Mode.");
 
                 }
                 if (options.CacheAdapterConfig.RedisClusterNodes.KeyHashTag == null)

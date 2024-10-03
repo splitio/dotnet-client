@@ -19,13 +19,13 @@ namespace Splitio.Services.InputValidation.Classes
             if (apiKey == string.Empty)
             {
                 _log.Error("factory instantiation: you passed and empty api_key, api_key must be a non-empty string.");
-                throw new ArgumentException("API Key must be set to initialize Split SDK.", "apiKey");
+                throw new ArgumentException("API Key must be set to initialize Split SDK.", nameof(apiKey));
             }
 
             if (apiKey == null)
             {
                 _log.Error("factory instantiation: you passed a null api_key, api_key must be a non-empty string.");
-                throw new ArgumentNullException("apiKey", "API Key must be set to initialize Split SDK.");
+                throw new ArgumentNullException(nameof(apiKey), "API Key must be set to initialize Split SDK.");
             }
         }
     }
