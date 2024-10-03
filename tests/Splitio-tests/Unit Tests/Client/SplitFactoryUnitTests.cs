@@ -149,6 +149,39 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
 
         [TestMethod]
+        [ExpectedException(typeof(Exception), "Redis Cluster Nodes should have at least one host to initialize Split SDK in Redis Mode.")]
+        public void BuildRedisSplitClientWithoutClusterNodesShouldReturnException()
+        {
+            //Arrange           
+            var configurationOptions = new ConfigurationOptions
+            {
+                Mode = Mode.Consumer,
+                CacheAdapterConfig = new CacheAdapterConfigurationOptions { RedisClusterNodes = new Splitio.Domain.ClusterNodes(new List<string>() { }, "") }
+            };
+
+            var factory = new SplitFactory("any", configurationOptions);
+
+            //Act         
+            var client = factory.Client();
+        }
+
+        [TestMethod]
+        public void BuildRedisSplitClientWithoutHashTagShouldNotReturnException()
+        {
+            //Arrange           
+            var configurationOptions = new ConfigurationOptions
+            {
+                Mode = Mode.Consumer,
+                CacheAdapterConfig = new CacheAdapterConfigurationOptions { RedisClusterNodes = new Splitio.Domain.ClusterNodes(new List<string>() { "localhost:6379" }, null) }
+            };
+            var factory = new SplitFactory("any", configurationOptions);
+
+            //Act         
+            var client = factory.Client();
+            Assert.AreEqual("{SPLITIO}", configurationOptions.CacheAdapterConfig.RedisClusterNodes.KeyHashTag);
+        }
+
+        [TestMethod]
         [DeploymentItem(@"Resources\split.yaml")]
         public void BuildSplitClient_WithLocalhostApiKeyAndIsYamlFile_ReturnsLocalhostClient()
         {

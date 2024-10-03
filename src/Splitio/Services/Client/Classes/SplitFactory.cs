@@ -1,6 +1,7 @@
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
@@ -10,6 +11,7 @@ namespace Splitio.Services.Client.Classes
 {
     public class SplitFactory : ISplitFactory
     {
+        protected readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitFactory));
         private readonly IApiKeyValidator _apiKeyValidator;
         private readonly IFactoryInstantiationsService _factoryInstantiationsService;
         private readonly string _apiKey;
@@ -79,11 +81,27 @@ namespace Splitio.Services.Client.Classes
                     {
                         try
                         {
-                            if (string.IsNullOrEmpty(_options.CacheAdapterConfig.Host) || string.IsNullOrEmpty(_options.CacheAdapterConfig.Port))
+                            if ((string.IsNullOrEmpty(_options.CacheAdapterConfig.Host) || string.IsNullOrEmpty(_options.CacheAdapterConfig.Port)) && _options.CacheAdapterConfig.RedisClusterNodes == null)
                             {
-                                throw new Exception("Redis Host and Port should be set to initialize Split SDK in Redis Mode.");
+                                throw new Exception("Redis Host and Port or Cluster Nodes should be set to initialize Split SDK in Redis Mode.");
                             }
+                            if (_options.CacheAdapterConfig.RedisClusterNodes != null)
+                            {
+                                if (_options.CacheAdapterConfig.RedisClusterNodes.EndPoints.Count == 0)
+                                {
+                                    throw new Exception("Redis Cluster Nodes should have at least one host to initialize Split SDK in Redis Mode.");
 
+                                }
+                                if (_options.CacheAdapterConfig.RedisClusterNodes.KeyHashTag == null)
+                                {
+                                    _options.CacheAdapterConfig.RedisClusterNodes.KeyHashTag = "{SPLITIO}";
+                                    _log.Warn("Redis Cluster Hashtag is not set, will set its value to: {SPLITIO}.");
+                                }
+                                if (!string.IsNullOrEmpty(_options.CacheAdapterConfig.Host))
+                                {
+                                    _log.Warn("Redis Cluster Nodes and single host are set, will default to cluster node entry.");
+                                }
+                            }
                             var redisAssembly = Assembly.Load(new AssemblyName("Splitio.Redis"));
                             var redisType = redisAssembly.GetType("Splitio.Redis.Services.Client.Classes.RedisClient");
 
