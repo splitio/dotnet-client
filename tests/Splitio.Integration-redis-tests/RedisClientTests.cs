@@ -395,7 +395,7 @@ namespace Splitio.Integration_redis_tests
             result = _redisAdapter.ListRange($"{{SPLITIO}}{UserPrefix}.SPLITIO.uniquekeys");
 
             // Assert.
-            Assert.AreEqual(2, result.Count());
+            Assert.AreEqual(2, result.Length);
 
             uniques = result.Select(x => JsonConvert.DeserializeObject<Mtks>(x)).ToList();
 
@@ -466,7 +466,7 @@ namespace Splitio.Integration_redis_tests
             // Assert.
             Assert.AreEqual(4, result.FirstOrDefault(x => ((string)x.Name).Contains("FACUNDO_TEST")).Value);
             Assert.AreEqual(3, result.FirstOrDefault(x => ((string)x.Name).Contains("MAURO_TEST")).Value);
-            Assert.AreEqual(5, redisImpressions.Count());
+            Assert.AreEqual(5, redisImpressions.Length);
 
             Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("FACUNDO_TEST") && ((string)x).Contains("mauro_test")));
             Assert.AreEqual(1, redisImpressions.Count(x => ((string)x).Contains("FACUNDO_TEST") && ((string)x).Contains("nico_test")));
@@ -726,7 +726,7 @@ namespace Splitio.Integration_redis_tests
             };
         }
 
-        protected ConfigurationOptions GetClusterConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)
+        protected static ConfigurationOptions GetClusterConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)
         {
             var clusterNodes = new ClusterNodes(new List<string>() { Host + ":" + Port }, "{SPLITIO}");
             var cacheConfig = new CacheAdapterConfigurationOptions
