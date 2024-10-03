@@ -5,21 +5,21 @@ using System;
 
 namespace Splitio.Domain
 {
-    public class RedisConfigurationValidator
+    public static class RedisConfigurationValidator
     {
-        protected static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(RedisConfigurationValidator));
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(RedisConfigurationValidator));
 
         public static void ValidateRedisOptions(ConfigurationOptions options)
         {
             if ((string.IsNullOrEmpty(options.CacheAdapterConfig.Host) || string.IsNullOrEmpty(options.CacheAdapterConfig.Port)) && options.CacheAdapterConfig.RedisClusterNodes == null)
             {
-                throw new ArgumentNullException("Redis Host and Port or Cluster Nodes should be set to initialize Split SDK in Redis Mode.");
+                throw new ArgumentNullException("CacheAdapterConfig.Host", "Redis Host and Port or Cluster Nodes should be set to initialize Split SDK in Redis Mode.");
             }
             if (options.CacheAdapterConfig.RedisClusterNodes != null)
             {
                 if (options.CacheAdapterConfig.RedisClusterNodes.EndPoints.Count == 0)
                 {
-                    throw new ArgumentNullException("Redis Cluster Nodes should have at least one host to initialize Split SDK in Redis Mode.");
+                    throw new ArgumentNullException("CacheAdapterConfig.RedisClusterNodes.EndPoints", "Redis Cluster Nodes should have at least one host to initialize Split SDK in Redis Mode.");
 
                 }
                 if (options.CacheAdapterConfig.RedisClusterNodes.KeyHashTag == null)
