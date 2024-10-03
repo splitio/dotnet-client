@@ -4,6 +4,7 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
@@ -41,11 +42,18 @@ namespace Splitio.Redis.Services.Cache.Classes
             _log.Error($"Exception calling Redis Adapter {command}.\nKey: {key}.\nMessage: {ex.Message}.\nStackTrace: {ex.StackTrace}.\n InnerExection: {ex.InnerException}.", ex);
         }
 
-        protected IServer GetServer()
+        protected List<IServer> GetServers()
         {
             var conn = _pool.GetConnection();
-
-            return conn?.GetServer(_config.HostAndPort);
+            var servers = new List<IServer>();
+            var endpoints = conn?.GetEndPoints();
+        
+            foreach (var endpoint in endpoints)
+            {
+                servers.Add(conn.GetServer(endpoint));
+            }
+        
+            return servers;
         }
 
         protected IDatabase GetDatabase()
