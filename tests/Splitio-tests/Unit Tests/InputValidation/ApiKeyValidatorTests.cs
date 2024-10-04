@@ -2,6 +2,7 @@
 using Moq;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Logger;
+using System;
 
 namespace Splitio_Tests.Unit_Tests.InputValidation
 {
@@ -20,7 +21,8 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         }
 
         [TestMethod]
-        public void Validate_WhenApiKeyIsEmpty_LogOneError()
+        [ExpectedException(typeof(Exception), "API Key must be set to initialize Split SDK.")]
+        public void Validate_WhenApiKeyIsEmpty_RaiseExceptionAndLogOneError()
         {
             //Arrange
             var apiKey = string.Empty;
@@ -33,7 +35,8 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         }
 
         [TestMethod]
-        public void Validate_WhenApiKeyIsNull_LogOneError()
+        [ExpectedException(typeof(Exception), "API Key must be set to initialize Split SDK.")]
+        public void Validate_WhenApiKeyIsNull_RaiseExceptionAndLogOneError()
         {
             //Arrange
             string apiKey = null;
