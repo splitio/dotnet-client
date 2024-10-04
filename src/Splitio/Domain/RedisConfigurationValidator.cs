@@ -26,7 +26,6 @@ namespace Splitio.Domain
                 if (config.RedisClusterNodes.EndPoints.Count == 0)
                 {
                     throw new Exception("Redis Cluster Nodes should have at least one host to initialize Split SDK in Redis Mode.");
-
                 }
 
                 if (string.IsNullOrEmpty(config.RedisClusterNodes.KeyHashTag))

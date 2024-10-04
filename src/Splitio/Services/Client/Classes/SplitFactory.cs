@@ -89,7 +89,6 @@ namespace Splitio.Services.Client.Classes
                     {
                         throw new Exception("Splitio.Redis package should be added as reference, to build split client in Redis Consumer mode.", e);
                     }
-                    
                     break;
                 case Mode.Producer:
                     throw new Exception("Unsupported mode.");
