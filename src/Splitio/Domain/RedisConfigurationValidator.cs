@@ -9,7 +9,7 @@ namespace Splitio.Domain
     {
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(RedisConfigurationValidator));
 
-        public static void ValidateRedisOptions(ConfigurationOptions options)
+        public static void Validate(CacheAdapterConfigurationOptions config)
         {
             if ((string.IsNullOrEmpty(options.CacheAdapterConfig.Host) || string.IsNullOrEmpty(options.CacheAdapterConfig.Port)) && options.CacheAdapterConfig.RedisClusterNodes == null)
             {
