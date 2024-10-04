@@ -21,7 +21,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException), "API Key must be set to initialize Split SDK.")]
+        [ExpectedException(typeof(Exception), "API Key must be set to initialize Split SDK.")]
         public void Validate_WhenApiKeyIsEmpty_RaiseExceptionAndLogOneError()
         {
             //Arrange
