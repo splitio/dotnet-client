@@ -1,7 +1,5 @@
 ﻿using Splitio.Domain;
-using Splitio.Redis.Services.Shared;
 using Splitio.Services.Client.Classes;
-using System.Collections.Generic;
 
 namespace Splitio.Redis.Services.Domain
 {
@@ -39,6 +37,10 @@ namespace Splitio.Redis.Services.Domain
             TlsConfig = options.TlsConfig;
             PoolSize = options.PoolSize ?? 1;
             ClusterNodes = options.RedisClusterNodes;
+            if (RedisUserPrefix != null && ClusterNodes != null && ClusterNodes.KeyHashTag != null)
+            {
+                RedisUserPrefix = ClusterNodes.KeyHashTag + RedisUserPrefix;
+            }
 
 #if NET_LATEST
             if (options.ProfilingEnabled)

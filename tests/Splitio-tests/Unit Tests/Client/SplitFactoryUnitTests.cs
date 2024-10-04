@@ -36,7 +36,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), "API Key should be set to initialize Split SDK.")]
+        [ExpectedException(typeof(Exception), "API Key should be set to initialize Split SDK.")]
         public void BuildSplitClientWithEmptyApiKeyShouldReturnException()
         {
             //Arrange

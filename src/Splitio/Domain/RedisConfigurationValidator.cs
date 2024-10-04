@@ -11,26 +11,26 @@ namespace Splitio.Domain
 
         public static void Validate(CacheAdapterConfigurationOptions config)
         {
-            if ((string.IsNullOrEmpty(options.CacheAdapterConfig.Host) || string.IsNullOrEmpty(options.CacheAdapterConfig.Port)) && options.CacheAdapterConfig.RedisClusterNodes == null)
+            if ((string.IsNullOrEmpty(config.Host) || string.IsNullOrEmpty(config.Port)) && config.RedisClusterNodes == null)
             {
-                throw new ArgumentNullException(nameof(options), "Redis Host and Port or Cluster Nodes should be set to initialize Split SDK in Redis Mode.");
+                throw new Exception("Redis Host and Port or Cluster Nodes should be set to initialize Split SDK in Redis Mode.");
             }
 
-            if (options.CacheAdapterConfig.RedisClusterNodes != null)
+            if (config.RedisClusterNodes != null)
             {
-                if (options.CacheAdapterConfig.RedisClusterNodes.EndPoints.Count == 0)
+                if (config.RedisClusterNodes.EndPoints.Count == 0)
                 {
-                    throw new ArgumentNullException(nameof(options), "Redis Cluster Nodes should have at least one host to initialize Split SDK in Redis Mode.");
+                    throw new Exception("Redis Cluster Nodes should have at least one host to initialize Split SDK in Redis Mode.");
 
                 }
 
                 if (string.IsNullOrEmpty(config.RedisClusterNodes.KeyHashTag))
                 {
-                    options.CacheAdapterConfig.RedisClusterNodes.KeyHashTag = "{SPLITIO}";
+                    config.RedisClusterNodes.KeyHashTag = "{SPLITIO}";
                     _log.Warn("Redis Cluster Hashtag is not set, will set its value to: {SPLITIO}.");
                 }
 
-                if (!string.IsNullOrEmpty(options.CacheAdapterConfig.Host))
+                if (!string.IsNullOrEmpty(config.Host))
                 {
                     _log.Warn("Redis Cluster Nodes and single host are set, will default to cluster node entry.");
                 }

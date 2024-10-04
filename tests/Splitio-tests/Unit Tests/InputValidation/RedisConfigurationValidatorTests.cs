@@ -10,7 +10,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
     public class RedisConfigurationValidatorTests
     {
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), "Redis Host, Port and Password should be set to initialize Split SDK in Redis Mode.")]
+        [ExpectedException(typeof(Exception), "Redis Host, Port and Password should be set to initialize Split SDK in Redis Mode.")]
         public void BuildRedisClientWithoutAllRequiredConfigsShouldReturnException()
         {
             //Arrange           
@@ -19,11 +19,11 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
                 Mode = Mode.Consumer,
                 CacheAdapterConfig = new CacheAdapterConfigurationOptions { Host = "local" }
             };
-            RedisConfigurationValidator.ValidateRedisOptions(configurationOptions);
+            RedisConfigurationValidator.Validate(configurationOptions.CacheAdapterConfig);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), "Redis Host, Port and Password should be set to initialize Split SDK in Redis Mode.")]
+        [ExpectedException(typeof(Exception), "Redis Host, Port and Password should be set to initialize Split SDK in Redis Mode.")]
         public void BuildRedisClusterClientWithoutHostsShouldReturnException()
         {
             //Arrange           
@@ -32,7 +32,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
                 Mode = Mode.Consumer,
                 CacheAdapterConfig = new CacheAdapterConfigurationOptions { RedisClusterNodes = new ClusterNodes(new List<string>() { }, "null") }
             };
-            RedisConfigurationValidator.ValidateRedisOptions(configurationOptions);
+            RedisConfigurationValidator.Validate(configurationOptions.CacheAdapterConfig);
         }
 
         [TestMethod]
@@ -44,7 +44,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
                 Mode = Mode.Consumer,
                 CacheAdapterConfig = new CacheAdapterConfigurationOptions { RedisClusterNodes = new Splitio.Domain.ClusterNodes(new List<string>() { "localhost:6379" }, null) }
             };
-            RedisConfigurationValidator.ValidateRedisOptions(configurationOptions);
+            RedisConfigurationValidator.Validate(configurationOptions.CacheAdapterConfig);
             Assert.AreEqual("{SPLITIO}", configurationOptions.CacheAdapterConfig.RedisClusterNodes.KeyHashTag);
         }
 

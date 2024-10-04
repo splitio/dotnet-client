@@ -76,10 +76,6 @@ namespace Splitio.Redis.Services.Client.Classes
             _config.FlagSetsInvalid = baseConfig.FlagSetsInvalid;
             _config.Mode = config.Mode;
             _config.FromCacheAdapterConfig(config.CacheAdapterConfig);
-            if (_config.RedisUserPrefix != null && _config.ClusterNodes != null && _config.ClusterNodes.KeyHashTag != null)
-            {
-                _config.RedisUserPrefix = _config.ClusterNodes.KeyHashTag + _config.RedisUserPrefix;
-            }
         }
 
         private void BuildRedisCache()
