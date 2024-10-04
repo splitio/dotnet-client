@@ -72,25 +72,24 @@ namespace Splitio.Services.Client.Classes
                     }
                     break;
                 case Mode.Consumer:
-                    if (_options.CacheAdapterConfig != null && _options.CacheAdapterConfig.Type == AdapterType.Redis)
-                    {
-                        try
-                        {
-                            RedisConfigurationValidator.Validate(_options.CacheAdapterConfig);
-                            var redisAssembly = Assembly.Load(new AssemblyName("Splitio.Redis"));
-                            var redisType = redisAssembly.GetType("Splitio.Redis.Services.Client.Classes.RedisClient");
 
-                            _client = (ISplitClient)Activator.CreateInstance(redisType, new object[] { _options, _apiKey });
-                        }
-                        catch (Exception e)
-                        {
-                            throw new Exception("Splitio.Redis package should be added as reference, to build split client in Redis Consumer mode.", e);
-                        }
-                    }
-                    else
+                    try
                     {
-                        throw new Exception("Redis config should be set to build split client in Consumer mode.");
+                        RedisConfigurationValidator.Validate(_options.CacheAdapterConfig);
+                        var redisAssembly = Assembly.Load(new AssemblyName("Splitio.Redis"));
+                        var redisType = redisAssembly.GetType("Splitio.Redis.Services.Client.Classes.RedisClient");
+
+                        _client = (ISplitClient)Activator.CreateInstance(redisType, new object[] { _options, _apiKey });
                     }
+                    catch (ArgumentException ex)
+                    {
+                        throw new Exception(ex.Message);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception("Splitio.Redis package should be added as reference, to build split client in Redis Consumer mode.", e);
+                    }
+                    
                     break;
                 case Mode.Producer:
                     throw new Exception("Unsupported mode.");

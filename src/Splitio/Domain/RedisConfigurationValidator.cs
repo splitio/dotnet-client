@@ -11,6 +11,11 @@ namespace Splitio.Domain
 
         public static void Validate(CacheAdapterConfigurationOptions config)
         {
+            if (config == null || config.Type != AdapterType.Redis)
+            {
+                throw new ArgumentException("Redis config should be set to build split client in Consumer mode.");
+            }
+        
             if ((string.IsNullOrEmpty(config.Host) || string.IsNullOrEmpty(config.Port)) && config.RedisClusterNodes == null)
             {
                 throw new Exception("Redis Host and Port or Cluster Nodes should be set to initialize Split SDK in Redis Mode.");
