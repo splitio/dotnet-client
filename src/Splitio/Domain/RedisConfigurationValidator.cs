@@ -28,6 +28,7 @@ namespace Splitio.Domain
                     options.CacheAdapterConfig.RedisClusterNodes.KeyHashTag = "{SPLITIO}";
                     _log.Warn("Redis Cluster Hashtag is not set, will set its value to: {SPLITIO}.");
                 }
+
                 if (!string.IsNullOrEmpty(options.CacheAdapterConfig.Host))
                 {
                     _log.Warn("Redis Cluster Nodes and single host are set, will default to cluster node entry.");
