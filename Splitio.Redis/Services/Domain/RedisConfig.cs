@@ -1,4 +1,5 @@
 ﻿using Splitio.Domain;
+using Splitio.Redis.Services.Shared;
 using Splitio.Services.Client.Classes;
 
 namespace Splitio.Redis.Services.Domain
