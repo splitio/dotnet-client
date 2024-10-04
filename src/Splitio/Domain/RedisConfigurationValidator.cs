@@ -15,6 +15,7 @@ namespace Splitio.Domain
             {
                 throw new ArgumentNullException(nameof(options), "Redis Host and Port or Cluster Nodes should be set to initialize Split SDK in Redis Mode.");
             }
+
             if (options.CacheAdapterConfig.RedisClusterNodes != null)
             {
                 if (options.CacheAdapterConfig.RedisClusterNodes.EndPoints.Count == 0)
