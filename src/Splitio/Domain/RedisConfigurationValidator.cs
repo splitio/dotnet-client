@@ -22,7 +22,8 @@ namespace Splitio.Domain
                     throw new ArgumentNullException(nameof(options), "Redis Cluster Nodes should have at least one host to initialize Split SDK in Redis Mode.");
 
                 }
-                if (options.CacheAdapterConfig.RedisClusterNodes.KeyHashTag == null)
+
+                if (string.IsNullOrEmpty(config.RedisClusterNodes.KeyHashTag))
                 {
                     options.CacheAdapterConfig.RedisClusterNodes.KeyHashTag = "{SPLITIO}";
                     _log.Warn("Redis Cluster Hashtag is not set, will set its value to: {SPLITIO}.");
