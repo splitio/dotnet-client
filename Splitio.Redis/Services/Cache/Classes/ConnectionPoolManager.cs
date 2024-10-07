@@ -1,4 +1,5 @@
-﻿using Splitio.Redis.Services.Cache.Interfaces;
+﻿using Splitio.Domain;
+using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
@@ -94,6 +95,27 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         private static ConfigurationOptions GetConfig(RedisConfig redisCfg)
         {
+            if (!string.IsNullOrEmpty(redisCfg.ConnectionString)) 
+            {
+                try
+                {
+                    ConfigurationOptions options = ConfigurationOptions.Parse(redisCfg.ConnectionString);
+                    options.AllowAdmin = true;
+                    options.KeepAlive = 1;
+                    if (options.EndPoints.Count > 1)
+                    {
+                        _log.Debug("Detected multiple redis hosts, setting KeyHashTag value to {{Splitio}}.");
+                        redisCfg.ClusterNodes = new ClusterNodes(new List<string>() { "host" }, "{SPLITIO}");
+                    }
+                    return options;
+                }
+                catch (Exception e)
+                {
+                    _log.Error($"Exception caught: Invalid Redis Connection String: {redisCfg.ConnectionString}.", e);
+                    return null;
+                }
+            }
+
             var config = new ConfigurationOptions
             {
                 Password = redisCfg.RedisPassword,

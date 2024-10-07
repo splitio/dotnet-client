@@ -48,5 +48,16 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             Assert.AreEqual("{SPLITIO}", configurationOptions.CacheAdapterConfig.RedisClusterNodes.KeyHashTag);
         }
 
+        [TestMethod]
+        public void UseConnectionStringIgnoresOtherProperties()
+        {
+            //Arrange           
+            var configurationOptions = new ConfigurationOptions
+            {
+                Mode = Mode.Consumer,
+                CacheAdapterConfig = new CacheAdapterConfigurationOptions { ConnectionString = "localhost:6379"}
+            };
+            RedisConfigurationValidator.Validate(configurationOptions.CacheAdapterConfig);
+        }
     }
 }

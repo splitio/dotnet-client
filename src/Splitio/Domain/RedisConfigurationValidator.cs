@@ -15,7 +15,14 @@ namespace Splitio.Domain
             {
                 throw new ArgumentException("Redis config should be set to build split client in Consumer mode.");
             }
-        
+            if (!string.IsNullOrEmpty(config.ConnectionString))
+            {
+                if (!string.IsNullOrEmpty(config.Host) || config.RedisClusterNodes != null)
+                {
+                    _log.Warn("Redis Connection String is set, will ignore all other properties.");
+                }
+                return;
+            }
             if ((string.IsNullOrEmpty(config.Host) || string.IsNullOrEmpty(config.Port)) && config.RedisClusterNodes == null)
             {
                 throw new Exception("Redis Host and Port or Cluster Nodes should be set to initialize Split SDK in Redis Mode.");
