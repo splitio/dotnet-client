@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
 using StackExchange.Redis;
@@ -19,7 +20,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         private readonly ISplitParser _splitParser;
         private readonly IRedisAdapterConsumer _redisAdapter;
 
-        public RedisSplitCache(IRedisAdapterConsumer redisAdapter, ISplitParser splitParser, string userPrefix = null) : base(userPrefix)
+        public RedisSplitCache(IRedisAdapterConsumer redisAdapter, ISplitParser splitParser, RedisConfig redisConfig = null, bool clusterMode = false) : base(redisConfig, clusterMode)
         {
             _redisAdapter = redisAdapter;
             _splitParser = splitParser;

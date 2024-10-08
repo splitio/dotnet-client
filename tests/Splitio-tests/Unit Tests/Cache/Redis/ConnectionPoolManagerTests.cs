@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Domain;
-using System;
 using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Cache
@@ -150,19 +149,6 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var pool = new ConnectionPoolManager(config);
             var conn1 = pool.GetConnection();
             Assert.IsNull(conn1);
-        }
-
-        [TestMethod]
-        public void ConnectionStringAddsKeyHashTagInCluster()
-        {
-            // Arrange.
-            var config = new RedisConfig
-            {
-                ConnectionString = "localhost:6379,localhost:6380,DefaultDatabase=0",
-                PoolSize = 5
-            };
-            var pool = new ConnectionPoolManager(config);
-            Assert.AreEqual("{SPLITIO}", config.ClusterNodes.KeyHashTag);
         }
     }
 }

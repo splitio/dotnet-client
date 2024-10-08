@@ -2,6 +2,7 @@
 using Moq;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Domain;
 using Splitio.Telemetry.Domain;
 using System;
 using System.Collections.Generic;
@@ -20,8 +21,20 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void Initialization()
         {
             _redisAdapter = new Mock<IRedisAdapterProducer>();
+            var config = new RedisConfig
+            {
+                RedisHost = "localhost",
+                RedisPort = "6379",
+                RedisPassword = "",
+                RedisDatabase = 0,
+                RedisConnectTimeout = 1000,
+                RedisConnectRetry = 5,
+                RedisSyncTimeout = 1000,
+                RedisUserPrefix = "test-pre:",
+                PoolSize = 1,
+            };
 
-            _cache = new RedisImpressionsCache(_redisAdapter.Object, "ip", "version", "mm", "test-pre:");
+            _cache = new RedisImpressionsCache(_redisAdapter.Object, "ip", "version", "mm", config);
         }
 
         [TestMethod]

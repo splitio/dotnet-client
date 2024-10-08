@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Domain;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,8 +20,8 @@ namespace Splitio.Redis.Services.Cache.Classes
         public RedisEventsCache(IRedisAdapterProducer redisAdapter, 
             string machineName,
             string machineIP, 
-            string sdkVersion, 
-            string userPrefix = null) : base(userPrefix) 
+            string sdkVersion,
+            RedisConfig redisConfig = null, bool clusterMode = false) : base(redisConfig, clusterMode) 
         {
             _redisAdapterProducer = redisAdapter;
             _machineName = machineName;

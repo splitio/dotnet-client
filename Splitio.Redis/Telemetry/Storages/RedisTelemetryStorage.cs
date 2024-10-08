@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
+using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Domain;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
@@ -25,16 +27,27 @@ namespace Splitio.Redis.Telemetry.Storages
             .Replace("{prefix}.", string.IsNullOrEmpty(_userPrefix) ? string.Empty : $"{_userPrefix}.");
 
         public RedisTelemetryStorage(IRedisAdapterProducer redisAdapterProducer,
-            string userPrefix,
+            RedisConfig redisConfig,
             string sdkVersion,
             string machineIp,
-            string machineName)
+            string machineName, bool clusterMode = false)
         {
             _redisAdapterProducer = redisAdapterProducer;
-            _userPrefix = userPrefix;
+            _userPrefix = redisConfig.RedisUserPrefix;
             _sdkVersion = sdkVersion;
             _machineIp = machineIp;
             _machineName = machineName;
+            if (clusterMode)
+            {
+                if (redisConfig.ClusterNodes != null && !string.IsNullOrEmpty(redisConfig.ClusterNodes.KeyHashTag))
+                {
+                    _userPrefix = redisConfig.ClusterNodes.KeyHashTag + _userPrefix;
+                }
+                else
+                {
+                    _userPrefix = RedisCacheBase.KeyHashTag + _userPrefix;
+                }
+            }
         }
 
         public async Task RecordConfigInitAsync(Config config)

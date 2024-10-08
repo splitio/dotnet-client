@@ -1,5 +1,4 @@
-﻿using Splitio.Domain;
-using Splitio.Redis.Services.Cache.Interfaces;
+﻿using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
@@ -19,6 +18,8 @@ namespace Splitio.Redis.Services.Cache.Classes
         private readonly Random _random;
 
         private bool _disposed;
+
+        private bool ClusterMode { get; set; }
 
         public ConnectionPoolManager(RedisConfig config)
         {
@@ -80,6 +81,10 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
         }
 
+        public bool GetClusterMode()
+        {
+            return ClusterMode;
+        }
         protected virtual void Dispose(bool disposing)
         {
             if (_disposed)
@@ -93,115 +98,18 @@ namespace Splitio.Redis.Services.Cache.Classes
             _disposed = true;
         }
 
-        private static ConfigurationOptions GetConfig(RedisConfig redisCfg)
-{
-    if (string.IsNullOrEmpty(redisCfg.ConnectionString)) 
-    {
-        return ParseFromRedisConfig(redisCfg);
-    }
-
-    return ParseFromConnectionString(redisCfg.ConnectionString);
-}
-
-private static ConfigurationOptions ParseFromRedisConfig(RedisConfig redisCfg)
-{
-    var config = new ConfigurationOptions
-    {
-        Password = redisCfg.RedisPassword,
-        AllowAdmin = true,
-        KeepAlive = 1
-    };
-
-    if (redisCfg.ClusterNodes != null)
-    {
-        foreach (var host in redisCfg.ClusterNodes.EndPoints)
+        private ConfigurationOptions GetConfig(RedisConfig redisCfg)
         {
-            config.EndPoints.Add(host);
-        }
-    }
-    else
-    {
-        config.EndPoints.Add(redisCfg.HostAndPort);
-    }
-
-    if (redisCfg.TlsConfig != null && redisCfg.TlsConfig.Ssl)
-    {
-        config.Ssl = redisCfg.TlsConfig.Ssl;
-
-        if (redisCfg.TlsConfig.CertificateValidationFunc != null)
-        {
-            config.CertificateValidation += redisCfg.TlsConfig.CertificateValidationFunc.Invoke;
-        }
-
-        if (redisCfg.TlsConfig.CertificateSelectionFunc != null)
-        {
-            config.CertificateSelection += redisCfg.TlsConfig.CertificateSelectionFunc.Invoke;
-        }
-    }
-
-    if (redisCfg.RedisConnectTimeout > 0)
-    {
-        config.ConnectTimeout = redisCfg.RedisConnectTimeout;
-    }
-
-    if (redisCfg.RedisConnectRetry > 0)
-    {
-        config.ConnectRetry = redisCfg.RedisConnectRetry;
-    }
-
-    if (redisCfg.RedisSyncTimeout > 0)
-    {
-        config.SyncTimeout = redisCfg.RedisSyncTimeout;
-    }
-
-    return config;
-}
-
-private static ConfigurationOptions ParseFromConnectionString(string connectionString)
-{
-    try
-    {
-        var options = ConfigurationOptions.Parse(connectionString);
-        options.AllowAdmin = true;
-        options.KeepAlive = 1;
-
-        if (!options.EndPoints.Any())
-        {
-            // maybe we can log some information here
-            // related with there are not exist endpoints or something like that. 
-            _log.Debug("...");
-        }
-
-        return options;
-    }
-    catch (Exception e)
-    {
-        _log.Error($"Exception caught: Invalid Redis Connection String: {connectionString}.", e);
-        return new ConfigurationOptions();
-    }
-}
-        {
-            if (!string.IsNullOrEmpty(redisCfg.ConnectionString)) 
+            if (string.IsNullOrEmpty(redisCfg.ConnectionString)) 
             {
-                try
-                {
-                    ConfigurationOptions options = ConfigurationOptions.Parse(redisCfg.ConnectionString);
-                    options.AllowAdmin = true;
-                    options.KeepAlive = 1;
-                    if (options.EndPoints.Count > 1)
-                    {
-                        _log.Debug("Detected multiple redis hosts, setting KeyHashTag value to {{Splitio}}.");
-                        redisCfg.ClusterNodes = new ClusterNodes(new List<string>() { "host" }, "{SPLITIO}");
-                    }
-                    return options;
-                }
-                catch (Exception e)
-                {
-                    _log.Error($"Exception caught: Invalid Redis Connection String: {redisCfg.ConnectionString}.", e);
-                    return null;
-                }
+                return ParseFromRedisConfig(redisCfg);
             }
 
+            return ParseFromConnectionString(redisCfg);
+        }
+
+        private ConfigurationOptions ParseFromRedisConfig(RedisConfig redisCfg)
+        {
             var config = new ConfigurationOptions
             {
                 Password = redisCfg.RedisPassword,
@@ -215,6 +123,7 @@ private static ConfigurationOptions ParseFromConnectionString(string connectionS
                 {
                     config.EndPoints.Add(host);
                 }
+                ClusterMode = true;
             }
             else
             {
@@ -252,6 +161,39 @@ private static ConfigurationOptions ParseFromConnectionString(string connectionS
             }
 
             return config;
+        }
+
+        private ConfigurationOptions ParseFromConnectionString(RedisConfig redisCfg)
+        {
+            try
+            {
+                var options = ConfigurationOptions.Parse(redisCfg.ConnectionString);
+                options.AllowAdmin = true;
+                options.KeepAlive = 1;
+
+                if (!options.EndPoints.Any())
+                {
+                    _log.Warn("No endpoints detected in Redis Connection String, Redis connection might fail.");
+                }
+
+                if (!string.IsNullOrEmpty(redisCfg.RedisHost) || redisCfg.ClusterNodes != null)
+                {
+                    _log.Warn("Redis ConnectionString is set, will ignore other connection parameters.");
+                }
+
+                if (options.EndPoints.Count > 1)
+                {
+                    _log.Debug("Detected multiple redis hosts, will set the KeyHashTag to {SPLITIO}.");
+                    ClusterMode = true;
+                }
+
+                return options;
+            }
+            catch (Exception e)
+            {
+                _log.Error($"Exception caught: Invalid Redis Connection String: {redisCfg.ConnectionString}.", e);
+                return new ConfigurationOptions();
+            }
         }
     }
 }

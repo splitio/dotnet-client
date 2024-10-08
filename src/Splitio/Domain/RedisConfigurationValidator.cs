@@ -2,6 +2,7 @@
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
+using System.Collections.Generic;
 
 namespace Splitio.Domain
 {
@@ -21,11 +22,6 @@ namespace Splitio.Domain
                 {
                     _log.Warn("Redis Connection String is set, will ignore all other properties.");
                 }
-            
-                config.RedisClusterNodes = new ClusterNodes();
-            
-                SetKeyHashTagDefault(config);
-            
                 return;
             }
             if ((string.IsNullOrEmpty(config.Host) || string.IsNullOrEmpty(config.Port)) && config.RedisClusterNodes == null)

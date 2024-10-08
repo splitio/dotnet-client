@@ -99,6 +99,7 @@ namespace Splitio.Integration_redis_tests
             Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "nico_test"), impressionExpected2);
             Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impressionExpected3);
 
+            impressionListener = new IntegrationTestsImpressionListener(50);
             configurations = GetClusterConfigurationOptions(impressionListener: impressionListener);
 
             var splitFactory2 = new SplitFactory(apikey, configurations);
@@ -707,7 +708,7 @@ namespace Splitio.Integration_redis_tests
             // Arrange.
             var cacheConfig = new CacheAdapterConfigurationOptions
             {
-                ConnectionString = Host+":"+Port+",DefaultDatabase="+Database,
+                RedisConnectionString = Host+":"+Port+",DefaultDatabase="+Database,
                 UserPrefix = UserPrefix
             };
             var configurations = new ConfigurationOptions

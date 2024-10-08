@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Domain;
 using Splitio.Telemetry.Domain;
 using StackExchange.Redis;
 using System;
@@ -29,7 +30,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             string machineIP,
             string sdkVersion,
             string machineName,
-            string userPrefix = null) : base(machineIP, sdkVersion, machineName, userPrefix)
+            RedisConfig redisConfig = null, bool clusterMode = false) : base(machineIP, sdkVersion, machineName, redisConfig, clusterMode)
         {
             _redisAdapterProducer = redisAdapter;
         }

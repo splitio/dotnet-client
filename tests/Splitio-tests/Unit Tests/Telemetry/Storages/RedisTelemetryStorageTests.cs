@@ -3,6 +3,7 @@ using Moq;
 using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Domain;
 using Splitio.Redis.Telemetry.Storages;
 using Splitio.Services.Client.Classes;
 using Splitio.Telemetry.Domain;
@@ -30,8 +31,20 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
             _sdkVersion = "sdk-version-test";
             _machineIp = "10.0.0.1";
             _machineName = "machine-name-test";
+            var config = new RedisConfig
+            {
+                RedisHost = "localhost",
+                RedisPort = "6379",
+                RedisPassword = "",
+                RedisDatabase = 0,
+                RedisConnectTimeout = 1000,
+                RedisConnectRetry = 5,
+                RedisSyncTimeout = 1000,
+                RedisUserPrefix = _userPrefix,
+                PoolSize = 1,
+            };
 
-            _telemetryStorage = new RedisTelemetryStorage(_redisAdapter.Object, _userPrefix, _sdkVersion, _machineIp, _machineName);
+            _telemetryStorage = new RedisTelemetryStorage(_redisAdapter.Object, config, _sdkVersion, _machineIp, _machineName);
         }
 
         [TestMethod]

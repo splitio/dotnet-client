@@ -35,7 +35,7 @@ namespace Splitio_Tests.Integration_Tests.Impressions
 
             _redisAdapter = new RedisAdapterForTests(config, connectionPoolManager);
             var redisProducer = new RedisAdapterProducer(config, connectionPoolManager);
-            _impressionsCache = new RedisImpressionsCache(redisProducer, "ip", "version", "mm", RedisPrefix);
+            _impressionsCache = new RedisImpressionsCache(redisProducer, "ip", "version", "mm", config);
         }
 
         [TestMethod]
@@ -125,7 +125,7 @@ namespace Splitio_Tests.Integration_Tests.Impressions
 
             var pool = new ConnectionPoolManager(config);
             var redisProducer = new RedisAdapterProducer(config, pool);
-            return new RedisImpressionsCache(redisProducer, "ip", "version", "mm", "{SPLITIO}" + RedisPrefix);
+            return new RedisImpressionsCache(redisProducer, "ip", "version", "mm", config, true);
         }
 
         private void Clean()

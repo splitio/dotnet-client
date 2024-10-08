@@ -55,7 +55,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             var configurationOptions = new ConfigurationOptions
             {
                 Mode = Mode.Consumer,
-                CacheAdapterConfig = new CacheAdapterConfigurationOptions { ConnectionString = "localhost:6379"}
+                CacheAdapterConfig = new CacheAdapterConfigurationOptions { RedisConnectionString = "localhost:6379"}
             };
             RedisConfigurationValidator.Validate(configurationOptions.CacheAdapterConfig);
         }
