@@ -94,6 +94,92 @@ namespace Splitio.Redis.Services.Cache.Classes
         }
 
         private static ConfigurationOptions GetConfig(RedisConfig redisCfg)
+{
+    if (string.IsNullOrEmpty(redisCfg.ConnectionString)) 
+    {
+        return ParseFromRedisConfig(redisCfg);
+    }
+
+    return ParseFromConnectionString(redisCfg.ConnectionString);
+}
+
+private static ConfigurationOptions ParseFromRedisConfig(RedisConfig redisCfg)
+{
+    var config = new ConfigurationOptions
+    {
+        Password = redisCfg.RedisPassword,
+        AllowAdmin = true,
+        KeepAlive = 1
+    };
+
+    if (redisCfg.ClusterNodes != null)
+    {
+        foreach (var host in redisCfg.ClusterNodes.EndPoints)
+        {
+            config.EndPoints.Add(host);
+        }
+    }
+    else
+    {
+        config.EndPoints.Add(redisCfg.HostAndPort);
+    }
+
+    if (redisCfg.TlsConfig != null && redisCfg.TlsConfig.Ssl)
+    {
+        config.Ssl = redisCfg.TlsConfig.Ssl;
+
+        if (redisCfg.TlsConfig.CertificateValidationFunc != null)
+        {
+            config.CertificateValidation += redisCfg.TlsConfig.CertificateValidationFunc.Invoke;
+        }
+
+        if (redisCfg.TlsConfig.CertificateSelectionFunc != null)
+        {
+            config.CertificateSelection += redisCfg.TlsConfig.CertificateSelectionFunc.Invoke;
+        }
+    }
+
+    if (redisCfg.RedisConnectTimeout > 0)
+    {
+        config.ConnectTimeout = redisCfg.RedisConnectTimeout;
+    }
+
+    if (redisCfg.RedisConnectRetry > 0)
+    {
+        config.ConnectRetry = redisCfg.RedisConnectRetry;
+    }
+
+    if (redisCfg.RedisSyncTimeout > 0)
+    {
+        config.SyncTimeout = redisCfg.RedisSyncTimeout;
+    }
+
+    return config;
+}
+
+private static ConfigurationOptions ParseFromConnectionString(string connectionString)
+{
+    try
+    {
+        var options = ConfigurationOptions.Parse(connectionString);
+        options.AllowAdmin = true;
+        options.KeepAlive = 1;
+
+        if (!options.EndPoints.Any())
+        {
+            // maybe we can log some information here
+            // related with there are not exist endpoints or something like that. 
+            _log.Debug("...");
+        }
+
+        return options;
+    }
+    catch (Exception e)
+    {
+        _log.Error($"Exception caught: Invalid Redis Connection String: {connectionString}.", e);
+        return new ConfigurationOptions();
+    }
+}
         {
             if (!string.IsNullOrEmpty(redisCfg.ConnectionString)) 
             {
