@@ -14,7 +14,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         protected string MachineIp;
         protected string MachineName;
 
-        public RedisCacheBase(RedisConfig redisConfig = null, bool clusterMode = false)
+        protected RedisCacheBase(RedisConfig redisConfig = null, bool clusterMode = false)
         {
             UserPrefix = redisConfig.RedisUserPrefix;
             RedisKeyPrefix = "SPLITIO.";

@@ -12,10 +12,8 @@ namespace Splitio.Domain
 
         public static void Validate(CacheAdapterConfigurationOptions config)
         {
-            if (config == null || config.Type != AdapterType.Redis)
-            {
-                throw new ArgumentException("Redis config should be set to build split client in Consumer mode.");
-            }
+            ValidateNullAdapter(config);
+
             if (!string.IsNullOrEmpty(config.RedisConnectionString))
             {
                 if (!string.IsNullOrEmpty(config.Host) || config.RedisClusterNodes != null)
@@ -24,11 +22,29 @@ namespace Splitio.Domain
                 }
                 return;
             }
+
+            ValidateRedisAndClusterHosts(config);
+
+            ValidateClusterOptions(config);
+        }
+
+        private static void ValidateNullAdapter(CacheAdapterConfigurationOptions config)
+        {
+            if (config == null || config.Type != AdapterType.Redis)
+            {
+                throw new ArgumentException("Redis config should be set to build split client in Consumer mode.");
+            }
+        }
+
+        private static void ValidateRedisAndClusterHosts(CacheAdapterConfigurationOptions config)
+        {
             if ((string.IsNullOrEmpty(config.Host) || string.IsNullOrEmpty(config.Port)) && config.RedisClusterNodes == null)
             {
                 throw new Exception("Redis Host and Port or Cluster Nodes should be set to initialize Split SDK in Redis Mode.");
             }
-
+        }
+        private static void ValidateClusterOptions(CacheAdapterConfigurationOptions config)
+        {
             if (config.RedisClusterNodes != null)
             {
                 if (config.RedisClusterNodes.EndPoints.Count == 0)
@@ -47,6 +63,7 @@ namespace Splitio.Domain
                     _log.Warn("Redis Cluster Nodes and single host are set, will default to cluster node entry.");
                 }
             }
+
         }
     }
 }
