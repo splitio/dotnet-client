@@ -2,7 +2,6 @@
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Splitio.Domain
