@@ -86,16 +86,16 @@ namespace Splitio.Redis.Services.Client.Classes
 
             BuildTelemetryStorage();
 
-            _segmentCacheConsumer = new RedisSegmentCache(_redisAdapterConsumer, _config, _connectionPoolManager.GetClusterMode());
+            _segmentCacheConsumer = new RedisSegmentCache(_redisAdapterConsumer, _config, _connectionPoolManager.IsClusterMode());
             _splitParser = new SplitParser(_segmentCacheConsumer);
-            _featureFlagCacheConsumer = new RedisSplitCache(_redisAdapterConsumer, _splitParser, _config, _connectionPoolManager.GetClusterMode());
+            _featureFlagCacheConsumer = new RedisSplitCache(_redisAdapterConsumer, _splitParser, _config, _connectionPoolManager.IsClusterMode());
             _blockUntilReadyService = new RedisBlockUntilReadyService(_redisAdapterConsumer);
             _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCacheConsumer, _blockUntilReadyService);
         }
 
         private void BuildTreatmentLog(IImpressionListener impressionListener)
         {
-            _impressionsCache = new RedisImpressionsCache(_redisAdapterProducer, _config.SdkMachineIP, _config.SdkVersion, _config.SdkMachineName, _config, _connectionPoolManager.GetClusterMode());
+            _impressionsCache = new RedisImpressionsCache(_redisAdapterProducer, _config, _connectionPoolManager.IsClusterMode());
             _impressionsLog = new RedisImpressionLog(_impressionsCache);
             _customerImpressionListener = impressionListener;
         }
@@ -126,7 +126,7 @@ namespace Splitio.Redis.Services.Client.Classes
 
         private void BuildEventLog()
         {
-            var eventsCache = new RedisEventsCache(_redisAdapterProducer, _config.SdkMachineName, _config.SdkMachineIP, _config.SdkVersion, _config, _connectionPoolManager.GetClusterMode());
+            var eventsCache = new RedisEventsCache(_redisAdapterProducer, _config, _connectionPoolManager.IsClusterMode());
             _eventsLog = new RedisEvenstLog(eventsCache, _tasksManager);
         }
         
@@ -143,7 +143,7 @@ namespace Splitio.Redis.Services.Client.Classes
 
         private void BuildTelemetryStorage()
         {
-            var redisTelemetryStorage = new RedisTelemetryStorage(_redisAdapterProducer, _config, _config.SdkVersion, _config.SdkMachineIP, _config.SdkMachineName, _connectionPoolManager.GetClusterMode());
+            var redisTelemetryStorage = new RedisTelemetryStorage(_redisAdapterProducer, _config, _connectionPoolManager.IsClusterMode());
 
             _telemetryInitProducer = redisTelemetryStorage;
             _telemetryEvaluationProducer = redisTelemetryStorage;

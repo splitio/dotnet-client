@@ -17,20 +17,11 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         private readonly IRedisAdapterProducer _redisAdapterProducer;
 
-        private string UniqueKeysKey => "{prefix}.SPLITIO.uniquekeys"
-            .Replace("{prefix}.", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
+        private string UniqueKeysKey => $"{RedisKeyPrefix}uniquekeys";
+        private string ImpressionsCountKey => $"{RedisKeyPrefix}impressions.count";
+        private string ImpressionsKey => $"{RedisKeyPrefix}impressions";
 
-        private string ImpressionsCountKey => "{prefix}.SPLITIO.impressions.count"
-            .Replace("{prefix}.", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
-
-        private string ImpressionsKey => "{prefix}.SPLITIO.impressions"
-            .Replace("{prefix}.", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
-
-        public RedisImpressionsCache(IRedisAdapterProducer redisAdapter,
-            string machineIP,
-            string sdkVersion,
-            string machineName,
-            RedisConfig redisConfig = null, bool clusterMode = false) : base(machineIP, sdkVersion, machineName, redisConfig, clusterMode)
+        public RedisImpressionsCache(IRedisAdapterProducer redisAdapter, RedisConfig redisConfig, bool clusterMode) : base(redisConfig, clusterMode, withMetadata: false)
         {
             _redisAdapterProducer = redisAdapter;
         }

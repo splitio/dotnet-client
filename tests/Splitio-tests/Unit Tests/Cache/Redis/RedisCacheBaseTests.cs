@@ -42,7 +42,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             };
             var splitParser = new Mock<ISplitParser>();
             var redisAdapterMock = new Mock<IRedisAdapterConsumer>();
-            var splitCache = new RedisSplitCache(redisAdapterMock.Object, splitParser.Object, config);
+            var splitCache = new RedisSplitCache(redisAdapterMock.Object, splitParser.Object, config, false);
 
             redisAdapterMock
                 .Setup(x => x.Get("SPLITIO.split.test_split"))
@@ -103,7 +103,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             };
             var splitParser = new Mock<ISplitParser>();
             var redisAdapterMock = new Mock<IRedisAdapterConsumer>();            
-            var splitCache = new RedisSplitCache(redisAdapterMock.Object, splitParser.Object, config);
+            var splitCache = new RedisSplitCache(redisAdapterMock.Object, splitParser.Object, config, false);
 
             redisAdapterMock
                 .Setup(x => x.Get("mycompany.SPLITIO.split.test_split"))

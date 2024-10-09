@@ -20,7 +20,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         private readonly ISplitParser _splitParser;
         private readonly IRedisAdapterConsumer _redisAdapter;
 
-        public RedisSplitCache(IRedisAdapterConsumer redisAdapter, ISplitParser splitParser, RedisConfig redisConfig = null, bool clusterMode = false) : base(redisConfig, clusterMode)
+        public RedisSplitCache(IRedisAdapterConsumer redisAdapter, ISplitParser splitParser, RedisConfig redisConfig, bool clusterMode) : base(redisConfig, clusterMode, withMetadata: false)
         {
             _redisAdapter = redisAdapter;
             _splitParser = splitParser;

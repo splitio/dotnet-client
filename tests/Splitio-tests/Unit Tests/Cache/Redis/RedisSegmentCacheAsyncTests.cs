@@ -31,7 +31,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 RedisSyncTimeout = 1000,
                 PoolSize = 1,
             };
-            _cache = new RedisSegmentCache(_redisAdapter.Object, config);
+            _cache = new RedisSegmentCache(_redisAdapter.Object, config, false);
         }
 
         [TestMethod]

@@ -32,9 +32,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 RedisSyncTimeout = 1000,
                 RedisUserPrefix = "test-pre:",
                 PoolSize = 1,
+                SdkMachineIP = "ip",
+                SdkVersion = "version",
+                SdkMachineName = "mm"
             };
 
-            _cache = new RedisImpressionsCache(_redisAdapter.Object, "ip", "version", "mm", config);
+            _cache = new RedisImpressionsCache(_redisAdapter.Object, config, false);
         }
 
         [TestMethod]
