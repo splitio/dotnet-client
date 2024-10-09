@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Domain;
 using Splitio.Services.Parsing.Interfaces;
 using System.Collections.Generic;
 
@@ -28,10 +29,20 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 status = "ACTIVE",
                 trafficTypeName = "test"
             };
-
+            var config = new RedisConfig
+            {
+                RedisHost = "localhost",
+                RedisPort = "6379",
+                RedisPassword = "",
+                RedisDatabase = 0,
+                RedisConnectTimeout = 1000,
+                RedisConnectRetry = 5,
+                RedisSyncTimeout = 1000,
+                PoolSize = 1,
+            };
             var splitParser = new Mock<ISplitParser>();
             var redisAdapterMock = new Mock<IRedisAdapterConsumer>();
-            var splitCache = new RedisSplitCache(redisAdapterMock.Object, splitParser.Object);
+            var splitCache = new RedisSplitCache(redisAdapterMock.Object, splitParser.Object, config, false);
 
             redisAdapterMock
                 .Setup(x => x.Get("SPLITIO.split.test_split"))
@@ -78,10 +89,21 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 status = "ACTIVE",
                 trafficTypeName = "test"
             };
-
+            var config = new RedisConfig
+            {
+                RedisHost = "localhost",
+                RedisPort = "6379",
+                RedisPassword = "",
+                RedisDatabase = 0,
+                RedisConnectTimeout = 1000,
+                RedisConnectRetry = 5,
+                RedisSyncTimeout = 1000,
+                RedisUserPrefix = "mycompany",
+                PoolSize = 1,
+            };
             var splitParser = new Mock<ISplitParser>();
             var redisAdapterMock = new Mock<IRedisAdapterConsumer>();            
-            var splitCache = new RedisSplitCache(redisAdapterMock.Object, splitParser.Object, "mycompany");
+            var splitCache = new RedisSplitCache(redisAdapterMock.Object, splitParser.Object, config, false);
 
             redisAdapterMock
                 .Setup(x => x.Get("mycompany.SPLITIO.split.test_split"))

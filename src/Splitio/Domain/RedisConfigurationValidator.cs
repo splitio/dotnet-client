@@ -2,6 +2,7 @@
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
+using System.Collections.Generic;
 
 namespace Splitio.Domain
 {
@@ -11,16 +12,40 @@ namespace Splitio.Domain
 
         public static void Validate(CacheAdapterConfigurationOptions config)
         {
+            ValidateNullAdapter(config);
+
+            if (!string.IsNullOrEmpty(config.RedisConnectionString))
+            {
+                if (!string.IsNullOrEmpty(config.Host) || config.RedisClusterNodes != null)
+                {
+                    _log.Warn("Redis Connection String is set, will ignore all other properties.");
+                }
+                return;
+            }
+
+            ValidateRedisAndClusterHosts(config);
+
+            ValidateClusterOptions(config);
+        }
+
+        private static void ValidateNullAdapter(CacheAdapterConfigurationOptions config)
+        {
             if (config == null || config.Type != AdapterType.Redis)
             {
                 throw new ArgumentException("Redis config should be set to build split client in Consumer mode.");
             }
-        
+        }
+
+        private static void ValidateRedisAndClusterHosts(CacheAdapterConfigurationOptions config)
+        {
             if ((string.IsNullOrEmpty(config.Host) || string.IsNullOrEmpty(config.Port)) && config.RedisClusterNodes == null)
             {
                 throw new Exception("Redis Host and Port or Cluster Nodes should be set to initialize Split SDK in Redis Mode.");
             }
+        }
 
+        private static void ValidateClusterOptions(CacheAdapterConfigurationOptions config)
+        {
             if (config.RedisClusterNodes != null)
             {
                 if (config.RedisClusterNodes.EndPoints.Count == 0)

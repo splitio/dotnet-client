@@ -1,4 +1,5 @@
 ﻿using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Domain;
 using Splitio.Services.Cache.Interfaces;
 using System.Threading.Tasks;
 
@@ -12,13 +13,12 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         private readonly IRedisAdapterConsumer _redisAdapterConsumer;
 
-        public RedisSegmentCache(IRedisAdapterConsumer redisAdapter, string userPrefix = null) : base(userPrefix)
+        public RedisSegmentCache(IRedisAdapterConsumer redisAdapter, RedisConfig redisConfig, bool clusterMode) : base(redisConfig, clusterMode)
         {
             _redisAdapterConsumer = redisAdapter;
         }
 
         #region Consumer
-
         public bool IsInSegment(string segmentName, string key)
         {
             var redisKey = $"{RedisKeyPrefix}{SegmentKeyPrefix}{segmentName}";

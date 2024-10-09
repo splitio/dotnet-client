@@ -72,10 +72,10 @@ namespace Splitio.Services.Client.Classes
                     }
                     break;
                 case Mode.Consumer:
-
                     try
                     {
                         RedisConfigurationValidator.Validate(_options.CacheAdapterConfig);
+
                         var redisAssembly = Assembly.Load(new AssemblyName("Splitio.Redis"));
                         var redisType = redisAssembly.GetType("Splitio.Redis.Services.Client.Classes.RedisClient");
 

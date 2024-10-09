@@ -1,44 +1,47 @@
-﻿namespace Splitio.Redis.Services.Cache.Classes
+﻿using Splitio.Redis.Services.Domain;
+
+namespace Splitio.Redis.Services.Cache.Classes
 {
     public abstract class RedisCacheBase
     {
-        private const string RedisKeyPrefixFormat = "SPLITIO/{sdk-language-version}/{instance-id}/";
+        private const string KeyHashTag = "{SPLITIO}";
 
         protected string RedisKeyPrefix;
-        protected string UserPrefix;
         protected string SdkVersion;
         protected string MachineIp;
         protected string MachineName;
 
-        public RedisCacheBase(string userPrefix = null)
+        protected RedisCacheBase(RedisConfig redisConfig, bool clusterMode)
         {
-            UserPrefix = userPrefix;
+            MachineIp = redisConfig.SdkMachineIP;
+            SdkVersion = redisConfig.SdkVersion;
+            MachineName = redisConfig.SdkMachineName;
+
             RedisKeyPrefix = "SPLITIO.";
 
-            if (!string.IsNullOrEmpty(userPrefix))
-            {
-                RedisKeyPrefix = userPrefix + "." + RedisKeyPrefix;
-            }
+            SetRedisKeyPrefix(redisConfig);
+            SetHashTagIfIsClusterMode(redisConfig, clusterMode);
         }
 
-        public RedisCacheBase(string machineIP,
-            string sdkVersion,
-            string machineName,
-            string userPrefix = null)
+        private void SetRedisKeyPrefix(RedisConfig redisConfig)
         {
-            UserPrefix = userPrefix;
-            MachineIp = machineIP;
-            SdkVersion = sdkVersion;
-            MachineName = machineName;
+            if (string.IsNullOrEmpty(redisConfig.RedisUserPrefix)) return;
+            
+            RedisKeyPrefix = redisConfig.RedisUserPrefix + "." + RedisKeyPrefix;
+        }
 
-            RedisKeyPrefix = RedisKeyPrefixFormat
-                .Replace("{sdk-language-version}", sdkVersion)
-                .Replace("{instance-id}", machineIP);
+        private void SetHashTagIfIsClusterMode(RedisConfig redisConfig, bool clusterMode)
+        {
+            if (!clusterMode) return;
 
-            if (!string.IsNullOrEmpty(userPrefix))
+            var hashTag = KeyHashTag;
+
+            if (redisConfig.ClusterNodes != null && !string.IsNullOrEmpty(redisConfig.ClusterNodes.KeyHashTag))
             {
-                RedisKeyPrefix = userPrefix + "." + RedisKeyPrefix;
+                hashTag = redisConfig.ClusterNodes.KeyHashTag;
             }
+
+            RedisKeyPrefix = hashTag + RedisKeyPrefix;
         }
     }
 }

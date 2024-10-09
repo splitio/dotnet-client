@@ -19,6 +19,8 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         private bool _disposed;
 
+        private bool _isClusterMode;
+
         public ConnectionPoolManager(RedisConfig config)
         {
             lock (_lock)
@@ -79,6 +81,10 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
         }
 
+        public bool IsClusterMode()
+        {
+            return _isClusterMode;
+        }
         protected virtual void Dispose(bool disposing)
         {
             if (_disposed)
@@ -92,7 +98,17 @@ namespace Splitio.Redis.Services.Cache.Classes
             _disposed = true;
         }
 
-        private static ConfigurationOptions GetConfig(RedisConfig redisCfg)
+        private ConfigurationOptions GetConfig(RedisConfig redisCfg)
+        {
+            if (string.IsNullOrEmpty(redisCfg.ConnectionString)) 
+            {
+                return ParseFromRedisConfig(redisCfg);
+            }
+
+            return ParseFromConnectionString(redisCfg);
+        }
+
+        private ConfigurationOptions ParseFromRedisConfig(RedisConfig redisCfg)
         {
             var config = new ConfigurationOptions
             {
@@ -107,6 +123,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 {
                     config.EndPoints.Add(host);
                 }
+                _isClusterMode = true;
             }
             else
             {
@@ -144,6 +161,39 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
 
             return config;
+        }
+
+        private ConfigurationOptions ParseFromConnectionString(RedisConfig redisCfg)
+        {
+            try
+            {
+                var options = ConfigurationOptions.Parse(redisCfg.ConnectionString);
+                options.AllowAdmin = true;
+                options.KeepAlive = 1;
+
+                if (!options.EndPoints.Any())
+                {
+                    _log.Warn("No endpoints detected in Redis Connection String, Redis connection might fail.");
+                }
+
+                if (!string.IsNullOrEmpty(redisCfg.RedisHost) || redisCfg.ClusterNodes != null)
+                {
+                    _log.Warn("Redis ConnectionString is set, will ignore other connection parameters.");
+                }
+
+                if (options.EndPoints.Count > 1)
+                {
+                    _log.Debug("Detected multiple redis hosts, will set the KeyHashTag to {SPLITIO}.");
+                    _isClusterMode = true;
+                }
+
+                return options;
+            }
+            catch (Exception e)
+            {
+                _log.Error($"Exception caught: Invalid Redis Connection String: {redisCfg.ConnectionString}.", e);
+                return new ConfigurationOptions();
+            }
         }
     }
 }

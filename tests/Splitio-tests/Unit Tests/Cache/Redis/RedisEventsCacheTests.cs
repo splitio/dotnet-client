@@ -3,6 +3,7 @@ using Moq;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Domain;
 using StackExchange.Redis;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -19,8 +20,22 @@ namespace Splitio_Tests.Unit_Tests.Cache.Redis
         public RedisEventsCacheTests()
         {
             _redisAdapterProducer = new Mock<IRedisAdapterProducer>();
-
-            _redisEventsCache = new RedisEventsCache(_redisAdapterProducer.Object, "machine-name", "machine-ip", "sdk-version", "prefix");
+            var config = new RedisConfig
+            {
+                RedisHost = "localhost",
+                RedisPort = "6379",
+                RedisPassword = "",
+                RedisDatabase = 0,
+                RedisConnectTimeout = 1000,
+                RedisConnectRetry = 5,
+                RedisSyncTimeout = 1000,
+                RedisUserPrefix = "prefix",
+                PoolSize = 1,
+                SdkMachineName = "machine-name",
+                SdkMachineIP = "machine-ip",
+                SdkVersion = "sdk-version"
+            };
+            _redisEventsCache = new RedisEventsCache(_redisAdapterProducer.Object, config, false);
         }
 
         [TestMethod]

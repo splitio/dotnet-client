@@ -99,6 +99,7 @@ namespace Splitio.Integration_redis_tests
             Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "nico_test"), impressionExpected2);
             Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impressionExpected3);
 
+            impressionListener = new IntegrationTestsImpressionListener(50);
             configurations = GetClusterConfigurationOptions(impressionListener: impressionListener);
 
             var splitFactory2 = new SplitFactory(apikey, configurations);
@@ -699,6 +700,48 @@ namespace Splitio.Integration_redis_tests
 
             Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
+        }
+
+        [TestMethod]
+        public void GetTreatments_UsingRedisConnectionString()
+        {
+            // Arrange.
+            var cacheConfig = new CacheAdapterConfigurationOptions
+            {
+                RedisConnectionString = Host+":"+Port+",DefaultDatabase="+Database,
+                UserPrefix = UserPrefix
+            };
+            var configurations = new ConfigurationOptions
+            {
+                CacheAdapterConfig = cacheConfig,
+                Mode = Mode.Consumer
+            };
+            var apikey = "base-apikey9";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", "Random_Treatment", "MAURO_TEST", "Test_Save_1", "Random_Treatment_2", });
+
+            // Assert.
+            Assert.AreEqual("on", result["FACUNDO_TEST"]);
+            Assert.AreEqual("control", result["Random_Treatment"]);
+            Assert.AreEqual("off", result["MAURO_TEST"]);
+            Assert.AreEqual("off", result["Test_Save_1"]);
+            Assert.AreEqual("control", result["Random_Treatment_2"]);
+
+            client.Destroy();
+
+            // Validate impressions
+            var impressionExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            var impressionExpected2 = GetImpressionExpected("MAURO_TEST", "nico_test");
+            var impressionExpected3 = GetImpressionExpected("Test_Save_1", "nico_test");
+
+            //Validate impressions sent to the be.            
+            AssertSentImpressions(3, impressionExpected1, impressionExpected2, impressionExpected3);
         }
 
         #region Protected Methods
