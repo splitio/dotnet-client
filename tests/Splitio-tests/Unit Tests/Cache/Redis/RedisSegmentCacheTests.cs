@@ -28,7 +28,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 RedisSyncTimeout = 1000,
                 PoolSize = 1,
             };
-            var segmentCache = new RedisSegmentCache(redisAdapterMock.Object, config);
+            var segmentCache = new RedisSegmentCache(redisAdapterMock.Object, config, false);
 
             redisAdapterMock
                 .Setup(x => x.SIsMember(segmentKeyPrefix + segmentName, "abcd"))
@@ -57,7 +57,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 RedisSyncTimeout = 1000,
                 PoolSize = 1,
             };
-            var segmentCache = new RedisSegmentCache(redisAdapterMock.Object, config);
+            var segmentCache = new RedisSegmentCache(redisAdapterMock.Object, config, false);
 
             redisAdapterMock
                 .Setup(x => x.SIsMember(segmentKeyPrefix + "test", "abcd"))

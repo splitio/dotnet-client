@@ -123,7 +123,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 {
                     config.EndPoints.Add(host);
                 }
-                ClusterMode = true;
+                _isClusterMode = true;
             }
             else
             {
@@ -184,7 +184,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 if (options.EndPoints.Count > 1)
                 {
                     _log.Debug("Detected multiple redis hosts, will set the KeyHashTag to {SPLITIO}.");
-                    ClusterMode = true;
+                    _isClusterMode = true;
                 }
 
                 return options;

@@ -11,22 +11,11 @@ namespace Splitio.Redis.Services.Cache.Classes
 {
     public class RedisEventsCache : RedisCacheBase, ISimpleCache<WrappedEvent>
     {
-        private readonly string _machineName;
-        private readonly string _machineIP;
-        private readonly string _sdkVersion;
-
         private readonly IRedisAdapterProducer _redisAdapterProducer;
 
-        public RedisEventsCache(IRedisAdapterProducer redisAdapter, 
-            string machineName,
-            string machineIP, 
-            string sdkVersion,
-            RedisConfig redisConfig = null, bool clusterMode = false) : base(redisConfig, clusterMode) 
+        public RedisEventsCache(IRedisAdapterProducer redisAdapter, RedisConfig redisConfig, bool clusterMode) : base(redisConfig, clusterMode)
         {
             _redisAdapterProducer = redisAdapter;
-            _machineName = machineName;
-            _machineIP = machineIP;
-            _sdkVersion = sdkVersion;
         }
 
         public int AddItems(IList<WrappedEvent> items)
@@ -47,7 +36,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             return JsonConvert.SerializeObject(new
             {
-                m = new { s = _sdkVersion, i = _machineIP, n = _machineName },
+                m = new { s = SdkVersion, i = MachineIp, n = MachineName },
                 e = wEvent.Event
             });
         }

@@ -31,8 +31,11 @@ namespace Splitio_Tests.Unit_Tests.Cache.Redis
                 RedisSyncTimeout = 1000,
                 RedisUserPrefix = "prefix",
                 PoolSize = 1,
+                SdkMachineName = "machine-name",
+                SdkMachineIP = "machine-ip",
+                SdkVersion = "sdk-version"
             };
-            _redisEventsCache = new RedisEventsCache(_redisAdapterProducer.Object, "machine-name", "machine-ip", "sdk-version", config);
+            _redisEventsCache = new RedisEventsCache(_redisAdapterProducer.Object, config, false);
         }
 
         [TestMethod]

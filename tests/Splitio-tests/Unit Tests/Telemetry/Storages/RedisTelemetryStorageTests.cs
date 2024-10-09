@@ -42,9 +42,12 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
                 RedisSyncTimeout = 1000,
                 RedisUserPrefix = _userPrefix,
                 PoolSize = 1,
+                SdkVersion = _sdkVersion,
+                SdkMachineIP = _machineIp,
+                SdkMachineName = _machineName,
             };
 
-            _telemetryStorage = new RedisTelemetryStorage(_redisAdapter.Object, config, _sdkVersion, _machineIp, _machineName);
+            _telemetryStorage = new RedisTelemetryStorage(_redisAdapter.Object, config, false);
         }
 
         [TestMethod]

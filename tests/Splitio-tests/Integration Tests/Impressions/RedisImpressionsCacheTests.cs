@@ -30,12 +30,15 @@ namespace Splitio_Tests.Integration_Tests.Impressions
                 RedisSyncTimeout = 1000,
                 RedisUserPrefix = RedisPrefix,
                 PoolSize = 1,
+                SdkMachineIP = "ip",
+                SdkVersion = "version",
+                SdkMachineName = "mm"
             };
             var connectionPoolManager = new ConnectionPoolManager(config);
 
             _redisAdapter = new RedisAdapterForTests(config, connectionPoolManager);
             var redisProducer = new RedisAdapterProducer(config, connectionPoolManager);
-            _impressionsCache = new RedisImpressionsCache(redisProducer, "ip", "version", "mm", config);
+            _impressionsCache = new RedisImpressionsCache(redisProducer, config, false);
         }
 
         [TestMethod]
@@ -120,12 +123,15 @@ namespace Splitio_Tests.Integration_Tests.Impressions
                 RedisConnectRetry = 5,
                 RedisSyncTimeout = 1000,
                 PoolSize = 1,
-                RedisUserPrefix = RedisPrefix
+                RedisUserPrefix = RedisPrefix,
+                SdkMachineIP = "ip",
+                SdkVersion = "version",
+                SdkMachineName = "mm"
             };
 
             var pool = new ConnectionPoolManager(config);
             var redisProducer = new RedisAdapterProducer(config, pool);
-            return new RedisImpressionsCache(redisProducer, "ip", "version", "mm", config, true);
+            return new RedisImpressionsCache(redisProducer, config, true);
         }
 
         private void Clean()

@@ -28,8 +28,11 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 RedisConnectRetry = 5,
                 RedisSyncTimeout = 1000,
                 PoolSize = 1,
+                SdkMachineIP = "10.0.0.1",
+                SdkVersion = "net-1.0.2",
+                SdkMachineName = "machine_name_test"
             };
-            var cache = new RedisImpressionsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2", "machine_name_test", config);
+            var cache = new RedisImpressionsCache(redisAdapterMock.Object, config, false);
             var impressions = new List<KeyImpression>
             {
                 new KeyImpression { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000 }
