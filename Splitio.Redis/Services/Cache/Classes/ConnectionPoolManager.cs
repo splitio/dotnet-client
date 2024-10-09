@@ -19,7 +19,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         private bool _disposed;
 
-        private bool ClusterMode { get; set; }
+        private bool _isClusterMode;
 
         public ConnectionPoolManager(RedisConfig config)
         {
