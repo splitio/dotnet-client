@@ -63,7 +63,6 @@ namespace Splitio.Domain
                     _log.Warn("Redis Cluster Nodes and single host are set, will default to cluster node entry.");
                 }
             }
-
         }
     }
 }
