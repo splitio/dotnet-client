@@ -43,6 +43,7 @@ namespace Splitio.Domain
                 throw new Exception("Redis Host and Port or Cluster Nodes should be set to initialize Split SDK in Redis Mode.");
             }
         }
+
         private static void ValidateClusterOptions(CacheAdapterConfigurationOptions config)
         {
             if (config.RedisClusterNodes != null)
