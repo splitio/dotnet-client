@@ -36,19 +36,6 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         }
 
         [TestMethod]
-        public void BuildRedisSplitClientWithoutHashTagShouldSetValue()
-        {
-            //Arrange           
-            var configurationOptions = new ConfigurationOptions
-            {
-                Mode = Mode.Consumer,
-                CacheAdapterConfig = new CacheAdapterConfigurationOptions { RedisClusterNodes = new Splitio.Domain.ClusterNodes(new List<string>() { "localhost:6379" }, null) }
-            };
-            RedisConfigurationValidator.Validate(configurationOptions.CacheAdapterConfig);
-            Assert.AreEqual("{SPLITIO}", configurationOptions.CacheAdapterConfig.RedisClusterNodes.KeyHashTag);
-        }
-
-        [TestMethod]
         public void UseConnectionStringIgnoresOtherProperties()
         {
             //Arrange           
@@ -58,6 +45,67 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
                 CacheAdapterConfig = new CacheAdapterConfigurationOptions { RedisConnectionString = "localhost:6379"}
             };
             RedisConfigurationValidator.Validate(configurationOptions.CacheAdapterConfig);
+        }
+
+        [TestMethod]
+        public void VerifyAndSetHashTagValue()
+        {
+            CacheAdapterConfigurationOptions CacheAdapterConfig = new CacheAdapterConfigurationOptions
+            {
+                RedisClusterNodes = new ClusterNodes(new List<string>() { "localhost:6379" },
+                    "{}")
+            };
+            RedisConfigurationValidator.Validate(CacheAdapterConfig);
+            Assert.AreEqual("{SPLITIO}", CacheAdapterConfig.RedisClusterNodes.KeyHashTag);
+
+            CacheAdapterConfig = new CacheAdapterConfigurationOptions
+            {
+                RedisClusterNodes = new ClusterNodes(new List<string>() { "localhost:6379" },
+                "{MyHashTag}")
+            };
+            RedisConfigurationValidator.Validate(CacheAdapterConfig);
+            Assert.AreEqual("{MyHashTag}", CacheAdapterConfig.RedisClusterNodes.KeyHashTag);
+
+
+            CacheAdapterConfig = new CacheAdapterConfigurationOptions
+            {
+                RedisClusterNodes = new ClusterNodes(new List<string>() { "localhost:6379" },
+                    "{without end bracket")
+            };
+            RedisConfigurationValidator.Validate(CacheAdapterConfig);
+            Assert.AreEqual("{SPLITIO}", CacheAdapterConfig.RedisClusterNodes.KeyHashTag);
+
+            CacheAdapterConfig = new CacheAdapterConfigurationOptions
+            {
+                RedisClusterNodes = new ClusterNodes(new List<string>() { "localhost:6379" },
+                    "without first bracket}")
+            };
+            RedisConfigurationValidator.Validate(CacheAdapterConfig);
+            Assert.AreEqual("{SPLITIO}", CacheAdapterConfig.RedisClusterNodes.KeyHashTag);
+
+            CacheAdapterConfig = new CacheAdapterConfigurationOptions
+            {
+                RedisClusterNodes = new ClusterNodes(new List<string>() { "localhost:6379" },
+            "without any bracket")
+            };
+            RedisConfigurationValidator.Validate(CacheAdapterConfig);
+            Assert.AreEqual("{SPLITIO}", CacheAdapterConfig.RedisClusterNodes.KeyHashTag);
+
+            CacheAdapterConfig = new CacheAdapterConfigurationOptions
+            {
+                RedisClusterNodes = new ClusterNodes(new List<string>() { "localhost:6379" },
+            "")
+            };
+            RedisConfigurationValidator.Validate(CacheAdapterConfig);
+            Assert.AreEqual("{SPLITIO}", CacheAdapterConfig.RedisClusterNodes.KeyHashTag);
+
+            CacheAdapterConfig = new CacheAdapterConfigurationOptions
+            {
+                RedisClusterNodes = new ClusterNodes(new List<string>() { "localhost:6379" },
+            null)
+            };
+            RedisConfigurationValidator.Validate(CacheAdapterConfig);
+            Assert.AreEqual("{SPLITIO}", CacheAdapterConfig.RedisClusterNodes.KeyHashTag);
         }
     }
 }
