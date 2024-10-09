@@ -13,7 +13,7 @@ namespace Splitio.Redis.Services.Cache.Classes
     {
         private readonly IRedisAdapterProducer _redisAdapterProducer;
 
-        public RedisEventsCache(IRedisAdapterProducer redisAdapter, RedisConfig redisConfig, bool clusterMode) : base(redisConfig, clusterMode, withMetadata: false)
+        public RedisEventsCache(IRedisAdapterProducer redisAdapter, RedisConfig redisConfig, bool clusterMode) : base(redisConfig, clusterMode)
         {
             _redisAdapterProducer = redisAdapter;
         }

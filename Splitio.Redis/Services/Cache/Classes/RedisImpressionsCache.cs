@@ -21,7 +21,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         private string ImpressionsCountKey => $"{RedisKeyPrefix}impressions.count";
         private string ImpressionsKey => $"{RedisKeyPrefix}impressions";
 
-        public RedisImpressionsCache(IRedisAdapterProducer redisAdapter, RedisConfig redisConfig, bool clusterMode) : base(redisConfig, clusterMode, withMetadata: false)
+        public RedisImpressionsCache(IRedisAdapterProducer redisAdapter, RedisConfig redisConfig, bool clusterMode) : base(redisConfig, clusterMode)
         {
             _redisAdapterProducer = redisAdapter;
         }

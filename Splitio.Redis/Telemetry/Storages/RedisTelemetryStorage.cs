@@ -17,7 +17,7 @@ namespace Splitio.Redis.Telemetry.Storages
         private string TelemetryExceptionKey => $"{RedisKeyPrefix}telemetry.exceptions";
         private string TelemetryInitKey => $"{RedisKeyPrefix}telemetry.init";
 
-        public RedisTelemetryStorage(IRedisAdapterProducer redisAdapterProducer, RedisConfig redisConfig, bool clusterMode) : base(redisConfig, clusterMode, withMetadata: false)
+        public RedisTelemetryStorage(IRedisAdapterProducer redisAdapterProducer, RedisConfig redisConfig, bool clusterMode) : base(redisConfig, clusterMode)
         {
             _redisAdapterProducer = redisAdapterProducer;
         }

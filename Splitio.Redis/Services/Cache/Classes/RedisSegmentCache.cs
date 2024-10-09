@@ -13,7 +13,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         private readonly IRedisAdapterConsumer _redisAdapterConsumer;
 
-        public RedisSegmentCache(IRedisAdapterConsumer redisAdapter, RedisConfig redisConfig, bool clusterMode) : base(redisConfig, clusterMode, withMetadata: false)
+        public RedisSegmentCache(IRedisAdapterConsumer redisAdapter, RedisConfig redisConfig, bool clusterMode) : base(redisConfig, clusterMode)
         {
             _redisAdapterConsumer = redisAdapter;
         }
