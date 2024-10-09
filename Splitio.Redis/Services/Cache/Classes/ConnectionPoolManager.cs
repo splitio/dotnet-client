@@ -81,9 +81,9 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
         }
 
-        public bool GetClusterMode()
+        public bool IsClusterMode()
         {
-            return ClusterMode;
+            return _isClusterMode;
         }
         protected virtual void Dispose(bool disposing)
         {
