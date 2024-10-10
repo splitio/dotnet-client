@@ -72,12 +72,12 @@ namespace Splitio.Domain
                 return DefaultHashTag;
             }
 
-            if (hashTag.Count() <= 2)
+            if (hashTag.Length <= 2)
             {
                 _log.Warn($"Redis Cluster Hashtag length is less than 3 characters, will set its value to: {DefaultHashTag}.");
                 return DefaultHashTag;
             }
-
+            
             if (!hashTag.StartsWith("{") || !hashTag.EndsWith("}"))
             {
                 _log.Warn($"Redis Cluster Hashtag must start wth `}}` and end with `{{` characters, will set its value to: {DefaultHashTag}.");
