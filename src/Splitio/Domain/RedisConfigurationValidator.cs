@@ -2,12 +2,15 @@
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
-using System.Collections.Generic;
 
 namespace Splitio.Domain
 {
     public static class RedisConfigurationValidator
     {
+        public const string DefaultHashTag = "{SPLITIO}";
+        private const string StartHashTag = "{";
+        private const string EndHashTag = "}";
+
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(RedisConfigurationValidator));
 
         public static void Validate(CacheAdapterConfigurationOptions config)
@@ -24,7 +27,6 @@ namespace Splitio.Domain
             }
 
             ValidateRedisAndClusterHosts(config);
-
             ValidateClusterOptions(config);
         }
 
@@ -52,18 +54,36 @@ namespace Splitio.Domain
                 {
                     throw new Exception("Redis Cluster Nodes should have at least one host to initialize Split SDK in Redis Mode.");
                 }
-
-                if (string.IsNullOrEmpty(config.RedisClusterNodes.KeyHashTag))
-                {
-                    config.RedisClusterNodes.KeyHashTag = "{SPLITIO}";
-                    _log.Warn("Redis Cluster Hashtag is not set, will set its value to: {SPLITIO}.");
-                }
-
+     
+                config.RedisClusterNodes.KeyHashTag = ValidateHashTag(config.RedisClusterNodes.KeyHashTag);
                 if (!string.IsNullOrEmpty(config.Host))
                 {
                     _log.Warn("Redis Cluster Nodes and single host are set, will default to cluster node entry.");
                 }
             }
+        }
+
+        private static string ValidateHashTag(string hashTag)
+        {
+            if (string.IsNullOrEmpty(hashTag))
+            {
+                _log.Warn($"Redis Cluster Hashtag is not set, will set its value to: {DefaultHashTag}.");
+                return DefaultHashTag;
+            }
+
+            if (hashTag.Length <= 2)
+            {
+                _log.Warn($"Redis Cluster Hashtag length is less than 3 characters, will set its value to: {DefaultHashTag}.");
+                return DefaultHashTag;
+            }
+            
+            if (!hashTag.StartsWith(StartHashTag) || !hashTag.EndsWith(EndHashTag))
+            {
+                _log.Warn($"Redis Cluster Hashtag must start wth {StartHashTag} and end with {EndHashTag} characters, will set its value to: {DefaultHashTag}.");
+                return DefaultHashTag;
+            }
+
+            return hashTag;
         }
     }
 }

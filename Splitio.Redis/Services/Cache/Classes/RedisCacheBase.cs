@@ -1,11 +1,10 @@
 ﻿using Splitio.Redis.Services.Domain;
+using Splitio.Domain;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
     public abstract class RedisCacheBase
     {
-        private const string KeyHashTag = "{SPLITIO}";
-
         protected string RedisKeyPrefix;
         protected string SdkVersion;
         protected string MachineIp;
@@ -34,7 +33,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             if (!clusterMode) return;
 
-            var hashTag = KeyHashTag;
+            var hashTag = RedisConfigurationValidator.DefaultHashTag;
 
             if (redisConfig.ClusterNodes != null && !string.IsNullOrEmpty(redisConfig.ClusterNodes.KeyHashTag))
             {
