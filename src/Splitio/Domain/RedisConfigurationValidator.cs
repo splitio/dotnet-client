@@ -2,13 +2,14 @@
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
-using System.Linq;
 
 namespace Splitio.Domain
 {
     public static class RedisConfigurationValidator
     {
         public const string DefaultHashTag = "{SPLITIO}";
+        private const string StartHashTag = "{";
+        private const string EndHashTag = "}";
 
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(RedisConfigurationValidator));
 
@@ -26,7 +27,6 @@ namespace Splitio.Domain
             }
 
             ValidateRedisAndClusterHosts(config);
-
             ValidateClusterOptions(config);
         }
 
@@ -54,9 +54,8 @@ namespace Splitio.Domain
                 {
                     throw new Exception("Redis Cluster Nodes should have at least one host to initialize Split SDK in Redis Mode.");
                 }
-
-                config.RedisClusterNodes.KeyHashTag = ValidateHashTag(config.RedisClusterNodes.KeyHashTag);
      
+                config.RedisClusterNodes.KeyHashTag = ValidateHashTag(config.RedisClusterNodes.KeyHashTag);
                 if (!string.IsNullOrEmpty(config.Host))
                 {
                     _log.Warn("Redis Cluster Nodes and single host are set, will default to cluster node entry.");
@@ -78,9 +77,9 @@ namespace Splitio.Domain
                 return DefaultHashTag;
             }
             
-            if (!hashTag.StartsWith("{") || !hashTag.EndsWith("}"))
+            if (!hashTag.StartsWith(StartHashTag) || !hashTag.EndsWith(EndHashTag))
             {
-                _log.Warn($"Redis Cluster Hashtag must start wth `}}` and end with `{{` characters, will set its value to: {DefaultHashTag}.");
+                _log.Warn($"Redis Cluster Hashtag must start wth {StartHashTag} and end with {EndHashTag} characters, will set its value to: {DefaultHashTag}.");
                 return DefaultHashTag;
             }
 
