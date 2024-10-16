@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Splitio.Tests.Common.Resources
 {
-    public class RedisAdapterForTests : RedisAdapter
+    public class RedisAdapterForTests : RedisAdapterConsumer
     {
         public RedisAdapterForTests(RedisConfig config, IConnectionPoolManager connectionPoolManager) : base(config, connectionPoolManager)
         {

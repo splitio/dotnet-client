@@ -3,12 +3,11 @@ using Splitio.Redis.Services.Domain;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
-    public class RedisAdapterConsumer : RedisAdapterProducer, IRedisAdapterConsumer
+    public class RedisAdapterConsumer : BaseAdapter, IRedisAdapterConsumer
     {
         public RedisAdapterConsumer(RedisConfig config, IConnectionPoolManager connectionPoolManager) : base(config, connectionPoolManager)
         {
@@ -17,7 +16,14 @@ namespace Splitio.Redis.Services.Cache.Classes
         #region Sync Methods
         public bool IsConnected()
         {
-            try { return GetServer()?.IsConnected ?? false; }
+            try
+            {
+                foreach (IServer server in GetServers())
+                {
+                    if (server.IsConnected) return true;
+                }
+                return false;
+            }
             catch { return false; }
         }
 
@@ -55,9 +61,14 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                var server = GetServer();
-                var keys = server.Keys(_config.RedisDatabase, pattern);
-
+                List<RedisKey> keys = new List<RedisKey>();
+                foreach (var server in GetServers())
+                {
+                    foreach (var key in server.Keys(pattern: pattern))
+                    {
+                        keys.Add(key);
+                    }
+                }
                 return keys.ToArray();
             }
             catch (Exception e)

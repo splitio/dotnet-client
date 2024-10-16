@@ -91,7 +91,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             var config = new ConfigurationOptions
             {
                 ImpressionsMode = ImpressionsMode.Debug,
-                FeaturesRefreshRate = 100, 
+                FeaturesRefreshRate = 100,
                 ImpressionsRefreshRate = 150,
                 SegmentsRefreshRate = 80,
                 StreamingEnabled = false,

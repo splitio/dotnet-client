@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Domain;
 using Splitio.Telemetry.Domain;
 using StackExchange.Redis;
 using System;
@@ -16,20 +17,11 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         private readonly IRedisAdapterProducer _redisAdapterProducer;
 
-        private string UniqueKeysKey => "{prefix}.SPLITIO.uniquekeys"
-            .Replace("{prefix}.", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
+        private string UniqueKeysKey => $"{RedisKeyPrefix}uniquekeys";
+        private string ImpressionsCountKey => $"{RedisKeyPrefix}impressions.count";
+        private string ImpressionsKey => $"{RedisKeyPrefix}impressions";
 
-        private string ImpressionsCountKey => "{prefix}.SPLITIO.impressions.count"
-            .Replace("{prefix}.", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
-
-        private string ImpressionsKey => "{prefix}.SPLITIO.impressions"
-            .Replace("{prefix}.", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
-
-        public RedisImpressionsCache(IRedisAdapterProducer redisAdapter,
-            string machineIP,
-            string sdkVersion,
-            string machineName,
-            string userPrefix = null) : base(machineIP, sdkVersion, machineName, userPrefix)
+        public RedisImpressionsCache(IRedisAdapterProducer redisAdapter, RedisConfig redisConfig, bool clusterMode) : base(redisConfig, clusterMode)
         {
             _redisAdapterProducer = redisAdapter;
         }

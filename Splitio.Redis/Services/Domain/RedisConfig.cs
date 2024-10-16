@@ -17,6 +17,9 @@ namespace Splitio.Redis.Services.Domain
         public int RedisSyncTimeout { get; set; }
         public TlsConfig TlsConfig { get; set; }
         public int PoolSize { get; set; }
+        public ClusterNodes ClusterNodes { get; set; }
+        public string ConnectionString { get; set; }
+
 #if NET_LATEST
         public AsyncLocalProfiler LocalProfiler { get; set; }
 #endif
@@ -35,6 +38,9 @@ namespace Splitio.Redis.Services.Domain
             RedisUserPrefix = options.UserPrefix;
             TlsConfig = options.TlsConfig;
             PoolSize = options.PoolSize ?? 1;
+            ClusterNodes = options.RedisClusterNodes;
+            ConnectionString = options.RedisConnectionString;
+
 #if NET_LATEST
             if (options.ProfilingEnabled)
                 LocalProfiler = new AsyncLocalProfiler();

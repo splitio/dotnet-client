@@ -1,5 +1,6 @@
 ﻿using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
+using Splitio.Redis.Services.Shared;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using StackExchange.Redis;
@@ -11,13 +12,15 @@ namespace Splitio.Redis.Services.Cache.Classes
 {
     public class ConnectionPoolManager : IConnectionPoolManager
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(RedisAdapter));
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(ConnectionPoolManager));
         private readonly object _lock = new object();
 
         private readonly IConnectionMultiplexer[] _connections;
         private readonly Random _random;
 
         private bool _disposed;
+
+        private bool _isClusterMode;
 
         public ConnectionPoolManager(RedisConfig config)
         {
@@ -79,6 +82,10 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
         }
 
+        public bool IsClusterMode()
+        {
+            return _isClusterMode;
+        }
         protected virtual void Dispose(bool disposing)
         {
             if (_disposed)
@@ -92,48 +99,14 @@ namespace Splitio.Redis.Services.Cache.Classes
             _disposed = true;
         }
 
-        private static ConfigurationOptions GetConfig(RedisConfig redisCfg)
+        private ConfigurationOptions GetConfig(RedisConfig redisCfg)
         {
-            var config = new ConfigurationOptions
+            if (string.IsNullOrEmpty(redisCfg.ConnectionString)) 
             {
-                EndPoints = { redisCfg.HostAndPort },
-                Password = redisCfg.RedisPassword,
-                AllowAdmin = true,
-                KeepAlive = 1
-            };
-
-            if (redisCfg.TlsConfig != null && redisCfg.TlsConfig.Ssl)
-            {
-                config.Ssl = redisCfg.TlsConfig.Ssl;
-                config.SslHost = redisCfg.RedisHost;
-
-                if (redisCfg.TlsConfig.CertificateValidationFunc != null)
-                {
-                    config.CertificateValidation += redisCfg.TlsConfig.CertificateValidationFunc.Invoke;
-                }
-
-                if (redisCfg.TlsConfig.CertificateSelectionFunc != null)
-                {
-                    config.CertificateSelection += redisCfg.TlsConfig.CertificateSelectionFunc.Invoke;
-                }
+                return Helper.ParseFromRedisConfig(redisCfg, ref _isClusterMode);
             }
 
-            if (redisCfg.RedisConnectTimeout > 0)
-            {
-                config.ConnectTimeout = redisCfg.RedisConnectTimeout;
-            }
-
-            if (redisCfg.RedisConnectRetry > 0)
-            {
-                config.ConnectRetry = redisCfg.RedisConnectRetry;
-            }
-
-            if (redisCfg.RedisSyncTimeout > 0)
-            {
-                config.SyncTimeout = redisCfg.RedisSyncTimeout;
-            }
-
-            return config;
+            return Helper.ParseFromConnectionString(redisCfg, ref _isClusterMode);
         }
     }
 }
