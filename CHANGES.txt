@@ -1,6 +1,6 @@
 CHANGES
 
-7.10.0 (Oct xx, 2024)
+7.10.0 (Oct 16, 2024)
 - Added support for Redis Cluster
 
 7.9.0 (Apr 30, 2024)
