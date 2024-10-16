@@ -1,8 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Client.Classes;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Client.Classes;
+using Splitio.Tests.Common.Resources;
 using Splitio_Tests.Resources;
 using System.Collections.Generic;
 
@@ -70,6 +72,17 @@ namespace Splitio_Tests.Integration_Tests
             //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual("on", result);
+
+            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(), API_KEY);
+
+            client2.BlockUntilReady(5000);
+
+            //Act           
+            result = client2.GetTreatment("test", "always_on", null);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("on", result);
         }
 
         [TestMethod]
@@ -86,6 +99,15 @@ namespace Splitio_Tests.Integration_Tests
             //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual("off", result);
+
+            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(), API_KEY);
+
+            client2.BlockUntilReady(5000);
+            result = client2.GetTreatment("test", "always_off", null);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("off", result);
         }
 
         [TestMethod]
@@ -97,6 +119,15 @@ namespace Splitio_Tests.Integration_Tests
 
             //Act           
             var result = client.GetTreatment("test", "always_control", null);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("control", result);
+
+            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(), API_KEY);
+
+            client2.BlockUntilReady(5000);
+            result = client2.GetTreatment("test", "always_control", null);
 
             //Assert
             Assert.IsNotNull(result);
@@ -118,6 +149,18 @@ namespace Splitio_Tests.Integration_Tests
 
             //Act           
             var result = client.GetTreatments("test", features, null);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("off", result[alwaysOff]);
+            Assert.AreEqual("on", result[alwaysOn]);
+
+
+            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(),
+                API_KEY);
+
+            client2.BlockUntilReady(5000);
+            result = client2.GetTreatments("test", features, null);
 
             //Assert
             Assert.IsNotNull(result);
@@ -147,6 +190,18 @@ namespace Splitio_Tests.Integration_Tests
             Assert.AreEqual("off", result[alwaysOff]);
             Assert.AreEqual("on", result[alwaysOn]);
             Assert.AreEqual("control", result[alwaysControl]);
+
+            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(),
+    API_KEY);
+
+            client2.BlockUntilReady(5000);
+            result = client2.GetTreatments("test", features, null);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("off", result[alwaysOff]);
+            Assert.AreEqual("on", result[alwaysOn]);
+            Assert.AreEqual("control", result[alwaysControl]);
         }
 
         [TestMethod]
@@ -157,6 +212,19 @@ namespace Splitio_Tests.Integration_Tests
             
             // Act.
             var result = client.GetTreatmentsWithConfig("key", new List<string>());
+
+            // Assert.
+            foreach (var res in result)
+            {
+                Assert.AreEqual("control", res.Value.Treatment);
+                Assert.IsNull(res.Value.Config);
+            }
+
+            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(),
+API_KEY);
+
+            client2.BlockUntilReady(5000);
+            result = client2.GetTreatmentsWithConfig("key", new List<string>());
 
             // Assert.
             foreach (var res in result)
@@ -178,6 +246,16 @@ namespace Splitio_Tests.Integration_Tests
             // Assert.
             Assert.AreEqual("control", result.Treatment);
             Assert.IsNull(result.Config);
+
+            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(),
+API_KEY);
+
+            client2.BlockUntilReady(5000);
+            result = client2.GetTreatmentWithConfig("key", string.Empty);
+
+            // Assert.
+            Assert.AreEqual("control", result.Treatment);
+            Assert.IsNull(result.Config);
         }
 
         [TestMethod]
@@ -188,6 +266,15 @@ namespace Splitio_Tests.Integration_Tests
 
             // Act.
             var result = client.GetTreatment("key", string.Empty);
+
+            // Assert.
+            Assert.AreEqual("control", result);
+
+            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(),
+API_KEY);
+
+            client2.BlockUntilReady(5000);
+            result = client2.GetTreatment("key", string.Empty);
 
             // Assert.
             Assert.AreEqual("control", result);
@@ -208,6 +295,17 @@ namespace Splitio_Tests.Integration_Tests
             {
                 Assert.AreEqual("control", res.Value);
             }
+
+            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(), API_KEY);
+
+            client2.BlockUntilReady(5000);
+            result = client2.GetTreatments("key", new List<string>());
+
+            // Assert.
+            foreach (var res in result)
+            {
+                Assert.AreEqual("control", res.Value);
+            }
         }
 
         [TestMethod]
@@ -220,6 +318,14 @@ namespace Splitio_Tests.Integration_Tests
             var result = client.Track("key", "traffic_type", "event_type");
 
             // Assert.
+            Assert.IsTrue(result);
+
+            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(),
+API_KEY);
+
+            client2.BlockUntilReady(5000);
+            // Act.
+            result = client2.Track("key", "traffic_type", "event_type");
             Assert.IsTrue(result);
         }
 
@@ -237,18 +343,48 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(client.IsDestroyed());
         }
 
-        [TestCleanup]
+        private ConfigurationOptions GetRedisClusterConfigurationOptions()
+        {
+            var clusterNodes = new ClusterNodes(
+                new List<string>()
+                {
+                    HOST + ":" + PORT
+                },
+                "{{SPLITIO}}");
+            var cacheAdapterConfig = new CacheAdapterConfigurationOptions
+            {
+                Host = HOST,
+                Port = PORT,
+                Password = PASSWORD,
+                Database = DB,
+                UserPrefix = _prefix
+            };
+
+            return new ConfigurationOptions
+            {
+                CacheAdapterConfig = cacheAdapterConfig,
+                SdkMachineIP = "192.168.0.1"
+            };
+        }
+
+    [TestCleanup]
         public void CleanKeys()
         {
             var keys = _redisAdapter.Keys($"{_prefix}*");
-
             _redisAdapter.Del(keys);
+
+            keys = _redisAdapter.Keys($"{{SPLITIO}}{_prefix}*");
+            _redisAdapter.Del(keys);
+
         }
 
         private void LoadSplits()
         {
             _redisAdapter.Set($"{_prefix}.SPLITIO.split.always_on", SplitsHelper.AlwaysOn);
             _redisAdapter.Set($"{_prefix}.SPLITIO.split.always_off", SplitsHelper.AlwaysOff);
+
+            _redisAdapter.Set($"{{SPLITIO}}{_prefix}.SPLITIO.split.always_on", SplitsHelper.AlwaysOn);
+            _redisAdapter.Set($"{{SPLITIO}}{_prefix}.SPLITIO.split.always_off", SplitsHelper.AlwaysOff);
         }
     }
 }

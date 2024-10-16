@@ -1,5 +1,8 @@
 CHANGES
 
+7.10.0 (Oct 16, 2024)
+- Added support for Redis Cluster
+
 7.9.0 (Apr 30, 2024)
 - Added support for targeting rules based on semantic versions (https://semver.org/).
 - Fixed async methods for LocalhostClient.

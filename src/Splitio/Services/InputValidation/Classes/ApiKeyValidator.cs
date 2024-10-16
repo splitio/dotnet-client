@@ -1,6 +1,7 @@
 ﻿using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using System;
 
 namespace Splitio.Services.InputValidation.Classes
 {
@@ -18,11 +19,13 @@ namespace Splitio.Services.InputValidation.Classes
             if (apiKey == string.Empty)
             {
                 _log.Error("factory instantiation: you passed and empty api_key, api_key must be a non-empty string.");
+                throw new Exception("API Key must be set to initialize Split SDK.");
             }
 
             if (apiKey == null)
             {
                 _log.Error("factory instantiation: you passed a null api_key, api_key must be a non-empty string.");
+                throw new Exception("API Key must be set to initialize Split SDK.");
             }
         }
     }

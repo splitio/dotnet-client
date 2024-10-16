@@ -2,6 +2,7 @@
 using Moq;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Domain;
 using Splitio.Services.Cache.Interfaces;
 using System.Threading.Tasks;
 
@@ -12,15 +13,25 @@ namespace Splitio_Tests.Unit_Tests.Cache
     {
         private const string SegmentKeyPrefix = "SPLITIO.segment.";
 
-        private readonly Mock<IRedisAdapter> _redisAdapter;
+        private readonly Mock<IRedisAdapterConsumer> _redisAdapter;
 
         private readonly ISegmentCacheConsumer _cache;
 
         public RedisSegmentCacheAsyncTests()
         {
-            _redisAdapter = new Mock<IRedisAdapter>();
-
-            _cache = new RedisSegmentCache(_redisAdapter.Object);
+            _redisAdapter = new Mock<IRedisAdapterConsumer>();
+            var config = new RedisConfig
+            {
+                RedisHost = "localhost",
+                RedisPort = "6379",
+                RedisPassword = "",
+                RedisDatabase = 0,
+                RedisConnectTimeout = 1000,
+                RedisConnectRetry = 5,
+                RedisSyncTimeout = 1000,
+                PoolSize = 1,
+            };
+            _cache = new RedisSegmentCache(_redisAdapter.Object, config, false);
         }
 
         [TestMethod]

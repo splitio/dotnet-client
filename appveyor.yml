@@ -4,11 +4,13 @@ image:
 nuget:
   account_feed: true
 
-version: 7.9.0
+version: 7.10.0
 dotnet_csproj:
   patch: true
   file: '**\*.csproj'
   package_version: '{version}'
+
+skip_branch_with_pr: true
 
 configuration: Release
 

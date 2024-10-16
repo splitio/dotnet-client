@@ -4,12 +4,13 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
     public abstract class BaseAdapter
     {
-        protected static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(RedisAdapter));
+        protected readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(BaseAdapter));
 
         protected readonly RedisConfig _config;
         protected readonly IConnectionPoolManager _pool;
@@ -36,16 +37,23 @@ namespace Splitio.Redis.Services.Cache.Classes
 #endif
         }
 
-        protected static void LogError(string command, string key, Exception ex)
+        protected void LogError(string command, string key, Exception ex)
         {
             _log.Error($"Exception calling Redis Adapter {command}.\nKey: {key}.\nMessage: {ex.Message}.\nStackTrace: {ex.StackTrace}.\n InnerExection: {ex.InnerException}.", ex);
         }
 
-        protected IServer GetServer()
+        protected List<IServer> GetServers()
         {
             var conn = _pool.GetConnection();
-
-            return conn?.GetServer(_config.HostAndPort);
+            var servers = new List<IServer>();
+            var endpoints = conn?.GetEndPoints();
+        
+            foreach (var endpoint in endpoints)
+            {
+                servers.Add(conn.GetServer(endpoint));
+            }
+        
+            return servers;
         }
 
         protected IDatabase GetDatabase()

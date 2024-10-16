@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Domain;
 using Splitio.Services.Parsing.Interfaces;
 using StackExchange.Redis;
 using System;
@@ -19,16 +20,26 @@ namespace Splitio_Tests.Unit_Tests.Cache
         private const string splitsKeyPrefix = "SPLITIO.splits.";
         private const string trafficTypeKeyPrefix = "SPLITIO.trafficType.";
 
-        private readonly Mock<IRedisAdapter> _redisAdapterMock;
+        private readonly Mock<IRedisAdapterConsumer> _redisAdapterMock;
         private readonly Mock<ISplitParser> _splitParserMock;
         private readonly RedisSplitCache _redisSplitCache;
 
         public RedisSplitCacheTests()
         {
-            _redisAdapterMock = new Mock<IRedisAdapter>();
+            _redisAdapterMock = new Mock<IRedisAdapterConsumer>();
             _splitParserMock = new Mock<ISplitParser>();
-
-            _redisSplitCache = new RedisSplitCache(_redisAdapterMock.Object, _splitParserMock.Object);
+            var config = new RedisConfig
+            {
+                RedisHost = "localhost",
+                RedisPort = "6379",
+                RedisPassword = "",
+                RedisDatabase = 0,
+                RedisConnectTimeout = 1000,
+                RedisConnectRetry = 5,
+                RedisSyncTimeout = 1000,
+                PoolSize = 1,
+            };
+            _redisSplitCache = new RedisSplitCache(_redisAdapterMock.Object, _splitParserMock.Object, config, false);
         }
 
         [TestMethod]

@@ -15,6 +15,8 @@ namespace Splitio.Services.Client.Classes
         public string UserPrefix { get; set; }
         public TlsConfig TlsConfig { get; set; }
         public int? PoolSize { get; set; }
+        public ClusterNodes RedisClusterNodes { get; set; }
+        public string RedisConnectionString { get; set; }
 #if NET_LATEST
         public bool ProfilingEnabled { get; set; }
 #endif

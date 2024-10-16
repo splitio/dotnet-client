@@ -7,11 +7,11 @@ namespace Splitio.Redis.Services.Shared
 {
     public class RedisBlockUntilReadyService : IBlockUntilReadyService
     {
-        private readonly IRedisAdapter _redisAdapter;
+        private readonly IRedisAdapterConsumer _redisAdapterConsumer;
 
-        public RedisBlockUntilReadyService(IRedisAdapter redisAdapter)
+        public RedisBlockUntilReadyService(IRedisAdapterConsumer redisAdapterConsumer)
         {
-            _redisAdapter = redisAdapter;
+            _redisAdapterConsumer = redisAdapterConsumer;
         }
 
         public void BlockUntilReady(int blockMilisecondsUntilReady)
@@ -41,7 +41,7 @@ namespace Splitio.Redis.Services.Shared
 
         public bool IsSdkReady()
         {
-            return _redisAdapter.IsConnected();
+            return _redisAdapterConsumer.IsConnected();
         }
     }
 }
