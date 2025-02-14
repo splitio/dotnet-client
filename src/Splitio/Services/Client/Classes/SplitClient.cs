@@ -433,7 +433,7 @@ namespace Splitio.Services.Client.Classes
 
                 await TrackImpressionsAsync(treatments, key);
 
-                return ExtractTreatmentResults(treatments);
+                return treatments;
             }
             catch (Exception ex)
             {
@@ -454,7 +454,7 @@ namespace Splitio.Services.Client.Classes
 
                 await TrackImpressionsAsync(treatments, key);
 
-                return ExtractTreatmentResults(treatments);
+                return treatments;
             }
             catch (Exception ex)
             {
@@ -487,7 +487,7 @@ namespace Splitio.Services.Client.Classes
 
                 TrackImpressions(treatments, key);
 
-                return ExtractTreatmentResults(treatments);
+                return treatments;
             }
             catch (Exception ex)
             {
@@ -498,15 +498,6 @@ namespace Splitio.Services.Client.Classes
             }
         }
 
-        private List<TreatmentResult> ExtractTreatmentResults(List<TreatmentResult> treatments)
-        {
-            var returnedTreatments = new List<TreatmentResult>();
-            foreach (TreatmentResult treatment in treatments)
-            {
-                returnedTreatments.Add(treatment);
-            };
-            return returnedTreatments;
-        }
 
         private List<TreatmentResult> GetTreatmentsByFlagSets(Enums.API method, Key key, List<string> flagSets, Dictionary<string, object> attributes)
         {

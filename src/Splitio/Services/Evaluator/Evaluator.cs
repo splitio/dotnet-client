@@ -35,7 +35,7 @@ namespace Splitio.Services.Evaluator
         #region Public Sync Methods
         public List<TreatmentResult> EvaluateFeatures(API method, Key key, List<string> featureNames, Dictionary<string, object> attributes = null, bool trackLatency = true)
         {
-            var expectedTreatmentsForFeatures = new List<TreatmentResult>();
+            var treatmentsForFeatures = new List<TreatmentResult>();
 
             try
             {
@@ -52,14 +52,14 @@ namespace Splitio.Services.Evaluator
 
                         var result = EvaluateTreatment(method, key, split, feature, attributes: attributes);
 
-                        expectedTreatmentsForFeatures.Add(result);
+                        treatmentsForFeatures.Add(result);
                     }
                     catch (Exception e)
                     {
                         _log.Error($"{method}: Something went wrong evaluation feature: {feature}", e);
 
                         _telemetryEvaluationProducer?.RecordException(method.ConvertToMethodEnum());
-                        expectedTreatmentsForFeatures.Add(new TreatmentResult(feature, Labels.Exception, Constants.Gral.Control, false));
+                        treatmentsForFeatures.Add(new TreatmentResult(feature, Labels.Exception, Constants.Gral.Control, false));
                     }
                 }
 
@@ -70,12 +70,12 @@ namespace Splitio.Services.Evaluator
             }
             catch (Exception ex)
             {
-                expectedTreatmentsForFeatures = EvaluateFeaturesException(ex, featureNames);
+                treatmentsForFeatures = EvaluateFeaturesException(ex, featureNames);
 
                 _telemetryEvaluationProducer?.RecordException(method.ConvertToMethodEnum());
             }
 
-            return expectedTreatmentsForFeatures;
+            return treatmentsForFeatures;
         }
 
         public List<TreatmentResult> EvaluateFeaturesByFlagSets(API method, Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
