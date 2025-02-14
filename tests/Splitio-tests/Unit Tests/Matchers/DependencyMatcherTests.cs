@@ -22,7 +22,7 @@ namespace Splitio_Tests.Unit_Tests
 
             evaluatorMock
                 .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), key, new List<string> { "test1" }, null, false))
-                .Returns(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on") });
+                .Returns(new List<ExpectedTreatmentResult> { new ExpectedTreatmentResult(new TreatmentResult("test1", "label", "on"), false) });
 
             //Act
             var result = matcher.Match(key, null, evaluatorMock.Object);
@@ -42,7 +42,7 @@ namespace Splitio_Tests.Unit_Tests
 
             evaluatorMock
                 .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), key, new List<string> { "test1" }, null, false))
-                .Returns(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on") });
+                .Returns(new List<ExpectedTreatmentResult> { new ExpectedTreatmentResult(new TreatmentResult("test1", "label", "on"), false) });
 
             //Act
             var result = matcher.Match(key, null, evaluatorMock.Object);
@@ -77,7 +77,7 @@ namespace Splitio_Tests.Unit_Tests
 
             evaluatorMock
                 .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), key, new List<string> { "test1" }, null, false))
-                .Returns(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on") });
+                .Returns(new List<ExpectedTreatmentResult> { new ExpectedTreatmentResult(new TreatmentResult("test1", "label", "on"), false) });
 
             //Act
             var result = matcher.Match(key, null, evaluatorMock.Object);
@@ -97,7 +97,7 @@ namespace Splitio_Tests.Unit_Tests
 
             evaluatorMock
                 .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), key, new List<string> { "test1" }, null, false))
-                .Returns(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on") });
+                .Returns(new List<ExpectedTreatmentResult> { new ExpectedTreatmentResult(new TreatmentResult("test1", "label", "on"), false) });
 
             //Act
             var result = matcher.Match(123, null, evaluatorMock.Object);
@@ -117,7 +117,7 @@ namespace Splitio_Tests.Unit_Tests
 
             evaluatorMock
                 .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), key, new List<string> { "test1" }, null, false))
-                .Returns(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on") });
+                .Returns(new List<ExpectedTreatmentResult> { new ExpectedTreatmentResult(new TreatmentResult("test1", "label", "on"), false) });
 
             //Act
             var result = matcher.Match(DateTime.UtcNow, null, evaluatorMock.Object);
@@ -138,7 +138,7 @@ namespace Splitio_Tests.Unit_Tests
 
             evaluatorMock
                 .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), key, new List<string> { "test1" }, null, false))
-                .Returns(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on") });
+                .Returns(new List<ExpectedTreatmentResult> { new ExpectedTreatmentResult(new TreatmentResult("test1", "label", "on"), false) });
 
             //Act
             var result = matcher.Match(DateTime.UtcNow, null, evaluatorMock.Object);
@@ -158,7 +158,7 @@ namespace Splitio_Tests.Unit_Tests
 
             evaluatorMock
                 .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), key, new List<string> { "test1" }, null, false))
-                .Returns(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on") });
+                .Returns(new List<ExpectedTreatmentResult> { new ExpectedTreatmentResult(new TreatmentResult("test1", "label", "on"), false) });
 
             //Act
             var result = matcher.Match("test", null, evaluatorMock.Object);
@@ -178,7 +178,7 @@ namespace Splitio_Tests.Unit_Tests
 
             evaluatorMock
                 .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), key, new List<string> { "test1" }, null, false))
-                .Returns(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on") });
+                .Returns(new List<ExpectedTreatmentResult> { new ExpectedTreatmentResult(new TreatmentResult("test1", "label", "on"), false) });
 
             //Act
             var result = matcher.Match(true, null, evaluatorMock.Object);

@@ -388,12 +388,6 @@ namespace Splitio.Services.Client.Classes
         #region Protected Methods
         protected void BuildUniqueKeysTracker(BaseConfig config)
         {
-            if (config.ImpressionsMode != ImpressionsMode.None)
-            {
-                _uniqueKeysTracker = new NoopUniqueKeysTracker();
-                return;
-            }
-
             var bloomFilter = new BloomFilter(config.BfExpectedElements, config.BfErrorRate);
             var filterAdapter = new FilterAdapter(bloomFilter);
             var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
@@ -408,12 +402,6 @@ namespace Splitio.Services.Client.Classes
 
         protected void BuildImpressionsCounter(BaseConfig config)
         {
-            if (config.ImpressionsMode == ImpressionsMode.Debug)
-            {
-                _impressionsCounter = new NoopImpressionsCounter();
-                return;
-            }
-
             var trackerConfig = new ComponentConfig(config.ImpressionsCounterCacheMaxSize, config.ImpressionsCountBulkSize);
             var task = _tasksManager.NewPeriodicTask(Enums.Task.ImpressionsCountSender, config.ImpressionsCounterRefreshRate * 1000);
             var sendBulkDataTask = _tasksManager.NewOnTimeTask(Enums.Task.ImpressionCounterSendBulkData);
@@ -445,7 +433,7 @@ namespace Splitio.Services.Client.Classes
 
                 await TrackImpressionsAsync(treatments, key);
 
-                return treatments;
+                return ExtractTreatmentResults(treatments);
             }
             catch (Exception ex)
             {
@@ -466,7 +454,7 @@ namespace Splitio.Services.Client.Classes
 
                 await TrackImpressionsAsync(treatments, key);
 
-                return treatments;
+                return ExtractTreatmentResults(treatments);
             }
             catch (Exception ex)
             {
@@ -477,7 +465,7 @@ namespace Splitio.Services.Client.Classes
             }
         }
 
-        private async Task TrackImpressionsAsync(List<TreatmentResult> evaluatorResults, Key key)
+        private async Task TrackImpressionsAsync(List<ExpectedTreatmentResult> evaluatorResults, Key key)
         {
             var impressions = BuildAndGetImpressions(evaluatorResults, key);
 
@@ -499,7 +487,7 @@ namespace Splitio.Services.Client.Classes
 
                 TrackImpressions(treatments, key);
 
-                return treatments;
+                return ExtractTreatmentResults(treatments);
             }
             catch (Exception ex)
             {
@@ -508,6 +496,16 @@ namespace Splitio.Services.Client.Classes
                 _log.Warn("Something went wrong evaluating features.", ex);
                 return _clientExtensionService.ReturnControl(features);
             }
+        }
+
+        private List<TreatmentResult> ExtractTreatmentResults(List<ExpectedTreatmentResult> treatments)
+        {
+            var returnedTreatments = new List<TreatmentResult>();
+            foreach (ExpectedTreatmentResult treatment in treatments)
+            {
+                returnedTreatments.Add(treatment.TreatmentResult);
+            };
+            return returnedTreatments;
         }
 
         private List<TreatmentResult> GetTreatmentsByFlagSets(Enums.API method, Key key, List<string> flagSets, Dictionary<string, object> attributes)
@@ -520,7 +518,7 @@ namespace Splitio.Services.Client.Classes
 
                 TrackImpressions(treatments, key);
 
-                return treatments;
+                return ExtractTreatmentResults(treatments);
             }
             catch (Exception ex)
             {
@@ -531,9 +529,9 @@ namespace Splitio.Services.Client.Classes
             }
         }
 
-        private List<KeyImpression> BuildAndGetImpressions(List<TreatmentResult> treatments, Key key)
+        private List<WrappedKeyImpression> BuildAndGetImpressions(List<ExpectedTreatmentResult> treatments, Key key)
         {
-            var impressions = new List<KeyImpression>();
+            var impressions = new List<WrappedKeyImpression>();
 
             foreach (var treatment in treatments)
             {
@@ -545,7 +543,7 @@ namespace Splitio.Services.Client.Classes
             return impressions;
         }
 
-        private void TrackImpressions(List<TreatmentResult> treatments, Key key)
+        private void TrackImpressions(List<ExpectedTreatmentResult> treatments, Key key)
         {
             try
             {

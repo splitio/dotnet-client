@@ -29,7 +29,7 @@ namespace Splitio.Services.Parsing.Classes
 
             if (result == null) return false;
 
-            return _treatments.Contains(result.Treatment);
+            return _treatments.Contains(result.TreatmentResult.Treatment);
         }
 
         public override async Task<bool> MatchAsync(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
@@ -44,7 +44,7 @@ namespace Splitio.Services.Parsing.Classes
 
             if (result == null) return false;
 
-            return _treatments.Contains(result.Treatment);
+            return _treatments.Contains(result.TreatmentResult.Treatment);
         }
     }
 }
