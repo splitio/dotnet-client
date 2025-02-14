@@ -164,7 +164,6 @@ namespace Splitio.Services.Impressions.Classes
 
             foreach (WrappedKeyImpression impression in impressions)
             {
-                Console.WriteLine(impression.ToString());
                 if (impression.impressionsDisabled) continue;
                 filteredImpressions.Add(impression.keyImpression);
             }
