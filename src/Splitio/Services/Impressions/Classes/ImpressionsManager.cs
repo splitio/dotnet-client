@@ -64,15 +64,15 @@ namespace Splitio.Services.Impressions.Classes
                 {
                     _impressionsCounter.Inc(result.TreatmentResult.FeatureFlagName, result.TreatmentResult.ImpTime);
                     _uniqueKeysTracker.Track(key.matchingKey, result.TreatmentResult.FeatureFlagName);
-                }
-                // In DEBUG mode we should calculate the pt only. 
-                if (_impressionsMode == ImpressionsMode.Debug)
+                } else if (_impressionsMode == ImpressionsMode.Debug)
                 {
+                    // In DEBUG mode we should calculate the pt only. 
+
                     ShouldCalculatePreviousTime(impression.keyImpression);
-                }
-                // In OPTIMIZED mode we should track the total amount of evaluations and deduplicate the impressions.
-                if (_impressionsMode == ImpressionsMode.Optimized)
-                { 
+                } else if (_impressionsMode == ImpressionsMode.Optimized)
+                {
+                    // In OPTIMIZED mode we should track the total amount of evaluations and deduplicate the impressions.
+
                     ShouldCalculatePreviousTime(impression.keyImpression);
                     if (impression.keyImpression.previousTime.HasValue)
                         _impressionsCounter.Inc(result.TreatmentResult.FeatureFlagName, result.TreatmentResult.ImpTime);
