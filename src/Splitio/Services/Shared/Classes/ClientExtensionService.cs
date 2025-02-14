@@ -149,7 +149,7 @@ namespace Splitio.Services.Shared.Classes
 
             foreach (var item in featureFlagNames)
             {
-                toReturn.Add(new TreatmentResult(item, Labels.Exception, Constants.Gral.Control));
+                toReturn.Add(new TreatmentResult(item, Labels.Exception, Constants.Gral.Control, false));
             }
 
             return toReturn;

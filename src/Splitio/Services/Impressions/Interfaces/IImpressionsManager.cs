@@ -6,8 +6,8 @@ namespace Splitio.Services.Impressions.Interfaces
 {
     public interface IImpressionsManager
     {
-        WrappedKeyImpression Build(ExpectedTreatmentResult treatmentResult, Key key);
-        void Track(List<WrappedKeyImpression> impressions);
-        Task TrackAsync(List<WrappedKeyImpression> impressions);
+        KeyImpression Build(TreatmentResult treatmentResult, Key key);
+        void Track(List<KeyImpression> impressions);
+        Task TrackAsync(List<KeyImpression> impressions);
     }
 }

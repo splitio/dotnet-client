@@ -29,7 +29,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
 
             _evaluator
                 .Setup(mock => mock.EvaluateFeaturesAsync(Splitio.Enums.API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
-                .ReturnsAsync(new List<ExpectedTreatmentResult> { new ExpectedTreatmentResult(new TreatmentResult("test1", "label", "on"), false) });
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
             var result = await matcher.MatchAsync(key, null, _evaluator.Object);
@@ -48,7 +48,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
 
             _evaluator
                 .Setup(mock => mock.EvaluateFeaturesAsync(Splitio.Enums.API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
-                .ReturnsAsync(new List<ExpectedTreatmentResult> { new ExpectedTreatmentResult(new TreatmentResult("test1", "label", "on"), false) });
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
             var result = await matcher.MatchAsync(key, null, _evaluator.Object);
@@ -82,7 +82,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
 
             _evaluator
                 .Setup(mock => mock.EvaluateFeaturesAsync(Splitio.Enums.API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
-                .ReturnsAsync(new List<ExpectedTreatmentResult> { new ExpectedTreatmentResult(new TreatmentResult("test1", "label", "on"), false) });
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
             var result = await matcher.MatchAsync(key, null, _evaluator.Object);
@@ -101,7 +101,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
 
             _evaluator
                 .Setup(mock => mock.EvaluateFeaturesAsync(Splitio.Enums.API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
-                .ReturnsAsync(new List<ExpectedTreatmentResult> { new ExpectedTreatmentResult(new TreatmentResult("test1", "label", "on"), false) });
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
             var result = await matcher.MatchAsync(123, null, _evaluator.Object);
@@ -120,7 +120,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
 
             _evaluator
                 .Setup(mock => mock.EvaluateFeaturesAsync(Splitio.Enums.API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
-                .ReturnsAsync(new List<ExpectedTreatmentResult> { new ExpectedTreatmentResult(new TreatmentResult("test1", "label", "on"), false) });
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
             var result = await matcher.MatchAsync(DateTime.UtcNow, null, _evaluator.Object);
@@ -140,7 +140,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
 
             _evaluator
                 .Setup(mock => mock.EvaluateFeaturesAsync(Splitio.Enums.API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
-                .ReturnsAsync(new List<ExpectedTreatmentResult> { new ExpectedTreatmentResult(new TreatmentResult("test1", "label", "on"), false) });
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
             var result = await matcher.MatchAsync(DateTime.UtcNow, null, _evaluator.Object);
@@ -159,7 +159,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
 
             _evaluator
                 .Setup(mock => mock.EvaluateFeaturesAsync(Splitio.Enums.API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
-                .ReturnsAsync(new List<ExpectedTreatmentResult> { new ExpectedTreatmentResult(new TreatmentResult("test1", "label", "on"), false) });
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
             var result = await matcher.MatchAsync("test", null, _evaluator.Object);
@@ -178,7 +178,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
 
             _evaluator
                 .Setup(mock => mock.EvaluateFeaturesAsync(Splitio.Enums.API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
-                .ReturnsAsync(new List<ExpectedTreatmentResult> { new ExpectedTreatmentResult(new TreatmentResult("test1", "label", "on"), false) });
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
             var result = await matcher.MatchAsync(true, null, _evaluator.Object);

@@ -465,7 +465,7 @@ namespace Splitio.Services.Client.Classes
             }
         }
 
-        private async Task TrackImpressionsAsync(List<ExpectedTreatmentResult> evaluatorResults, Key key)
+        private async Task TrackImpressionsAsync(List<TreatmentResult> evaluatorResults, Key key)
         {
             var impressions = BuildAndGetImpressions(evaluatorResults, key);
 
@@ -498,12 +498,12 @@ namespace Splitio.Services.Client.Classes
             }
         }
 
-        private List<TreatmentResult> ExtractTreatmentResults(List<ExpectedTreatmentResult> treatments)
+        private List<TreatmentResult> ExtractTreatmentResults(List<TreatmentResult> treatments)
         {
             var returnedTreatments = new List<TreatmentResult>();
-            foreach (ExpectedTreatmentResult treatment in treatments)
+            foreach (TreatmentResult treatment in treatments)
             {
-                returnedTreatments.Add(treatment.TreatmentResult);
+                returnedTreatments.Add(treatment);
             };
             return returnedTreatments;
         }
@@ -518,7 +518,7 @@ namespace Splitio.Services.Client.Classes
 
                 TrackImpressions(treatments, key);
 
-                return ExtractTreatmentResults(treatments);
+                return treatments;
             }
             catch (Exception ex)
             {
@@ -529,9 +529,9 @@ namespace Splitio.Services.Client.Classes
             }
         }
 
-        private List<WrappedKeyImpression> BuildAndGetImpressions(List<ExpectedTreatmentResult> treatments, Key key)
+        private List<KeyImpression> BuildAndGetImpressions(List<TreatmentResult> treatments, Key key)
         {
-            var impressions = new List<WrappedKeyImpression>();
+            var impressions = new List<KeyImpression>();
 
             foreach (var treatment in treatments)
             {
@@ -543,7 +543,7 @@ namespace Splitio.Services.Client.Classes
             return impressions;
         }
 
-        private void TrackImpressions(List<ExpectedTreatmentResult> treatments, Key key)
+        private void TrackImpressions(List<TreatmentResult> treatments, Key key)
         {
             try
             {

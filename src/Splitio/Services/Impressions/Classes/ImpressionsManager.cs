@@ -51,32 +51,32 @@ namespace Splitio.Services.Impressions.Classes
         }
 
         #region Public Methods
-        public WrappedKeyImpression Build(ExpectedTreatmentResult result, Key key)
+        public KeyImpression Build(TreatmentResult result, Key key)
         {
-            if (Labels.SplitNotFound.Equals(result.TreatmentResult.Label)) return null;
+            if (Labels.SplitNotFound.Equals(result.Label)) return null;
 
-            var impression = new WrappedKeyImpression(new KeyImpression(key.matchingKey, result.TreatmentResult.FeatureFlagName, result.TreatmentResult.Treatment, result.TreatmentResult.ImpTime, result.TreatmentResult.ChangeNumber, _labelsEnabled ? result.TreatmentResult.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null), result.ImpressionsDisabled);
+            var impression = new KeyImpression(key.matchingKey, result.FeatureFlagName, result.Treatment, result.ImpTime, result.ChangeNumber, _labelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null, result.ImpressionsDisabled);
             
             try
             {
                 // In NONE mode we should track the total amount of evaluations and the unique keys.
                 if (_impressionsMode == ImpressionsMode.None || result.ImpressionsDisabled)
                 {
-                    _impressionsCounter.Inc(result.TreatmentResult.FeatureFlagName, result.TreatmentResult.ImpTime);
-                    _uniqueKeysTracker.Track(key.matchingKey, result.TreatmentResult.FeatureFlagName);
+                    _impressionsCounter.Inc(result.FeatureFlagName, result.ImpTime);
+                    _uniqueKeysTracker.Track(key.matchingKey, result.FeatureFlagName);
                 } else if (_impressionsMode == ImpressionsMode.Debug)
                 {
                     // In DEBUG mode we should calculate the pt only. 
 
-                    ShouldCalculatePreviousTime(impression.keyImpression);
+                    ShouldCalculatePreviousTime(impression);
                 } else if (_impressionsMode == ImpressionsMode.Optimized)
                 {
                     // In OPTIMIZED mode we should track the total amount of evaluations and deduplicate the impressions.
 
-                    ShouldCalculatePreviousTime(impression.keyImpression);
-                    if (impression.keyImpression.previousTime.HasValue)
-                        _impressionsCounter.Inc(result.TreatmentResult.FeatureFlagName, result.TreatmentResult.ImpTime);
-                        impression.keyImpression.Optimized = ShouldQueueImpression(impression.keyImpression);
+                    ShouldCalculatePreviousTime(impression);
+                    if (impression.previousTime.HasValue)
+                        _impressionsCounter.Inc(result.FeatureFlagName, result.ImpTime);
+                        impression.Optimized = ShouldQueueImpression(impression);
                 }
             }
             catch (Exception ex)
@@ -87,7 +87,7 @@ namespace Splitio.Services.Impressions.Classes
             return impression;
         }
 
-        public void Track(List<WrappedKeyImpression> impressions)
+        public void Track(List<KeyImpression> impressions)
         {
             try
             {
@@ -107,7 +107,7 @@ namespace Splitio.Services.Impressions.Classes
             }
         }
 
-        public async Task TrackAsync(List<WrappedKeyImpression> impressions)
+        public async Task TrackAsync(List<KeyImpression> impressions)
         {
             try
             {
@@ -142,7 +142,7 @@ namespace Splitio.Services.Impressions.Classes
             impression.previousTime = _impressionsObserver.TestAndSet(impression);
         }
 
-        private void LogImpressionListener(List<WrappedKeyImpression> impressions)
+        private void LogImpressionListener(List<KeyImpression> impressions)
         {
             if (_customerImpressionListener == null || !impressions.Any()) return;
 
@@ -150,22 +150,22 @@ namespace Splitio.Services.Impressions.Classes
             {
                 foreach (var imp in impressions)
                 {
-                    _customerImpressionListener.Log(imp.keyImpression);
+                    _customerImpressionListener.Log(imp);
                 }
             });
         }
 
-        private bool GetImpressionsToTrack(List<WrappedKeyImpression> impressions, out List<KeyImpression> impressionsToTrack)
+        private bool GetImpressionsToTrack(List<KeyImpression> impressions, out List<KeyImpression> impressionsToTrack)
         {
             impressionsToTrack = new List<KeyImpression>();
             var filteredImpressions = new List<KeyImpression>();
 
             if (_impressionsMode == ImpressionsMode.None || !impressions.Any() || _impressionsLog == null) return false;
 
-            foreach (WrappedKeyImpression impression in impressions)
+            foreach (KeyImpression impression in impressions)
             {
                 if (impression.impressionsDisabled) continue;
-                filteredImpressions.Add(impression.keyImpression);
+                filteredImpressions.Add(impression);
             }
             switch (_impressionsMode)
             {

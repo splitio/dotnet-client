@@ -748,7 +748,7 @@ namespace Splitio.Tests.Common
             Assert.AreEqual("{\"color\":\"green\"}", treatment.Value.Config);
 
             //Validate impressions sent to the be.
-            var impressionExpected = new KeyImpression("nico_test", "FACUNDO_TEST", "on", 0, 1506703262916, "whitelisted", null, null, false);
+            var impressionExpected = new KeyImpression("nico_test", "FACUNDO_TEST", "on", 0, 1506703262916, "whitelisted", null, false, null, false);
             
             AssertSentImpressions(1, impressionExpected);
             AssertImpressionListener(1, impressionListener);

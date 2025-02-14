@@ -6,7 +6,7 @@ namespace Splitio.Domain
     {
         public KeyImpression() { }
 
-        public KeyImpression(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey, long? previousTime = null, bool optimized = false)
+        public KeyImpression(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey, bool impressionsDisabled, long? previousTime = null, bool optimized = false)
         {
             this.feature = feature;
             keyName = matchingKey;
@@ -16,6 +16,7 @@ namespace Splitio.Domain
             this.label = label;
             this.bucketingKey = bucketingKey;
             this.previousTime = previousTime;
+            this.impressionsDisabled = impressionsDisabled;
             Optimized = optimized;
         }
 
@@ -30,5 +31,7 @@ namespace Splitio.Domain
         public long? previousTime { get; set; }
         [JsonIgnore]
         public bool Optimized { get; set; }
+        [JsonIgnore]
+        public bool impressionsDisabled { get; set; }
     }
 }
