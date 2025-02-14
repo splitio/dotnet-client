@@ -44,7 +44,8 @@ namespace Splitio.Services.Parsing
                     trafficAllocation = split.trafficAllocation,
                     trafficAllocationSeed = split.trafficAllocationSeed ?? 0,
                     configurations = split.configurations,
-                    Sets = split.Sets
+                    Sets = split.Sets,
+                    impressionsDisabled = split.impressionsDisabled
                 };
 
                 return ParseConditions(split.conditions, parsedSplit);

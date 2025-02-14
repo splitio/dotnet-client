@@ -33,9 +33,9 @@ namespace Splitio.Services.Evaluator
         }
 
         #region Public Sync Methods
-        public List<TreatmentResult> EvaluateFeatures(API method, Key key, List<string> featureNames, Dictionary<string, object> attributes = null, bool trackLatency = true)
+        public List<ExpectedTreatmentResult> EvaluateFeatures(API method, Key key, List<string> featureNames, Dictionary<string, object> attributes = null, bool trackLatency = true)
         {
-            var treatmentsForFeatures = new List<TreatmentResult>();
+            var expectedTreatmentsForFeatures = new List<ExpectedTreatmentResult>();
 
             try
             {
@@ -52,14 +52,14 @@ namespace Splitio.Services.Evaluator
 
                         var result = EvaluateTreatment(method, key, split, feature, attributes: attributes);
 
-                        treatmentsForFeatures.Add(result);
+                        expectedTreatmentsForFeatures.Add(result);
                     }
                     catch (Exception e)
                     {
                         _log.Error($"{method}: Something went wrong evaluation feature: {feature}", e);
 
                         _telemetryEvaluationProducer?.RecordException(method.ConvertToMethodEnum());
-                        treatmentsForFeatures.Add(new TreatmentResult(feature, Labels.Exception, Constants.Gral.Control));
+                        expectedTreatmentsForFeatures.Add(new ExpectedTreatmentResult(new TreatmentResult(feature, Labels.Exception, Constants.Gral.Control), false));
                     }
                 }
 
@@ -70,17 +70,17 @@ namespace Splitio.Services.Evaluator
             }
             catch (Exception ex)
             {
-                treatmentsForFeatures = EvaluateFeaturesException(ex, featureNames);
+                expectedTreatmentsForFeatures = EvaluateFeaturesException(ex, featureNames);
 
                 _telemetryEvaluationProducer?.RecordException(method.ConvertToMethodEnum());
             }
 
-            return treatmentsForFeatures;
+            return expectedTreatmentsForFeatures;
         }
 
-        public List<TreatmentResult> EvaluateFeaturesByFlagSets(API method, Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        public List<ExpectedTreatmentResult> EvaluateFeaturesByFlagSets(API method, Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
         {
-            var evaluations = new List<TreatmentResult>();
+            var evaluations = new List<ExpectedTreatmentResult>();
 
             try
             {
@@ -105,9 +105,9 @@ namespace Splitio.Services.Evaluator
         #endregion
 
         #region Public Async Methods
-        public async Task<List<TreatmentResult>> EvaluateFeaturesAsync(API method, Key key, List<string> featureNames, Dictionary<string, object> attributes = null, bool trackLatency = true)
+        public async Task<List<ExpectedTreatmentResult>> EvaluateFeaturesAsync(API method, Key key, List<string> featureNames, Dictionary<string, object> attributes = null, bool trackLatency = true)
         {
-            var treatmentsForFeatures = new List<TreatmentResult>();
+            var treatmentsForFeatures = new List<ExpectedTreatmentResult>();
 
             try
             {
@@ -133,7 +133,7 @@ namespace Splitio.Services.Evaluator
                         if (_telemetryEvaluationProducer != null)
                             await _telemetryEvaluationProducer.RecordExceptionAsync(method.ConvertToMethodEnum());
 
-                        treatmentsForFeatures.Add(new TreatmentResult(feature, Labels.Exception, Constants.Gral.Control));
+                        treatmentsForFeatures.Add(new ExpectedTreatmentResult(new TreatmentResult(feature, Labels.Exception, Constants.Gral.Control), false));
                     }
                 }
 
@@ -153,9 +153,9 @@ namespace Splitio.Services.Evaluator
             return treatmentsForFeatures;
         }
 
-        public async Task<List<TreatmentResult>> EvaluateFeaturesByFlagSetsAsync(API method, Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
+        public async Task<List<ExpectedTreatmentResult>> EvaluateFeaturesByFlagSetsAsync(API method, Key key, List<string> flagSets, Dictionary<string, object> attributes = null)
         {
-            var evaluations = new List<TreatmentResult>();
+            var evaluations = new List<ExpectedTreatmentResult>();
 
             try
             {
@@ -183,15 +183,15 @@ namespace Splitio.Services.Evaluator
         #endregion
 
         #region Private Sync Methods
-        private TreatmentResult EvaluateTreatment(API method, Key key, ParsedSplit parsedSplit, string featureFlagName, Dictionary<string, object> attributes = null)
+        private ExpectedTreatmentResult EvaluateTreatment(API method, Key key, ParsedSplit parsedSplit, string featureFlagName, Dictionary<string, object> attributes = null)
         {
             try
             {
-                if (IsSplitNotFound(method, featureFlagName, parsedSplit, out TreatmentResult resultNotFound)) return resultNotFound;
+                if (IsSplitNotFound(method, featureFlagName, parsedSplit, out TreatmentResult resultNotFound)) return new ExpectedTreatmentResult(resultNotFound, false);
 
                 var treatmentResult = GetTreatmentResult(key, parsedSplit, attributes);
 
-                return ParseConfigurationAndReturnTreatment(parsedSplit, treatmentResult);
+                return new ExpectedTreatmentResult(ParseConfigurationAndReturnTreatment(parsedSplit, treatmentResult), parsedSplit.impressionsDisabled);
             }
             catch (Exception e)
             {
@@ -262,15 +262,15 @@ namespace Splitio.Services.Evaluator
         #endregion
 
         #region Private Async Methods
-        private async Task<TreatmentResult> EvaluateTreatmentAsync(API method, Key key, ParsedSplit parsedSplit, string featureFlagName, Dictionary<string, object> attributes = null)
+        private async Task<ExpectedTreatmentResult> EvaluateTreatmentAsync(API method, Key key, ParsedSplit parsedSplit, string featureFlagName, Dictionary<string, object> attributes = null)
         {
             try
             {
-                if (IsSplitNotFound(method, featureFlagName, parsedSplit, out TreatmentResult resultNotFound)) return resultNotFound;
+                if (IsSplitNotFound(method, featureFlagName, parsedSplit, out TreatmentResult resultNotFound)) return new ExpectedTreatmentResult(resultNotFound, false);
 
                 var treatmentResult = await GetTreatmentResultAsync(key, parsedSplit, attributes);
 
-                return ParseConfigurationAndReturnTreatment(parsedSplit, treatmentResult);
+                return new ExpectedTreatmentResult(ParseConfigurationAndReturnTreatment(parsedSplit, treatmentResult), parsedSplit.impressionsDisabled);
             }
             catch (Exception e)
             {
@@ -327,22 +327,22 @@ namespace Splitio.Services.Evaluator
             return new TreatmentResult(split.name, Labels.DefaultRule, split.defaultTreatment, split.changeNumber);
         }
 
-        private TreatmentResult EvaluateFeatureException(Exception e, string featureName)
+        private ExpectedTreatmentResult EvaluateFeatureException(Exception e, string featureName)
         {
             _log.Error($"Exception caught getting treatment for feature flag: {featureName}", e);
 
-            return new TreatmentResult(featureName, Labels.Exception, Constants.Gral.Control, exception: true);
+            return new ExpectedTreatmentResult(new TreatmentResult(featureName, Labels.Exception, Constants.Gral.Control, exception: true), false);
         }
 
-        private List<TreatmentResult> EvaluateFeaturesException(Exception e, List<string> featureNames)
+        private List<ExpectedTreatmentResult> EvaluateFeaturesException(Exception e, List<string> featureNames)
         {
-            var toReturn = new List<TreatmentResult>();
+            var toReturn = new List<ExpectedTreatmentResult>();
 
             _log.Error($"Exception caught getting treatments", e);
 
             foreach (var name in featureNames)
             {
-                toReturn.Add(new TreatmentResult(name, Labels.Exception, Constants.Gral.Control));
+                toReturn.Add(new ExpectedTreatmentResult(new TreatmentResult(name, Labels.Exception, Constants.Gral.Control), false));
             }
 
             return toReturn;
