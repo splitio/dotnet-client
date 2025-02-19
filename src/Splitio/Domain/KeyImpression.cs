@@ -16,7 +16,7 @@ namespace Splitio.Domain
             this.label = label;
             this.bucketingKey = bucketingKey;
             this.previousTime = previousTime;
-            this.impressionsDisabled = impressionsDisabled;
+            ImpressionsDisabled = impressionsDisabled;
             Optimized = optimized;
         }
 
@@ -32,6 +32,6 @@ namespace Splitio.Domain
         [JsonIgnore]
         public bool Optimized { get; set; }
         [JsonIgnore]
-        public bool impressionsDisabled { get; set; }
+        public bool ImpressionsDisabled { get; set; }
     }
 }

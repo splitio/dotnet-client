@@ -241,7 +241,7 @@ namespace Splitio.Services.Evaluator
 
                     if (bucket > split.trafficAllocation)
                     {
-                        result = new TreatmentResult(split.name, Labels.TrafficAllocationFailed, split.defaultTreatment, split.impressionsDisabled, split.changeNumber);
+                        result = new TreatmentResult(split.name, Labels.TrafficAllocationFailed, split.defaultTreatment, split.ImpressionsDisabled, split.changeNumber);
                     }
                 }
 
@@ -257,7 +257,7 @@ namespace Splitio.Services.Evaluator
 
             var treatment = _splitter.GetTreatment(key.bucketingKey, split.seed, condition.partitions, split.algo);
 
-            return new TreatmentResult(split.name, condition.label, treatment, split.impressionsDisabled, split.changeNumber);
+            return new TreatmentResult(split.name, condition.label, treatment, split.ImpressionsDisabled, split.changeNumber);
         }
         #endregion
 
@@ -315,7 +315,7 @@ namespace Splitio.Services.Evaluator
 
             if (split.killed)
             {
-                result = new TreatmentResult(split.name, Labels.Killed, split.defaultTreatment, split.impressionsDisabled, split.changeNumber);
+                result = new TreatmentResult(split.name, Labels.Killed, split.defaultTreatment, split.ImpressionsDisabled, split.changeNumber);
                 return true;
             }
 
@@ -324,7 +324,7 @@ namespace Splitio.Services.Evaluator
 
         private static TreatmentResult ReturnDefaultTreatment(ParsedSplit split)
         {
-            return new TreatmentResult(split.name, Labels.DefaultRule, split.defaultTreatment, split.impressionsDisabled, split.changeNumber);
+            return new TreatmentResult(split.name, Labels.DefaultRule, split.defaultTreatment, split.ImpressionsDisabled, split.changeNumber);
         }
 
         private TreatmentResult EvaluateFeatureException(Exception e, string featureName)

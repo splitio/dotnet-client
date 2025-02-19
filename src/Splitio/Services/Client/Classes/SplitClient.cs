@@ -498,7 +498,6 @@ namespace Splitio.Services.Client.Classes
             }
         }
 
-
         private List<TreatmentResult> GetTreatmentsByFlagSets(Enums.API method, Key key, List<string> flagSets, Dictionary<string, object> attributes)
         {
             try

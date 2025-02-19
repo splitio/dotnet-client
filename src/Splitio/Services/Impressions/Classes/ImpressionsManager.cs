@@ -158,15 +158,15 @@ namespace Splitio.Services.Impressions.Classes
         private bool GetImpressionsToTrack(List<KeyImpression> impressions, out List<KeyImpression> impressionsToTrack)
         {
             impressionsToTrack = new List<KeyImpression>();
-            var filteredImpressions = new List<KeyImpression>();
 
-            if (_impressionsMode == ImpressionsMode.None || !impressions.Any() || _impressionsLog == null) return false;
+            if (_impressionsMode == ImpressionsMode.None || impressions.Count == 0 || _impressionsLog == null) return false;
 
-            foreach (KeyImpression impression in impressions)
-            {
-                if (impression.impressionsDisabled) continue;
-                filteredImpressions.Add(impression);
-            }
+            var filteredImpressions = impressions
+                .Where(i => !i.ImpressionsDisabled)
+                .ToList();
+
+            if (filteredImpressions.Count == 0) return false;
+
             switch (_impressionsMode)
             {
                 case ImpressionsMode.Debug:

@@ -27,7 +27,7 @@ namespace Splitio.Domain
                 configs = configurations,
                 defaultTreatment = defaultTreatment,
                 sets = Sets != null ? Sets.ToList() : new List<string>(),
-                impressionsDisabled = impressionsDisabled
+                impressionsDisabled = ImpressionsDisabled
             };
         }
     }
