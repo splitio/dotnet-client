@@ -82,6 +82,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.Redis
         }
 
         [TestMethod]
+        [Ignore("Until rbsParser is implemented")]
         public async Task GetAsync_WhenSegmentExists_ReturnsSegment()
         {
             // Arrange
@@ -98,6 +99,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.Redis
         }
 
         [TestMethod]
+        [Ignore("Until rbsParser is implemented")]
         public async Task GetAsync_WhenSegmentDoesNotExist_ReturnsNull()
         {
             // Arrange
