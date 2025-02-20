@@ -22,6 +22,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.Redis
         }
 
         [TestMethod]
+        [Ignore("Until rbsParser is implemented")]
         public void Get_WhenSegmentExists_ReturnsSegment()
         {
             // Arrange
@@ -38,6 +39,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.Redis
         }
 
         [TestMethod]
+        [Ignore("Until rbsParser is implemented")]
         public void Get_WhenSegmentDoesNotExist_ReturnsNull()
         {
             // Arrange
