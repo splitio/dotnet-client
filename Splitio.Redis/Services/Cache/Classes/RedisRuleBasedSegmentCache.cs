@@ -9,8 +9,8 @@ namespace Splitio.Redis.Services.Cache.Classes
 {
     public class RedisRuleBasedSegmentCache : RedisCacheBase, IRuleBasedSegmentCacheConsumer
     {
-        private const string RuleBasedSegmentKeyPrefix = "rbs";
-        private string TillKey => $"{RedisKeyPrefix}{RuleBasedSegmentKeyPrefix}.till";
+        private const string RuleBasedSegmentKeyPrefix = "rbsegment";
+        private string TillKey => $"{RedisKeyPrefix}rbsegments.till";
 
         private readonly IRedisAdapterConsumer _redisAdapter;
 
