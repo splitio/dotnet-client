@@ -4,7 +4,7 @@ using Splitio.Services.SegmentFetcher.Interfaces;
 
 namespace Splitio.Services.Parsing.Classes
 {
-    public class InMemorySplitParser : SplitParser
+    public class InMemorySplitParser : FeatureFlagParser
     {
         private readonly ISegmentFetcher _segmentFetcher;
 
@@ -13,11 +13,11 @@ namespace Splitio.Services.Parsing.Classes
             _segmentFetcher = segmentFetcher;
         }
 
-        protected override IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit)
+        protected override IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition)
         {
             _segmentFetcher.InitializeSegment(matcherDefinition.userDefinedSegmentMatcherData.segmentName);
 
-            return base.GetInSegmentMatcher(matcherDefinition, parsedSplit);
+            return base.GetInSegmentMatcher(matcherDefinition);
         }
     }
 }

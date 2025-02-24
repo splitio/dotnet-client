@@ -14,7 +14,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
     [TestClass]
     public class FeatureFlagSyncServiceTests
     {
-        private readonly Mock<ISplitParser> _featureFlagParser;
+        private readonly Mock<IParser<Split, ParsedSplit>> _featureFlagParser;
         private readonly Mock<IFeatureFlagCacheProducer> _featureFlagsCache;
         private readonly Mock<IFlagSetsFilter> _flagSetsFilter;
 
@@ -22,7 +22,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
 
         public FeatureFlagSyncServiceTests()
         {
-            _featureFlagParser = new Mock<ISplitParser>();
+            _featureFlagParser = new Mock<IParser<Split, ParsedSplit>>();
             _featureFlagsCache = new Mock<IFeatureFlagCacheProducer>();
             _flagSetsFilter = new Mock<IFlagSetsFilter>();
 

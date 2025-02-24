@@ -116,7 +116,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
-            var parser = new SplitParser(segmentCacheConsumer.Object);
+            var parser = new FeatureFlagParser(segmentCacheConsumer.Object);
 
             var split = new Split
             {
@@ -179,7 +179,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
-            var parser = new SplitParser(segmentCacheConsumer.Object);
+            var parser = new FeatureFlagParser(segmentCacheConsumer.Object);
 
             var split = new Split
             {
@@ -243,7 +243,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
-            var parser = new SplitParser(segmentCacheConsumer.Object);
+            var parser = new FeatureFlagParser(segmentCacheConsumer.Object);
 
             var split = new Split
             {
@@ -307,7 +307,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
-            var parser = new SplitParser(segmentCacheConsumer.Object);
+            var parser = new FeatureFlagParser(segmentCacheConsumer.Object);
 
             var split = new Split
             {
@@ -371,7 +371,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
-            var parser = new SplitParser(segmentCacheConsumer.Object);
+            var parser = new FeatureFlagParser(segmentCacheConsumer.Object);
 
             var split = new Split
             {
@@ -439,7 +439,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
-            var parser = new SplitParser(segmentCacheConsumer.Object);
+            var parser = new FeatureFlagParser(segmentCacheConsumer.Object);
 
             var split = new Split
             {

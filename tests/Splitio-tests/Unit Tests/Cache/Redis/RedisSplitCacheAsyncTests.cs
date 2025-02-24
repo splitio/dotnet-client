@@ -21,13 +21,13 @@ namespace Splitio_Tests.Unit_Tests.Cache
         private const string SplitKeyPrefix = "SPLITIO.split.";
 
         private readonly Mock<IRedisAdapterConsumer> _redisAdapterMock;
-        private readonly Mock<ISplitParser> _splitParserMock;
+        private readonly Mock<IParser<Split, ParsedSplit>> _splitParserMock;
         private readonly IFeatureFlagCacheConsumer _redisSplitCache;
 
         public RedisSplitCacheAsyncTests()
         {
             _redisAdapterMock = new Mock<IRedisAdapterConsumer>();
-            _splitParserMock = new Mock<ISplitParser>();
+            _splitParserMock = new Mock<IParser<Split, ParsedSplit>>();
             var config = new RedisConfig
             {
                 RedisHost = "localhost",
