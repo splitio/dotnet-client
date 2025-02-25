@@ -9,14 +9,14 @@ using System.Linq;
 
 namespace Splitio.Services.Parsing
 {
-    public class RuleBasedSegmentParser : Parser, IParser<RuleBasedSegmentDTO, RuleBasedSegment>
+    public class RuleBasedSegmentParser : Parser, IParser<RuleBasedSegmentDto, RuleBasedSegment>
     {
         public RuleBasedSegmentParser(ISegmentCacheConsumer segmentCache,
             ISegmentFetcher segmentFetcher) : base(segmentCache, segmentFetcher)
         {
         }
 
-        public RuleBasedSegment Parse(RuleBasedSegmentDTO rbsDTO)
+        public RuleBasedSegment Parse(RuleBasedSegmentDto rbsDTO)
         {
             if (!Enum.TryParse(rbsDTO.Status, out StatusEnum result) || result != StatusEnum.ACTIVE)
             {

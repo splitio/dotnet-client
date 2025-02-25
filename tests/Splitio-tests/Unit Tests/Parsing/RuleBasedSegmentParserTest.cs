@@ -28,7 +28,7 @@ namespace Splitio_Tests.Unit_Tests.Parsing
         public void Parse_ValidDTO_ReturnsRuleBasedSegment()
         {
             // Arrange
-            var rbsDTO = new RuleBasedSegmentDTO
+            var rbsDTO = new RuleBasedSegmentDto
             {
                 Status = "ACTIVE",
                 Name = "test-segment",
@@ -74,7 +74,7 @@ namespace Splitio_Tests.Unit_Tests.Parsing
         public void Parse_InvalidStatus_ReturnsNull()
         {
             // Arrange
-            var rbsDTO = new RuleBasedSegmentDTO
+            var rbsDTO = new RuleBasedSegmentDto
             {
                 Status = "ARCHIVE",
                 Name = "test-segment",
@@ -97,7 +97,7 @@ namespace Splitio_Tests.Unit_Tests.Parsing
         public void Parse_MissingMatchers_ThrowsException()
         {
             // Arrange
-            var rbsDTO = new RuleBasedSegmentDTO
+            var rbsDTO = new RuleBasedSegmentDto
             {
                 Status = "ACTIVE",
                 Name = "test-segment",
