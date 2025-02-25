@@ -10,4 +10,10 @@ namespace Splitio.Domain
         public Excluded Excluded { get; set; }
         public List<ConditionDefinition> Conditions { get; set; }
     }
+
+    public class Excluded
+    {
+        public List<string> Keys { get; set; }
+        public List<string> Segments { get; set; }
+    }
 }

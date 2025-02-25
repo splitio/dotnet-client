@@ -29,7 +29,7 @@ namespace Splitio_Tests.Unit_Tests
                 conditions = new List<ConditionDefinition>()
             };
 
-            var parser = new InMemorySplitParser(null, null);
+            var parser = new FeatureFlagParser(null, null);
 
             //Act
             var parsedSplit = parser.Parse(split);
@@ -62,7 +62,7 @@ namespace Splitio_Tests.Unit_Tests
                 conditions = new List<ConditionDefinition>()
             };
 
-            var parser = new InMemorySplitParser(null, null);
+            var parser = new FeatureFlagParser(null, null);
 
             //Act
             var parsedSplit = parser.Parse(split);
@@ -95,7 +95,7 @@ namespace Splitio_Tests.Unit_Tests
                 conditions = new List<ConditionDefinition>()
             };
 
-            var parser = new InMemorySplitParser(null, null);
+            var parser = new FeatureFlagParser(null, null);
 
             //Act
             var parsedSplit = parser.Parse(split);
@@ -116,7 +116,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
-            var parser = new FeatureFlagParser(segmentCacheConsumer.Object);
+            var parser = new FeatureFlagParser(segmentCacheConsumer.Object, null);
 
             var split = new Split
             {
@@ -179,7 +179,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
-            var parser = new FeatureFlagParser(segmentCacheConsumer.Object);
+            var parser = new FeatureFlagParser(segmentCacheConsumer.Object, null);
 
             var split = new Split
             {
@@ -243,7 +243,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
-            var parser = new FeatureFlagParser(segmentCacheConsumer.Object);
+            var parser = new FeatureFlagParser(segmentCacheConsumer.Object, null);
 
             var split = new Split
             {
@@ -307,7 +307,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
-            var parser = new FeatureFlagParser(segmentCacheConsumer.Object);
+            var parser = new FeatureFlagParser(segmentCacheConsumer.Object, null);
 
             var split = new Split
             {
@@ -371,7 +371,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
-            var parser = new FeatureFlagParser(segmentCacheConsumer.Object);
+            var parser = new FeatureFlagParser(segmentCacheConsumer.Object, null);
 
             var split = new Split
             {
@@ -439,7 +439,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
-            var parser = new FeatureFlagParser(segmentCacheConsumer.Object);
+            var parser = new FeatureFlagParser(segmentCacheConsumer.Object, null);
 
             var split = new Split
             {

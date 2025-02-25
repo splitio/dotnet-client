@@ -1,9 +1,10 @@
-using System;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Classes;
+using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
+using System;
 
 namespace Splitio.Services.Parsing
 {
@@ -12,10 +13,13 @@ namespace Splitio.Services.Parsing
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(Parser));
 
         private readonly ISegmentCacheConsumer _segmentsCache;
+        private readonly ISegmentFetcher _segmentFetcher;
 
-        public Parser(ISegmentCacheConsumer segmentCache)
+        public Parser(ISegmentCacheConsumer segmentCache,
+            ISegmentFetcher segmentFetcher = null)
         {
             _segmentsCache = segmentCache;
+            _segmentFetcher = segmentFetcher;
         }
 
         public AttributeMatcher ParseMatcher(MatcherDefinition mDefinition)
@@ -130,8 +134,13 @@ namespace Splitio.Services.Parsing
             return attributeMatcher;
         }
 
-        protected virtual IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition)
+        private IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition)
         {
+            if (_segmentFetcher != null)
+            {
+                _segmentFetcher.InitializeSegment(matcherDefinition.userDefinedSegmentMatcherData.segmentName);
+            }
+
             return new UserDefinedSegmentMatcher(matcherDefinition.userDefinedSegmentMatcherData.segmentName, _segmentsCache);
         }
     }

@@ -3,6 +3,7 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.Parsing.Interfaces;
+using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
@@ -14,9 +15,9 @@ namespace Splitio.Services.Parsing
     {
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(FeatureFlagParser));
 
-        public FeatureFlagParser(ISegmentCacheConsumer segmentsCache) : base(segmentsCache)
-        {
-        }
+        public FeatureFlagParser(ISegmentCacheConsumer segmentsCache,
+            ISegmentFetcher segmentFetcher) : base(segmentsCache, segmentFetcher)
+        { }
 
         public ParsedSplit Parse(Split split)
         {
