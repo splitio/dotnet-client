@@ -16,7 +16,8 @@ namespace Splitio.Services.Parsing
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(FeatureFlagParser));
 
         public FeatureFlagParser(ISegmentCacheConsumer segmentsCache,
-            ISegmentFetcher segmentFetcher) : base(segmentsCache, segmentFetcher)
+            IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache,
+            ISegmentFetcher segmentFetcher) : base(segmentsCache, ruleBasedSegmentCache, segmentFetcher)
         { }
 
         public ParsedSplit Parse(Split split)

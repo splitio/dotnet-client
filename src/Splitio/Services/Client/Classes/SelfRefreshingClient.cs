@@ -11,7 +11,6 @@ using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Parsing;
-using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
@@ -51,6 +50,7 @@ namespace Splitio.Services.Client.Classes
         private IFeatureFlagCache _featureFlagCache;
         private ISegmentCache _segmentCache;
         private IFeatureFlagSyncService _featureFlagSyncService;
+        private IRuleBasedSegmentCache _ruleBasedSegmentCache;
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config) : base(apiKey)
         {
@@ -94,6 +94,11 @@ namespace Splitio.Services.Client.Classes
             _segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(_config.ConcurrencyLevel, InitialCapacity));
         }
 
+        private void BuildRuleBasedSegmentCache()
+        {
+            _ruleBasedSegmentCache = new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>(_config.ConcurrencyLevel, InitialCapacity));
+        }
+
         private void BuildTelemetryStorage()
         {
             var telemetryStorage = new InMemoryTelemetryStorage();
@@ -115,7 +120,7 @@ namespace Splitio.Services.Client.Classes
             _selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, _segmentCache, segmentsQueue, segmentsFetcherTask, _statusManager);
 
             var splitChangeFetcher = new ApiSplitChangeFetcher(_splitSdkApiClient);
-            _splitParser = new FeatureFlagParser(_segmentCache, (SelfRefreshingSegmentFetcher)_selfRefreshingSegmentFetcher);
+            _splitParser = new FeatureFlagParser(_segmentCache, _ruleBasedSegmentCache, (SelfRefreshingSegmentFetcher)_selfRefreshingSegmentFetcher);
             var featureFlagRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SplitsRefreshRate) : _config.SplitsRefreshRate;
             var featureFlagsTask = _tasksManager.NewPeriodicTask(Enums.Task.FeatureFlagsFetcher, featureFlagRefreshRate * 1000);
             _featureFlagSyncService = new FeatureFlagSyncService(_splitParser, _featureFlagCache, _flagSetsFilter);

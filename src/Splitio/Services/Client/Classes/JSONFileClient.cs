@@ -7,7 +7,6 @@ using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Parsing;
-using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Classes;
@@ -21,6 +20,7 @@ namespace Splitio.Services.Client.Classes
     {
         private readonly IFeatureFlagCache _featureFlagCache;
         private readonly ISegmentCache _segmentCache;
+        private readonly IRuleBasedSegmentCache _ruleBasedSegmentCache;
 
         public JSONFileClient(string splitsFilePath,
             string segmentsFilePath,
@@ -30,9 +30,11 @@ namespace Splitio.Services.Client.Classes
             bool isLabelsEnabled = true,
             IEventsLog eventsLog = null,
             ITrafficTypeValidator trafficTypeValidator = null,
-            IImpressionsManager impressionsManager = null) : base("localhost")
+            IImpressionsManager impressionsManager = null,
+            IRuleBasedSegmentCache ruleBasedSegmentCache = null) : base("localhost")
         {
             _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
+            _ruleBasedSegmentCache = ruleBasedSegmentCache ?? new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>());
 
             var segmentFetcher = new JSONFileSegmentFetcher(segmentsFilePath, _segmentCache);
             var splitChangeFetcher = new JSONFileSplitChangeFetcher(splitsFilePath);
@@ -42,7 +44,7 @@ namespace Splitio.Services.Client.Classes
             var splitChangesResult = task.Result;
             var parsedSplits = new ConcurrentDictionary<string, ParsedSplit>();
 
-            _splitParser = new FeatureFlagParser(_segmentCache, segmentFetcher);
+            _splitParser = new FeatureFlagParser(_segmentCache, _ruleBasedSegmentCache, segmentFetcher);
 
             foreach (var split in splitChangesResult.splits)
             {

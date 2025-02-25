@@ -14,6 +14,7 @@ namespace Splitio_Tests.Unit_Tests.Parsing
     {
         private Mock<ISegmentCacheConsumer> _segmentCacheMock;
         private Mock<ISegmentFetcher> _segmentFetcherMock;
+        private Mock<IRuleBasedSegmentCacheConsumer> _rbsConsumer;
         private RuleBasedSegmentParser _parser;
 
         [TestInitialize]
@@ -21,7 +22,9 @@ namespace Splitio_Tests.Unit_Tests.Parsing
         {
             _segmentCacheMock = new Mock<ISegmentCacheConsumer>();
             _segmentFetcherMock = new Mock<ISegmentFetcher>();
-            _parser = new RuleBasedSegmentParser(_segmentCacheMock.Object, _segmentFetcherMock.Object);
+            _rbsConsumer = new Mock<IRuleBasedSegmentCacheConsumer>();
+
+            _parser = new RuleBasedSegmentParser(_segmentCacheMock.Object, _rbsConsumer.Object, _segmentFetcherMock.Object);
         }
 
         [TestMethod]

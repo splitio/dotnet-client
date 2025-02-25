@@ -12,7 +12,8 @@ namespace Splitio.Services.Parsing
     public class RuleBasedSegmentParser : Parser, IParser<RuleBasedSegmentDto, RuleBasedSegment>
     {
         public RuleBasedSegmentParser(ISegmentCacheConsumer segmentCache,
-            ISegmentFetcher segmentFetcher) : base(segmentCache, segmentFetcher)
+            IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache,
+            ISegmentFetcher segmentFetcher) : base(segmentCache, ruleBasedSegmentCache, segmentFetcher)
         {
         }
 
