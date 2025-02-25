@@ -54,17 +54,15 @@ namespace Splitio.Redis.Services.Cache.Classes
             return $"{RedisKeyPrefix}{RuleBasedSegmentKeyPrefix}.{name}";
         }
 
-        private RuleBasedSegment DeserializeAndParse(string rbsJSON)
+        private static RuleBasedSegment DeserializeAndParse(string rbsJSON)
         {
             if (string.IsNullOrEmpty(rbsJSON))
                 return null;
 
-            var ruleBasedSegment = JsonConvert.DeserializeObject<RuleBasedSegmentDTO>(rbsJSON);
+            // TODO: implement rbsParser
+            _ = JsonConvert.DeserializeObject<RuleBasedSegmentDto>(rbsJSON);
 
-            // TODO: implement rbsParser
-            //return _rbsParser.Parse(ruleBasedSegment);
             return null;
-            // TODO: implement rbsParser
         }
 
         private static long ParseChangeNumber(string cnString)

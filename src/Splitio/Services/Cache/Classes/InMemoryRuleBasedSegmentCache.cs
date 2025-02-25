@@ -9,9 +9,7 @@ using System.Threading.Tasks;
 namespace Splitio.Services.Cache.Classes
 {
     public class InMemoryRuleBasedSegmentCache : IRuleBasedSegmentCache
-    {
-        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemoryRuleBasedSegmentCache));
-        
+    {   
         private readonly ConcurrentDictionary<string, RuleBasedSegment> _cache;
         private long _changeNumber;
 
