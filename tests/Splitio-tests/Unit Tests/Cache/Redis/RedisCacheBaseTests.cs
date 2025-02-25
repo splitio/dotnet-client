@@ -5,6 +5,7 @@ using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
 using System.Collections.Generic;
 
@@ -42,14 +43,15 @@ namespace Splitio_Tests.Unit_Tests.Cache
             };
             var splitParser = new Mock<IParser<Split, ParsedSplit>>();
             var redisAdapterMock = new Mock<IRedisAdapterConsumer>();
-            var splitCache = new RedisSplitCache(redisAdapterMock.Object, splitParser.Object, config, false);
+            var rbsParser = new Mock<IRuleBasedSegmentCacheConsumer>();
+            var splitCache = new RedisSplitCache(redisAdapterMock.Object, splitParser.Object, config, false, rbsParser.Object);
 
             redisAdapterMock
                 .Setup(x => x.Get("SPLITIO.split.test_split"))
                 .Returns(JsonConvert.SerializeObject(split));
 
             splitParser
-                .Setup(mock => mock.Parse(It.IsAny<Split>()))
+                .Setup(mock => mock.Parse(It.IsAny<Split>(), rbsParser.Object))
                 .Returns(new ParsedSplit
                 {
                     name = split.name,
@@ -103,14 +105,15 @@ namespace Splitio_Tests.Unit_Tests.Cache
             };
             var splitParser = new Mock<IParser<Split, ParsedSplit>>();
             var redisAdapterMock = new Mock<IRedisAdapterConsumer>();
-            var splitCache = new RedisSplitCache(redisAdapterMock.Object, splitParser.Object, config, false);
+            var rbsParser = new Mock<IRuleBasedSegmentCacheConsumer>();
+            var splitCache = new RedisSplitCache(redisAdapterMock.Object, splitParser.Object, config, false, rbsParser.Object);
 
             redisAdapterMock
                 .Setup(x => x.Get("mycompany.SPLITIO.split.test_split"))
                 .Returns(JsonConvert.SerializeObject(split));
 
             splitParser
-                .Setup(mock => mock.Parse(It.IsAny<Split>()))
+                .Setup(mock => mock.Parse(It.IsAny<Split>(), rbsParser.Object))
                 .Returns(new ParsedSplit
                 {
                     name = split.name,

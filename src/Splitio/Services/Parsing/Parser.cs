@@ -14,19 +14,16 @@ namespace Splitio.Services.Parsing
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(Parser));
 
         private readonly ISegmentCacheConsumer _segmentsCache;
-        private readonly IRuleBasedSegmentCacheConsumer _ruleBasedSegmentCache;
         private readonly ISegmentFetcher _segmentFetcher;
 
         public Parser(ISegmentCacheConsumer segmentCache,
-            IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache,
             ISegmentFetcher segmentFetcher = null)
         {
             _segmentsCache = segmentCache;
-            _ruleBasedSegmentCache = ruleBasedSegmentCache;
             _segmentFetcher = segmentFetcher;
         }
 
-        public AttributeMatcher ParseMatcher(MatcherDefinition mDefinition)
+        public AttributeMatcher ParseMatcher(MatcherDefinition mDefinition, IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache)
         {
             if (mDefinition.matcherType == null)
             {
@@ -112,7 +109,7 @@ namespace Splitio.Services.Parsing
                             matcher = new InListSemverMatcher(mDefinition.whitelistMatcherData.whitelist);
                             break;
                         case MatcherTypeEnum.IN_RULE_BASED_SEGMENT:
-                            matcher = new RuleBasedSegmentMatcher(mDefinition.userDefinedSegmentMatcherData.segmentName, _ruleBasedSegmentCache, _segmentsCache);
+                            matcher = new RuleBasedSegmentMatcher(mDefinition.userDefinedSegmentMatcherData.segmentName, ruleBasedSegmentCache, _segmentsCache);
                             break;
                     }
                 }

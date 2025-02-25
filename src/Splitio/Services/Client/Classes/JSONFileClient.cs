@@ -44,11 +44,11 @@ namespace Splitio.Services.Client.Classes
             var splitChangesResult = task.Result;
             var parsedSplits = new ConcurrentDictionary<string, ParsedSplit>();
 
-            _splitParser = new FeatureFlagParser(_segmentCache, _ruleBasedSegmentCache, segmentFetcher);
+            _splitParser = new FeatureFlagParser(_segmentCache, segmentFetcher);
 
             foreach (var split in splitChangesResult.splits)
             {
-                parsedSplits.TryAdd(split.name, _splitParser.Parse(split));
+                parsedSplits.TryAdd(split.name, _splitParser.Parse(split, _ruleBasedSegmentCache));
             }
 
             BuildFlagSetsFilter(new HashSet<string>());

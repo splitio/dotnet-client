@@ -65,7 +65,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             var rbsDto = JsonConvert.DeserializeObject<RuleBasedSegmentDto>(rbsJSON);
 
-            return _rbsParser.Parse(rbsDto);
+            return _rbsParser.Parse(rbsDto, this);
         }
 
         private static long ParseChangeNumber(string cnString)

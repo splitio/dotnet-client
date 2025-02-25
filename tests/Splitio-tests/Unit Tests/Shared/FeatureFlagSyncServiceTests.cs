@@ -17,6 +17,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
         private readonly Mock<IParser<Split, ParsedSplit>> _featureFlagParser;
         private readonly Mock<IFeatureFlagCacheProducer> _featureFlagsCache;
         private readonly Mock<IFlagSetsFilter> _flagSetsFilter;
+        private readonly Mock<IRuleBasedSegmentCacheConsumer> _rbsCache;
 
         private readonly IFeatureFlagSyncService _featureFlagSyncService;
 
@@ -25,8 +26,9 @@ namespace Splitio_Tests.Unit_Tests.Shared
             _featureFlagParser = new Mock<IParser<Split, ParsedSplit>>();
             _featureFlagsCache = new Mock<IFeatureFlagCacheProducer>();
             _flagSetsFilter = new Mock<IFlagSetsFilter>();
+            _rbsCache = new Mock<IRuleBasedSegmentCacheConsumer>();
 
-            _featureFlagSyncService = new FeatureFlagSyncService(_featureFlagParser.Object, _featureFlagsCache.Object, _flagSetsFilter.Object);
+            _featureFlagSyncService = new FeatureFlagSyncService(_featureFlagParser.Object, _featureFlagsCache.Object, _flagSetsFilter.Object, _rbsCache.Object);
         }
 
         [TestMethod]
@@ -42,7 +44,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             };
 
             _featureFlagParser
-                .Setup(mock => mock.Parse(It.IsAny<Split>()))
+                .Setup(mock => mock.Parse(It.IsAny<Split>(), _rbsCache.Object))
                 .Returns(new ParsedSplit());
 
             _flagSetsFilter
@@ -71,7 +73,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             };
 
             _featureFlagParser
-                .SetupSequence(mock => mock.Parse(It.IsAny<Split>()))
+                .SetupSequence(mock => mock.Parse(It.IsAny<Split>(), _rbsCache.Object))
                 .Returns(new ParsedSplit())
                 .Returns((ParsedSplit)null)
                 .Returns(new ParsedSplit());
@@ -102,7 +104,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             };
 
             _featureFlagParser
-                .Setup(mock => mock.Parse(It.IsAny<Split>()))
+                .Setup(mock => mock.Parse(It.IsAny<Split>(), _rbsCache.Object))
                 .Returns(new ParsedSplit());
 
             _flagSetsFilter

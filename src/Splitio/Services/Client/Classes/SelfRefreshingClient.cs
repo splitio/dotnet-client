@@ -59,6 +59,7 @@ namespace Splitio.Services.Client.Classes
             BuildFlagSetsFilter(_config.FlagSetsFilter);
             BuildSplitCache();
             BuildSegmentCache();
+            BuildRuleBasedSegmentCache();
             BuildTelemetryStorage();
             BuildTelemetrySyncTask();
 
@@ -120,10 +121,10 @@ namespace Splitio.Services.Client.Classes
             _selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, _segmentCache, segmentsQueue, segmentsFetcherTask, _statusManager);
 
             var splitChangeFetcher = new ApiSplitChangeFetcher(_splitSdkApiClient);
-            _splitParser = new FeatureFlagParser(_segmentCache, _ruleBasedSegmentCache, (SelfRefreshingSegmentFetcher)_selfRefreshingSegmentFetcher);
+            _splitParser = new FeatureFlagParser(_segmentCache, (SelfRefreshingSegmentFetcher)_selfRefreshingSegmentFetcher);
             var featureFlagRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SplitsRefreshRate) : _config.SplitsRefreshRate;
             var featureFlagsTask = _tasksManager.NewPeriodicTask(Enums.Task.FeatureFlagsFetcher, featureFlagRefreshRate * 1000);
-            _featureFlagSyncService = new FeatureFlagSyncService(_splitParser, _featureFlagCache, _flagSetsFilter);
+            _featureFlagSyncService = new FeatureFlagSyncService(_splitParser, _featureFlagCache, _flagSetsFilter, _ruleBasedSegmentCache);
             _splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, _statusManager, featureFlagsTask, _featureFlagCache, _featureFlagSyncService);
             _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCache, _blockUntilReadyService);
         }

@@ -12,12 +12,11 @@ namespace Splitio.Services.Parsing
     public class RuleBasedSegmentParser : Parser, IParser<RuleBasedSegmentDto, RuleBasedSegment>
     {
         public RuleBasedSegmentParser(ISegmentCacheConsumer segmentCache,
-            IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache,
-            ISegmentFetcher segmentFetcher) : base(segmentCache, ruleBasedSegmentCache, segmentFetcher)
+            ISegmentFetcher segmentFetcher) : base(segmentCache, segmentFetcher)
         {
         }
 
-        public RuleBasedSegment Parse(RuleBasedSegmentDto rbsDTO)
+        public RuleBasedSegment Parse(RuleBasedSegmentDto rbsDTO, IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache)
         {
             if (!Enum.TryParse(rbsDTO.Status, out StatusEnum result) || result != StatusEnum.ACTIVE)
             {
@@ -29,11 +28,11 @@ namespace Splitio.Services.Parsing
                 Name = rbsDTO.Name,
                 ChangeNumber = rbsDTO.ChangeNumber,
                 Excluded = rbsDTO.Excluded,
-                CombiningMatchers = ParseCombiningMatchers(rbsDTO.Conditions)
+                CombiningMatchers = ParseCombiningMatchers(rbsDTO.Conditions, ruleBasedSegmentCache)
             };
         }
 
-        private List<CombiningMatcher> ParseCombiningMatchers(List<ConditionDefinition> conditions)
+        private List<CombiningMatcher> ParseCombiningMatchers(List<ConditionDefinition> conditions, IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache)
         {
             var toReturn = new List<CombiningMatcher>();
 
@@ -47,7 +46,7 @@ namespace Splitio.Services.Parsing
                 var delegates = condition
                     .matcherGroup
                     .matchers
-                    .Select(ParseMatcher)
+                    .Select(m => ParseMatcher(m, ruleBasedSegmentCache))
                     .ToList();
 
                 toReturn.Add(new CombiningMatcher()

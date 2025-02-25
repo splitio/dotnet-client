@@ -4,6 +4,7 @@ using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
 using System.Threading.Tasks;
 
@@ -14,6 +15,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.Redis
     {
         private Mock<IRedisAdapterConsumer> _redisAdapterMock;
         private Mock<IParser<RuleBasedSegmentDto, RuleBasedSegment>> _rbsParser;
+
         private RedisRuleBasedSegmentCache _cache;
 
         [TestInitialize]
@@ -37,7 +39,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.Redis
                 .Returns(segmentJson);
 
             _rbsParser
-                .Setup(x => x.Parse(It.IsAny<RuleBasedSegmentDto>()))
+                .Setup(x => x.Parse(It.IsAny<RuleBasedSegmentDto>(), It.IsAny<IRuleBasedSegmentCacheConsumer>()))
                 .Returns(new RuleBasedSegment
                 {
                     Name = segmentName,
@@ -105,7 +107,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.Redis
                 .ReturnsAsync(segmentJson);
 
             _rbsParser
-                .Setup(x => x.Parse(It.IsAny<RuleBasedSegmentDto>()))
+                .Setup(x => x.Parse(It.IsAny<RuleBasedSegmentDto>(), It.IsAny<IRuleBasedSegmentCacheConsumer>()))
                 .Returns(new RuleBasedSegment
                 {
                     Name = segmentName,
