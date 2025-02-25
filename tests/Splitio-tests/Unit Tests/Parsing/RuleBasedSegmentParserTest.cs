@@ -44,7 +44,14 @@ namespace Splitio_Tests.Unit_Tests.Parsing
                         {
                             matchers = new List<MatcherDefinition>
                             {
-                                new MatcherDefinition { matcherType = "EQUAL_TO", stringMatcherData = "test" }
+                                new MatcherDefinition 
+                                { 
+                                    matcherType = "EQUAL_TO", unaryNumericMatcherData = new UnaryNumericData
+                                    {
+                                        dataType = DataTypeEnum.NUMBER,
+                                        value = 123
+                                    }
+                                }
                             },
                             combiner = "AND"
                         }
