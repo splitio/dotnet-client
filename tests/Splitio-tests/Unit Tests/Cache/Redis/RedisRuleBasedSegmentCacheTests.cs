@@ -1,9 +1,11 @@
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
+using Splitio.Services.Parsing.Interfaces;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Cache.Redis
 {
@@ -11,24 +13,36 @@ namespace Splitio_Tests.Unit_Tests.Cache.Redis
     public class RedisRuleBasedSegmentCacheTests
     {
         private Mock<IRedisAdapterConsumer> _redisAdapterMock;
+        private Mock<IParser<RuleBasedSegmentDto, RuleBasedSegment>> _rbsParser;
         private RedisRuleBasedSegmentCache _cache;
 
         [TestInitialize]
         public void Initialize()
         {
             _redisAdapterMock = new Mock<IRedisAdapterConsumer>();
+            _rbsParser = new Mock<IParser<RuleBasedSegmentDto, RuleBasedSegment>>();
             var config = new RedisConfig();
-            _cache = new RedisRuleBasedSegmentCache(_redisAdapterMock.Object, config, false);
+            
+            _cache = new RedisRuleBasedSegmentCache(_redisAdapterMock.Object, _rbsParser.Object, config, false);
         }
 
         [TestMethod]
-        [Ignore("Until rbsParser is implemented")]
         public void Get_WhenSegmentExists_ReturnsSegment()
         {
             // Arrange
             var segmentName = "test-segment";
             var segmentJson = "{\"name\":\"test-segment\"}";
-            _redisAdapterMock.Setup(x => x.Get(It.IsAny<string>())).Returns(segmentJson);
+            _redisAdapterMock
+                .Setup(x => x.Get(It.IsAny<string>()))
+                .Returns(segmentJson);
+
+            _rbsParser
+                .Setup(x => x.Parse(It.IsAny<RuleBasedSegmentDto>()))
+                .Returns(new RuleBasedSegment
+                {
+                    Name = segmentName,
+                });
+                
 
             // Act
             var result = _cache.Get(segmentName);
@@ -39,7 +53,6 @@ namespace Splitio_Tests.Unit_Tests.Cache.Redis
         }
 
         [TestMethod]
-        [Ignore("Until rbsParser is implemented")]
         public void Get_WhenSegmentDoesNotExist_ReturnsNull()
         {
             // Arrange
@@ -82,13 +95,21 @@ namespace Splitio_Tests.Unit_Tests.Cache.Redis
         }
 
         [TestMethod]
-        [Ignore("Until rbsParser is implemented")]
         public async Task GetAsync_WhenSegmentExists_ReturnsSegment()
         {
             // Arrange
             var segmentName = "test-segment";
             var segmentJson = "{\"name\":\"test-segment\"}";
-            _redisAdapterMock.Setup(x => x.GetAsync(It.IsAny<string>())).ReturnsAsync(segmentJson);
+            _redisAdapterMock
+                .Setup(x => x.GetAsync(It.IsAny<string>()))
+                .ReturnsAsync(segmentJson);
+
+            _rbsParser
+                .Setup(x => x.Parse(It.IsAny<RuleBasedSegmentDto>()))
+                .Returns(new RuleBasedSegment
+                {
+                    Name = segmentName,
+                });
 
             // Act
             var result = await _cache.GetAsync(segmentName);
@@ -99,7 +120,6 @@ namespace Splitio_Tests.Unit_Tests.Cache.Redis
         }
 
         [TestMethod]
-        [Ignore("Until rbsParser is implemented")]
         public async Task GetAsync_WhenSegmentDoesNotExist_ReturnsNull()
         {
             // Arrange

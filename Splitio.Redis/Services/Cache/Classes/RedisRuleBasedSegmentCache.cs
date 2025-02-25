@@ -3,6 +3,7 @@ using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Parsing.Interfaces;
 using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Cache.Classes
@@ -13,12 +14,15 @@ namespace Splitio.Redis.Services.Cache.Classes
         private string TillKey => $"{RedisKeyPrefix}rbsegments.till";
 
         private readonly IRedisAdapterConsumer _redisAdapter;
+        private readonly IParser<RuleBasedSegmentDto, RuleBasedSegment> _rbsParser;
 
         public RedisRuleBasedSegmentCache(IRedisAdapterConsumer redisAdapter,
+            IParser<RuleBasedSegmentDto, RuleBasedSegment> rbsParser,
             RedisConfig redisConfig,
             bool clusterMode) : base(redisConfig, clusterMode)
         {
             _redisAdapter = redisAdapter;
+            _rbsParser = rbsParser;
         }
 
         public RuleBasedSegment Get(string name)
@@ -31,7 +35,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         public long GetChangeNumber()
         {
             var cnString = _redisAdapter.Get(TillKey);
-            
+
             return ParseChangeNumber(cnString);
         }
 
@@ -54,15 +58,14 @@ namespace Splitio.Redis.Services.Cache.Classes
             return $"{RedisKeyPrefix}{RuleBasedSegmentKeyPrefix}.{name}";
         }
 
-        private static RuleBasedSegment DeserializeAndParse(string rbsJSON)
+        private RuleBasedSegment DeserializeAndParse(string rbsJSON)
         {
             if (string.IsNullOrEmpty(rbsJSON))
                 return null;
 
-            // TODO: implement rbsParser
-            _ = JsonConvert.DeserializeObject<RuleBasedSegmentDto>(rbsJSON);
+            var rbsDto = JsonConvert.DeserializeObject<RuleBasedSegmentDto>(rbsJSON);
 
-            return null;
+            return _rbsParser.Parse(rbsDto);
         }
 
         private static long ParseChangeNumber(string cnString)

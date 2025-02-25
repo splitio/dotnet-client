@@ -40,7 +40,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 RedisSyncTimeout = 1000,
                 PoolSize = 1,
             };
-            var splitParser = new Mock<ISplitParser>();
+            var splitParser = new Mock<IParser<Split, ParsedSplit>>();
             var redisAdapterMock = new Mock<IRedisAdapterConsumer>();
             var splitCache = new RedisSplitCache(redisAdapterMock.Object, splitParser.Object, config, false);
 
@@ -101,8 +101,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 RedisUserPrefix = "mycompany",
                 PoolSize = 1,
             };
-            var splitParser = new Mock<ISplitParser>();
-            var redisAdapterMock = new Mock<IRedisAdapterConsumer>();            
+            var splitParser = new Mock<IParser<Split, ParsedSplit>>();
+            var redisAdapterMock = new Mock<IRedisAdapterConsumer>();
             var splitCache = new RedisSplitCache(redisAdapterMock.Object, splitParser.Object, config, false);
 
             redisAdapterMock

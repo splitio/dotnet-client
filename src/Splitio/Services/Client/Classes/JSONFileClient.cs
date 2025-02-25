@@ -6,6 +6,7 @@ using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
+using Splitio.Services.Parsing;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.Shared.Classes;
@@ -41,7 +42,7 @@ namespace Splitio.Services.Client.Classes
             var splitChangesResult = task.Result;
             var parsedSplits = new ConcurrentDictionary<string, ParsedSplit>();
 
-            _splitParser = new InMemorySplitParser(segmentFetcher, _segmentCache);
+            _splitParser = new FeatureFlagParser(_segmentCache, segmentFetcher);
 
             foreach (var split in splitChangesResult.splits)
             {

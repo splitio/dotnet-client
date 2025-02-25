@@ -13,11 +13,11 @@ namespace Splitio.Services.Shared.Classes
     {
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(FeatureFlagSyncService));
 
-        private readonly ISplitParser _featureFlagParser;
+        private readonly IParser<Split, ParsedSplit> _featureFlagParser;
         private readonly IFeatureFlagCacheProducer _featureFlagsCache;
         private readonly IFlagSetsFilter _flagSetsFilter;
 
-        public FeatureFlagSyncService(ISplitParser featureFlagParser,
+        public FeatureFlagSyncService(IParser<Split, ParsedSplit> featureFlagParser,
             IFeatureFlagCacheProducer featureFlagsCache,
             IFlagSetsFilter flagSetsFilter)
         {

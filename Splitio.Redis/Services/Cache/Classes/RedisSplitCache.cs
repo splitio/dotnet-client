@@ -17,10 +17,10 @@ namespace Splitio.Redis.Services.Cache.Classes
         protected const string SplitKeyPrefix = "split.";
         protected const string SplitsKeyPrefix = "splits.";
 
-        private readonly ISplitParser _splitParser;
+        private readonly IParser<Split, ParsedSplit> _splitParser;
         private readonly IRedisAdapterConsumer _redisAdapter;
 
-        public RedisSplitCache(IRedisAdapterConsumer redisAdapter, ISplitParser splitParser, RedisConfig redisConfig, bool clusterMode) : base(redisConfig, clusterMode)
+        public RedisSplitCache(IRedisAdapterConsumer redisAdapter, IParser<Split, ParsedSplit> splitParser, RedisConfig redisConfig, bool clusterMode) : base(redisConfig, clusterMode)
         {
             _redisAdapter = redisAdapter;
             _splitParser = splitParser;
