@@ -46,7 +46,7 @@ namespace Splitio.Services.Shared.Classes
                 }
 
                 toAdd.Add(ffParsed);
-                segmentNames.AddRange(featureFlag.GetSegments());
+                segmentNames.AddRange(ffParsed.GetSegments());
             }
 
             _featureFlagsCache.Update(toAdd, toRemove, till);
