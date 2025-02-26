@@ -65,7 +65,7 @@ namespace Splitio.Services.Parsing
                     {
                         conditionType = Enum.TryParse(condition.conditionType, out ConditionType result) ? result : ConditionType.WHITELIST,
                         partitions = condition.partitions,
-                        matcher = ParseMatcherGroup(parsedSplit, condition.matcherGroup, ruleBasedSegmentCache),
+                        matcher = ParseMatcherGroup(condition.matcherGroup, ruleBasedSegmentCache),
                         label = condition.label
                     });
                 }
@@ -80,7 +80,7 @@ namespace Splitio.Services.Parsing
             return parsedSplit;
         }
 
-        private CombiningMatcher ParseMatcherGroup(ParsedSplit parsedSplit, MatcherGroupDefinition matcherGroupDefinition, IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache)
+        private CombiningMatcher ParseMatcherGroup(MatcherGroupDefinition matcherGroupDefinition, IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache)
         {
             if (matcherGroupDefinition.matchers == null || matcherGroupDefinition.matchers.Count == 0)
             {

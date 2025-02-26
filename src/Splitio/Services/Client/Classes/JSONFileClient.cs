@@ -20,7 +20,6 @@ namespace Splitio.Services.Client.Classes
     {
         private readonly IFeatureFlagCache _featureFlagCache;
         private readonly ISegmentCache _segmentCache;
-        private readonly IRuleBasedSegmentCache _ruleBasedSegmentCache;
 
         public JSONFileClient(string splitsFilePath,
             string segmentsFilePath,
@@ -34,7 +33,7 @@ namespace Splitio.Services.Client.Classes
             IRuleBasedSegmentCache ruleBasedSegmentCache = null) : base("localhost")
         {
             _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            _ruleBasedSegmentCache = ruleBasedSegmentCache ?? new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>());
+            var rbsCache = ruleBasedSegmentCache ?? new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>());
 
             var segmentFetcher = new JSONFileSegmentFetcher(segmentsFilePath, _segmentCache);
             var splitChangeFetcher = new JSONFileSplitChangeFetcher(splitsFilePath);
@@ -48,7 +47,7 @@ namespace Splitio.Services.Client.Classes
 
             foreach (var split in splitChangesResult.splits)
             {
-                parsedSplits.TryAdd(split.name, _splitParser.Parse(split, _ruleBasedSegmentCache));
+                parsedSplits.TryAdd(split.name, _splitParser.Parse(split, rbsCache));
             }
 
             BuildFlagSetsFilter(new HashSet<string>());
