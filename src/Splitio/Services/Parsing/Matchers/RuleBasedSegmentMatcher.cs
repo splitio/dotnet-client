@@ -36,7 +36,12 @@ namespace Splitio.Services.Parsing.Matchers
                 return false;
             }
 
-            if (IsExcluded(rbs, key))
+            if (rbs.Excluded.Keys.Contains(key.matchingKey))
+            {
+                return false;
+            }
+
+            if (rbs.Excluded.Segments.Any(s => _segmentsCache.IsInSegment(s, key.matchingKey)))
             {
                 return false;
             }
@@ -57,9 +62,17 @@ namespace Splitio.Services.Parsing.Matchers
                 return false;
             }
 
-            if (IsExcluded(rbs, key))
+            if (rbs.Excluded.Keys.Contains(key.matchingKey))
             {
                 return false;
+            }
+
+            foreach (var segment in rbs.Excluded.Segments)
+            {
+                if (await _segmentsCache.IsInSegmentAsync(segment, key.matchingKey))
+                { 
+                    return false; 
+                }
             }
 
             foreach (var cm in rbs.CombiningMatchers)
@@ -76,21 +89,6 @@ namespace Splitio.Services.Parsing.Matchers
         public override async Task<bool> MatchAsync(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             return await MatchAsync(new Key(key, null), attributes, evaluator);
-        }
-
-        private bool IsExcluded(RuleBasedSegment rbs, Key key)
-        {
-            if (rbs.Excluded.Keys.Contains(key.matchingKey))
-            {
-                return true;
-            }
-
-            if (rbs.Excluded.Segments.Any(s => _segmentsCache.IsInSegment(s, key.matchingKey)))
-            {
-                return true;
-            }
-
-            return false;
         }
     }
 }
