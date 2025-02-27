@@ -7,7 +7,6 @@ using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Parsing;
-using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Classes;
@@ -30,9 +29,11 @@ namespace Splitio.Services.Client.Classes
             bool isLabelsEnabled = true,
             IEventsLog eventsLog = null,
             ITrafficTypeValidator trafficTypeValidator = null,
-            IImpressionsManager impressionsManager = null) : base("localhost")
+            IImpressionsManager impressionsManager = null,
+            IRuleBasedSegmentCache ruleBasedSegmentCache = null) : base("localhost")
         {
             _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
+            var rbsCache = ruleBasedSegmentCache ?? new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>());
 
             var segmentFetcher = new JSONFileSegmentFetcher(segmentsFilePath, _segmentCache);
             var splitChangeFetcher = new JSONFileSplitChangeFetcher(splitsFilePath);
@@ -46,7 +47,7 @@ namespace Splitio.Services.Client.Classes
 
             foreach (var split in splitChangesResult.splits)
             {
-                parsedSplits.TryAdd(split.name, _splitParser.Parse(split));
+                parsedSplits.TryAdd(split.name, _splitParser.Parse(split, rbsCache));
             }
 
             BuildFlagSetsFilter(new HashSet<string>());

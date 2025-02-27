@@ -19,7 +19,7 @@ namespace Splitio.Services.Parsing
             ISegmentFetcher segmentFetcher) : base(segmentsCache, segmentFetcher)
         { }
 
-        public ParsedSplit Parse(Split split)
+        public ParsedSplit Parse(Split split, IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache)
         {
             try
             {
@@ -46,7 +46,7 @@ namespace Splitio.Services.Parsing
                     Sets = split.Sets
                 };
 
-                return ParseConditions(split.conditions, parsedSplit);
+                return ParseConditions(split.conditions, parsedSplit, ruleBasedSegmentCache);
             }
             catch (Exception e)
             {
@@ -55,7 +55,7 @@ namespace Splitio.Services.Parsing
             }
         }
 
-        private ParsedSplit ParseConditions(List<ConditionDefinition> conditions, ParsedSplit parsedSplit)
+        private ParsedSplit ParseConditions(List<ConditionDefinition> conditions, ParsedSplit parsedSplit, IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache)
         {
             try
             {
@@ -65,7 +65,7 @@ namespace Splitio.Services.Parsing
                     {
                         conditionType = Enum.TryParse(condition.conditionType, out ConditionType result) ? result : ConditionType.WHITELIST,
                         partitions = condition.partitions,
-                        matcher = ParseMatcherGroup(parsedSplit, condition.matcherGroup),
+                        matcher = ParseMatcherGroup(condition.matcherGroup, ruleBasedSegmentCache),
                         label = condition.label
                     });
                 }
@@ -80,7 +80,7 @@ namespace Splitio.Services.Parsing
             return parsedSplit;
         }
 
-        private CombiningMatcher ParseMatcherGroup(ParsedSplit parsedSplit, MatcherGroupDefinition matcherGroupDefinition)
+        private CombiningMatcher ParseMatcherGroup(MatcherGroupDefinition matcherGroupDefinition, IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache)
         {
             if (matcherGroupDefinition.matchers == null || matcherGroupDefinition.matchers.Count == 0)
             {
@@ -89,7 +89,7 @@ namespace Splitio.Services.Parsing
 
             var delegates = matcherGroupDefinition
                 .matchers
-                .Select(ParseMatcher)
+                .Select(m => ParseMatcher(m, ruleBasedSegmentCache))
                 .ToList();
 
             return new CombiningMatcher()

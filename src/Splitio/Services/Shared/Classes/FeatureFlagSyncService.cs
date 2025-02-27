@@ -16,14 +16,17 @@ namespace Splitio.Services.Shared.Classes
         private readonly IParser<Split, ParsedSplit> _featureFlagParser;
         private readonly IFeatureFlagCacheProducer _featureFlagsCache;
         private readonly IFlagSetsFilter _flagSetsFilter;
+        private readonly IRuleBasedSegmentCacheConsumer _ruleBasedSegmentCache;
 
         public FeatureFlagSyncService(IParser<Split, ParsedSplit> featureFlagParser,
             IFeatureFlagCacheProducer featureFlagsCache,
-            IFlagSetsFilter flagSetsFilter)
+            IFlagSetsFilter flagSetsFilter,
+            IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache)
         {
             _featureFlagParser = featureFlagParser;
             _featureFlagsCache = featureFlagsCache;
             _flagSetsFilter = flagSetsFilter;
+            _ruleBasedSegmentCache = ruleBasedSegmentCache;
         }
 
         public List<string> UpdateFeatureFlagsFromChanges(List<Split> changes, long till)
@@ -34,7 +37,7 @@ namespace Splitio.Services.Shared.Classes
 
             foreach (var featureFlag in changes)
             {
-                var ffParsed = _featureFlagParser.Parse(featureFlag);
+                var ffParsed = _featureFlagParser.Parse(featureFlag, _ruleBasedSegmentCache);
 
                 if (ffParsed == null || !_flagSetsFilter.Intersect(featureFlag.Sets))
                 {

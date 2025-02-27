@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing;
 using Splitio.Services.SegmentFetcher.Interfaces;
+using System;
+using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Parsing
 {
@@ -14,6 +14,7 @@ namespace Splitio_Tests.Unit_Tests.Parsing
     {
         private Mock<ISegmentCacheConsumer> _segmentCacheMock;
         private Mock<ISegmentFetcher> _segmentFetcherMock;
+        private Mock<IRuleBasedSegmentCacheConsumer> _rbsConsumer;
         private RuleBasedSegmentParser _parser;
 
         [TestInitialize]
@@ -21,6 +22,8 @@ namespace Splitio_Tests.Unit_Tests.Parsing
         {
             _segmentCacheMock = new Mock<ISegmentCacheConsumer>();
             _segmentFetcherMock = new Mock<ISegmentFetcher>();
+            _rbsConsumer = new Mock<IRuleBasedSegmentCacheConsumer>();
+
             _parser = new RuleBasedSegmentParser(_segmentCacheMock.Object, _segmentFetcherMock.Object);
         }
 
@@ -60,7 +63,7 @@ namespace Splitio_Tests.Unit_Tests.Parsing
             };
 
             // Act
-            var result = _parser.Parse(rbsDTO);
+            var result = _parser.Parse(rbsDTO, _rbsConsumer.Object);
 
             // Assert
             Assert.IsNotNull(result);
@@ -86,7 +89,7 @@ namespace Splitio_Tests.Unit_Tests.Parsing
             };
 
             // Act
-            var result = _parser.Parse(rbsDTO);
+            var result = _parser.Parse(rbsDTO, _rbsConsumer.Object);
 
             // Assert
             Assert.IsNull(result);
@@ -119,7 +122,7 @@ namespace Splitio_Tests.Unit_Tests.Parsing
             };
 
             // Act
-            _parser.Parse(rbsDTO);
+            _parser.Parse(rbsDTO, _rbsConsumer.Object);
         }
     }
 }

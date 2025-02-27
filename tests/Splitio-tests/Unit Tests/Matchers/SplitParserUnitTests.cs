@@ -13,11 +13,18 @@ namespace Splitio_Tests.Unit_Tests
     [TestClass]
     public class SplitParserUnitTests
     {
+        private readonly Mock<IRuleBasedSegmentCacheConsumer> _rbsCache;
+
+        public SplitParserUnitTests()
+        {
+            _rbsCache = new Mock<IRuleBasedSegmentCacheConsumer>();
+        }
+
         [TestMethod]
         public void ParseSuccessfullyWhenNonSpecifiedAlgorithm()
         {
             //Arrange
-            Split split = new Split
+            var split = new Split
             {
                 name = "test1",
                 seed = 2323,
@@ -32,7 +39,7 @@ namespace Splitio_Tests.Unit_Tests
             var parser = new FeatureFlagParser(null, null);
 
             //Act
-            var parsedSplit = parser.Parse(split);
+            var parsedSplit = parser.Parse(split, _rbsCache.Object);
 
             //Assert
             Assert.IsNotNull(parsedSplit);
@@ -65,7 +72,7 @@ namespace Splitio_Tests.Unit_Tests
             var parser = new FeatureFlagParser(null, null);
 
             //Act
-            var parsedSplit = parser.Parse(split);
+            var parsedSplit = parser.Parse(split, _rbsCache.Object);
 
             //Assert
             Assert.IsNotNull(parsedSplit);
@@ -98,7 +105,7 @@ namespace Splitio_Tests.Unit_Tests
             var parser = new FeatureFlagParser(null, null);
 
             //Act
-            var parsedSplit = parser.Parse(split);
+            var parsedSplit = parser.Parse(split, _rbsCache.Object);
 
             //Assert
             Assert.IsNotNull(parsedSplit);
@@ -116,6 +123,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
+
             var parser = new FeatureFlagParser(segmentCacheConsumer.Object, null);
 
             var split = new Split
@@ -159,7 +167,7 @@ namespace Splitio_Tests.Unit_Tests
             };
 
             // Act.
-            var result = parser.Parse(split);
+            var result = parser.Parse(split, _rbsCache.Object);
 
             // Assert.
             Assert.AreEqual("test1", result.name);
@@ -179,6 +187,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
+
             var parser = new FeatureFlagParser(segmentCacheConsumer.Object, null);
 
             var split = new Split
@@ -225,7 +234,7 @@ namespace Splitio_Tests.Unit_Tests
             };
 
             // Act.
-            var result = parser.Parse(split);
+            var result = parser.Parse(split, _rbsCache.Object);
 
             // Assert.
             Assert.AreEqual("test1", result.name);
@@ -243,6 +252,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
+
             var parser = new FeatureFlagParser(segmentCacheConsumer.Object, null);
 
             var split = new Split
@@ -289,7 +299,7 @@ namespace Splitio_Tests.Unit_Tests
             };
 
             // Act.
-            var result = parser.Parse(split);
+            var result = parser.Parse(split, _rbsCache.Object);
 
             // Assert.
             Assert.AreEqual("test1", result.name);
@@ -307,6 +317,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
+
             var parser = new FeatureFlagParser(segmentCacheConsumer.Object, null);
 
             var split = new Split
@@ -353,7 +364,7 @@ namespace Splitio_Tests.Unit_Tests
             };
 
             // Act.
-            var result = parser.Parse(split);
+            var result = parser.Parse(split, _rbsCache.Object);
 
             // Assert.
             Assert.AreEqual("test1", result.name);
@@ -371,6 +382,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
+
             var parser = new FeatureFlagParser(segmentCacheConsumer.Object, null);
 
             var split = new Split
@@ -421,7 +433,7 @@ namespace Splitio_Tests.Unit_Tests
             };
 
             // Act.
-            var result = parser.Parse(split);
+            var result = parser.Parse(split, _rbsCache.Object);
 
             // Assert.
             Assert.AreEqual("test1", result.name);
@@ -439,6 +451,7 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             var segmentCacheConsumer = new Mock<ISegmentCacheConsumer>();
+
             var parser = new FeatureFlagParser(segmentCacheConsumer.Object, null);
 
             var split = new Split
@@ -488,7 +501,7 @@ namespace Splitio_Tests.Unit_Tests
             };
 
             // Act.
-            var result = parser.Parse(split);
+            var result = parser.Parse(split, _rbsCache.Object);
 
             // Assert.
             Assert.AreEqual("test1", result.name);

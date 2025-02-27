@@ -2,6 +2,7 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Classes;
+using Splitio.Services.Parsing.Matchers;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System;
@@ -22,7 +23,7 @@ namespace Splitio.Services.Parsing
             _segmentFetcher = segmentFetcher;
         }
 
-        public AttributeMatcher ParseMatcher(MatcherDefinition mDefinition)
+        public AttributeMatcher ParseMatcher(MatcherDefinition mDefinition, IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache)
         {
             if (mDefinition.matcherType == null)
             {
@@ -106,6 +107,9 @@ namespace Splitio.Services.Parsing
                             break;
                         case MatcherTypeEnum.IN_LIST_SEMVER:
                             matcher = new InListSemverMatcher(mDefinition.whitelistMatcherData.whitelist);
+                            break;
+                        case MatcherTypeEnum.IN_RULE_BASED_SEGMENT:
+                            matcher = new RuleBasedSegmentMatcher(mDefinition.userDefinedSegmentMatcherData.segmentName, ruleBasedSegmentCache, _segmentsCache);
                             break;
                     }
                 }
