@@ -3,7 +3,6 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
-using System.Drawing;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
