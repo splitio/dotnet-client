@@ -37,5 +37,10 @@ namespace Splitio.Services.Parsing
         {
             return await MatchAsync(key.matchingKey, attributes, evaluator);
         }
+
+        public string GetSegmentName()
+        {
+            return _segmentName;
+        }
     }
 }

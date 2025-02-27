@@ -9,16 +9,16 @@ using System.Linq;
 
 namespace Splitio.Services.Shared.Classes
 {
-    public class FeatureFlagSyncService : IFeatureFlagSyncService
+    public class FeatureFlagUpdater : IUpdater<Split>
     {
-        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(FeatureFlagSyncService));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(FeatureFlagUpdater));
 
         private readonly IParser<Split, ParsedSplit> _featureFlagParser;
         private readonly IFeatureFlagCacheProducer _featureFlagsCache;
         private readonly IFlagSetsFilter _flagSetsFilter;
         private readonly IRuleBasedSegmentCacheConsumer _ruleBasedSegmentCache;
 
-        public FeatureFlagSyncService(IParser<Split, ParsedSplit> featureFlagParser,
+        public FeatureFlagUpdater(IParser<Split, ParsedSplit> featureFlagParser,
             IFeatureFlagCacheProducer featureFlagsCache,
             IFlagSetsFilter flagSetsFilter,
             IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache)
@@ -29,7 +29,7 @@ namespace Splitio.Services.Shared.Classes
             _ruleBasedSegmentCache = ruleBasedSegmentCache;
         }
 
-        public List<string> UpdateFeatureFlagsFromChanges(List<Split> changes, long till)
+        public List<string> Process(List<Split> changes, long till)
         {
             var toAdd = new List<ParsedSplit>();
             var toRemove = new List<string>();
@@ -46,7 +46,7 @@ namespace Splitio.Services.Shared.Classes
                 }
 
                 toAdd.Add(ffParsed);
-                segmentNames.AddRange(featureFlag.GetSegments());
+                segmentNames.AddRange(ffParsed.GetSegments());
             }
 
             _featureFlagsCache.Update(toAdd, toRemove, till);

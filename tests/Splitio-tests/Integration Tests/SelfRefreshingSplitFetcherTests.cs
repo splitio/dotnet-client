@@ -47,7 +47,7 @@ namespace Splitio_Tests.Integration_Tests
             var gates = new InMemoryReadinessGatesCache();
             var taskManager = new TasksManager(gates);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.FeatureFlagsFetcher, 250);
-            var featureFlagSyncService = new FeatureFlagSyncService(splitParser, splitCache, flagSetsFilter, rbsCache);
+            var featureFlagSyncService = new FeatureFlagUpdater(splitParser, splitCache, flagSetsFilter, rbsCache);
             var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, gates, task, splitCache, featureFlagSyncService);
             selfRefreshingSplitFetcher.Start();
             Thread.Sleep(1000);
@@ -79,7 +79,7 @@ namespace Splitio_Tests.Integration_Tests
             var gates = new InMemoryReadinessGatesCache();
             var taskManager = new TasksManager(gates);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.FeatureFlagsFetcher, 250);
-            var featureFlagSyncService = new FeatureFlagSyncService(splitParser, splitCache, flagSetsFilter, rbsCache);
+            var featureFlagSyncService = new FeatureFlagUpdater(splitParser, splitCache, flagSetsFilter, rbsCache);
             var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, gates, task, splitCache, featureFlagSyncService);
             selfRefreshingSplitFetcher.Start();
             Thread.Sleep(1000);
@@ -135,7 +135,7 @@ namespace Splitio_Tests.Integration_Tests
             var splitParser = new FeatureFlagParser(segmentCache, selfRefreshingSegmentFetcher);
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), flagSetsFilter);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.FeatureFlagsFetcher, 3000);
-            var featureFlagSyncService = new FeatureFlagSyncService(splitParser, splitCache, flagSetsFilter, rbsCache);
+            var featureFlagSyncService = new FeatureFlagUpdater(splitParser, splitCache, flagSetsFilter, rbsCache);
             var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(apiSplitChangeFetcher, gates, task, splitCache, featureFlagSyncService);
             selfRefreshingSplitFetcher.Start();
 

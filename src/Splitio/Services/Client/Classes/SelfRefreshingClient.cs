@@ -49,7 +49,7 @@ namespace Splitio.Services.Client.Classes
         private ITelemetryAPI _telemetryAPI;
         private IFeatureFlagCache _featureFlagCache;
         private ISegmentCache _segmentCache;
-        private IFeatureFlagSyncService _featureFlagSyncService;
+        private IUpdater<Split> _featureFlagUpdater;
         private IRuleBasedSegmentCache _ruleBasedSegmentCache;
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config) : base(apiKey)
@@ -124,8 +124,8 @@ namespace Splitio.Services.Client.Classes
             _splitParser = new FeatureFlagParser(_segmentCache, (SelfRefreshingSegmentFetcher)_selfRefreshingSegmentFetcher);
             var featureFlagRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SplitsRefreshRate) : _config.SplitsRefreshRate;
             var featureFlagsTask = _tasksManager.NewPeriodicTask(Enums.Task.FeatureFlagsFetcher, featureFlagRefreshRate * 1000);
-            _featureFlagSyncService = new FeatureFlagSyncService(_splitParser, _featureFlagCache, _flagSetsFilter, _ruleBasedSegmentCache);
-            _splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, _statusManager, featureFlagsTask, _featureFlagCache, _featureFlagSyncService);
+            _featureFlagUpdater = new FeatureFlagUpdater(_splitParser, _featureFlagCache, _flagSetsFilter, _ruleBasedSegmentCache);
+            _splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, _statusManager, featureFlagsTask, _featureFlagCache, _featureFlagUpdater);
             _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCache, _blockUntilReadyService);
         }
 
@@ -230,7 +230,7 @@ namespace Splitio.Services.Client.Classes
                 var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _impressionsCounter, _statusManager, _telemetrySyncTask, _featureFlagCache, backOffFeatureFlags, backOffSegments, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs, _segmentCache, _uniqueKeysTracker);
 
                 // Workers
-                var splitsWorker = new SplitsWorker(synchronizer, _featureFlagCache, _telemetryRuntimeProducer, _selfRefreshingSegmentFetcher, _featureFlagSyncService);
+                var splitsWorker = new SplitsWorker(synchronizer, _featureFlagCache, _telemetryRuntimeProducer, _selfRefreshingSegmentFetcher, _featureFlagUpdater);
                 var segmentsWorker = new SegmentsWorker(synchronizer);
 
                 // NotificationProcessor

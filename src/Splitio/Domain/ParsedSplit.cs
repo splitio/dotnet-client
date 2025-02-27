@@ -1,10 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using Splitio.Services.Parsing;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Splitio.Domain
 {
     public class ParsedSplit : SplitBase
     {
+        public ParsedSplit()
+        {
+            conditions = new List<ConditionWithLogic>();
+        }
+
         public List<ConditionWithLogic> conditions { get; set; }
         public AlgorithmEnum algo { get; set; }
         public int trafficAllocationSeed { get; set; }
@@ -28,6 +34,24 @@ namespace Splitio.Domain
                 defaultTreatment = defaultTreatment,
                 sets = Sets != null ? Sets.ToList() : new List<string>()
             };
+        }
+
+        public List<string> GetSegments()
+        {
+            var segments = new List<string>();
+
+            foreach (var condition in conditions)
+            {
+                foreach (var del in condition.matcher.delegates)
+                {
+                    if (del.matcher is UserDefinedSegmentMatcher matcher)
+                    {
+                        segments.Add(matcher.GetSegmentName());
+                    }
+                }
+            }
+
+            return segments;
         }
     }
 }

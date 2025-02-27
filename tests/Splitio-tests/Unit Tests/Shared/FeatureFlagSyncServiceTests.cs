@@ -19,7 +19,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
         private readonly Mock<IFlagSetsFilter> _flagSetsFilter;
         private readonly Mock<IRuleBasedSegmentCacheConsumer> _rbsCache;
 
-        private readonly IFeatureFlagSyncService _featureFlagSyncService;
+        private readonly IUpdater<Split> _featureFlagSyncService;
 
         public FeatureFlagSyncServiceTests()
         {
@@ -28,7 +28,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             _flagSetsFilter = new Mock<IFlagSetsFilter>();
             _rbsCache = new Mock<IRuleBasedSegmentCacheConsumer>();
 
-            _featureFlagSyncService = new FeatureFlagSyncService(_featureFlagParser.Object, _featureFlagsCache.Object, _flagSetsFilter.Object, _rbsCache.Object);
+            _featureFlagSyncService = new FeatureFlagUpdater(_featureFlagParser.Object, _featureFlagsCache.Object, _flagSetsFilter.Object, _rbsCache.Object);
         }
 
         [TestMethod]
@@ -52,7 +52,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Returns(true);
 
             // Act.
-            var result = _featureFlagSyncService.UpdateFeatureFlagsFromChanges(changes, till);
+            var result = _featureFlagSyncService.Process(changes, till);
 
             // Assert.
             Assert.IsFalse(result.Any());
@@ -83,7 +83,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Returns(true);
 
             // Act.
-            var result = _featureFlagSyncService.UpdateFeatureFlagsFromChanges(changes, till);
+            var result = _featureFlagSyncService.Process(changes, till);
 
             // Assert.
             Assert.IsFalse(result.Any());
@@ -114,7 +114,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Returns(false);
 
             // Act.
-            var result = _featureFlagSyncService.UpdateFeatureFlagsFromChanges(changes, till);
+            var result = _featureFlagSyncService.Process(changes, till);
 
             // Assert.
             Assert.IsFalse(result.Any());

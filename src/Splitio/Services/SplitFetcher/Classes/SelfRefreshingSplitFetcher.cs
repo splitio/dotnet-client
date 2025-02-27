@@ -19,18 +19,18 @@ namespace Splitio.Services.SplitFetcher.Classes
         private readonly IStatusManager _statusManager;
         private readonly ISplitTask _periodicTask;
         private readonly IFeatureFlagCache _featureFlagCache;
-        private readonly IFeatureFlagSyncService _featureFlagSyncService;
+        private readonly IUpdater<Split> _featureFlagUpdater;
 
         public SelfRefreshingSplitFetcher(ISplitChangeFetcher splitChangeFetcher,
             IStatusManager statusManager,
             ISplitTask periodicTask,
             IFeatureFlagCache featureFlagCache,
-            IFeatureFlagSyncService featureFlagSyncService)
+            IUpdater<Split> featureFlagUpdater)
         {
             _splitChangeFetcher = splitChangeFetcher;
             _statusManager = statusManager;
             _featureFlagCache = featureFlagCache;
-            _featureFlagSyncService = featureFlagSyncService;
+            _featureFlagUpdater = featureFlagUpdater;
             _periodicTask = periodicTask;
             _periodicTask.SetFunction(async () => await FetchSplitsAsync(new FetchOptions()));
         }
@@ -79,7 +79,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                     if (result.splits != null && result.splits.Count > 0)
                     {
-                        var sNames = _featureFlagSyncService.UpdateFeatureFlagsFromChanges(result.splits, result.till);
+                        var sNames = _featureFlagUpdater.Process(result.splits, result.till);
                         segmentNames.AddRange(sNames);
                     }
                 }

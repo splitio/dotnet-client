@@ -18,14 +18,14 @@ namespace Splitio.Services.EventSource.Workers
         private readonly IFeatureFlagCache _featureFlagCache;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly ISelfRefreshingSegmentFetcher _segmentFetcher;
-        private readonly IFeatureFlagSyncService _featureFlagSyncService;
+        private readonly IUpdater<Split> _featureFlagUpdater;
         private readonly SplitQueue<SplitChangeNotification> _queue;
 
         public SplitsWorker(ISynchronizer synchronizer,
             IFeatureFlagCache featureFlagCache,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
             ISelfRefreshingSegmentFetcher segmentFetcher,
-            IFeatureFlagSyncService featureFlagSyncService) : base("FeatureFlagsWorker", WrapperAdapter.Instance().GetLogger(typeof(SplitsWorker)))
+            IUpdater<Split> featureFlagUpdater) : base("FeatureFlagsWorker", WrapperAdapter.Instance().GetLogger(typeof(SplitsWorker)))
         {
             _synchronizer = synchronizer;
             _featureFlagCache = featureFlagCache;
@@ -33,7 +33,7 @@ namespace Splitio.Services.EventSource.Workers
             _queue.AddObserver(this);
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _segmentFetcher = segmentFetcher;
-            _featureFlagSyncService = featureFlagSyncService;
+            _featureFlagUpdater = featureFlagUpdater;
         }
 
         #region Public Methods
@@ -104,7 +104,7 @@ namespace Splitio.Services.EventSource.Workers
                 if (scn.FeatureFlag == null || _featureFlagCache.GetChangeNumber() != scn.PreviousChangeNumber)
                     return false;
 
-                var sNames = _featureFlagSyncService.UpdateFeatureFlagsFromChanges(new List<Split> { scn.FeatureFlag }, scn.ChangeNumber);
+                var sNames = _featureFlagUpdater.Process(new List<Split> { scn.FeatureFlag }, scn.ChangeNumber);
 
                 if (sNames.Count > 0) await _segmentFetcher.FetchSegmentsIfNotExistsAsync(sNames);
 
