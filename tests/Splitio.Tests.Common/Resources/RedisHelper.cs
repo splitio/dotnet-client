@@ -50,9 +50,9 @@ namespace Splitio.Tests.Common.Resources
 
             var splitsJson = File.ReadAllText($"{rootFilePath}split_changes.json");
 
-            var splitResult = JsonConvert.DeserializeObject<SplitChangesResult>(splitsJson);
+            var result = JsonConvert.DeserializeObject<SplitChangesResult>(splitsJson);
 
-            foreach (var split in splitResult.splits)
+            foreach (var split in result.FeatureFlags.Data)
             {
                 await redisAdapter.SetAsync($"{userPrefix}.SPLITIO.split.{split.name}", JsonConvert.SerializeObject(split));
 

@@ -3,25 +3,26 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
+using System.Drawing;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {
     public abstract class SplitChangeFetcher : ISplitChangeFetcher
     {
-        private static readonly ISplitLogger Log = WrapperAdapter.Instance().GetLogger(typeof(SplitChangeFetcher));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitChangeFetcher));
 
-        protected abstract Task<SplitChangesResult> FetchFromBackendAsync(long since, FetchOptions fetchOptions);
+        protected abstract Task<SplitChangesResult> FetchFromBackendAsync(FetchOptions fetchOptions);
 
-        public async Task<SplitChangesResult> FetchAsync(long since, FetchOptions fetchOptions)
+        public async Task<SplitChangesResult> FetchAsync(FetchOptions fo)
         {
             try
             {
-                return await FetchFromBackendAsync(since, fetchOptions);
+                return await FetchFromBackendAsync(fo);
             }
             catch(Exception e)
             {
-                Log.Error(string.Format("Exception caught executing Fetch since={0}", since), e);
+                _log.Error($"Exception caught executing Fetch since={fo.FeatureFlagsSince} and rbSince={fo.RuleBasedSegmentsSince}", e);
                 return null;
             }
         }

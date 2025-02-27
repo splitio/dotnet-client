@@ -17,7 +17,7 @@ namespace Splitio.Services.Common
         private readonly static int OnDemandFetchBackoffMaxRetries = 10;
         
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(Synchronizer));
-        private readonly ISplitFetcher _splitFetcher;
+        private readonly ITargetingRulesFetcher _splitFetcher;
         private readonly ISelfRefreshingSegmentFetcher _segmentFetcher;
         private readonly IImpressionsLog _impressionsLog;
         private readonly IEventsLog _eventsLog;
@@ -33,7 +33,7 @@ namespace Splitio.Services.Common
         private readonly int _onDemandFetchRetryDelayMs;
         private readonly FetchOptions _defaultFetchOptions;
 
-        public Synchronizer(ISplitFetcher splitFetcher,
+        public Synchronizer(ITargetingRulesFetcher splitFetcher,
             ISelfRefreshingSegmentFetcher segmentFetcher,
             IImpressionsLog impressionsLog,
             IEventsLog eventsLog,

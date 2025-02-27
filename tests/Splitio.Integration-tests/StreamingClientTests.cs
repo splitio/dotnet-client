@@ -540,107 +540,119 @@ namespace Splitio.Integration_tests
                 // Arrange.
                 var changes1 = new SplitChangesResult
                 {
-                    since = -1,
-                    till = 10,
-                    splits = new List<Split>()
+                    FeatureFlags = new ChangesDto<Split>
                     {
-                        new Split
+                        Since = -1,
+                        Till = 10,
+                        Data = new List<Split>()
                         {
-                            name = "split-name-1",
-                            changeNumber = 10,
-                            conditions = new List<ConditionDefinition>
+                            new Split
                             {
-                                new ConditionDefinition
+                                name = "split-name-1",
+                                changeNumber = 10,
+                                conditions = new List<ConditionDefinition>
                                 {
-                                    conditionType = "ROLLOUT",
-                                    partitions = new List<PartitionDefinition>
+                                    new ConditionDefinition
                                     {
-                                        new PartitionDefinition
+                                        conditionType = "ROLLOUT",
+                                        partitions = new List<PartitionDefinition>
                                         {
-                                            size = 100,
-                                            treatment = "on"
-                                        }
-                                    },
-                                    matcherGroup = new MatcherGroupDefinition
-                                    {
-                                        matchers = new List<MatcherDefinition>
-                                        {
-                                            new MatcherDefinition
+                                            new PartitionDefinition
                                             {
-                                                whitelistMatcherData = new WhitelistData
+                                                size = 100,
+                                                treatment = "on"
+                                            }
+                                        },
+                                        matcherGroup = new MatcherGroupDefinition
+                                        {
+                                            matchers = new List<MatcherDefinition>
+                                            {
+                                                new MatcherDefinition
                                                 {
-                                                    whitelist = new List<string>{ "mauro" }
-                                                },
-                                                matcherType = "WHITELIST"
+                                                    whitelistMatcherData = new WhitelistData
+                                                    {
+                                                        whitelist = new List<string>{ "mauro" }
+                                                    },
+                                                    matcherType = "WHITELIST"
+                                                }
                                             }
                                         }
                                     }
-                                }
-                            },
-                            defaultTreatment = "on",
-                            killed = false,
-                            status = "ACTIVE"
+                                },
+                                defaultTreatment = "on",
+                                killed = false,
+                                status = "ACTIVE"
+                            }
                         }
                     }
                 };
                 var changes2 = new SplitChangesResult
                 {
-                    since = 10,
-                    till = 10,
-                    splits = new List<Split>()
+                    FeatureFlags = new ChangesDto<Split>
+                    {
+                        Since = 10,
+                        Till = 10,
+                        Data = new List<Split>()
+                    }
                 };
 
                 var changes3 = new SplitChangesResult
                 {
-                    since = 10,
-                    till = 11,
-                    splits = new List<Split>()
+                    FeatureFlags = new ChangesDto<Split>
                     {
-                        new Split
+                        Since = 10,
+                        Till = 11,
+                        Data = new List<Split>()
                         {
-                            name = "split-name-1",
-                            changeNumber = 11,
-                            conditions = new List<ConditionDefinition>
+                            new Split
                             {
-                                new ConditionDefinition
+                                name = "split-name-1",
+                                changeNumber = 11,
+                                conditions = new List<ConditionDefinition>
                                 {
-                                    conditionType = "ROLLOUT",
-                                    partitions = new List<PartitionDefinition>
+                                    new ConditionDefinition
                                     {
-                                        new PartitionDefinition
+                                        conditionType = "ROLLOUT",
+                                        partitions = new List<PartitionDefinition>
                                         {
-                                            size = 100,
-                                            treatment = "off"
-                                        }
-                                    },
-                                    matcherGroup = new MatcherGroupDefinition
-                                    {
-                                        matchers = new List<MatcherDefinition>
-                                        {
-                                            new MatcherDefinition
+                                            new PartitionDefinition
                                             {
-                                                whitelistMatcherData = new WhitelistData
+                                                size = 100,
+                                                treatment = "off"
+                                            }
+                                        },
+                                        matcherGroup = new MatcherGroupDefinition
+                                        {
+                                            matchers = new List<MatcherDefinition>
+                                            {
+                                                new MatcherDefinition
                                                 {
-                                                    whitelist = new List<string>{ "mauro" }
-                                                },
-                                                matcherType = "WHITELIST"
+                                                    whitelistMatcherData = new WhitelistData
+                                                    {
+                                                        whitelist = new List<string>{ "mauro" }
+                                                    },
+                                                    matcherType = "WHITELIST"
+                                                }
                                             }
                                         }
                                     }
-                                }
-                            },
-                            defaultTreatment = "off",
-                            killed = false,
-                            status = "ACTIVE"
+                                },
+                                defaultTreatment = "off",
+                                killed = false,
+                                status = "ACTIVE"
+                            }
                         }
                     }
                 };
 
                 var changes4 = new SplitChangesResult
                 {
-                    since = 11,
-                    till = 11,
-                    splits = new List<Split>()
+                    FeatureFlags = new ChangesDto<Split>
+                    {
+                        Since = 11,
+                        Till = 11,
+                        Data = new List<Split>()
+                    }
                 };
 
                 httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes1), "-1");

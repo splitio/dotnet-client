@@ -14,9 +14,9 @@ namespace Splitio.Services.SplitFetcher.Classes
             _apiClient = apiClient;
         }
 
-        protected override async Task<SplitChangesResult> FetchFromBackendAsync(long since, FetchOptions fetchOptions)
+        protected override async Task<SplitChangesResult> FetchFromBackendAsync(FetchOptions fo)
         {
-            var fetchResult = await _apiClient.FetchSplitChangesAsync(since, fetchOptions);
+            var fetchResult = await _apiClient.FetchSplitChangesAsync(fo);
 
             return JsonConvert.DeserializeObject<SplitChangesResult>(fetchResult);
         }

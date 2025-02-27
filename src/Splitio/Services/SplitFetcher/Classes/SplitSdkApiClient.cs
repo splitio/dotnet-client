@@ -32,7 +32,7 @@ namespace Splitio.Services.SplitFetcher.Classes
             _flagSets = flagSetsFilter.GetFlagSets();
         }
 
-        public async Task<string> FetchSplitChangesAsync(long since, FetchOptions fetchOptions)
+        public async Task<string> FetchSplitChangesAsync(FetchOptions op)
         {
             using (var clock = new Util.SplitStopwatch())
             {
@@ -40,8 +40,8 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                 try
                 {
-                    var requestUri = GetRequestUri(since, fetchOptions.Till);
-                    var response = await _httpClient.GetAsync(requestUri, fetchOptions.CacheControlHeaders);
+                    var requestUri = GetRequestUri(op);
+                    var response = await _httpClient.GetAsync(requestUri, op.CacheControlHeaders);
 
                     clock.Stop();
                     Util.Helper.RecordTelemetrySync(nameof(FetchSplitChangesAsync), response, ResourceEnum.SplitSync, clock, _telemetryRuntimeProducer, _log);
@@ -67,15 +67,18 @@ namespace Splitio.Services.SplitFetcher.Classes
             }
         }
 
-        private string GetRequestUri(long since, long? till = null)
+        private string GetRequestUri(FetchOptions op)
         {
-            var uri = $"{_baseUrl}/api/splitChanges?s={ApiVersions.FlagsSpec}&since={Uri.EscapeDataString(since.ToString())}";
+            var ffSince = Uri.EscapeDataString(op.FeatureFlagsSince.ToString());
+            var rbsSince = Uri.EscapeDataString(op.RuleBasedSegmentsSince.ToString());
+
+            var uri = $"{_baseUrl}/api/splitChanges?s={ApiVersions.FlagsSpec}&since={ffSince}&rbSince={rbsSince}";
 
             if (!string.IsNullOrEmpty(_flagSets))
                 uri = $"{uri}&sets={_flagSets}";
 
-            if (till.HasValue)
-                uri = $"{uri}&till={Uri.EscapeDataString(till.Value.ToString())}";
+            if (op.Till.HasValue)
+                uri = $"{uri}&till={Uri.EscapeDataString(op.Till.Value.ToString())}";
 
             return uri;
         }

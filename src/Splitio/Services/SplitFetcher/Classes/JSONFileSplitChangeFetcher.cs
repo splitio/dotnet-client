@@ -19,7 +19,7 @@ namespace Splitio.Services.SplitFetcher.Classes
             _wrapperAdapter = WrapperAdapter.Instance();
         }
 
-        protected override Task<SplitChangesResult> FetchFromBackendAsync(long since, FetchOptions fetchOptions)
+        protected override Task<SplitChangesResult> FetchFromBackendAsync(FetchOptions fetchOptions)
         {
             var json = File.ReadAllText(_filePath);
             var splitChangesResult = JsonConvert.DeserializeObject<SplitChangesResult>(json);

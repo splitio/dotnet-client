@@ -17,7 +17,7 @@ namespace Splitio_Tests.Unit_Tests.Common
     [TestClass]
     public class SynchronizerTests
     {
-        private readonly Mock<ISplitFetcher> _splitFetcher;
+        private readonly Mock<ITargetingRulesFetcher> _splitFetcher;
         private readonly Mock<ISelfRefreshingSegmentFetcher> _segmentFetcher;
         private readonly Mock<IImpressionsLog> _impressionsLog;
         private readonly Mock<IEventsLog> _eventsLog;
@@ -32,7 +32,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
         public SynchronizerTests()
         {
-            _splitFetcher = new Mock<ISplitFetcher>();
+            _splitFetcher = new Mock<ITargetingRulesFetcher>();
             _segmentFetcher = new Mock<ISelfRefreshingSegmentFetcher>();
             _impressionsLog = new Mock<IImpressionsLog>();
             _eventsLog = new Mock<IEventsLog>();

@@ -37,15 +37,15 @@ namespace Splitio.Services.Client.Classes
 
             var segmentFetcher = new JSONFileSegmentFetcher(segmentsFilePath, _segmentCache);
             var splitChangeFetcher = new JSONFileSplitChangeFetcher(splitsFilePath);
-            var task = splitChangeFetcher.FetchAsync(-1, new FetchOptions());
+            var task = splitChangeFetcher.FetchAsync(new FetchOptions());
             task.Wait();
             
-            var splitChangesResult = task.Result;
+            var result = task.Result;
             var parsedSplits = new ConcurrentDictionary<string, ParsedSplit>();
 
             _splitParser = new FeatureFlagParser(_segmentCache, segmentFetcher);
 
-            foreach (var split in splitChangesResult.splits)
+            foreach (var split in result.FeatureFlags.Data)
             {
                 parsedSplits.TryAdd(split.name, _splitParser.Parse(split, rbsCache));
             }
