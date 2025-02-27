@@ -31,14 +31,14 @@ namespace Splitio_Tests.Unit_Tests
                 .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(@"{
                           'rbs':{
-                             'since':-1,
-                             'till':-1,
-                             'data':[
+                             's':-1,
+                             't':-1,
+                             'd':[
         
                              ]
                           },
                           'ff':{
-                             'data':[
+                             'd':[
                                 {
                                    'trafficType':'user',
                                    'name':'Reset_Seed_UI',
@@ -76,8 +76,8 @@ namespace Splitio_Tests.Unit_Tests
                                    ]
                                 }
                              ],
-                             'since':1469817846929,
-                             'till':1469827821322
+                             's':1469817846929,
+                             't':1469827821322
                           }
                         }");
 
@@ -100,12 +100,12 @@ namespace Splitio_Tests.Unit_Tests
                 .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(@"{
                           'rbs':{
-                            'since':-1,
-                            'till':-1,
-                            'data':[]
+                            's':-1,
+                            't':-1,
+                            'd':[]
                           },
                           'ff':{
-                            'data': [
+                            'd': [
                             {
                               'trafficTypeName': 'user',
                               'name': 'Test_1',
@@ -147,8 +147,8 @@ namespace Splitio_Tests.Unit_Tests
                               ]
                             }   
                           ],
-                          'since': -1,
-                          'till': 1470855828956
+                          's': -1,
+                          't': 1470855828956
                           },
                         }");
 
@@ -177,12 +177,12 @@ namespace Splitio_Tests.Unit_Tests
                 .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(@"{
                           'rbs':{
-                            'since':-1,
-                            'till':-1,
-                            'data':[]
+                            's':-1,
+                            't':-1,
+                            'd':[]
                           },
                           'ff': {
-                            'data': [
+                            'd': [
                             {
                               'trafficTypeName': 'user',
                               'name': 'Test_1',
@@ -225,8 +225,8 @@ namespace Splitio_Tests.Unit_Tests
                               ]
                             }   
                           ],
-                          'since': -1,
-                          'till': 1470855828956
+                          's': -1,
+                          't': 1470855828956
                           }
                         }");
 
@@ -247,12 +247,12 @@ namespace Splitio_Tests.Unit_Tests
                 .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(@"{
                           'rbs':{
-                            'since':-1,
-                            'till':-1,
-                            'data':[]
+                            's':-1,
+                            't':-1,
+                            'd':[]
                           },
                           'ff':{
-                            'data': [
+                            'd': [
                             {
                               'trafficTypeName': 'user',
                               'name': 'Test_1',
@@ -295,8 +295,8 @@ namespace Splitio_Tests.Unit_Tests
                               ]
                             }   
                           ],
-                          'since': -1,
-                          'till': 1470855828956
+                          's': -1,
+                          't': 1470855828956
                           }
                         }");
 
@@ -334,12 +334,12 @@ namespace Splitio_Tests.Unit_Tests
                 .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(@"{
                           'rbs':{
-                            'since':-1,
-                            'till':-1,
-                            'data':[]
+                            's':-1,
+                            't':-1,
+                            'd':[]
                           },
                           'ff':{
-                            'data': [
+                            'd': [
                             {
                               'trafficTypeName': 'user',
                               'name': 'Test_1',
@@ -386,8 +386,8 @@ namespace Splitio_Tests.Unit_Tests
                               ]
                             }   
                           ],
-                          'since': -1,
-                          'till': 1470855828956
+                          's': -1,
+                          't': 1470855828956
                           }
                         }");
 
@@ -409,12 +409,12 @@ namespace Splitio_Tests.Unit_Tests
                 .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
                 .ReturnsAsync(@"{
                           'rbs':{
-                            'since':-1,
-                            'till':-1,
-                            'data':[]
+                            's':-1,
+                            't':-1,
+                            'd':[]
                           },
                           'ff':{
-                            'data': [
+                            'd': [
                             {
                               'trafficTypeName': 'user',
                               'name': 'Test_1',
@@ -462,8 +462,8 @@ namespace Splitio_Tests.Unit_Tests
                               ]
                             }   
                           ],
-                          'since': -1,
-                          'till': 1470855828956
+                          's': -1,
+                          't': 1470855828956
                           }
                         }");
 

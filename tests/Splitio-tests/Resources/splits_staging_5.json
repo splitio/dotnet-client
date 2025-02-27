@@ -1,11 +1,11 @@
 ﻿{
   "rbs": {
-    "since": -1,
-    "till": -1,
-    "data": []
+    "s": -1,
+    "t": -1,
+    "d": []
   },
   "ff": {
-    "data": [
+    "d": [
       {
         "trafficTypeName": "machine",
         "name": "UT_NOT_SET_MATCHER",
@@ -1218,7 +1218,7 @@
         ]
       }
     ],
-    "since": -1,
-    "till": 1492723024413
+    "s": -1,
+    "t": 1492723024413
   }
 }

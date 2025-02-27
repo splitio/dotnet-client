@@ -1,11 +1,11 @@
 {
   "rbs": {
-    "since": -1,
-    "till": -1,
-    "data": []
+    "s": -1,
+    "t": -1,
+    "d": []
   },
   "ff": {
-    "data": [
+    "d": [
       {
         "orgId": null,
         "environment": null,

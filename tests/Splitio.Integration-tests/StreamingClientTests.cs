@@ -540,6 +540,45 @@ namespace Splitio.Integration_tests
                 // Arrange.
                 var changes1 = new SplitChangesResult
                 {
+                    RuleBasedSegments = new ChangesDto<RuleBasedSegmentDto>
+                    {
+                        Since = -1,
+                        Till = 11,
+                        Data = new List<RuleBasedSegmentDto>
+                        {
+                            new RuleBasedSegmentDto
+                            {
+                                Status = "ACTIVE",
+                                Name = "rbs_test",
+                                ChangeNumber = 1,
+                                Excluded = new Excluded
+                                {
+                                    Keys = new List<string>(),
+                                    Segments = new List<string>()
+                                },
+                                Conditions = new List<ConditionDefinition>
+                                {
+                                    new ConditionDefinition
+                                    {
+                                        matcherGroup = new MatcherGroupDefinition
+                                        {
+                                            matchers = new List<MatcherDefinition>
+                                            {
+                                                new MatcherDefinition
+                                                {
+                                                    whitelistMatcherData = new WhitelistData
+                                                    {
+                                                        whitelist = new List<string>{ "mauro" }
+                                                    },
+                                                    matcherType = "WHITELIST"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
                     FeatureFlags = new ChangesDto<Split>
                     {
                         Since = -1,
@@ -588,6 +627,12 @@ namespace Splitio.Integration_tests
                 };
                 var changes2 = new SplitChangesResult
                 {
+                    RuleBasedSegments = new ChangesDto<RuleBasedSegmentDto>
+                    {
+                        Since = 11,
+                        Till = 11,
+                        Data = new List<RuleBasedSegmentDto>()
+                    },
                     FeatureFlags = new ChangesDto<Split>
                     {
                         Since = 10,
@@ -598,6 +643,12 @@ namespace Splitio.Integration_tests
 
                 var changes3 = new SplitChangesResult
                 {
+                    RuleBasedSegments = new ChangesDto<RuleBasedSegmentDto>
+                    {
+                        Since = 11,
+                        Till = 11,
+                        Data = new List<RuleBasedSegmentDto>()
+                    },
                     FeatureFlags = new ChangesDto<Split>
                     {
                         Since = 10,
@@ -647,6 +698,12 @@ namespace Splitio.Integration_tests
 
                 var changes4 = new SplitChangesResult
                 {
+                    RuleBasedSegments = new ChangesDto<RuleBasedSegmentDto>
+                    {
+                        Since = 11,
+                        Till = 11,
+                        Data = new List<RuleBasedSegmentDto>()
+                    },
                     FeatureFlags = new ChangesDto<Split>
                     {
                         Since = 11,
@@ -655,8 +712,8 @@ namespace Splitio.Integration_tests
                     }
                 };
 
-                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes1), "-1");
-                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes2), "10");
+                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes1), "-1", "-1");
+                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes2), "10", "11");
                 httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
                 httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 
@@ -683,8 +740,8 @@ namespace Splitio.Integration_tests
                 var result = client.GetTreatment("admin", "split-name-1");
                 Assert.AreEqual("on", result);
 
-                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes3), "10");
-                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes4), "11");
+                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes3), "10", "11");
+                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes4), "11", "11");
 
                 Thread.Sleep(3000);
 

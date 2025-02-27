@@ -53,13 +53,14 @@ namespace Splitio.Tests.Common
         }
 
         #region SplitChanges
-        public void SplitChangesOkWithBody(string body, string since)
+        public void SplitChangesOkWithBody(string body, string since, string rbSince)
         {
             _mockServer
                 .Given(
                     Request.Create()
                     .WithPath("/api/splitChanges")
                     .WithParam("since", since)
+                    .WithParam("rbSince", rbSince)
                     .UsingGet()
                 )
                 .RespondWith(

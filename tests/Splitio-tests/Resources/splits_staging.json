@@ -1,8 +1,8 @@
 {
   "rbs": {
-    "since": 10,
-    "till": 10,
-    "data": [
+    "s": 10,
+    "t": 10,
+    "d": [
       {
         "name": "rbs_test",
         "status": "ACTIVE",
@@ -31,7 +31,7 @@
     ]
   },
   "ff": {
-    "data": [
+    "d": [
       {
         "trafficTypeName": "user",
         "name": "Marcio_Test_1",
@@ -951,7 +951,7 @@
         ]
       }
     ],
-    "since": 1470855828956,
-    "till": 1470855828956
+    "s": 1470855828956,
+    "t": 1470855828956
   }
 }

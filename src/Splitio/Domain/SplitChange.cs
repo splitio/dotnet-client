@@ -13,8 +13,11 @@ namespace Splitio.Domain
 
     public class ChangesDto<T> where T : class
     {
+        [JsonProperty("s")]
         public long Since { get; set; }
+        [JsonProperty("t")]
         public long Till { get; set; }
+        [JsonProperty("d")]
         public List<T> Data { get; set; }
     }
 }

@@ -1,11 +1,11 @@
 {
   "rbs": {
-    "since": -1,
-    "till": -1,
-    "data": []
+    "s": -1,
+    "t": -1,
+    "d": []
   },
   "ff": {
-    "data": [
+    "d": [
       {
         "trafficTypeName": "account",
         "name": "Traffic_Allocation_UI",
@@ -327,7 +327,7 @@
         ]
       }
     ],
-    "since": -1,
-    "till": 1470855828956
+    "s": -1,
+    "t": 1470855828956
   }
 }
