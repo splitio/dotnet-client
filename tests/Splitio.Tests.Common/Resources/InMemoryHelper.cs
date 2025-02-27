@@ -30,7 +30,10 @@ namespace Splitio.Tests.Common.Resources
             new KeyImpression("test_ltet", "semver_less_or_equalto", "on", 0, 1675259356568, "less than or equal to semver", null, false, null, false),
             new KeyImpression("test_ltet2", "semver_less_or_equalto", "off", 0, 1675259356568, "default rule", null, false, null, false),
             new KeyImpression("test_list", "semver_inlist", "on", 0, 1675259356568, "in list semver", null, false, null, false),
-            new KeyImpression("test_list2", "semver_inlist", "off", 0, 1675259356568, "default rule", null, false, null, false)
+            new KeyImpression("test_list2", "semver_inlist", "off", 0, 1675259356568, "default rule", null, false, null, false),
+            new KeyImpression("test1", "with_track_enabled", "off", 0, 1675259356568, "default rule", null, false, null, false),
+            new KeyImpression("test2", "with_track_disabled", "off", 0, 1675259356568, "default rule", null, false, null, false),
+            new KeyImpression("test3", "without_track", "off", 0, 1675259356568, "default rule", null, false, null, false)
         };
 
         public static KeyImpression GetImpressionExpected(string featureName, string key)
