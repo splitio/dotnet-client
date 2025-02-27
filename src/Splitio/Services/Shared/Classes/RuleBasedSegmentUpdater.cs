@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Splitio.Services.Shared.Classes
 {
-    public class RuleBasedSegmentUpdater : IRuleBasedSegmentUpdater
+    public class RuleBasedSegmentUpdater : IUpdater<RuleBasedSegmentDto>
     {
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(RuleBasedSegmentUpdater));
 

@@ -22,7 +22,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         private readonly Mock<IFeatureFlagCache> _featureFlagCache;
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private readonly Mock<ISelfRefreshingSegmentFetcher> _segmentFetcher;
-        private readonly Mock<IFeatureFlagSyncService> _featureFlagSyncService;
+        private readonly Mock<IUpdater<Split>> _featureFlagSyncService;
 
         private readonly ISplitsWorker _splitsWorker;
 
@@ -32,7 +32,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _featureFlagCache = new Mock<IFeatureFlagCache>();
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _segmentFetcher = new Mock<ISelfRefreshingSegmentFetcher>();
-            _featureFlagSyncService = new Mock<IFeatureFlagSyncService>();
+            _featureFlagSyncService = new Mock<IUpdater<Split>>();
 
             _splitsWorker = new SplitsWorker(_synchronizer.Object, _featureFlagCache.Object, _telemetryRuntimeProducer.Object, _segmentFetcher.Object, _featureFlagSyncService.Object);
         }
@@ -76,7 +76,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
                 .Returns(5);
 
             _featureFlagSyncService
-                .Setup(mock => mock.UpdateFeatureFlagsFromChanges(It.IsAny<List<Split>>(), It.IsAny<long>()))
+                .Setup(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()))
                 .Returns(new List<string> { "segment-name" });
 
             // Act.
@@ -115,7 +115,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             await Task.Delay(1000);
 
             // Assert.
-            _featureFlagSyncService.Verify(mock => mock.UpdateFeatureFlagsFromChanges(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
+            _featureFlagSyncService.Verify(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
             _featureFlagCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<string>>(), It.IsAny<long>()), Times.Never);
             _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Never);
             _featureFlagCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Never);
@@ -132,7 +132,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
                 .Returns(5);
 
             _featureFlagSyncService
-                .Setup(mock => mock.UpdateFeatureFlagsFromChanges(It.IsAny<List<Split>>(), It.IsAny<long>()))
+                .Setup(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()))
                 .Returns(new List<string>());
 
             // Act.
@@ -152,7 +152,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             await Task.Delay(1000);
 
             // Assert.
-            _featureFlagSyncService.Verify(mock => mock.UpdateFeatureFlagsFromChanges(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
+            _featureFlagSyncService.Verify(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
             _featureFlagCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<string>>(), It.IsAny<long>()), Times.Never);
             _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Never);
             _featureFlagCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Never);
@@ -168,7 +168,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
                 .Returns(1);
 
             _featureFlagSyncService
-                .Setup(mock => mock.UpdateFeatureFlagsFromChanges(It.IsAny<List<Split>>(), It.IsAny<long>()))
+                .Setup(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()))
                 .Returns(new List<string>());
 
             // Act.
@@ -187,7 +187,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             await Task.Delay(1000);
 
             // Assert.
-            _featureFlagSyncService.Verify(mock => mock.UpdateFeatureFlagsFromChanges(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
+            _featureFlagSyncService.Verify(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
             _featureFlagCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<string>>(), It.IsAny<long>()), Times.Never);
             _featureFlagCache.Verify(mock => mock.SetChangeNumber(2), Times.Never);
 
