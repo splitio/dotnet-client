@@ -750,7 +750,7 @@ namespace Splitio.Tests.Common
             var result = await manager.SplitNamesAsync();
 
             // Assert.
-            Assert.AreEqual(36, result.Count);
+            Assert.AreEqual(39, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<string>));
 
             await client.DestroyAsync();
@@ -773,7 +773,7 @@ namespace Splitio.Tests.Common
             var result = await manager.SplitsAsync();
 
             // Assert.
-            Assert.AreEqual(36, result.Count);
+            Assert.AreEqual(39, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<SplitView>));
 
             await splitFactory.Client().DestroyAsync();
