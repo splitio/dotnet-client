@@ -1,4 +1,5 @@
 ﻿using Splitio.Services.Parsing;
+using Splitio.Services.Parsing.Matchers;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -34,6 +35,24 @@ namespace Splitio.Domain
                 defaultTreatment = defaultTreatment,
                 sets = Sets != null ? Sets.ToList() : new List<string>()
             };
+        }
+
+        public List<string> GetRuleBasedSegments()
+        {
+            var toReturn = new List<string>();
+
+            foreach (var condition in conditions)
+            {
+                foreach (var del in condition.matcher.delegates)
+                {
+                    if (del.matcher is RuleBasedSegmentMatcher matcher)
+                    {
+                        toReturn.Add(matcher.GetRuleBasedSegmentName());
+                    }
+                }
+            }
+
+            return toReturn;
         }
 
         public List<string> GetSegments()

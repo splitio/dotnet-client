@@ -90,5 +90,10 @@ namespace Splitio.Services.Parsing.Matchers
         {
             return await MatchAsync(new Key(key, null), attributes, evaluator);
         }
+
+        public string GetRuleBasedSegmentName()
+        {
+            return _segmentName;
+        }
     }
 }

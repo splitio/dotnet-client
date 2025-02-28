@@ -1,4 +1,5 @@
 ﻿using Splitio.Domain;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Cache.Interfaces
@@ -7,6 +8,7 @@ namespace Splitio.Services.Cache.Interfaces
     {
         long GetChangeNumber();
         RuleBasedSegment Get(string name);
+        bool Contains(List<string> names);
 
         #region Async
         Task<long> GetChangeNumberAsync();

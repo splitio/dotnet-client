@@ -4,6 +4,7 @@ using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Cache.Classes
@@ -73,6 +74,12 @@ namespace Splitio.Redis.Services.Cache.Classes
             var result = long.TryParse(cnString, out long changeNumberParsed);
 
             return result ? changeNumberParsed : -1;
+        }
+
+        public bool Contains(List<string> names)
+        {
+            // no-op
+            return true;
         }
     }
 }

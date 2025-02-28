@@ -29,11 +29,15 @@ namespace Splitio.Services.Shared.Classes
             _ruleBasedSegmentCache = ruleBasedSegmentCache;
         }
 
-        public List<string> Process(List<Split> changes, long till)
+        public Dictionary<Enums.SegmentType, List<string>> Process(List<Split> changes, long till)
         {
             var toAdd = new List<ParsedSplit>();
             var toRemove = new List<string>();
-            var segmentNames = new List<string>();
+            var toReturn = new Dictionary<Enums.SegmentType, List<string>>
+            {
+                { Enums.SegmentType.Standard, new List<string>() },
+                { Enums.SegmentType.RuleBased, new List<string>() }
+            };
 
             foreach (var featureFlag in changes)
             {
@@ -46,7 +50,8 @@ namespace Splitio.Services.Shared.Classes
                 }
 
                 toAdd.Add(ffParsed);
-                segmentNames.AddRange(ffParsed.GetSegments());
+                toReturn[Enums.SegmentType.Standard].AddRange(ffParsed.GetSegments());
+                toReturn[Enums.SegmentType.RuleBased].AddRange(ffParsed.GetRuleBasedSegments());
             }
 
             _featureFlagsCache.Update(toAdd, toRemove, till);
@@ -61,7 +66,7 @@ namespace Splitio.Services.Shared.Classes
                 _log.Debug($"Deleted feature flags: {string.Join(" - ", toRemove)}");
             }
 
-            return segmentNames;
+            return toReturn;
         }
     }
 }

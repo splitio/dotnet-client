@@ -23,6 +23,8 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private readonly Mock<ISelfRefreshingSegmentFetcher> _segmentFetcher;
         private readonly Mock<IUpdater<Split>> _featureFlagSyncService;
+        private readonly Mock<IRuleBasedSegmentCache> _rbsCache;
+        private readonly Mock<IUpdater<RuleBasedSegmentDto>> _rbsUpdater;
 
         private readonly ISplitsWorker _splitsWorker;
 
@@ -33,8 +35,11 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _segmentFetcher = new Mock<ISelfRefreshingSegmentFetcher>();
             _featureFlagSyncService = new Mock<IUpdater<Split>>();
+            _rbsCache = new Mock<IRuleBasedSegmentCache>();
+            _rbsUpdater = new Mock<IUpdater<RuleBasedSegmentDto>>();
 
-            _splitsWorker = new SplitsWorker(_synchronizer.Object, _featureFlagCache.Object, _telemetryRuntimeProducer.Object, _segmentFetcher.Object, _featureFlagSyncService.Object);
+
+            _splitsWorker = new SplitsWorker(_synchronizer.Object, _featureFlagCache.Object, _telemetryRuntimeProducer.Object, _segmentFetcher.Object, _featureFlagSyncService.Object, _rbsCache.Object, _rbsUpdater.Object);
         }
 
         [TestMethod]
@@ -77,7 +82,11 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             _featureFlagSyncService
                 .Setup(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()))
-                .Returns(new List<string> { "segment-name" });
+                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                { 
+                    { Splitio.Enums.SegmentType.Standard, new List<string> { "segment-name" } },
+                    { Splitio.Enums.SegmentType.RuleBased, new List<string>() }
+                });
 
             // Act.
             _splitsWorker.Start();
@@ -133,7 +142,11 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             _featureFlagSyncService
                 .Setup(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()))
-                .Returns(new List<string>());
+                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                {
+                    { Splitio.Enums.SegmentType.Standard, new List<string>() },
+                    { Splitio.Enums.SegmentType.RuleBased, new List<string>() }
+                });
 
             // Act.
             _splitsWorker.Start();
@@ -169,7 +182,11 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             _featureFlagSyncService
                 .Setup(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()))
-                .Returns(new List<string>());
+                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                {
+                    { Splitio.Enums.SegmentType.Standard, new List<string>() },
+                    { Splitio.Enums.SegmentType.RuleBased, new List<string>() }
+                });
 
             // Act.
             _splitsWorker.Start();

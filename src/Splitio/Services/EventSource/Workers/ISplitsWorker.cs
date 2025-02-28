@@ -4,7 +4,7 @@ namespace Splitio.Services.EventSource.Workers
 {
     public interface ISplitsWorker : IWorker
     {
-        Task AddToQueue(SplitChangeNotification scn);
+        Task AddToQueue(InstantUpdateNotification scn);
         void Kill(SplitKillNotification skn);
     }
 }
