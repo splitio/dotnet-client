@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Interfaces
 {
-    public interface ISplitFetcher : IPeriodicTask
+    public interface ITargetingRulesFetcher : IPeriodicTask
     {
         Task<FetchResult> FetchSplitsAsync(FetchOptions fetchOptions);
         void Clear();

@@ -46,6 +46,7 @@ namespace Splitio.Services.Client.Classes
         protected IBlockUntilReadyService _blockUntilReadyService;
         protected IFactoryInstantiationsService _factoryInstantiationsService;
         protected IParser<Split, ParsedSplit> _splitParser;
+        protected IParser<RuleBasedSegmentDto, RuleBasedSegment> _rbsParser;
         protected IEvaluator _evaluator;
         protected ITelemetryEvaluationProducer _telemetryEvaluationProducer;
         protected ITelemetryInitProducer _telemetryInitProducer;

@@ -54,7 +54,8 @@ namespace Splitio.Integration_tests
         {
             using (var httpClientMock = new HttpClientMock())
             {
-                httpClientMock.SplitChangesOkWithBody("{\"splits\": [],\"since\": -1,\"till\": -1}", "-1");
+                var payload = @"{'rbs':{'d': [],'s': -1,'t': -1}, 'ff':{'d': [],'s': -1,'t': -1}}";
+                httpClientMock.SplitChangesOkWithBody(payload, "-1", "-1");
                 httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
                 httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 

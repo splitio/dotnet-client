@@ -35,7 +35,7 @@ namespace Splitio_Tests.Integration_Tests
             var SplitSdkApiClient = new SplitSdkApiClient(httpClient, telemetryStorage, baseUrl, fsFilter);
 
             //Act
-            var result = await SplitSdkApiClient.FetchSplitChangesAsync(-1, new FetchOptions());
+            var result = await SplitSdkApiClient.FetchSplitChangesAsync(new FetchOptions());
 
             //Assert
             Assert.IsTrue(result == string.Empty);
