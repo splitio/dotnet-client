@@ -13,15 +13,15 @@ namespace Splitio.Services.SplitFetcher.Classes
 
         protected abstract Task<SplitChangesResult> FetchFromBackendAsync(FetchOptions fetchOptions);
 
-        public async Task<SplitChangesResult> FetchAsync(FetchOptions fo)
+        public async Task<SplitChangesResult> FetchAsync(FetchOptions fetchOptions)
         {
             try
             {
-                return await FetchFromBackendAsync(fo);
+                return await FetchFromBackendAsync(fetchOptions);
             }
             catch(Exception e)
             {
-                _log.Error($"Exception caught executing Fetch since={fo.FeatureFlagsSince} and rbSince={fo.RuleBasedSegmentsSince}", e);
+                _log.Error($"Exception caught executing Fetch since={fetchOptions.FeatureFlagsSince} and rbSince={fetchOptions.RuleBasedSegmentsSince}", e);
                 return null;
             }
         }

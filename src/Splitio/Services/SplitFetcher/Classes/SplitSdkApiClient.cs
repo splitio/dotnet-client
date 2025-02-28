@@ -32,7 +32,7 @@ namespace Splitio.Services.SplitFetcher.Classes
             _flagSets = flagSetsFilter.GetFlagSets();
         }
 
-        public async Task<string> FetchSplitChangesAsync(FetchOptions op)
+        public async Task<string> FetchSplitChangesAsync(FetchOptions fetchOptions)
         {
             using (var clock = new Util.SplitStopwatch())
             {
@@ -40,8 +40,8 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                 try
                 {
-                    var requestUri = GetRequestUri(op);
-                    var response = await _httpClient.GetAsync(requestUri, op.CacheControlHeaders);
+                    var requestUri = GetRequestUri(fetchOptions);
+                    var response = await _httpClient.GetAsync(requestUri, fetchOptions.CacheControlHeaders);
 
                     clock.Stop();
                     Util.Helper.RecordTelemetrySync(nameof(FetchSplitChangesAsync), response, ResourceEnum.SplitSync, clock, _telemetryRuntimeProducer, _log);
@@ -67,18 +67,18 @@ namespace Splitio.Services.SplitFetcher.Classes
             }
         }
 
-        private string GetRequestUri(FetchOptions op)
+        private string GetRequestUri(FetchOptions fetchOptions)
         {
-            var ffSince = Uri.EscapeDataString(op.FeatureFlagsSince.ToString());
-            var rbsSince = Uri.EscapeDataString(op.RuleBasedSegmentsSince.ToString());
+            var ffSince = Uri.EscapeDataString(fetchOptions.FeatureFlagsSince.ToString());
+            var rbsSince = Uri.EscapeDataString(fetchOptions.RuleBasedSegmentsSince.ToString());
 
             var uri = $"{_baseUrl}/api/splitChanges?s={ApiVersions.FlagsSpec}&since={ffSince}&rbSince={rbsSince}";
 
             if (!string.IsNullOrEmpty(_flagSets))
                 uri = $"{uri}&sets={_flagSets}";
 
-            if (op.Till.HasValue)
-                uri = $"{uri}&till={Uri.EscapeDataString(op.Till.Value.ToString())}";
+            if (fetchOptions.Till.HasValue)
+                uri = $"{uri}&till={Uri.EscapeDataString(fetchOptions.Till.Value.ToString())}";
 
             return uri;
         }

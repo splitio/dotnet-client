@@ -49,7 +49,6 @@ namespace Splitio.Services.Client.Classes
         private IFeatureFlagCache _featureFlagCache;
         private ISegmentCache _segmentCache;
         private IUpdater<Split> _featureFlagUpdater;
-        private IUpdater<RuleBasedSegmentDto> _ruleBasedSegmentUpdater;
         private IRuleBasedSegmentCache _ruleBasedSegmentCache;
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config) : base(apiKey)
@@ -126,8 +125,8 @@ namespace Splitio.Services.Client.Classes
             var featureFlagRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SplitsRefreshRate) : _config.SplitsRefreshRate;
             var featureFlagsTask = _tasksManager.NewPeriodicTask(Enums.Task.FeatureFlagsFetcher, featureFlagRefreshRate * 1000);
             _featureFlagUpdater = new FeatureFlagUpdater(_splitParser, _featureFlagCache, _flagSetsFilter, _ruleBasedSegmentCache);
-            _ruleBasedSegmentUpdater = new RuleBasedSegmentUpdater(_rbsParser, _ruleBasedSegmentCache);
-            _targetingRulesFetcher = new TargetingRulesFetcher(splitChangeFetcher, _statusManager, featureFlagsTask, _featureFlagCache, _featureFlagUpdater, _ruleBasedSegmentUpdater, _ruleBasedSegmentCache);
+            var ruleBasedSegmentUpdater = new RuleBasedSegmentUpdater(_rbsParser, _ruleBasedSegmentCache);
+            _targetingRulesFetcher = new TargetingRulesFetcher(splitChangeFetcher, _statusManager, featureFlagsTask, _featureFlagCache, _featureFlagUpdater, ruleBasedSegmentUpdater, _ruleBasedSegmentCache);
             _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCache, _blockUntilReadyService);
         }
 

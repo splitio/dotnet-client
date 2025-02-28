@@ -58,7 +58,7 @@ namespace Splitio.Services.SplitFetcher.Classes
             _log.Debug("FeatureFlags cache disposed ...");
         }
 
-        public async Task<FetchResult> FetchSplitsAsync(FetchOptions fo)
+        public async Task<FetchResult> FetchSplitsAsync(FetchOptions fetchOptions)
         {
             var segmentNames = new List<string>();
             var success = false;
@@ -68,12 +68,12 @@ namespace Splitio.Services.SplitFetcher.Classes
                 var ffChangeNumber = _featureFlagCache.GetChangeNumber();
                 var rbsChangeNumber = _ruleBasedSegmentCache.GetChangeNumber();
 
-                fo.FeatureFlagsSince = ffChangeNumber;
-                fo.RuleBasedSegmentsSince = rbsChangeNumber;
+                fetchOptions.FeatureFlagsSince = ffChangeNumber;
+                fetchOptions.RuleBasedSegmentsSince = rbsChangeNumber;
 
                 try
                 {
-                    var result = await _splitChangeFetcher.FetchAsync(fo);
+                    var result = await _splitChangeFetcher.FetchAsync(fetchOptions);
 
                     if (result == null || _statusManager.IsDestroyed())
                     {
