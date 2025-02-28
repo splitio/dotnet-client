@@ -40,7 +40,7 @@ namespace Splitio.Integration_events_tests
 
             for (int i = 0; i < 13; i++)
             {
-                impressions.Add(new KeyImpression($"key-{i}", $"feature-{i}", "off", 1, 1, "label-test", $"bucket-{i}"));
+                impressions.Add(new KeyImpression($"key-{i}", $"feature-{i}", "off", 1, 1, "label-test", $"bucket-{i}", false));
             }
 
             var data1 = "[{\"f\":\"feature-0\",\"i\":[{\"k\":\"key-0\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-0\"}]},{\"f\":\"feature-1\",\"i\":[{\"k\":\"key-1\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-1\"}]},{\"f\":\"feature-2\",\"i\":[{\"k\":\"key-2\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-2\"}]},{\"f\":\"feature-3\",\"i\":[{\"k\":\"key-3\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-3\"}]},{\"f\":\"feature-4\",\"i\":[{\"k\":\"key-4\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-4\"}]}]";
@@ -74,7 +74,7 @@ namespace Splitio.Integration_events_tests
 
             for (int i = 0; i < 10; i++)
             {
-                impressions.Add(new KeyImpression($"key-{i}", $"feature-{i}", "off", 1, 1, "label-test", $"bucket-{i}"));
+                impressions.Add(new KeyImpression($"key-{i}", $"feature-{i}", "off", 1, 1, "label-test", $"bucket-{i}", false));
             }
 
             var data1 = "[{\"f\":\"feature-0\",\"i\":[{\"k\":\"key-0\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-0\"}]},{\"f\":\"feature-1\",\"i\":[{\"k\":\"key-1\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-1\"}]},{\"f\":\"feature-2\",\"i\":[{\"k\":\"key-2\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-2\"}]},{\"f\":\"feature-3\",\"i\":[{\"k\":\"key-3\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-3\"}]},{\"f\":\"feature-4\",\"i\":[{\"k\":\"key-4\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-4\"}]},{\"f\":\"feature-5\",\"i\":[{\"k\":\"key-5\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-5\"}]},{\"f\":\"feature-6\",\"i\":[{\"k\":\"key-6\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-6\"}]},{\"f\":\"feature-7\",\"i\":[{\"k\":\"key-7\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-7\"}]},{\"f\":\"feature-8\",\"i\":[{\"k\":\"key-8\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-8\"}]},{\"f\":\"feature-9\",\"i\":[{\"k\":\"key-9\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-9\"}]}]";
@@ -101,7 +101,7 @@ namespace Splitio.Integration_events_tests
 
             for (int i = 0; i < 10; i++)
             {
-                impressions.Add(new KeyImpression($"key-{i}", $"feature-{i}", "off", 1, 1, "label-test", $"bucket-{i}"));
+                impressions.Add(new KeyImpression($"key-{i}", $"feature-{i}", "off", 1, 1, "label-test", $"bucket-{i}", false));
             }
 
             var data1 = "[{\"f\":\"feature-0\",\"i\":[{\"k\":\"key-0\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-0\"}]},{\"f\":\"feature-1\",\"i\":[{\"k\":\"key-1\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-1\"}]},{\"f\":\"feature-2\",\"i\":[{\"k\":\"key-2\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-2\"}]},{\"f\":\"feature-3\",\"i\":[{\"k\":\"key-3\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-3\"}]},{\"f\":\"feature-4\",\"i\":[{\"k\":\"key-4\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-4\"}]},{\"f\":\"feature-5\",\"i\":[{\"k\":\"key-5\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-5\"}]},{\"f\":\"feature-6\",\"i\":[{\"k\":\"key-6\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-6\"}]},{\"f\":\"feature-7\",\"i\":[{\"k\":\"key-7\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-7\"}]},{\"f\":\"feature-8\",\"i\":[{\"k\":\"key-8\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-8\"}]},{\"f\":\"feature-9\",\"i\":[{\"k\":\"key-9\",\"t\":\"off\",\"m\":1,\"c\":1,\"r\":\"label-test\",\"b\":\"bucket-9\"}]}]";

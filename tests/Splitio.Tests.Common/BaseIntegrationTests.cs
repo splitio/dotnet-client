@@ -748,7 +748,7 @@ namespace Splitio.Tests.Common
             Assert.AreEqual("{\"color\":\"green\"}", treatment.Value.Config);
 
             //Validate impressions sent to the be.
-            var impressionExpected = new KeyImpression("nico_test", "FACUNDO_TEST", "on", 0, 1506703262916, "whitelisted", null, null, false);
+            var impressionExpected = new KeyImpression("nico_test", "FACUNDO_TEST", "on", 0, 1506703262916, "whitelisted", null, false, null, false);
             
             AssertSentImpressions(1, impressionExpected);
             AssertImpressionListener(1, impressionListener);
@@ -976,7 +976,7 @@ namespace Splitio.Tests.Common
             var result = manager.SplitNames();
 
             // Assert.
-            Assert.AreEqual(36, result.Count);
+            Assert.AreEqual(39, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<string>));
 
             client.Destroy();
@@ -999,7 +999,7 @@ namespace Splitio.Tests.Common
             var result = manager.Splits();
 
             // Assert.
-            Assert.AreEqual(36, result.Count);
+            Assert.AreEqual(39, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<SplitView>));
 
             splitFactory.Client().Destroy();
