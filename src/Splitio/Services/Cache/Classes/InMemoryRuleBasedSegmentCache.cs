@@ -24,7 +24,7 @@ namespace Splitio.Services.Cache.Classes
         {
             foreach (string name in names)
             {
-                if (!_cache.Keys.Contains(name)) return false;
+                if (!_cache.ContainsKey(name)) return false;
             }
 
             return true;

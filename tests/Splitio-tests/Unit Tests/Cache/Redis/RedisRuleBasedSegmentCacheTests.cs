@@ -6,6 +6,7 @@ using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Cache.Redis
@@ -161,6 +162,13 @@ namespace Splitio_Tests.Unit_Tests.Cache.Redis
 
             // Assert
             Assert.AreEqual(-1, result);
+        }
+
+        [TestMethod]
+        public void Contains_ShouldReturnTrue()
+        {
+            // Act and Assert
+            Assert.IsTrue(_cache.Contains(new List<string>()));
         }
     }
 }
