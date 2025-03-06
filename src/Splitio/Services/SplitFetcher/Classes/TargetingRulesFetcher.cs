@@ -55,6 +55,7 @@ namespace Splitio.Services.SplitFetcher.Classes
         public void Clear()
         {
             _featureFlagCache.Clear();
+            _ruleBasedSegmentCache.Clear();
             _log.Debug("FeatureFlags cache disposed ...");
         }
 
