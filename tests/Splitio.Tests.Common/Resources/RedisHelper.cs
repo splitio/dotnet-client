@@ -64,6 +64,11 @@ namespace Splitio.Tests.Common.Resources
                     }
                 }
             }
+
+            foreach (var rbs in result.RuleBasedSegments.Data)
+            {
+                await redisAdapter.SetAsync($"{userPrefix}.SPLITIO.rbsegment.{rbs.Name}", JsonConvert.SerializeObject(rbs));
+            }
         }
 
         public static async Task CleanupAsync(string userPrefix, RedisAdapterForTests redisAdapter)
