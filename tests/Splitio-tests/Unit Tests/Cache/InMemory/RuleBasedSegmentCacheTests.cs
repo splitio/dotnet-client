@@ -11,13 +11,12 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
     public class RuleBasedSegmentCacheTests
     {
         private InMemoryRuleBasedSegmentCache _segmentCache;
-        private ConcurrentDictionary<string, RuleBasedSegment> _cache;
 
         [TestInitialize]
         public void Setup()
         {
-            _cache = new ConcurrentDictionary<string, RuleBasedSegment>();
-            _segmentCache = new InMemoryRuleBasedSegmentCache(_cache);
+            var cache = new ConcurrentDictionary<string, RuleBasedSegment>();
+            _segmentCache = new InMemoryRuleBasedSegmentCache(cache);
         }
 
         [TestMethod]
@@ -26,7 +25,8 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
             // Arrange
             var segmentName = "test-segment";
             var segment = new RuleBasedSegment { Name = segmentName };
-            _cache.TryAdd(segmentName, segment);
+
+            _segmentCache.Update(new List<RuleBasedSegment> { segment }, new List<string>(), 10);
 
             // Act
             var result = _segmentCache.Get(segmentName);
@@ -67,16 +67,15 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
         {
             // Arrange
             var segmentToAdd = new RuleBasedSegment { Name = "segment-to-add" };
-            var segmentToRemove = "segment-to-remove";
-            _cache.TryAdd(segmentToRemove, new RuleBasedSegment { Name = segmentToRemove });
+            var segmentToRemove = new RuleBasedSegment { Name = "segment-to-remove" };
             var till = 67890;
 
             // Act
-            _segmentCache.Update(new List<RuleBasedSegment> { segmentToAdd }, new List<string> { segmentToRemove }, till);
+            _segmentCache.Update(new List<RuleBasedSegment> { segmentToAdd, segmentToRemove }, new List<string> { segmentToRemove.Name }, till);
 
             // Assert
-            Assert.IsTrue(_cache.ContainsKey(segmentToAdd.Name));
-            Assert.IsFalse(_cache.ContainsKey(segmentToRemove));
+            Assert.IsTrue(_segmentCache.Contains(new List<string> { segmentToAdd.Name }));
+            Assert.IsFalse(_segmentCache.Contains(new List<string> { segmentToRemove.Name }));
             Assert.AreEqual(till, _segmentCache.GetChangeNumber());
         }
 
@@ -84,14 +83,18 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
         public void Clear_ShouldRemoveAllSegments()
         {
             // Arrange
-            _cache.TryAdd("segment1", new RuleBasedSegment { Name = "segment1" });
-            _cache.TryAdd("segment2", new RuleBasedSegment { Name = "segment2" });
+            var toAdd = new List<RuleBasedSegment>
+            {
+                new RuleBasedSegment { Name = "segment1" },
+                new RuleBasedSegment { Name = "segment2" }
+            };
+            _segmentCache.Update(toAdd, new List<string>(), 10);
 
             // Act
             _segmentCache.Clear();
 
             // Assert
-            Assert.AreEqual(0, _cache.Count);
+            Assert.IsFalse(_segmentCache.Contains(new List<string> { "segment1", "segment2" }));
         }
 
         [TestMethod]
@@ -100,7 +103,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
             // Arrange
             var segmentName = "test-segment";
             var segment = new RuleBasedSegment { Name = segmentName };
-            _cache.TryAdd(segmentName, segment);
+            _segmentCache.Update(new List<RuleBasedSegment> { segment }, new List<string>(), 10);
 
             // Act
             var result = await _segmentCache.GetAsync(segmentName);
@@ -134,6 +137,24 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
 
             // Assert
             Assert.AreEqual(changeNumber, result);
+        }
+
+        [TestMethod]
+        public void Contains_ShouldReturnTrue()
+        {
+            // Arrange
+            var toAdd = new List<RuleBasedSegment>
+            {
+                new RuleBasedSegment { Name = "segment1" },
+                new RuleBasedSegment { Name = "segment2" }
+            };
+
+            _segmentCache.Update(toAdd, new List<string>(), 10);
+
+            // Act & Assert
+            Assert.IsTrue(_segmentCache.Contains(new List<string> { "segment1" }));
+            Assert.IsFalse(_segmentCache.Contains(new List<string> { "segment1", "segment3" }));
+            Assert.IsTrue(_segmentCache.Contains(new List<string> { "segment1", "segment2" }));
         }
     }
 }

@@ -240,7 +240,6 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             // Arrange.
             var message = "id: 123123\nevent: message\ndata: {\"id\":\"1111\",\"clientId\":\"pri:ODc1NjQyNzY1\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"xxxx_xxxx_splits\",\"data\":\"{\\\"type\\\":\\\"SPLIT_UPDATE\\\",\\\"changeNumber\\\":1684265694505,\\\"pcn\\\":111,\\\"c\\\":0,\\\"d\\\":\\\"eyJ0cmFmZmljVHlwZU5hbWUiOiJ1c2VyIiwiaWQiOiJkNDMxY2RkMC1iMGJlLTExZWEtOGE4MC0xNjYwYWRhOWNlMzkiLCJuYW1lIjoibWF1cm9famF2YSIsInRyYWZmaWNBbGxvY2F0aW9uIjoxMDAsInRyYWZmaWNBbGxvY2F0aW9uU2VlZCI6LTkyMzkxNDkxLCJzZWVkIjotMTc2OTM3NzYwNCwic3RhdHVzIjoiQUNUSVZFIiwia2lsbGVkIjpmYWxzZSwiZGVmYXVsdFRyZWF0bWVudCI6Im9mZiIsImNoYW5nZU51bWJlciI6MTY4NDMyOTg1NDM4NSwiYWxnbyI6MiwiY29uZmlndXJhdGlvbnMiOnt9LCJjb25kaXRpb25zIjpbeyJjb25kaXRpb25UeXBlIjoiV0hJVEVMSVNUIiwibWF0Y2hlckdyb3VwIjp7ImNvbWJpbmVyIjoiQU5EIiwibWF0Y2hlcnMiOlt7Im1hdGNoZXJUeXBlIjoiV0hJVEVMSVNUIiwibmVnYXRlIjpmYWxzZSwid2hpdGVsaXN0TWF0Y2hlckRhdGEiOnsid2hpdGVsaXN0IjpbImFkbWluIiwibWF1cm8iLCJuaWNvIl19fV19LCJwYXJ0aXRpb25zIjpbeyJ0cmVhdG1lbnQiOiJvZmYiLCJzaXplIjoxMDB9XSwibGFiZWwiOiJ3aGl0ZWxpc3RlZCJ9LHsiY29uZGl0aW9uVHlwZSI6IlJPTExPVVQiLCJtYXRjaGVyR3JvdXAiOnsiY29tYmluZXIiOiJBTkQiLCJtYXRjaGVycyI6W3sia2V5U2VsZWN0b3IiOnsidHJhZmZpY1R5cGUiOiJ1c2VyIn0sIm1hdGNoZXJUeXBlIjoiSU5fU0VHTUVOVCIsIm5lZ2F0ZSI6ZmFsc2UsInVzZXJEZWZpbmVkU2VnbWVudE1hdGNoZXJEYXRhIjp7InNlZ21lbnROYW1lIjoibWF1ci0yIn19XX0sInBhcnRpdGlvbnMiOlt7InRyZWF0bWVudCI6Im9uIiwic2l6ZSI6MH0seyJ0cmVhdG1lbnQiOiJvZmYiLCJzaXplIjoxMDB9LHsidHJlYXRtZW50IjoiVjQiLCJzaXplIjowfSx7InRyZWF0bWVudCI6InY1Iiwic2l6ZSI6MH1dLCJsYWJlbCI6ImluIHNlZ21lbnQgbWF1ci0yIn0seyJjb25kaXRpb25UeXBlIjoiUk9MTE9VVCIsIm1hdGNoZXJHcm91cCI6eyJjb21iaW5lciI6IkFORCIsIm1hdGNoZXJzIjpbeyJrZXlTZWxlY3RvciI6eyJ0cmFmZmljVHlwZSI6InVzZXIifSwibWF0Y2hlclR5cGUiOiJBTExfS0VZUyIsIm5lZ2F0ZSI6ZmFsc2V9XX0sInBhcnRpdGlvbnMiOlt7InRyZWF0bWVudCI6Im9uIiwic2l6ZSI6MH0seyJ0cmVhdG1lbnQiOiJvZmYiLCJzaXplIjoxMDB9LHsidHJlYXRtZW50IjoiVjQiLCJzaXplIjowfSx7InRyZWF0bWVudCI6InY1Iiwic2l6ZSI6MH1dLCJsYWJlbCI6ImRlZmF1bHQgcnVsZSJ9XX0=\\\"}\"}";
 
-
             // Act.
             var result = _notificationParser.Parse(message);
 
@@ -254,6 +253,66 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             Assert.AreEqual("mauro_java", changeNotification.FeatureFlag.name);
             Assert.AreEqual("ACTIVE", changeNotification.FeatureFlag.status);
             Assert.AreEqual("off", changeNotification.FeatureFlag.defaultTreatment);
+        }
+
+        [TestMethod]
+        public void Parse_RuleBasedSegmentNotificationMessage_Zlib()
+        {
+            // Arrange
+            var message = "id: 123123\nevent: message\ndata: {\"id\":\"1111\",\"clientId\":\"pri:ODc1NjQyNzY1\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"xxxx_xxxx_flags\",\"data\":\"{\\\"type\\\":\\\"RB_SEGMENT_UPDATE\\\",\\\"changeNumber\\\":1684265694505,\\\"pcn\\\":111,\\\"c\\\":2,\\\"d\\\":\\\"eJx0kkGLnEAQhf9LnT3k7G2ISwiZeHEIhLAsZft0mm27pbqaRRb/e+hxohNwbt2+9z58Vf1J5sp+QJ3GFkLll4JUuO+tucwTah5BJaUIoYL8epM2vimi0mY9ORcMqw3+EbB/bYDupsTtoKwpUkmnr5fvv16ooHfrXBZ7dhEFdeg5Ob0IWEd4pZKoIHZDuOVN8J3N6Ejln8/9mn96tY6s5gr5JiFNVGbL2FqfK9KprnbDCnjH3MDBaJBsfhjBXp9VxbZJQaVPzi0b4m47nc9vP15+N3lSGDj77mUyoEJvPboGQ67zc01WrLzSCvq4WoWz8UhLnmWu0wix5kBuoR+Af640KtYPB3qHCb6DN/NROAQHPsLGZ7yHpmeWAc/qLq9LQROL/lviGnfcwuX9La+3Hfd2SML/WSJ0O9txEsSY5cpGbvcHtPwNAAD//9u9Atc=\\\"}\"}";
+
+            // Act
+            var result = _notificationParser.Parse(message);
+
+            // Assert
+            var notitifaction = (RuleBasedSegmentNotification)result;
+            Assert.AreEqual(NotificationType.RB_SEGMENT_UPDATE, notitifaction.Type);
+            Assert.AreEqual("xxxx_xxxx_flags", notitifaction.Channel);
+            Assert.AreEqual(CompressionType.Zlib, notitifaction.CompressionType);
+            Assert.AreEqual(1684265694505, notitifaction.ChangeNumber);
+            Assert.AreEqual(111, notitifaction.PreviousChangeNumber);
+            Assert.AreEqual("rbs_test", notitifaction.RuleBasedSegmentDto.Name);
+            Assert.AreEqual("ACTIVE", notitifaction.RuleBasedSegmentDto.Status);
+        }
+
+        [TestMethod]
+        public void Parse_RuleBasedSegmentNotificationMessage_NotCompressed()
+        {
+            // Arrange
+            var message = "id: 123123\nevent: message\ndata: {\"id\":\"1111\",\"clientId\":\"pri:ODc1NjQyNzY1\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"xxxx_xxxx_flags\",\"data\":\"{\\\"type\\\":\\\"RB_SEGMENT_UPDATE\\\",\\\"changeNumber\\\":1684265694505,\\\"pcn\\\":111,\\\"c\\\":0,\\\"d\\\":\\\"eyJuYW1lIjoicmJzX3Rlc3QiLCJzdGF0dXMiOiJBQ1RJVkUiLCJ0cmFmZmljVHlwZU5hbWUiOiJ1c2VyIiwiZXhjbHVkZWQiOnsia2V5cyI6W10sInNlZ21lbnRzIjpbXX0sImNvbmRpdGlvbnMiOlt7Im1hdGNoZXJHcm91cCI6eyJjb21iaW5lciI6IkFORCIsIm1hdGNoZXJzIjpbeyJrZXlTZWxlY3RvciI6eyJ0cmFmZmljVHlwZSI6InVzZXIifSwibWF0Y2hlclR5cGUiOiJBTExfS0VZUyIsIm5lZ2F0ZSI6ZmFsc2V9XX19XX0=\\\"}\"}";
+
+            // Act
+            var result = _notificationParser.Parse(message);
+
+            // Assert
+            var notitifaction = (RuleBasedSegmentNotification)result;
+            Assert.AreEqual(NotificationType.RB_SEGMENT_UPDATE, notitifaction.Type);
+            Assert.AreEqual("xxxx_xxxx_flags", notitifaction.Channel);
+            Assert.AreEqual(CompressionType.NotCompressed, notitifaction.CompressionType);
+            Assert.AreEqual(1684265694505, notitifaction.ChangeNumber);
+            Assert.AreEqual(111, notitifaction.PreviousChangeNumber);
+            Assert.AreEqual("rbs_test", notitifaction.RuleBasedSegmentDto.Name);
+            Assert.AreEqual("ACTIVE", notitifaction.RuleBasedSegmentDto.Status);
+        }
+
+        [TestMethod]
+        public void Parse_RuleBasedSegmentNotificationMessage_Gzip()
+        {
+            // Arrange
+            var message = "id: 123123\nevent: message\ndata: {\"id\":\"1111\",\"clientId\":\"pri:ODc1NjQyNzY1\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"xxxx_xxxx_flags\",\"data\":\"{\\\"type\\\":\\\"RB_SEGMENT_UPDATE\\\",\\\"changeNumber\\\":1684265694505,\\\"pcn\\\":111,\\\"c\\\":1,\\\"d\\\":\\\"H4sIAAAAAAAA/3SSQYucQBCF/0udPeTsbYhLCJl4cQiEsCxl+3SabbuluppFFv976HGiE3Bu3b73PnxV/Unmyn5AncYWQuWXglS47625zBNqHkElpQihgvx6kza+KaLSZj05FwyrDf4RsH9tgO6mxO2grClSSaevl++/Xqigd+tcFnt2EQV16Dk5vQhYR3ilkqggdkO45U3wnc3oSOWfz/2af3q1jqzmCvkmIU1UZsvYWp8r0qmudsMKeMfcwMFokGx+GMFen1XFtklBpU/OLRvibjudz28/Xn43eVIYOPvuZTKgQm89ugZDrvNzTVasvNIK+rhahbPxSEueZa7TCLHmQG6hH4B/rjQq1g8HeocJvoM381E4BAc+wsZnvIemZ5YBz+our0tBE4v+W+Iad9zC5f0tr7cd93ZIwv9ZInQ723ESxJjlykZu9we0/A0AAP//PlHpp9gCAAA=\\\"}\"}";
+
+            // Act
+            var result = _notificationParser.Parse(message);
+
+            // Assert
+            var notitifaction = (RuleBasedSegmentNotification)result;
+            Assert.AreEqual(NotificationType.RB_SEGMENT_UPDATE, notitifaction.Type);
+            Assert.AreEqual("xxxx_xxxx_flags", notitifaction.Channel);
+            Assert.AreEqual(CompressionType.Gzip, notitifaction.CompressionType);
+            Assert.AreEqual(1684265694505, notitifaction.ChangeNumber);
+            Assert.AreEqual(111, notitifaction.PreviousChangeNumber);
+            Assert.AreEqual("rbs_test", notitifaction.RuleBasedSegmentDto.Name);
+            Assert.AreEqual("ACTIVE", notitifaction.RuleBasedSegmentDto.Status);
         }
     }
 }

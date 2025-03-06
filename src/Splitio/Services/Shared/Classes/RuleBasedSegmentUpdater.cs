@@ -1,4 +1,5 @@
 ﻿using Splitio.Domain;
+using Splitio.Enums;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Interfaces;
@@ -22,11 +23,14 @@ namespace Splitio.Services.Shared.Classes
             _ruleBasedSegmentCache = ruleBasedSegmentCache;
         }
 
-        public List<string> Process(List<RuleBasedSegmentDto> changes, long till)
+        public Dictionary<SegmentType, List<string>> Process(List<RuleBasedSegmentDto> changes, long till)
         {
             var toAdd = new List<RuleBasedSegment>();
             var toRemove = new List<string>();
-            var segmentNames = new List<string>();
+            var toReturn = new Dictionary<SegmentType, List<string>>
+            {
+                { SegmentType.Standard, new List<string>() }
+            };
 
             foreach (var rbsDto in changes)
             {
@@ -39,7 +43,7 @@ namespace Splitio.Services.Shared.Classes
                 }
 
                 toAdd.Add(rbs);
-                segmentNames.AddRange(rbs.GetSegments());
+                toReturn[SegmentType.Standard].AddRange(rbs.GetSegments());
             }
 
             _ruleBasedSegmentCache.Update(toAdd, toRemove, till);
@@ -54,7 +58,7 @@ namespace Splitio.Services.Shared.Classes
                 _log.Debug($"Deleted Rule-based Segments: {string.Join(" - ", toRemove)}");
             }
 
-            return segmentNames;
+            return toReturn;
         }
     }
 }

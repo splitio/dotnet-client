@@ -37,6 +37,9 @@ namespace Splitio.Services.EventSource
                         var sc = (SegmentChangeNotification)notification;
                         await _segmentsWorker.AddToQueue(sc.ChangeNumber, sc.SegmentName);
                         break;
+                    case NotificationType.RB_SEGMENT_UPDATE:
+                        await _featureFlagsWorker.AddToQueue((RuleBasedSegmentNotification)notification);
+                        break;
                     default:
                         _log.Debug($"Incorrect Event type: {notification}");
                         break;

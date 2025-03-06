@@ -74,5 +74,24 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             // Assert.
             _segmentsWorker.Verify(mock => mock.AddToQueue(notification.ChangeNumber, notification.SegmentName), Times.Once);
         }
+
+        [TestMethod]
+        public void Process_RuleBasedSegmentUpdate_AddToQueue()
+        {
+            // Arrange
+            var notification = new RuleBasedSegmentNotification
+            {
+                Type = NotificationType.RB_SEGMENT_UPDATE,
+                ChangeNumber = 100,
+                Data = "",
+                Channel = "FLAGS_UPDATE"
+            };
+
+            // Act
+            _notificationPorcessor.Proccess(notification);
+
+            // Assert
+            _splitsWorker.Verify(mock => mock.AddToQueue(notification), Times.Once);
+        }
     }
 }

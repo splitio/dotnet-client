@@ -55,6 +55,7 @@ namespace Splitio.Services.SplitFetcher.Classes
         public void Clear()
         {
             _featureFlagCache.Clear();
+            _ruleBasedSegmentCache.Clear();
             _log.Debug("FeatureFlags cache disposed ...");
         }
 
@@ -89,14 +90,14 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                     if (result.RuleBasedSegments.Data != null && result.RuleBasedSegments.Data.Count > 0)
                     {
-                        var sNames = _ruleBasedSegmentUpdater.Process(result.RuleBasedSegments.Data, result.RuleBasedSegments.Till);
-                        segmentNames.AddRange(sNames);
+                        var segments = _ruleBasedSegmentUpdater.Process(result.RuleBasedSegments.Data, result.RuleBasedSegments.Till);
+                        segmentNames.AddRange(segments[Enums.SegmentType.Standard]);
                     }
 
                     if (result.FeatureFlags.Data != null && result.FeatureFlags.Data.Count > 0)
                     {
-                        var sNames = _featureFlagUpdater.Process(result.FeatureFlags.Data, result.FeatureFlags.Till);
-                        segmentNames.AddRange(sNames);
+                        var segments = _featureFlagUpdater.Process(result.FeatureFlags.Data, result.FeatureFlags.Till);
+                        segmentNames.AddRange(segments[Enums.SegmentType.Standard]);
                     }
                 }
                 catch (Exception e)

@@ -1,7 +1,5 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -22,6 +20,16 @@ namespace Splitio.Services.Cache.Classes
 
         #region Sync Methods
         // Consumer
+        public bool Contains(List<string> names)
+        {
+            foreach (string name in names)
+            {
+                if (!_cache.ContainsKey(name)) return false;
+            }
+
+            return true;
+        }
+
         public RuleBasedSegment Get(string name)
         {
             _cache.TryGetValue(name, out RuleBasedSegment segment);
