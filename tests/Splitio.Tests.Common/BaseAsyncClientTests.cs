@@ -30,6 +30,86 @@ namespace Splitio.Tests.Common
             await CleanupAsync();
         }
 
+        #region Rule Based Segments
+        [TestMethod]
+        public async Task GetTreatmentAsync_RuleBasedSegmentMatcher()
+        {
+            // Arrange
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "rbs_apikey1";
+            var ffName = "rbs_test_flag";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act
+            var result1 = await client.GetTreatmentAsync("mauro@split.io", ffName);
+            var result2 = await client.GetTreatmentAsync("mauro@harness.io", ffName);
+            var result3 = await client.GetTreatmentAsync("mauro.sanz@split.io", ffName);
+            client.Destroy();
+
+            // Assert
+            Assert.AreEqual("v2", result1);
+            Assert.AreEqual("v2", result2);
+            Assert.AreEqual("v1", result3);
+
+            // Validate impressions sent to the be.
+            var impressionExpected1 = Helper.GetImpressionExpected(ffName, "mauro@split.io");
+            var impressionExpected2 = Helper.GetImpressionExpected(ffName, "mauro@harness.io");
+            var impressionExpected3 = Helper.GetImpressionExpected(ffName, "mauro.sanz@split.io");
+            AssertSentImpressions(3, impressionExpected1, impressionExpected2, impressionExpected3);
+
+            // Validate impressions in listener.
+            Helper.AssertImpressionListener(_mode, 3, impressionListener);
+            Helper.AssertImpression(impressionListener.Get(ffName, "mauro@split.io"), impressionExpected1);
+            Helper.AssertImpression(impressionListener.Get(ffName, "mauro@harness.io"), impressionExpected2);
+            Helper.AssertImpression(impressionListener.Get(ffName, "mauro.sanz@split.io"), impressionExpected3);
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentAsync_RuleBasedSegmentMatcher_Negated()
+        {
+            // Arrange
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "rbs_apikey1";
+            var ffName = "rbs_test_flag_negated";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act
+            var negated1 = await client.GetTreatmentAsync("mauro@split.io", ffName);
+            var negated2 = await client.GetTreatmentAsync("mauro@harness.io", ffName);
+            var negated3 = await client.GetTreatmentAsync("mauro.sanz@split.io", ffName);
+            client.Destroy();
+
+            // Assert
+            Assert.AreEqual("v1", negated1);
+            Assert.AreEqual("v1", negated2);
+            Assert.AreEqual("v2", negated3);
+
+            // Validate impressions sent to the be.
+            var impressionExpected1 = Helper.GetImpressionExpected(ffName, "mauro@split.io");
+            var impressionExpected2 = Helper.GetImpressionExpected(ffName, "mauro@harness.io");
+            var impressionExpected3 = Helper.GetImpressionExpected(ffName, "mauro.sanz@split.io");
+            AssertSentImpressions(3, impressionExpected1, impressionExpected2, impressionExpected3);
+
+            // Validate impressions in listener.
+            Helper.AssertImpressionListener(_mode, 3, impressionListener);
+            Helper.AssertImpression(impressionListener.Get(ffName, "mauro@split.io"), impressionExpected1);
+            Helper.AssertImpression(impressionListener.Get(ffName, "mauro@harness.io"), impressionExpected2);
+            Helper.AssertImpression(impressionListener.Get(ffName, "mauro.sanz@split.io"), impressionExpected3);
+        }
+        #endregion
+
         #region Semver
         [TestMethod]
         public async Task GetTreatment_BetweenSemverMatcher()
@@ -750,7 +830,7 @@ namespace Splitio.Tests.Common
             var result = await manager.SplitNamesAsync();
 
             // Assert.
-            Assert.AreEqual(36, result.Count);
+            Assert.AreEqual(38, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<string>));
 
             await client.DestroyAsync();
@@ -773,7 +853,7 @@ namespace Splitio.Tests.Common
             var result = await manager.SplitsAsync();
 
             // Assert.
-            Assert.AreEqual(36, result.Count);
+            Assert.AreEqual(38, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<SplitView>));
 
             await splitFactory.Client().DestroyAsync();

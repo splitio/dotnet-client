@@ -30,7 +30,13 @@ namespace Splitio.Tests.Common.Resources
             new KeyImpression("test_ltet", "semver_less_or_equalto", "on", 0, 1675259356568, "less than or equal to semver", null, null, false),
             new KeyImpression("test_ltet2", "semver_less_or_equalto", "off", 0, 1675259356568, "default rule", null, null, false),
             new KeyImpression("test_list", "semver_inlist", "on", 0, 1675259356568, "in list semver", null, null, false),
-            new KeyImpression("test_list2", "semver_inlist", "off", 0, 1675259356568, "default rule", null, null, false)
+            new KeyImpression("test_list2", "semver_inlist", "off", 0, 1675259356568, "default rule", null, null, false),
+            new KeyImpression("mauro@split.io", "rbs_test_flag_negated", "v1", 0, 10, "not in rule based segment test_rule_based_segment", null, null, false),
+            new KeyImpression("mauro@harness.io", "rbs_test_flag_negated", "v1", 0, 10, "not in rule based segment test_rule_based_segment", null, null, false),
+            new KeyImpression("mauro.sanz@split.io", "rbs_test_flag_negated", "v2", 0, 10, "default rule", null, null, false),
+            new KeyImpression("mauro@split.io", "rbs_test_flag", "v2", 0, 10, "default rule", null, null, false),
+            new KeyImpression("mauro@harness.io", "rbs_test_flag", "v2", 0, 10, "default rule", null, null, false),
+            new KeyImpression("mauro.sanz@split.io", "rbs_test_flag", "v1", 0, 10, "in rule based segment test_rule_based_segment", null, null, false),
         };
 
         public static KeyImpression GetImpressionExpected(string featureName, string key)
