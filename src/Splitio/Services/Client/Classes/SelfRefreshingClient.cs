@@ -229,7 +229,7 @@ namespace Splitio.Services.Client.Classes
                 // Synchronizer
                 var backOffFeatureFlags = new BackOff(backOffBase: 10, attempt: 0, maxAllowed: 60);
                 var backOffSegments = new BackOff(backOffBase: 10, attempt: 0, maxAllowed: 60);
-                var synchronizer = new Synchronizer(_targetingRulesFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _impressionsCounter, _statusManager, _telemetrySyncTask, _featureFlagCache, backOffFeatureFlags, backOffSegments, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs, _segmentCache, _uniqueKeysTracker);
+                var synchronizer = new Synchronizer(_targetingRulesFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _impressionsCounter, _statusManager, _telemetrySyncTask, backOffFeatureFlags, backOffSegments, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs, _segmentCache, _uniqueKeysTracker);
 
                 // Workers
                 var splitsWorker = new SplitsWorker(synchronizer, _featureFlagCache, _telemetryRuntimeProducer, _selfRefreshingSegmentFetcher, _featureFlagUpdater, _ruleBasedSegmentCache, _ruleBasedSegmentUpdater);

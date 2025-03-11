@@ -24,7 +24,6 @@ namespace Splitio.Services.Common
         private readonly IImpressionsCounter _impressionsCounter;
         private readonly IStatusManager _statusManager;
         private readonly ITelemetrySyncTask _telemetrySyncTask;
-        private readonly IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
         private readonly ISegmentCacheConsumer _segmentCacheConsumer;
         private readonly IBackOff _backOffFeatureFlags;
         private readonly IBackOff _backOffSegments;
@@ -40,7 +39,6 @@ namespace Splitio.Services.Common
             IImpressionsCounter impressionsCounter,
             IStatusManager statusManager,
             ITelemetrySyncTask telemetrySyncTask,
-            IFeatureFlagCacheConsumer featureFlagCacheConsumer,
             IBackOff backOffFeatureFlags,
             IBackOff backOffSegments,
             int onDemandFetchMaxRetries,
@@ -55,7 +53,6 @@ namespace Splitio.Services.Common
             _impressionsCounter = impressionsCounter;
             _statusManager = statusManager;
             _telemetrySyncTask = telemetrySyncTask;
-            _featureFlagCacheConsumer = featureFlagCacheConsumer;
             _backOffFeatureFlags = backOffFeatureFlags;
             _backOffSegments = backOffSegments;
             _onDemandFetchMaxRetries = onDemandFetchMaxRetries;
@@ -150,15 +147,15 @@ namespace Splitio.Services.Common
             }
         }
 
-        public async Task SynchronizeSplitsAsync(long targetChangeNumber)
+        public async Task SynchronizeSplitsAsync(long targetChangeNumber, ICacheConsumer cacheConsumer)
         {
             try
             {
-                if (targetChangeNumber <= _featureFlagCacheConsumer.GetChangeNumber()) return;
+                if (targetChangeNumber <= cacheConsumer.GetChangeNumber()) return;
 
                 var fetchOptions = new FetchOptions { CacheControlHeaders = true };
 
-                var result = await AttemptSplitsAsync(targetChangeNumber, fetchOptions, _onDemandFetchMaxRetries, _onDemandFetchRetryDelayMs, false);
+                var result = await AttemptSplitsAsync(targetChangeNumber, fetchOptions, _onDemandFetchMaxRetries, _onDemandFetchRetryDelayMs, false, cacheConsumer);
 
                 if (result.Success)
                 {
@@ -169,7 +166,7 @@ namespace Splitio.Services.Common
                 }
 
                 fetchOptions.Till = targetChangeNumber;
-                var withCDNBypassed = await AttemptSplitsAsync(targetChangeNumber, fetchOptions, OnDemandFetchBackoffMaxRetries, null, true);
+                var withCDNBypassed = await AttemptSplitsAsync(targetChangeNumber, fetchOptions, OnDemandFetchBackoffMaxRetries, null, true, cacheConsumer);
 
                 if (withCDNBypassed.Success)
                 {
@@ -223,7 +220,7 @@ namespace Splitio.Services.Common
             return new SyncResult(false, 0);
         }
 
-        private async Task<SyncResult> AttemptSplitsAsync(long targetChangeNumber, FetchOptions fetchOptions, int maxRetries, int? retryDelayMs, bool withBackoff)
+        private async Task<SyncResult> AttemptSplitsAsync(long targetChangeNumber, FetchOptions fetchOptions, int maxRetries, int? retryDelayMs, bool withBackoff, ICacheConsumer cacheConsumer)
         {
             try
             {
@@ -236,7 +233,7 @@ namespace Splitio.Services.Common
                     remainingAttempts--;
                     var result = await _splitFetcher.FetchSplitsAsync(fetchOptions);
 
-                    if (targetChangeNumber <= _featureFlagCacheConsumer.GetChangeNumber())
+                    if (targetChangeNumber <= cacheConsumer.GetChangeNumber())
                     {
                         return new SyncResult(true, remainingAttempts, result.SegmentNames);
                     }

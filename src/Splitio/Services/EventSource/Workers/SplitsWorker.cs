@@ -88,6 +88,7 @@ namespace Splitio.Services.EventSource.Workers
 
 
                 var success = false;
+                ICacheConsumer consumer = _featureFlagCache;
                 switch (notification)
                 {
                     case SplitChangeNotification scn:
@@ -95,11 +96,12 @@ namespace Splitio.Services.EventSource.Workers
                         break;
                     case RuleBasedSegmentNotification rbsn:
                         success = await ProcessRuleBasedSegmentNotificationAsync(rbsn);
+                        consumer = _ruleBasedSegmentCache;
                         break;
                 }
 
                 if (!success)
-                    await _synchronizer.SynchronizeSplitsAsync(notification.ChangeNumber);
+                    await _synchronizer.SynchronizeSplitsAsync(notification.ChangeNumber, consumer);
             }
             catch (Exception ex)
             {

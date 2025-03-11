@@ -47,13 +47,6 @@ namespace Splitio.Redis.Services.Cache.Classes
             return DeserializeAndParse(rbsJSON);
         }
 
-        public async Task<long> GetChangeNumberAsync()
-        {
-            var cnString = await _redisAdapter.GetAsync(TillKey);
-
-            return ParseChangeNumber(cnString);
-        }
-
         private string GetRuleBasedSegmentKey(string name)
         {
             return $"{RedisKeyPrefix}{RuleBasedSegmentKeyPrefix}.{name}";

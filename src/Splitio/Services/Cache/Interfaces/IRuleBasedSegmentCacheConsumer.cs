@@ -4,14 +4,12 @@ using System.Threading.Tasks;
 
 namespace Splitio.Services.Cache.Interfaces
 {
-    public interface IRuleBasedSegmentCacheConsumer
+    public interface IRuleBasedSegmentCacheConsumer : ICacheConsumer
     {
-        long GetChangeNumber();
         RuleBasedSegment Get(string name);
         bool Contains(List<string> names);
 
         #region Async
-        Task<long> GetChangeNumberAsync();
         Task<RuleBasedSegment> GetAsync(string name);
         #endregion
     }

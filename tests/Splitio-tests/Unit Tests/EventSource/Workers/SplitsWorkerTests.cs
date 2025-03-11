@@ -68,7 +68,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Assert.
             _featureFlagCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<string>>(), It.IsAny<long>()), Times.Never);
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Never);
             _featureFlagCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Never);
         }
 
@@ -126,7 +126,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             // Assert.
             _featureFlagSyncService.Verify(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
             _featureFlagCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<string>>(), It.IsAny<long>()), Times.Never);
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Never);
             _featureFlagCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Never);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits), Times.Once);
             _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExistsAsync(It.IsAny<List<string>>()), Times.Once);
@@ -167,7 +167,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             // Assert.
             _featureFlagSyncService.Verify(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
             _featureFlagCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<string>>(), It.IsAny<long>()), Times.Never);
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Never);
             _featureFlagCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Never);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits), Times.Once);
         }
@@ -222,7 +222,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             await Task.Delay(1000);
 
             // Assert
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Exactly(4));
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Exactly(4));
 
             _splitsWorker.Stop();
             await _splitsWorker.AddToQueue(new SplitChangeNotification { ChangeNumber = 1585956698486 });
@@ -230,7 +230,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             await _splitsWorker.AddToQueue(new SplitChangeNotification { ChangeNumber = 1585956698496 });
 
             // Assert
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Exactly(4));
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Exactly(4));
         }
 
         [TestMethod]
@@ -241,7 +241,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             Thread.Sleep(1000);
 
             // Assert.
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Never);
         }
 
         [TestMethod]
@@ -338,7 +338,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _rbsCache.Verify(mock => mock.GetChangeNumber(), Times.Exactly(3));
             _rbsUpdater.Verify(mock => mock.Process(It.IsAny<List<RuleBasedSegmentDto>>(), 2), Times.Once);
             _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExistsAsync(It.IsAny<IList<string>>()), Times.Never);
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Never);
         }
 
         [TestMethod]
@@ -376,7 +376,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Assert
             _rbsCache.Verify(mock => mock.GetChangeNumber(), Times.Exactly(2));
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Once);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _rbsCache.Object), Times.Once);
             _rbsUpdater.Verify(mock => mock.Process(It.IsAny<List<RuleBasedSegmentDto>>(), It.IsAny<long>()), Times.Never);
             _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExistsAsync(It.IsAny<IList<string>>()), Times.Never);
         }
@@ -411,7 +411,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Assert
             _rbsCache.Verify(mock => mock.GetChangeNumber(), Times.Once);
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Once);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _rbsCache.Object), Times.Once);
             _rbsUpdater.Verify(mock => mock.Process(It.IsAny<List<RuleBasedSegmentDto>>(), It.IsAny<long>()), Times.Never);
             _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExistsAsync(It.IsAny<IList<string>>()), Times.Never);
         }
@@ -449,7 +449,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _rbsCache.Verify(mock => mock.GetChangeNumber(), Times.Exactly(2));
             _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExistsAsync(It.IsAny<IList<string>>()), Times.Once);
             _rbsUpdater.Verify(mock => mock.Process(It.IsAny<List<RuleBasedSegmentDto>>(), It.IsAny<long>()), Times.Once);
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Never);
         }
 
         [TestMethod]
@@ -492,7 +492,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _featureFlagCache.Verify(mock => mock.GetChangeNumber(), Times.Exactly(2));
             _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExistsAsync(It.IsAny<IList<string>>()), Times.Once);
             _featureFlagSyncService.Verify(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Never);
         }
 
         [TestMethod]
@@ -535,7 +535,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _featureFlagCache.Verify(mock => mock.GetChangeNumber(), Times.Exactly(2));
             _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExistsAsync(It.IsAny<IList<string>>()), Times.Once);
             _featureFlagSyncService.Verify(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Once);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Once);
         }
     }
 }

@@ -137,34 +137,6 @@ namespace Splitio_Tests.Unit_Tests.Cache.Redis
         }
 
         [TestMethod]
-        public async Task GetChangeNumberAsync_WhenValid_ReturnsChangeNumber()
-        {
-            // Arrange
-            var changeNumber = "123";
-            _redisAdapterMock.Setup(x => x.GetAsync(It.IsAny<string>())).ReturnsAsync(changeNumber);
-
-            // Act
-            var result = await _cache.GetChangeNumberAsync();
-
-            // Assert
-            Assert.AreEqual(123, result);
-        }
-
-        [TestMethod]
-        public async Task GetChangeNumberAsync_WhenInvalid_ReturnsMinusOne()
-        {
-            // Arrange
-            var changeNumber = "invalid";
-            _redisAdapterMock.Setup(x => x.GetAsync(It.IsAny<string>())).ReturnsAsync(changeNumber);
-
-            // Act
-            var result = await _cache.GetChangeNumberAsync();
-
-            // Assert
-            Assert.AreEqual(-1, result);
-        }
-
-        [TestMethod]
         public void Contains_ShouldReturnTrue()
         {
             // Act and Assert
