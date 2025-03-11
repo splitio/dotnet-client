@@ -435,6 +435,186 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             Assert.AreEqual("labelEndsWith", results.FirstOrDefault().Label);
             Assert.AreEqual(parsedSplit.changeNumber, results.FirstOrDefault().ChangeNumber);
         }
+
+        [TestMethod]
+        public void EvaluateFeatures_WithPrerequisites_ReturnsTreatment()
+        {
+            // Arrange
+            var ffName1 = "featureFlagTest";
+            var ffName2 = "ffPrerequisites";
+            var flag = new ParsedSplit
+            {
+                name = ffName1,
+                Prerequisites = new List<PrerequisitesDto>
+                {
+                    new PrerequisitesDto
+                    {
+                        FeatureFlagName = ffName2,
+                        Treatments = new List<string>{ "v1" }
+                    }
+                },
+                conditions = new List<ConditionWithLogic>
+                {
+                    new ConditionWithLogic
+                    {
+                        conditionType = ConditionType.ROLLOUT,
+                        label = "label",
+                        partitions = new List<PartitionDefinition>
+                        {
+                            new PartitionDefinition
+                            {
+                                size = 100,
+                                treatment = "testOk"
+                            }
+                        },
+                        matcher = new CombiningMatcher
+                        {
+                                combiner = CombinerEnum.AND,
+                                delegates = new List<AttributeMatcher>
+                                {
+                                    new AttributeMatcher
+                                    {
+                                        matcher = new AllKeysMatcher()
+                                    }
+                                }
+                        }
+                    }
+                }
+            };
+
+            _splitCache
+                .Setup(mock => mock.FetchMany(new List<string> { ffName1 }))
+                .Returns(new List<ParsedSplit> { flag });
+            
+            _splitCache
+                .Setup(mock => mock.FetchMany(new List<string> { ffName2 }))
+                .Returns(new List<ParsedSplit> { new ParsedSplit
+                {
+                    name = ffName2,
+                    conditions = new List<ConditionWithLogic>
+                    {
+                        new ConditionWithLogic
+                        {
+                            conditionType = ConditionType.ROLLOUT,
+                            label = "label",
+                            matcher = new CombiningMatcher
+                            {
+                                 combiner = CombinerEnum.AND,
+                                 delegates = new List<AttributeMatcher>
+                                 {
+                                     new AttributeMatcher
+                                     {
+                                         matcher = new AllKeysMatcher()
+                                     }
+                                 }
+                            }
+                        }
+                    }
+                }});
+
+            _splitter
+                .SetupSequence(mock => mock.GetTreatment(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<List<PartitionDefinition>>(), It.IsAny<AlgorithmEnum>()))
+                .Returns("v1")
+                .Returns("testOk");
+
+            // Act
+            var results = _evaluator.EvaluateFeatures(Splitio.Enums.API.GetTreatment, new Key("matching-key", null), new List<string> { ffName1 });
+
+            // Assert
+            var res = results.FirstOrDefault();
+            Assert.AreEqual("testOk", res.Treatment);
+            Assert.AreEqual(ffName1, res.FeatureFlagName);
+        }
+
+        [TestMethod]
+        public void EvaluateFeatures_WithPrerequisites_ReturnsDefaultTreatment()
+        {
+            // Arrange
+            var ffName1 = "featureFlagTest";
+            var ffName2 = "ffPrerequisites";
+            var flag = new ParsedSplit
+            {
+                name = ffName1,
+                defaultTreatment = "defaultTreatment",
+                Prerequisites = new List<PrerequisitesDto>
+                {
+                    new PrerequisitesDto
+                    {
+                        FeatureFlagName = ffName2,
+                        Treatments = new List<string>{ "v1" }
+                    }
+                },
+                conditions = new List<ConditionWithLogic>
+                {
+                    new ConditionWithLogic
+                    {
+                        conditionType = ConditionType.ROLLOUT,
+                        label = "label",
+                        partitions = new List<PartitionDefinition>
+                        {
+                            new PartitionDefinition
+                            {
+                                size = 100,
+                                treatment = "testOk"
+                            }
+                        },
+                        matcher = new CombiningMatcher
+                        {
+                                combiner = CombinerEnum.AND,
+                                delegates = new List<AttributeMatcher>
+                                {
+                                    new AttributeMatcher
+                                    {
+                                        matcher = new AllKeysMatcher()
+                                    }
+                                }
+                        }
+                    }
+                }
+            };
+
+            _splitCache
+                .Setup(mock => mock.FetchMany(new List<string> { ffName1 }))
+                .Returns(new List<ParsedSplit> { flag });
+
+            _splitCache
+                .Setup(mock => mock.FetchMany(new List<string> { ffName2 }))
+                .Returns(new List<ParsedSplit> { new ParsedSplit
+                {
+                    name = ffName2,
+                    conditions = new List<ConditionWithLogic>
+                    {
+                        new ConditionWithLogic
+                        {
+                            conditionType = ConditionType.ROLLOUT,
+                            label = "label",
+                            matcher = new CombiningMatcher
+                            {
+                                 combiner = CombinerEnum.AND,
+                                 delegates = new List<AttributeMatcher>
+                                 {
+                                     new AttributeMatcher
+                                     {
+                                         matcher = new AllKeysMatcher()
+                                     }
+                                 }
+                            }
+                        }
+                    }
+                }});
+
+            _splitter
+                .Setup(mock => mock.GetTreatment(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<List<PartitionDefinition>>(), It.IsAny<AlgorithmEnum>()))
+                .Returns("v2");
+
+            // Act
+            var results = _evaluator.EvaluateFeatures(Splitio.Enums.API.GetTreatment, new Key("matching-key", null), new List<string> { ffName1 });
+
+            // Assert
+            var res = results.FirstOrDefault();
+            Assert.AreEqual(flag.defaultTreatment, res.Treatment);
+            Assert.AreEqual(ffName1, res.FeatureFlagName);
+        }
         #endregion
 
         #region EvaluateFeatures
