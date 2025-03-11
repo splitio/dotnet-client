@@ -74,11 +74,6 @@ namespace Splitio.Services.Cache.Classes
         {
             return Task.FromResult(Get(name));
         }
-
-        public Task<long> GetChangeNumberAsync()
-        {
-            return Task.FromResult(GetChangeNumber());
-        }
         #endregion
     }
 }

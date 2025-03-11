@@ -126,20 +126,6 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
         }
 
         [TestMethod]
-        public async Task GetChangeNumberAsync_ShouldReturnChangeNumber()
-        {
-            // Arrange
-            var changeNumber = 12345;
-            _segmentCache.SetChangeNumber(changeNumber);
-
-            // Act
-            var result = await _segmentCache.GetChangeNumberAsync();
-
-            // Assert
-            Assert.AreEqual(changeNumber, result);
-        }
-
-        [TestMethod]
         public void Contains_ShouldReturnTrue()
         {
             // Arrange

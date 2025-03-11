@@ -4,9 +4,8 @@ using System.Threading.Tasks;
 
 namespace Splitio.Services.Cache.Interfaces
 {
-    public interface IFeatureFlagCacheConsumer
+    public interface IFeatureFlagCacheConsumer : ICacheConsumer
     {
-        long GetChangeNumber();
         ParsedSplit GetSplit(string splitName);
         List<ParsedSplit> GetAllSplits();
         bool TrafficTypeExists(string trafficType);
