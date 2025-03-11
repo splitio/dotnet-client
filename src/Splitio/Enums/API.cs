@@ -31,7 +31,10 @@ namespace Splitio.Enums
 
         // Matchers
         DependecyMatcher,
-        DependecyMatcherAsync
+        DependecyMatcherAsync,
+
+        // Prerequisites
+        Prerequisites
     }
 }
 

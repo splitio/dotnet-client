@@ -203,6 +203,24 @@ namespace Splitio.Services.Evaluator
         {
             if (IsSplitKilled(split, out TreatmentResult result)) return result;
 
+            if (split.Prerequisites != null) 
+            {
+                foreach (var pr in split.Prerequisites)
+                {
+                    var results = EvaluateFeatures(API.Prerequisites, key, new List<string> { pr.FeatureFlagName }, attributes, trackLatency: false);
+                    
+                    if (results.Count == 0)
+                    {
+                        return EvaluateFeatureException(new Exception("Somenthing went wrong evaluation a pre-requisite"), pr.FeatureFlagName);
+                    }
+
+                    if (!pr.Treatments.Contains(results.FirstOrDefault().Treatment))
+                    {
+                        return ReturnDefaultTreatment(split);
+                    }
+                }
+            }
+
             var inRollout = false;
 
             // use the first matching condition
@@ -281,6 +299,24 @@ namespace Splitio.Services.Evaluator
         private async Task<TreatmentResult> GetTreatmentResultAsync(Key key, ParsedSplit split, Dictionary<string, object> attributes = null)
         {
             if (IsSplitKilled(split, out TreatmentResult result)) return result;
+
+            if (split.Prerequisites != null)
+            {
+                foreach (var pr in split.Prerequisites)
+                {
+                    var results = await EvaluateFeaturesAsync(API.Prerequisites, key, new List<string> { pr.FeatureFlagName }, attributes, trackLatency: false);
+                    
+                    if (results.Count == 0)
+                    {
+                        return EvaluateFeatureException(new Exception("Somenthing went wrong evaluation a pre-requisite"), pr.FeatureFlagName);
+                    }
+
+                    if (!pr.Treatments.Contains(results.FirstOrDefault().Treatment))
+                    {
+                        return ReturnDefaultTreatment(split);
+                    }
+                }
+            }
 
             var inRollout = false;
 
