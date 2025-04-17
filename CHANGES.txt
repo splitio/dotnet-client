@@ -1,5 +1,8 @@
 CHANGES
 
+7.11.0 (Apr 18, 2025)
+- Added support for the new impressions tracking toggle available on feature flags, both respecting the setting and including the new field being returned on SplitView type objects. Read more in our docs.
+
 7.10.0 (Oct 16, 2024)
 - Added support for Redis Cluster
 
