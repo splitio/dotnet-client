@@ -27,10 +27,13 @@ namespace Splitio.Services.SplitFetcher.Classes
             {
                 var featureFlags = JsonConvert.DeserializeObject<OldSplitChangesDto>(result.Content);
 
-                return featureFlags.ToTargetingRulesDto();
+                return featureFlags.ToTargetingRulesDto(result.ClearCache);
             }
 
-            return JsonConvert.DeserializeObject<TargetingRulesDto>(result.Content);
+            var targetingRulesDto = JsonConvert.DeserializeObject<TargetingRulesDto>(result.Content);
+            targetingRulesDto.ClearCache = result.ClearCache;
+            
+            return targetingRulesDto;
         }
     }
 }

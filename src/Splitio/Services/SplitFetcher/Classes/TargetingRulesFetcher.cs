@@ -88,6 +88,12 @@ namespace Splitio.Services.SplitFetcher.Classes
                         break;
                     }
 
+                    if (result.ClearCache)
+                    {
+                        _featureFlagCache.Clear();
+                        _ruleBasedSegmentCache.Clear();
+                    }
+
                     if (result.RuleBasedSegments.Data != null && result.RuleBasedSegments.Data.Count > 0)
                     {
                         var segments = _ruleBasedSegmentUpdater.Process(result.RuleBasedSegments.Data, result.RuleBasedSegments.Till);

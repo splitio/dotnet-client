@@ -49,7 +49,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                 try
                 {
-                    if (_lastProxyCheckTimestamp != null && CurrentTimeHelper.CurrentTimeMillis() - _lastProxyCheckTimestamp >= PROXY_CHECK_INTERVAL_MILLISECONDS_SS)
+                    if (ShouldSwitchToLatestFlagsSpec)
                     {
                         _flagSpec = ApiVersions.LatestFlagsSpec;
                         _log.Info($"Switching to new Feature flag spec {_flagSpec} and fetching.");
@@ -66,7 +66,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                         var result = new ApiFetchResult
                         {
                             Success = true,
-                            ClearCache = _lastProxyCheckTimestamp!= null,
+                            ClearCache = _lastProxyCheckTimestamp != null,
                             Spec = _flagSpec,
                             Content = response.Content
                         };
@@ -122,5 +122,9 @@ namespace Splitio.Services.SplitFetcher.Classes
 
             return uri;
         }
+
+        private bool ShouldSwitchToLatestFlagsSpec => _lastProxyCheckTimestamp != null &&
+                CurrentTimeHelper.CurrentTimeMillis() - _lastProxyCheckTimestamp >= PROXY_CHECK_INTERVAL_MILLISECONDS_SS &&
+                !_flagSpec.Equals(ApiVersions.LatestFlagsSpec);
     }
 }

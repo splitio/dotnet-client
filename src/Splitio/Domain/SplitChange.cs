@@ -9,7 +9,7 @@ namespace Splitio.Domain
         public long Till { get; set; }
         public List<Split> Splits { get; set; }
 
-        public TargetingRulesDto ToTargetingRulesDto()
+        public TargetingRulesDto ToTargetingRulesDto(bool clearCache = false)
         {
             return new TargetingRulesDto
             {
@@ -24,7 +24,8 @@ namespace Splitio.Domain
                     Data = new List<RuleBasedSegmentDto>(),
                     Since = -1,
                     Till = -1
-                }
+                },
+                ClearCache = clearCache
             };
         }
     }
@@ -35,6 +36,8 @@ namespace Splitio.Domain
         public ChangesDto<Split> FeatureFlags { get; set; }
         [JsonProperty("rbs")]
         public ChangesDto<RuleBasedSegmentDto> RuleBasedSegments { get; set; }
+        [JsonIgnore]
+        public bool ClearCache { get; set; }
     }
 
     public class ChangesDto<T> where T : class
