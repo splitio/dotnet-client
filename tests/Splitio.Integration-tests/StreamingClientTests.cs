@@ -538,7 +538,7 @@ namespace Splitio.Integration_tests
             using (var httpClientMock = new HttpClientMock())
             {
                 // Arrange.
-                var changes1 = new SplitChangesResult
+                var changes1 = new TargetingRulesDto
                 {
                     RuleBasedSegments = new ChangesDto<RuleBasedSegmentDto>
                     {
@@ -554,7 +554,7 @@ namespace Splitio.Integration_tests
                                 Excluded = new Excluded
                                 {
                                     Keys = new List<string>(),
-                                    Segments = new List<string>()
+                                    Segments = new List<ExcludedSegments>()
                                 },
                                 Conditions = new List<ConditionDefinition>
                                 {
@@ -625,7 +625,7 @@ namespace Splitio.Integration_tests
                         }
                     }
                 };
-                var changes2 = new SplitChangesResult
+                var changes2 = new TargetingRulesDto
                 {
                     RuleBasedSegments = new ChangesDto<RuleBasedSegmentDto>
                     {
@@ -641,7 +641,7 @@ namespace Splitio.Integration_tests
                     }
                 };
 
-                var changes3 = new SplitChangesResult
+                var changes3 = new TargetingRulesDto
                 {
                     RuleBasedSegments = new ChangesDto<RuleBasedSegmentDto>
                     {
@@ -696,7 +696,7 @@ namespace Splitio.Integration_tests
                     }
                 };
 
-                var changes4 = new SplitChangesResult
+                var changes4 = new TargetingRulesDto
                 {
                     RuleBasedSegments = new ChangesDto<RuleBasedSegmentDto>
                     {

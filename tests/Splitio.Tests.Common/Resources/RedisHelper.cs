@@ -50,7 +50,7 @@ namespace Splitio.Tests.Common.Resources
 
             var splitsJson = File.ReadAllText($"{rootFilePath}split_changes.json");
 
-            var result = JsonConvert.DeserializeObject<SplitChangesResult>(splitsJson);
+            var result = JsonConvert.DeserializeObject<TargetingRulesDto>(splitsJson);
 
             foreach (var split in result.FeatureFlags.Data)
             {

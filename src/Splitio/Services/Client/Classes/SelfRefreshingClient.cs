@@ -42,7 +42,7 @@ namespace Splitio.Services.Client.Classes
         private IImpressionsSdkApiClient _impressionsSdkApiClient;
         private IEventSdkApiClient _eventSdkApiClient;
         private SelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
-        private ITelemetrySyncTask _telemetrySyncTask;        
+        private ITelemetrySyncTask _telemetrySyncTask;
         private ITelemetryStorageConsumer _telemetryStorageConsumer;
         private ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private ITelemetryAPI _telemetryAPI;
@@ -190,7 +190,7 @@ namespace Splitio.Services.Client.Classes
             headers.Add(Constants.Http.KeepAlive, "true");
 
             var sdkHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
-            _splitSdkApiClient = new SplitSdkApiClient(sdkHttpClient, _telemetryRuntimeProducer, _config.BaseUrl, _flagSetsFilter);
+            _splitSdkApiClient = new SplitSdkApiClient(sdkHttpClient, _telemetryRuntimeProducer, _config.BaseUrl, _flagSetsFilter, IsHTTPProxyDetected());
 
             var segmentsHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
             _segmentSdkApiClient = new SegmentSdkApiClient(segmentsHttpClient, _telemetryRuntimeProducer, _config.BaseUrl);
@@ -215,7 +215,7 @@ namespace Splitio.Services.Client.Classes
         private void BuildTelemetrySyncTask()
         {
             var httpClient = new SplitioHttpClient(ApiKey, _config, GetHeaders());
-            var telemetryStatsSubmitterTask =  _tasksManager.NewPeriodicTask(Enums.Task.TelemetryStats, _config.TelemetryRefreshRate * 1000);
+            var telemetryStatsSubmitterTask = _tasksManager.NewPeriodicTask(Enums.Task.TelemetryStats, _config.TelemetryRefreshRate * 1000);
             var telemetryInitSubmitterTask = _tasksManager.NewOnTimeTask(Enums.Task.TelemetryInit);
 
             _telemetryAPI = new TelemetryAPI(httpClient, _config.TelemetryServiceURL, _telemetryRuntimeProducer);
@@ -275,7 +275,7 @@ namespace Splitio.Services.Client.Classes
             {
                 _log.Error($"BuildSyncManager: {ex.Message}");
             }
-        }        
+        }
 
         private Dictionary<string, string> GetHeaders()
         {
@@ -296,6 +296,13 @@ namespace Splitio.Services.Client.Classes
             }
 
             return headers;
+        }
+
+        private bool IsHTTPProxyDetected()
+        {
+            return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HTTP_PROXY")) ||
+                !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HTTPS_PROXY")) ||
+                !string.IsNullOrEmpty(_config.ProxyHost);
         }
         #endregion
     }

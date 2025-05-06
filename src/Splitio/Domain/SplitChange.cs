@@ -3,7 +3,33 @@ using System.Collections.Generic;
 
 namespace Splitio.Domain
 {
-    public class SplitChangesResult
+    public class OldSplitChangesDto
+    {
+        public long Since { get; set; }
+        public long Till { get; set; }
+        public List<Split> Splits { get; set; }
+
+        public TargetingRulesDto ToTargetingRulesDto()
+        {
+            return new TargetingRulesDto
+            {
+                FeatureFlags = new ChangesDto<Split>
+                {
+                    Data = Splits,
+                    Since = Since,
+                    Till = Till
+                },
+                RuleBasedSegments = new ChangesDto<RuleBasedSegmentDto>
+                {
+                    Data = new List<RuleBasedSegmentDto>(),
+                    Since = -1,
+                    Till = -1
+                }
+            };
+        }
+    }
+
+    public class TargetingRulesDto
     {
         [JsonProperty("ff")]
         public ChangesDto<Split> FeatureFlags { get; set; }

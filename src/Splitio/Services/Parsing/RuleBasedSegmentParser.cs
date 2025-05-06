@@ -27,7 +27,7 @@ namespace Splitio.Services.Parsing
             {
                 Name = rbsDTO.Name,
                 ChangeNumber = rbsDTO.ChangeNumber,
-                Excluded = rbsDTO.Excluded,
+                Excluded = CheckExcluded(rbsDTO.Excluded),
                 CombiningMatchers = ParseCombiningMatchers(rbsDTO.Conditions, ruleBasedSegmentCache)
             };
         }
@@ -57,6 +57,26 @@ namespace Splitio.Services.Parsing
             }
 
             return toReturn;
+        }
+
+        private static Excluded CheckExcluded(Excluded excluded)
+        {
+            if (excluded == null)
+            {
+                return new Excluded();
+            }
+
+            if (excluded.Keys == null)
+            {
+                excluded.Keys = new List<string>();
+            }
+
+            if (excluded.Segments == null)
+            {
+                excluded.Segments = new List<ExcludedSegments>();
+            }
+
+            return excluded;
         }
     }
 }

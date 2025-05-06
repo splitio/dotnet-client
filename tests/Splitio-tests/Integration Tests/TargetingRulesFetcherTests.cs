@@ -135,7 +135,7 @@ namespace Splitio_Tests.Integration_Tests
             };
             var httpClient = new SplitioHttpClient("0", config, headers);
             var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
-            var sdkApiClient = new SplitSdkApiClient(httpClient, telemetryStorage, baseUrl, flagSetsFilter);
+            var sdkApiClient = new SplitSdkApiClient(httpClient, telemetryStorage, baseUrl, flagSetsFilter, false);
             var apiSplitChangeFetcher = new ApiSplitChangeFetcher(sdkApiClient);
             var sdkSegmentApiClient = new SegmentSdkApiClient(httpClient, telemetryStorage, baseUrl);
             var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkSegmentApiClient);

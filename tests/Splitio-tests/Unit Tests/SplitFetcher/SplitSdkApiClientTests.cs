@@ -29,8 +29,8 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
             // Arrange.
             var baseUrl = "https://app.split-testing.io";
             var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
-            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter);
-            var expectedUrl = $"{baseUrl}/api/splitChanges?s=1.1&since=-1&rbSince=-1";
+            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter, false);
+            var expectedUrl = $"{baseUrl}/api/splitChanges?s=1.3&since=-1&rbSince=-1";
 
             _httpClient
                 .Setup(mock => mock.GetAsync(expectedUrl, false))
@@ -49,7 +49,8 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
             });
 
             // Assert.
-            Assert.AreEqual("ok", result);
+            Assert.AreEqual("ok", result.Content);
+            Assert.IsTrue(result.Success);
             _httpClient.Verify(mock => mock.GetAsync(expectedUrl, false), Times.Once);
         }
 
@@ -59,8 +60,8 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
             // Arrange.
             var baseUrl = "https://app.split-testing.io";
             var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
-            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter);
-            var expectedUrl = $"{baseUrl}/api/splitChanges?s=1.1&since=-1&rbSince=-1&till=10";
+            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter, false);
+            var expectedUrl = $"{baseUrl}/api/splitChanges?s=1.3&since=-1&rbSince=-1&till=10";
 
             _httpClient
                 .Setup(mock => mock.GetAsync(expectedUrl, false))
@@ -80,7 +81,8 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
             });
 
             // Assert.
-            Assert.AreEqual("ok", result);
+            Assert.AreEqual("ok", result.Content);
+            Assert.IsTrue(result.Success);
             _httpClient.Verify(mock => mock.GetAsync(expectedUrl, false), Times.Once);
         }
 
@@ -91,8 +93,8 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
             var baseUrl = "https://app.split-testing.io";
             var sets = new HashSet<string> { "set_c", "set_a", "set_b" };
             var flagSetsFilter = new FlagSetsFilter(sets);
-            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter);
-            var expectedUrl = $"{baseUrl}/api/splitChanges?s=1.1&since=-1&rbSince=-1&sets=set_a,set_b,set_c";
+            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter, false);
+            var expectedUrl = $"{baseUrl}/api/splitChanges?s=1.3&since=-1&rbSince=-1&sets=set_a,set_b,set_c";
 
             _httpClient
                 .Setup(mock => mock.GetAsync(expectedUrl, false))
@@ -111,7 +113,7 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
             });
 
             // Assert.
-            Assert.AreEqual("ok", result);
+            Assert.AreEqual("ok", result.Content);
             _httpClient.Verify(mock => mock.GetAsync(expectedUrl, false), Times.Once);
         }
 
@@ -122,8 +124,8 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
             var baseUrl = "https://app.split-testing.io";
             var sets = new HashSet<string> { "set_c", "set_a", "set_b" };
             var flagSetsFilter = new FlagSetsFilter(sets);
-            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter);
-            var expectedUrl = $"{baseUrl}/api/splitChanges?s=1.1&since=-1&rbSince=22&sets=set_a,set_b,set_c&till=11";
+            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter, false);
+            var expectedUrl = $"{baseUrl}/api/splitChanges?s=1.3&since=-1&rbSince=22&sets=set_a,set_b,set_c&till=11";
 
             _httpClient
                 .Setup(mock => mock.GetAsync(expectedUrl, false))
@@ -143,7 +145,8 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
             });
 
             // Assert.
-            Assert.AreEqual("ok", result);
+            Assert.AreEqual("ok", result.Content);
+            Assert.IsTrue(result.Success);
             _httpClient.Verify(mock => mock.GetAsync(expectedUrl, false), Times.Once);
         }
     }

@@ -29,7 +29,11 @@ namespace Splitio_Tests.Unit_Tests
             //Arrange            
             _apiClient
                 .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
-                .ReturnsAsync(@"{
+                .ReturnsAsync(new ApiFetchResult
+                {
+                    Spec = "1.3",
+                    Success = true,
+                    Content = @"{
                           'rbs':{
                              's':-1,
                              't':-1,
@@ -79,7 +83,8 @@ namespace Splitio_Tests.Unit_Tests
                              's':1469817846929,
                              't':1469827821322
                           }
-                        }");
+                        }"
+                });
 
 
             ApiSplitChangeFetcher apiSplitChangeFetcher = new ApiSplitChangeFetcher(_apiClient.Object);
@@ -98,7 +103,11 @@ namespace Splitio_Tests.Unit_Tests
             //Arrange
             _apiClient
                 .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
-                .ReturnsAsync(@"{
+                .ReturnsAsync(new ApiFetchResult
+                {
+                    Spec = "1.3",
+                    Success = true,
+                    Content = @"{
                           'rbs':{
                             's':-1,
                             't':-1,
@@ -150,7 +159,8 @@ namespace Splitio_Tests.Unit_Tests
                           's': -1,
                           't': 1470855828956
                           },
-                        }");
+                        }"
+                });
 
             //Act
             var result = await _apiFetcher.FetchAsync(new FetchOptions());
@@ -175,7 +185,11 @@ namespace Splitio_Tests.Unit_Tests
             //Arrange
             _apiClient
                 .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
-                .ReturnsAsync(@"{
+                .ReturnsAsync(new ApiFetchResult
+                {
+                    Spec = "1.3",
+                    Success = true,
+                    Content = @"{
                           'rbs':{
                             's':-1,
                             't':-1,
@@ -228,7 +242,8 @@ namespace Splitio_Tests.Unit_Tests
                           's': -1,
                           't': 1470855828956
                           }
-                        }");
+                        }"
+                });
 
             //Act
             var result = await _apiFetcher.FetchAsync(new FetchOptions());
@@ -245,7 +260,11 @@ namespace Splitio_Tests.Unit_Tests
             //Arrange
             _apiClient
                 .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
-                .ReturnsAsync(@"{
+                .ReturnsAsync(new ApiFetchResult
+                {
+                    Spec = "1.3",
+                    Success = true,
+                    Content = @"{
                           'rbs':{
                             's':-1,
                             't':-1,
@@ -298,7 +317,8 @@ namespace Splitio_Tests.Unit_Tests
                           's': -1,
                           't': 1470855828956
                           }
-                        }");
+                        }"
+                });
 
             //Act
             var result = await _apiFetcher.FetchAsync(new FetchOptions());
@@ -332,7 +352,11 @@ namespace Splitio_Tests.Unit_Tests
             //Arrange
             _apiClient
                 .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
-                .ReturnsAsync(@"{
+                .ReturnsAsync(new ApiFetchResult
+                {
+                    Spec = "1.3",
+                    Success = true,
+                    Content = @"{
                           'rbs':{
                             's':-1,
                             't':-1,
@@ -389,7 +413,8 @@ namespace Splitio_Tests.Unit_Tests
                           's': -1,
                           't': 1470855828956
                           }
-                        }");
+                        }"
+                });
 
             //Act
             var result = await _apiFetcher.FetchAsync(new FetchOptions());
@@ -407,7 +432,11 @@ namespace Splitio_Tests.Unit_Tests
             // Arrange.
             _apiClient
                 .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
-                .ReturnsAsync(@"{
+                .ReturnsAsync(new ApiFetchResult
+                {
+                    Spec = "1.3",
+                    Success = true,
+                    Content = @"{
                           'rbs':{
                             's':-1,
                             't':-1,
@@ -465,7 +494,8 @@ namespace Splitio_Tests.Unit_Tests
                           's': -1,
                           't': 1470855828956
                           }
-                        }");
+                        }"
+                });
 
             // Act.
             var result = await _apiFetcher.FetchAsync(new FetchOptions());

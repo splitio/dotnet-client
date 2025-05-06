@@ -32,13 +32,13 @@ namespace Splitio_Tests.Integration_Tests
             };
             var httpClient = new SplitioHttpClient(string.Empty, config, headers);
             var fsFilter = new FlagSetsFilter(new HashSet<string>());
-            var SplitSdkApiClient = new SplitSdkApiClient(httpClient, telemetryStorage, baseUrl, fsFilter);
+            var SplitSdkApiClient = new SplitSdkApiClient(httpClient, telemetryStorage, baseUrl, fsFilter, false);
 
             //Act
             var result = await SplitSdkApiClient.FetchSplitChangesAsync(new FetchOptions());
 
             //Assert
-            Assert.IsTrue(result == string.Empty);
+            Assert.IsTrue(result.Content == string.Empty);
         }
     }
 }

@@ -32,6 +32,21 @@ namespace Splitio.Domain
     public class Excluded
     {
         public List<string> Keys { get; set; }
-        public List<string> Segments { get; set; }
+        public List<ExcludedSegments> Segments { get; set; }
+
+        public Excluded()
+        {
+            Keys = new List<string>();
+            Segments = new List<ExcludedSegments>();
+        }
+    }
+
+    public class ExcludedSegments
+    {
+        public string Type { get; set; }
+        public string Name { get; set; }
+
+        public bool IsStandard => Type == "standard";
+        public bool IsRuleBased => Type == "rule-based";
     }
 }

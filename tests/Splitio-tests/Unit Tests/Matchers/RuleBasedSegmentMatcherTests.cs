@@ -35,7 +35,14 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string> { "excluded-key" },
-                    Segments = new List<string> { "excluded-segment" }
+                    Segments = new List<ExcludedSegments>
+                    {
+                        new ExcludedSegments
+                        {
+                            Type = "standard",
+                            Name = "excluded-segment"
+                        }
+                    }
                 },
                 CombiningMatchers = new List<CombiningMatcher>
                 {
@@ -78,7 +85,14 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string> { "excluded-key" },
-                    Segments = new List<string> { "excluded-segment" }
+                    Segments = new List<ExcludedSegments>
+                    {
+                        new ExcludedSegments
+                        {
+                            Type = "standard",
+                            Name = "excluded-segment"
+                        }
+                    }
                 },
                 CombiningMatchers = new List<CombiningMatcher>
                 {
@@ -121,7 +135,14 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string> { "excluded-key" },
-                    Segments = new List<string> { "excluded-segment" }
+                    Segments = new List<ExcludedSegments>
+                    {
+                        new ExcludedSegments
+                        {
+                            Type = "standard",
+                            Name = "excluded-segment"
+                        }
+                    }
                 },
                 CombiningMatchers = new List<CombiningMatcher>
                 {
@@ -164,7 +185,14 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string> { "excluded-key" },
-                    Segments = new List<string> { "excluded-segment" }
+                    Segments = new List<ExcludedSegments>
+                    {
+                        new ExcludedSegments
+                        {
+                            Type = "standard",
+                            Name = "excluded-segment"
+                        }
+                    }
                 },
                 CombiningMatchers = new List<CombiningMatcher>
                 {
@@ -282,16 +310,24 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string>(),
-                    Segments = new List<string> { "test-key" }
-                }
+                    Segments = new List<ExcludedSegments>
+                    {
+                        new ExcludedSegments
+                        {
+                            Type = "standard",
+                            Name = "test-key"
+                        }
+                    }
+                },
+                Name = "test-segment"
             };
 
             _mockRuleBasedSegmentCache
-                .Setup(x => x.GetAsync(It.IsAny<string>()))
+                .Setup(x => x.GetAsync("test-segment"))
                 .ReturnsAsync(rbs);
 
             _mockSegmentsCache
-                .Setup(x => x.IsInSegmentAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(x => x.IsInSegmentAsync("test-key", "test-key"))
                 .ReturnsAsync(true);
 
             // Act
@@ -299,6 +335,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
 
             // Assert
             Assert.IsFalse(result);
+            _mockSegmentsCache.Verify(x => x.IsInSegmentAsync("test-key", "test-key"), Times.Once);
         }
 
         [TestMethod]
@@ -310,16 +347,24 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string>(),
-                    Segments = new List<string> { "test-key" }
-                }
+                    Segments = new List<ExcludedSegments>
+                    {
+                        new ExcludedSegments
+                        {
+                            Type = "standard",
+                            Name = "test-key"
+                        }
+                    }
+                },
+                Name = "test-segment"
             };
 
             _mockRuleBasedSegmentCache
-                .Setup(x => x.Get(It.IsAny<string>()))
+                .Setup(x => x.Get("test-segment"))
                 .Returns(rbs);
 
             _mockSegmentsCache
-                .Setup(x => x.IsInSegment(It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(x => x.IsInSegment("test-key", "test-key"))
                 .Returns(true);
 
             // Act
@@ -327,6 +372,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
 
             // Assert
             Assert.IsFalse(result);
+            _mockSegmentsCache.Verify(x => x.IsInSegment("test-key", "test-key"), Times.Once);
         }
 
         [TestMethod]
@@ -339,7 +385,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded 
                 {
                     Keys = new List<string>(),
-                    Segments = new List<string>()
+                    Segments = new List<ExcludedSegments>()
                 },
                 CombiningMatchers = new List<CombiningMatcher>
                 {
@@ -378,7 +424,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string>(),
-                    Segments = new List<string>()
+                    Segments = new List<ExcludedSegments>()
                 },
                 CombiningMatchers = new List<CombiningMatcher>
                 {
@@ -417,7 +463,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string>(),
-                    Segments = new List<string>()
+                    Segments = new List<ExcludedSegments>()
                 },
                 CombiningMatchers = new List<CombiningMatcher>
                 {
@@ -456,7 +502,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string>(),
-                    Segments = new List<string>()
+                    Segments = new List<ExcludedSegments>()
                 },
                 CombiningMatchers = new List<CombiningMatcher>
                 {
