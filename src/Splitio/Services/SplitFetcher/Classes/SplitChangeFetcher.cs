@@ -11,6 +11,8 @@ namespace Splitio.Services.SplitFetcher.Classes
     {
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitChangeFetcher));
 
+        protected abstract Task<TargetingRulesDto> FetchFromBackendAsync(FetchOptions fetchOptions);
+
         public async Task<TargetingRulesDto> FetchAsync(FetchOptions fetchOptions)
         {
             try
@@ -23,7 +25,5 @@ namespace Splitio.Services.SplitFetcher.Classes
                 return null;
             }
         }
-
-        protected abstract Task<TargetingRulesDto> FetchFromBackendAsync(FetchOptions fetchOptions);
     }
 }

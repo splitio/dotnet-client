@@ -46,7 +46,7 @@ namespace Splitio.Domain
         public string Type { get; set; }
         public string Name { get; set; }
 
-        public bool IsStandard => Type == "standard";
-        public bool IsRuleBased => Type == "rule-based";
+        public bool IsStandard => Type.Equals("standard");
+        public bool IsRuleBased => Type.Equals("rule-based");
     }
 }
