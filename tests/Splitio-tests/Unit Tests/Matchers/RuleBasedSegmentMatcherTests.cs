@@ -718,12 +718,12 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             };
 
             _mockRuleBasedSegmentCache
-                .Setup(x => x.Get(_rbsName))
-                .Returns(rbs);
+                .Setup(x => x.GetAsync(_rbsName))
+                .ReturnsAsync(rbs);
 
             _mockRuleBasedSegmentCache
-                .Setup(x => x.Get(excludedName))
-                .Returns(excludedSegment);
+                .Setup(x => x.GetAsync(excludedName))
+                .ReturnsAsync(excludedSegment);
 
             // Act
             var result = await _matcher.MatchAsync(new Key("mauro@split.io", null));
