@@ -15,6 +15,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         private Mock<IRuleBasedSegmentCacheConsumer> _mockRuleBasedSegmentCache;
         private Mock<ISegmentCacheConsumer> _mockSegmentsCache;
         private RuleBasedSegmentMatcher _matcher;
+        private readonly string _rbsName = "test-segment";
 
         [TestInitialize]
         public void Initialize()
@@ -22,7 +23,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             _mockRuleBasedSegmentCache = new Mock<IRuleBasedSegmentCacheConsumer>();
             _mockSegmentsCache = new Mock<ISegmentCacheConsumer>();
 
-            _matcher = new RuleBasedSegmentMatcher("test-segment", _mockRuleBasedSegmentCache.Object, _mockSegmentsCache.Object);
+            _matcher = new RuleBasedSegmentMatcher(_rbsName, _mockRuleBasedSegmentCache.Object, _mockSegmentsCache.Object);
         }
 
         [TestMethod]
@@ -35,7 +36,14 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string> { "excluded-key" },
-                    Segments = new List<string> { "excluded-segment" }
+                    Segments = new List<ExcludedSegments>
+                    {
+                        new ExcludedSegments
+                        {
+                            Type = "standard",
+                            Name = "excluded-segment"
+                        }
+                    }
                 },
                 CombiningMatchers = new List<CombiningMatcher>
                 {
@@ -78,7 +86,14 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string> { "excluded-key" },
-                    Segments = new List<string> { "excluded-segment" }
+                    Segments = new List<ExcludedSegments>
+                    {
+                        new ExcludedSegments
+                        {
+                            Type = "standard",
+                            Name = "excluded-segment"
+                        }
+                    }
                 },
                 CombiningMatchers = new List<CombiningMatcher>
                 {
@@ -121,7 +136,14 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string> { "excluded-key" },
-                    Segments = new List<string> { "excluded-segment" }
+                    Segments = new List<ExcludedSegments>
+                    {
+                        new ExcludedSegments
+                        {
+                            Type = "standard",
+                            Name = "excluded-segment"
+                        }
+                    }
                 },
                 CombiningMatchers = new List<CombiningMatcher>
                 {
@@ -164,7 +186,14 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string> { "excluded-key" },
-                    Segments = new List<string> { "excluded-segment" }
+                    Segments = new List<ExcludedSegments>
+                    {
+                        new ExcludedSegments
+                        {
+                            Type = "standard",
+                            Name = "excluded-segment"
+                        }
+                    }
                 },
                 CombiningMatchers = new List<CombiningMatcher>
                 {
@@ -282,16 +311,24 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string>(),
-                    Segments = new List<string> { "test-key" }
-                }
+                    Segments = new List<ExcludedSegments>
+                    {
+                        new ExcludedSegments
+                        {
+                            Type = "standard",
+                            Name = "test-key"
+                        }
+                    }
+                },
+                Name = "test-segment"
             };
 
             _mockRuleBasedSegmentCache
-                .Setup(x => x.GetAsync(It.IsAny<string>()))
+                .Setup(x => x.GetAsync("test-segment"))
                 .ReturnsAsync(rbs);
 
             _mockSegmentsCache
-                .Setup(x => x.IsInSegmentAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(x => x.IsInSegmentAsync("test-key", "test-key"))
                 .ReturnsAsync(true);
 
             // Act
@@ -299,6 +336,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
 
             // Assert
             Assert.IsFalse(result);
+            _mockSegmentsCache.Verify(x => x.IsInSegmentAsync("test-key", "test-key"), Times.Once);
         }
 
         [TestMethod]
@@ -310,16 +348,24 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string>(),
-                    Segments = new List<string> { "test-key" }
-                }
+                    Segments = new List<ExcludedSegments>
+                    {
+                        new ExcludedSegments
+                        {
+                            Type = "standard",
+                            Name = "test-key"
+                        }
+                    }
+                },
+                Name = "test-segment"
             };
 
             _mockRuleBasedSegmentCache
-                .Setup(x => x.Get(It.IsAny<string>()))
+                .Setup(x => x.Get("test-segment"))
                 .Returns(rbs);
 
             _mockSegmentsCache
-                .Setup(x => x.IsInSegment(It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(x => x.IsInSegment("test-key", "test-key"))
                 .Returns(true);
 
             // Act
@@ -327,6 +373,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
 
             // Assert
             Assert.IsFalse(result);
+            _mockSegmentsCache.Verify(x => x.IsInSegment("test-key", "test-key"), Times.Once);
         }
 
         [TestMethod]
@@ -339,7 +386,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded 
                 {
                     Keys = new List<string>(),
-                    Segments = new List<string>()
+                    Segments = new List<ExcludedSegments>()
                 },
                 CombiningMatchers = new List<CombiningMatcher>
                 {
@@ -378,7 +425,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string>(),
-                    Segments = new List<string>()
+                    Segments = new List<ExcludedSegments>()
                 },
                 CombiningMatchers = new List<CombiningMatcher>
                 {
@@ -417,7 +464,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string>(),
-                    Segments = new List<string>()
+                    Segments = new List<ExcludedSegments>()
                 },
                 CombiningMatchers = new List<CombiningMatcher>
                 {
@@ -456,7 +503,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
                 Excluded = new Excluded
                 {
                     Keys = new List<string>(),
-                    Segments = new List<string>()
+                    Segments = new List<ExcludedSegments>()
                 },
                 CombiningMatchers = new List<CombiningMatcher>
                 {
@@ -483,6 +530,206 @@ namespace Splitio_Tests.Unit_Tests.Matchers
 
             // Assert
             Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void Match_WithRbsExcluded_ShouldReturnFalse()
+        {
+            // Arrange
+            var excludedName = "rule-based_segment";
+            var excludedSegment = new RuleBasedSegment
+            {
+                Name = excludedName,
+                Excluded = new Excluded
+                {
+                    Keys = new List<string> { "test-key" }
+                }
+            };
+
+            var rbs = new RuleBasedSegment
+            {
+                Name = _rbsName,
+                Excluded = new Excluded
+                {
+                    Keys = new List<string>(),
+                    Segments = new List<ExcludedSegments>
+                    {
+                        new ExcludedSegments { Type = "rule-based", Name = excludedName }
+                    }
+                },
+                CombiningMatchers = new List<CombiningMatcher>()
+            };
+
+            _mockRuleBasedSegmentCache
+                .Setup(x => x.Get(_rbsName))
+                .Returns(rbs);
+
+            _mockRuleBasedSegmentCache
+                .Setup(x => x.Get(excludedName))
+                .Returns(excludedSegment);
+
+            // Act
+            var result = _matcher.Match(new Key("test-key", null));
+
+            // Assert
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void Match_WithRbsExcluded_ShouldReturnTrue()
+        {
+            // Arrange
+            var excludedName = "rule-based_segment";
+            var excludedSegment = new RuleBasedSegment
+            {
+                Name = excludedName,
+                Excluded = new Excluded
+                {
+                    Keys = new List<string> { "test-key-2" }
+                },
+                CombiningMatchers = new List<CombiningMatcher>()
+            };
+
+            var rbs = new RuleBasedSegment
+            {
+                Name = _rbsName,
+                Excluded = new Excluded
+                {
+                    Keys = new List<string>(),
+                    Segments = new List<ExcludedSegments>
+                    {
+                        new ExcludedSegments { Type = "rule-based", Name = excludedName }
+                    }
+                },
+                CombiningMatchers = new List<CombiningMatcher>
+                {
+                    new CombiningMatcher
+                    {
+                        combiner = CombinerEnum.AND,
+                        delegates = new List<AttributeMatcher>
+                        {
+                            new AttributeMatcher
+                            {
+                                matcher = new EndsWithMatcher(new List<string> { "@split.io" })
+                            }
+                        }
+                    }
+                }
+            };
+
+            _mockRuleBasedSegmentCache
+                .Setup(x => x.Get(_rbsName))
+                .Returns(rbs);
+
+            _mockRuleBasedSegmentCache
+                .Setup(x => x.Get(excludedName))
+                .Returns(excludedSegment);
+
+            // Act
+            var result = _matcher.Match(new Key("mauro@split.io", null));
+
+            // Assert
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task MatchAsync_WithRbsExcluded_ShouldReturnFalse()
+        {
+            // Arrange
+            var excludedName = "rule-based_segment";
+            var excludedSegment = new RuleBasedSegment
+            {
+                Name = excludedName,
+                Excluded = new Excluded
+                {
+                    Keys = new List<string> { "test-key" }
+                }
+            };
+
+            var rbs = new RuleBasedSegment
+            {
+                Name = _rbsName,
+                Excluded = new Excluded
+                {
+                    Keys = new List<string>(),
+                    Segments = new List<ExcludedSegments>
+                    {
+                        new ExcludedSegments { Type = "rule-based", Name = excludedName }
+                    }
+                },
+                CombiningMatchers = new List<CombiningMatcher>()
+            };
+
+            _mockRuleBasedSegmentCache
+                .Setup(x => x.Get(_rbsName))
+                .Returns(rbs);
+
+            _mockRuleBasedSegmentCache
+                .Setup(x => x.Get(excludedName))
+                .Returns(excludedSegment);
+
+            // Act
+            var result = await _matcher.MatchAsync(new Key("test-key", null));
+
+            // Assert
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task MatchAsync_WithRbsExcluded_ShouldReturnTrue()
+        {
+            // Arrange
+            var excludedName = "rule-based_segment";
+            var excludedSegment = new RuleBasedSegment
+            {
+                Name = excludedName,
+                Excluded = new Excluded
+                {
+                    Keys = new List<string> { "test-key-2" }
+                },
+                CombiningMatchers = new List<CombiningMatcher>()
+            };
+
+            var rbs = new RuleBasedSegment
+            {
+                Name = _rbsName,
+                Excluded = new Excluded
+                {
+                    Keys = new List<string>(),
+                    Segments = new List<ExcludedSegments>
+                    {
+                        new ExcludedSegments { Type = "rule-based", Name = excludedName }
+                    }
+                },
+                CombiningMatchers = new List<CombiningMatcher>
+                {
+                    new CombiningMatcher
+                    {
+                        combiner = CombinerEnum.AND,
+                        delegates = new List<AttributeMatcher>
+                        {
+                            new AttributeMatcher
+                            {
+                                matcher = new EndsWithMatcher(new List<string> { "@split.io" })
+                            }
+                        }
+                    }
+                }
+            };
+
+            _mockRuleBasedSegmentCache
+                .Setup(x => x.GetAsync(_rbsName))
+                .ReturnsAsync(rbs);
+
+            _mockRuleBasedSegmentCache
+                .Setup(x => x.GetAsync(excludedName))
+                .ReturnsAsync(excludedSegment);
+
+            // Act
+            var result = await _matcher.MatchAsync(new Key("mauro@split.io", null));
+
+            // Assert
+            Assert.IsTrue(result);
         }
     }
 }

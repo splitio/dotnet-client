@@ -25,7 +25,7 @@ namespace Splitio.Services.Common
             ISplitioHttpClient splitioHttpClient,
             ITelemetryRuntimeProducer telemetryRuntimeProducer)
         {
-            _url = $"{url}?s={ApiVersions.FlagsSpec}";
+            _url = $"{url}?s={ApiVersions.LatestFlagsSpec}";
             _splitioHttpClient = splitioHttpClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
         }

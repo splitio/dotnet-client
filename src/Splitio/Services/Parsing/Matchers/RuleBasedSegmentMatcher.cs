@@ -41,7 +41,7 @@ namespace Splitio.Services.Parsing.Matchers
                 return false;
             }
 
-            if (rbs.Excluded.Segments.Any(s => _segmentsCache.IsInSegment(s, key.matchingKey)))
+            if (MatchExcludedSegments(rbs.Excluded.Segments, key, attributes, evaluator))
             {
                 return false;
             }
@@ -67,12 +67,9 @@ namespace Splitio.Services.Parsing.Matchers
                 return false;
             }
 
-            foreach (var segment in rbs.Excluded.Segments)
+            if (await MatchExcludedSegmentsAsync(rbs.Excluded.Segments, key, attributes, evaluator))
             {
-                if (await _segmentsCache.IsInSegmentAsync(segment, key.matchingKey))
-                { 
-                    return false; 
-                }
+                return false;
             }
 
             foreach (var cm in rbs.CombiningMatchers)
@@ -94,6 +91,50 @@ namespace Splitio.Services.Parsing.Matchers
         public string GetRuleBasedSegmentName()
         {
             return _segmentName;
+        }
+
+        private async Task<bool> MatchExcludedSegmentsAsync(List<ExcludedSegments> excludedSegments, Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            foreach (var excludedSegment in excludedSegments)
+            {
+                if (excludedSegment.IsStandard && await _segmentsCache.IsInSegmentAsync(excludedSegment.Name, key.matchingKey))
+                {
+                    return true;
+                }
+
+                if (excludedSegment.IsRuleBased)
+                {
+                    var rbsMatcher = new RuleBasedSegmentMatcher(excludedSegment.Name, _ruleBasedSegmentCache, _segmentsCache);
+                    if (await rbsMatcher.MatchAsync(key, attributes, evaluator))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private bool MatchExcludedSegments(List<ExcludedSegments> excludedSegments, Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            foreach (var excludedSegment in excludedSegments)
+            {
+                if (excludedSegment.IsStandard && _segmentsCache.IsInSegment(excludedSegment.Name, key.matchingKey))
+                {
+                    return true;
+                }
+
+                if (excludedSegment.IsRuleBased)
+                {
+                    var rbsMatcher = new RuleBasedSegmentMatcher(excludedSegment.Name, _ruleBasedSegmentCache, _segmentsCache);
+                    if (rbsMatcher.Match(key, attributes, evaluator))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

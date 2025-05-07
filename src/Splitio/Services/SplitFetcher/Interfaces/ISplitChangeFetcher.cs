@@ -5,6 +5,6 @@ namespace Splitio.Services.SplitFetcher.Interfaces
 {
     public interface ISplitChangeFetcher
     {
-        Task<SplitChangesResult> FetchAsync(FetchOptions fetchOptions);
+        Task<TargetingRulesDto> FetchAsync(FetchOptions fetchOptions);
     }
 }

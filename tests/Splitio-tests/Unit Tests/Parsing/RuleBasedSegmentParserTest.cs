@@ -37,7 +37,8 @@ namespace Splitio_Tests.Unit_Tests.Parsing
                 Name = "test-segment",
                 ChangeNumber = 123,
                 Excluded = new Excluded{
-                    Keys = new List<string> { "user1", "user2" }
+                    Keys = new List<string> { "user1", "user2" },
+                    Segments = null
                 },
                 Conditions = new List<ConditionDefinition>
                 {
@@ -71,6 +72,101 @@ namespace Splitio_Tests.Unit_Tests.Parsing
             Assert.AreEqual(123, result.ChangeNumber);
             CollectionAssert.AreEqual(new List<string> { "user1", "user2" }, result.Excluded.Keys);
             Assert.AreEqual(1, result.CombiningMatchers.Count);
+        }
+
+        [TestMethod]
+        public void Parse_ValidDTO_ExcludedNull()
+        {
+            // Arrange
+            var rbsDTO = new RuleBasedSegmentDto
+            {
+                Status = "ACTIVE",
+                Name = "test-segment",
+                ChangeNumber = 123,
+                Excluded = null,
+                Conditions = new List<ConditionDefinition>
+                {
+                    new ConditionDefinition
+                    {
+                        matcherGroup = new MatcherGroupDefinition
+                        {
+                            matchers = new List<MatcherDefinition>
+                            {
+                                new MatcherDefinition
+                                {
+                                    matcherType = "EQUAL_TO", unaryNumericMatcherData = new UnaryNumericData
+                                    {
+                                        dataType = DataTypeEnum.NUMBER,
+                                        value = 123
+                                    }
+                                }
+                            },
+                            combiner = "AND"
+                        }
+                    }
+                }
+            };
+
+            // Act
+            var result = _parser.Parse(rbsDTO, _rbsConsumer.Object);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Excluded);
+            Assert.IsNotNull(result.Excluded.Keys);
+            Assert.AreEqual(0, result.Excluded.Keys.Count);
+            Assert.IsNotNull(result.Excluded.Segments);
+            Assert.AreEqual(0, result.Excluded.Segments.Count);
+        }
+
+        [TestMethod]
+        public void Parse_ValidDTO_ExcludedKeysNull()
+        {
+            // Arrange
+            var rbsDTO = new RuleBasedSegmentDto
+            {
+                Status = "ACTIVE",
+                Name = "test-segment",
+                ChangeNumber = 123,
+                Excluded = new Excluded
+                {
+                    Keys = null,
+                    Segments = new List<ExcludedSegments>
+                    {
+                        new ExcludedSegments{ Type = "standard", Name = "seg1" },
+                        new ExcludedSegments{ Type = "rule-based", Name = "seg2" },
+                    }
+                },
+                Conditions = new List<ConditionDefinition>
+                {
+                    new ConditionDefinition
+                    {
+                        matcherGroup = new MatcherGroupDefinition
+                        {
+                            matchers = new List<MatcherDefinition>
+                            {
+                                new MatcherDefinition
+                                {
+                                    matcherType = "EQUAL_TO", unaryNumericMatcherData = new UnaryNumericData
+                                    {
+                                        dataType = DataTypeEnum.NUMBER,
+                                        value = 123
+                                    }
+                                }
+                            },
+                            combiner = "AND"
+                        }
+                    }
+                }
+            };
+
+            // Act
+            var result = _parser.Parse(rbsDTO, _rbsConsumer.Object);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Excluded.Keys.Count);
+            Assert.AreEqual(2, result.Excluded.Segments.Count);
         }
 
         [TestMethod]
