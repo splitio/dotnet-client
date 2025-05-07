@@ -23,6 +23,91 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
+        public async Task ExecuteOldSpec()
+        {
+            //Arrange            
+            _apiClient
+                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
+                .ReturnsAsync(new ApiFetchResult
+                {
+                    Spec = "1.1",
+                    Success = true,
+                    Content = @"{
+                            'splits':[{
+                                'trafficType':'user',
+                                'name':'Reset_Seed_UI',
+                                'seed':1552577712,
+                                'status':'ACTIVE',
+                                'defaultTreatment':'off',
+                                'changeNumber':1469827821322,
+                                'conditions':[{
+                                    'matcherGroup':{
+                                    'combiner':'AND',
+                                    'matchers':[{
+                                        'keySelector':{
+                                            'trafficType':'user',
+                                            'attribute':null
+                                        },
+                                        'matcherType':'ALL_KEYS',
+                                        'negate':false
+                                    }]},
+                                    'partitions':[
+                                    {
+                                        'treatment':'on',
+                                        'size':100
+                                    },
+                                    {
+                                        'treatment':'off',
+                                        'size':0,
+                                        'addedField':'test'
+                                    }]
+                                }]
+                            }],
+                            'since':1469817846929,
+                            'till':1469827821322
+                        }"
+                });
+
+
+            var apiSplitChangeFetcher = new ApiSplitChangeFetcher(_apiClient.Object);
+
+            //Act
+            var result = await apiSplitChangeFetcher.FetchAsync(new FetchOptions());
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.FeatureFlags.Data.Count > 0);
+            Assert.AreEqual(1469827821322, result.FeatureFlags.Till);
+            Assert.AreEqual(1469817846929, result.FeatureFlags.Since);
+            Assert.IsTrue(result.RuleBasedSegments.Data.Count == 0);
+            Assert.AreEqual(-1, result.RuleBasedSegments.Till);
+            Assert.AreEqual(-1, result.RuleBasedSegments.Since);
+        }
+
+        [TestMethod]
+        public async Task ExecuteUnsuccess()
+        {
+            //Arrange            
+            _apiClient
+                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
+                .ReturnsAsync(new ApiFetchResult
+                {
+                    Spec = "1.3",
+                    Success = false,
+                    Content = string.Empty
+                });
+
+
+            var apiSplitChangeFetcher = new ApiSplitChangeFetcher(_apiClient.Object);
+
+            //Act
+            var result = await apiSplitChangeFetcher.FetchAsync(new FetchOptions());
+
+            //Assert
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
         [Description("Test a Json that changes its structure and is deserialized without exception. Contains: a field renamed, a field removed and a field added.")]
         public async Task ExecuteJsonDeserializeSuccessfulWithChangeInJsonFormat()
         {

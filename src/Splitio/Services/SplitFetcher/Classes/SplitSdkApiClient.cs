@@ -15,8 +15,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 {
     public class SplitSdkApiClient : ISplitSdkApiClient
     {
-        private const int PROXY_CHECK_INTERVAL_MILLISECONDS_SS = 24 * 60 * 60 * 1000;
-
+        private const int PROXY_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitSdkApiClient));
 
         private readonly ISplitioHttpClient _httpClient;
@@ -24,6 +23,7 @@ namespace Splitio.Services.SplitFetcher.Classes
         private readonly string _baseUrl;
         private readonly string _flagSets;
         private readonly bool _proxy;
+        private readonly int _proxyCheckIntervalMs;
 
         private string _flagSpec = ApiVersions.LatestFlagsSpec;
         private long? _lastProxyCheckTimestamp;
@@ -32,13 +32,15 @@ namespace Splitio.Services.SplitFetcher.Classes
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
             string baseUrl,
             IFlagSetsFilter flagSetsFilter,
-            bool proxy)
+            bool proxy,
+            int? proxyCheckIntervalMs = null)
         {
             _httpClient = httpClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _baseUrl = baseUrl;
             _flagSets = flagSetsFilter.GetFlagSets();
             _proxy = proxy;
+            _proxyCheckIntervalMs = proxyCheckIntervalMs ?? PROXY_CHECK_INTERVAL_MS;
         }
 
         public async Task<ApiFetchResult> FetchSplitChangesAsync(FetchOptions fetchOptions)
@@ -124,7 +126,7 @@ namespace Splitio.Services.SplitFetcher.Classes
         }
 
         private bool ShouldSwitchToLatestFlagsSpec => _lastProxyCheckTimestamp != null &&
-                CurrentTimeHelper.CurrentTimeMillis() - _lastProxyCheckTimestamp >= PROXY_CHECK_INTERVAL_MILLISECONDS_SS &&
+                CurrentTimeHelper.CurrentTimeMillis() - _lastProxyCheckTimestamp >= _proxyCheckIntervalMs &&
                 !_flagSpec.Equals(ApiVersions.LatestFlagsSpec);
     }
 }
