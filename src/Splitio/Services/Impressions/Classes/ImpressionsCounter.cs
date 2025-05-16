@@ -30,7 +30,7 @@ namespace Splitio.Services.Impressions.Classes
         {
             var key = new KeyCache(splitName, timeFrame);
 
-            //_log.Debug($"Impressions Count Inc: {splitName} - {timeFrame}");
+            _log.Debug($"Impressions Count Inc: {splitName} - {timeFrame}");
 
             _cache.AddOrUpdate(key, DefaultAmount, (keyCache, cacheAmount) => cacheAmount + DefaultAmount);
 
