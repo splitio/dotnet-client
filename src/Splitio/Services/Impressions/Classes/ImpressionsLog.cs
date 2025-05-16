@@ -42,7 +42,7 @@ namespace Splitio.Services.Impressions.Classes
 
         public int Log(IList<KeyImpression> impressions)
         {
-            _log.Debug($"Adding impressions: {impressions.Count}");
+            //_log.Debug($"Adding impressions: {impressions.Count}");
 
             return _impressionsCache.AddItems(impressions);
         }

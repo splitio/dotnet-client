@@ -1,5 +1,6 @@
 ﻿using Splitio.Services.Parsing;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Splitio.Domain
 {
@@ -12,7 +13,15 @@ namespace Splitio.Domain
 
         public List<string> GetSegments()
         {
-            var segments = new List<string>();
+            var segments = new HashSet<string>();
+
+            foreach (var segment in Excluded.Segments)
+            {
+                if (segment.IsStandard)
+                {
+                    segments.Add(segment.Name);
+                }
+            }
 
             foreach (var cm in CombiningMatchers)
             {
@@ -25,7 +34,7 @@ namespace Splitio.Domain
                 }
             }
 
-            return segments;
+            return segments.ToList();
         }
     }
 
