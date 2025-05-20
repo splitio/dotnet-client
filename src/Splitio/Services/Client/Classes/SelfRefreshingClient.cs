@@ -302,7 +302,8 @@ namespace Splitio.Services.Client.Classes
         {
             return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HTTP_PROXY")) ||
                 !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HTTPS_PROXY")) ||
-                !string.IsNullOrEmpty(_config.ProxyHost);
+                !string.IsNullOrEmpty(_config.ProxyHost) ||
+                _config.BaseUrl != Constants.Urls.BaseUrl;
         }
         #endregion
     }

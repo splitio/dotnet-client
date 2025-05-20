@@ -51,13 +51,15 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                 try
                 {
+                    var requestUri = GetRequestUri(fetchOptions.FeatureFlagsSince, fetchOptions.RuleBasedSegmentsSince, fetchOptions.Till);
+
                     if (ShouldSwitchToLatestFlagsSpec)
                     {
                         _flagSpec = ApiVersions.LatestFlagsSpec;
                         _log.Info($"Switching to new Feature flag spec {_flagSpec} and fetching.");
+                        requestUri = GetRequestUri(-1, -1, fetchOptions.Till);
                     }
 
-                    var requestUri = GetRequestUri(fetchOptions);
                     var response = await _httpClient.GetAsync(requestUri, fetchOptions.CacheControlHeaders);
 
                     clock.Stop();
@@ -105,22 +107,22 @@ namespace Splitio.Services.SplitFetcher.Classes
             }
         }
 
-        private string GetRequestUri(FetchOptions fetchOptions)
+        private string GetRequestUri(long since, long rbSinceTarget, long? till)
         {
-            var ffSince = Uri.EscapeDataString(fetchOptions.FeatureFlagsSince.ToString());
+            var ffSince = Uri.EscapeDataString(since.ToString());
             var uri = $"{_baseUrl}/api/splitChanges?s={_flagSpec}&since={ffSince}";
 
             if (_flagSpec.Equals(ApiVersions.LatestFlagsSpec))
             {
-                var rbsSince = Uri.EscapeDataString(fetchOptions.RuleBasedSegmentsSince.ToString());
-                uri = $"{uri}&rbSince={rbsSince}";
+                var rbSince = Uri.EscapeDataString(rbSinceTarget.ToString());
+                uri = $"{uri}&rbSince={rbSince}";
             }
 
             if (!string.IsNullOrEmpty(_flagSets))
                 uri = $"{uri}&sets={_flagSets}";
 
-            if (fetchOptions.Till.HasValue)
-                uri = $"{uri}&till={Uri.EscapeDataString(fetchOptions.Till.Value.ToString())}";
+            if (till.HasValue)
+                uri = $"{uri}&till={Uri.EscapeDataString(till.Value.ToString())}";
 
             return uri;
         }
