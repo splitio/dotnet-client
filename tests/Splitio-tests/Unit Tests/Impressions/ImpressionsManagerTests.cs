@@ -53,7 +53,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 .Returns(ptTime);
 
             // Act.
-            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
+            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
 
             // Assert.
             Assert.AreEqual("matching-key", result.keyName);
@@ -80,7 +80,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 .Returns((long?)null);
 
             // Act.
-            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
+            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
 
             // Assert.
             Assert.AreEqual("matching-key", result.keyName);
@@ -103,7 +103,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
             // Act.
-            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
+            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
 
             // Assert.
             Assert.AreEqual("matching-key", result.keyName);
@@ -126,7 +126,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
             // Act.
-            var imp = impressionsManager.Build(new TreatmentResult("feature", "label", "off", 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
+            var imp = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
             impressionsManager.Track(new List<KeyImpression> { imp });
            
             // Assert.
@@ -147,7 +147,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
             // Act.
-            var imp = impressionsManager.Build(new TreatmentResult("feature", "label", "off", 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
+            var imp = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
             impressionsManager.Track(new List<KeyImpression> { imp });
 
             // Assert.
@@ -168,8 +168,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
             var impressions = new List<KeyImpression>
             {
-                new KeyImpression("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key", optimized: true),
-                new KeyImpression("matching-key-2", "feature-2", "off", impTime, 432543, "label-2", "bucketing-key", optimized: true)
+                new KeyImpression("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key", false, optimized: true),
+                new KeyImpression("matching-key-2", "feature-2", "off", impTime, 432543, "label-2", "bucketing-key", false, optimized: true)
             };
 
             // Act.
@@ -193,8 +193,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
             var impressions = new List<KeyImpression>
             {
-                new KeyImpression("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key", optimized: true),
-                new KeyImpression("matching-key-2", "feature-2", "off", impTime, 432543, "label-2", "bucketing-key", optimized: true)
+                new KeyImpression("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key", false, optimized: true),
+                new KeyImpression("matching-key-2", "feature-2", "off", impTime, 432543, "label-2", "bucketing-key", false, optimized: true)
             };
 
             _impressionsLog
@@ -222,8 +222,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
             var impressions = new List<KeyImpression>
             {
-                new KeyImpression("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key", optimized: false),
-                new KeyImpression("matching-key-2", "feature-2", "off", impTime, 432543, "label-2", "bucketing-key", optimized: false)
+                new KeyImpression("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key", false, optimized: false),
+                new KeyImpression("matching-key-2", "feature-2", "off", impTime, 432543, "label-2", "bucketing-key", false, optimized: false)
             };
 
             // Act.
@@ -247,8 +247,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
             var impressions = new List<KeyImpression>
             {
-                new KeyImpression("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key"),
-                new KeyImpression("matching-key-2", "feature-2", "off", impTime, 432543, "label-2", "bucketing-key")
+                new KeyImpression("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key", false),
+                new KeyImpression("matching-key-2", "feature-2", "off", impTime, 432543, "label-2", "bucketing-key", false)
             };
 
             // Act.
@@ -273,10 +273,10 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
             var impressions = new List<KeyImpression>
             {
-                impressionsManager.Build(new TreatmentResult("feature", "label", "off", 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"))
+                impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"))
             };
 
             var optimizedImpressions = impressions.Where(i => ImpressionsManager.ShouldQueueImpression(i)).ToList();
@@ -305,10 +305,10 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
             var impressions = new List<KeyImpression>
             {
-                impressionsManager.Build(new TreatmentResult("feature", "label", "off", 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"))
+                impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"))
             };
 
             // Act.
@@ -332,7 +332,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
             // Act.
-            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
+            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
 
             // Assert.
             Assert.AreEqual("matching-key", result.keyName);
@@ -355,7 +355,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
             // Act.
-            var imp = impressionsManager.Build(new TreatmentResult("feature", "label", "off", 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
+            var imp = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
             impressionsManager.Track(new List<KeyImpression> { imp });
 
             // Assert.
@@ -374,10 +374,10 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             var impressions = new List<KeyImpression>
             {
-                impressionsManager.Build(new TreatmentResult("feature", "label", "off", 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"))
+                impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"))
             };
 
             // Act.
@@ -402,8 +402,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Act.
             await manager.TrackAsync(new List<KeyImpression>
             {
-                manager.Build(new TreatmentResult("feature", "label", "off", 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
-                manager.Build(new TreatmentResult("feature", "label", "off", 432543, impTime: impTime), new Key("matching-key", "bucketing-key"))
+                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
+                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"))
             });
 
             // Assert.
@@ -430,8 +430,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Act.
             await manager.TrackAsync(new List<KeyImpression>
             {
-                manager.Build(new TreatmentResult("feature", "label", "off", 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
-                manager.Build(new TreatmentResult("feature", "label", "off", 432543, impTime: impTime), new Key("matching-key", "bucketing-key"))
+                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
+                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"))
             });
 
             // Assert.
@@ -459,8 +459,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Act.
             await manager.TrackAsync(new List<KeyImpression>
             {
-                manager.Build(new TreatmentResult("feature", "label", "off", 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
-                manager.Build(new TreatmentResult("feature", "label", "off", 432543, impTime: impTime), new Key("matching-key", "bucketing-key"))
+                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
+                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"))
             });
 
             // Assert.

@@ -389,12 +389,6 @@ namespace Splitio.Services.Client.Classes
         #region Protected Methods
         protected void BuildUniqueKeysTracker(BaseConfig config)
         {
-            if (config.ImpressionsMode != ImpressionsMode.None)
-            {
-                _uniqueKeysTracker = new NoopUniqueKeysTracker();
-                return;
-            }
-
             var bloomFilter = new BloomFilter(config.BfExpectedElements, config.BfErrorRate);
             var filterAdapter = new FilterAdapter(bloomFilter);
             var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
@@ -409,12 +403,6 @@ namespace Splitio.Services.Client.Classes
 
         protected void BuildImpressionsCounter(BaseConfig config)
         {
-            if (config.ImpressionsMode == ImpressionsMode.Debug)
-            {
-                _impressionsCounter = new NoopImpressionsCounter();
-                return;
-            }
-
             var trackerConfig = new ComponentConfig(config.ImpressionsCounterCacheMaxSize, config.ImpressionsCountBulkSize);
             var task = _tasksManager.NewPeriodicTask(Enums.Task.ImpressionsCountSender, config.ImpressionsCounterRefreshRate * 1000);
             var sendBulkDataTask = _tasksManager.NewOnTimeTask(Enums.Task.ImpressionCounterSendBulkData);

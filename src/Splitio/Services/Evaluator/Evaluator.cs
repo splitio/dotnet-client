@@ -59,7 +59,7 @@ namespace Splitio.Services.Evaluator
                         _log.Error($"{method}: Something went wrong evaluation feature: {feature}", e);
 
                         _telemetryEvaluationProducer?.RecordException(method.ConvertToMethodEnum());
-                        treatmentsForFeatures.Add(new TreatmentResult(feature, Labels.Exception, Constants.Gral.Control));
+                        treatmentsForFeatures.Add(new TreatmentResult(feature, Labels.Exception, Constants.Gral.Control, false));
                     }
                 }
 
@@ -133,7 +133,7 @@ namespace Splitio.Services.Evaluator
                         if (_telemetryEvaluationProducer != null)
                             await _telemetryEvaluationProducer.RecordExceptionAsync(method.ConvertToMethodEnum());
 
-                        treatmentsForFeatures.Add(new TreatmentResult(feature, Labels.Exception, Constants.Gral.Control));
+                        treatmentsForFeatures.Add(new TreatmentResult(feature, Labels.Exception, Constants.Gral.Control, false));
                     }
                 }
 
@@ -241,7 +241,7 @@ namespace Splitio.Services.Evaluator
 
                     if (bucket > split.trafficAllocation)
                     {
-                        result = new TreatmentResult(split.name, Labels.TrafficAllocationFailed, split.defaultTreatment, split.changeNumber);
+                        result = new TreatmentResult(split.name, Labels.TrafficAllocationFailed, split.defaultTreatment, split.ImpressionsDisabled, split.changeNumber);
                     }
                 }
 
@@ -257,7 +257,7 @@ namespace Splitio.Services.Evaluator
 
             var treatment = _splitter.GetTreatment(key.bucketingKey, split.seed, condition.partitions, split.algo);
 
-            return new TreatmentResult(split.name, condition.label, treatment, split.changeNumber);
+            return new TreatmentResult(split.name, condition.label, treatment, split.ImpressionsDisabled, split.changeNumber);
         }
         #endregion
 
@@ -315,7 +315,7 @@ namespace Splitio.Services.Evaluator
 
             if (split.killed)
             {
-                result = new TreatmentResult(split.name, Labels.Killed, split.defaultTreatment, split.changeNumber);
+                result = new TreatmentResult(split.name, Labels.Killed, split.defaultTreatment, split.ImpressionsDisabled, split.changeNumber);
                 return true;
             }
 
@@ -324,14 +324,14 @@ namespace Splitio.Services.Evaluator
 
         private static TreatmentResult ReturnDefaultTreatment(ParsedSplit split)
         {
-            return new TreatmentResult(split.name, Labels.DefaultRule, split.defaultTreatment, split.changeNumber);
+            return new TreatmentResult(split.name, Labels.DefaultRule, split.defaultTreatment, split.ImpressionsDisabled, split.changeNumber);
         }
 
         private TreatmentResult EvaluateFeatureException(Exception e, string featureName)
         {
             _log.Error($"Exception caught getting treatment for feature flag: {featureName}", e);
 
-            return new TreatmentResult(featureName, Labels.Exception, Constants.Gral.Control, exception: true);
+            return new TreatmentResult(featureName, Labels.Exception, Constants.Gral.Control, false, exception: true);
         }
 
         private List<TreatmentResult> EvaluateFeaturesException(Exception e, List<string> featureNames)
@@ -342,7 +342,7 @@ namespace Splitio.Services.Evaluator
 
             foreach (var name in featureNames)
             {
-                toReturn.Add(new TreatmentResult(name, Labels.Exception, Constants.Gral.Control));
+                toReturn.Add(new TreatmentResult(name, Labels.Exception, Constants.Gral.Control, false));
             }
 
             return toReturn;
@@ -357,7 +357,7 @@ namespace Splitio.Services.Evaluator
 
             _log.Warn($"{method}: you passed {featureFlagName} that does not exist in this environment, please double check what feature flags exist in the Split user interface.");
 
-            result = new TreatmentResult(featureFlagName, Labels.SplitNotFound, Constants.Gral.Control);
+            result = new TreatmentResult(featureFlagName, Labels.SplitNotFound, Constants.Gral.Control, false);
 
             return true;
         }
