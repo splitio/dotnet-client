@@ -45,7 +45,7 @@ namespace Splitio.Services.Parsing
                     configurations = split.configurations,
                     Sets = split.Sets,
                     ImpressionsDisabled = split.ImpressionsDisabled,
-                    Prerequisites = split.Prerequisites,
+                    Prerequisites = new Matchers.PrerequisitesMatcher(split.Prerequisites),
                 };
 
                 return ParseConditions(split.conditions, parsedSplit, ruleBasedSegmentCache);

@@ -10,11 +10,13 @@ namespace Splitio.Domain
         public ParsedSplit()
         {
             conditions = new List<ConditionWithLogic>();
+            Prerequisites = new PrerequisitesMatcher();
         }
 
         public List<ConditionWithLogic> conditions { get; set; }
         public AlgorithmEnum algo { get; set; }
         public int trafficAllocationSeed { get; set; }
+        public PrerequisitesMatcher Prerequisites { get; set; }
 
         public SplitView ToSplitView()
         {

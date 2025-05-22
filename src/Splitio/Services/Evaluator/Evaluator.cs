@@ -203,22 +203,9 @@ namespace Splitio.Services.Evaluator
         {
             if (IsSplitKilled(split, out TreatmentResult result)) return result;
 
-            if (split.Prerequisites != null) 
+            if (!split.Prerequisites.Match(key, attributes, this))
             {
-                foreach (var pr in split.Prerequisites)
-                {
-                    var results = EvaluateFeatures(API.Prerequisites, key, new List<string> { pr.FeatureFlagName }, attributes, trackLatency: false);
-                    
-                    if (results.Count == 0)
-                    {
-                        return EvaluateFeatureException(new Exception("Somenthing went wrong evaluation a pre-requisite"), pr.FeatureFlagName);
-                    }
-
-                    if (!pr.Treatments.Contains(results.FirstOrDefault().Treatment))
-                    {
-                        return ReturnDefaultTreatment(split);
-                    }
-                }
+                return ReturnDefaultTreatment(split);
             }
 
             var inRollout = false;
@@ -300,22 +287,9 @@ namespace Splitio.Services.Evaluator
         {
             if (IsSplitKilled(split, out TreatmentResult result)) return result;
 
-            if (split.Prerequisites != null)
+            if (!await split.Prerequisites.MatchAsync(key, attributes, this))
             {
-                foreach (var pr in split.Prerequisites)
-                {
-                    var results = await EvaluateFeaturesAsync(API.Prerequisites, key, new List<string> { pr.FeatureFlagName }, attributes, trackLatency: false);
-                    
-                    if (results.Count == 0)
-                    {
-                        return EvaluateFeatureException(new Exception("Somenthing went wrong evaluation a pre-requisite"), pr.FeatureFlagName);
-                    }
-
-                    if (!pr.Treatments.Contains(results.FirstOrDefault().Treatment))
-                    {
-                        return ReturnDefaultTreatment(split);
-                    }
-                }
+                return ReturnDefaultTreatment(split);
             }
 
             var inRollout = false;
