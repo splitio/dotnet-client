@@ -1056,7 +1056,7 @@ namespace Splitio.Tests.Common
             var result = manager.SplitNames();
 
             // Assert.
-            Assert.AreEqual(38, result.Count);
+            Assert.AreEqual(41, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<string>));
 
             client.Destroy();
@@ -1079,7 +1079,7 @@ namespace Splitio.Tests.Common
             var result = manager.Splits();
 
             // Assert.
-            Assert.AreEqual(38, result.Count);
+            Assert.AreEqual(41, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<SplitView>));
 
             splitFactory.Client().Destroy();
