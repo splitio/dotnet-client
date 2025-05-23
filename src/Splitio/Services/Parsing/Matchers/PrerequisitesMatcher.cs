@@ -32,7 +32,7 @@ namespace Splitio.Services.Parsing.Matchers
 
         public override async Task<bool> MatchAsync(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            if (_prerequisites == null)
+            if (_prerequisites != null)
             {
                 foreach (var pr in _prerequisites)
                 {
