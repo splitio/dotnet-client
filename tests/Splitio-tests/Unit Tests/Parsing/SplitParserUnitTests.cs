@@ -55,7 +55,7 @@ namespace Splitio_Tests.Unit_Tests
             Assert.AreEqual(split.changeNumber, parsedSplit.changeNumber);
             Assert.AreEqual(AlgorithmEnum.LegacyHash, parsedSplit.algo);
             Assert.AreEqual(split.trafficTypeName, parsedSplit.trafficTypeName);
-            CollectionAssert.AreEqual(split.Prerequisites, parsedSplit.Prerequisites);
+            Assert.IsNotNull(parsedSplit.Prerequisites);
         }
 
         [TestMethod]

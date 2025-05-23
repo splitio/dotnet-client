@@ -6,6 +6,7 @@ using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Parsing;
 using Splitio.Services.Parsing.Classes;
+using Splitio.Services.Parsing.Matchers;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Linq;
@@ -492,14 +493,14 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             var flag = new ParsedSplit
             {
                 name = ffName1,
-                Prerequisites = new List<PrerequisitesDto>
+                Prerequisites = new PrerequisitesMatcher(new List<PrerequisitesDto>
                 {
                     new PrerequisitesDto
                     {
                         FeatureFlagName = ffName2,
                         Treatments = new List<string>{ "v1" }
                     }
-                },
+                }),
                 conditions = new List<ConditionWithLogic>
                 {
                     new ConditionWithLogic
@@ -583,14 +584,14 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             {
                 name = ffName1,
                 defaultTreatment = "defaultTreatment",
-                Prerequisites = new List<PrerequisitesDto>
+                Prerequisites = new PrerequisitesMatcher(new List<PrerequisitesDto>
                 {
                     new PrerequisitesDto
                     {
                         FeatureFlagName = ffName2,
                         Treatments = new List<string>{ "v1" }
                     }
-                },
+                }),
                 conditions = new List<ConditionWithLogic>
                 {
                     new ConditionWithLogic

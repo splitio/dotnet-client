@@ -22,7 +22,7 @@ namespace Splitio.Services.Parsing.Matchers
                 foreach (var pr in _prerequisites)
                 {
                     var evaluations = evaluator.EvaluateFeatures(Enums.API.Prerequisites, key, new List<string> { pr.FeatureFlagName }, attributes, trackLatency: false);
-                    if (!pr.Treatments.Contains(evaluations.FirstOrDefault().Treatment))
+                    if (evaluations.Count == 0 || !pr.Treatments.Contains(evaluations.FirstOrDefault().Treatment))
                     {
                         return false;
                     }
