@@ -525,6 +525,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             var res = results.FirstOrDefault();
             Assert.AreEqual("testOk", res.Treatment);
             Assert.AreEqual(ffName1, res.FeatureFlagName);
+            Assert.AreEqual("label", res.Label);
         }
 
         [TestMethod]
@@ -615,6 +616,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             var res = results.FirstOrDefault();
             Assert.AreEqual(flag.defaultTreatment, res.Treatment);
             Assert.AreEqual(ffName1, res.FeatureFlagName);
+            Assert.AreEqual(Labels.Prerequisites, res.Label);
         }
         #endregion
 
