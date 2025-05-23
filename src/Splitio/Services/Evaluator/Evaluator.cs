@@ -205,7 +205,7 @@ namespace Splitio.Services.Evaluator
 
             if (!split.Prerequisites.Match(key, attributes, this))
             {
-                return ReturnDefaultTreatment(split);
+                return new TreatmentResult(split.name, Labels.Prerequisites, split.defaultTreatment, split.ImpressionsDisabled, split.changeNumber);
             }
 
             var inRollout = false;
@@ -289,7 +289,7 @@ namespace Splitio.Services.Evaluator
 
             if (!await split.Prerequisites.MatchAsync(key, attributes, this))
             {
-                return ReturnDefaultTreatment(split);
+                return new TreatmentResult(split.name, Labels.Prerequisites, split.defaultTreatment, split.ImpressionsDisabled, split.changeNumber);
             }
 
             var inRollout = false;

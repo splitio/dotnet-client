@@ -9,5 +9,6 @@
         public static string TrafficAllocationFailed => "not in split";
         public static string ClientNotReady => "not ready";
         public static string UnsupportedMatcherType => "unsupported matcher type";
+        public static string Prerequisites => "prerequisites not met";
     }
 }
