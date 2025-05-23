@@ -22,10 +22,8 @@ namespace Splitio.Services.Parsing.Matchers
                 foreach (var pr in _prerequisites)
                 {
                     var evaluations = evaluator.EvaluateFeatures(Enums.API.Prerequisites, key, new List<string> { pr.FeatureFlagName }, attributes, trackLatency: false);
-                    if (evaluations.Count == 0 || !pr.Treatments.Contains(evaluations.FirstOrDefault().Treatment))
-                    {
-                        return false;
-                    }
+
+                    if (MatchRequisite(evaluations, pr)) return false;
                 }
             }
 
@@ -34,19 +32,24 @@ namespace Splitio.Services.Parsing.Matchers
 
         public override async Task<bool> MatchAsync(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            if (_prerequisites != null)
+            if (_prerequisites == null)
             {
                 foreach (var pr in _prerequisites)
                 {
                     var evaluations = await evaluator.EvaluateFeaturesAsync(Enums.API.Prerequisites, key, new List<string> { pr.FeatureFlagName }, attributes, trackLatency: false);
-                    if (!pr.Treatments.Contains(evaluations.FirstOrDefault().Treatment))
-                    {
-                        return false;
-                    }
+                    
+                    if (MatchRequisite(evaluations, pr)) return false;
                 }
             }
 
             return true;
+        }
+
+        private static bool MatchRequisite(List<TreatmentResult> evaluations, PrerequisitesDto prerequisites)
+        {
+            var evaluation = evaluations.FirstOrDefault();
+
+            return evaluations.Count == 0 || (evaluation != null && !prerequisites.Treatments.Contains(evaluation.Treatment));
         }
     }
 }
