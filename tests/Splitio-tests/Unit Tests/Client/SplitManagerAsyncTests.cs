@@ -4,6 +4,7 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Client.Interfaces;
+using Splitio.Services.Parsing.Matchers;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,14 +65,25 @@ namespace Splitio_Tests.Unit_Tests.Client
                 conditionWithLogic2
             };
 
+            var prerequisitesExpected = new List<PrerequisitesDto>
+            {
+                new PrerequisitesDto
+                {
+                    FeatureFlagName = "flag1",
+                    Treatments = new List<string>{ "v1","v2" }
+                }
+            };
+
+            var prerequisites = new PrerequisitesMatcher(prerequisitesExpected);
+
             var splits = new List<ParsedSplit>
             {
-                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, defaultTreatment = "def", Sets = new HashSet<string> { "set1", "set2"} },
+                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, defaultTreatment = "def", Sets = new HashSet<string> { "set1", "set2"}, Prerequisites = prerequisites },
                 new ParsedSplit { name = "test2", conditions = conditionsWithLogic },
                 new ParsedSplit { name = "test3", conditions = conditionsWithLogic },
                 new ParsedSplit { name = "test4", conditions = conditionsWithLogic },
                 new ParsedSplit { name = "test5", conditions = conditionsWithLogic },
-                new ParsedSplit { name = "test6", conditions = conditionsWithLogic }
+                new ParsedSplit { name = "test6", conditions = conditionsWithLogic, Prerequisites = new PrerequisitesMatcher(null) }
             };
 
             _blockUntilReadyService
@@ -101,9 +113,13 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(2, firstResult.sets.Count);
             Assert.IsTrue(firstResult.sets.Contains("set1"));
             Assert.IsTrue(firstResult.sets.Contains("set2"));
+            CollectionAssert.AreEqual(prerequisitesExpected, firstResult.prerequisites);
             var test5 = result.Find(x => x.name == "test5");
             Assert.IsFalse(test5.sets.Any());
             Assert.IsFalse(test5.sets.Contains("set1"));
+            Assert.IsTrue(test5.prerequisites.Count == 0);
+            var test6 = result.Find(x => x.name == "test6");
+            Assert.IsTrue(test6.prerequisites.Count == 0);
         }
 
         [TestMethod]
