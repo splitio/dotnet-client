@@ -21,7 +21,7 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void ParseSuccessfullyWhenNonSpecifiedAlgorithm()
+        public void ParseSuccessfullyWhenNonSpecifiedAlgorithmAndwithPrerequisites()
         {
             //Arrange
             var split = new Split
@@ -33,7 +33,12 @@ namespace Splitio_Tests.Unit_Tests
                 defaultTreatment = "off",
                 changeNumber = 232323,
                 trafficTypeName = "user",
-                conditions = new List<ConditionDefinition>()
+                conditions = new List<ConditionDefinition>(),
+                Prerequisites = new List<PrerequisitesDto>
+                {
+                    new PrerequisitesDto { FeatureFlagName = "flagTest1", Treatments = new List<string> { "t1", "t2" } },
+                    new PrerequisitesDto { FeatureFlagName = "flagTest2", Treatments = new List<string> { "t1" }},
+                }
             };
 
             var parser = new FeatureFlagParser(null, null);
@@ -50,6 +55,7 @@ namespace Splitio_Tests.Unit_Tests
             Assert.AreEqual(split.changeNumber, parsedSplit.changeNumber);
             Assert.AreEqual(AlgorithmEnum.LegacyHash, parsedSplit.algo);
             Assert.AreEqual(split.trafficTypeName, parsedSplit.trafficTypeName);
+            CollectionAssert.AreEqual(split.Prerequisites, parsedSplit.Prerequisites);
         }
 
         [TestMethod]
