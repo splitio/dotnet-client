@@ -3331,6 +3331,54 @@
             "label": "default rule"
           }
         ]
+      },
+      {
+        "name": "always_on_if_prerequisite",
+        "trafficTypeName": "user",
+        "trafficAllocation": 100,
+        "trafficAllocationSeed": 1828377380,
+        "changeNumber": 5,
+        "seed": -790401604,
+        "status": "ACTIVE",
+        "killed": false,
+        "defaultTreatment": "off",
+        "prerequisites": [
+          {
+            "n": "rbs_test_flag",
+            "ts": [
+              "v1"
+            ]
+          }
+        ],
+        "conditions": [
+          {
+            "conditionType": "ROLLOUT",
+            "matcherGroup": {
+              "combiner": "AND",
+              "matchers": [
+                {
+                  "keySelector": {
+                    "trafficType": "user",
+                    "attribute": null
+                  },
+                  "matcherType": "ALL_KEYS",
+                  "negate": false,
+                  "userDefinedSegmentMatcherData": null,
+                  "whitelistMatcherData": null,
+                  "unaryNumericMatcherData": null,
+                  "betweenMatcherData": null
+                }
+              ]
+            },
+            "partitions": [
+              {
+                "treatment": "on",
+                "size": 100
+              }
+            ],
+            "label": "always_on_if_prerequisite label"
+          }
+        ]
       }
     ],
     "s": -1,
