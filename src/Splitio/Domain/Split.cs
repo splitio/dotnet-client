@@ -8,5 +8,6 @@ namespace Splitio.Domain
         public List<ConditionDefinition> conditions { get; set; }
         public int? algo { get; set; }
         public int? trafficAllocationSeed { get; set; }
+        public List<PrerequisitesDto> Prerequisites { get; set; }
     }
 }

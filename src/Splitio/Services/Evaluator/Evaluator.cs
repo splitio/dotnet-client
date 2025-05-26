@@ -203,6 +203,11 @@ namespace Splitio.Services.Evaluator
         {
             if (IsSplitKilled(split, out TreatmentResult result)) return result;
 
+            if (!split.Prerequisites.Match(key, attributes, this))
+            {
+                return new TreatmentResult(split.name, Labels.Prerequisites, split.defaultTreatment, split.ImpressionsDisabled, split.changeNumber);
+            }
+
             var inRollout = false;
 
             // use the first matching condition
@@ -281,6 +286,11 @@ namespace Splitio.Services.Evaluator
         private async Task<TreatmentResult> GetTreatmentResultAsync(Key key, ParsedSplit split, Dictionary<string, object> attributes = null)
         {
             if (IsSplitKilled(split, out TreatmentResult result)) return result;
+
+            if (!await split.Prerequisites.MatchAsync(key, attributes, this))
+            {
+                return new TreatmentResult(split.name, Labels.Prerequisites, split.defaultTreatment, split.ImpressionsDisabled, split.changeNumber);
+            }
 
             var inRollout = false;
 
