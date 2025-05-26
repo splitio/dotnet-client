@@ -45,6 +45,11 @@ namespace Splitio.Services.Parsing.Matchers
             return true;
         }
 
+        public List<PrerequisitesDto> Get()
+        {
+            return _prerequisites ?? new List<PrerequisitesDto>();
+        }
+
         private static bool MatchRequisite(List<TreatmentResult> evaluations, PrerequisitesDto prerequisites)
         {
             var evaluation = evaluations.FirstOrDefault();
