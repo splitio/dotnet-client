@@ -40,6 +40,9 @@ namespace Splitio.Tests.Common.Resources
             new KeyImpression("mauro@split.io", "rbs_test_flag", "v2", 0, 10, "default rule", null, false, null, false),
             new KeyImpression("mauro@harness.io", "rbs_test_flag", "v2", 0, 10, "default rule", null, false, null, false),
             new KeyImpression("mauro.sanz@split.io", "rbs_test_flag", "v1", 0, 10, "in rule based segment test_rule_based_segment", null, false, null, false),
+            new KeyImpression("mauro@split.io", "always_on_if_prerequisite", "off", 0, 5, "prerequisites not met", null, false, null, false),
+            new KeyImpression("bilal@split.io", "always_on_if_prerequisite", "on", 0, 5, "always_on_if_prerequisite label", null, false, null, false),
+            new KeyImpression("other_key", "always_on_if_prerequisite", "off", 0, 5, "prerequisites not met", null, false, null, false),
         };
 
         public static KeyImpression GetImpressionExpected(string featureName, string key)
