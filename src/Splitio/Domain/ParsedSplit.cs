@@ -10,11 +10,13 @@ namespace Splitio.Domain
         public ParsedSplit()
         {
             conditions = new List<ConditionWithLogic>();
+            Prerequisites = new PrerequisitesMatcher();
         }
 
         public List<ConditionWithLogic> conditions { get; set; }
         public AlgorithmEnum algo { get; set; }
         public int trafficAllocationSeed { get; set; }
+        public PrerequisitesMatcher Prerequisites { get; set; }
 
         public SplitView ToSplitView()
         {
@@ -34,7 +36,8 @@ namespace Splitio.Domain
                 configs = configurations,
                 defaultTreatment = defaultTreatment,
                 sets = Sets != null ? Sets.ToList() : new List<string>(),
-                impressionsDisabled = ImpressionsDisabled
+                impressionsDisabled = ImpressionsDisabled,
+                prerequisites = Prerequisites.Get()
             };
         }
 

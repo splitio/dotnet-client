@@ -44,7 +44,8 @@ namespace Splitio.Services.Parsing
                     trafficAllocationSeed = split.trafficAllocationSeed ?? 0,
                     configurations = split.configurations,
                     Sets = split.Sets,
-                    ImpressionsDisabled = split.ImpressionsDisabled
+                    ImpressionsDisabled = split.ImpressionsDisabled,
+                    Prerequisites = new Matchers.PrerequisitesMatcher(split.Prerequisites),
                 };
 
                 return ParseConditions(split.conditions, parsedSplit, ruleBasedSegmentCache);
