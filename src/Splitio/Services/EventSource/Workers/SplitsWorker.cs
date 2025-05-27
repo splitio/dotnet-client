@@ -18,26 +18,32 @@ namespace Splitio.Services.EventSource.Workers
         private readonly IFeatureFlagCache _featureFlagCache;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly ISelfRefreshingSegmentFetcher _segmentFetcher;
-        private readonly IFeatureFlagSyncService _featureFlagSyncService;
-        private readonly SplitQueue<SplitChangeNotification> _queue;
+        private readonly IUpdater<Split> _featureFlagUpdater;
+        private readonly SplitQueue<InstantUpdateNotification> _queue;
+        private readonly IRuleBasedSegmentCache _ruleBasedSegmentCache;
+        private readonly IUpdater<RuleBasedSegmentDto> _rbsUpdater;
 
         public SplitsWorker(ISynchronizer synchronizer,
             IFeatureFlagCache featureFlagCache,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
             ISelfRefreshingSegmentFetcher segmentFetcher,
-            IFeatureFlagSyncService featureFlagSyncService) : base("FeatureFlagsWorker", WrapperAdapter.Instance().GetLogger(typeof(SplitsWorker)))
+            IUpdater<Split> featureFlagUpdater,
+            IRuleBasedSegmentCache ruleBasedSegmentCache,
+            IUpdater<RuleBasedSegmentDto> rbsUpdater) : base("FeatureFlagsWorker", WrapperAdapter.Instance().GetLogger(typeof(SplitsWorker)))
         {
             _synchronizer = synchronizer;
             _featureFlagCache = featureFlagCache;
-            _queue = new SplitQueue<SplitChangeNotification>();
+            _queue = new SplitQueue<InstantUpdateNotification>();
             _queue.AddObserver(this);
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _segmentFetcher = segmentFetcher;
-            _featureFlagSyncService = featureFlagSyncService;
+            _featureFlagUpdater = featureFlagUpdater;
+            _ruleBasedSegmentCache = ruleBasedSegmentCache;
+            _rbsUpdater = rbsUpdater;
         }
 
         #region Public Methods
-        public async Task AddToQueue(SplitChangeNotification scn)
+        public async Task AddToQueue(InstantUpdateNotification notification)
         {
             if (!_running)
             {
@@ -47,8 +53,8 @@ namespace Splitio.Services.EventSource.Workers
 
             try
             {
-                _log.Debug($"Add to queue: {scn.ChangeNumber}");
-                await _queue.EnqueueAsync(scn);
+                _log.Debug($"Add to queue: {notification.ChangeNumber}");
+                await _queue.EnqueueAsync(notification);
             }
             catch (Exception ex)
             {
@@ -76,13 +82,26 @@ namespace Splitio.Services.EventSource.Workers
         {
             try
             {
-                if (!_queue.TryDequeue(out SplitChangeNotification scn)) return;
+                if (!_queue.TryDequeue(out InstantUpdateNotification notification)) return;
 
-                _log.Debug($"ChangeNumber dequeue: {scn.ChangeNumber}");
+                _log.Debug($"ChangeNumber dequeue: {notification.ChangeNumber}, Type: {notification.Type}.");
 
-                var success = await ProcessSplitChangeNotificationAsync(scn);
 
-                if (!success) await _synchronizer.SynchronizeSplitsAsync(scn.ChangeNumber);
+                var success = false;
+                ICacheConsumer consumer = _featureFlagCache;
+                switch (notification)
+                {
+                    case SplitChangeNotification scn:
+                        success = await ProcessSplitChangeNotificationAsync(scn);
+                        break;
+                    case RuleBasedSegmentNotification rbsn:
+                        success = await ProcessRuleBasedSegmentNotificationAsync(rbsn);
+                        consumer = _ruleBasedSegmentCache;
+                        break;
+                }
+
+                if (!success)
+                    await _synchronizer.SynchronizeSplitsAsync(notification.ChangeNumber, consumer);
             }
             catch (Exception ex)
             {
@@ -94,6 +113,31 @@ namespace Splitio.Services.EventSource.Workers
         #endregion
 
         #region Private Methods
+        private async Task<bool> ProcessRuleBasedSegmentNotificationAsync(RuleBasedSegmentNotification notification)
+        {
+            try
+            {
+                if (_ruleBasedSegmentCache.GetChangeNumber() >= notification.ChangeNumber) return true;
+
+                if (notification.RuleBasedSegmentDto == null || _ruleBasedSegmentCache.GetChangeNumber() != notification.PreviousChangeNumber)
+                    return false;
+
+                var segments = _rbsUpdater.Process(new List<RuleBasedSegmentDto> { notification.RuleBasedSegmentDto }, notification.ChangeNumber);
+
+                if (segments[Enums.SegmentType.Standard].Count > 0)
+                    await _segmentFetcher.FetchSegmentsIfNotExistsAsync(segments[Enums.SegmentType.Standard]);
+
+                _log.Debug($"IRBSU, Rule-based Segment updated successfully: {notification.RuleBasedSegmentDto.Name}");
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Somenthing went wrong processing a Rule-based Segment notification", ex);
+
+                return false;
+            }
+
+            return true;
+        }
         private async Task<bool> ProcessSplitChangeNotificationAsync(SplitChangeNotification scn)
         {
             try
@@ -104,9 +148,13 @@ namespace Splitio.Services.EventSource.Workers
                 if (scn.FeatureFlag == null || _featureFlagCache.GetChangeNumber() != scn.PreviousChangeNumber)
                     return false;
 
-                var sNames = _featureFlagSyncService.UpdateFeatureFlagsFromChanges(new List<Split> { scn.FeatureFlag }, scn.ChangeNumber);
+                var segments = _featureFlagUpdater.Process(new List<Split> { scn.FeatureFlag }, scn.ChangeNumber);
 
-                if (sNames.Count > 0) await _segmentFetcher.FetchSegmentsIfNotExistsAsync(sNames);
+                if (segments[Enums.SegmentType.Standard].Count > 0)
+                    await _segmentFetcher.FetchSegmentsIfNotExistsAsync(segments[Enums.SegmentType.Standard]);
+
+                if (segments[Enums.SegmentType.RuleBased].Count >0 && !_ruleBasedSegmentCache.Contains(segments[Enums.SegmentType.RuleBased]))
+                    return false;
 
                 _telemetryRuntimeProducer.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits);
 

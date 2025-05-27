@@ -17,13 +17,19 @@ namespace Splitio.Redis.Services.Cache.Classes
         protected const string SplitKeyPrefix = "split.";
         protected const string SplitsKeyPrefix = "splits.";
 
-        private readonly ISplitParser _splitParser;
+        private readonly IParser<Split, ParsedSplit> _splitParser;
         private readonly IRedisAdapterConsumer _redisAdapter;
+        private readonly IRuleBasedSegmentCacheConsumer _ruleBasedSegmentCache;
 
-        public RedisSplitCache(IRedisAdapterConsumer redisAdapter, ISplitParser splitParser, RedisConfig redisConfig, bool clusterMode) : base(redisConfig, clusterMode)
+        public RedisSplitCache(IRedisAdapterConsumer redisAdapter,
+            IParser<Split, ParsedSplit> splitParser,
+            RedisConfig redisConfig,
+            bool clusterMode,
+            IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache) : base(redisConfig, clusterMode)
         {
             _redisAdapter = redisAdapter;
             _splitParser = splitParser;
+            _ruleBasedSegmentCache = ruleBasedSegmentCache;
         }
 
         #region Sync Methods
@@ -46,7 +52,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             var split = JsonConvert.DeserializeObject<Split>(splitJson);
 
-            return _splitParser.Parse(split);
+            return _splitParser.Parse(split, _ruleBasedSegmentCache);
         }
 
         public List<ParsedSplit> GetAllSplits()
@@ -60,7 +66,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             var splits = splitValues
                 .Where(x => !x.IsNull)
-                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s)));
+                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s), _ruleBasedSegmentCache));
 
             return splits
                 .Where(s => s != null)
@@ -97,7 +103,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             var splits = splitValues
                 .Where(s => !s.IsNull)
-                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s)));
+                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s), _ruleBasedSegmentCache));
 
             return splits
                 .Where(s => s != null)
@@ -149,7 +155,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             var splits = splitValues
                 .Where(s => !s.IsNull)
-                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s)));
+                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s), _ruleBasedSegmentCache));
 
             return splits
                 .Where(s => s != null)
@@ -166,7 +172,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             var splits = splitValues
                 .Where(x => !x.IsNull)
-                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s)));
+                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s), _ruleBasedSegmentCache));
 
             return splits
                 .Where(s => s != null)
@@ -182,7 +188,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             var split = JsonConvert.DeserializeObject<Split>(splitJson);
 
-            return _splitParser.Parse(split);
+            return _splitParser.Parse(split, _ruleBasedSegmentCache);
         }
 
         public async Task<List<string>> GetSplitNamesAsync()

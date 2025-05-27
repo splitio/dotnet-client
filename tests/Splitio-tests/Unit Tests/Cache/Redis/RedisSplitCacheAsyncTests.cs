@@ -21,13 +21,15 @@ namespace Splitio_Tests.Unit_Tests.Cache
         private const string SplitKeyPrefix = "SPLITIO.split.";
 
         private readonly Mock<IRedisAdapterConsumer> _redisAdapterMock;
-        private readonly Mock<ISplitParser> _splitParserMock;
+        private readonly Mock<IParser<Split, ParsedSplit>> _splitParserMock;
+        private readonly Mock<IRuleBasedSegmentCacheConsumer> _rbsCache;
         private readonly IFeatureFlagCacheConsumer _redisSplitCache;
 
         public RedisSplitCacheAsyncTests()
         {
             _redisAdapterMock = new Mock<IRedisAdapterConsumer>();
-            _splitParserMock = new Mock<ISplitParser>();
+            _splitParserMock = new Mock<IParser<Split, ParsedSplit>>();
+            _rbsCache = new Mock<IRuleBasedSegmentCacheConsumer>();
             var config = new RedisConfig
             {
                 RedisHost = "localhost",
@@ -39,7 +41,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 RedisSyncTimeout = 1000,
                 PoolSize = 1,
             };
-            _redisSplitCache = new RedisSplitCache(_redisAdapterMock.Object, _splitParserMock.Object, config, false);
+            _redisSplitCache = new RedisSplitCache(_redisAdapterMock.Object, _splitParserMock.Object, config, false, _rbsCache.Object);
         }
 
         [TestMethod]
@@ -78,7 +80,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 .ReturnsAsync(new RedisValue[] { splitJson, splitJson2 });
 
             _splitParserMock
-                .Setup(mock => mock.Parse(It.IsAny<Split>()))
+                .Setup(mock => mock.Parse(It.IsAny<Split>(), _rbsCache.Object))
                 .Returns(new ParsedSplit());
 
             //Act

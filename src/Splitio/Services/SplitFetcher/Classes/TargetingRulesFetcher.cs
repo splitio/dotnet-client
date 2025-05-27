@@ -11,26 +11,32 @@ using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {
-    public class SelfRefreshingSplitFetcher : ISplitFetcher
+    public class TargetingRulesFetcher : ITargetingRulesFetcher
     {
-        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingSplitFetcher));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(TargetingRulesFetcher));
 
         private readonly ISplitChangeFetcher _splitChangeFetcher;
         private readonly IStatusManager _statusManager;
         private readonly ISplitTask _periodicTask;
         private readonly IFeatureFlagCache _featureFlagCache;
-        private readonly IFeatureFlagSyncService _featureFlagSyncService;
+        private readonly IUpdater<Split> _featureFlagUpdater;
+        private readonly IUpdater<RuleBasedSegmentDto> _ruleBasedSegmentUpdater;
+        private readonly IRuleBasedSegmentCache _ruleBasedSegmentCache;
 
-        public SelfRefreshingSplitFetcher(ISplitChangeFetcher splitChangeFetcher,
+        public TargetingRulesFetcher(ISplitChangeFetcher splitChangeFetcher,
             IStatusManager statusManager,
             ISplitTask periodicTask,
             IFeatureFlagCache featureFlagCache,
-            IFeatureFlagSyncService featureFlagSyncService)
+            IUpdater<Split> featureFlagUpdater,
+            IUpdater<RuleBasedSegmentDto> ruleBasedSegmentUpdater,
+            IRuleBasedSegmentCache ruleBasedSegmentCache)
         {
             _splitChangeFetcher = splitChangeFetcher;
             _statusManager = statusManager;
             _featureFlagCache = featureFlagCache;
-            _featureFlagSyncService = featureFlagSyncService;
+            _featureFlagUpdater = featureFlagUpdater;
+            _ruleBasedSegmentUpdater = ruleBasedSegmentUpdater;
+            _ruleBasedSegmentCache = ruleBasedSegmentCache;
             _periodicTask = periodicTask;
             _periodicTask.SetFunction(async () => await FetchSplitsAsync(new FetchOptions()));
         }
@@ -49,6 +55,7 @@ namespace Splitio.Services.SplitFetcher.Classes
         public void Clear()
         {
             _featureFlagCache.Clear();
+            _ruleBasedSegmentCache.Clear();
             _log.Debug("FeatureFlags cache disposed ...");
         }
 
@@ -59,28 +66,44 @@ namespace Splitio.Services.SplitFetcher.Classes
 
             while (!_statusManager.IsDestroyed())
             {   
-                var changeNumber = _featureFlagCache.GetChangeNumber();
+                var ffChangeNumber = _featureFlagCache.GetChangeNumber();
+                var rbsChangeNumber = _ruleBasedSegmentCache.GetChangeNumber();
+
+                fetchOptions.FeatureFlagsSince = ffChangeNumber;
+                fetchOptions.RuleBasedSegmentsSince = rbsChangeNumber;
 
                 try
                 {
-                    var result = await _splitChangeFetcher.FetchAsync(changeNumber, fetchOptions);
+                    var result = await _splitChangeFetcher.FetchAsync(fetchOptions);
 
                     if (result == null || _statusManager.IsDestroyed())
                     {
                         break;
                     }
 
-                    if (changeNumber >= result.till)
+                    if (ffChangeNumber >= result.FeatureFlags.Till && rbsChangeNumber >= result.RuleBasedSegments.Till)
                     {
                         success = true;
                         //There are no new split changes
                         break;
                     }
 
-                    if (result.splits != null && result.splits.Count > 0)
+                    if (result.ClearCache)
                     {
-                        var sNames = _featureFlagSyncService.UpdateFeatureFlagsFromChanges(result.splits, result.till);
-                        segmentNames.AddRange(sNames);
+                        _featureFlagCache.Clear();
+                        _ruleBasedSegmentCache.Clear();
+                    }
+
+                    if (result.RuleBasedSegments.Data != null && result.RuleBasedSegments.Data.Count > 0)
+                    {
+                        var segments = _ruleBasedSegmentUpdater.Process(result.RuleBasedSegments.Data, result.RuleBasedSegments.Till);
+                        segmentNames.AddRange(segments[Enums.SegmentType.Standard]);
+                    }
+
+                    if (result.FeatureFlags.Data != null && result.FeatureFlags.Data.Count > 0)
+                    {
+                        var segments = _featureFlagUpdater.Process(result.FeatureFlags.Data, result.FeatureFlags.Till);
+                        segmentNames.AddRange(segments[Enums.SegmentType.Standard]);
                     }
                 }
                 catch (Exception e)
@@ -92,7 +115,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                 {
                     if (_log.IsDebugEnabled)
                     {
-                        _log.Debug($"split fetch before: {changeNumber}, after: {_featureFlagCache.GetChangeNumber()}");
+                        _log.Debug($"split fetch before: {ffChangeNumber} & {rbsChangeNumber}, after: {_featureFlagCache.GetChangeNumber()} & {_ruleBasedSegmentCache.GetChangeNumber()}");
                     }
                 }
             }

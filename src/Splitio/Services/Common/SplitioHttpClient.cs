@@ -73,6 +73,10 @@ namespace Splitio.Services.Common
                     result.IsSuccessStatusCode = response.IsSuccessStatusCode;
                 }
             }
+            catch (HttpRequestException e)
+            {
+                result.StatusCode = HttpStatusCode.BadRequest;
+            }
             catch (Exception e)
             {
                 _log.Error($"Exception caught executing GET {url}", e);

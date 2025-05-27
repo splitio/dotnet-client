@@ -22,7 +22,9 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         private readonly Mock<IFeatureFlagCache> _featureFlagCache;
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private readonly Mock<ISelfRefreshingSegmentFetcher> _segmentFetcher;
-        private readonly Mock<IFeatureFlagSyncService> _featureFlagSyncService;
+        private readonly Mock<IUpdater<Split>> _featureFlagSyncService;
+        private readonly Mock<IRuleBasedSegmentCache> _rbsCache;
+        private readonly Mock<IUpdater<RuleBasedSegmentDto>> _rbsUpdater;
 
         private readonly ISplitsWorker _splitsWorker;
 
@@ -32,9 +34,12 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _featureFlagCache = new Mock<IFeatureFlagCache>();
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _segmentFetcher = new Mock<ISelfRefreshingSegmentFetcher>();
-            _featureFlagSyncService = new Mock<IFeatureFlagSyncService>();
+            _featureFlagSyncService = new Mock<IUpdater<Split>>();
+            _rbsCache = new Mock<IRuleBasedSegmentCache>();
+            _rbsUpdater = new Mock<IUpdater<RuleBasedSegmentDto>>();
 
-            _splitsWorker = new SplitsWorker(_synchronizer.Object, _featureFlagCache.Object, _telemetryRuntimeProducer.Object, _segmentFetcher.Object, _featureFlagSyncService.Object);
+
+            _splitsWorker = new SplitsWorker(_synchronizer.Object, _featureFlagCache.Object, _telemetryRuntimeProducer.Object, _segmentFetcher.Object, _featureFlagSyncService.Object, _rbsCache.Object, _rbsUpdater.Object);
         }
 
         [TestMethod]
@@ -63,7 +68,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Assert.
             _featureFlagCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<string>>(), It.IsAny<long>()), Times.Never);
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Never);
             _featureFlagCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Never);
         }
 
@@ -76,8 +81,12 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
                 .Returns(5);
 
             _featureFlagSyncService
-                .Setup(mock => mock.UpdateFeatureFlagsFromChanges(It.IsAny<List<Split>>(), It.IsAny<long>()))
-                .Returns(new List<string> { "segment-name" });
+                .Setup(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()))
+                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                { 
+                    { Splitio.Enums.SegmentType.Standard, new List<string> { "segment-name" } },
+                    { Splitio.Enums.SegmentType.RuleBased, new List<string>() }
+                });
 
             // Act.
             _splitsWorker.Start();
@@ -115,9 +124,9 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             await Task.Delay(1000);
 
             // Assert.
-            _featureFlagSyncService.Verify(mock => mock.UpdateFeatureFlagsFromChanges(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
+            _featureFlagSyncService.Verify(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
             _featureFlagCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<string>>(), It.IsAny<long>()), Times.Never);
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Never);
             _featureFlagCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Never);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits), Times.Once);
             _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExistsAsync(It.IsAny<List<string>>()), Times.Once);
@@ -132,8 +141,12 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
                 .Returns(5);
 
             _featureFlagSyncService
-                .Setup(mock => mock.UpdateFeatureFlagsFromChanges(It.IsAny<List<Split>>(), It.IsAny<long>()))
-                .Returns(new List<string>());
+                .Setup(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()))
+                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                {
+                    { Splitio.Enums.SegmentType.Standard, new List<string>() },
+                    { Splitio.Enums.SegmentType.RuleBased, new List<string>() }
+                });
 
             // Act.
             _splitsWorker.Start();
@@ -152,9 +165,9 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             await Task.Delay(1000);
 
             // Assert.
-            _featureFlagSyncService.Verify(mock => mock.UpdateFeatureFlagsFromChanges(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
+            _featureFlagSyncService.Verify(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
             _featureFlagCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<string>>(), It.IsAny<long>()), Times.Never);
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Never);
             _featureFlagCache.Verify(mock => mock.SetChangeNumber(It.IsAny<long>()), Times.Never);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits), Times.Once);
         }
@@ -168,8 +181,12 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
                 .Returns(1);
 
             _featureFlagSyncService
-                .Setup(mock => mock.UpdateFeatureFlagsFromChanges(It.IsAny<List<Split>>(), It.IsAny<long>()))
-                .Returns(new List<string>());
+                .Setup(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()))
+                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                {
+                    { Splitio.Enums.SegmentType.Standard, new List<string>() },
+                    { Splitio.Enums.SegmentType.RuleBased, new List<string>() }
+                });
 
             // Act.
             _splitsWorker.Start();
@@ -187,7 +204,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             await Task.Delay(1000);
 
             // Assert.
-            _featureFlagSyncService.Verify(mock => mock.UpdateFeatureFlagsFromChanges(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
+            _featureFlagSyncService.Verify(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
             _featureFlagCache.Verify(mock => mock.Update(It.IsAny<List<ParsedSplit>>(), It.IsAny<List<string>>(), It.IsAny<long>()), Times.Never);
             _featureFlagCache.Verify(mock => mock.SetChangeNumber(2), Times.Never);
 
@@ -205,7 +222,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             await Task.Delay(1000);
 
             // Assert
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Exactly(4));
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Exactly(4));
 
             _splitsWorker.Stop();
             await _splitsWorker.AddToQueue(new SplitChangeNotification { ChangeNumber = 1585956698486 });
@@ -213,7 +230,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             await _splitsWorker.AddToQueue(new SplitChangeNotification { ChangeNumber = 1585956698496 });
 
             // Assert
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Exactly(4));
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Exactly(4));
         }
 
         [TestMethod]
@@ -224,7 +241,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             Thread.Sleep(1000);
 
             // Assert.
-            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>()), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Never);
         }
 
         [TestMethod]
@@ -279,6 +296,246 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Assert.
             _featureFlagCache.Verify(mock => mock.Kill(changeNumber, splitName, defaultTreatment), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task AddToQueue_ShouldProcess()
+        {
+            // Arrange.
+            _rbsCache
+                .SetupSequence(mock => mock.GetChangeNumber())
+                .Returns(1)
+                .Returns(1)
+                .Returns(2);
+
+            _rbsUpdater
+                .Setup(mock => mock.Process(It.IsAny<List<RuleBasedSegmentDto>>(), 2))
+                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                {
+                    { Splitio.Enums.SegmentType.Standard, new List<string>() },
+                    { Splitio.Enums.SegmentType.RuleBased, new List<string>() }
+                });
+
+            _splitsWorker.Start();
+
+            // Act.
+            var notification = new RuleBasedSegmentNotification
+            {
+                ChangeNumber = 2,
+                PreviousChangeNumber = 1,
+                RuleBasedSegmentDto = new RuleBasedSegmentDto
+                {
+                    Status = "ACTIVE",
+                    Name = "rb_test",
+                    ChangeNumber = 2
+                }
+            };
+            await _splitsWorker.AddToQueue(notification);
+            await _splitsWorker.AddToQueue(notification);
+            await Task.Delay(1000);
+
+            // Assert
+            _rbsCache.Verify(mock => mock.GetChangeNumber(), Times.Exactly(3));
+            _rbsUpdater.Verify(mock => mock.Process(It.IsAny<List<RuleBasedSegmentDto>>(), 2), Times.Once);
+            _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExistsAsync(It.IsAny<IList<string>>()), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task AddToQueue_ShouldForceFetch()
+        {
+            // Arrange.
+            _rbsCache
+                .Setup(mock => mock.GetChangeNumber())
+                .Returns(1);
+
+            _rbsUpdater
+                .Setup(mock => mock.Process(It.IsAny<List<RuleBasedSegmentDto>>(), 2))
+                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                {
+                    { Splitio.Enums.SegmentType.Standard, new List<string>() },
+                    { Splitio.Enums.SegmentType.RuleBased, new List<string>() }
+                });
+
+            _splitsWorker.Start();
+
+            // Act.
+            var notification = new RuleBasedSegmentNotification
+            {
+                ChangeNumber = 2,
+                PreviousChangeNumber = 3,
+                RuleBasedSegmentDto = new RuleBasedSegmentDto
+                {
+                    Status = "ACTIVE",
+                    Name = "rb_test",
+                    ChangeNumber = 2
+                }
+            };
+            await _splitsWorker.AddToQueue(notification);
+            await Task.Delay(1000);
+
+            // Assert
+            _rbsCache.Verify(mock => mock.GetChangeNumber(), Times.Exactly(2));
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _rbsCache.Object), Times.Once);
+            _rbsUpdater.Verify(mock => mock.Process(It.IsAny<List<RuleBasedSegmentDto>>(), It.IsAny<long>()), Times.Never);
+            _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExistsAsync(It.IsAny<IList<string>>()), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task AddToQueue_WhenRuleBasedSegmentIsNull_ShouldForceFetch()
+        {
+            // Arrange.
+            _rbsCache
+                .Setup(mock => mock.GetChangeNumber())
+                .Returns(1);
+
+            _rbsUpdater
+                .Setup(mock => mock.Process(It.IsAny<List<RuleBasedSegmentDto>>(), 2))
+                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                {
+                    { Splitio.Enums.SegmentType.Standard, new List<string>() },
+                    { Splitio.Enums.SegmentType.RuleBased, new List<string>() }
+                });
+
+            _splitsWorker.Start();
+
+            // Act.
+            var notification = new RuleBasedSegmentNotification
+            {
+                ChangeNumber = 2,
+                PreviousChangeNumber = 1,
+                RuleBasedSegmentDto = null
+            };
+            await _splitsWorker.AddToQueue(notification);
+            await Task.Delay(1000);
+
+            // Assert
+            _rbsCache.Verify(mock => mock.GetChangeNumber(), Times.Once);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _rbsCache.Object), Times.Once);
+            _rbsUpdater.Verify(mock => mock.Process(It.IsAny<List<RuleBasedSegmentDto>>(), It.IsAny<long>()), Times.Never);
+            _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExistsAsync(It.IsAny<IList<string>>()), Times.Never);
+        }
+
+
+        [TestMethod]
+        public async Task AddToQueue_RuleBaseSegmentNot_WithSegmentNames_ShouldForceFetch()
+        {
+            // Arrange.
+            _rbsCache
+                .Setup(mock => mock.GetChangeNumber())
+                .Returns(1);
+
+            _rbsUpdater
+                .Setup(mock => mock.Process(It.IsAny<List<RuleBasedSegmentDto>>(), 2))
+                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                {
+                    { Splitio.Enums.SegmentType.Standard, new List<string> { "segment1" } },
+                    { Splitio.Enums.SegmentType.RuleBased, new List<string> { "rbs1", "rbs2"} }
+                });
+
+            _splitsWorker.Start();
+
+            // Act.
+            var notification = new RuleBasedSegmentNotification
+            {
+                ChangeNumber = 2,
+                PreviousChangeNumber = 1,
+                RuleBasedSegmentDto = new RuleBasedSegmentDto()
+            };
+            await _splitsWorker.AddToQueue(notification);
+            await Task.Delay(1000);
+
+            // Assert
+            _rbsCache.Verify(mock => mock.GetChangeNumber(), Times.Exactly(2));
+            _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExistsAsync(It.IsAny<IList<string>>()), Times.Once);
+            _rbsUpdater.Verify(mock => mock.Process(It.IsAny<List<RuleBasedSegmentDto>>(), It.IsAny<long>()), Times.Once);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task AddToQueue_SplitChangeNot_WithSegmentNames_ShouldCheckSegments()
+        {
+            // Arrange.
+            _featureFlagCache
+                .Setup(mock => mock.GetChangeNumber())
+                .Returns(1);
+
+            _featureFlagSyncService
+                .Setup(mock => mock.Process(It.IsAny<List<Split>>(), 2))
+                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                {
+                    { Splitio.Enums.SegmentType.Standard, new List<string> { "segment1" } },
+                    { Splitio.Enums.SegmentType.RuleBased, new List<string> { "rbs1", "rbs2"} }
+                });
+
+            _rbsCache
+                .Setup(mock => mock.Contains(new List<string> { "rbs1", "rbs2" }))
+                .Returns(true);
+
+            _splitsWorker.Start();
+
+            // Act.
+            var notification = new SplitChangeNotification
+            {
+                ChangeNumber = 2,
+                PreviousChangeNumber = 1,
+                FeatureFlag = new Split
+                {
+                    status = "ACTIVE",
+                    changeNumber = 2,
+                }
+            };
+            await _splitsWorker.AddToQueue(notification);
+            await Task.Delay(1000);
+
+            // Assert
+            _featureFlagCache.Verify(mock => mock.GetChangeNumber(), Times.Exactly(2));
+            _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExistsAsync(It.IsAny<IList<string>>()), Times.Once);
+            _featureFlagSyncService.Verify(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task AddToQueue_SplitChangeNot_WithSegmentNames_ShouldForceFetch()
+        {
+            // Arrange.
+            _featureFlagCache
+                .Setup(mock => mock.GetChangeNumber())
+                .Returns(1);
+
+            _featureFlagSyncService
+                .Setup(mock => mock.Process(It.IsAny<List<Split>>(), 2))
+                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                {
+                    { Splitio.Enums.SegmentType.Standard, new List<string> { "segment1" } },
+                    { Splitio.Enums.SegmentType.RuleBased, new List<string> { "rbs1", "rbs2"} }
+                });
+
+            _rbsCache
+                .Setup(mock => mock.Contains(new List<string> { "rbs1", "rbs2" }))
+                .Returns(false);
+
+            _splitsWorker.Start();
+
+            // Act.
+            var notification = new SplitChangeNotification
+            {
+                ChangeNumber = 2,
+                PreviousChangeNumber = 1,
+                FeatureFlag = new Split
+                {
+                    status = "ACTIVE",
+                    changeNumber = 2,
+                }
+            };
+            await _splitsWorker.AddToQueue(notification);
+            await Task.Delay(1000);
+
+            // Assert
+            _featureFlagCache.Verify(mock => mock.GetChangeNumber(), Times.Exactly(2));
+            _segmentFetcher.Verify(mock => mock.FetchSegmentsIfNotExistsAsync(It.IsAny<IList<string>>()), Times.Once);
+            _featureFlagSyncService.Verify(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()), Times.Once);
+            _synchronizer.Verify(mock => mock.SynchronizeSplitsAsync(It.IsAny<long>(), _featureFlagCache.Object), Times.Once);
         }
     }
 }

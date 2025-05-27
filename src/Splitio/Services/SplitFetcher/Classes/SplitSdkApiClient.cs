@@ -1,4 +1,5 @@
-﻿using Splitio.Constants;
+﻿using Splitio.CommonLibraries;
+using Splitio.Constants;
 using Splitio.Domain;
 using Splitio.Services.Common;
 using Splitio.Services.Filters;
@@ -14,25 +15,35 @@ namespace Splitio.Services.SplitFetcher.Classes
 {
     public class SplitSdkApiClient : ISplitSdkApiClient
     {
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitSdkApiClient));
+        private const int PROXY_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitSdkApiClient));
 
         private readonly ISplitioHttpClient _httpClient;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private readonly string _baseUrl;
         private readonly string _flagSets;
+        private readonly bool _proxy;
+        private readonly int _proxyCheckIntervalMs;
+
+        private string _flagSpec = ApiVersions.LatestFlagsSpec;
+        private long? _lastProxyCheckTimestamp;
 
         public SplitSdkApiClient(ISplitioHttpClient httpClient,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
             string baseUrl,
-            IFlagSetsFilter flagSetsFilter)
+            IFlagSetsFilter flagSetsFilter,
+            bool proxy,
+            int? proxyCheckIntervalMs = null)
         {
             _httpClient = httpClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _baseUrl = baseUrl;
             _flagSets = flagSetsFilter.GetFlagSets();
+            _proxy = proxy;
+            _proxyCheckIntervalMs = proxyCheckIntervalMs ?? PROXY_CHECK_INTERVAL_MS;
         }
 
-        public async Task<string> FetchSplitChangesAsync(long since, FetchOptions fetchOptions)
+        public async Task<ApiFetchResult> FetchSplitChangesAsync(FetchOptions fetchOptions)
         {
             using (var clock = new Util.SplitStopwatch())
             {
@@ -40,7 +51,15 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                 try
                 {
-                    var requestUri = GetRequestUri(since, fetchOptions.Till);
+                    var requestUri = GetRequestUri(fetchOptions.FeatureFlagsSince, fetchOptions.RuleBasedSegmentsSince, fetchOptions.Till);
+
+                    if (ShouldSwitchToLatestFlagsSpec)
+                    {
+                        _flagSpec = ApiVersions.LatestFlagsSpec;
+                        _log.Info($"Switching to new Feature flag spec {_flagSpec} and fetching.");
+                        requestUri = GetRequestUri(-1, -1, fetchOptions.Till);
+                    }
+
                     var response = await _httpClient.GetAsync(requestUri, fetchOptions.CacheControlHeaders);
 
                     clock.Stop();
@@ -48,28 +67,56 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                     if (response.IsSuccessStatusCode)
                     {
-                        return response.Content;
+                        var result = new ApiFetchResult
+                        {
+                            Success = true,
+                            ClearCache = _lastProxyCheckTimestamp != null,
+                            Spec = _flagSpec,
+                            Content = response.Content
+                        };
+
+                        _lastProxyCheckTimestamp = null;
+
+                        return result;
+                    }
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.BadRequest && _flagSpec.Equals(ApiVersions.LatestFlagsSpec) && _proxy)
+                    {
+                        _flagSpec = ApiVersions.Spec1_1;
+                        _lastProxyCheckTimestamp = CurrentTimeHelper.CurrentTimeMillis();
+                        _log.Warn($"Detected proxy without support for Feature flags spec {ApiVersions.LatestFlagsSpec} version, will switch to spec version {_flagSpec}");
+
+                        return await FetchSplitChangesAsync(fetchOptions);
                     }
 
                     if (response.StatusCode == System.Net.HttpStatusCode.RequestUriTooLong)
                     {
                         _log.Error($"SDK Initialization, the amount of flag sets provided are big causing uri length error.");
                     }
-
-                    return string.Empty;
                 }
                 catch (Exception e)
                 {
                     _log.Error("Exception caught executing FetchSplitChanges", e);
-
-                    return string.Empty;
                 }
+
+                return new ApiFetchResult
+                {
+                    Success = false,
+                    Content = string.Empty
+                };
             }
         }
 
-        private string GetRequestUri(long since, long? till = null)
+        private string GetRequestUri(long since, long rbSinceTarget, long? till)
         {
-            var uri = $"{_baseUrl}/api/splitChanges?s={ApiVersions.FlagsSpec}&since={Uri.EscapeDataString(since.ToString())}";
+            var ffSince = Uri.EscapeDataString(since.ToString());
+            var uri = $"{_baseUrl}/api/splitChanges?s={_flagSpec}&since={ffSince}";
+
+            if (_flagSpec.Equals(ApiVersions.LatestFlagsSpec))
+            {
+                var rbSince = Uri.EscapeDataString(rbSinceTarget.ToString());
+                uri = $"{uri}&rbSince={rbSince}";
+            }
 
             if (!string.IsNullOrEmpty(_flagSets))
                 uri = $"{uri}&sets={_flagSets}";
@@ -79,5 +126,9 @@ namespace Splitio.Services.SplitFetcher.Classes
 
             return uri;
         }
+
+        private bool ShouldSwitchToLatestFlagsSpec => _lastProxyCheckTimestamp != null &&
+                CurrentTimeHelper.CurrentTimeMillis() - _lastProxyCheckTimestamp >= _proxyCheckIntervalMs &&
+                !_flagSpec.Equals(ApiVersions.LatestFlagsSpec);
     }
 }

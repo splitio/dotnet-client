@@ -45,7 +45,8 @@ namespace Splitio.Services.Client.Classes
         protected ITrafficTypeValidator _trafficTypeValidator;
         protected IBlockUntilReadyService _blockUntilReadyService;
         protected IFactoryInstantiationsService _factoryInstantiationsService;
-        protected ISplitParser _splitParser;
+        protected IParser<Split, ParsedSplit> _splitParser;
+        protected IParser<RuleBasedSegmentDto, RuleBasedSegment> _rbsParser;
         protected IEvaluator _evaluator;
         protected ITelemetryEvaluationProducer _telemetryEvaluationProducer;
         protected ITelemetryInitProducer _telemetryInitProducer;

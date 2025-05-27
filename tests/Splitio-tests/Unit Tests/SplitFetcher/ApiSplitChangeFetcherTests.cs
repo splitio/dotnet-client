@@ -23,22 +23,163 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
+        public async Task ExecuteOldSpec()
+        {
+            //Arrange            
+            _apiClient
+                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
+                .ReturnsAsync(new ApiFetchResult
+                {
+                    Spec = "1.1",
+                    Success = true,
+                    Content = @"{
+                            'splits':[{
+                                'trafficType':'user',
+                                'name':'Reset_Seed_UI',
+                                'seed':1552577712,
+                                'status':'ACTIVE',
+                                'defaultTreatment':'off',
+                                'changeNumber':1469827821322,
+                                'conditions':[{
+                                    'matcherGroup':{
+                                    'combiner':'AND',
+                                    'matchers':[{
+                                        'keySelector':{
+                                            'trafficType':'user',
+                                            'attribute':null
+                                        },
+                                        'matcherType':'ALL_KEYS',
+                                        'negate':false
+                                    }]},
+                                    'partitions':[
+                                    {
+                                        'treatment':'on',
+                                        'size':100
+                                    },
+                                    {
+                                        'treatment':'off',
+                                        'size':0,
+                                        'addedField':'test'
+                                    }]
+                                }]
+                            }],
+                            'since':1469817846929,
+                            'till':1469827821322
+                        }"
+                });
+
+
+            var apiSplitChangeFetcher = new ApiSplitChangeFetcher(_apiClient.Object);
+
+            //Act
+            var result = await apiSplitChangeFetcher.FetchAsync(new FetchOptions());
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.FeatureFlags.Data.Count > 0);
+            Assert.AreEqual(1469827821322, result.FeatureFlags.Till);
+            Assert.AreEqual(1469817846929, result.FeatureFlags.Since);
+            Assert.IsTrue(result.RuleBasedSegments.Data.Count == 0);
+            Assert.AreEqual(-1, result.RuleBasedSegments.Till);
+            Assert.AreEqual(-1, result.RuleBasedSegments.Since);
+        }
+
+        [TestMethod]
+        public async Task ExecuteUnsuccess()
+        {
+            //Arrange            
+            _apiClient
+                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
+                .ReturnsAsync(new ApiFetchResult
+                {
+                    Spec = "1.3",
+                    Success = false,
+                    Content = string.Empty
+                });
+
+
+            var apiSplitChangeFetcher = new ApiSplitChangeFetcher(_apiClient.Object);
+
+            //Act
+            var result = await apiSplitChangeFetcher.FetchAsync(new FetchOptions());
+
+            //Assert
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
         [Description("Test a Json that changes its structure and is deserialized without exception. Contains: a field renamed, a field removed and a field added.")]
         public async Task ExecuteJsonDeserializeSuccessfulWithChangeInJsonFormat()
         {
             //Arrange            
             _apiClient
-                .Setup(x => x.FetchSplitChangesAsync(-1, It.IsAny<FetchOptions>()))
-                .ReturnsAsync("{\"splits\": [ { \"trafficType\": \"user\", \"name\": \"Reset_Seed_UI\", \"seed\": 1552577712, \"status\": \"ACTIVE\", \"defaultTreatment\": \"off\", \"changeNumber\": 1469827821322, \"conditions\": [ { \"matcherGroup\": { \"combiner\": \"AND\", \"matchers\": [ { \"keySelector\": { \"trafficType\": \"user\", \"attribute\": null }, \"matcherType\": \"ALL_KEYS\", \"negate\": false, \"userDefinedSegmentMatcherData\": null, \"whitelistMatcherData\": null, \"unaryNumericMatcherData\": null, \"betweenMatcherData\": null } ] }, \"partitions\": [ { \"treatment\": \"on\", \"size\": 100 }, { \"treatment\": \"off\", \"size\": 0, \"addedField\": \"test\"  } ] } ] } ], \"since\": 1469817846929, \"till\": 1469827821322 }\r\n");
+                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
+                .ReturnsAsync(new ApiFetchResult
+                {
+                    Spec = "1.3",
+                    Success = true,
+                    Content = @"{
+                          'rbs':{
+                             's':-1,
+                             't':-1,
+                             'd':[
+        
+                             ]
+                          },
+                          'ff':{
+                             'd':[
+                                {
+                                   'trafficType':'user',
+                                   'name':'Reset_Seed_UI',
+                                   'seed':1552577712,
+                                   'status':'ACTIVE',
+                                   'defaultTreatment':'off',
+                                   'changeNumber':1469827821322,
+                                   'conditions':[
+                                      {
+                                         'matcherGroup':{
+                                            'combiner':'AND',
+                                            'matchers':[
+                                               {
+                                                  'keySelector':{
+                                                     'trafficType':'user',
+                                                     'attribute':null
+                                                  },
+                                                  'matcherType':'ALL_KEYS',
+                                                  'negate':false
+                                               }
+                                            ]
+                                         },
+                                         'partitions':[
+                                            {
+                                               'treatment':'on',
+                                               'size':100
+                                            },
+                                            {
+                                               'treatment':'off',
+                                               'size':0,
+                                               'addedField':'test'
+                                            }
+                                         ]
+                                      }
+                                   ]
+                                }
+                             ],
+                             's':1469817846929,
+                             't':1469827821322
+                          }
+                        }"
+                });
+
 
             ApiSplitChangeFetcher apiSplitChangeFetcher = new ApiSplitChangeFetcher(_apiClient.Object);
 
             //Act
-            var result = await apiSplitChangeFetcher.FetchAsync(-1, new FetchOptions());
+            var result = await apiSplitChangeFetcher.FetchAsync(new FetchOptions());
 
             //Assert
             Assert.IsTrue(result != null);
-            Assert.IsTrue(result.splits.Count > 0);
+            Assert.IsTrue(result.FeatureFlags.Data.Count > 0);
         }
 
         [TestMethod]
@@ -46,9 +187,19 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             _apiClient
-                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<long>(), It.IsAny<FetchOptions>()))
-                .ReturnsAsync(@"{
-                          'splits': [
+                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
+                .ReturnsAsync(new ApiFetchResult
+                {
+                    Spec = "1.3",
+                    Success = true,
+                    Content = @"{
+                          'rbs':{
+                            's':-1,
+                            't':-1,
+                            'd':[]
+                          },
+                          'ff':{
+                            'd': [
                             {
                               'trafficTypeName': 'user',
                               'name': 'Test_1',
@@ -90,24 +241,26 @@ namespace Splitio_Tests.Unit_Tests
                               ]
                             }   
                           ],
-                          'since': -1,
-                          'till': 1470855828956
-                        }");
+                          's': -1,
+                          't': 1470855828956
+                          },
+                        }"
+                });
 
             //Act
-            var result = await _apiFetcher.FetchAsync(-1, new FetchOptions());
+            var result = await _apiFetcher.FetchAsync(new FetchOptions());
 
             //Assert
             Assert.IsNotNull(result);
-            var split = result.splits.First();
+            var split = result.FeatureFlags.Data.First();
             Assert.AreEqual("Test_1", split.name);
             Assert.AreEqual(false, split.killed);
             Assert.AreEqual("ACTIVE", split.status);
             Assert.AreEqual("user", split.trafficTypeName);
             Assert.AreEqual("off", split.defaultTreatment);
             Assert.IsNotNull(split.conditions);
-            Assert.AreEqual(-1, result.since);
-            Assert.AreEqual(1470855828956, result.till);
+            Assert.AreEqual(-1, result.FeatureFlags.Since);
+            Assert.AreEqual(1470855828956, result.FeatureFlags.Till);
             Assert.AreEqual(null, split.algo);
         }
 
@@ -116,9 +269,19 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             _apiClient
-                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<long>(), It.IsAny<FetchOptions>()))
-                .ReturnsAsync(@"{
-                          'splits': [
+                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
+                .ReturnsAsync(new ApiFetchResult
+                {
+                    Spec = "1.3",
+                    Success = true,
+                    Content = @"{
+                          'rbs':{
+                            's':-1,
+                            't':-1,
+                            'd':[]
+                          },
+                          'ff': {
+                            'd': [
                             {
                               'trafficTypeName': 'user',
                               'name': 'Test_1',
@@ -161,16 +324,18 @@ namespace Splitio_Tests.Unit_Tests
                               ]
                             }   
                           ],
-                          'since': -1,
-                          'till': 1470855828956
-                        }");
+                          's': -1,
+                          't': 1470855828956
+                          }
+                        }"
+                });
 
             //Act
-            var result = await _apiFetcher.FetchAsync(-1, new FetchOptions());
+            var result = await _apiFetcher.FetchAsync(new FetchOptions());
 
             //Assert
             Assert.IsNotNull(result);
-            var split = result.splits.First();
+            var split = result.FeatureFlags.Data.First();
             Assert.AreEqual(AlgorithmEnum.LegacyHash, (AlgorithmEnum)split.algo);
         }
 
@@ -179,9 +344,19 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             _apiClient
-                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<long>(), It.IsAny<FetchOptions>()))
-                .ReturnsAsync(@"{
-                          'splits': [
+                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
+                .ReturnsAsync(new ApiFetchResult
+                {
+                    Spec = "1.3",
+                    Success = true,
+                    Content = @"{
+                          'rbs':{
+                            's':-1,
+                            't':-1,
+                            'd':[]
+                          },
+                          'ff':{
+                            'd': [
                             {
                               'trafficTypeName': 'user',
                               'name': 'Test_1',
@@ -224,16 +399,18 @@ namespace Splitio_Tests.Unit_Tests
                               ]
                             }   
                           ],
-                          'since': -1,
-                          'till': 1470855828956
-                        }");
+                          's': -1,
+                          't': 1470855828956
+                          }
+                        }"
+                });
 
             //Act
-            var result = await _apiFetcher.FetchAsync(-1, new FetchOptions());
+            var result = await _apiFetcher.FetchAsync(new FetchOptions());
 
             //Assert
             Assert.IsNotNull(result);
-            var split = result.splits.First();
+            var split = result.FeatureFlags.Data.First();
             Assert.AreEqual(AlgorithmEnum.Murmur, (AlgorithmEnum)split.algo);
         }
 
@@ -242,13 +419,13 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             _apiClient
-                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<long>(), It.IsAny<FetchOptions>()))
+                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
                 .Throws(new Exception());
 
             var apiFetcher = new ApiSplitChangeFetcher(_apiClient.Object);
 
             // Act.
-            var result = await apiFetcher.FetchAsync(-1, new FetchOptions());
+            var result = await apiFetcher.FetchAsync(new FetchOptions());
 
             // Assert.
             Assert.IsNull(result);
@@ -259,9 +436,19 @@ namespace Splitio_Tests.Unit_Tests
         {
             //Arrange
             _apiClient
-                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<long>(), It.IsAny<FetchOptions>()))
-                .ReturnsAsync(@"{
-                          'splits': [
+                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
+                .ReturnsAsync(new ApiFetchResult
+                {
+                    Spec = "1.3",
+                    Success = true,
+                    Content = @"{
+                          'rbs':{
+                            's':-1,
+                            't':-1,
+                            'd':[]
+                          },
+                          'ff':{
+                            'd': [
                             {
                               'trafficTypeName': 'user',
                               'name': 'Test_1',
@@ -308,16 +495,18 @@ namespace Splitio_Tests.Unit_Tests
                               ]
                             }   
                           ],
-                          'since': -1,
-                          'till': 1470855828956
-                        }");
+                          's': -1,
+                          't': 1470855828956
+                          }
+                        }"
+                });
 
             //Act
-            var result = await _apiFetcher.FetchAsync(-1, new FetchOptions());
+            var result = await _apiFetcher.FetchAsync(new FetchOptions());
 
             //Assert
             Assert.IsNotNull(result);
-            var split = result.splits.First();
+            var split = result.FeatureFlags.Data.First();
             Assert.AreEqual(AlgorithmEnum.Murmur, (AlgorithmEnum)split.algo);
             Assert.IsNotNull(split.configurations);
         }
@@ -327,9 +516,19 @@ namespace Splitio_Tests.Unit_Tests
         {
             // Arrange.
             _apiClient
-                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<long>(), It.IsAny<FetchOptions>()))
-                .ReturnsAsync(@"{
-                          'splits': [
+                .Setup(x => x.FetchSplitChangesAsync(It.IsAny<FetchOptions>()))
+                .ReturnsAsync(new ApiFetchResult
+                {
+                    Spec = "1.3",
+                    Success = true,
+                    Content = @"{
+                          'rbs':{
+                            's':-1,
+                            't':-1,
+                            'd':[]
+                          },
+                          'ff':{
+                            'd': [
                             {
                               'trafficTypeName': 'user',
                               'name': 'Test_1',
@@ -377,15 +576,17 @@ namespace Splitio_Tests.Unit_Tests
                               ]
                             }   
                           ],
-                          'since': -1,
-                          'till': 1470855828956
-                        }");
+                          's': -1,
+                          't': 1470855828956
+                          }
+                        }"
+                });
 
             // Act.
-            var result = await _apiFetcher.FetchAsync(-1, new FetchOptions());
+            var result = await _apiFetcher.FetchAsync(new FetchOptions());
 
             // Assert.
-            var split = result.splits.First();
+            var split = result.FeatureFlags.Data.First();
             Assert.AreEqual(4, split.Sets.Count);
             Assert.IsTrue(split.Sets.Contains("set_a"));
             Assert.IsTrue(split.Sets.Contains("set_b"));

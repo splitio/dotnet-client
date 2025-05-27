@@ -538,113 +538,182 @@ namespace Splitio.Integration_tests
             using (var httpClientMock = new HttpClientMock())
             {
                 // Arrange.
-                var changes1 = new SplitChangesResult
+                var changes1 = new TargetingRulesDto
                 {
-                    since = -1,
-                    till = 10,
-                    splits = new List<Split>()
+                    RuleBasedSegments = new ChangesDto<RuleBasedSegmentDto>
                     {
-                        new Split
+                        Since = -1,
+                        Till = 11,
+                        Data = new List<RuleBasedSegmentDto>
                         {
-                            name = "split-name-1",
-                            changeNumber = 10,
-                            conditions = new List<ConditionDefinition>
+                            new RuleBasedSegmentDto
                             {
-                                new ConditionDefinition
+                                Status = "ACTIVE",
+                                Name = "rbs_test",
+                                ChangeNumber = 1,
+                                Excluded = new Excluded
                                 {
-                                    conditionType = "ROLLOUT",
-                                    partitions = new List<PartitionDefinition>
+                                    Keys = new List<string>(),
+                                    Segments = new List<ExcludedSegments>()
+                                },
+                                Conditions = new List<ConditionDefinition>
+                                {
+                                    new ConditionDefinition
                                     {
-                                        new PartitionDefinition
+                                        matcherGroup = new MatcherGroupDefinition
                                         {
-                                            size = 100,
-                                            treatment = "on"
-                                        }
-                                    },
-                                    matcherGroup = new MatcherGroupDefinition
-                                    {
-                                        matchers = new List<MatcherDefinition>
-                                        {
-                                            new MatcherDefinition
+                                            matchers = new List<MatcherDefinition>
                                             {
-                                                whitelistMatcherData = new WhitelistData
+                                                new MatcherDefinition
                                                 {
-                                                    whitelist = new List<string>{ "mauro" }
-                                                },
-                                                matcherType = "WHITELIST"
+                                                    whitelistMatcherData = new WhitelistData
+                                                    {
+                                                        whitelist = new List<string>{ "mauro" }
+                                                    },
+                                                    matcherType = "WHITELIST"
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            },
-                            defaultTreatment = "on",
-                            killed = false,
-                            status = "ACTIVE"
+                            }
                         }
-                    }
-                };
-                var changes2 = new SplitChangesResult
-                {
-                    since = 10,
-                    till = 10,
-                    splits = new List<Split>()
-                };
-
-                var changes3 = new SplitChangesResult
-                {
-                    since = 10,
-                    till = 11,
-                    splits = new List<Split>()
+                    },
+                    FeatureFlags = new ChangesDto<Split>
                     {
-                        new Split
+                        Since = -1,
+                        Till = 10,
+                        Data = new List<Split>()
                         {
-                            name = "split-name-1",
-                            changeNumber = 11,
-                            conditions = new List<ConditionDefinition>
+                            new Split
                             {
-                                new ConditionDefinition
+                                name = "split-name-1",
+                                changeNumber = 10,
+                                conditions = new List<ConditionDefinition>
                                 {
-                                    conditionType = "ROLLOUT",
-                                    partitions = new List<PartitionDefinition>
+                                    new ConditionDefinition
                                     {
-                                        new PartitionDefinition
+                                        conditionType = "ROLLOUT",
+                                        partitions = new List<PartitionDefinition>
                                         {
-                                            size = 100,
-                                            treatment = "off"
-                                        }
-                                    },
-                                    matcherGroup = new MatcherGroupDefinition
-                                    {
-                                        matchers = new List<MatcherDefinition>
-                                        {
-                                            new MatcherDefinition
+                                            new PartitionDefinition
                                             {
-                                                whitelistMatcherData = new WhitelistData
+                                                size = 100,
+                                                treatment = "on"
+                                            }
+                                        },
+                                        matcherGroup = new MatcherGroupDefinition
+                                        {
+                                            matchers = new List<MatcherDefinition>
+                                            {
+                                                new MatcherDefinition
                                                 {
-                                                    whitelist = new List<string>{ "mauro" }
-                                                },
-                                                matcherType = "WHITELIST"
+                                                    whitelistMatcherData = new WhitelistData
+                                                    {
+                                                        whitelist = new List<string>{ "mauro" }
+                                                    },
+                                                    matcherType = "WHITELIST"
+                                                }
                                             }
                                         }
                                     }
-                                }
-                            },
-                            defaultTreatment = "off",
-                            killed = false,
-                            status = "ACTIVE"
+                                },
+                                defaultTreatment = "on",
+                                killed = false,
+                                status = "ACTIVE"
+                            }
+                        }
+                    }
+                };
+                var changes2 = new TargetingRulesDto
+                {
+                    RuleBasedSegments = new ChangesDto<RuleBasedSegmentDto>
+                    {
+                        Since = 11,
+                        Till = 11,
+                        Data = new List<RuleBasedSegmentDto>()
+                    },
+                    FeatureFlags = new ChangesDto<Split>
+                    {
+                        Since = 10,
+                        Till = 10,
+                        Data = new List<Split>()
+                    }
+                };
+
+                var changes3 = new TargetingRulesDto
+                {
+                    RuleBasedSegments = new ChangesDto<RuleBasedSegmentDto>
+                    {
+                        Since = 11,
+                        Till = 11,
+                        Data = new List<RuleBasedSegmentDto>()
+                    },
+                    FeatureFlags = new ChangesDto<Split>
+                    {
+                        Since = 10,
+                        Till = 11,
+                        Data = new List<Split>()
+                        {
+                            new Split
+                            {
+                                name = "split-name-1",
+                                changeNumber = 11,
+                                conditions = new List<ConditionDefinition>
+                                {
+                                    new ConditionDefinition
+                                    {
+                                        conditionType = "ROLLOUT",
+                                        partitions = new List<PartitionDefinition>
+                                        {
+                                            new PartitionDefinition
+                                            {
+                                                size = 100,
+                                                treatment = "off"
+                                            }
+                                        },
+                                        matcherGroup = new MatcherGroupDefinition
+                                        {
+                                            matchers = new List<MatcherDefinition>
+                                            {
+                                                new MatcherDefinition
+                                                {
+                                                    whitelistMatcherData = new WhitelistData
+                                                    {
+                                                        whitelist = new List<string>{ "mauro" }
+                                                    },
+                                                    matcherType = "WHITELIST"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                defaultTreatment = "off",
+                                killed = false,
+                                status = "ACTIVE"
+                            }
                         }
                     }
                 };
 
-                var changes4 = new SplitChangesResult
+                var changes4 = new TargetingRulesDto
                 {
-                    since = 11,
-                    till = 11,
-                    splits = new List<Split>()
+                    RuleBasedSegments = new ChangesDto<RuleBasedSegmentDto>
+                    {
+                        Since = 11,
+                        Till = 11,
+                        Data = new List<RuleBasedSegmentDto>()
+                    },
+                    FeatureFlags = new ChangesDto<Split>
+                    {
+                        Since = 11,
+                        Till = 11,
+                        Data = new List<Split>()
+                    }
                 };
 
-                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes1), "-1");
-                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes2), "10");
+                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes1), "-1", "-1");
+                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes2), "10", "11");
                 httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
                 httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 
@@ -671,8 +740,8 @@ namespace Splitio.Integration_tests
                 var result = client.GetTreatment("admin", "split-name-1");
                 Assert.AreEqual("on", result);
 
-                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes3), "10");
-                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes4), "11");
+                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes3), "10", "11");
+                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes4), "11", "11");
 
                 Thread.Sleep(3000);
 

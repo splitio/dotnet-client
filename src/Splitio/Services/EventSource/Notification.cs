@@ -22,6 +22,7 @@ namespace Splitio.Services.EventSource
         SPLIT_UPDATE,
         SPLIT_KILL,
         SEGMENT_UPDATE,
+        RB_SEGMENT_UPDATE,
         CONTROL,
         OCCUPANCY,
         ERROR
@@ -47,7 +48,7 @@ namespace Splitio.Services.EventSource
         public int Code { get; set; }
     }
 
-    public class SplitChangeNotification : IncomingNotification
+    public class InstantUpdateNotification : IncomingNotification
     {
         public long ChangeNumber { get; set; }
         [JsonProperty("pcn")]
@@ -57,12 +58,19 @@ namespace Splitio.Services.EventSource
         [JsonProperty("c")]
         public CompressionType? CompressionType { get; set; }
 
-        public Split FeatureFlag { get; set; }
-
         public override string ToString()
         {
             return $"cn: {ChangeNumber} - pcn: {PreviousChangeNumber} - c: {CompressionType}";
         }
+    }
+
+    public class SplitChangeNotification : InstantUpdateNotification
+    {
+        public Split FeatureFlag { get; set; }
+    }
+    public class RuleBasedSegmentNotification : InstantUpdateNotification
+    {
+        public RuleBasedSegmentDto RuleBasedSegmentDto { get; set; }
     }
 
     public class SplitKillNotification : IncomingNotification

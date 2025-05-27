@@ -10,9 +10,8 @@ using Splitio.Services.EventSource.Workers;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
-using Splitio.Services.Parsing.Classes;
+using Splitio.Services.Parsing;
 using Splitio.Services.SegmentFetcher.Classes;
-using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Classes;
@@ -37,19 +36,21 @@ namespace Splitio.Services.Client.Classes
         /// </summary>
         private const int InitialCapacity = 31;
 
-        private ISplitFetcher _splitFetcher;
+        private ITargetingRulesFetcher _targetingRulesFetcher;
         private ISplitSdkApiClient _splitSdkApiClient;
         private ISegmentSdkApiClient _segmentSdkApiClient;
         private IImpressionsSdkApiClient _impressionsSdkApiClient;
         private IEventSdkApiClient _eventSdkApiClient;
-        private ISelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
-        private ITelemetrySyncTask _telemetrySyncTask;        
+        private SelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
+        private ITelemetrySyncTask _telemetrySyncTask;
         private ITelemetryStorageConsumer _telemetryStorageConsumer;
         private ITelemetryRuntimeProducer _telemetryRuntimeProducer;
         private ITelemetryAPI _telemetryAPI;
         private IFeatureFlagCache _featureFlagCache;
         private ISegmentCache _segmentCache;
-        private IFeatureFlagSyncService _featureFlagSyncService;
+        private IUpdater<Split> _featureFlagUpdater;
+        private IRuleBasedSegmentCache _ruleBasedSegmentCache;
+        private IUpdater<RuleBasedSegmentDto> _ruleBasedSegmentUpdater;
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config) : base(apiKey)
         {
@@ -58,6 +59,7 @@ namespace Splitio.Services.Client.Classes
             BuildFlagSetsFilter(_config.FlagSetsFilter);
             BuildSplitCache();
             BuildSegmentCache();
+            BuildRuleBasedSegmentCache();
             BuildTelemetryStorage();
             BuildTelemetrySyncTask();
 
@@ -93,6 +95,11 @@ namespace Splitio.Services.Client.Classes
             _segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(_config.ConcurrencyLevel, InitialCapacity));
         }
 
+        private void BuildRuleBasedSegmentCache()
+        {
+            _ruleBasedSegmentCache = new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>(_config.ConcurrencyLevel, InitialCapacity));
+        }
+
         private void BuildTelemetryStorage()
         {
             var telemetryStorage = new InMemoryTelemetryStorage();
@@ -114,11 +121,13 @@ namespace Splitio.Services.Client.Classes
             _selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, _segmentCache, segmentsQueue, segmentsFetcherTask, _statusManager);
 
             var splitChangeFetcher = new ApiSplitChangeFetcher(_splitSdkApiClient);
-            _splitParser = new InMemorySplitParser((SelfRefreshingSegmentFetcher)_selfRefreshingSegmentFetcher, _segmentCache);
+            _splitParser = new FeatureFlagParser(_segmentCache, _selfRefreshingSegmentFetcher);
+            _rbsParser = new RuleBasedSegmentParser(_segmentCache, _selfRefreshingSegmentFetcher);
             var featureFlagRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SplitsRefreshRate) : _config.SplitsRefreshRate;
             var featureFlagsTask = _tasksManager.NewPeriodicTask(Enums.Task.FeatureFlagsFetcher, featureFlagRefreshRate * 1000);
-            _featureFlagSyncService = new FeatureFlagSyncService(_splitParser, _featureFlagCache, _flagSetsFilter);
-            _splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, _statusManager, featureFlagsTask, _featureFlagCache, _featureFlagSyncService);
+            _featureFlagUpdater = new FeatureFlagUpdater(_splitParser, _featureFlagCache, _flagSetsFilter, _ruleBasedSegmentCache);
+            _ruleBasedSegmentUpdater = new RuleBasedSegmentUpdater(_rbsParser, _ruleBasedSegmentCache);
+            _targetingRulesFetcher = new TargetingRulesFetcher(splitChangeFetcher, _statusManager, featureFlagsTask, _featureFlagCache, _featureFlagUpdater, _ruleBasedSegmentUpdater, _ruleBasedSegmentCache);
             _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCache, _blockUntilReadyService);
         }
 
@@ -181,7 +190,7 @@ namespace Splitio.Services.Client.Classes
             headers.Add(Constants.Http.KeepAlive, "true");
 
             var sdkHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
-            _splitSdkApiClient = new SplitSdkApiClient(sdkHttpClient, _telemetryRuntimeProducer, _config.BaseUrl, _flagSetsFilter);
+            _splitSdkApiClient = new SplitSdkApiClient(sdkHttpClient, _telemetryRuntimeProducer, _config.BaseUrl, _flagSetsFilter, IsHTTPProxyDetected());
 
             var segmentsHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
             _segmentSdkApiClient = new SegmentSdkApiClient(segmentsHttpClient, _telemetryRuntimeProducer, _config.BaseUrl);
@@ -206,7 +215,7 @@ namespace Splitio.Services.Client.Classes
         private void BuildTelemetrySyncTask()
         {
             var httpClient = new SplitioHttpClient(ApiKey, _config, GetHeaders());
-            var telemetryStatsSubmitterTask =  _tasksManager.NewPeriodicTask(Enums.Task.TelemetryStats, _config.TelemetryRefreshRate * 1000);
+            var telemetryStatsSubmitterTask = _tasksManager.NewPeriodicTask(Enums.Task.TelemetryStats, _config.TelemetryRefreshRate * 1000);
             var telemetryInitSubmitterTask = _tasksManager.NewOnTimeTask(Enums.Task.TelemetryInit);
 
             _telemetryAPI = new TelemetryAPI(httpClient, _config.TelemetryServiceURL, _telemetryRuntimeProducer);
@@ -220,10 +229,10 @@ namespace Splitio.Services.Client.Classes
                 // Synchronizer
                 var backOffFeatureFlags = new BackOff(backOffBase: 10, attempt: 0, maxAllowed: 60);
                 var backOffSegments = new BackOff(backOffBase: 10, attempt: 0, maxAllowed: 60);
-                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _impressionsCounter, _statusManager, _telemetrySyncTask, _featureFlagCache, backOffFeatureFlags, backOffSegments, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs, _segmentCache, _uniqueKeysTracker);
+                var synchronizer = new Synchronizer(_targetingRulesFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _impressionsCounter, _statusManager, _telemetrySyncTask, backOffFeatureFlags, backOffSegments, _config.OnDemandFetchMaxRetries, _config.OnDemandFetchRetryDelayMs, _segmentCache, _uniqueKeysTracker);
 
                 // Workers
-                var splitsWorker = new SplitsWorker(synchronizer, _featureFlagCache, _telemetryRuntimeProducer, _selfRefreshingSegmentFetcher, _featureFlagSyncService);
+                var splitsWorker = new SplitsWorker(synchronizer, _featureFlagCache, _telemetryRuntimeProducer, _selfRefreshingSegmentFetcher, _featureFlagUpdater, _ruleBasedSegmentCache, _ruleBasedSegmentUpdater);
                 var segmentsWorker = new SegmentsWorker(synchronizer);
 
                 // NotificationProcessor
@@ -266,7 +275,7 @@ namespace Splitio.Services.Client.Classes
             {
                 _log.Error($"BuildSyncManager: {ex.Message}");
             }
-        }        
+        }
 
         private Dictionary<string, string> GetHeaders()
         {
@@ -287,6 +296,14 @@ namespace Splitio.Services.Client.Classes
             }
 
             return headers;
+        }
+
+        private bool IsHTTPProxyDetected()
+        {
+            return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HTTP_PROXY")) ||
+                !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HTTPS_PROXY")) ||
+                !string.IsNullOrEmpty(_config.ProxyHost) ||
+                _config.BaseUrl != Constants.Urls.BaseUrl;
         }
         #endregion
     }

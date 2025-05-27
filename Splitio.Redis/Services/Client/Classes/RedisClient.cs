@@ -28,7 +28,6 @@ namespace Splitio.Redis.Services.Client.Classes
         private IImpressionsCache _impressionsCache;
         private ConnectionPoolManager _connectionPoolManager;
         private IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
-        private ISegmentCacheConsumer _segmentCacheConsumer;
 
         public RedisClient(ConfigurationOptions config, string apiKey) : base(apiKey)
         {
@@ -86,9 +85,11 @@ namespace Splitio.Redis.Services.Client.Classes
 
             BuildTelemetryStorage();
 
-            _segmentCacheConsumer = new RedisSegmentCache(_redisAdapterConsumer, _config, _connectionPoolManager.IsClusterMode());
-            _splitParser = new SplitParser(_segmentCacheConsumer);
-            _featureFlagCacheConsumer = new RedisSplitCache(_redisAdapterConsumer, _splitParser, _config, _connectionPoolManager.IsClusterMode());
+            var segmentCacheConsumer = new RedisSegmentCache(_redisAdapterConsumer, _config, _connectionPoolManager.IsClusterMode());
+            var rbsParser = new RuleBasedSegmentParser(segmentCacheConsumer, null);
+            var ruleBasedSegmentCacheConsumer = new RedisRuleBasedSegmentCache(_redisAdapterConsumer, rbsParser, _config, _connectionPoolManager.IsClusterMode());
+            _splitParser = new FeatureFlagParser(segmentCacheConsumer, null);
+            _featureFlagCacheConsumer = new RedisSplitCache(_redisAdapterConsumer, _splitParser, _config, _connectionPoolManager.IsClusterMode(), ruleBasedSegmentCacheConsumer);
             _blockUntilReadyService = new RedisBlockUntilReadyService(_redisAdapterConsumer);
             _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCacheConsumer, _blockUntilReadyService);
         }

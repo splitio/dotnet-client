@@ -52,8 +52,14 @@ namespace Splitio.Services.EventSource
             switch (data?.Type)
             {
                 case NotificationType.SPLIT_UPDATE:
-                    var changeNotification = JsonConvert.DeserializeObject<SplitChangeNotification>(notificationData.Data);
-                    result = DecompressData(changeNotification);
+                    var sNotification = JsonConvert.DeserializeObject<SplitChangeNotification>(notificationData.Data);
+                    sNotification.FeatureFlag = DecompressData<Split>(sNotification);
+                    result = sNotification;
+                    break;
+                case NotificationType.RB_SEGMENT_UPDATE:
+                    var rbNotification = JsonConvert.DeserializeObject<RuleBasedSegmentNotification>(notificationData.Data);
+                    rbNotification.RuleBasedSegmentDto = DecompressData<RuleBasedSegmentDto>(rbNotification);
+                    result = rbNotification;
                     break;
                 case NotificationType.SPLIT_KILL:
                     result = JsonConvert.DeserializeObject<SplitKillNotification>(notificationData.Data);
@@ -121,24 +127,25 @@ namespace Splitio.Services.EventSource
             return JsonConvert.DeserializeObject<T>(data.Trim());
         }
 
-        private IncomingNotification DecompressData(SplitChangeNotification notification)
+        private T DecompressData<T>(InstantUpdateNotification notification) where T : class
         {
+            if (!notification.CompressionType.HasValue)
+                return null;
+
             try
             {
-                if (!notification.CompressionType.HasValue) return notification;
-
                 var input = Convert.FromBase64String(notification.Data);
 
                 switch (notification.CompressionType)
                 {
                     case CompressionType.Gzip:
-                        notification.FeatureFlag = DeserializeSplitObject(DecompressionUtil.GZip(input));
-                        break;
+                        return DeserializeObject<T>(DecompressionUtil.GZip(input));
                     case CompressionType.Zlib:
-                        notification.FeatureFlag = DeserializeSplitObject(DecompressionUtil.ZLib(input));
-                        break;
+                        return DeserializeObject<T>(DecompressionUtil.ZLib(input));
                     case CompressionType.NotCompressed:
-                        notification.FeatureFlag = DeserializeSplitObject(input);
+                        return DeserializeObject<T>(input);
+                    default:
+                        _log.Debug($"Unsupported compression type: {notification.CompressionType}");
                         break;
                 }
             }
@@ -147,12 +154,12 @@ namespace Splitio.Services.EventSource
                 _log.Debug("Somenthing went wrong decompressing message data.", ex);
             }
 
-            return notification;
+            return null;
         }
 
-        private static Split DeserializeSplitObject(byte[] input)
+        private static T DeserializeObject<T>(byte[] input)
         {
-            return JsonConvert.DeserializeObject<Split>(Encoding.UTF8.GetString(input));
+            return JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(input));
         }
     }
 }

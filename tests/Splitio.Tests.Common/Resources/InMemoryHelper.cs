@@ -33,7 +33,13 @@ namespace Splitio.Tests.Common.Resources
             new KeyImpression("test_list2", "semver_inlist", "off", 0, 1675259356568, "default rule", null, false, null, false),
             new KeyImpression("test1", "with_track_enabled", "off", 0, 1675259356568, "default rule", null, false, null, false),
             new KeyImpression("test2", "with_track_disabled", "off", 0, 1675259356568, "default rule", null, false, null, false),
-            new KeyImpression("test3", "without_track", "off", 0, 1675259356568, "default rule", null, false, null, false)
+            new KeyImpression("test3", "without_track", "off", 0, 1675259356568, "default rule", null, false, null, false),
+            new KeyImpression("mauro@split.io", "rbs_test_flag_negated", "v1", 0, 10, "not in rule based segment test_rule_based_segment", null, false, null, false),
+            new KeyImpression("mauro@harness.io", "rbs_test_flag_negated", "v1", 0, 10, "not in rule based segment test_rule_based_segment", null, false, null, false),
+            new KeyImpression("mauro.sanz@split.io", "rbs_test_flag_negated", "v2", 0, 10, "default rule", null, false, null, false),
+            new KeyImpression("mauro@split.io", "rbs_test_flag", "v2", 0, 10, "default rule", null, false, null, false),
+            new KeyImpression("mauro@harness.io", "rbs_test_flag", "v2", 0, 10, "default rule", null, false, null, false),
+            new KeyImpression("mauro.sanz@split.io", "rbs_test_flag", "v1", 0, 10, "in rule based segment test_rule_based_segment", null, false, null, false),
         };
 
         public static KeyImpression GetImpressionExpected(string featureName, string key)
