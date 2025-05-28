@@ -1,7 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Splitio.Domain;
-using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System.IO;
 using System.Threading.Tasks;
@@ -10,21 +8,25 @@ namespace Splitio.Services.SplitFetcher.Classes
 {
     public class JSONFileSplitChangeFetcher : SplitChangeFetcher, ISplitChangeFetcher 
     {
-        private readonly IWrapperAdapter _wrapperAdapter;
         private readonly string _filePath;
 
         public JSONFileSplitChangeFetcher(string filePath)
         {
             _filePath = filePath;
-            _wrapperAdapter = WrapperAdapter.Instance();
         }
 
-        protected override Task<SplitChangesResult> FetchFromBackendAsync(long since, FetchOptions fetchOptions)
+        protected override Task<TargetingRulesDto> FetchFromBackendAsync(FetchOptions fetchOptions)
         {
             var json = File.ReadAllText(_filePath);
-            var splitChangesResult = JsonConvert.DeserializeObject<SplitChangesResult>(json);
+            var targetingRulesDto = JsonConvert.DeserializeObject<TargetingRulesDto>(json);
+            if (targetingRulesDto != null)
+            {
+                return Task.FromResult(targetingRulesDto);
+            }
 
-            return Task.FromResult(splitChangesResult);
+            var splitsResult = JsonConvert.DeserializeObject<OldSplitChangesDto>(json);
+
+            return Task.FromResult(splitsResult.ToTargetingRulesDto());
         }
     }
 }

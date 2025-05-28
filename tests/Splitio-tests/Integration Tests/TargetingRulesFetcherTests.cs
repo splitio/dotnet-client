@@ -4,7 +4,7 @@ using Splitio.Services.Cache.Classes;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
 using Splitio.Services.Filters;
-using Splitio.Services.Parsing.Classes;
+using Splitio.Services.Parsing;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Classes;
@@ -18,11 +18,11 @@ using System.Threading.Tasks;
 namespace Splitio_Tests.Integration_Tests
 {
     [TestClass]
-    public class SelfRefreshingSplitFetcherTests
+    public class TargetingRulesFetcherTests
     {
         private readonly string rootFilePath;
 
-        public SelfRefreshingSplitFetcherTests()
+        public TargetingRulesFetcherTests()
         {
             // This line is to clean the warnings.
             rootFilePath = string.Empty;
@@ -39,28 +39,42 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            var splitParser = new InMemorySplitParser(new JSONFileSegmentFetcher($"{rootFilePath}segment_payed.json", segmentCache), segmentCache);
+            var rbsCache = new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>());
+            var segmentFetcher = new JSONFileSegmentFetcher($"{rootFilePath}segment_payed.json", segmentCache);
+            var splitParser = new FeatureFlagParser(segmentCache, segmentFetcher);
             var splitChangeFetcher = new JSONFileSplitChangeFetcher($"{rootFilePath}splits_staging.json");
             var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), flagSetsFilter);
             var gates = new InMemoryReadinessGatesCache();
             var taskManager = new TasksManager(gates);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.FeatureFlagsFetcher, 250);
-            var featureFlagSyncService = new FeatureFlagSyncService(splitParser, splitCache, flagSetsFilter);
-            var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, gates, task, splitCache, featureFlagSyncService);
-            selfRefreshingSplitFetcher.Start();
+            var featureFlagSyncService = new FeatureFlagUpdater(splitParser, splitCache, flagSetsFilter, rbsCache);
+            var rbsParser = new RuleBasedSegmentParser(segmentCache, segmentFetcher);
+            var rbsUpdater = new RuleBasedSegmentUpdater(rbsParser, rbsCache);
+            var targetingRulesFetcher = new TargetingRulesFetcher(splitChangeFetcher, gates, task, splitCache, featureFlagSyncService, rbsUpdater, rbsCache);
+            targetingRulesFetcher.Start();
             Thread.Sleep(1000);
 
-            //Act           
-            var result = splitCache.GetSplit("Pato_Test_1");
+            //Act
+            var ffResult = splitCache.GetSplit("Pato_Test_1");
+            var ffCn = splitCache.GetChangeNumber();
+
+            var rbsResult = rbsCache.Get("rbs_test");
+            var rbsCn = rbsCache.GetChangeNumber();
 
             //Assert
-            Assert.IsNotNull(result);
-            Assert.IsTrue(result.name == "Pato_Test_1");
-            Assert.IsTrue(result.conditions.Count > 0);
+            Assert.IsNotNull(ffResult);
+            Assert.AreEqual("Pato_Test_1", ffResult.name);
+            Assert.IsTrue(ffResult.conditions.Count > 0);
+            Assert.AreEqual(1470855828956, ffCn);
 
-            await selfRefreshingSplitFetcher.StopAsync();
-            selfRefreshingSplitFetcher.Clear();
+            Assert.IsNotNull(rbsResult);
+            Assert.AreEqual("rbs_test", rbsResult.Name);
+            Assert.IsTrue(rbsResult.CombiningMatchers.Count > 0);
+            Assert.AreEqual(10, rbsCn);
+
+            await targetingRulesFetcher.StopAsync();
+            targetingRulesFetcher.Clear();
         }
 
         [TestMethod]
@@ -70,15 +84,19 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            var splitParser = new InMemorySplitParser(new JSONFileSegmentFetcher($"{rootFilePath}segment_payed.json", segmentCache), segmentCache);
+            var rbsCache = new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>());
+            var segmentFetcher = new JSONFileSegmentFetcher($"{rootFilePath}segment_payed.json", segmentCache);
+            var splitParser = new FeatureFlagParser(segmentCache, segmentFetcher);
             var splitChangeFetcher = new JSONFileSplitChangeFetcher($"{rootFilePath}splits_staging_4.json");
             var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), flagSetsFilter);
             var gates = new InMemoryReadinessGatesCache();
             var taskManager = new TasksManager(gates);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.FeatureFlagsFetcher, 250);
-            var featureFlagSyncService = new FeatureFlagSyncService(splitParser, splitCache, flagSetsFilter);
-            var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, gates, task, splitCache, featureFlagSyncService);
+            var featureFlagSyncService = new FeatureFlagUpdater(splitParser, splitCache, flagSetsFilter, rbsCache);
+            var rbsParser = new RuleBasedSegmentParser(segmentCache, segmentFetcher);
+            var rbsUpdater = new RuleBasedSegmentUpdater(rbsParser, rbsCache);
+            var selfRefreshingSplitFetcher = new TargetingRulesFetcher(splitChangeFetcher, gates, task, splitCache, featureFlagSyncService, rbsUpdater, rbsCache);
             selfRefreshingSplitFetcher.Start();
             Thread.Sleep(1000);
 
@@ -87,9 +105,9 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.name == "Traffic_Allocation_UI");
-            Assert.IsTrue(result.trafficAllocation == 100);
-            Assert.IsTrue(result.trafficAllocationSeed == 0);
+            Assert.AreEqual("Traffic_Allocation_UI", result.name);
+            Assert.AreEqual(100, result.trafficAllocation);
+            Assert.AreEqual(0, result.trafficAllocationSeed);
             Assert.IsTrue(result.conditions.Count > 0);
             Assert.IsNotNull(result.conditions.Find(x => x.conditionType == ConditionType.ROLLOUT));
 
@@ -117,7 +135,7 @@ namespace Splitio_Tests.Integration_Tests
             };
             var httpClient = new SplitioHttpClient("0", config, headers);
             var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
-            var sdkApiClient = new SplitSdkApiClient(httpClient, telemetryStorage, baseUrl, flagSetsFilter);
+            var sdkApiClient = new SplitSdkApiClient(httpClient, telemetryStorage, baseUrl, flagSetsFilter, false);
             var apiSplitChangeFetcher = new ApiSplitChangeFetcher(sdkApiClient);
             var sdkSegmentApiClient = new SegmentSdkApiClient(httpClient, telemetryStorage, baseUrl);
             var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkSegmentApiClient);
@@ -128,12 +146,15 @@ namespace Splitio_Tests.Integration_Tests
             var worker = new SegmentTaskWorker(4, segmentsQueue);
             segmentsQueue.AddObserver(worker);
             var segmentsTask = taskManager.NewPeriodicTask(Splitio.Enums.Task.SegmentsFetcher, 3000);
-            var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, segmentCache, segmentsQueue, segmentsTask, gates);
-            var splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, segmentCache);
+            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, segmentCache, segmentsQueue, segmentsTask, gates);
+            var rbsCache = new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>());
+            var splitParser = new FeatureFlagParser(segmentCache, segmentFetcher);
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), flagSetsFilter);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.FeatureFlagsFetcher, 3000);
-            var featureFlagSyncService = new FeatureFlagSyncService(splitParser, splitCache, flagSetsFilter);
-            var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(apiSplitChangeFetcher, gates, task, splitCache, featureFlagSyncService);
+            var featureFlagSyncService = new FeatureFlagUpdater(splitParser, splitCache, flagSetsFilter, rbsCache);
+            var rbsParser = new RuleBasedSegmentParser(segmentCache, segmentFetcher);
+            var rbsUpdater = new RuleBasedSegmentUpdater(rbsParser, rbsCache);
+            var selfRefreshingSplitFetcher = new TargetingRulesFetcher(apiSplitChangeFetcher, gates, task, splitCache, featureFlagSyncService, rbsUpdater, rbsCache);
             selfRefreshingSplitFetcher.Start();
 
             //Act

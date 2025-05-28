@@ -23,6 +23,134 @@ namespace Splitio.Tests.Common
             _mode = mode;
         }
 
+        #region Prerequisites
+        [TestMethod]
+        public void GetTreatment_PrerequisitesMatcher()
+        {
+            // Arrange
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "prerequisites_apikey2";
+            var ffName = "always_on_if_prerequisite";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+            client.BlockUntilReady(10000);
+
+            // Act
+            var splitView = splitFactory.Manager().Split(ffName);
+            var splitViewNull = splitFactory.Manager().Split("rbs_test_flag_negated");
+            var result1 = client.GetTreatment("mauro@split.io", ffName);
+            var result2 = client.GetTreatment("bilal@split.io", ffName);
+            var result3 = client.GetTreatment("other_key", ffName);
+            client.Destroy();
+
+            // Assert
+            Assert.AreEqual("off", result1);
+            Assert.AreEqual("on", result2);
+            Assert.AreEqual("off", result3);
+
+            // Validate impressions sent to the be.
+            var impressionExpected1 = Helper.GetImpressionExpected(ffName, "mauro@split.io");
+            var impressionExpected2 = Helper.GetImpressionExpected(ffName, "bilal@split.io");
+            var impressionExpected3 = Helper.GetImpressionExpected(ffName, "other_key");
+            AssertSentImpressions(3, impressionExpected1, impressionExpected2, impressionExpected3);
+
+            // Validate impressions in listener.
+            Helper.AssertImpressionListener(_mode, 3, impressionListener);
+            Helper.AssertImpression(impressionListener.Get(ffName, "mauro@split.io"), impressionExpected1);
+            Helper.AssertImpression(impressionListener.Get(ffName, "bilal@split.io"), impressionExpected2);
+            Helper.AssertImpression(impressionListener.Get(ffName, "other_key"), impressionExpected3);
+
+            // Validate mananger.splitView
+            var prActual = splitView.prerequisites.FirstOrDefault();
+            Assert.AreEqual("rbs_test_flag", prActual.FeatureFlagName);
+            Assert.AreEqual("v1", prActual.Treatments.FirstOrDefault());
+            Assert.AreEqual(0, splitViewNull.prerequisites.Count);
+        }
+        #endregion
+
+        #region Rule Based Segments
+        [TestMethod]
+        public void GetTreatment_RuleBasedSegmentMatcher()
+        {
+            // Arrange
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "rbs_apikey1";
+            var ffName = "rbs_test_flag";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act
+            var result1 = client.GetTreatment("mauro@split.io", ffName);
+            var result2 = client.GetTreatment("mauro@harness.io", ffName);
+            var result3 = client.GetTreatment("mauro.sanz@split.io", ffName);
+            client.Destroy();
+
+            // Assert
+            Assert.AreEqual("v2", result1);
+            Assert.AreEqual("v2", result2);
+            Assert.AreEqual("v1", result3);
+
+            // Validate impressions sent to the be.
+            var impressionExpected1 = Helper.GetImpressionExpected(ffName, "mauro@split.io");
+            var impressionExpected2 = Helper.GetImpressionExpected(ffName, "mauro@harness.io");
+            var impressionExpected3 = Helper.GetImpressionExpected(ffName, "mauro.sanz@split.io");
+            AssertSentImpressions(3, impressionExpected1, impressionExpected2, impressionExpected3);
+
+            // Validate impressions in listener.
+            Helper.AssertImpressionListener(_mode, 3, impressionListener);
+            Helper.AssertImpression(impressionListener.Get(ffName, "mauro@split.io"), impressionExpected1);
+            Helper.AssertImpression(impressionListener.Get(ffName, "mauro@harness.io"), impressionExpected2);
+            Helper.AssertImpression(impressionListener.Get(ffName, "mauro.sanz@split.io"), impressionExpected3);
+        }
+
+        [TestMethod]
+        public void GetTreatment_RuleBasedSegmentMatcher_Negated()
+        {
+            // Arrange
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+
+            var apikey = "rbs_apikey1";
+            var ffName = "rbs_test_flag_negated";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act
+            var negated1 = client.GetTreatment("mauro@split.io", ffName);
+            var negated2 = client.GetTreatment("mauro@harness.io", ffName);
+            var negated3 = client.GetTreatment("mauro.sanz@split.io", ffName);
+            client.Destroy();
+
+            // Assert
+            Assert.AreEqual("v1", negated1);
+            Assert.AreEqual("v1", negated2);
+            Assert.AreEqual("v2", negated3);
+
+            // Validate impressions sent to the be.
+            var impressionExpected1 = Helper.GetImpressionExpected(ffName, "mauro@split.io");
+            var impressionExpected2 = Helper.GetImpressionExpected(ffName, "mauro@harness.io");
+            var impressionExpected3 = Helper.GetImpressionExpected(ffName, "mauro.sanz@split.io");
+            AssertSentImpressions(3, impressionExpected1, impressionExpected2, impressionExpected3);
+
+            // Validate impressions in listener.
+            Helper.AssertImpressionListener(_mode, 3, impressionListener);
+            Helper.AssertImpression(impressionListener.Get(ffName, "mauro@split.io"), impressionExpected1);
+            Helper.AssertImpression(impressionListener.Get(ffName, "mauro@harness.io"), impressionExpected2);
+            Helper.AssertImpression(impressionListener.Get(ffName, "mauro.sanz@split.io"), impressionExpected3);
+        }
+        #endregion
+
         #region Semver
         [TestMethod]
         public void GetTreatment_BetweenSemverMatcher()
@@ -748,7 +876,7 @@ namespace Splitio.Tests.Common
             Assert.AreEqual("{\"color\":\"green\"}", treatment.Value.Config);
 
             //Validate impressions sent to the be.
-            var impressionExpected = new KeyImpression("nico_test", "FACUNDO_TEST", "on", 0, 1506703262916, "whitelisted", null, null, false);
+            var impressionExpected = new KeyImpression("nico_test", "FACUNDO_TEST", "on", 0, 1506703262916, "whitelisted", null, false, null, false);
             
             AssertSentImpressions(1, impressionExpected);
             AssertImpressionListener(1, impressionListener);
@@ -976,7 +1104,7 @@ namespace Splitio.Tests.Common
             var result = manager.SplitNames();
 
             // Assert.
-            Assert.AreEqual(36, result.Count);
+            Assert.AreEqual(42, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<string>));
 
             client.Destroy();
@@ -999,7 +1127,7 @@ namespace Splitio.Tests.Common
             var result = manager.Splits();
 
             // Assert.
-            Assert.AreEqual(36, result.Count);
+            Assert.AreEqual(42, result.Count);
             Assert.IsInstanceOfType(result, typeof(List<SplitView>));
 
             splitFactory.Client().Destroy();

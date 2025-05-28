@@ -50,9 +50,9 @@ namespace Splitio.Tests.Common.Resources
 
             var splitsJson = File.ReadAllText($"{rootFilePath}split_changes.json");
 
-            var splitResult = JsonConvert.DeserializeObject<SplitChangesResult>(splitsJson);
+            var result = JsonConvert.DeserializeObject<TargetingRulesDto>(splitsJson);
 
-            foreach (var split in splitResult.splits)
+            foreach (var split in result.FeatureFlags.Data)
             {
                 await redisAdapter.SetAsync($"{userPrefix}.SPLITIO.split.{split.name}", JsonConvert.SerializeObject(split));
 
@@ -63,6 +63,11 @@ namespace Splitio.Tests.Common.Resources
                         await redisAdapter.SAddAsync($"{userPrefix}.SPLITIO.flagSet.{fSet}", split.name);
                     }
                 }
+            }
+
+            foreach (var rbs in result.RuleBasedSegments.Data)
+            {
+                await redisAdapter.SetAsync($"{userPrefix}.SPLITIO.rbsegment.{rbs.Name}", JsonConvert.SerializeObject(rbs));
             }
         }
 

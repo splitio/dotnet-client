@@ -57,6 +57,7 @@
 
     public static class ApiVersions
     {
-        public static string FlagsSpec => "1.1";
+        public static string Spec1_1 => "1.1";
+        public static string LatestFlagsSpec => "1.3";
     }
 }

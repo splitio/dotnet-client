@@ -538,6 +538,122 @@ namespace Splitio.Integration_tests
             Assert.AreEqual(0, impressionListener.Count(), "InMemory: Impression Listener not match");
         }
 
+        [TestMethod]
+        public void GetTreatment_Impressions_Toggle_OptimizedMode()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+            configurations.ImpressionsMode = ImpressionsMode.Optimized;
+            var apikey = "base-apikey1000";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result1 = client.GetTreatment("test1", "with_track_enabled");
+            var result2 = client.GetTreatment("test2", "with_track_disabled");
+            var result3 = client.GetTreatment("test3", "without_track");
+            client.Destroy();
+
+            // Assert.
+            Assert.AreEqual("off", result1);
+            Assert.AreEqual("off", result2);
+            Assert.AreEqual("off", result3);
+
+            var impressionExpected1 = GetImpressionExpected("with_track_enabled", "test1");
+            var impressionExpected2 = GetImpressionExpected("with_track_disabled", "test2");
+            var impressionExpected3 = GetImpressionExpected("without_track", "test3");
+
+            //Validate impressions sent to the be.
+            AssertSentImpressions(2, impressionExpected1, impressionExpected3);
+
+            // Validate impressions in listener.
+            AssertImpressionListener(3, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("with_track_enabled", "test1"), impressionExpected1);
+            Helper.AssertImpression(impressionListener.Get("with_track_disabled", "test2"), impressionExpected2);
+            Helper.AssertImpression(impressionListener.Get("without_track", "test3"), impressionExpected3);
+        }
+
+        [TestMethod]
+        public void GetTreatment_Impressions_Toggle_DebugMode()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+            configurations.ImpressionsMode = ImpressionsMode.Debug;
+            var apikey = "base-apikey1000";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result1 = client.GetTreatment("test1", "with_track_enabled");
+            var result2 = client.GetTreatment("test2", "with_track_disabled");
+            var result3 = client.GetTreatment("test3", "without_track");
+            client.Destroy();
+
+            // Assert.
+            Assert.AreEqual("off", result1);
+            Assert.AreEqual("off", result2);
+            Assert.AreEqual("off", result3);
+
+            var impressionExpected1 = GetImpressionExpected("with_track_enabled", "test1");
+            var impressionExpected2 = GetImpressionExpected("with_track_disabled", "test2");
+            var impressionExpected3 = GetImpressionExpected("without_track", "test3");
+
+            //Validate impressions sent to the be.
+            AssertSentImpressions(2, impressionExpected1, impressionExpected3);
+
+            // Validate impressions in listener.
+            AssertImpressionListener(3, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("with_track_enabled", "test1"), impressionExpected1);
+            Helper.AssertImpression(impressionListener.Get("with_track_disabled", "test2"), impressionExpected2);
+            Helper.AssertImpression(impressionListener.Get("without_track", "test3"), impressionExpected3);
+        }
+
+        [TestMethod]
+        public void GetTreatment_Impressions_Toggle_NoneMode()
+        {
+            // Arrange.
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+            configurations.ImpressionsMode = ImpressionsMode.None;
+            var apikey = "base-apikey1000";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result1 = client.GetTreatment("test1", "with_track_enabled");
+            var result2 = client.GetTreatment("test2", "with_track_disabled");
+            var result3 = client.GetTreatment("test3", "without_track");
+            client.Destroy();
+
+            // Assert.
+            Assert.AreEqual("off", result1);
+            Assert.AreEqual("off", result2);
+            Assert.AreEqual("off", result3);
+
+            var impressionExpected1 = GetImpressionExpected("with_track_enabled", "test1");
+            var impressionExpected2 = GetImpressionExpected("with_track_disabled", "test2");
+            var impressionExpected3 = GetImpressionExpected("without_track", "test3");
+
+            //Validate impressions sent to be 0.
+            Assert.IsTrue(InMemoryHelper.GetImpressionsSentBackend(httpClientMock).Count == 0);
+
+            // Validate impressions in listener.
+            AssertImpressionListener(3, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("with_track_enabled", "test1"), impressionExpected1);
+            Helper.AssertImpression(impressionListener.Get("with_track_disabled", "test2"), impressionExpected2);
+            Helper.AssertImpression(impressionListener.Get("without_track", "test3"), impressionExpected3);
+        }
         #region Protected Methods
         protected override ConfigurationOptions GetConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)
         {

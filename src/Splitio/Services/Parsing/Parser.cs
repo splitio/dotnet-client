@@ -1,106 +1,29 @@
-﻿using Splitio.Domain;
+using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Classes;
-using Splitio.Services.Parsing.Interfaces;
+using Splitio.Services.Parsing.Matchers;
+using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Splitio.Services.Parsing
 {
-    public class SplitParser : ISplitParser
+    public class Parser
     {
-        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitParser));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(Parser));
+
         private readonly ISegmentCacheConsumer _segmentsCache;
+        private readonly ISegmentFetcher _segmentFetcher;
 
-        public SplitParser(ISegmentCacheConsumer segmentsCache)
+        public Parser(ISegmentCacheConsumer segmentCache,
+            ISegmentFetcher segmentFetcher = null)
         {
-            _segmentsCache = segmentsCache;
+            _segmentsCache = segmentCache;
+            _segmentFetcher = segmentFetcher;
         }
 
-        public ParsedSplit Parse(Split split)
-        {
-            try
-            {
-                var isValidStatus = Enum.TryParse(split.status, out StatusEnum result);
-
-                if (!isValidStatus || result != StatusEnum.ACTIVE)
-                {
-                    return null;
-                }
-
-                var parsedSplit = new ParsedSplit
-                {
-                    name = split.name,
-                    killed = split.killed,
-                    defaultTreatment = split.defaultTreatment,
-                    seed = split.seed,
-                    conditions = new List<ConditionWithLogic>(),
-                    changeNumber = split.changeNumber,
-                    trafficTypeName = split.trafficTypeName,
-                    algo = split.algo == 0 || split.algo == null ? AlgorithmEnum.LegacyHash : (AlgorithmEnum)split.algo,
-                    trafficAllocation = split.trafficAllocation,
-                    trafficAllocationSeed = split.trafficAllocationSeed ?? 0,
-                    configurations = split.configurations,
-                    Sets = split.Sets
-                };
-
-                return ParseConditions(split.conditions, parsedSplit);
-            }
-            catch (Exception e)
-            {
-                _log.Error("Exception caught parsing split", e);
-                return null;
-            }
-        }
-
-        protected virtual IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit)
-        {
-            return new UserDefinedSegmentMatcher(matcherDefinition.userDefinedSegmentMatcherData.segmentName, _segmentsCache);
-        }
-
-        private ParsedSplit ParseConditions(List<ConditionDefinition> conditions, ParsedSplit parsedSplit)
-        {
-            try
-            {
-                foreach (var condition in conditions)
-                {
-                    parsedSplit.conditions.Add(new ConditionWithLogic()
-                    {
-                        conditionType = Enum.TryParse(condition.conditionType, out ConditionType result) ? result : ConditionType.WHITELIST,
-                        partitions = condition.partitions,
-                        matcher = ParseMatcherGroup(parsedSplit, condition.matcherGroup),
-                        label = condition.label
-                    });
-                }
-            }
-            catch (UnsupportedMatcherException ex)
-            {
-                _log.Error(ex.Message);
-
-                parsedSplit.conditions = Helper.GetDefaultConditions();
-            }
-
-            return parsedSplit;
-        }
-
-        private CombiningMatcher ParseMatcherGroup(ParsedSplit parsedSplit, MatcherGroupDefinition matcherGroupDefinition)
-        {
-            if (matcherGroupDefinition.matchers == null || matcherGroupDefinition.matchers.Count == 0)
-            {
-                throw new Exception("Missing or empty matchers");
-            }
-
-            return new CombiningMatcher()
-            {
-                delegates = matcherGroupDefinition.matchers.Select(x => ParseMatcher(parsedSplit, x)).ToList(),
-                combiner = Helper.ParseCombiner(matcherGroupDefinition.combiner)
-            };
-        }
-
-        private AttributeMatcher ParseMatcher(ParsedSplit parsedSplit, MatcherDefinition mDefinition)
+        public AttributeMatcher ParseMatcher(MatcherDefinition mDefinition, IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache)
         {
             if (mDefinition.matcherType == null)
             {
@@ -130,7 +53,7 @@ namespace Splitio.Services.Parsing
                             matcher = new GreaterOrEqualToMatcher(gtoetData.dataType, gtoetData.value);
                             break;
                         case MatcherTypeEnum.IN_SEGMENT:
-                            matcher = GetInSegmentMatcher(mDefinition, parsedSplit);
+                            matcher = GetInSegmentMatcher(mDefinition);
                             break;
                         case MatcherTypeEnum.LESS_THAN_OR_EQUAL_TO:
                             var ltoetData = mDefinition.unaryNumericMatcherData;
@@ -185,6 +108,9 @@ namespace Splitio.Services.Parsing
                         case MatcherTypeEnum.IN_LIST_SEMVER:
                             matcher = new InListSemverMatcher(mDefinition.whitelistMatcherData.whitelist);
                             break;
+                        case MatcherTypeEnum.IN_RULE_BASED_SEGMENT:
+                            matcher = new RuleBasedSegmentMatcher(mDefinition.userDefinedSegmentMatcherData.segmentName, ruleBasedSegmentCache, _segmentsCache);
+                            break;
                     }
                 }
             }
@@ -210,6 +136,16 @@ namespace Splitio.Services.Parsing
             }
 
             return attributeMatcher;
+        }
+
+        private IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition)
+        {
+            if (_segmentFetcher != null)
+            {
+                _segmentFetcher.InitializeSegment(matcherDefinition.userDefinedSegmentMatcherData.segmentName);
+            }
+
+            return new UserDefinedSegmentMatcher(matcherDefinition.userDefinedSegmentMatcherData.segmentName, _segmentsCache);
         }
     }
 }

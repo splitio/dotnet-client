@@ -14,19 +14,21 @@ namespace Splitio_Tests.Unit_Tests.Shared
     [TestClass]
     public class FeatureFlagSyncServiceTests
     {
-        private readonly Mock<ISplitParser> _featureFlagParser;
+        private readonly Mock<IParser<Split, ParsedSplit>> _featureFlagParser;
         private readonly Mock<IFeatureFlagCacheProducer> _featureFlagsCache;
         private readonly Mock<IFlagSetsFilter> _flagSetsFilter;
+        private readonly Mock<IRuleBasedSegmentCacheConsumer> _rbsCache;
 
-        private readonly IFeatureFlagSyncService _featureFlagSyncService;
+        private readonly IUpdater<Split> _featureFlagSyncService;
 
         public FeatureFlagSyncServiceTests()
         {
-            _featureFlagParser = new Mock<ISplitParser>();
+            _featureFlagParser = new Mock<IParser<Split, ParsedSplit>>();
             _featureFlagsCache = new Mock<IFeatureFlagCacheProducer>();
             _flagSetsFilter = new Mock<IFlagSetsFilter>();
+            _rbsCache = new Mock<IRuleBasedSegmentCacheConsumer>();
 
-            _featureFlagSyncService = new FeatureFlagSyncService(_featureFlagParser.Object, _featureFlagsCache.Object, _flagSetsFilter.Object);
+            _featureFlagSyncService = new FeatureFlagUpdater(_featureFlagParser.Object, _featureFlagsCache.Object, _flagSetsFilter.Object, _rbsCache.Object);
         }
 
         [TestMethod]
@@ -42,7 +44,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             };
 
             _featureFlagParser
-                .Setup(mock => mock.Parse(It.IsAny<Split>()))
+                .Setup(mock => mock.Parse(It.IsAny<Split>(), _rbsCache.Object))
                 .Returns(new ParsedSplit());
 
             _flagSetsFilter
@@ -50,10 +52,11 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Returns(true);
 
             // Act.
-            var result = _featureFlagSyncService.UpdateFeatureFlagsFromChanges(changes, till);
+            var result = _featureFlagSyncService.Process(changes, till);
 
             // Assert.
-            Assert.IsFalse(result.Any());
+            Assert.AreEqual(0, result[Splitio.Enums.SegmentType.Standard].Count);
+            Assert.AreEqual(0, result[Splitio.Enums.SegmentType.RuleBased].Count);
             _flagSetsFilter.Verify(mock => mock.Intersect(It.IsAny<HashSet<string>>()), Times.Exactly(3));
             _featureFlagsCache.Verify(mock => mock.Update(It.Is<List<ParsedSplit>>(l => l.Count == 3), It.Is<List<string>>(l => l.Count == 0), It.IsAny<long>()), Times.Once);
         }
@@ -71,7 +74,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             };
 
             _featureFlagParser
-                .SetupSequence(mock => mock.Parse(It.IsAny<Split>()))
+                .SetupSequence(mock => mock.Parse(It.IsAny<Split>(), _rbsCache.Object))
                 .Returns(new ParsedSplit())
                 .Returns((ParsedSplit)null)
                 .Returns(new ParsedSplit());
@@ -81,10 +84,11 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Returns(true);
 
             // Act.
-            var result = _featureFlagSyncService.UpdateFeatureFlagsFromChanges(changes, till);
+            var result = _featureFlagSyncService.Process(changes, till);
 
             // Assert.
-            Assert.IsFalse(result.Any());
+            Assert.AreEqual(0, result[Splitio.Enums.SegmentType.Standard].Count);
+            Assert.AreEqual(0, result[Splitio.Enums.SegmentType.RuleBased].Count);
             _flagSetsFilter.Verify(mock => mock.Intersect(It.IsAny<HashSet<string>>()), Times.Exactly(2));
             _featureFlagsCache.Verify(mock => mock.Update(It.Is<List<ParsedSplit>>(l => l.Count == 2), It.Is<List<string>>(l => l.Count == 1), It.IsAny<long>()), Times.Once);
         }
@@ -102,7 +106,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             };
 
             _featureFlagParser
-                .Setup(mock => mock.Parse(It.IsAny<Split>()))
+                .Setup(mock => mock.Parse(It.IsAny<Split>(), _rbsCache.Object))
                 .Returns(new ParsedSplit());
 
             _flagSetsFilter
@@ -112,10 +116,11 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Returns(false);
 
             // Act.
-            var result = _featureFlagSyncService.UpdateFeatureFlagsFromChanges(changes, till);
+            var result = _featureFlagSyncService.Process(changes, till);
 
             // Assert.
-            Assert.IsFalse(result.Any());
+            Assert.AreEqual(0, result[Splitio.Enums.SegmentType.Standard].Count);
+            Assert.AreEqual(0, result[Splitio.Enums.SegmentType.RuleBased].Count);
             _flagSetsFilter.Verify(mock => mock.Intersect(It.IsAny<HashSet<string>>()), Times.Exactly(3));
             _featureFlagsCache.Verify(mock => mock.Update(It.Is<List<ParsedSplit>>(l => l.Count == 2), It.Is<List<string>>(l => l.Count == 1), It.IsAny<long>()), Times.Once);
         }

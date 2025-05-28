@@ -29,7 +29,144 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
             // Arrange.
             var baseUrl = "https://app.split-testing.io";
             var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
-            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter);
+            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter, false);
+            var expectedUrl = $"{baseUrl}/api/splitChanges?s=1.3&since=-1&rbSince=-1";
+
+            _httpClient
+                .Setup(mock => mock.GetAsync(expectedUrl, false))
+                .ReturnsAsync(new HTTPResult
+                {
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Content = "ok",
+                    IsSuccessStatusCode = true
+                });
+
+            // Act.
+            var result = await splitSdkApiClient.FetchSplitChangesAsync(new FetchOptions
+            {
+                FeatureFlagsSince = -1,
+                RuleBasedSegmentsSince = -1
+            });
+
+            // Assert.
+            Assert.AreEqual("ok", result.Content);
+            Assert.IsTrue(result.Success);
+            _httpClient.Verify(mock => mock.GetAsync(expectedUrl, false), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task FetchSplitChangesAsyncWithSinceAndTill()
+        {
+            // Arrange.
+            var baseUrl = "https://app.split-testing.io";
+            var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
+            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter, false);
+            var expectedUrl = $"{baseUrl}/api/splitChanges?s=1.3&since=-1&rbSince=-1&till=10";
+
+            _httpClient
+                .Setup(mock => mock.GetAsync(expectedUrl, false))
+                .ReturnsAsync(new HTTPResult
+                {
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Content = "ok",
+                    IsSuccessStatusCode = true
+                });
+
+            // Act.
+            var result = await splitSdkApiClient.FetchSplitChangesAsync(new FetchOptions
+            {
+                FeatureFlagsSince = -1,
+                RuleBasedSegmentsSince=-1,
+                Till = 10
+            });
+
+            // Assert.
+            Assert.AreEqual("ok", result.Content);
+            Assert.IsTrue(result.Success);
+            _httpClient.Verify(mock => mock.GetAsync(expectedUrl, false), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task FetchSplitChangesAsyncWithSinceAndSets()
+        {
+            // Arrange.
+            var baseUrl = "https://app.split-testing.io";
+            var sets = new HashSet<string> { "set_c", "set_a", "set_b" };
+            var flagSetsFilter = new FlagSetsFilter(sets);
+            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter, false);
+            var expectedUrl = $"{baseUrl}/api/splitChanges?s=1.3&since=-1&rbSince=-1&sets=set_a,set_b,set_c";
+
+            _httpClient
+                .Setup(mock => mock.GetAsync(expectedUrl, false))
+                .ReturnsAsync(new HTTPResult
+                {
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Content = "ok",
+                    IsSuccessStatusCode = true
+                });
+
+            // Act.
+            var result = await splitSdkApiClient.FetchSplitChangesAsync(new FetchOptions
+            {
+                FeatureFlagsSince = -1,
+                RuleBasedSegmentsSince = -1,
+            });
+
+            // Assert.
+            Assert.AreEqual("ok", result.Content);
+            _httpClient.Verify(mock => mock.GetAsync(expectedUrl, false), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task FetchSplitChangesAsyncWithSinceAndTillAndSets()
+        {
+            // Arrange.
+            var baseUrl = "https://app.split-testing.io";
+            var sets = new HashSet<string> { "set_c", "set_a", "set_b" };
+            var flagSetsFilter = new FlagSetsFilter(sets);
+            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter, false);
+            var expectedUrl = $"{baseUrl}/api/splitChanges?s=1.3&since=-1&rbSince=22&sets=set_a,set_b,set_c&till=11";
+
+            _httpClient
+                .Setup(mock => mock.GetAsync(expectedUrl, false))
+                .ReturnsAsync(new HTTPResult
+                {
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Content = "ok",
+                    IsSuccessStatusCode = true
+                });
+
+            // Act.
+            var result = await splitSdkApiClient.FetchSplitChangesAsync(new FetchOptions
+            {
+                FeatureFlagsSince = -1,
+                RuleBasedSegmentsSince = 22,
+                Till = 11
+            });
+
+            // Assert.
+            Assert.AreEqual("ok", result.Content);
+            Assert.IsTrue(result.Success);
+            _httpClient.Verify(mock => mock.GetAsync(expectedUrl, false), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task FetchSplitChangesAsync_SwitchFlagSpec_Ok()
+        {
+            // Arrange.
+            var baseUrl = "https://app.split-testing.io";
+            var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
+            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter,true);
+            var expectedUrl = $"{baseUrl}/api/splitChanges?s=1.3&since=-1&rbSince=-1";
+
+            _httpClient
+                .Setup(mock => mock.GetAsync(expectedUrl, false))
+                .ReturnsAsync(new HTTPResult
+                {
+                    StatusCode = System.Net.HttpStatusCode.BadRequest,
+                    Content = "error",
+                    IsSuccessStatusCode = false
+                });
 
             _httpClient
                 .Setup(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?s=1.1&since=-1", false))
@@ -41,49 +178,77 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
                 });
 
             // Act.
-            var result = await splitSdkApiClient.FetchSplitChangesAsync(-1, new FetchOptions());
+            var result = await splitSdkApiClient.FetchSplitChangesAsync(new FetchOptions
+            {
+                FeatureFlagsSince = -1,
+                RuleBasedSegmentsSince = -1                
+            });
 
             // Assert.
-            Assert.AreEqual("ok", result);
+            Assert.AreEqual("ok", result.Content);
+            Assert.IsTrue(result.Success);
+            _httpClient.Verify(mock => mock.GetAsync(expectedUrl, false), Times.Once);
             _httpClient.Verify(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?s=1.1&since=-1", false), Times.Once);
         }
 
         [TestMethod]
-        public async Task FetchSplitChangesAsyncWithSinceAndTill()
+        public async Task FetchSplitChangesAsync_SwitchFlagSpec_BadRequest()
         {
             // Arrange.
             var baseUrl = "https://app.split-testing.io";
             var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
-            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter);
+            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter, true);
+            var expectedUrl = $"{baseUrl}/api/splitChanges?s=1.3&since=-1&rbSince=-1";
 
             _httpClient
-                .Setup(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?s=1.1&since=-1&till=10", false))
+                .Setup(mock => mock.GetAsync(expectedUrl, false))
                 .ReturnsAsync(new HTTPResult
                 {
-                    StatusCode = System.Net.HttpStatusCode.OK,
-                    Content = "ok",
-                    IsSuccessStatusCode = true
+                    StatusCode = System.Net.HttpStatusCode.BadRequest,
+                    Content = "error",
+                    IsSuccessStatusCode = false
+                });
+
+            _httpClient
+                .Setup(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?s=1.1&since=-1", false))
+                .ReturnsAsync(new HTTPResult
+                {
+                    StatusCode = System.Net.HttpStatusCode.BadRequest,
+                    Content = "error",
+                    IsSuccessStatusCode = false
                 });
 
             // Act.
-            var result = await splitSdkApiClient.FetchSplitChangesAsync(-1, new FetchOptions { Till = 10 });
+            var result = await splitSdkApiClient.FetchSplitChangesAsync(new FetchOptions
+            {
+                FeatureFlagsSince = -1,
+                RuleBasedSegmentsSince = -1
+            });
 
             // Assert.
-            Assert.AreEqual("ok", result);
-            _httpClient.Verify(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?s=1.1&since=-1&till=10", false), Times.Once);
+            Assert.AreEqual(string.Empty, result.Content);
+            Assert.IsFalse(result.Success);
+            _httpClient.Verify(mock => mock.GetAsync(expectedUrl, false), Times.Once);
+            _httpClient.Verify(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?s=1.1&since=-1", false), Times.Once);
         }
 
         [TestMethod]
-        public async Task FetchSplitChangesAsyncWithSinceAndSets()
+        public async Task FetchSplitChangesAsync_SwitchFlagSpecAndBack_Ok()
         {
             // Arrange.
             var baseUrl = "https://app.split-testing.io";
-            var sets = new HashSet<string> { "set_c", "set_a", "set_b" };
-            var flagSetsFilter = new FlagSetsFilter(sets);
-            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter);
+            var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
+            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter, true, 0);
+            var expectedUrl = $"{baseUrl}/api/splitChanges?s=1.3&since=-1&rbSince=-1";
 
             _httpClient
-                .Setup(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?s=1.1&since=-1&sets=set_a,set_b,set_c", false))
+                .SetupSequence(mock => mock.GetAsync(expectedUrl, false))
+                .ReturnsAsync(new HTTPResult
+                {
+                    StatusCode = System.Net.HttpStatusCode.BadRequest,
+                    Content = "error",
+                    IsSuccessStatusCode = false
+                })
                 .ReturnsAsync(new HTTPResult
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -92,37 +257,16 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
                 });
 
             // Act.
-            var result = await splitSdkApiClient.FetchSplitChangesAsync(-1, new FetchOptions());
+            var result = await splitSdkApiClient.FetchSplitChangesAsync(new FetchOptions
+            {
+                FeatureFlagsSince = -1,
+                RuleBasedSegmentsSince = -1
+            });
 
             // Assert.
-            Assert.AreEqual("ok", result);
-            _httpClient.Verify(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?s=1.1&since=-1&sets=set_a,set_b,set_c", false), Times.Once);
-        }
-
-        [TestMethod]
-        public async Task FetchSplitChangesAsyncWithSinceAndTillAndSets()
-        {
-            // Arrange.
-            var baseUrl = "https://app.split-testing.io";
-            var sets = new HashSet<string> { "set_c", "set_a", "set_b" };
-            var flagSetsFilter = new FlagSetsFilter(sets);
-            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter);
-
-            _httpClient
-                .Setup(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?s=1.1&since=-1&sets=set_a,set_b,set_c&till=11", false))
-                .ReturnsAsync(new HTTPResult
-                {
-                    StatusCode = System.Net.HttpStatusCode.OK,
-                    Content = "ok",
-                    IsSuccessStatusCode = true
-                });
-
-            // Act.
-            var result = await splitSdkApiClient.FetchSplitChangesAsync(-1, new FetchOptions { Till = 11 });
-
-            // Assert.
-            Assert.AreEqual("ok", result);
-            _httpClient.Verify(mock => mock.GetAsync($"{baseUrl}/api/splitChanges?s=1.1&since=-1&sets=set_a,set_b,set_c&till=11", false), Times.Once);
+            Assert.AreEqual("ok", result.Content);
+            Assert.IsTrue(result.Success);
+            _httpClient.Verify(mock => mock.GetAsync(expectedUrl, false), Times.Exactly(2));
         }
     }
 }

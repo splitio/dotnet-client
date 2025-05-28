@@ -6,7 +6,7 @@ using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
-using Splitio.Services.Parsing.Classes;
+using Splitio.Services.Parsing;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Classes;
@@ -29,23 +29,25 @@ namespace Splitio.Services.Client.Classes
             bool isLabelsEnabled = true,
             IEventsLog eventsLog = null,
             ITrafficTypeValidator trafficTypeValidator = null,
-            IImpressionsManager impressionsManager = null) : base("localhost")
+            IImpressionsManager impressionsManager = null,
+            IRuleBasedSegmentCache ruleBasedSegmentCache = null) : base("localhost")
         {
             _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
+            var rbsCache = ruleBasedSegmentCache ?? new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>());
 
             var segmentFetcher = new JSONFileSegmentFetcher(segmentsFilePath, _segmentCache);
             var splitChangeFetcher = new JSONFileSplitChangeFetcher(splitsFilePath);
-            var task = splitChangeFetcher.FetchAsync(-1, new FetchOptions());
+            var task = splitChangeFetcher.FetchAsync(new FetchOptions());
             task.Wait();
             
-            var splitChangesResult = task.Result;
+            var result = task.Result;
             var parsedSplits = new ConcurrentDictionary<string, ParsedSplit>();
 
-            _splitParser = new InMemorySplitParser(segmentFetcher, _segmentCache);
+            _splitParser = new FeatureFlagParser(_segmentCache, segmentFetcher);
 
-            foreach (var split in splitChangesResult.splits)
+            foreach (var split in result.FeatureFlags.Data)
             {
-                parsedSplits.TryAdd(split.name, _splitParser.Parse(split));
+                parsedSplits.TryAdd(split.name, _splitParser.Parse(split, rbsCache));
             }
 
             BuildFlagSetsFilter(new HashSet<string>());

@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Splitio.Domain
 {
@@ -14,5 +13,6 @@ namespace Splitio.Domain
         public int trafficAllocation { get; set; }
         public Dictionary<string, string> configurations { get; set; }
         public HashSet<string> Sets { get; set; }
+        public bool ImpressionsDisabled { get; set; }
     }
 }

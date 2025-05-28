@@ -12,5 +12,7 @@ namespace Splitio.Domain
         public Dictionary<string, string> configs { get; set; }
         public string defaultTreatment { get; set; }
         public List<string> sets { get; set; }
+        public bool impressionsDisabled { set; get; }
+        public List<PrerequisitesDto> prerequisites { get; set; }
     }
 }

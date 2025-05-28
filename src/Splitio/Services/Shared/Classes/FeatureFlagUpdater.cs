@@ -9,32 +9,39 @@ using System.Linq;
 
 namespace Splitio.Services.Shared.Classes
 {
-    public class FeatureFlagSyncService : IFeatureFlagSyncService
+    public class FeatureFlagUpdater : IUpdater<Split>
     {
-        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(FeatureFlagSyncService));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(FeatureFlagUpdater));
 
-        private readonly ISplitParser _featureFlagParser;
+        private readonly IParser<Split, ParsedSplit> _featureFlagParser;
         private readonly IFeatureFlagCacheProducer _featureFlagsCache;
         private readonly IFlagSetsFilter _flagSetsFilter;
+        private readonly IRuleBasedSegmentCacheConsumer _ruleBasedSegmentCache;
 
-        public FeatureFlagSyncService(ISplitParser featureFlagParser,
+        public FeatureFlagUpdater(IParser<Split, ParsedSplit> featureFlagParser,
             IFeatureFlagCacheProducer featureFlagsCache,
-            IFlagSetsFilter flagSetsFilter)
+            IFlagSetsFilter flagSetsFilter,
+            IRuleBasedSegmentCacheConsumer ruleBasedSegmentCache)
         {
             _featureFlagParser = featureFlagParser;
             _featureFlagsCache = featureFlagsCache;
             _flagSetsFilter = flagSetsFilter;
+            _ruleBasedSegmentCache = ruleBasedSegmentCache;
         }
 
-        public List<string> UpdateFeatureFlagsFromChanges(List<Split> changes, long till)
+        public Dictionary<Enums.SegmentType, List<string>> Process(List<Split> changes, long till)
         {
             var toAdd = new List<ParsedSplit>();
             var toRemove = new List<string>();
-            var segmentNames = new List<string>();
+            var toReturn = new Dictionary<Enums.SegmentType, List<string>>
+            {
+                { Enums.SegmentType.Standard, new List<string>() },
+                { Enums.SegmentType.RuleBased, new List<string>() }
+            };
 
             foreach (var featureFlag in changes)
             {
-                var ffParsed = _featureFlagParser.Parse(featureFlag);
+                var ffParsed = _featureFlagParser.Parse(featureFlag, _ruleBasedSegmentCache);
 
                 if (ffParsed == null || !_flagSetsFilter.Intersect(featureFlag.Sets))
                 {
@@ -43,7 +50,8 @@ namespace Splitio.Services.Shared.Classes
                 }
 
                 toAdd.Add(ffParsed);
-                segmentNames.AddRange(featureFlag.GetSegments());
+                toReturn[Enums.SegmentType.Standard].AddRange(ffParsed.GetSegments());
+                toReturn[Enums.SegmentType.RuleBased].AddRange(ffParsed.GetRuleBasedSegments());
             }
 
             _featureFlagsCache.Update(toAdd, toRemove, till);
@@ -58,7 +66,7 @@ namespace Splitio.Services.Shared.Classes
                 _log.Debug($"Deleted feature flags: {string.Join(" - ", toRemove)}");
             }
 
-            return segmentNames;
+            return toReturn;
         }
     }
 }

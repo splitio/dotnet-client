@@ -1,13 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using Splitio.Services.Parsing;
+using Splitio.Services.Parsing.Matchers;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Splitio.Domain
 {
     public class ParsedSplit : SplitBase
     {
+        public ParsedSplit()
+        {
+            conditions = new List<ConditionWithLogic>();
+            Prerequisites = new PrerequisitesMatcher();
+        }
+
         public List<ConditionWithLogic> conditions { get; set; }
         public AlgorithmEnum algo { get; set; }
         public int trafficAllocationSeed { get; set; }
+        public PrerequisitesMatcher Prerequisites { get; set; }
 
         public SplitView ToSplitView()
         {
@@ -26,8 +35,46 @@ namespace Splitio.Domain
                 trafficType = trafficTypeName,
                 configs = configurations,
                 defaultTreatment = defaultTreatment,
-                sets = Sets != null ? Sets.ToList() : new List<string>()
+                sets = Sets != null ? Sets.ToList() : new List<string>(),
+                impressionsDisabled = ImpressionsDisabled,
+                prerequisites = Prerequisites.Get()
             };
+        }
+
+        public List<string> GetRuleBasedSegments()
+        {
+            var toReturn = new List<string>();
+
+            foreach (var condition in conditions)
+            {
+                foreach (var del in condition.matcher.delegates)
+                {
+                    if (del.matcher is RuleBasedSegmentMatcher matcher)
+                    {
+                        toReturn.Add(matcher.GetRuleBasedSegmentName());
+                    }
+                }
+            }
+
+            return toReturn;
+        }
+
+        public List<string> GetSegments()
+        {
+            var segments = new List<string>();
+
+            foreach (var condition in conditions)
+            {
+                foreach (var del in condition.matcher.delegates)
+                {
+                    if (del.matcher is UserDefinedSegmentMatcher matcher)
+                    {
+                        segments.Add(matcher.GetSegmentName());
+                    }
+                }
+            }
+
+            return segments;
         }
     }
 }
