@@ -7,19 +7,19 @@ using System.Collections.Generic;
 
 namespace Splitio.Services.InputValidation.Classes
 {
-    public class EventPropertiesValidator : IEventPropertiesValidator
+    public class PropertiesValidator : IPropertiesValidator
     {
         private const int MAX_PROPERTIES_LENGTH_BYTES = 32 * 1024;
         protected readonly ISplitLogger _log;
 
-        public EventPropertiesValidator(ISplitLogger log = null)
+        public PropertiesValidator(ISplitLogger log = null)
         {
-            _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(EventPropertiesValidator));
+            _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(PropertiesValidator));
         }
 
-        public EventValidatorResult IsValid(Dictionary<string, object> properties)
+        public PropertiesValidatorResult IsValid(Dictionary<string, object> properties)
         {
-            if (properties == null) return new EventValidatorResult { Success = true };
+            if (properties == null) return new PropertiesValidatorResult { Success = true };
 
             var propertiesResult = new Dictionary<string, object>();
             var size = 1024L;
@@ -48,21 +48,21 @@ namespace Splitio.Services.InputValidation.Classes
                 if (size > MAX_PROPERTIES_LENGTH_BYTES)
                 {
                     _log.Error($"The maximum size allowed for the properties is 32768 bytes. Current one is {size} bytes. Event not queued");
-                    return new EventValidatorResult { Success = false };
+                    return new PropertiesValidatorResult { Success = false };
                 }
 
                 propertiesResult.Add(entry.Key, value);
             }
 
-            return new EventValidatorResult
+            return new PropertiesValidatorResult
             {
                 Success = true,
                 Value = propertiesResult,
-                EventSize = size
+                Size = size
             };
         }
 
-        private bool IsNumeric(object value)
+        private static bool IsNumeric(object value)
         {
             if (value == null) return false;
 
