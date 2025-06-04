@@ -33,5 +33,6 @@ namespace Splitio.Domain
         public bool Optimized { get; set; }
         [JsonIgnore]
         public bool ImpressionsDisabled { get; set; }
+        public string Properties { get; set; }
     }
 }
