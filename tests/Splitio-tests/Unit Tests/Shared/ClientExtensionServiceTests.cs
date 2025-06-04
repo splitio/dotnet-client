@@ -25,7 +25,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
         private readonly ISplitNameValidator _splitNameValidator;
         private readonly IKeyValidator _keyValidator;
         private readonly IEventTypeValidator _eventTypeValidator;
-        private readonly IEventPropertiesValidator _eventPropertiesValidator;
+        private readonly IPropertiesValidator _eventPropertiesValidator;
         private readonly ITrafficTypeValidator _trafficTypeValidator;
         private readonly IFlagSetsValidator _flagSetsValidator;
         private readonly IFlagSetsFilter _flagSetsFilter;
@@ -42,7 +42,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             _splitNameValidator = new SplitNameValidator();
             _keyValidator = new KeyValidator(_logger.Object);
             _eventTypeValidator = new EventTypeValidator(_logger.Object);
-            _eventPropertiesValidator = new EventPropertiesValidator(_logger.Object);
+            _eventPropertiesValidator = new PropertiesValidator(_logger.Object);
             _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCacheConsumer.Object, _blockUntilReadyService.Object, _logger.Object);
             _flagSetsValidator = new FlagSetsValidator();
             _flagSetsFilter = new FlagSetsFilter(new HashSet<string>());

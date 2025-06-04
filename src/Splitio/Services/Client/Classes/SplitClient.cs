@@ -34,7 +34,7 @@ namespace Splitio.Services.Client.Classes
         protected readonly IKeyValidator _keyValidator;
         protected readonly ISplitNameValidator _splitNameValidator;
         protected readonly IEventTypeValidator _eventTypeValidator;
-        protected readonly IEventPropertiesValidator _eventPropertiesValidator;
+        protected readonly IPropertiesValidator _eventPropertiesValidator;
         protected readonly IWrapperAdapter _wrapperAdapter;
         protected readonly IConfigService _configService;
         protected readonly IFlagSetsValidator _flagSetsValidator;
@@ -71,7 +71,7 @@ namespace Splitio.Services.Client.Classes
             _keyValidator = new KeyValidator();
             _splitNameValidator = new SplitNameValidator();
             _eventTypeValidator = new EventTypeValidator();
-            _eventPropertiesValidator = new EventPropertiesValidator();
+            _eventPropertiesValidator = new PropertiesValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
             _flagSetsValidator = new FlagSetsValidator();
             _configService = new ConfigService(_wrapperAdapter, _flagSetsValidator, new SdkMetadataValidator());
