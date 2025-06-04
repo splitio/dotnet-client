@@ -56,12 +56,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
 
             // Assert.
-            Assert.AreEqual("matching-key", result.keyName);
-            Assert.AreEqual("feature", result.feature);
-            Assert.AreEqual("off", result.treatment);
-            Assert.AreEqual("label", result.label);
-            Assert.AreEqual("bucketing-key", result.bucketingKey);
-            Assert.AreEqual(ptTime, result.previousTime);
+            Assert.AreEqual("matching-key", result.KeyName);
+            Assert.AreEqual("feature", result.Feature);
+            Assert.AreEqual("off", result.Treatment);
+            Assert.AreEqual("label", result.Label);
+            Assert.AreEqual("bucketing-key", result.BucketingKey);
+            Assert.AreEqual(ptTime, result.PreviousTime);
 
             _impressionsObserver.Verify(mock => mock.TestAndSet(It.IsAny<KeyImpression>()), Times.Once);
             _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Once);
@@ -83,12 +83,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
 
             // Assert.
-            Assert.AreEqual("matching-key", result.keyName);
-            Assert.AreEqual("feature", result.feature);
-            Assert.AreEqual("off", result.treatment);
-            Assert.AreEqual("label", result.label);
-            Assert.AreEqual("bucketing-key", result.bucketingKey);
-            Assert.IsNull(result.previousTime);
+            Assert.AreEqual("matching-key", result.KeyName);
+            Assert.AreEqual("feature", result.Feature);
+            Assert.AreEqual("off", result.Treatment);
+            Assert.AreEqual("label", result.Label);
+            Assert.AreEqual("bucketing-key", result.BucketingKey);
+            Assert.IsNull(result.PreviousTime);
 
             _impressionsObserver.Verify(mock => mock.TestAndSet(It.IsAny<KeyImpression>()), Times.Once);
             _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Never);
@@ -106,12 +106,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
 
             // Assert.
-            Assert.AreEqual("matching-key", result.keyName);
-            Assert.AreEqual("feature", result.feature);
-            Assert.AreEqual("off", result.treatment);
-            Assert.AreEqual("label", result.label);
-            Assert.AreEqual("bucketing-key", result.bucketingKey);
-            Assert.IsNull(result.previousTime);
+            Assert.AreEqual("matching-key", result.KeyName);
+            Assert.AreEqual("feature", result.Feature);
+            Assert.AreEqual("off", result.Treatment);
+            Assert.AreEqual("label", result.Label);
+            Assert.AreEqual("bucketing-key", result.BucketingKey);
+            Assert.IsNull(result.PreviousTime);
 
             _impressionsObserver.Verify(mock => mock.TestAndSet(It.IsAny<KeyImpression>()), Times.Never);
             _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Never);
@@ -335,12 +335,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
 
             // Assert.
-            Assert.AreEqual("matching-key", result.keyName);
-            Assert.AreEqual("feature", result.feature);
-            Assert.AreEqual("off", result.treatment);
-            Assert.AreEqual("label", result.label);
-            Assert.AreEqual("bucketing-key", result.bucketingKey);
-            Assert.IsNull(result.previousTime);
+            Assert.AreEqual("matching-key", result.KeyName);
+            Assert.AreEqual("feature", result.Feature);
+            Assert.AreEqual("off", result.Treatment);
+            Assert.AreEqual("label", result.Label);
+            Assert.AreEqual("bucketing-key", result.BucketingKey);
+            Assert.IsNull(result.PreviousTime);
 
             _impressionsObserver.Verify(mock => mock.TestAndSet(It.IsAny<KeyImpression>()), Times.Never);
             _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Once);

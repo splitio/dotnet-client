@@ -74,7 +74,7 @@ namespace Splitio.Services.Impressions.Classes
                     // In OPTIMIZED mode we should track the total amount of evaluations and deduplicate the impressions.
 
                     ShouldCalculatePreviousTime(impression);
-                    if (impression.previousTime.HasValue)
+                    if (impression.PreviousTime.HasValue)
                         _impressionsCounter.Inc(result.FeatureFlagName, result.ImpTime);
                         impression.Optimized = ShouldQueueImpression(impression);
                 }
@@ -130,7 +130,7 @@ namespace Splitio.Services.Impressions.Classes
         // Public only for tests
         public static bool ShouldQueueImpression(KeyImpression impression)
         {
-            return !impression.previousTime.HasValue || (ImpressionsHelper.TruncateTimeFrame(impression.previousTime.Value) != ImpressionsHelper.TruncateTimeFrame(impression.time));
+            return !impression.PreviousTime.HasValue || (ImpressionsHelper.TruncateTimeFrame(impression.PreviousTime.Value) != ImpressionsHelper.TruncateTimeFrame(impression.Time));
         }
         #endregion
 
@@ -139,7 +139,7 @@ namespace Splitio.Services.Impressions.Classes
         {
             if (!_addPreviousTime) return;
             
-            impression.previousTime = _impressionsObserver.TestAndSet(impression);
+            impression.PreviousTime = _impressionsObserver.TestAndSet(impression);
         }
 
         private void LogImpressionListener(List<KeyImpression> impressions)

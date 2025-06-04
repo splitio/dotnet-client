@@ -83,7 +83,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             var impressions = items.Select(item => JsonConvert.SerializeObject(new
             {
                 m = new { s = SdkVersion, i = MachineIp, n = MachineName },
-                i = new { k = item.keyName, b = item.bucketingKey, f = item.feature, t = item.treatment, r = item.label, c = item.changeNumber, m = item.time, pt = item.previousTime }
+                i = new { k = item.KeyName, b = item.BucketingKey, f = item.Feature, t = item.Treatment, r = item.Label, c = item.ChangeNumber, m = item.Time, pt = item.PreviousTime }
             }));
 
             return impressions
