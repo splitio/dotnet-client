@@ -159,7 +159,7 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildImpressionManager()
         {
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, true, _config.ImpressionsMode, _telemetryRuntimeProducer, _tasksManager, _uniqueKeysTracker, _impressionsObserver, _config.LabelsEnabled);
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, true, _config.ImpressionsMode, _telemetryRuntimeProducer, _tasksManager, _uniqueKeysTracker, _impressionsObserver, _config.LabelsEnabled, _propertiesValidator);
         }
 
         private void BuildEventLog()
