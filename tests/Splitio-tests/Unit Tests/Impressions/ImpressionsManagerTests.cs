@@ -483,7 +483,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public async Task BuildAndTrackAsyncOptimizedWithDebug()
+        public async Task BuildAndTrackAsyncDebugdWithProperties()
         {
             // Arrange.
             _propertiesValidator
@@ -520,7 +520,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _impressionsLog.Verify(mock => mock.LogAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsQueued, 2), Times.Once);
             _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, 0), Times.Once);
-            _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, 0), Times.Once);
+            _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, 0), Times.Never);
         }
 
         [TestMethod]
