@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 namespace Splitio.Services.Cache.Classes
 {
     public class InMemoryRuleBasedSegmentCache : IRuleBasedSegmentCache
-    {   
+    {
+        private readonly object _lock = new object();
+
         private readonly ConcurrentDictionary<string, RuleBasedSegment> _cache;
         private long _changeNumber;
 
@@ -45,17 +47,20 @@ namespace Splitio.Services.Cache.Classes
         // Producer
         public void Update(List<RuleBasedSegment> toAdd, List<string> toRemove, long till)
         {
-            foreach (var rbSegment in toAdd)
+            lock (_lock)
             {
-                _cache.AddOrUpdate(rbSegment.Name, rbSegment, (key, oldValue) => rbSegment);
-            }
+                foreach (var rbSegment in toAdd)
+                {
+                    _cache.AddOrUpdate(rbSegment.Name, rbSegment, (key, oldValue) => rbSegment);
+                }
 
-            foreach (var name in toRemove)
-            {
-                _cache.TryRemove(name, out var _);
-            }
+                foreach (var name in toRemove)
+                {
+                    _cache.TryRemove(name, out var _);
+                }
 
-            SetChangeNumber(till);
+                SetChangeNumber(till);
+            }
         }
 
         public void SetChangeNumber(long changeNumber)

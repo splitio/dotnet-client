@@ -109,20 +109,18 @@ namespace Splitio.Services.SplitFetcher.Classes
 
         private string GetRequestUri(long since, long rbSinceTarget, long? till)
         {
-            var ffSince = Uri.EscapeDataString(since.ToString());
-            var uri = $"{_baseUrl}/api/splitChanges?s={_flagSpec}&since={ffSince}";
+            var uri = $"{_baseUrl}/api/splitChanges?s={_flagSpec}&since={since}";
 
             if (_flagSpec.Equals(ApiVersions.LatestFlagsSpec))
             {
-                var rbSince = Uri.EscapeDataString(rbSinceTarget.ToString());
-                uri = $"{uri}&rbSince={rbSince}";
+                uri = $"{uri}&rbSince={rbSinceTarget}";
             }
 
             if (!string.IsNullOrEmpty(_flagSets))
                 uri = $"{uri}&sets={_flagSets}";
 
             if (till.HasValue)
-                uri = $"{uri}&till={Uri.EscapeDataString(till.Value.ToString())}";
+                uri = $"{uri}&till={till.Value}";
 
             return uri;
         }

@@ -18,6 +18,8 @@ namespace Splitio.Services.Cache.Classes
         private readonly ConcurrentDictionary<string, ParsedSplit> _featureFlags;
         private readonly ConcurrentDictionary<string, int> _trafficTypes;
         private readonly ConcurrentDictionary<string, HashSet<string>> _flagSets;
+        
+        private readonly object _lock = new object();
 
         private long _changeNumber;
 
@@ -47,32 +49,33 @@ namespace Splitio.Services.Cache.Classes
         #region Sync Methods
         public void Update(List<ParsedSplit> toAdd, List<string> toRemove, long till)
         {
-            foreach (var featureFlag in toAdd)
+            lock (_lock)
             {
-                if (_featureFlags.TryGetValue(featureFlag.name, out ParsedSplit existing))
+                foreach (var featureFlag in toAdd)
                 {
-                    DecreaseTrafficTypeCount(existing);
-                    RemoveFromFlagSets(existing.name, existing.Sets);
+                    if (_featureFlags.TryGetValue(featureFlag.name, out ParsedSplit existing))
+                    {
+                        DecreaseTrafficTypeCount(existing);
+                        RemoveFromFlagSets(existing.name, existing.Sets);
+                    }
+
+                    _featureFlags.AddOrUpdate(featureFlag.name, featureFlag, (key, oldValue) => featureFlag);
+
+                    IncreaseTrafficTypeCount(featureFlag.trafficTypeName);
+                    AddToFlagSets(featureFlag);
                 }
 
-                _featureFlags.AddOrUpdate(featureFlag.name, featureFlag, (key, oldValue) => featureFlag);
+                foreach (var featureFlagName in toRemove)
+                {
+                    if (_featureFlags.TryRemove(featureFlagName, out ParsedSplit removedSplit))
+                    {
+                        DecreaseTrafficTypeCount(removedSplit);
+                        RemoveFromFlagSets(removedSplit.name, removedSplit.Sets);
+                    }
+                }
 
-                IncreaseTrafficTypeCount(featureFlag.trafficTypeName);
-                AddToFlagSets(featureFlag);
+                SetChangeNumber(till);
             }
-
-            foreach (var featureFlagName in toRemove)
-            {
-                if (!_featureFlags.TryGetValue(featureFlagName, out ParsedSplit cached))
-                    continue;
-
-                _featureFlags.TryRemove(featureFlagName, out ParsedSplit removedSplit);
-
-                DecreaseTrafficTypeCount(removedSplit);
-                RemoveFromFlagSets(removedSplit.name, removedSplit.Sets);
-            }
-
-            SetChangeNumber(till);
         }
 
         public void SetChangeNumber(long changeNumber)

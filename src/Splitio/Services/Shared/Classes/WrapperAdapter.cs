@@ -44,9 +44,9 @@ namespace Splitio.Services.Shared.Classes
             var ipAddressesEnabled = config.IPAddressesEnabled ?? true;
 
 #if NET_LATEST
-            metadata.Version = ".NET_CORE-" + SplitSdkVersion();
+            metadata.Version = ".NET_CORE-" + SplitSdkVersion(log);
 #else
-            metadata.Version = ".NET-" + SplitSdkVersion();
+            metadata.Version = ".NET-" + SplitSdkVersion(log);
 #endif
             metadata.MachineName = GetSdkMachineName(config, ipAddressesEnabled, log);
             metadata.MachineIP = GetSdkMachineIP(config, ipAddressesEnabled, log);
@@ -59,13 +59,22 @@ namespace Splitio.Services.Shared.Classes
             return Task.WhenAny(tasks);
         }
 
-        private static string SplitSdkVersion()
+        private static string SplitSdkVersion(ISplitLogger log)
         {
+            try
+            {
 #if NET_LATEST
-            return typeof(Split).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+                return typeof(Split).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 #else
-            return FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
+                return FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
 #endif
+            }
+            catch (Exception ex)
+            {
+                log.Warn("Exception retrieving sdk version", ex);
+            }
+
+            return Constants.Gral.SdkVersion;
         }
 
         public void SetCustomerLogger(ISplitLogger splitLogger)
