@@ -55,6 +55,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                     if (ShouldSwitchToLatestFlagsSpec)
                     {
+                        _lastProxyCheckTimestamp = null;
                         _flagSpec = ApiVersions.LatestFlagsSpec;
                         _log.Info($"Switching to new Feature flag spec {_flagSpec} and fetching.");
                         requestUri = GetRequestUri(-1, -1, fetchOptions.Till);
@@ -70,12 +71,15 @@ namespace Splitio.Services.SplitFetcher.Classes
                         var result = new ApiFetchResult
                         {
                             Success = true,
-                            ClearCache = _lastProxyCheckTimestamp != null,
                             Spec = _flagSpec,
                             Content = response.Content
                         };
 
-                        _lastProxyCheckTimestamp = null;
+                        if (_flagSpec != ApiVersions.Spec1_1)
+                        {
+                            result.ClearCache = _lastProxyCheckTimestamp != null;
+                            _lastProxyCheckTimestamp = null;
+                        }
 
                         return result;
                     }
@@ -84,6 +88,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                     {
                         _flagSpec = ApiVersions.Spec1_1;
                         _lastProxyCheckTimestamp = CurrentTimeHelper.CurrentTimeMillis();
+                        _log.Info($"FetchSplitChange BadRequest: {requestUri}");
                         _log.Warn($"Detected proxy without support for Feature flags spec {ApiVersions.LatestFlagsSpec} version, will switch to spec version {_flagSpec}");
 
                         return await FetchSplitChangesAsync(fetchOptions);
