@@ -55,7 +55,6 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                     if (ShouldSwitchToLatestFlagsSpec)
                     {
-                        _lastProxyCheckTimestamp = null;
                         _flagSpec = ApiVersions.LatestFlagsSpec;
                         _log.Info($"Switching to new Feature flag spec {_flagSpec} and fetching.");
                         requestUri = GetRequestUri(-1, -1, fetchOptions.Till);
