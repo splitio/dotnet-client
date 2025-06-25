@@ -87,7 +87,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                     {
                         _flagSpec = ApiVersions.Spec1_1;
                         _lastProxyCheckTimestamp = CurrentTimeHelper.CurrentTimeMillis();
-                        _log.Info($"FetchSplitChange BadRequest: {requestUri}");
+                        _log.Debug($"FetchSplitChange BadRequest: {requestUri}");
                         _log.Warn($"Detected proxy without support for Feature flags spec {ApiVersions.LatestFlagsSpec} version, will switch to spec version {_flagSpec}");
 
                         return await FetchSplitChangesAsync(fetchOptions);
