@@ -8,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Splitio.Redis.Common;
+using Splitio.Redis.Services.Common;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
@@ -55,7 +57,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             var lengthRedis = 0L;
             foreach (var item in uniqueKeys)
             {
-                lengthRedis = await _redisAdapterProducer.ListRightPushAsync(UniqueKeysKey, JsonConvert.SerializeObject(item));
+                lengthRedis = await _redisAdapterProducer.ListRightPushAsync(UniqueKeysKey, JsonConvert.SerializeObject(item, SerializerSettings.DefaultSerializerSettings));
             }
 
             // This operation will simply do nothing if the key no longer exists (queue is empty)
@@ -84,7 +86,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             {
                 m = new { s = SdkVersion, i = MachineIp, n = MachineName },
                 i = new { k = item.keyName, b = item.bucketingKey, f = item.feature, t = item.treatment, r = item.label, c = item.changeNumber, m = item.time, pt = item.previousTime }
-            }));
+            }, SerializerSettings.DefaultSerializerSettings));
 
             return impressions
                 .Select(i => (RedisValue)i)

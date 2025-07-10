@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Splitio.Redis.Common;
+using Splitio.Redis.Services.Common;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
@@ -50,7 +52,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             if (string.IsNullOrEmpty(splitJson))
                 return null;
 
-            var split = JsonConvert.DeserializeObject<Split>(splitJson);
+            var split = JsonConvert.DeserializeObject<Split>(splitJson, SerializerSettings.DefaultSerializerSettings);
 
             return _splitParser.Parse(split, _ruleBasedSegmentCache);
         }
@@ -66,7 +68,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             var splits = splitValues
                 .Where(x => !x.IsNull)
-                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s), _ruleBasedSegmentCache));
+                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s, SerializerSettings.DefaultSerializerSettings), _ruleBasedSegmentCache));
 
             return splits
                 .Where(s => s != null)
@@ -103,7 +105,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             var splits = splitValues
                 .Where(s => !s.IsNull)
-                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s), _ruleBasedSegmentCache));
+                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s, SerializerSettings.DefaultSerializerSettings), _ruleBasedSegmentCache));
 
             return splits
                 .Where(s => s != null)
@@ -155,7 +157,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             var splits = splitValues
                 .Where(s => !s.IsNull)
-                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s), _ruleBasedSegmentCache));
+                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s, SerializerSettings.DefaultSerializerSettings), _ruleBasedSegmentCache));
 
             return splits
                 .Where(s => s != null)
@@ -172,7 +174,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             var splits = splitValues
                 .Where(x => !x.IsNull)
-                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s), _ruleBasedSegmentCache));
+                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s, SerializerSettings.DefaultSerializerSettings), _ruleBasedSegmentCache));
 
             return splits
                 .Where(s => s != null)
@@ -186,7 +188,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             if (string.IsNullOrEmpty(splitJson)) return null;
 
-            var split = JsonConvert.DeserializeObject<Split>(splitJson);
+            var split = JsonConvert.DeserializeObject<Split>(splitJson, SerializerSettings.DefaultSerializerSettings);
 
             return _splitParser.Parse(split, _ruleBasedSegmentCache);
         }

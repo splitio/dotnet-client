@@ -6,6 +6,8 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Splitio.Redis.Common;
+using Splitio.Redis.Services.Common;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
@@ -57,7 +59,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             if (string.IsNullOrEmpty(rbsJSON))
                 return null;
 
-            var rbsDto = JsonConvert.DeserializeObject<RuleBasedSegmentDto>(rbsJSON);
+            var rbsDto = JsonConvert.DeserializeObject<RuleBasedSegmentDto>(rbsJSON, SerializerSettings.DefaultSerializerSettings);
 
             return _rbsParser.Parse(rbsDto, this);
         }

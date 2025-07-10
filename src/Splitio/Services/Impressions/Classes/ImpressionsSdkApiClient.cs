@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Splitio.Common;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -82,12 +83,12 @@ namespace Splitio.Services.Impressions.Classes
                 .GroupBy(item => item.feature)
                 .Select(group => new { f = group.Key, i = group.Select(x => new { k = x.keyName, t = x.treatment, m = x.time, c = x.changeNumber, r = x.label, b = x.bucketingKey }) });
 
-            return JsonConvert.SerializeObject(impressionsPerFeature);
+            return JsonConvert.SerializeObject(impressionsPerFeature, SerializerSettings.DefaultSerializerSettings);
         }
 
         public static string ConvertToJson(List<ImpressionsCountModel> impressionsCount)
         {
-            return JsonConvert.SerializeObject(new { pf = impressionsCount });
+            return JsonConvert.SerializeObject(new { pf = impressionsCount }, SerializerSettings.DefaultSerializerSettings);
         }
 
         private async Task BuildJsonAndPostAsync(List<KeyImpression> impressions, Util.SplitStopwatch clock)

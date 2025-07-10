@@ -3,6 +3,8 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using System.Collections.Generic;
 using System.IO;
+using Splitio.Common;
+using Splitio.Services.Common;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
@@ -16,7 +18,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             if (!string.IsNullOrEmpty(filePath))
             {
                 var json = File.ReadAllText(filePath);
-                var segmentChangesResult = JsonConvert.DeserializeObject<SegmentChange>(json);
+                var segmentChangesResult = JsonConvert.DeserializeObject<SegmentChange>(json, SerializerSettings.DefaultSerializerSettings);
                 added = segmentChangesResult.added;
             }
         }

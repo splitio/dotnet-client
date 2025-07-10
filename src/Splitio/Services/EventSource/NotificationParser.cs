@@ -5,6 +5,8 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Util;
 using System;
 using System.Text;
+using Splitio.Common;
+using Splitio.Services.Common;
 
 namespace Splitio.Services.EventSource
 {
@@ -46,26 +48,26 @@ namespace Splitio.Services.EventSource
         private IncomingNotification ParseMessage(string notificationString)
         {
             var notificationData = GetNotificationData<NotificationData>(notificationString);
-            var data = JsonConvert.DeserializeObject<IncomingNotification>(notificationData.Data);
+            var data = JsonConvert.DeserializeObject<IncomingNotification>(notificationData.Data, SerializerSettings.DefaultSerializerSettings);
 
             IncomingNotification result;
             switch (data?.Type)
             {
                 case NotificationType.SPLIT_UPDATE:
-                    var sNotification = JsonConvert.DeserializeObject<SplitChangeNotification>(notificationData.Data);
+                    var sNotification = JsonConvert.DeserializeObject<SplitChangeNotification>(notificationData.Data, SerializerSettings.DefaultSerializerSettings);
                     sNotification.FeatureFlag = DecompressData<Split>(sNotification);
                     result = sNotification;
                     break;
                 case NotificationType.RB_SEGMENT_UPDATE:
-                    var rbNotification = JsonConvert.DeserializeObject<RuleBasedSegmentNotification>(notificationData.Data);
+                    var rbNotification = JsonConvert.DeserializeObject<RuleBasedSegmentNotification>(notificationData.Data, SerializerSettings.DefaultSerializerSettings);
                     rbNotification.RuleBasedSegmentDto = DecompressData<RuleBasedSegmentDto>(rbNotification);
                     result = rbNotification;
                     break;
                 case NotificationType.SPLIT_KILL:
-                    result = JsonConvert.DeserializeObject<SplitKillNotification>(notificationData.Data);
+                    result = JsonConvert.DeserializeObject<SplitKillNotification>(notificationData.Data, SerializerSettings.DefaultSerializerSettings);
                     break;
                 case NotificationType.SEGMENT_UPDATE:
-                    result = JsonConvert.DeserializeObject<SegmentChangeNotification>(notificationData.Data);
+                    result = JsonConvert.DeserializeObject<SegmentChangeNotification>(notificationData.Data, SerializerSettings.DefaultSerializerSettings);
                     break;
                 default:
                     return null;
@@ -83,7 +85,7 @@ namespace Splitio.Services.EventSource
 
             if (notificationData.Data.Contains("controlType"))
             {
-                var controlNotification = JsonConvert.DeserializeObject<ControlNotification>(notificationData.Data);
+                var controlNotification = JsonConvert.DeserializeObject<ControlNotification>(notificationData.Data, SerializerSettings.DefaultSerializerSettings);
                 controlNotification.Type = NotificationType.CONTROL;
                 controlNotification.Channel = channel;
 
@@ -95,7 +97,7 @@ namespace Splitio.Services.EventSource
 
         private static IncomingNotification ParseOccupancy(string payload, string channel)
         {
-            var occupancyNotification = JsonConvert.DeserializeObject<OccupancyNotification>(payload);
+            var occupancyNotification = JsonConvert.DeserializeObject<OccupancyNotification>(payload, SerializerSettings.DefaultSerializerSettings);
 
             if (occupancyNotification?.Metrics == null)
                 return null;
@@ -124,7 +126,7 @@ namespace Splitio.Services.EventSource
             var index = Array.FindIndex(notificationArray, row => row.Contains("data:"));
             var data = notificationArray[index].Replace("data:", string.Empty);
 
-            return JsonConvert.DeserializeObject<T>(data.Trim());
+            return JsonConvert.DeserializeObject<T>(data.Trim(), SerializerSettings.DefaultSerializerSettings);
         }
 
         private T DecompressData<T>(InstantUpdateNotification notification) where T : class
@@ -159,7 +161,7 @@ namespace Splitio.Services.EventSource
 
         private static T DeserializeObject<T>(byte[] input)
         {
-            return JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(input));
+            return JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(input), SerializerSettings.DefaultSerializerSettings);
         }
     }
 }

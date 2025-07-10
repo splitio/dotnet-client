@@ -6,6 +6,8 @@ using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Splitio.Redis.Common;
+using Splitio.Redis.Services.Common;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
@@ -38,7 +40,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             {
                 m = new { s = SdkVersion, i = MachineIp, n = MachineName },
                 e = wEvent.Event
-            });
+            }, SerializerSettings.DefaultSerializerSettings);
         }
     }
 }
