@@ -4,7 +4,6 @@ using Splitio.Services.SplitFetcher.Interfaces;
 using System.IO;
 using System.Threading.Tasks;
 using Splitio.Common;
-using Splitio.Services.Common;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {

@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Splitio.Redis.Common;
-using Splitio.Redis.Services.Common;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {

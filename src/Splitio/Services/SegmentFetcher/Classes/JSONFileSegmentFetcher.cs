@@ -4,7 +4,6 @@ using Splitio.Services.Cache.Interfaces;
 using System.Collections.Generic;
 using System.IO;
 using Splitio.Common;
-using Splitio.Services.Common;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {

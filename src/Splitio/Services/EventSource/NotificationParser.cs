@@ -6,7 +6,6 @@ using Splitio.Util;
 using System;
 using System.Text;
 using Splitio.Common;
-using Splitio.Services.Common;
 
 namespace Splitio.Services.EventSource
 {
