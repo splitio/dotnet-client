@@ -63,13 +63,11 @@ namespace Splitio.Services.Cache.Classes
 
             foreach (var featureFlagName in toRemove)
             {
-                if (!_featureFlags.TryGetValue(featureFlagName, out ParsedSplit cached))
-                    continue;
-
-                _featureFlags.TryRemove(featureFlagName, out ParsedSplit removedSplit);
-
-                DecreaseTrafficTypeCount(removedSplit);
-                RemoveFromFlagSets(removedSplit.name, removedSplit.Sets);
+                if (_featureFlags.TryRemove(featureFlagName, out ParsedSplit removedSplit))
+                {
+                    DecreaseTrafficTypeCount(removedSplit);
+                    RemoveFromFlagSets(removedSplit.name, removedSplit.Sets);
+                }
             }
 
             SetChangeNumber(till);

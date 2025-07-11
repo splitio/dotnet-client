@@ -56,7 +56,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                     if (ShouldSwitchToLatestFlagsSpec)
                     {
                         _flagSpec = ApiVersions.LatestFlagsSpec;
-                        _log.Info($"Switching to new Feature flag spec {_flagSpec} and fetching.");
+                        _log.Warn($"Switching to new Feature flag spec {_flagSpec} and fetching.");
                         requestUri = GetRequestUri(-1, -1, fetchOptions.Till);
                     }
 
@@ -70,15 +70,21 @@ namespace Splitio.Services.SplitFetcher.Classes
                         var result = new ApiFetchResult
                         {
                             Success = true,
-                            ClearCache = _lastProxyCheckTimestamp != null,
                             Spec = _flagSpec,
-                            Content = response.Content
+                            Content = response.Content,
+                            ClearCache = false
                         };
 
-                        _lastProxyCheckTimestamp = null;
+                        if (_flagSpec != ApiVersions.Spec1_1)
+                        {
+                            result.ClearCache = _lastProxyCheckTimestamp != null;
+                            _lastProxyCheckTimestamp = null;
+                        }
 
                         return result;
                     }
+
+                    _log.Warn($"FetchSplitChange fail request: {response.StatusCode}: {requestUri} - {response.Content}");
 
                     if (response.StatusCode == System.Net.HttpStatusCode.BadRequest && _flagSpec.Equals(ApiVersions.LatestFlagsSpec) && _proxy)
                     {
@@ -102,27 +108,27 @@ namespace Splitio.Services.SplitFetcher.Classes
                 return new ApiFetchResult
                 {
                     Success = false,
-                    Content = string.Empty
+                    Content = string.Empty,
+                    Spec = _flagSpec,
+                    ClearCache = false
                 };
             }
         }
 
         private string GetRequestUri(long since, long rbSinceTarget, long? till)
         {
-            var ffSince = Uri.EscapeDataString(since.ToString());
-            var uri = $"{_baseUrl}/api/splitChanges?s={_flagSpec}&since={ffSince}";
+            var uri = $"{_baseUrl}/api/splitChanges?s={_flagSpec}&since={since}";
 
             if (_flagSpec.Equals(ApiVersions.LatestFlagsSpec))
             {
-                var rbSince = Uri.EscapeDataString(rbSinceTarget.ToString());
-                uri = $"{uri}&rbSince={rbSince}";
+                uri = $"{uri}&rbSince={rbSinceTarget}";
             }
 
             if (!string.IsNullOrEmpty(_flagSets))
                 uri = $"{uri}&sets={_flagSets}";
 
             if (till.HasValue)
-                uri = $"{uri}&till={Uri.EscapeDataString(till.Value.ToString())}";
+                uri = $"{uri}&till={till.Value}";
 
             return uri;
         }
