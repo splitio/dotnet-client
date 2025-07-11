@@ -6,6 +6,7 @@ using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System.Threading.Tasks;
+using Splitio.Redis.Common;
 
 namespace Splitio.Redis.Telemetry.Storages
 {
@@ -28,7 +29,7 @@ namespace Splitio.Redis.Telemetry.Storages
             {
                 t = new { oM = config.OperationMode, st = config.Storage, aF = config.ActiveFactories, rF = config.RedundantActiveFactories, t = config.Tags },
                 m = new { i = MachineIp, n = MachineName, s = SdkVersion }
-            });
+            }, SerializerSettings.DefaultSerializerSettings);
 
             await _redisAdapterProducer.HashSetAsync(TelemetryInitKey, $"{SdkVersion}/{MachineName}/{MachineIp}", jsonData);
         }

@@ -3,6 +3,7 @@ using Splitio.Constants;
 using Splitio.Domain;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System.Threading.Tasks;
+using Splitio.Common;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {
@@ -25,12 +26,12 @@ namespace Splitio.Services.SplitFetcher.Classes
 
             if (result.Spec.Equals(ApiVersions.Spec1_1))
             {
-                var featureFlags = JsonConvert.DeserializeObject<OldSplitChangesDto>(result.Content);
+                var featureFlags = JsonConvert.DeserializeObject<OldSplitChangesDto>(result.Content, SerializerSettings.DefaultSerializerSettings);
 
                 return featureFlags.ToTargetingRulesDto(result.ClearCache);
             }
 
-            var targetingRulesDto = JsonConvert.DeserializeObject<TargetingRulesDto>(result.Content);
+            var targetingRulesDto = JsonConvert.DeserializeObject<TargetingRulesDto>(result.Content, SerializerSettings.DefaultSerializerSettings);
             targetingRulesDto.ClearCache = result.ClearCache;
             
             return targetingRulesDto;

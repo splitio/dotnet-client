@@ -10,6 +10,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Splitio.Common;
 
 namespace Splitio.Services.Common
 {
@@ -71,14 +72,14 @@ namespace Splitio.Services.Common
         #region Private Methods
         private AuthenticationResponse GetSuccessResponse(string content)
         {
-            var authResponse = JsonConvert.DeserializeObject<AuthenticationResponse>(content);
+            var authResponse = JsonConvert.DeserializeObject<AuthenticationResponse>(content, SerializerSettings.DefaultSerializerSettings);
             authResponse.Retry = authResponse.PushEnabled;
 
             if (authResponse.PushEnabled == false) 
                 return authResponse;
 
             var tokenDecoded = DecodeJwt(authResponse.Token);
-            var token = JsonConvert.DeserializeObject<Jwt>(tokenDecoded);
+            var token = JsonConvert.DeserializeObject<Jwt>(tokenDecoded, SerializerSettings.DefaultSerializerSettings);
 
             authResponse.Channels = GetChannels(token);
             authResponse.Expiration = GetExpirationSeconds(token);
@@ -90,7 +91,7 @@ namespace Splitio.Services.Common
 
         private static string GetChannels(Jwt token)
         {
-            var capability = (JObject)JsonConvert.DeserializeObject(token.Capability);
+            var capability = (JObject)JsonConvert.DeserializeObject(token.Capability, SerializerSettings.DefaultSerializerSettings);
             var channelsList = capability
                 .Children()
                 .Select(c => c.First.Path)

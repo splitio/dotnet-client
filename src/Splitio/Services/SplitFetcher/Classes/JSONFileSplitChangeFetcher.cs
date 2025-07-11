@@ -3,6 +3,7 @@ using Splitio.Domain;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System.IO;
 using System.Threading.Tasks;
+using Splitio.Common;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {
@@ -18,13 +19,13 @@ namespace Splitio.Services.SplitFetcher.Classes
         protected override Task<TargetingRulesDto> FetchFromBackendAsync(FetchOptions fetchOptions)
         {
             var json = File.ReadAllText(_filePath);
-            var targetingRulesDto = JsonConvert.DeserializeObject<TargetingRulesDto>(json);
+            var targetingRulesDto = JsonConvert.DeserializeObject<TargetingRulesDto>(json, SerializerSettings.DefaultSerializerSettings);
             if (targetingRulesDto != null)
             {
                 return Task.FromResult(targetingRulesDto);
             }
 
-            var splitsResult = JsonConvert.DeserializeObject<OldSplitChangesDto>(json);
+            var splitsResult = JsonConvert.DeserializeObject<OldSplitChangesDto>(json, SerializerSettings.DefaultSerializerSettings);
 
             return Task.FromResult(splitsResult.ToTargetingRulesDto());
         }

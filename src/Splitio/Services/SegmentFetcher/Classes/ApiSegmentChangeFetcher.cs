@@ -3,6 +3,7 @@ using Splitio.Domain;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System.Threading.Tasks;
+using Splitio.Common;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
@@ -19,7 +20,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
         {
             var fetchResult = await _apiClient.FetchSegmentChangesAsync(name, since, fetchOptions);
 
-            return JsonConvert.DeserializeObject<SegmentChange>(fetchResult);
+            return JsonConvert.DeserializeObject<SegmentChange>(fetchResult, SerializerSettings.DefaultSerializerSettings);
         }
     }
 }
