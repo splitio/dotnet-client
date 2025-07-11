@@ -13,6 +13,15 @@ namespace Splitio.Services.Shared.Classes
             }
         };
 
+        private static readonly JsonSerializerSettings _nullValueHandlingSettings = new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            ContractResolver = new DefaultContractResolver
+            {
+                NamingStrategy = new DefaultNamingStrategy()
+            }
+        };
+
         public static string SerializeObject(object value)
         {
             return JsonConvert.SerializeObject(value, _defaultSerializerSettings);
@@ -20,14 +29,7 @@ namespace Splitio.Services.Shared.Classes
 
         public static string SerializeObjectIgnoreNullValue(object value)
         {
-            return JsonConvert.SerializeObject(value, new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-                ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new DefaultNamingStrategy()
-                }
-            });
+            return JsonConvert.SerializeObject(value, _nullValueHandlingSettings);
         }
 
         public static T DeserializeObject<T>(string value)
