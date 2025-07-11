@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -22,7 +23,7 @@ namespace Splitio.TestSupport
 
         public SplitTest(string test) : base(typeof(object))
         {
-            var splitTest = JsonConvert.DeserializeObject<SplitTest>(test);
+            var splitTest = JsonConvertWrapper.DeserializeObject<SplitTest>(test);
             this.feature = splitTest.feature;
             this.treatments = splitTest.treatments;
         }

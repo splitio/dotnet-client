@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
+using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -57,7 +57,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             if (string.IsNullOrEmpty(rbsJSON))
                 return null;
 
-            var rbsDto = JsonConvert.DeserializeObject<RuleBasedSegmentDto>(rbsJSON);
+            var rbsDto = JsonConvertWrapper.DeserializeObject<RuleBasedSegmentDto>(rbsJSON);
 
             return _rbsParser.Parse(rbsDto, this);
         }

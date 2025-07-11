@@ -6,6 +6,7 @@ using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Redis.Telemetry.Storages;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using System.Threading.Tasks;
@@ -78,7 +79,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Storages
                 BURTimeouts = 5
             };
 
-            var redisValue = JsonConvert.SerializeObject(new
+            var redisValue = JsonConvertWrapper.SerializeObject(new
             {
                 t = new { oM = config.OperationMode, st = config.Storage, aF = config.ActiveFactories, rF = config.RedundantActiveFactories, t = config.Tags },
                 m = new { i = _machineIp, n = _machineName, s = _sdkVersion }

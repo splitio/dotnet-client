@@ -59,7 +59,6 @@ namespace Splitio_Tests.Integration_Tests
             //Assert
             Assert.IsTrue(isSet);
             Assert.AreEqual("test_value", result);
-
         }
 
         [TestMethod]

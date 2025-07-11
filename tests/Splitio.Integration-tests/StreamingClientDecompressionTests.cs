@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Shared.Classes;
 using Splitio.Tests.Common;
 
 namespace Splitio.Integration_tests
@@ -67,7 +67,7 @@ namespace Splitio.Integration_tests
                     Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ4LWFibHktY2FwYWJpbGl0eSI6IntcInh4eHhfeHh4eF9zZWdtZW50c1wiOltcInN1YnNjcmliZVwiXSxcInh4eHhfeHh4eF9zcGxpdHNcIjpbXCJzdWJzY3JpYmVcIl0sXCJjb250cm9sXCI6W1wic3Vic2NyaWJlXCJdfSJ9"
                 };
 
-                httpClientMock.AuthService_Response(JsonConvert.SerializeObject(authResponse));
+                httpClientMock.AuthService_Response(JsonConvertWrapper.SerializeObject(authResponse));
 
                 var url = httpClientMock.GetUrl();
                 var config = new ConfigurationOptions

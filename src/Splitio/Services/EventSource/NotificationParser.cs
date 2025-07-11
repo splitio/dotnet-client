@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Util;
@@ -46,26 +45,26 @@ namespace Splitio.Services.EventSource
         private IncomingNotification ParseMessage(string notificationString)
         {
             var notificationData = GetNotificationData<NotificationData>(notificationString);
-            var data = JsonConvert.DeserializeObject<IncomingNotification>(notificationData.Data);
+            var data = JsonConvertWrapper.DeserializeObject<IncomingNotification>(notificationData.Data);
 
             IncomingNotification result;
             switch (data?.Type)
             {
                 case NotificationType.SPLIT_UPDATE:
-                    var sNotification = JsonConvert.DeserializeObject<SplitChangeNotification>(notificationData.Data);
+                    var sNotification = JsonConvertWrapper.DeserializeObject<SplitChangeNotification>(notificationData.Data);
                     sNotification.FeatureFlag = DecompressData<Split>(sNotification);
                     result = sNotification;
                     break;
                 case NotificationType.RB_SEGMENT_UPDATE:
-                    var rbNotification = JsonConvert.DeserializeObject<RuleBasedSegmentNotification>(notificationData.Data);
+                    var rbNotification = JsonConvertWrapper.DeserializeObject<RuleBasedSegmentNotification>(notificationData.Data);
                     rbNotification.RuleBasedSegmentDto = DecompressData<RuleBasedSegmentDto>(rbNotification);
                     result = rbNotification;
                     break;
                 case NotificationType.SPLIT_KILL:
-                    result = JsonConvert.DeserializeObject<SplitKillNotification>(notificationData.Data);
+                    result = JsonConvertWrapper.DeserializeObject<SplitKillNotification>(notificationData.Data);
                     break;
                 case NotificationType.SEGMENT_UPDATE:
-                    result = JsonConvert.DeserializeObject<SegmentChangeNotification>(notificationData.Data);
+                    result = JsonConvertWrapper.DeserializeObject<SegmentChangeNotification>(notificationData.Data);
                     break;
                 default:
                     return null;
@@ -83,7 +82,7 @@ namespace Splitio.Services.EventSource
 
             if (notificationData.Data.Contains("controlType"))
             {
-                var controlNotification = JsonConvert.DeserializeObject<ControlNotification>(notificationData.Data);
+                var controlNotification = JsonConvertWrapper.DeserializeObject<ControlNotification>(notificationData.Data);
                 controlNotification.Type = NotificationType.CONTROL;
                 controlNotification.Channel = channel;
 
@@ -95,7 +94,7 @@ namespace Splitio.Services.EventSource
 
         private static IncomingNotification ParseOccupancy(string payload, string channel)
         {
-            var occupancyNotification = JsonConvert.DeserializeObject<OccupancyNotification>(payload);
+            var occupancyNotification = JsonConvertWrapper.DeserializeObject<OccupancyNotification>(payload);
 
             if (occupancyNotification?.Metrics == null)
                 return null;
@@ -124,7 +123,7 @@ namespace Splitio.Services.EventSource
             var index = Array.FindIndex(notificationArray, row => row.Contains("data:"));
             var data = notificationArray[index].Replace("data:", string.Empty);
 
-            return JsonConvert.DeserializeObject<T>(data.Trim());
+            return JsonConvertWrapper.DeserializeObject<T>(data.Trim());
         }
 
         private T DecompressData<T>(InstantUpdateNotification notification) where T : class
@@ -159,7 +158,7 @@ namespace Splitio.Services.EventSource
 
         private static T DeserializeObject<T>(byte[] input)
         {
-            return JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(input));
+            return JsonConvertWrapper.DeserializeObject<T>(Encoding.UTF8.GetString(input));
         }
     }
 }

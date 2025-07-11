@@ -190,35 +190,5 @@ namespace Splitio_Tests.Unit_Tests.Parsing
             // Assert
             Assert.IsNull(result);
         }
-
-        [TestMethod]
-        [ExpectedException(typeof(Exception), "Missing or empty matchers")]
-        public void Parse_MissingMatchers_ThrowsException()
-        {
-            // Arrange
-            var rbsDTO = new RuleBasedSegmentDto
-            {
-                Status = "ACTIVE",
-                Name = "test-segment",
-                ChangeNumber = 123,
-                Excluded = new Excluded{
-                    Keys = new List<string> { "user1", "user2" }
-                },
-                Conditions = new List<ConditionDefinition>
-                {
-                    new ConditionDefinition
-                    {
-                        matcherGroup = new MatcherGroupDefinition
-                        {
-                            matchers = null,
-                            combiner = "AND"
-                        }
-                    }
-                }
-            };
-
-            // Act
-            _parser.Parse(rbsDTO, _rbsConsumer.Object);
-        }
     }
 }

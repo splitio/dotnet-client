@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,7 +22,7 @@ namespace Splitio.Tests.Common.Resources
 
             foreach (var item in redisEvents)
             {
-                var actualEvent = JsonConvert.DeserializeObject<EventRedis>(item);
+                var actualEvent = JsonConvertWrapper.DeserializeObject<EventRedis>(item);
 
                 AssertEvent(actualEvent, eventsExcpected);
             }
@@ -38,7 +38,7 @@ namespace Splitio.Tests.Common.Resources
 
             foreach (var item in redisImpressions)
             {
-                var actualImp = JsonConvert.DeserializeObject<KeyImpressionRedis>(item);
+                var actualImp = JsonConvertWrapper.DeserializeObject<KeyImpressionRedis>(item);
 
                 AssertImpression(actualImp, expectedImpressions.ToList());
             }
@@ -50,11 +50,11 @@ namespace Splitio.Tests.Common.Resources
 
             var splitsJson = File.ReadAllText($"{rootFilePath}split_changes.json");
 
-            var result = JsonConvert.DeserializeObject<TargetingRulesDto>(splitsJson);
+            var result = JsonConvertWrapper.DeserializeObject<TargetingRulesDto>(splitsJson);
 
             foreach (var split in result.FeatureFlags.Data)
             {
-                await redisAdapter.SetAsync($"{userPrefix}.SPLITIO.split.{split.name}", JsonConvert.SerializeObject(split));
+                await redisAdapter.SetAsync($"{userPrefix}.SPLITIO.split.{split.name}", JsonConvertWrapper.SerializeObject(split));
 
                 if (split.Sets != null && split.Sets.Any())
                 {
@@ -67,7 +67,7 @@ namespace Splitio.Tests.Common.Resources
 
             foreach (var rbs in result.RuleBasedSegments.Data)
             {
-                await redisAdapter.SetAsync($"{userPrefix}.SPLITIO.rbsegment.{rbs.Name}", JsonConvert.SerializeObject(rbs));
+                await redisAdapter.SetAsync($"{userPrefix}.SPLITIO.rbsegment.{rbs.Name}", JsonConvertWrapper.SerializeObject(rbs));
             }
         }
 

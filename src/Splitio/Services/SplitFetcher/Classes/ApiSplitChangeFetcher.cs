@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
-using Splitio.Constants;
+﻿using Splitio.Constants;
 using Splitio.Domain;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System.Threading.Tasks;
 
@@ -25,12 +25,12 @@ namespace Splitio.Services.SplitFetcher.Classes
 
             if (result.Spec.Equals(ApiVersions.Spec1_1))
             {
-                var featureFlags = JsonConvert.DeserializeObject<OldSplitChangesDto>(result.Content);
+                var featureFlags = JsonConvertWrapper.DeserializeObject<OldSplitChangesDto>(result.Content);
 
                 return featureFlags.ToTargetingRulesDto(result.ClearCache);
             }
 
-            var targetingRulesDto = JsonConvert.DeserializeObject<TargetingRulesDto>(result.Content);
+            var targetingRulesDto = JsonConvertWrapper.DeserializeObject<TargetingRulesDto>(result.Content);
             targetingRulesDto.ClearCache = result.ClearCache;
             
             return targetingRulesDto;
