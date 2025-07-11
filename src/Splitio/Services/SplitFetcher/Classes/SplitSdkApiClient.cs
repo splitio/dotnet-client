@@ -56,7 +56,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                     if (ShouldSwitchToLatestFlagsSpec)
                     {
                         _flagSpec = ApiVersions.LatestFlagsSpec;
-                        _log.Info($"Switching to new Feature flag spec {_flagSpec} and fetching.");
+                        _log.Warn($"Switching to new Feature flag spec {_flagSpec} and fetching.");
                         requestUri = GetRequestUri(-1, -1, fetchOptions.Till);
                     }
 
@@ -71,7 +71,8 @@ namespace Splitio.Services.SplitFetcher.Classes
                         {
                             Success = true,
                             Spec = _flagSpec,
-                            Content = response.Content
+                            Content = response.Content,
+                            ClearCache = false
                         };
 
                         if (_flagSpec != ApiVersions.Spec1_1)
@@ -107,7 +108,9 @@ namespace Splitio.Services.SplitFetcher.Classes
                 return new ApiFetchResult
                 {
                     Success = false,
-                    Content = string.Empty
+                    Content = string.Empty,
+                    Spec = _flagSpec,
+                    ClearCache = false
                 };
             }
         }
