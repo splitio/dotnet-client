@@ -1,12 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
+using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Cache
@@ -48,7 +48,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             redisAdapterMock
                 .Setup(x => x.Get("SPLITIO.split.test_split"))
-                .Returns(JsonConvert.SerializeObject(split));
+                .Returns(JsonConvertWrapper.SerializeObject(split));
 
             splitParser
                 .Setup(mock => mock.Parse(It.IsAny<Split>(), rbsParser.Object))
@@ -110,7 +110,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             redisAdapterMock
                 .Setup(x => x.Get("mycompany.SPLITIO.split.test_split"))
-                .Returns(JsonConvert.SerializeObject(split));
+                .Returns(JsonConvertWrapper.SerializeObject(split));
 
             splitParser
                 .Setup(mock => mock.Parse(It.IsAny<Split>(), rbsParser.Object))

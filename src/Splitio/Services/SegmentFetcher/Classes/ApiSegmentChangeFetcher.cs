@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.SegmentFetcher.Interfaces;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System.Threading.Tasks;
 
@@ -19,7 +19,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
         {
             var fetchResult = await _apiClient.FetchSegmentChangesAsync(name, since, fetchOptions);
 
-            return JsonConvert.DeserializeObject<SegmentChange>(fetchResult);
+            return JsonConvertWrapper.DeserializeObject<SegmentChange>(fetchResult);
         }
     }
 }

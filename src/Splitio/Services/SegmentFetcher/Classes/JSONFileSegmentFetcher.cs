@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
 using System.IO;
 
@@ -16,7 +16,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             if (!string.IsNullOrEmpty(filePath))
             {
                 var json = File.ReadAllText(filePath);
-                var segmentChangesResult = JsonConvert.DeserializeObject<SegmentChange>(json);
+                var segmentChangesResult = JsonConvertWrapper.DeserializeObject<SegmentChange>(json);
                 added = segmentChangesResult.added;
             }
         }
