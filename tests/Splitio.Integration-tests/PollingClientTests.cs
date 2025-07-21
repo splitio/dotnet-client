@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using Splitio.Tests.Common;
 using Splitio.Tests.Common.Resources;
 using System;
@@ -694,7 +694,7 @@ namespace Splitio.Integration_tests
             if (logs.FirstOrDefault() == null)
                 return null;
 
-            return JsonConvert.DeserializeObject<Telemetry.Domain.Config>(logs.FirstOrDefault().RequestMessage.Body);
+            return JsonConvertWrapper.DeserializeObject<Telemetry.Domain.Config>(logs.FirstOrDefault().RequestMessage.Body);
         }
 
         private static List<Telemetry.Domain.Stats> GetMetricsStatsSentBackend(HttpClientMock httpClientMock)
@@ -704,7 +704,7 @@ namespace Splitio.Integration_tests
 
             foreach (var item in logs)
             {
-                var stat = JsonConvert.DeserializeObject<Telemetry.Domain.Stats>(item.RequestMessage.Body);
+                var stat = JsonConvertWrapper.DeserializeObject<Telemetry.Domain.Stats>(item.RequestMessage.Body);
 
                 stats.Add(stat);
             }
@@ -719,7 +719,7 @@ namespace Splitio.Integration_tests
 
             foreach (var log in logs)
             {
-                var _impression = JsonConvert.DeserializeObject<ImpressionCount>(log.RequestMessage.Body);
+                var _impression = JsonConvertWrapper.DeserializeObject<ImpressionCount>(log.RequestMessage.Body);
 
                 impressions.Add(_impression);
             }

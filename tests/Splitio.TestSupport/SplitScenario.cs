@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -19,7 +20,7 @@ namespace Splitio.TestSupport
 
         public SplitScenario(string features) : base(typeof(object))
         {
-            this.features = JsonConvert.DeserializeObject<SplitTest[]>(features);
+            this.features = JsonConvertWrapper.DeserializeObject<SplitTest[]>(features);
         }
 
         public override IEnumerable<object[]> GetData(MethodInfo methodUnderTest)

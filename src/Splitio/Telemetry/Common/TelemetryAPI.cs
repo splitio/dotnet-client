@@ -54,10 +54,7 @@ namespace Splitio.Telemetry.Common
             {
                 clock.Start();
 
-                var jsonData = JsonConvert.SerializeObject(data, new JsonSerializerSettings
-                {
-                    NullValueHandling = NullValueHandling.Ignore
-                });
+                var jsonData = JsonConvertWrapper.SerializeObjectIgnoreNullValue(data);
 
                 var response = await _splitioHttpClient.PostAsync($"{_telemetryURL}{url}", jsonData);
 
