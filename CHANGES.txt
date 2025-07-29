@@ -1,6 +1,6 @@
 CHANGES
 
-7.11.1 (Jul 29, 2025)
+7.11.2 (Jul 29, 2025)
 - Added support for .NET 9
 - Fixed JsonSerializer when customers use snake case by default, which caused problems parsing results from the backend
 
