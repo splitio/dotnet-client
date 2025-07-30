@@ -65,10 +65,7 @@ namespace Splitio.Services.Events.Classes
         #region Private Methods
         private async Task BuildJsonAndPostAsync(List<Event> events, Util.SplitStopwatch clock)
         {
-            var eventsJson = JsonConvert.SerializeObject(events, new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore
-            });
+            var eventsJson = JsonConvertWrapper.SerializeObjectIgnoreNullValue(events);
 
             for (int i = 0; i < MaxAttempts; i++)
             {

@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using Splitio.Tests.Common;
 using System.Collections.Generic;
 using System.Threading;
@@ -45,7 +45,7 @@ namespace Splitio.Integration_tests
                     Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ4LWFibHktY2FwYWJpbGl0eSI6IntcInh4eHhfeHh4eF9zZWdtZW50c1wiOltcInN1YnNjcmliZVwiXSxcInh4eHhfeHh4eF9zcGxpdHNcIjpbXCJzdWJzY3JpYmVcIl0sXCJjb250cm9sXCI6W1wic3Vic2NyaWJlXCJdfSJ9"
                 };
 
-                httpClientMock.AuthService_Response(JsonConvert.SerializeObject(authResponse));
+                httpClientMock.AuthService_Response(JsonConvertWrapper.SerializeObject(authResponse));
 
                 var url = httpClientMock.GetUrl();
                 var config = new ConfigurationOptions
@@ -94,7 +94,7 @@ namespace Splitio.Integration_tests
                     Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ4LWFibHktY2FwYWJpbGl0eSI6IntcInh4eHhfeHh4eF9zZWdtZW50c1wiOltcInN1YnNjcmliZVwiXSxcInh4eHhfeHh4eF9zcGxpdHNcIjpbXCJzdWJzY3JpYmVcIl0sXCJjb250cm9sXCI6W1wic3Vic2NyaWJlXCJdfSJ9"
                 };
 
-                httpClientMock.AuthService_Response(JsonConvert.SerializeObject(authResponse));
+                httpClientMock.AuthService_Response(JsonConvertWrapper.SerializeObject(authResponse));
 
                 var url = httpClientMock.GetUrl();
                 var config = new ConfigurationOptions
@@ -146,7 +146,7 @@ namespace Splitio.Integration_tests
                     Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ4LWFibHktY2FwYWJpbGl0eSI6IntcInh4eHhfeHh4eF9zZWdtZW50c1wiOltcInN1YnNjcmliZVwiXSxcInh4eHhfeHh4eF9zcGxpdHNcIjpbXCJzdWJzY3JpYmVcIl0sXCJjb250cm9sXCI6W1wic3Vic2NyaWJlXCJdfSJ9"
                 };
 
-                httpClientMock.AuthService_Response(JsonConvert.SerializeObject(authResponse));
+                httpClientMock.AuthService_Response(JsonConvertWrapper.SerializeObject(authResponse));
 
                 var url = httpClientMock.GetUrl();
                 var config = new ConfigurationOptions
@@ -198,7 +198,7 @@ namespace Splitio.Integration_tests
                     Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ4LWFibHktY2FwYWJpbGl0eSI6IntcInh4eHhfeHh4eF9zZWdtZW50c1wiOltcInN1YnNjcmliZVwiXSxcInh4eHhfeHh4eF9zcGxpdHNcIjpbXCJzdWJzY3JpYmVcIl0sXCJjb250cm9sXCI6W1wic3Vic2NyaWJlXCJdfSJ9"
                 };
 
-                httpClientMock.AuthService_Response(JsonConvert.SerializeObject(authResponse));
+                httpClientMock.AuthService_Response(JsonConvertWrapper.SerializeObject(authResponse));
 
                 var url = httpClientMock.GetUrl();
                 var config = new ConfigurationOptions
@@ -248,7 +248,7 @@ namespace Splitio.Integration_tests
                     Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ4LWFibHktY2FwYWJpbGl0eSI6IntcInh4eHhfeHh4eF9zZWdtZW50c1wiOltcInN1YnNjcmliZVwiXSxcInh4eHhfeHh4eF9zcGxpdHNcIjpbXCJzdWJzY3JpYmVcIl0sXCJjb250cm9sXCI6W1wic3Vic2NyaWJlXCJdfSJ9"
                 };
 
-                httpClientMock.AuthService_Response(JsonConvert.SerializeObject(authResponse));
+                httpClientMock.AuthService_Response(JsonConvertWrapper.SerializeObject(authResponse));
 
                 var url = httpClientMock.GetUrl();
                 var config = new ConfigurationOptions
@@ -300,7 +300,7 @@ namespace Splitio.Integration_tests
                     Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ4LWFibHktY2FwYWJpbGl0eSI6IntcInh4eHhfeHh4eF9zZWdtZW50c1wiOltcInN1YnNjcmliZVwiXSxcInh4eHhfeHh4eF9zcGxpdHNcIjpbXCJzdWJzY3JpYmVcIl0sXCJjb250cm9sXCI6W1wic3Vic2NyaWJlXCJdfSJ9"
                 };
 
-                httpClientMock.AuthService_Response(JsonConvert.SerializeObject(authResponse));
+                httpClientMock.AuthService_Response(JsonConvertWrapper.SerializeObject(authResponse));
 
                 var url = httpClientMock.GetUrl();
                 var config = new ConfigurationOptions
@@ -350,7 +350,7 @@ namespace Splitio.Integration_tests
                     Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ4LWFibHktY2FwYWJpbGl0eSI6IntcInh4eHhfeHh4eF9zZWdtZW50c1wiOltcInN1YnNjcmliZVwiXSxcInh4eHhfeHh4eF9zcGxpdHNcIjpbXCJzdWJzY3JpYmVcIl0sXCJjb250cm9sXCI6W1wic3Vic2NyaWJlXCJdfSJ9"
                 };
 
-                httpClientMock.AuthService_Response(JsonConvert.SerializeObject(authResponse));
+                httpClientMock.AuthService_Response(JsonConvertWrapper.SerializeObject(authResponse));
 
                 var url = httpClientMock.GetUrl();
                 var config = new ConfigurationOptions
@@ -401,7 +401,7 @@ namespace Splitio.Integration_tests
                     Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ4LWFibHktY2FwYWJpbGl0eSI6IntcInh4eHhfeHh4eF9zZWdtZW50c1wiOltcInN1YnNjcmliZVwiXSxcInh4eHhfeHh4eF9zcGxpdHNcIjpbXCJzdWJzY3JpYmVcIl0sXCJjb250cm9sXCI6W1wic3Vic2NyaWJlXCJdfSJ9"
                 };
 
-                httpClientMock.AuthService_Response(JsonConvert.SerializeObject(authResponse));
+                httpClientMock.AuthService_Response(JsonConvertWrapper.SerializeObject(authResponse));
 
                 var url = httpClientMock.GetUrl();
                 var config = new ConfigurationOptions
@@ -452,7 +452,7 @@ namespace Splitio.Integration_tests
                     Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ4LWFibHktY2FwYWJpbGl0eSI6IntcInh4eHhfeHh4eF9zZWdtZW50c1wiOltcInN1YnNjcmliZVwiXSxcInh4eHhfeHh4eF9zcGxpdHNcIjpbXCJzdWJzY3JpYmVcIl0sXCJjb250cm9sXCI6W1wic3Vic2NyaWJlXCJdfSJ9"
                 };
 
-                httpClientMock.AuthService_Response(JsonConvert.SerializeObject(authResponse));
+                httpClientMock.AuthService_Response(JsonConvertWrapper.SerializeObject(authResponse));
 
                 var url = httpClientMock.GetUrl();
                 var config = new ConfigurationOptions
@@ -503,7 +503,7 @@ namespace Splitio.Integration_tests
                     Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ4LWFibHktY2FwYWJpbGl0eSI6IntcInh4eHhfeHh4eF9zZWdtZW50c1wiOltcInN1YnNjcmliZVwiXSxcInh4eHhfeHh4eF9zcGxpdHNcIjpbXCJzdWJzY3JpYmVcIl0sXCJjb250cm9sXCI6W1wic3Vic2NyaWJlXCJdfSJ9"
                 };
 
-                httpClientMock.AuthService_Response(JsonConvert.SerializeObject(authResponse));
+                httpClientMock.AuthService_Response(JsonConvertWrapper.SerializeObject(authResponse));
 
                 var url = httpClientMock.GetUrl();
                 var config = new ConfigurationOptions
@@ -712,8 +712,8 @@ namespace Splitio.Integration_tests
                     }
                 };
 
-                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes1), "-1", "-1");
-                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes2), "10", "11");
+                httpClientMock.SplitChangesOkWithBody(JsonConvertWrapper.SerializeObject(changes1), "-1", "-1");
+                httpClientMock.SplitChangesOkWithBody(JsonConvertWrapper.SerializeObject(changes2), "10", "11");
                 httpClientMock.Post_Response("/api/testImpressions/bulk", 200, "ok");
                 httpClientMock.Post_Response("/api/events/bulk", 200, "ok");
 
@@ -740,8 +740,8 @@ namespace Splitio.Integration_tests
                 var result = client.GetTreatment("admin", "split-name-1");
                 Assert.AreEqual("on", result);
 
-                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes3), "10", "11");
-                httpClientMock.SplitChangesOkWithBody(JsonConvert.SerializeObject(changes4), "11", "11");
+                httpClientMock.SplitChangesOkWithBody(JsonConvertWrapper.SerializeObject(changes3), "10", "11");
+                httpClientMock.SplitChangesOkWithBody(JsonConvertWrapper.SerializeObject(changes4), "11", "11");
 
                 Thread.Sleep(3000);
 
