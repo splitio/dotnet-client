@@ -34,7 +34,7 @@ namespace Splitio.Services.Client.Classes
         protected readonly IKeyValidator _keyValidator;
         protected readonly ISplitNameValidator _splitNameValidator;
         protected readonly IEventTypeValidator _eventTypeValidator;
-        protected readonly IPropertiesValidator _eventPropertiesValidator;
+        protected readonly IPropertiesValidator _propertiesValidator;
         protected readonly IWrapperAdapter _wrapperAdapter;
         protected readonly IConfigService _configService;
         protected readonly IFlagSetsValidator _flagSetsValidator;
@@ -71,7 +71,7 @@ namespace Splitio.Services.Client.Classes
             _keyValidator = new KeyValidator();
             _splitNameValidator = new SplitNameValidator();
             _eventTypeValidator = new EventTypeValidator();
-            _eventPropertiesValidator = new PropertiesValidator();
+            _propertiesValidator = new PropertiesValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
             _flagSetsValidator = new FlagSetsValidator();
             _configService = new ConfigService(_wrapperAdapter, _flagSetsValidator, new SdkMetadataValidator());
@@ -412,7 +412,7 @@ namespace Splitio.Services.Client.Classes
 
         protected void BuildClientExtension()
         {
-            _clientExtensionService = new ClientExtensionService(_blockUntilReadyService, _statusManager, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator, _flagSetsValidator, _flagSetsFilter);
+            _clientExtensionService = new ClientExtensionService(_blockUntilReadyService, _statusManager, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer, _eventTypeValidator, _propertiesValidator, _trafficTypeValidator, _flagSetsValidator, _flagSetsFilter);
         }
 
         protected void BuildFlagSetsFilter(HashSet<string> sets)
@@ -520,13 +520,13 @@ namespace Splitio.Services.Client.Classes
             }
         }
 
-        private List<KeyImpression> BuildAndGetImpressions(List<TreatmentResult> treatments, Key key)
+        private List<KeyImpression> BuildAndGetImpressions(List<TreatmentResult> treatments, Key key, Dictionary<string, object> properties = null)
         {
             var impressions = new List<KeyImpression>();
 
             foreach (var treatment in treatments)
             {
-                var impression = _impressionsManager.Build(treatment, key);
+                var impression = _impressionsManager.Build(treatment, key, properties);
 
                 if (impression != null) impressions.Add(impression);
             }
