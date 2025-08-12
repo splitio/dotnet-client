@@ -10,8 +10,6 @@ using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
@@ -124,8 +122,7 @@ namespace Splitio.Services.Impressions.Classes
                 { "i", currentFeatureImps }
             });
           
-
-                return JsonConvert.SerializeObject(impressionsPerFeature);
+            return JsonConvert.SerializeObject(impressionsPerFeature);
         }
 
         public static string ConvertToJson(List<ImpressionsCountModel> impressionsCount)
