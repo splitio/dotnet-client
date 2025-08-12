@@ -65,7 +65,9 @@ namespace Splitio.Services.Impressions.Classes
             var validatorResult = _propertiesValidator.IsValid(properties);
             if (validatorResult.Success)
             {
-                impression.Properties = JsonConvert.SerializeObject(validatorResult.Value);
+                if (properties != null) {
+                    impression.Properties = JsonConvert.SerializeObject(validatorResult.Value);
+                }
             }
             
             try
@@ -76,7 +78,7 @@ namespace Splitio.Services.Impressions.Classes
                     _impressionsCounter.Inc(result.FeatureFlagName, result.ImpTime);
                     _uniqueKeysTracker.Track(key.matchingKey, result.FeatureFlagName);
                 }
-                else if (string.IsNullOrEmpty(impression.Properties))
+                else if ( string.IsNullOrEmpty(impression.Properties))
                 {
                     switch (_impressionsMode)
                     {
