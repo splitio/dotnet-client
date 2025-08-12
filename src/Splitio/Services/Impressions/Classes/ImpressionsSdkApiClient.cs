@@ -97,7 +97,6 @@ namespace Splitio.Services.Impressions.Classes
                         { "f", currentFeature },
                         { "i", currentFeatureImps }
                     });
-                    currentFeature = "";
                     currentFeatureImps = new List<Dictionary<String, Object>>();
                 }
                 impRecord = new Dictionary<String, Object>
