@@ -65,7 +65,9 @@ namespace Splitio.Services.Impressions.Classes
             var validatorResult = _propertiesValidator.IsValid(properties);
             if (validatorResult.Success)
             {
-                impression.Properties = JsonConvert.SerializeObject(validatorResult.Value);
+                if (properties != null) {
+                    impression.Properties = JsonConvert.SerializeObject(validatorResult.Value);
+                }
             }
             
             try
