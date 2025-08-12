@@ -78,7 +78,7 @@ namespace Splitio.Services.Impressions.Classes
                     _impressionsCounter.Inc(result.FeatureFlagName, result.ImpTime);
                     _uniqueKeysTracker.Track(key.matchingKey, result.FeatureFlagName);
                 }
-                else if ( string.IsNullOrEmpty(impression.Properties))
+                else if (string.IsNullOrEmpty(impression.Properties))
                 {
                     switch (_impressionsMode)
                     {
