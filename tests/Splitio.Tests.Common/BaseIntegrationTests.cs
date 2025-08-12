@@ -343,11 +343,12 @@ namespace Splitio.Tests.Common
 
             client.BlockUntilReady(10000);
 
-            EvaluationOptions evaluationOption = new EvaluationOptions();
-            evaluationOption.Properties = new Dictionary<string, object>
-            {
-                { "prop1", "val1" }
-            };
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object>
+                {
+                    { "prop1", "val1" }
+                }
+            );
             // Act.
             var result1 = client.GetTreatment("nico_test", "FACUNDO_TEST", evaluationOptions: evaluationOption);
             var result2 = client.GetTreatment("mauro_test", "FACUNDO_TEST");
