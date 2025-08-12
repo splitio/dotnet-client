@@ -344,8 +344,7 @@ namespace Splitio.Tests.Common
             client.BlockUntilReady(10000);
 
             EvaluationOptions evaluationOption = new EvaluationOptions(
-                new Dictionary<string, object>
-                {
+                new Dictionary<string, object> { 
                     { "prop1", "val1" }
                 }
             );
@@ -493,11 +492,11 @@ namespace Splitio.Tests.Common
 
             client.BlockUntilReady(10000);
 
-            EvaluationOptions evaluationOption = new EvaluationOptions();
-            evaluationOption.Properties = new Dictionary<string, object>
-            {
-                { "prop1", "val1" }
-            };
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
 
             // Act.
             var result1 = client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST", evaluationOptions: evaluationOption);
@@ -622,11 +621,11 @@ namespace Splitio.Tests.Common
 
             client.BlockUntilReady(10000);
 
-            EvaluationOptions evaluationOption = new EvaluationOptions();
-            evaluationOption.Properties = new Dictionary<string, object>
-            {
-                { "prop1", "val1" }
-            };
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
             // Act.
             var result = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" }, evaluationOptions: evaluationOption);
             client.Destroy();
@@ -743,11 +742,11 @@ namespace Splitio.Tests.Common
             var client = splitFactory.Client();
 
             client.BlockUntilReady(10000);
-            EvaluationOptions evaluationOption = new EvaluationOptions();
-            evaluationOption.Properties = new Dictionary<string, object>
-            {
-                { "prop1", "val1" }
-            };
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
 
             // Act.
             var result = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" }, evaluationOptions: evaluationOption);
@@ -886,11 +885,11 @@ namespace Splitio.Tests.Common
             var client = splitFactory.Client();
 
             client.BlockUntilReady(10000);
-            EvaluationOptions evaluationOption = new EvaluationOptions();
-            evaluationOption.Properties = new Dictionary<string, object>
-            {
-                { "prop1", "val1" }
-            };
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
 
             // Act.
             var result = client.GetTreatmentsWithConfigByFlagSets("nico_test", new List<string> { "set_1", "set_2", "set_3", string.Empty, null }, evaluationOptions: evaluationOption);
@@ -950,11 +949,11 @@ namespace Splitio.Tests.Common
             var client = splitFactory.Client();
 
             client.BlockUntilReady(10000);
-            EvaluationOptions evaluationOption = new EvaluationOptions();
-            evaluationOption.Properties = new Dictionary<string, object>
-            {
-                { "prop1", "val1" }
-            };
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
 
             // Act.
             var result = client.GetTreatmentsByFlagSets("nico_test", new List<string> { "set_1", "set_2", "set_3", string.Empty, null }, evaluationOptions: evaluationOption);
@@ -1013,11 +1012,11 @@ namespace Splitio.Tests.Common
             var client = splitFactory.Client();
 
             client.BlockUntilReady(10000);
-            EvaluationOptions evaluationOption = new EvaluationOptions();
-            evaluationOption.Properties = new Dictionary<string, object>
-            {
-                { "prop1", "val1" }
-            };
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
 
             // Act.
             var result = client.GetTreatmentsWithConfigByFlagSet("nico_test", "set_1", evaluationOptions: evaluationOption);
@@ -1077,11 +1076,11 @@ namespace Splitio.Tests.Common
             var client = splitFactory.Client();
 
             client.BlockUntilReady(10000);
-            EvaluationOptions evaluationOption = new EvaluationOptions();
-            evaluationOption.Properties = new Dictionary<string, object>
-            {
-                { "prop1", "val1" }
-            };
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
 
             // Act.
             var result = client.GetTreatmentsByFlagSet("nico_test", "set_1", evaluationOptions: evaluationOption);
