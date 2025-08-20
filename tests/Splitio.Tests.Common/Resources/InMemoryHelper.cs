@@ -107,6 +107,7 @@ namespace Splitio.Tests.Common.Resources
                     .Where(si => expectedImp.KeyName == si.K)
                     .Where(si => expectedImp.Label == si.R)
                     .Where(si => expectedImp.Treatment == si.T)
+                    .Where(si => expectedImp.Properties == si.PROPERTIES)
                     .Any());
             }
         }
