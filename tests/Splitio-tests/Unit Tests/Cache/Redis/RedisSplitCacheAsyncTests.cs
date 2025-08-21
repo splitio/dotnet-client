@@ -1,12 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
+using Splitio.Services.Shared.Classes;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -68,8 +68,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Arrange
             var splitName = "test_split";
             var splitName2 = "test_split2";
-            var splitJson = JsonConvert.SerializeObject(BuildSplit(splitName));
-            var splitJson2 = JsonConvert.SerializeObject(BuildSplit(splitName2));
+            var splitJson = JsonConvertWrapper.SerializeObject(BuildSplit(splitName));
+            var splitJson2 = JsonConvertWrapper.SerializeObject(BuildSplit(splitName2));
 
             _redisAdapterMock
                 .Setup(x => x.Keys(SplitKeyPrefix + "*"))

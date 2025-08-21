@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
+using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
 using StackExchange.Redis;
 using System;
@@ -55,7 +55,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             var lengthRedis = 0L;
             foreach (var item in uniqueKeys)
             {
-                lengthRedis = await _redisAdapterProducer.ListRightPushAsync(UniqueKeysKey, JsonConvert.SerializeObject(item));
+                lengthRedis = await _redisAdapterProducer.ListRightPushAsync(UniqueKeysKey, JsonConvertWrapper.SerializeObject(item));
             }
 
             // This operation will simply do nothing if the key no longer exists (queue is empty)
@@ -80,7 +80,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         private RedisValue[] GetImpressions(IList<KeyImpression> items)
         {
-            var impressions = items.Select(item => JsonConvert.SerializeObject(new
+            var impressions = items.Select(item => JsonConvertWrapper.SerializeObject(new
             {
                 m = new { s = SdkVersion, i = MachineIp, n = MachineName },
                 i = new { k = item.KeyName, b = item.BucketingKey, f = item.Feature, t = item.Treatment, r = item.Label, c = item.ChangeNumber, m = item.Time, pt = item.PreviousTime }

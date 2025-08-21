@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-using Splitio.Redis.Services.Cache.Classes;
+﻿using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
+using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
@@ -24,7 +24,7 @@ namespace Splitio.Redis.Telemetry.Storages
 
         public async Task RecordConfigInitAsync(Config config)
         {
-            var jsonData = JsonConvert.SerializeObject(new
+            var jsonData = JsonConvertWrapper.SerializeObject(new
             {
                 t = new { oM = config.OperationMode, st = config.Storage, aF = config.ActiveFactories, rF = config.RedundantActiveFactories, t = config.Tags },
                 m = new { i = MachineIp, n = MachineName, s = SdkVersion }

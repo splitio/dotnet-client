@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using Splitio.Constants;
 using Splitio.Domain;
 using Splitio.Services.Logger;
@@ -71,14 +70,14 @@ namespace Splitio.Services.Common
         #region Private Methods
         private AuthenticationResponse GetSuccessResponse(string content)
         {
-            var authResponse = JsonConvert.DeserializeObject<AuthenticationResponse>(content);
+            var authResponse = JsonConvertWrapper.DeserializeObject<AuthenticationResponse>(content);
             authResponse.Retry = authResponse.PushEnabled;
 
             if (authResponse.PushEnabled == false) 
                 return authResponse;
 
             var tokenDecoded = DecodeJwt(authResponse.Token);
-            var token = JsonConvert.DeserializeObject<Jwt>(tokenDecoded);
+            var token = JsonConvertWrapper.DeserializeObject<Jwt>(tokenDecoded);
 
             authResponse.Channels = GetChannels(token);
             authResponse.Expiration = GetExpirationSeconds(token);
@@ -90,7 +89,7 @@ namespace Splitio.Services.Common
 
         private static string GetChannels(Jwt token)
         {
-            var capability = (JObject)JsonConvert.DeserializeObject(token.Capability);
+            var capability = JsonConvertWrapper.DeserializeObject<JObject>(token.Capability);
             var channelsList = capability
                 .Children()
                 .Select(c => c.First.Path)

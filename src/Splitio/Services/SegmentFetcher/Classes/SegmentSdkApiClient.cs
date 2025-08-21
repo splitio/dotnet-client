@@ -67,10 +67,10 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
         private string GetRequestUri(string name, long since, long? till = null)
         {
-            var uri = $"{_baseUrl}/api/segmentChanges/{name}?since={Uri.EscapeDataString(since.ToString())}";
+            var uri = $"{_baseUrl}/api/segmentChanges/{name}?since={since}";
 
             if (till.HasValue)
-                return $"{uri}&till={Uri.EscapeDataString(till.Value.ToString())}";
+                uri = $"{uri}&till={till.Value}";
 
             return uri;
         }

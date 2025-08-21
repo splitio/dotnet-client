@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Common;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
@@ -7,7 +6,6 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -126,7 +124,7 @@ namespace Splitio.Services.Impressions.Classes
 
         public static string ConvertToJson(List<ImpressionsCountModel> impressionsCount)
         {
-            return JsonConvert.SerializeObject(new { pf = impressionsCount });
+            return JsonConvertWrapper.SerializeObject(new { pf = impressionsCount });
         }
 
         private async Task BuildJsonAndPostAsync(List<KeyImpression> impressions, Util.SplitStopwatch clock)

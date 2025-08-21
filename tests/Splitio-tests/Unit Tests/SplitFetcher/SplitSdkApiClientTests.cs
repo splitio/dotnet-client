@@ -7,6 +7,8 @@ using Splitio.Services.Filters;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.SplitFetcher
@@ -238,11 +240,12 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
             // Arrange.
             var baseUrl = "https://app.split-testing.io";
             var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
-            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter, true, 0);
-            var expectedUrl = $"{baseUrl}/api/splitChanges?s=1.3&since=-1&rbSince=-1";
+            var splitSdkApiClient = new SplitSdkApiClient(_httpClient.Object, _telemetryRuntimeProducer.Object, baseUrl, flagSetsFilter, true, 100);
+            var expectedUrl1_3 = $"{baseUrl}/api/splitChanges?s=1.3&since=-1&rbSince=-1";
+            var expectedUrl1_1 = $"{baseUrl}/api/splitChanges?s=1.1&since=-1";
 
             _httpClient
-                .SetupSequence(mock => mock.GetAsync(expectedUrl, false))
+                .SetupSequence(mock => mock.GetAsync(expectedUrl1_3, false))
                 .ReturnsAsync(new HTTPResult
                 {
                     StatusCode = System.Net.HttpStatusCode.BadRequest,
@@ -256,17 +259,39 @@ namespace Splitio_Tests.Unit_Tests.SplitFetcher
                     IsSuccessStatusCode = true
                 });
 
-            // Act.
+            _httpClient
+                .Setup(mock => mock.GetAsync(expectedUrl1_1, false))
+                .ReturnsAsync(new HTTPResult
+                {
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Content = "ok",
+                    IsSuccessStatusCode = true
+                });
+
+            // Act and Assert.
             var result = await splitSdkApiClient.FetchSplitChangesAsync(new FetchOptions
             {
                 FeatureFlagsSince = -1,
                 RuleBasedSegmentsSince = -1
             });
 
-            // Assert.
             Assert.AreEqual("ok", result.Content);
             Assert.IsTrue(result.Success);
-            _httpClient.Verify(mock => mock.GetAsync(expectedUrl, false), Times.Exactly(2));
+            _httpClient.Verify(mock => mock.GetAsync(expectedUrl1_1, false), Times.Once);
+            _httpClient.Verify(mock => mock.GetAsync(expectedUrl1_3, false), Times.Once);
+
+
+            Thread.Sleep(150);
+            result = await splitSdkApiClient.FetchSplitChangesAsync(new FetchOptions
+            {
+                FeatureFlagsSince = -1,
+                RuleBasedSegmentsSince = -1
+            });
+
+            Assert.AreEqual("ok", result.Content);
+            Assert.IsTrue(result.Success);
+            _httpClient.Verify(mock => mock.GetAsync(expectedUrl1_1, false), Times.Once);
+            _httpClient.Verify(mock => mock.GetAsync(expectedUrl1_3, false), Times.Exactly(2));
         }
     }
 }

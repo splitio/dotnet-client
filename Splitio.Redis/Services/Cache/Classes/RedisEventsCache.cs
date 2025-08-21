@@ -2,6 +2,7 @@
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +35,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         private string SerializeEventObject(WrappedEvent wEvent)
         {
-            return JsonConvert.SerializeObject(new
+            return JsonConvertWrapper.SerializeObject(new
             {
                 m = new { s = SdkVersion, i = MachineIp, n = MachineName },
                 e = wEvent.Event
