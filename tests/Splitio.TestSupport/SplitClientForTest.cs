@@ -51,12 +51,12 @@ namespace Splitio.Services.Client.Classes
             return _tests.ContainsKey(feature) ? _tests[feature] : "control";
         }
 
-        public override string GetTreatment(string key, string feature, Dictionary<string, object> attributes = null)
+        public override string GetTreatment(string key, string feature, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
             return GetTreatment(key, feature);
         }
 
-        public override string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null)
+        public override string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
             return _tests.ContainsKey(feature) ? _tests[feature] : "control";
         }

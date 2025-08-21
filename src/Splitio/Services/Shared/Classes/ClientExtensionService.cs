@@ -21,7 +21,7 @@ namespace Splitio.Services.Shared.Classes
         private readonly ISplitNameValidator _splitNameValidator;
         private readonly ITelemetryEvaluationProducer _telemetryEvaluationProducer;
         private readonly IEventTypeValidator _eventTypeValidator;
-        private readonly IEventPropertiesValidator _eventPropertiesValidator;
+        private readonly IPropertiesValidator _eventPropertiesValidator;
         private readonly ITrafficTypeValidator _trafficTypeValidator;
         private readonly IFlagSetsValidator _flagSetsValidator;
         private readonly IFlagSetsFilter _flagSetsFilter;
@@ -32,7 +32,7 @@ namespace Splitio.Services.Shared.Classes
             ISplitNameValidator splitNameValidator,
             ITelemetryEvaluationProducer telemetryEvaluationProducer,
             IEventTypeValidator eventTypeValidator,
-            IEventPropertiesValidator eventPropertiesValidator,
+            IPropertiesValidator eventPropertiesValidator,
             ITrafficTypeValidator trafficTypeValidator,
             IFlagSetsValidator flagSetsValidator,
             IFlagSetsFilter flagSetsFilter)
@@ -55,15 +55,15 @@ namespace Splitio.Services.Shared.Classes
 
             var keyResult = _keyValidator.IsValid(new Key(key, null), API.Track);
             var eventTypeResult = _eventTypeValidator.IsValid(eventType, nameof(eventType));
-            var eventPropertiesResult = _eventPropertiesValidator.IsValid(properties);
+            var propertiesResult = _eventPropertiesValidator.IsValid(properties);
             var trafficTypeResult = _trafficTypeValidator.IsValid(trafficType, API.Track);
 
-            if (!keyResult || !trafficTypeResult.Success || !eventTypeResult || !eventPropertiesResult.Success)
+            if (!keyResult || !trafficTypeResult.Success || !eventTypeResult || !propertiesResult.Success)
                 return false;
 
             wrappedEvent = new WrappedEvent
             {
-                Size = eventPropertiesResult.EventSize,
+                Size = propertiesResult.Size,
                 Event = new Event
                 {
                     key = key,
@@ -71,7 +71,7 @@ namespace Splitio.Services.Shared.Classes
                     eventTypeId = eventType,
                     value = value,
                     timestamp = CurrentTimeHelper.CurrentTimeMillis(),
-                    properties = (Dictionary<string, object>)eventPropertiesResult.Value
+                    properties = (Dictionary<string, object>)propertiesResult.Value
                 }
             };
 

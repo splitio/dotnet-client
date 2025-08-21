@@ -40,7 +40,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             //Act
             var impressions = new List<KeyImpression>
             {
-                new KeyImpression { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test" }
+                new KeyImpression { KeyName = "GetTreatment", Feature = "test", Treatment = "on", Time = 7000, ChangeNumber = 1, Label = "test" }
             };
 
             _impressionsLog.Log(impressions);
@@ -52,10 +52,10 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 element = _queue.Dequeue();
             }
             Assert.IsNotNull(element);
-            Assert.AreEqual("GetTreatment", element.keyName);
-            Assert.AreEqual("test", element.feature);
-            Assert.AreEqual("on", element.treatment);
-            Assert.AreEqual(7000, element.time);
+            Assert.AreEqual("GetTreatment", element.KeyName);
+            Assert.AreEqual("test", element.Feature);
+            Assert.AreEqual("on", element.Treatment);
+            Assert.AreEqual(7000, element.Time);
         }
 
         [TestMethod]
@@ -66,7 +66,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             var impressions = new List<KeyImpression>
             {
-                new KeyImpression { keyName = key.matchingKey, feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label", bucketingKey = key.bucketingKey }
+                new KeyImpression { KeyName = key.matchingKey, Feature = "test", Treatment = "on", Time = 7000, ChangeNumber = 1, Label = "test-label", BucketingKey = key.bucketingKey }
             };
 
             _impressionsLog.Log(impressions);
@@ -78,11 +78,11 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 element = _queue.Dequeue();
             }
             Assert.IsNotNull(element);
-            Assert.AreEqual("testkey", element.keyName);
-            Assert.AreEqual("a", element.bucketingKey);
-            Assert.AreEqual("test", element.feature);
-            Assert.AreEqual("on", element.treatment);
-            Assert.AreEqual(7000, element.time);
+            Assert.AreEqual("testkey", element.KeyName);
+            Assert.AreEqual("a", element.BucketingKey);
+            Assert.AreEqual("test", element.Feature);
+            Assert.AreEqual("on", element.Treatment);
+            Assert.AreEqual(7000, element.Time);
         }
 
         [TestMethod]
@@ -91,7 +91,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             //Act            
             var impressions = new List<KeyImpression>
             {
-                new KeyImpression() { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label" }
+                new KeyImpression() { KeyName = "GetTreatment", Feature = "test", Treatment = "on", Time = 7000, ChangeNumber = 1, Label = "test-label" }
             };
 
             _impressionsLog.Start();

@@ -14,6 +14,7 @@ namespace Splitio.Tests.Common.Resources
         public string B { get; set; }
         public string T { get; set; }
         public string R { get; set; }
+        public string PROPERTIES { get; set; }
         public long? C { get; set; }
         public long? M { get; set; }
     }

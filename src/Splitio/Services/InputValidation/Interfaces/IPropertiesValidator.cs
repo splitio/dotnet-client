@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 namespace Splitio.Services.InputValidation.Interfaces
 {
-    public interface IEventPropertiesValidator
+    public interface IPropertiesValidator
     {
-        EventValidatorResult IsValid(Dictionary<string, object> properties);
+        PropertiesValidatorResult IsValid(Dictionary<string, object> properties);
     }
 }

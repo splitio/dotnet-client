@@ -10,7 +10,7 @@ namespace Splitio.Services.Impressions.Classes
     {
         public ulong Process(KeyImpression impression)
         {
-            var key = $"{UnknowIfNull(impression.keyName)}:{UnknowIfNull(impression.feature)}:{UnknowIfNull(impression.treatment)}:{UnknowIfNull(impression.label)}:{ZeroIfNull(impression.changeNumber)}";
+            var key = $"{UnknowIfNull(impression.KeyName)}:{UnknowIfNull(impression.Feature)}:{UnknowIfNull(impression.Treatment)}:{UnknowIfNull(impression.Label)}:{ZeroIfNull(impression.ChangeNumber)}";
 
             return Hash(key, 0);
         }
