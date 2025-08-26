@@ -63,11 +63,9 @@ namespace Splitio.Services.Impressions.Classes
             var impression = new KeyImpression(key.matchingKey, result.FeatureFlagName, result.Treatment, result.ImpTime, result.ChangeNumber, _labelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null, result.ImpressionsDisabled);
 
             var validatorResult = _propertiesValidator.IsValid(properties);
-            if (validatorResult.Success)
+            if (validatorResult.Success && properties != null)
             {
-                if (properties != null) {
-                    impression.Properties = JsonConvert.SerializeObject(validatorResult.Value);
-                }
+                impression.Properties = JsonConvert.SerializeObject(validatorResult.Value);
             }
             
             try
