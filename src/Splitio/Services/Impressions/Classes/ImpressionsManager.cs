@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
@@ -65,7 +64,7 @@ namespace Splitio.Services.Impressions.Classes
             var validatorResult = _propertiesValidator.IsValid(properties);
             if (validatorResult.Success && properties != null)
             {
-                    impression.Properties = JsonConvert.SerializeObject(validatorResult.Value);
+                    impression.Properties = JsonConvertWrapper.SerializeObject(validatorResult.Value);
             }
             
             try

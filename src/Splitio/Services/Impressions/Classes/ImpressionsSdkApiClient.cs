@@ -92,11 +92,7 @@ namespace Splitio.Services.Impressions.Classes
                         properties = x.Properties
                     })
                 });
-            return JsonConvert.SerializeObject(impressionsPerFeature, Newtonsoft.Json.Formatting.None,
-                            new JsonSerializerSettings
-                            {
-                                NullValueHandling = NullValueHandling.Ignore
-                            });
+            return JsonConvertWrapper.SerializeObjectIgnoreNullValue(impressionsPerFeature);
         }
 
         public static string ConvertToJson(List<ImpressionsCountModel> impressionsCount)
