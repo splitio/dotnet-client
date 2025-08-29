@@ -55,11 +55,11 @@ namespace Splitio.Services.Impressions.Classes
         }
 
         #region Public Methods
-        public KeyImpression Build(TreatmentResult result, Key key, Dictionary<string, object> properties)
+        public KeyImpression Build(TreatmentResult treatmentResult, Key key, Dictionary<string, object> properties)
         {
-            if (Labels.SplitNotFound.Equals(result.Label)) return null;
+            if (Labels.SplitNotFound.Equals(treatmentResult.Label)) return null;
 
-            var impression = new KeyImpression(key.matchingKey, result.FeatureFlagName, result.Treatment, result.ImpTime, result.ChangeNumber, _labelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null, result.ImpressionsDisabled);
+            var impression = new KeyImpression(key.matchingKey, treatmentResult.FeatureFlagName, treatmentResult.Treatment, treatmentResult.ImpTime, treatmentResult.ChangeNumber, _labelsEnabled ? treatmentResult.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null, treatmentResult.ImpressionsDisabled);
 
             var validatorResult = _propertiesValidator.IsValid(properties);
             if (validatorResult.Success && properties != null)
@@ -70,10 +70,10 @@ namespace Splitio.Services.Impressions.Classes
             try
             {
                 // In NONE mode we should track the total amount of evaluations and the unique keys.
-                if (_impressionsMode == ImpressionsMode.None || result.ImpressionsDisabled)
+                if (_impressionsMode == ImpressionsMode.None || treatmentResult.ImpressionsDisabled)
                 {
-                    _impressionsCounter.Inc(result.FeatureFlagName, result.ImpTime);
-                    _uniqueKeysTracker.Track(key.matchingKey, result.FeatureFlagName);
+                    _impressionsCounter.Inc(treatmentResult.FeatureFlagName, treatmentResult.ImpTime);
+                    _uniqueKeysTracker.Track(key.matchingKey, treatmentResult.FeatureFlagName);
                 }
                 else if (string.IsNullOrEmpty(impression.Properties))
                 {
@@ -87,7 +87,7 @@ namespace Splitio.Services.Impressions.Classes
                             // In OPTIMIZED mode we should track the total amount of evaluations and deduplicate the impressions.
                             ShouldCalculatePreviousTime(impression);
                             if (impression.PreviousTime.HasValue)
-                                _impressionsCounter.Inc(result.FeatureFlagName, result.ImpTime);
+                                _impressionsCounter.Inc(treatmentResult.FeatureFlagName, treatmentResult.ImpTime);
                             impression.Optimized = ShouldQueueImpression(impression);
                             break;
                     }
