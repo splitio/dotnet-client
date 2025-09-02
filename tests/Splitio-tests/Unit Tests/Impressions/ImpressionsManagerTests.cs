@@ -128,6 +128,44 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
+        public void BuildImpressionWithOptimizedAndProperties()
+        {
+            // Arrange.
+            var impressionsManager = GetManager(_customerImpressionListener.Object, labelsEnabled: true);
+
+            var impTime = CurrentTimeHelper.CurrentTimeMillis();
+            var ptTime = impTime - 150;
+            var properties = new Dictionary<string, object> { { "prop", "val" } };
+
+            _impressionsObserver
+                .Setup(mock => mock.TestAndSet(It.IsAny<KeyImpression>()))
+                .Returns(ptTime);
+            _propertiesValidator
+                .Setup(mock => mock.IsValid(It.IsAny<Dictionary<string, object>>()))
+                .Returns(new PropertiesValidatorResult
+                {
+                    Success = true,
+                    Value = properties
+                });
+
+            // Act.
+            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), properties);
+
+            // Assert.
+            Assert.AreEqual("matching-key", result.KeyName);
+            Assert.AreEqual("feature", result.Feature);
+            Assert.AreEqual("off", result.Treatment);
+            Assert.AreEqual("label", result.Label);
+            Assert.AreEqual("bucketing-key", result.BucketingKey);
+            Assert.AreEqual(null, result.PreviousTime);
+            Assert.AreEqual("{\"prop\":\"val\"}", result.Properties);
+
+            _impressionsObserver.Verify(mock => mock.TestAndSet(It.IsAny<KeyImpression>()), Times.Never);
+            _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Never);
+        }
+
+
+        [TestMethod]
         public void BuildAndTrack()
         {
             // Arrange.
