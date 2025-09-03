@@ -30,7 +30,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             //Arrange
             var impressions = new List<KeyImpression>
             {
-                new KeyImpression { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test" }
+                new KeyImpression { KeyName = "GetTreatment", Feature = "test", Treatment = "on", Time = 7000, ChangeNumber = 1, Label = "test" }
             };
 
             //Act
@@ -48,7 +48,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             var impressions = new List<KeyImpression>
             {
-                new KeyImpression { keyName = key.matchingKey, feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label", bucketingKey = key.bucketingKey }
+                new KeyImpression { KeyName = key.matchingKey, Feature = "test", Treatment = "on", Time = 7000, ChangeNumber = 1, Label = "test-label", BucketingKey = key.bucketingKey }
             };
 
             //Act
@@ -56,13 +56,13 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             //Assert
             _impressionsCache
-                .Verify(mock => mock.Add(It.Is<IList<KeyImpression>>(v => v.Any(ki => ki.keyName == key.matchingKey && 
-                                                                                      ki.feature == "test" &&
-                                                                                      ki.treatment == "on" &&
-                                                                                      ki.time == 7000 &&
-                                                                                      ki.changeNumber == 1 &&
-                                                                                      ki.label == "test-label" &&
-                                                                                      ki.bucketingKey == key.bucketingKey))), Times.Once());
+                .Verify(mock => mock.Add(It.Is<IList<KeyImpression>>(v => v.Any(ki => ki.KeyName == key.matchingKey && 
+                                                                                      ki.Feature == "test" &&
+                                                                                      ki.Treatment == "on" &&
+                                                                                      ki.Time == 7000 &&
+                                                                                      ki.ChangeNumber == 1 &&
+                                                                                      ki.Label == "test-label" &&
+                                                                                      ki.BucketingKey == key.bucketingKey))), Times.Once());
         }
 
         [TestMethod]

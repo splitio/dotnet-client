@@ -14,7 +14,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Arrange
             var queue = new BlockingQueue<KeyImpression>(2);
             var cache = new InMemorySimpleCache<KeyImpression>(queue);
-            var impression = new KeyImpression { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000 };
+            var impression = new KeyImpression { Feature = "test", ChangeNumber = 100, KeyName = "date", Label = "testdate", Time = 10000000 };
 
             //Act
             cache.AddItems(new List<KeyImpression> { impression });
@@ -32,8 +32,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Arrange
             var queue = new BlockingQueue<KeyImpression>(1);
             var cache = new InMemorySimpleCache<KeyImpression>(queue);
-            var impression = new KeyImpression { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000 };
-            var impression2 = new KeyImpression { feature = "test2", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000 };
+            var impression = new KeyImpression { Feature = "test", ChangeNumber = 100, KeyName = "date", Label = "testdate", Time = 10000000 };
+            var impression2 = new KeyImpression { Feature = "test2", ChangeNumber = 100, KeyName = "date", Label = "testdate", Time = 10000000 };
 
             //Act
             cache.AddItems(new List<KeyImpression> { impression });
@@ -54,8 +54,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var queue = new BlockingQueue<KeyImpression>(2);
             var cache = new InMemorySimpleCache<KeyImpression>(queue);
 
-            var impression = new KeyImpression { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000 };
-            var impression2 = new KeyImpression { feature = "test2", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000 };
+            var impression = new KeyImpression { Feature = "test", ChangeNumber = 100, KeyName = "date", Label = "testdate", Time = 10000000 };
+            var impression2 = new KeyImpression { Feature = "test2", ChangeNumber = 100, KeyName = "date", Label = "testdate", Time = 10000000 };
 
             cache.AddItems(new List<KeyImpression> { impression });
             cache.AddItems(new List<KeyImpression> { impression2 });
@@ -75,8 +75,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
         {
             //Arrange
             var cache = new InMemorySimpleCache<KeyImpression>(null);
-            var impression = new KeyImpression { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000 };
-            var impression2 = new KeyImpression { feature = "test2", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000 };
+            var impression = new KeyImpression { Feature = "test", ChangeNumber = 100, KeyName = "date", Label = "testdate", Time = 10000000 };
+            var impression2 = new KeyImpression { Feature = "test2", ChangeNumber = 100, KeyName = "date", Label = "testdate", Time = 10000000 };
 
             cache.AddItems(new List<KeyImpression> { impression });
             cache.AddItems(new List<KeyImpression> { impression2 });
@@ -95,8 +95,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var queue = new BlockingQueue<KeyImpression>(1);
             var cache = new InMemorySimpleCache<KeyImpression>(queue);
 
-            var impression = new KeyImpression { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000 };
-            var impression2 = new KeyImpression { feature = "test2", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000 };
+            var impression = new KeyImpression { Feature = "test", ChangeNumber = 100, KeyName = "date", Label = "testdate", Time = 10000000 };
+            var impression2 = new KeyImpression { Feature = "test2", ChangeNumber = 100, KeyName = "date", Label = "testdate", Time = 10000000 };
 
             cache.AddItems(new List<KeyImpression> { impression });
             cache.AddItems(new List<KeyImpression> { impression2 });
@@ -115,8 +115,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var queue = new BlockingQueue<KeyImpression>(3);
             var cache = new InMemorySimpleCache<KeyImpression>(queue);
 
-            var impression = new KeyImpression { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000 };
-            var impression2 = new KeyImpression { feature = "test2", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000 };
+            var impression = new KeyImpression { Feature = "test", ChangeNumber = 100, KeyName = "date", Label = "testdate", Time = 10000000 };
+            var impression2 = new KeyImpression { Feature = "test2", ChangeNumber = 100, KeyName = "date", Label = "testdate", Time = 10000000 };
 
             cache.AddItems(new List<KeyImpression> { impression });
             cache.AddItems(new List<KeyImpression> { impression2 });

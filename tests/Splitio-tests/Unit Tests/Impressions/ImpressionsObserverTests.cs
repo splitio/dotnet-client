@@ -14,31 +14,31 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             var impression = new KeyImpression
             {
-                keyName = "matching_key",
-                bucketingKey = "bucketing_key",
-                feature = "split_name",
-                treatment = "treatment",
-                label = "default label",
-                changeNumber = 1533177602748,
-                time = 1478113516022
+                KeyName = "matching_key",
+                BucketingKey = "bucketing_key",
+                Feature = "split_name",
+                Treatment = "treatment",
+                Label = "default label",
+                ChangeNumber = 1533177602748,
+                Time = 1478113516022
             };
 
             var impression2 = new KeyImpression
             {
-                keyName = "matching_key_2",
-                bucketingKey = "bucketing_key_2",
-                feature = "split_name_2",
-                treatment = "treatment_2",
-                label = "default label_2",
-                changeNumber = 1533177602748,
-                time = 1478113516022
+                KeyName = "matching_key_2",
+                BucketingKey = "bucketing_key_2",
+                Feature = "split_name_2",
+                Treatment = "treatment_2",
+                Label = "default label_2",
+                ChangeNumber = 1533177602748,
+                Time = 1478113516022
             };
 
             var result = impressionsObserver.TestAndSet(impression);
             Assert.IsNull(result);
 
             // Should return previous time
-            impression.time = 1478113516500;
+            impression.Time = 1478113516500;
             result = impressionsObserver.TestAndSet(impression);
             Assert.AreEqual(1478113516022, result);
 
@@ -47,7 +47,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Assert.AreEqual(1478113516500, result);
 
             // When impression.time < previous should return the min.
-            impression.time = 1478113516001;
+            impression.Time = 1478113516001;
             result = impressionsObserver.TestAndSet(impression);
             Assert.AreEqual(1478113516001, result);
 
@@ -56,7 +56,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Assert.IsNull(result);
 
             // Should return previous time
-            impression2.time = 1478113516500;
+            impression2.Time = 1478113516500;
             result = impressionsObserver.TestAndSet(impression2);
             Assert.AreEqual(1478113516022, result);
 

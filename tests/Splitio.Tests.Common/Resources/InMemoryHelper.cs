@@ -47,16 +47,16 @@ namespace Splitio.Tests.Common.Resources
 
         public static KeyImpression GetImpressionExpected(string featureName, string key)
         {
-            return _impressionsExpected.FirstOrDefault(i => i.feature.Equals(featureName) && i.keyName.Equals(key));
+            return _impressionsExpected.FirstOrDefault(i => i.Feature.Equals(featureName) && i.KeyName.Equals(key));
         }
 
         public static void AssertImpression(KeyImpression impression, KeyImpression expected)
         {
-            Assert.AreEqual(expected.changeNumber, expected.changeNumber);
-            Assert.AreEqual(expected.feature, impression.feature);
-            Assert.AreEqual(expected.keyName, impression.keyName);
-            Assert.AreEqual(expected.label, impression.label);
-            Assert.AreEqual(expected.treatment, impression.treatment);
+            Assert.AreEqual(expected.ChangeNumber, expected.ChangeNumber);
+            Assert.AreEqual(expected.Feature, impression.Feature);
+            Assert.AreEqual(expected.KeyName, impression.KeyName);
+            Assert.AreEqual(expected.Label, impression.Label);
+            Assert.AreEqual(expected.Treatment, impression.Treatment);
         }
 
         public static void AssertImpressionListener(string mode, int expected, IntegrationTestsImpressionListener impressionListener)
@@ -96,17 +96,18 @@ namespace Splitio.Tests.Common.Resources
             {
                 var impressions = new List<ImpressionData>();
 
-                foreach (var ki in sentImpressions.Where(si => si.F.Equals(expectedImp.feature)))
+                foreach (var ki in sentImpressions.Where(si => si.F.Equals(expectedImp.Feature)))
                 {
                     impressions.AddRange(ki.I);
                 }
 
                 Assert.IsTrue(impressions
-                    .Where(si => expectedImp.bucketingKey == si.B)
-                    .Where(si => expectedImp.changeNumber == si.C)
-                    .Where(si => expectedImp.keyName == si.K)
-                    .Where(si => expectedImp.label == si.R)
-                    .Where(si => expectedImp.treatment == si.T)
+                    .Where(si => expectedImp.BucketingKey == si.B)
+                    .Where(si => expectedImp.ChangeNumber == si.C)
+                    .Where(si => expectedImp.KeyName == si.K)
+                    .Where(si => expectedImp.Label == si.R)
+                    .Where(si => expectedImp.Treatment == si.T)
+                    .Where(si => expectedImp.Properties == si.PROPERTIES)
                     .Any());
             }
         }

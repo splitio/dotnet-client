@@ -12,14 +12,14 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
     public class EventPropertiesValidatorTests
     {
         private Mock<ISplitLogger> _log;
-        private EventPropertiesValidator eventPropertiesValidator;
+        private PropertiesValidator eventPropertiesValidator;
 
         [TestInitialize]
         public void Initialize()
         {
             _log = new Mock<ISplitLogger>();
 
-            eventPropertiesValidator = new EventPropertiesValidator(_log.Object);
+            eventPropertiesValidator = new PropertiesValidator(_log.Object);
         }
 
         [TestMethod]
@@ -31,7 +31,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             // Assert.
             Assert.IsTrue(result.Success);
             Assert.IsNull(result.Value);
-            Assert.IsTrue(result.EventSize == default(long));
+            Assert.IsTrue(result.Size == default(long));
         }
 
         [TestMethod]
@@ -95,7 +95,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             Assert.AreEqual(ushortValue, dicResult["property_11"]);
             Assert.AreEqual(uintValue, dicResult["property_12"]);
             Assert.AreEqual(ulongValue, dicResult["property_13"]);
-            Assert.IsTrue(result.EventSize == sizeExpected);
+            Assert.IsTrue(result.Size == sizeExpected);
 
             _log.Verify(mock => mock.Warn($"Property Splitio.Domain.ParsedSplit is of invalid type. Setting value to null"), Times.Once);
             _log.Verify(mock => mock.Warn(It.IsAny<string>()), Times.Exactly(1));
@@ -128,7 +128,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             // Assert.
             Assert.IsTrue(result.Success);
             Assert.IsNotNull(result.Value);
-            Assert.IsTrue(result.EventSize == sizeExpected);
+            Assert.IsTrue(result.Size == sizeExpected);
 
             _log.Verify(mock => mock.Warn("Event has more than 300 properties. Some of them will be trimmed when processed"), Times.Once);
             _log.Verify(mock => mock.Warn(It.IsAny<string>()), Times.Exactly(1));
@@ -153,7 +153,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             // Assert.
             Assert.IsFalse(result.Success);
             Assert.IsNull(result.Value);
-            Assert.IsTrue(result.EventSize == default(long));
+            Assert.IsTrue(result.Size == default(long));
 
             var size = 1024L;
             foreach (var item in properties)

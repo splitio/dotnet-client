@@ -122,7 +122,7 @@ namespace Splitio.Redis.Services.Client.Classes
         {
             var shouldCalculatePreviousTime = _config.ImpressionsMode == ImpressionsMode.Optimized;
 
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, shouldCalculatePreviousTime, _config.ImpressionsMode, null, _tasksManager, _uniqueKeysTracker, _impressionsObserver, _config.LabelsEnabled);
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, shouldCalculatePreviousTime, _config.ImpressionsMode, null, _tasksManager, _uniqueKeysTracker, _impressionsObserver, _config.LabelsEnabled, _propertiesValidator);
         }
 
         private void BuildEventLog()

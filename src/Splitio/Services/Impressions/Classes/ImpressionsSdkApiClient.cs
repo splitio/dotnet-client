@@ -77,10 +77,22 @@ namespace Splitio.Services.Impressions.Classes
         {
             var impressionsPerFeature =
                 impressions
-                .GroupBy(item => item.feature)
-                .Select(group => new { f = group.Key, i = group.Select(x => new { k = x.keyName, t = x.treatment, m = x.time, c = x.changeNumber, r = x.label, b = x.bucketingKey }) });
-
-            return JsonConvertWrapper.SerializeObject(impressionsPerFeature);
+                .GroupBy(item => item.Feature)
+                .Select(group => new
+                {
+                    f = group.Key,
+                    i = group.Select(x => new
+                    {
+                        k = x.KeyName,
+                        t = x.Treatment,
+                        m = x.Time,
+                        c = x.ChangeNumber,
+                        r = x.Label,
+                        b = x.BucketingKey,
+                        properties = x.Properties
+                    })
+                });
+            return JsonConvertWrapper.SerializeObjectIgnoreNullValue(impressionsPerFeature);
         }
 
         public static string ConvertToJson(List<ImpressionsCountModel> impressionsCount)

@@ -103,8 +103,173 @@ namespace Splitio_Tests.Unit_Tests.Client
             // Assert
             Assert.AreEqual("control", result);
 
-            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>()), Times.Once);
             _impressionsManager.Verify(mock => mock.Track(It.IsAny<List<KeyImpression>>()), Times.Never);
+        }
+        #endregion
+
+        #region ImpressionsProperties
+        [TestMethod]
+        public void GetTreatment_withProperties()
+        {
+            // Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            _evaluatorMock
+                .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
+                .Returns(new List<TreatmentResult> { new TreatmentResult("flag", Labels.DefaultRule, "on", false) });
+
+            // Act
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
+            var result = _splitClientForTesting.GetTreatment("key", "flag", evaluationOptions: evaluationOption);
+
+            // Assert
+            Assert.AreEqual("on", result);
+
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), evaluationOption.Properties), Times.Once);
+        }
+
+        [TestMethod]
+        public void GetTreatments_withProperties()
+        {
+            // Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            _evaluatorMock
+                .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
+                .Returns(new List<TreatmentResult> { new TreatmentResult("flag", Labels.DefaultRule, "on", false) });
+
+            // Act
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
+            var result = _splitClientForTesting.GetTreatments("key", new List<string> { "flag" }, evaluationOptions: evaluationOption);
+
+            // Assert
+            var resultOn = result["flag"];
+            Assert.AreEqual("on", resultOn);
+
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), evaluationOption.Properties), Times.Once);
+        }
+
+        [TestMethod]
+        public void GetTreatmentsByFlagset_withProperties()
+        {
+            // Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            _evaluatorMock
+                .Setup(mock => mock.EvaluateFeaturesByFlagSets(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new List<TreatmentResult> { new TreatmentResult("flag", Labels.DefaultRule, "on", false) });
+
+            // Act
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
+            var result = _splitClientForTesting.GetTreatmentsByFlagSet("key", "flagset", evaluationOptions: evaluationOption);
+
+            // Assert
+            var resultOn = result["flag"];
+            Assert.AreEqual("on", resultOn);
+
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), evaluationOption.Properties), Times.Once);
+        }
+
+        [TestMethod]
+        public void GetTreatmentsByFlagsets_withProperties()
+        {
+            // Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            _evaluatorMock
+                .Setup(mock => mock.EvaluateFeaturesByFlagSets(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new List<TreatmentResult> { new TreatmentResult("flag", Labels.DefaultRule, "on", false) });
+
+            // Act
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
+
+            var result = _splitClientForTesting.GetTreatmentsByFlagSets("key", new List<string> { "flagset" }, evaluationOptions: evaluationOption);
+
+            // Assert
+            var resultOn = result["flag"];
+            Assert.AreEqual("on", resultOn);
+
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), evaluationOption.Properties), Times.Once);
+        }
+
+        [TestMethod]
+        public void GetTreatmentsByFlagsetWithConfig_withProperties()
+        {
+            // Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            _evaluatorMock
+                .Setup(mock => mock.EvaluateFeaturesByFlagSets(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new List<TreatmentResult> { new TreatmentResult("flag", Labels.DefaultRule, "on", false) });
+
+            // Act
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
+            var result = _splitClientForTesting.GetTreatmentsWithConfigByFlagSet("key", "flagset", evaluationOptions: evaluationOption);
+
+            // Assert
+            var resultOn = result["flag"];
+            Assert.AreEqual("on", resultOn.Treatment);
+
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), evaluationOption.Properties), Times.Once);
+        }
+
+        [TestMethod]
+        public void GetTreatmentsByFlagsetsWithConfig_withProperties()
+        {
+            // Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            _evaluatorMock
+                .Setup(mock => mock.EvaluateFeaturesByFlagSets(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new List<TreatmentResult> { new TreatmentResult("flag", Labels.DefaultRule, "on", false) });
+
+            // Act
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
+
+            var result = _splitClientForTesting.GetTreatmentsWithConfigByFlagSets("key", new List<string> { "flagset" }, evaluationOptions: evaluationOption);
+
+            // Assert
+            var resultOn = result["flag"];
+            Assert.AreEqual("on", resultOn.Treatment);
+
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), evaluationOption.Properties), Times.Once);
         }
         #endregion
 
@@ -154,6 +319,11 @@ namespace Splitio_Tests.Unit_Tests.Client
             };
             var configExpected = configurations[treatmentExpected];
             var parsedSplit = GetParsedSplit(feature, defaultTreatment: "off", configurations: configurations);
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
 
             _splitCacheMock
                 .Setup(mock => mock.GetSplit(feature))
@@ -168,11 +338,12 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(new List<TreatmentResult> { new TreatmentResult(feature, "label", treatmentExpected, false, config: configExpected) });
 
             // Act
-            var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
+            var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature, evaluationOptions: evaluationOption);
 
             // Assert
             Assert.AreEqual(treatmentExpected, result.Treatment);
             Assert.AreEqual(configExpected, result.Config);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), evaluationOption.Properties), Times.Once);
         }
 
         [TestMethod]
@@ -422,7 +593,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual("control", result.Treatment);
             Assert.IsNull(result.Config);
 
-            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>()), Times.Once);
             _impressionsManager.Verify(mock => mock.Track(It.IsAny<List<KeyImpression>>()), Times.Never);
         }
         #endregion
@@ -526,8 +697,14 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
+
             // Act
-            var result = _splitClientForTesting.GetTreatmentsWithConfig("user", new List<string> { treatmenOff, treatmenOn });
+            var result = _splitClientForTesting.GetTreatmentsWithConfig("user", new List<string> { treatmenOff, treatmenOn }, evaluationOptions: evaluationOption);
 
             // Assert
             var resultOn = result[parsedSplitOn.name];
@@ -537,6 +714,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             var resultOff = result[parsedSplitOff.name];
             Assert.AreEqual("off", resultOff.Treatment);
             Assert.AreEqual(configExpectedOff, resultOff.Config);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), evaluationOption.Properties), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -563,7 +741,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 Assert.IsNull(res.Value.Config);
             }
 
-            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>()), Times.Once);
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>()), Times.Once);
             _impressionsManager.Verify(mock => mock.Track(It.IsAny<List<KeyImpression>>()), Times.Never);
         }
         #endregion

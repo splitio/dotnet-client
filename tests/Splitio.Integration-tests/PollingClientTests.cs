@@ -347,8 +347,6 @@ namespace Splitio.Integration_tests
             Assert.AreEqual(0, impressionCounts.Count);
         }
 
-        // TODO: None mode is not supported yet.
-        [Ignore]
         [TestMethod]
         public void GetTreatments_WithImpressionsInNoneMode()
         {
