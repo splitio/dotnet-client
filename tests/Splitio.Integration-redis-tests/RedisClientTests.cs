@@ -1,10 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
 using Splitio.Tests.Common;
 using Splitio.Tests.Common.Resources;
@@ -161,7 +161,7 @@ namespace Splitio.Integration_redis_tests
 
             foreach (var item in redisImpressions)
             {
-                var impression = JsonConvert.DeserializeObject<KeyImpressionRedis>(item);
+                var impression = JsonConvertWrapper.DeserializeObject<KeyImpressionRedis>(item);
 
                 Assert.AreNotEqual("NA", impression.M.I);
                 Assert.AreNotEqual("NA", impression.M.N);
@@ -173,7 +173,7 @@ namespace Splitio.Integration_redis_tests
 
             foreach (var item in redisEvents)
             {
-                var eventRedis = JsonConvert.DeserializeObject<EventRedis>(item);
+                var eventRedis = JsonConvertWrapper.DeserializeObject<EventRedis>(item);
 
                 Assert.AreNotEqual("NA", eventRedis.M.I);
                 Assert.AreNotEqual("NA", eventRedis.M.N);
@@ -210,7 +210,7 @@ namespace Splitio.Integration_redis_tests
 
             foreach (var item in redisImpressions)
             {
-                var impression = JsonConvert.DeserializeObject<KeyImpressionRedis>(item);
+                var impression = JsonConvertWrapper.DeserializeObject<KeyImpressionRedis>(item);
 
                 Assert.AreNotEqual("NA", impression.M.I);
                 Assert.AreNotEqual("NA", impression.M.N);
@@ -222,7 +222,7 @@ namespace Splitio.Integration_redis_tests
 
             foreach (var item in redisEvents)
             {
-                var eventRedis = JsonConvert.DeserializeObject<EventRedis>(item);
+                var eventRedis = JsonConvertWrapper.DeserializeObject<EventRedis>(item);
 
                 Assert.AreNotEqual("NA", eventRedis.M.I);
                 Assert.AreNotEqual("NA", eventRedis.M.N);
@@ -268,7 +268,7 @@ namespace Splitio.Integration_redis_tests
 
             foreach (var item in redisImpressions)
             {
-                var impression = JsonConvert.DeserializeObject<KeyImpressionRedis>(item);
+                var impression = JsonConvertWrapper.DeserializeObject<KeyImpressionRedis>(item);
 
                 Assert.AreEqual("NA", impression.M.I);
                 Assert.AreEqual("NA", impression.M.N);
@@ -280,7 +280,7 @@ namespace Splitio.Integration_redis_tests
 
             foreach (var item in redisEvents)
             {
-                var eventRedis = JsonConvert.DeserializeObject<EventRedis>(item);
+                var eventRedis = JsonConvertWrapper.DeserializeObject<EventRedis>(item);
 
                 Assert.AreEqual("NA", eventRedis.M.I);
                 Assert.AreEqual("NA", eventRedis.M.N);
@@ -317,7 +317,7 @@ namespace Splitio.Integration_redis_tests
 
             foreach (var item in redisImpressions)
             {
-                var impression = JsonConvert.DeserializeObject<KeyImpressionRedis>(item);
+                var impression = JsonConvertWrapper.DeserializeObject<KeyImpressionRedis>(item);
 
                 Assert.AreEqual("NA", impression.M.I);
                 Assert.AreEqual("NA", impression.M.N);
@@ -329,7 +329,7 @@ namespace Splitio.Integration_redis_tests
 
             foreach (var item in redisEvents)
             {
-                var eventRedis = JsonConvert.DeserializeObject<EventRedis>(item);
+                var eventRedis = JsonConvertWrapper.DeserializeObject<EventRedis>(item);
 
                 Assert.AreEqual("NA", eventRedis.M.I);
                 Assert.AreEqual("NA", eventRedis.M.N);
@@ -375,7 +375,7 @@ namespace Splitio.Integration_redis_tests
             // Assert.
             Assert.AreEqual(2, result.Count());
 
-            var uniques = result.Select(x => JsonConvert.DeserializeObject<Mtks>(x)).ToList();
+            var uniques = result.Select(x => JsonConvertWrapper.DeserializeObject<Mtks>(x)).ToList();
 
             Assert.IsTrue(uniques.Any(u => u.Feature.Equals("FACUNDO_TEST") && u.Keys.Contains("mauro_test") && u.Keys.Contains("nico_test") && u.Keys.Contains("redo_test")));
             Assert.IsTrue(uniques.Any(u => u.Feature.Equals("MAURO_TEST") && u.Keys.Contains("redo_test")));
@@ -398,7 +398,7 @@ namespace Splitio.Integration_redis_tests
             // Assert.
             Assert.AreEqual(2, result.Length);
 
-            uniques = result.Select(x => JsonConvert.DeserializeObject<Mtks>(x)).ToList();
+            uniques = result.Select(x => JsonConvertWrapper.DeserializeObject<Mtks>(x)).ToList();
 
             Assert.IsTrue(uniques.Any(u => u.Feature.Equals("FACUNDO_TEST") && u.Keys.Contains("mauro_test") && u.Keys.Contains("nico_test") && u.Keys.Contains("redo_test")));
             Assert.IsTrue(uniques.Any(u => u.Feature.Equals("MAURO_TEST") && u.Keys.Contains("redo_test")));

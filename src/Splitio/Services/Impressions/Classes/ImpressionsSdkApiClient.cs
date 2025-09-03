@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Common;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
@@ -7,7 +6,6 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -77,56 +75,29 @@ namespace Splitio.Services.Impressions.Classes
         // Public for tests
         public static string ConvertToJson(List<KeyImpression> impressions)
         {
-            List<Dictionary<String, Object>> impressionsPerFeature = new List<Dictionary<String, Object>>();
-            List<Dictionary<String, Object>> currentFeatureImps = new List<Dictionary<String, Object>>();
-            String currentFeature = "";
-            Dictionary<String, Object> impRecord = new Dictionary<String, Object>();
-            Boolean first = true;
-            foreach (KeyImpression impression in impressions.OrderBy(i => i.Feature))
-            {
-                if (first)
+            var impressionsPerFeature =
+                impressions
+                .GroupBy(item => item.Feature)
+                .Select(group => new
                 {
-                    currentFeature = impression.Feature;
-                    first = false;
-                }
-
-                if (impression.Feature != currentFeature)
-                {
-                    impressionsPerFeature.Add(new Dictionary<String, Object>
+                    f = group.Key,
+                    i = group.Select(x => new
                     {
-                        { "f", currentFeature },
-                        { "i", currentFeatureImps }
-                    });
-                    currentFeatureImps = new List<Dictionary<String, Object>>();
-                }
-                impRecord = new Dictionary<String, Object>
-                {
-                    { "k", impression.KeyName },
-                    { "t", impression.Treatment },
-                    { "m", impression.Time },
-                    { "c", impression.ChangeNumber },
-                    { "r", impression.Label },
-                    { "b", impression.BucketingKey }
-                };
-                if (impression.Properties != null)
-                {
-                    impRecord.Add("properties", impression.Properties);
-                }
-                currentFeatureImps.Add(impRecord);
-                currentFeature = impression.Feature;
-            }
-            impressionsPerFeature.Add(new Dictionary<String, Object>
-            {
-                { "f", currentFeature },
-                { "i", currentFeatureImps }
-            });
-          
-            return JsonConvert.SerializeObject(impressionsPerFeature);
+                        k = x.KeyName,
+                        t = x.Treatment,
+                        m = x.Time,
+                        c = x.ChangeNumber,
+                        r = x.Label,
+                        b = x.BucketingKey,
+                        properties = x.Properties
+                    })
+                });
+            return JsonConvertWrapper.SerializeObjectIgnoreNullValue(impressionsPerFeature);
         }
 
         public static string ConvertToJson(List<ImpressionsCountModel> impressionsCount)
         {
-            return JsonConvert.SerializeObject(new { pf = impressionsCount });
+            return JsonConvertWrapper.SerializeObject(new { pf = impressionsCount });
         }
 
         private async Task BuildJsonAndPostAsync(List<KeyImpression> impressions, Util.SplitStopwatch clock)

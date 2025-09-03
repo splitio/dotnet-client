@@ -90,6 +90,8 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                     if (result.ClearCache)
                     {
+                        _log.Warn($"Forcing a cache cleanup because a different Spec Version was detected.");
+
                         _featureFlagCache.Clear();
                         _ruleBasedSegmentCache.Clear();
                     }

@@ -704,6 +704,280 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
         #endregion
 
+        #region ImpressionsProperties
+        [TestMethod]
+        public async Task GetTreatment_WithProperties()
+        {
+            // Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            _evaluator
+                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), new List<string>() { "feature_flag_test" }, It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("feature_flag_test", Labels.DefaultRule, "on", false, 1000, null) });
+
+            _impressionsManager
+                .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new KeyImpression());
+
+            // Act
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
+
+            var result = await _splitClient.GetTreatmentAsync("key", "feature_flag_test", evaluationOptions: evaluationOption);
+
+            // Assert
+            Assert.AreEqual("on", result);
+
+            _splitClient.Destroy();
+
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), evaluationOption.Properties), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentWithConfig_WithProperties()
+        {
+            // Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            _evaluator
+                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), new List<string>() { "feature_flag_test" }, It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("feature_flag_test", Labels.DefaultRule, "on", false, 1000, null) });
+
+            _impressionsManager
+                .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new KeyImpression());
+
+            // Act
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
+
+            var result = await _splitClient.GetTreatmentWithConfigAsync("key", "feature_flag_test", evaluationOptions: evaluationOption);
+
+            // Assert
+            Assert.AreEqual("on", result.Treatment);
+
+            _splitClient.Destroy();
+
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), evaluationOption.Properties), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task GetTreatments_WithProperties()
+        {
+            // Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            _evaluator
+                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), new List<string>() { "feature_flag_test" }, It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("feature_flag_test", Labels.DefaultRule, "on", false, 1000, null) });
+
+            _impressionsManager
+                .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new KeyImpression());
+
+            // Act
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
+
+            var result = await _splitClient.GetTreatmentsAsync("key", new List<string> { "feature_flag_test" }, evaluationOptions: evaluationOption);
+
+            // Assert
+            Assert.AreEqual("on", result["feature_flag_test"]);
+
+            _splitClient.Destroy();
+
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), evaluationOption.Properties), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentsWithConfig_WithProperties()
+        {
+            // Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            _evaluator
+                .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), new List<string>() { "feature_flag_test" }, It.IsAny<Dictionary<string, object>>(), true))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("feature_flag_test", Labels.DefaultRule, "on", false, 1000, null) });
+
+            _impressionsManager
+                .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new KeyImpression());
+
+            // Act
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
+
+            var result = await _splitClient.GetTreatmentsWithConfigAsync("key", new List<string> { "feature_flag_test" }, evaluationOptions: evaluationOption);
+
+            // Assert
+            Assert.AreEqual("on", result["feature_flag_test"].Treatment);
+
+            _splitClient.Destroy();
+
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), evaluationOption.Properties), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentsByFlagset_WithProperties()
+        {
+            // Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            _evaluator
+                .Setup(mock => mock.EvaluateFeaturesByFlagSetsAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), new List<string>() { "flagset" }, It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("feature_flag_test", Labels.DefaultRule, "on", false, 1000, null) });
+
+            _impressionsManager
+                .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new KeyImpression());
+
+            // Act
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
+
+            var result = await _splitClient.GetTreatmentsByFlagSetAsync("key", "flagset", evaluationOptions: evaluationOption);
+
+            // Assert
+            Assert.AreEqual("on", result["feature_flag_test"]);
+
+            _splitClient.Destroy();
+
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), evaluationOption.Properties), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentsByFlagsets_WithProperties()
+        {
+            // Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            _evaluator
+                .Setup(mock => mock.EvaluateFeaturesByFlagSetsAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), new List<string>() { "flagset" }, It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("feature_flag_test", Labels.DefaultRule, "on", false, 1000, null) });
+
+            _impressionsManager
+                .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new KeyImpression());
+
+            // Act
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
+
+            var result = await _splitClient.GetTreatmentsByFlagSetsAsync("key", new List<string> { "flagset" }, evaluationOptions: evaluationOption);
+
+            // Assert
+            Assert.AreEqual("on", result["feature_flag_test"]);
+
+            _splitClient.Destroy();
+
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), evaluationOption.Properties), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentsWithConfigByFlagset_WithProperties()
+        {
+            // Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            _evaluator
+                .Setup(mock => mock.EvaluateFeaturesByFlagSetsAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), new List<string>() { "flagset" }, It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("feature_flag_test", Labels.DefaultRule, "on", false, 1000, null) });
+
+            _impressionsManager
+                .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new KeyImpression());
+
+            // Act
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
+
+            var result = await _splitClient.GetTreatmentsWithConfigByFlagSetAsync("key", "flagset", evaluationOptions: evaluationOption);
+
+            // Assert
+            Assert.AreEqual("on", result["feature_flag_test"].Treatment);
+
+            _splitClient.Destroy();
+
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), evaluationOption.Properties), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task GetTreatmentsWithConfigByFlagsets_WithProperties()
+        {
+            // Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            _evaluator
+                .Setup(mock => mock.EvaluateFeaturesByFlagSetsAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), new List<string>() { "flagset" }, It.IsAny<Dictionary<string, object>>()))
+                .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("feature_flag_test", Labels.DefaultRule, "on", false, 1000, null) });
+
+            _impressionsManager
+                .Setup(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new KeyImpression());
+
+            // Act
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
+
+            var result = await _splitClient.GetTreatmentsWithConfigByFlagSetsAsync("key", new List<string> { "flagset" }, evaluationOptions: evaluationOption);
+
+            // Assert
+            Assert.AreEqual("on", result["feature_flag_test"].Treatment);
+
+            _splitClient.Destroy();
+
+            _impressionsManager.Verify(mock => mock.Build(It.IsAny<TreatmentResult>(), It.IsAny<Key>(), evaluationOption.Properties), Times.Once);
+            _impressionsManager.Verify(mock => mock.TrackAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
+        }
+        #endregion
+
         #region TrackAsync
         [TestMethod]
         public async Task Track_ShouldReturnFalse_WithNullKey()

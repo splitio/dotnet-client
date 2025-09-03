@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 using Splitio.Domain;
+using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -119,7 +119,7 @@ namespace Splitio.Tests.Common.Resources
 
             foreach (var log in logs)
             {
-                var imps = JsonConvert.DeserializeObject<List<KeyImpressionBackend>>(log.RequestMessage.Body);
+                var imps = JsonConvertWrapper.DeserializeObject<List<KeyImpressionBackend>>(log.RequestMessage.Body);
 
                 impressions.AddRange(imps);
             }
@@ -164,7 +164,7 @@ namespace Splitio.Tests.Common.Resources
 
             foreach (var log in logs)
             {
-                var _events = JsonConvert.DeserializeObject<List<EventBackend>>(log.RequestMessage.Body);
+                var _events = JsonConvertWrapper.DeserializeObject<List<EventBackend>>(log.RequestMessage.Body);
 
                 foreach (var item in _events)
                 {

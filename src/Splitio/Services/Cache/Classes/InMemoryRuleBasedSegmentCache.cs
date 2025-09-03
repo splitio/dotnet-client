@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Splitio.Services.Cache.Classes
 {
     public class InMemoryRuleBasedSegmentCache : IRuleBasedSegmentCache
-    {   
+    {
         private readonly ConcurrentDictionary<string, RuleBasedSegment> _cache;
         private long _changeNumber;
 
