@@ -108,13 +108,13 @@ namespace Splitio.Services.Impressions.Classes
             int bulkSize = 0;
             foreach (var unique in bulksFlattened)
             {
-                if ((unique.Keys.Count() + bulkSize) > _maxBulkSize)
+                if ((unique.Keys.Count + bulkSize) > _maxBulkSize)
                 {
                     await _senderAdapter.RecordUniqueKeysAsync(bulksToSend);
                     bulkSize = 0;
                     bulksToSend = new List<Mtks>();
                 }
-                bulkSize += unique.Keys.Count();
+                bulkSize += unique.Keys.Count;
                 bulksToSend.Add(unique);
             }
             await _senderAdapter.RecordUniqueKeysAsync(bulksToSend);
