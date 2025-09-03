@@ -52,7 +52,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Assert.
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test", "feature-name-test"));
 
-            Thread.Sleep(1500);
+            Thread.Sleep(2000);
 
             _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Once);
 
