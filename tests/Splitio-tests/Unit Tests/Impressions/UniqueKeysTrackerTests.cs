@@ -136,7 +136,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-5", "feature-name-test-2"));
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-6", "feature-name-test-2"));
 
-            Thread.Sleep(2000);
+            Thread.Sleep(4000);
             _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Exactly(4));
 
             _cache.Clear();
