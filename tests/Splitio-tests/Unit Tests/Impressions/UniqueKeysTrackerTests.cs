@@ -6,7 +6,6 @@ using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -111,12 +110,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public async Task Track_WithFullSize_ShouldSplitBulks()
+        public void Track_WithFullSize_ShouldSplitBulks()
         {
             // Arrange.
             Mock<IFilterAdapter> _filterAdapter2 = new Mock<IFilterAdapter>();
             Mock<IStatusManager> _statusManager2 = new Mock<IStatusManager>();
-            ITasksManager _tasksManager2 = new TasksManager(_statusManager2.Object);
+            TasksManager _tasksManager2 = new TasksManager(_statusManager2.Object);
             var _cache2 = new ConcurrentDictionary<string, HashSet<string>>();
             _cache2.Clear();
             Mock<IImpressionsSenderAdapter> _senderAdapter2 = new Mock<IImpressionsSenderAdapter>();
@@ -125,7 +124,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var task = _tasksManager2.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 1);
             var cacheLongTermCleaningTask = _tasksManager2.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
             var sendBulkDataTask = _tasksManager2.NewOnTimeTask(Splitio.Enums.Task.MtkSendBulkData);
-            IUniqueKeysTracker _uniqueKeysTracker2 = new UniqueKeysTracker(config, _filterAdapter2.Object, _cache2, _senderAdapter2.Object, task, cacheLongTermCleaningTask, sendBulkDataTask);
+            UniqueKeysTracker _uniqueKeysTracker2 = new UniqueKeysTracker(config, _filterAdapter2.Object, _cache2, _senderAdapter2.Object, task, cacheLongTermCleaningTask, sendBulkDataTask);
 
             // Act && Assert.
             Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-1", "feature-name-test"));
@@ -144,7 +143,6 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-5", "feature-name-test-2"));
             Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-6", "feature-name-test-2"));
             Thread.Sleep(1000);
-
 
             _senderAdapter2.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Exactly(4));
 
