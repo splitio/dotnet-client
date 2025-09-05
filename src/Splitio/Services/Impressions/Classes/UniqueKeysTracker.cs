@@ -20,6 +20,7 @@ namespace Splitio.Services.Impressions.Classes
         private readonly ConcurrentDictionary<string, HashSet<string>> _cache;
         private readonly IImpressionsSenderAdapter _senderAdapter;
         private readonly ISplitTask _cacheLongTermCleaningTask;
+        private int _keySize;
 
         public UniqueKeysTracker(ComponentConfig config,
             IFilterAdapter filterAdapter,
@@ -34,6 +35,7 @@ namespace Splitio.Services.Impressions.Classes
             _senderAdapter = senderAdapter;
             _cacheLongTermCleaningTask = cacheLongTermCleaningTask;
             _cacheLongTermCleaningTask.SetAction(_filterAdapter.Clear);
+            _keySize = 0;
         }
 
         #region Public Methods
@@ -48,8 +50,8 @@ namespace Splitio.Services.Impressions.Classes
                 hashSet.Add(key);
                 return hashSet;
             });
-
-            if (_cache.Count >= _cacheMaxSize)
+            _keySize++;
+            if (_keySize >= _maxBulkSize)
             {
                 _taskBulkData.Start();
             }
@@ -76,8 +78,9 @@ namespace Splitio.Services.Impressions.Classes
             try
             {
                 var uniques = new ConcurrentDictionary<string, HashSet<string>>(_cache);
-
+                var keySize = _keySize;
                 _cache.Clear();
+                _keySize = 0;
 
                 if (!uniques.Any()) return;
 
@@ -85,23 +88,64 @@ namespace Splitio.Services.Impressions.Classes
                     .Select(v => new Mtks(v.Key, v.Value))
                     .ToList();
 
-                if (values.Count <= _maxBulkSize)
+                if (keySize <= _maxBulkSize)
                 {
                     await _senderAdapter.RecordUniqueKeysAsync(values);
                     return;
                 }
-
-                while (values.Count > 0)
-                {
-                    var bulkToPost = Util.Helper.TakeFromList(values, _maxBulkSize);
-
-                    await _senderAdapter.RecordUniqueKeysAsync(bulkToPost);
-                }
+                List<Mtks> bulksFlattened = FlattenBulks(values);
+                await SendAllBulks(bulksFlattened);
             }
             catch (Exception e)
             {
                 _logger.Error("Exception caught sending Unique Keys.", e);
             }
+        }
+
+        protected async Task SendAllBulks(List<Mtks> bulksFlattened)
+        {
+            List<Mtks> bulksToSend = new List<Mtks>();
+            int bulkSize = 0;
+            foreach (var unique in bulksFlattened)
+            {
+                if ((unique.Keys.Count + bulkSize) > _maxBulkSize)
+                {
+                    await _senderAdapter.RecordUniqueKeysAsync(bulksToSend);
+                    bulkSize = 0;
+                    bulksToSend = new List<Mtks>();
+                }
+                bulkSize += unique.Keys.Count;
+                bulksToSend.Add(unique);
+            }
+            await _senderAdapter.RecordUniqueKeysAsync(bulksToSend);
+        }
+
+        protected List<Mtks> FlattenBulks(List<Mtks> values)
+        {
+            List<Mtks> bulksFlattened = new List<Mtks>();
+            foreach (var unique in values)
+            {
+                var bulks = ConvertToBulks(unique);
+                bulksFlattened.AddRange(bulks);
+            }
+            return bulksFlattened;
+        }
+
+        protected List<Mtks> ConvertToBulks(Mtks unique)
+        {
+            if (unique.Keys.Count > _maxBulkSize)
+            {
+                List<Mtks> chunks = new List<Mtks>();
+                var uniqueTemp = new List<String>(unique.Keys.ToArray());
+                var bulks = Util.Helper.ChunkBy(uniqueTemp, _maxBulkSize);
+                foreach (var bulk in bulks)
+                {
+                    chunks.Add(new Mtks(unique.Feature, new HashSet<string>(bulk)));
+                }
+                return chunks;
+            }
+
+            return new List<Mtks> { unique };
         }
         #endregion
     }

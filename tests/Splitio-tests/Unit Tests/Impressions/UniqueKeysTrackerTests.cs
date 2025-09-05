@@ -6,7 +6,6 @@ using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -52,7 +51,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Assert.
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test", "feature-name-test"));
 
-            Thread.Sleep(1500);
+            Thread.Sleep(2000);
 
             _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Once);
 
@@ -65,7 +64,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public void Track_WithFullSize_ShouldSendBulk()
+        public void Track_WithFullSize_ShouldSendTwoBulk()
         {
             // Arrange.
             _cache.Clear();
@@ -101,38 +100,53 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Assert.AreEqual(1, values2.Count);
             _cache.TryGetValue("feature-name-test-3", out HashSet<string> values3);
             Assert.AreEqual(1, values3.Count);
+            Assert.IsTrue(_uniqueKeysTracker.Track("key-test", "feature-name-test-5"));
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-5"));
 
-            Thread.Sleep(500);
-            _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Once);
+            Thread.Sleep(2000);
+            _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Exactly(2));
 
             _cache.Clear();
         }
 
         [TestMethod]
-        public void Track_WithFullSize_ShouldSendTwoBulk()
+        public void Track_WithFullSize_ShouldSplitBulks()
         {
             // Arrange.
-            _cache.Clear();
-
+            Mock<IFilterAdapter> _filterAdapter2 = new Mock<IFilterAdapter>();
+            Mock<IStatusManager> _statusManager2 = new Mock<IStatusManager>();
+            TasksManager _tasksManager2 = new TasksManager(_statusManager2.Object);
+            var _cache2 = new ConcurrentDictionary<string, HashSet<string>>();
+            _cache2.Clear();
+            Mock<IImpressionsSenderAdapter> _senderAdapter2 = new Mock<IImpressionsSenderAdapter>();
+                        
             var config = new ComponentConfig(6, 3);
-            var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 1);
-            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
-            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Enums.Task.MtkSendBulkData);
-            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask, sendBulkDataTask);
+            var task = _tasksManager2.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 1);
+            var cacheLongTermCleaningTask = _tasksManager2.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
+            var sendBulkDataTask = _tasksManager2.NewOnTimeTask(Splitio.Enums.Task.MtkSendBulkData);
+            UniqueKeysTracker _uniqueKeysTracker2 = new UniqueKeysTracker(config, _filterAdapter2.Object, _cache2, _senderAdapter2.Object, task, cacheLongTermCleaningTask, sendBulkDataTask);
 
             // Act && Assert.
-            Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test"));
-            Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-2"));
-            Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-3"));
-            Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-4"));
-            Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-5"));
-            Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-6"));
+            Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-1", "feature-name-test"));
+            Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-2", "feature-name-test"));
+            Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-3", "feature-name-test"));
+            Thread.Sleep(1000);
+            Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-4", "feature-name-test"));
+            Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-5", "feature-name-test"));
+            Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-6", "feature-name-test"));
+            Thread.Sleep(1000);
+            Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-1", "feature-name-test-2"));
+            Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-2", "feature-name-test-2"));
+            Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-3", "feature-name-test-2"));
+            Thread.Sleep(1000);
+            Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-4", "feature-name-test-2"));
+            Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-5", "feature-name-test-2"));
+            Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-6", "feature-name-test-2"));
+            Thread.Sleep(1000);
 
-            Thread.Sleep(500);
-            _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Exactly(2));
+            _senderAdapter2.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Exactly(4));
 
-            _cache.Clear();
+            _cache2.Clear();
         }
     }
 }
