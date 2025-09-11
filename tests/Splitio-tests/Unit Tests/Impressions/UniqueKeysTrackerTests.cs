@@ -90,6 +90,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Assert.IsFalse(_uniqueKeysTracker.Track("key-test", "feature-name-test"));
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test"));
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-2"));
+            Thread.Sleep(2000);
             Assert.IsFalse(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-2"));
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-3"));
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-4"));
