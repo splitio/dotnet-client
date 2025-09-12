@@ -32,7 +32,7 @@
         public static int DestroyTimeount => 30000;
         public static int IntervalToClearLongTermCache => 3600000;
         public static string Control => "control";
-        public static string SdkVersion => "7.11.2";
+        public static string SdkVersion => "7.12.0";
     }
 
     public static class Urls

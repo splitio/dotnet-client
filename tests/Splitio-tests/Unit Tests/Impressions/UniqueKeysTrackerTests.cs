@@ -69,7 +69,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Arrange.
             _cache.Clear();
 
-            var config = new ComponentConfig(5, 5);
+            var config = new ComponentConfig(10, 5);
             var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 1);
             var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
             var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Enums.Task.MtkSendBulkData);

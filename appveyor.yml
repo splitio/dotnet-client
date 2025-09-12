@@ -4,7 +4,7 @@ image:
 nuget:
   account_feed: true
 
-version: 7.12.2-rc.{build}
+version: 7.12.3-rc.{build}
 dotnet_csproj:
   patch: true
   file: '**\*.csproj'
