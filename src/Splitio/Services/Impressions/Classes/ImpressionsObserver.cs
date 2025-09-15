@@ -51,17 +51,17 @@ namespace Splitio.Services.Impressions.Classes
 #if NET45
                 if (_cache.TryGetValue(hash, out long previous))
                 {
-                    toReturn = Math.Min(previous, impression.Time);
+                    toReturn = Math.Min(previous, impression.time);
                 }
 
-                _cache.AddOrUpdate(hash, impression.Time);
+                _cache.AddOrUpdate(hash, impression.time);
 #else
                 if (_cache.TryGet(hash, out long previous))
                 {
-                    toReturn = Math.Min(previous, impression.Time);
+                    toReturn = Math.Min(previous, impression.time);
                 }
 
-                _cache.AddOrUpdate(hash, impression.Time);
+                _cache.AddOrUpdate(hash, impression.time);
 #endif
             }
             catch (Exception ex)

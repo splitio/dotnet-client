@@ -188,8 +188,8 @@ namespace Splitio.Tests.Common
             Assert.AreEqual("off", result2);
 
             var impExp = Helper.GetImpressionExpected("semver_between", "mauro_test");
-            KeyImpression impressionExpected1 = new KeyImpression(impExp.KeyName, impExp.Feature, impExp.Treatment, impExp.Time, impExp.ChangeNumber, impExp.Label, impExp.BucketingKey, impExp.ImpressionsDisabled, impExp.PreviousTime, impExp.Optimized);
-            impressionExpected1.Properties = "{\"prop1\":\"val1\"}";
+            KeyImpression impressionExpected1 = new KeyImpression(impExp.keyName, impExp.feature, impExp.treatment, impExp.time, impExp.changeNumber, impExp.label, impExp.bucketingKey, impExp.ImpressionsDisabled, impExp.previousTime, impExp.optimized);
+            impressionExpected1.properties = "{\"prop1\":\"val1\"}";
             var impressionExpected2 = Helper.GetImpressionExpected("semver_between", "mauro_test2");
 
             //Validate impressions sent to the be.

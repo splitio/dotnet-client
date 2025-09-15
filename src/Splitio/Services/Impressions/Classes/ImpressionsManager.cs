@@ -64,7 +64,7 @@ namespace Splitio.Services.Impressions.Classes
             var validatorResult = _propertiesValidator.IsValid(properties);
             if (validatorResult.Success && properties != null)
             {
-                impression.Properties = JsonConvertWrapper.SerializeObject(validatorResult.Value);
+                impression.properties = JsonConvertWrapper.SerializeObject(validatorResult.Value);
             }
             
             try
@@ -75,7 +75,7 @@ namespace Splitio.Services.Impressions.Classes
                     _impressionsCounter.Inc(treatmentResult.FeatureFlagName, treatmentResult.ImpTime);
                     _uniqueKeysTracker.Track(key.matchingKey, treatmentResult.FeatureFlagName);
                 }
-                else if (string.IsNullOrEmpty(impression.Properties))
+                else if (string.IsNullOrEmpty(impression.properties))
                 {
                     switch (_impressionsMode)
                     {
@@ -86,9 +86,9 @@ namespace Splitio.Services.Impressions.Classes
                         case ImpressionsMode.Optimized:
                             // In OPTIMIZED mode we should track the total amount of evaluations and deduplicate the impressions.
                             ShouldCalculatePreviousTime(impression);
-                            if (impression.PreviousTime.HasValue)
+                            if (impression.previousTime.HasValue)
                                 _impressionsCounter.Inc(treatmentResult.FeatureFlagName, treatmentResult.ImpTime);
-                            impression.Optimized = ShouldQueueImpression(impression);
+                            impression.optimized = ShouldQueueImpression(impression);
                             break;
                     }
                 }
@@ -144,7 +144,7 @@ namespace Splitio.Services.Impressions.Classes
         // Public only for tests
         public static bool ShouldQueueImpression(KeyImpression impression)
         {
-            return !impression.PreviousTime.HasValue || (ImpressionsHelper.TruncateTimeFrame(impression.PreviousTime.Value) != ImpressionsHelper.TruncateTimeFrame(impression.Time));
+            return !impression.previousTime.HasValue || (ImpressionsHelper.TruncateTimeFrame(impression.previousTime.Value) != ImpressionsHelper.TruncateTimeFrame(impression.time));
         }
         #endregion
 
@@ -153,7 +153,7 @@ namespace Splitio.Services.Impressions.Classes
         {
             if (!_addPreviousTime) return;
             
-            impression.PreviousTime = _impressionsObserver.TestAndSet(impression);
+            impression.previousTime = _impressionsObserver.TestAndSet(impression);
         }
 
         private void LogImpressionListener(List<KeyImpression> impressions)
@@ -192,7 +192,7 @@ namespace Splitio.Services.Impressions.Classes
                 case ImpressionsMode.Optimized:
                 default:
                     impressionsToTrack = filteredImpressions
-                        .Where(i => i.Optimized || !string.IsNullOrEmpty(i.Properties))
+                        .Where(i => i.optimized || !string.IsNullOrEmpty(i.properties))
                         .ToList();
 
                     _telemetryRuntimeProducer?.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, filteredImpressions.Count - impressionsToTrack.Count);
