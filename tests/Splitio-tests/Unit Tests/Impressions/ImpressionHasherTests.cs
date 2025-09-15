@@ -29,43 +29,43 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             var impression = new KeyImpression
             {
-                Feature = "someFeature",
-                KeyName = "someKeyName",
-                Treatment = "someTreatment",
-                ChangeNumber = 3245463,
-                Label = "someLabel"
+                feature = "someFeature",
+                keyName = "someKeyName",
+                treatment = "someTreatment",
+                changeNumber = 3245463,
+                label = "someLabel"
             };
 
             var impression2 = new KeyImpression
             {
-                Feature = "someFeature",
-                KeyName = "someKeyName",
-                Treatment = "otherTreatment",
-                ChangeNumber = 3245463,
-                Label = "someLabel"
+                feature = "someFeature",
+                keyName = "someKeyName",
+                treatment = "otherTreatment",
+                changeNumber = 3245463,
+                label = "someLabel"
             };
 
             var result = impressionHasher.Process(impression);
             var result2 = impressionHasher.Process(impression2);
             Assert.AreNotEqual(result, result2);
 
-            impression2.KeyName = "otherKeyName";
+            impression2.keyName = "otherKeyName";
             var result3 = impressionHasher.Process(impression2);
             Assert.AreNotEqual(result2, result3);
 
-            impression2.Feature = "otherFeature";
+            impression2.feature = "otherFeature";
             var result4 = impressionHasher.Process(impression2);
             Assert.AreNotEqual(result3, result4);
 
-            impression2.Treatment = "treatment";
+            impression2.treatment = "treatment";
             var result5 = impressionHasher.Process(impression2);
             Assert.AreNotEqual(result4, result5);
 
-            impression2.Label = "otherLabel";
+            impression2.label = "otherLabel";
             var result6 = impressionHasher.Process(impression2);
             Assert.AreNotEqual(result5, result6);
 
-            impression2.ChangeNumber = 888755;
+            impression2.changeNumber = 888755;
             var result7 = impressionHasher.Process(impression2);
             Assert.AreNotEqual(result6, result7);
         }
@@ -77,25 +77,25 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             var impression = new KeyImpression
             {
-                Feature = null,
-                KeyName = "someKeyName",
-                Treatment = "someTreatment",
-                ChangeNumber = 3245463,
-                Label = "someLabel"
+                feature = null,
+                keyName = "someKeyName",
+                treatment = "someTreatment",
+                changeNumber = 3245463,
+                label = "someLabel"
             };
 
             Assert.IsNotNull(impressionHasher.Process(impression));
 
-            impression.KeyName = null;
+            impression.keyName = null;
             Assert.IsNotNull(impressionHasher.Process(impression));
 
-            impression.ChangeNumber = null;
+            impression.changeNumber = null;
             Assert.IsNotNull(impressionHasher.Process(impression));
 
-            impression.Label = null;
+            impression.label = null;
             Assert.IsNotNull(impressionHasher.Process(impression));
 
-            impression.Treatment = null;
+            impression.treatment = null;
             Assert.IsNotNull(impressionHasher.Process(impression));
         }
 

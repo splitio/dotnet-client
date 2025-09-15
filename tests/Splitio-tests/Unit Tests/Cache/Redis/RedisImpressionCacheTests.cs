@@ -35,7 +35,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var cache = new RedisImpressionsCache(redisAdapterMock.Object, config, false);
             var impressions = new List<KeyImpression>
             {
-                new KeyImpression { Feature = "test", ChangeNumber = 100, KeyName = "date", Label = "testdate", Time = 10000000 }
+                new KeyImpression { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000 }
             };
 
             //Act

@@ -90,11 +90,11 @@ namespace Splitio.Tests.Common.Resources
             Assert.IsFalse(string.IsNullOrEmpty(impressionActual.M.S));
 
             Assert.IsTrue(sentImpressions
-                .Where(si => impressionActual.I.B == si.BucketingKey)
-                .Where(si => impressionActual.I.C == si.ChangeNumber)
-                .Where(si => impressionActual.I.K == si.KeyName)
-                .Where(si => impressionActual.I.R == si.Label)
-                .Where(si => impressionActual.I.T == si.Treatment)
+                .Where(si => impressionActual.I.B == si.bucketingKey)
+                .Where(si => impressionActual.I.C == si.changeNumber)
+                .Where(si => impressionActual.I.K == si.keyName)
+                .Where(si => impressionActual.I.R == si.label)
+                .Where(si => impressionActual.I.T == si.treatment)
                 .Any());
         }
 
