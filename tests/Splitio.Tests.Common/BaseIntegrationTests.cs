@@ -1,10 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using HandlebarsDotNet.Features;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Tests.Common.Resources;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 
 namespace Splitio.Tests.Common
 {
@@ -343,8 +345,13 @@ namespace Splitio.Tests.Common
 
             client.BlockUntilReady(10000);
 
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> { 
+                    { "prop1", "val1" }
+                }
+            );
             // Act.
-            var result1 = client.GetTreatment("nico_test", "FACUNDO_TEST");
+            var result1 = client.GetTreatment("nico_test", "FACUNDO_TEST", evaluationOptions: evaluationOption);
             var result2 = client.GetTreatment("mauro_test", "FACUNDO_TEST");
             var result3 = client.GetTreatment("1", "Test_Save_1");
             var result4 = client.GetTreatment("24", "Test_Save_1");
@@ -356,7 +363,9 @@ namespace Splitio.Tests.Common
             Assert.AreEqual("on", result3);
             Assert.AreEqual("off", result4);
 
-            var impressionExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            var impExp = GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            KeyImpression impressionExpected1 = new KeyImpression(impExp.keyName, impExp.feature, impExp.treatment, impExp.time, impExp.changeNumber, impExp.label, impExp.bucketingKey, impExp.ImpressionsDisabled, impExp.previousTime, impExp.optimized);
+            impressionExpected1.properties = "{\"prop1\":\"val1\"}";
             var impressionExpected2 = GetImpressionExpected("FACUNDO_TEST", "mauro_test");
             var impressionExpected3 = GetImpressionExpected("Test_Save_1", "1");
             var impressionExpected4 = GetImpressionExpected("Test_Save_1", "24");
@@ -487,8 +496,14 @@ namespace Splitio.Tests.Common
 
             client.BlockUntilReady(10000);
 
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
+
             // Act.
-            var result1 = client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+            var result1 = client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST", evaluationOptions: evaluationOption);
             var result2 = client.GetTreatmentWithConfig("mauro_test", "FACUNDO_TEST");
             var result3 = client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
             var result4 = client.GetTreatmentWithConfig("test", "MAURO_TEST");
@@ -505,7 +520,9 @@ namespace Splitio.Tests.Common
             Assert.AreEqual("{\"version\":\"v2\"}", result3.Config);
             Assert.AreEqual("{\"version\":\"v1\"}", result4.Config);
 
-            var impExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            var impExp = GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            KeyImpression impExpected1 = new KeyImpression(impExp.keyName, impExp.feature, impExp.treatment, impExp.time, impExp.changeNumber, impExp.label, impExp.bucketingKey, impExp.ImpressionsDisabled, impExp.previousTime, impExp.optimized);
+            impExpected1.properties = "{\"prop1\":\"val1\"}";
             var impExpected2 = GetImpressionExpected("FACUNDO_TEST", "mauro_test");
             var impExpected3 = GetImpressionExpected("MAURO_TEST", "mauro");
             var impExpected4 = GetImpressionExpected("MAURO_TEST", "test");
@@ -610,8 +627,13 @@ namespace Splitio.Tests.Common
 
             client.BlockUntilReady(10000);
 
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
             // Act.
-            var result = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+            var result = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" }, evaluationOptions: evaluationOption);
             client.Destroy();
 
             // Assert.
@@ -619,9 +641,15 @@ namespace Splitio.Tests.Common
             Assert.AreEqual("off", result["MAURO_TEST"]);
             Assert.AreEqual("off", result["Test_Save_1"]);
 
-            var impExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
-            var impExpected2 = GetImpressionExpected("MAURO_TEST", "nico_test");
-            var impExpected3 = GetImpressionExpected("Test_Save_1", "nico_test");
+            var impExp = GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            KeyImpression impExpected1 = new KeyImpression(impExp.keyName, impExp.feature, impExp.treatment, impExp.time, impExp.changeNumber, impExp.label, impExp.bucketingKey, impExp.ImpressionsDisabled, impExp.previousTime, impExp.optimized);
+            impExpected1.properties = "{\"prop1\":\"val1\"}";
+            impExp = GetImpressionExpected("MAURO_TEST", "nico_test");
+            KeyImpression impExpected2 = new KeyImpression(impExp.keyName, impExp.feature, impExp.treatment, impExp.time, impExp.changeNumber, impExp.label, impExp.bucketingKey, impExp.ImpressionsDisabled, impExp.previousTime, impExp.optimized);
+            impExpected2.properties = "{\"prop1\":\"val1\"}";
+            impExp = GetImpressionExpected("Test_Save_1", "nico_test");
+            KeyImpression impExpected3 = new KeyImpression(impExp.keyName, impExp.feature, impExp.treatment, impExp.time, impExp.changeNumber, impExp.label, impExp.bucketingKey, impExp.ImpressionsDisabled, impExp.previousTime, impExp.optimized);
+            impExpected3.properties = "{\"prop1\":\"val1\"}";
 
             //Validate impressions sent to the be.
             AssertSentImpressions(3, impExpected1, impExpected2, impExpected3);
@@ -726,9 +754,14 @@ namespace Splitio.Tests.Common
             var client = splitFactory.Client();
 
             client.BlockUntilReady(10000);
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
 
             // Act.
-            var result = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+            var result = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" }, evaluationOptions: evaluationOption);
             client.Destroy();
 
             // Assert.
@@ -740,9 +773,15 @@ namespace Splitio.Tests.Common
             Assert.AreEqual("{\"version\":\"v1\"}", result["MAURO_TEST"].Config);
             Assert.IsNull(result["Test_Save_1"].Config);
 
-            var impExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
-            var impExpected2 = GetImpressionExpected("MAURO_TEST", "nico_test");
-            var impExpected3 = GetImpressionExpected("Test_Save_1", "nico_test");
+            var impExp = GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            KeyImpression impExpected1 = new KeyImpression(impExp.keyName, impExp.feature, impExp.treatment, impExp.time, impExp.changeNumber, impExp.label, impExp.bucketingKey, impExp.ImpressionsDisabled, impExp.previousTime, impExp.optimized);
+            impExpected1.properties = "{\"prop1\":\"val1\"}";
+            impExp = GetImpressionExpected("MAURO_TEST", "nico_test");
+            KeyImpression impExpected2 = new KeyImpression(impExp.keyName, impExp.feature, impExp.treatment, impExp.time, impExp.changeNumber, impExp.label, impExp.bucketingKey, impExp.ImpressionsDisabled, impExp.previousTime, impExp.optimized);
+            impExpected2.properties = "{\"prop1\":\"val1\"}";
+            impExp = GetImpressionExpected("Test_Save_1", "nico_test");
+            KeyImpression impExpected3 = new KeyImpression(impExp.keyName, impExp.feature, impExp.treatment, impExp.time, impExp.changeNumber, impExp.label, impExp.bucketingKey, impExp.ImpressionsDisabled, impExp.previousTime, impExp.optimized);
+            impExpected3.properties = "{\"prop1\":\"val1\"}";
 
             //Validate impressions sent to the be.
             AssertSentImpressions(3, impExpected1, impExpected2, impExpected3);
@@ -864,9 +903,14 @@ namespace Splitio.Tests.Common
             var client = splitFactory.Client();
 
             client.BlockUntilReady(10000);
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
 
             // Act.
-            var result = client.GetTreatmentsWithConfigByFlagSets("nico_test", new List<string> { "set_1", "set_2", "set_3", string.Empty, null });
+            var result = client.GetTreatmentsWithConfigByFlagSets("nico_test", new List<string> { "set_1", "set_2", "set_3", string.Empty, null }, evaluationOptions: evaluationOption);
             client.Destroy();
 
             // Assert.
@@ -876,8 +920,10 @@ namespace Splitio.Tests.Common
             Assert.AreEqual("{\"color\":\"green\"}", treatment.Value.Config);
 
             //Validate impressions sent to the be.
-            var impressionExpected = new KeyImpression("nico_test", "FACUNDO_TEST", "on", 0, 1506703262916, "whitelisted", null, false, null, false);
-            
+            var impExp = new KeyImpression("nico_test", "FACUNDO_TEST", "on", 0, 1506703262916, "whitelisted", null, false, null, false);
+            KeyImpression impressionExpected = new KeyImpression(impExp.keyName, impExp.feature, impExp.treatment, impExp.time, impExp.changeNumber, impExp.label, impExp.bucketingKey, impExp.ImpressionsDisabled, impExp.previousTime, impExp.optimized);
+            impressionExpected.properties = "{\"prop1\":\"val1\"}";
+
             AssertSentImpressions(1, impressionExpected);
             AssertImpressionListener(1, impressionListener);
             Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected);
@@ -923,9 +969,14 @@ namespace Splitio.Tests.Common
             var client = splitFactory.Client();
 
             client.BlockUntilReady(10000);
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
 
             // Act.
-            var result = client.GetTreatmentsByFlagSets("nico_test", new List<string> { "set_1", "set_2", "set_3", string.Empty, null });
+            var result = client.GetTreatmentsByFlagSets("nico_test", new List<string> { "set_1", "set_2", "set_3", string.Empty, null }, evaluationOptions: evaluationOption);
             client.Destroy();
 
             // Assert.
@@ -933,7 +984,9 @@ namespace Splitio.Tests.Common
             Assert.AreEqual("FACUNDO_TEST", treatment.Key);
             Assert.AreEqual("on", treatment.Value);
 
-            var impExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            var impExp = GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            KeyImpression impExpected1 = new KeyImpression(impExp.keyName, impExp.feature, impExp.treatment, impExp.time, impExp.changeNumber, impExp.label, impExp.bucketingKey, impExp.ImpressionsDisabled, impExp.previousTime, impExp.optimized);
+            impExpected1.properties = "{\"prop1\":\"val1\"}";
 
             //Validate impressions sent to the be.
             AssertSentImpressions(1, impExpected1);
@@ -981,9 +1034,14 @@ namespace Splitio.Tests.Common
             var client = splitFactory.Client();
 
             client.BlockUntilReady(10000);
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
 
             // Act.
-            var result = client.GetTreatmentsWithConfigByFlagSet("nico_test", "set_1");
+            var result = client.GetTreatmentsWithConfigByFlagSet("nico_test", "set_1", evaluationOptions: evaluationOption);
             client.Destroy();
 
             // Assert.
@@ -992,7 +1050,9 @@ namespace Splitio.Tests.Common
             Assert.AreEqual("on", treatment.Value.Treatment);
             Assert.AreEqual("{\"color\":\"green\"}", treatment.Value.Config);
 
-            var impExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            var impExp = GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            KeyImpression impExpected1 = new KeyImpression(impExp.keyName, impExp.feature, impExp.treatment, impExp.time, impExp.changeNumber, impExp.label, impExp.bucketingKey, impExp.ImpressionsDisabled, impExp.previousTime, impExp.optimized);
+            impExpected1.properties = "{\"prop1\":\"val1\"}";
 
             //Validate impressions sent to the be.
             AssertSentImpressions(1, impExpected1);
@@ -1040,9 +1100,14 @@ namespace Splitio.Tests.Common
             var client = splitFactory.Client();
 
             client.BlockUntilReady(10000);
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
 
             // Act.
-            var result = client.GetTreatmentsByFlagSet("nico_test", "set_1");
+            var result = client.GetTreatmentsByFlagSet("nico_test", "set_1", evaluationOptions: evaluationOption);
             client.Destroy();
 
             // Assert.
@@ -1050,7 +1115,9 @@ namespace Splitio.Tests.Common
             Assert.AreEqual("FACUNDO_TEST", treatment.Key);
             Assert.AreEqual("on", treatment.Value);
 
-            var impExpected1 = GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            var impExp = GetImpressionExpected("FACUNDO_TEST", "nico_test");
+            KeyImpression impExpected1 = new KeyImpression(impExp.keyName, impExp.feature, impExp.treatment, impExp.time, impExp.changeNumber, impExp.label, impExp.bucketingKey, impExp.ImpressionsDisabled, impExp.previousTime, impExp.optimized);
+            impExpected1.properties = "{\"prop1\":\"val1\"}";
 
             //Validate impressions sent to the be.
             AssertSentImpressions(1, impExpected1);

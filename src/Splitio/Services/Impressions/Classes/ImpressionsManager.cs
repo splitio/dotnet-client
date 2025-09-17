@@ -1,5 +1,6 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Tasks;
@@ -24,6 +25,7 @@ namespace Splitio.Services.Impressions.Classes
         private readonly ITasksManager _taskManager;
         private readonly ImpressionsMode _impressionsMode;
         private readonly IUniqueKeysTracker _uniqueKeysTracker;
+        private readonly IPropertiesValidator _propertiesValidator;
         private readonly bool _addPreviousTime;
         private readonly bool _labelsEnabled;
 
@@ -36,7 +38,8 @@ namespace Splitio.Services.Impressions.Classes
             ITasksManager taskManager,
             IUniqueKeysTracker uniqueKeysTracker,
             IImpressionsObserver impressionsObserver,
-            bool labelsEnabled)
+            bool labelsEnabled,
+            IPropertiesValidator propertiesValidator)
         {
             _impressionsLog = impressionsLog;
             _customerImpressionListener = customerImpressionListener;
@@ -48,35 +51,46 @@ namespace Splitio.Services.Impressions.Classes
             _impressionsMode = impressionsMode;
             _uniqueKeysTracker = uniqueKeysTracker;
             _labelsEnabled = labelsEnabled;
+            _propertiesValidator = propertiesValidator;
         }
 
         #region Public Methods
-        public KeyImpression Build(TreatmentResult result, Key key)
+        public KeyImpression Build(TreatmentResult treatmentResult, Key key, Dictionary<string, object> properties)
         {
-            if (Labels.SplitNotFound.Equals(result.Label)) return null;
+            if (Labels.SplitNotFound.Equals(treatmentResult.Label)) return null;
 
-            var impression = new KeyImpression(key.matchingKey, result.FeatureFlagName, result.Treatment, result.ImpTime, result.ChangeNumber, _labelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null, result.ImpressionsDisabled);
+            var impression = new KeyImpression(key.matchingKey, treatmentResult.FeatureFlagName, treatmentResult.Treatment, treatmentResult.ImpTime, treatmentResult.ChangeNumber, _labelsEnabled ? treatmentResult.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null, treatmentResult.ImpressionsDisabled);
+
+            var validatorResult = _propertiesValidator.IsValid(properties);
+            if (validatorResult.Success && properties != null)
+            {
+                impression.properties = JsonConvertWrapper.SerializeObject(validatorResult.Value);
+            }
             
             try
             {
                 // In NONE mode we should track the total amount of evaluations and the unique keys.
-                if (_impressionsMode == ImpressionsMode.None || result.ImpressionsDisabled)
+                if (_impressionsMode == ImpressionsMode.None || treatmentResult.ImpressionsDisabled)
                 {
-                    _impressionsCounter.Inc(result.FeatureFlagName, result.ImpTime);
-                    _uniqueKeysTracker.Track(key.matchingKey, result.FeatureFlagName);
-                } else if (_impressionsMode == ImpressionsMode.Debug)
+                    _impressionsCounter.Inc(treatmentResult.FeatureFlagName, treatmentResult.ImpTime);
+                    _uniqueKeysTracker.Track(key.matchingKey, treatmentResult.FeatureFlagName);
+                }
+                else if (string.IsNullOrEmpty(impression.properties))
                 {
-                    // In DEBUG mode we should calculate the pt only. 
-
-                    ShouldCalculatePreviousTime(impression);
-                } else if (_impressionsMode == ImpressionsMode.Optimized)
-                {
-                    // In OPTIMIZED mode we should track the total amount of evaluations and deduplicate the impressions.
-
-                    ShouldCalculatePreviousTime(impression);
-                    if (impression.previousTime.HasValue)
-                        _impressionsCounter.Inc(result.FeatureFlagName, result.ImpTime);
-                        impression.Optimized = ShouldQueueImpression(impression);
+                    switch (_impressionsMode)
+                    {
+                        case ImpressionsMode.Debug:
+                            // In DEBUG mode we should calculate the pt only.
+                            ShouldCalculatePreviousTime(impression);
+                            break;
+                        case ImpressionsMode.Optimized:
+                            // In OPTIMIZED mode we should track the total amount of evaluations and deduplicate the impressions.
+                            ShouldCalculatePreviousTime(impression);
+                            if (impression.previousTime.HasValue)
+                                _impressionsCounter.Inc(treatmentResult.FeatureFlagName, treatmentResult.ImpTime);
+                            impression.optimized = ShouldQueueImpression(impression);
+                            break;
+                    }
                 }
             }
             catch (Exception ex)
@@ -165,20 +179,26 @@ namespace Splitio.Services.Impressions.Classes
                 .Where(i => !i.ImpressionsDisabled)
                 .ToList();
 
-            if (filteredImpressions.Count == 0) return false;
+            if (filteredImpressions.Count == 0)
+            {
+                return false;
+            }
 
             switch (_impressionsMode)
             {
                 case ImpressionsMode.Debug:
-                    impressionsToTrack.AddRange(filteredImpressions);
+                    impressionsToTrack = filteredImpressions;
                     break;
                 case ImpressionsMode.Optimized:
                 default:
-                    impressionsToTrack.AddRange(filteredImpressions.Where(i => i.Optimized).ToList());
-                    var deduped = filteredImpressions.Count - impressionsToTrack.Count;
-                    _telemetryRuntimeProducer?.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, deduped);
+                    impressionsToTrack = filteredImpressions
+                        .Where(i => i.optimized || !string.IsNullOrEmpty(i.properties))
+                        .ToList();
+
+                    _telemetryRuntimeProducer?.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, filteredImpressions.Count - impressionsToTrack.Count);
                     break;
             }
+
             return true;
         }
 

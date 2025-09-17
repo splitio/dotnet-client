@@ -71,7 +71,7 @@ namespace Splitio.Services.Shared.Classes
             baseConfig.UniqueKeysRefreshRate = 300;
             baseConfig.ImpressionsCounterRefreshRate = 300;
             baseConfig.ImpressionsCountBulkSize = 10000;
-            baseConfig.UniqueKeysBulkSize = 10000;
+            baseConfig.UniqueKeysBulkSize = 5000;
 
             return baseConfig;
         }
@@ -93,7 +93,7 @@ namespace Splitio.Services.Shared.Classes
                 ImpressionsCounterCacheMaxSize = baseConfig.ImpressionsCounterCacheMaxSize,
                 FlagSetsFilter = baseConfig.FlagSetsFilter,
                 FlagSetsInvalid = baseConfig.FlagSetsInvalid,
-                UniqueKeysBulkSize = 30000,
+                UniqueKeysBulkSize = 5000,
                 ImpressionsCountBulkSize = 30000,
                 UniqueKeysRefreshRate = 3600,
                 ImpressionsCounterRefreshRate = 1800, // Send bulk impressions count - Refresh rate: 30 min.

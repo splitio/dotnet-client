@@ -172,9 +172,14 @@ namespace Splitio.Tests.Common
             var client = splitFactory.Client();
 
             client.BlockUntilReady(10000);
+            EvaluationOptions evaluationOption = new EvaluationOptions(
+                new Dictionary<string, object> {
+                    { "prop1", "val1" }
+                }
+            );
 
             // Act.
-            var result1 = await client.GetTreatmentAsync("mauro_test", "semver_between", new Dictionary<string, object> { { "version", "2.0.0" } });
+            var result1 = await client.GetTreatmentAsync("mauro_test", "semver_between", new Dictionary<string, object> { { "version", "2.0.0" } }, evaluationOptions: evaluationOption);
             var result2 = await client.GetTreatmentAsync("mauro_test2", "semver_between", new Dictionary<string, object> { { "version", "3.0.0" } });
             client.Destroy();
 
@@ -182,7 +187,9 @@ namespace Splitio.Tests.Common
             Assert.AreEqual("on", result1);
             Assert.AreEqual("off", result2);
 
-            var impressionExpected1 = Helper.GetImpressionExpected("semver_between", "mauro_test");
+            var impExp = Helper.GetImpressionExpected("semver_between", "mauro_test");
+            KeyImpression impressionExpected1 = new KeyImpression(impExp.keyName, impExp.feature, impExp.treatment, impExp.time, impExp.changeNumber, impExp.label, impExp.bucketingKey, impExp.ImpressionsDisabled, impExp.previousTime, impExp.optimized);
+            impressionExpected1.properties = "{\"prop1\":\"val1\"}";
             var impressionExpected2 = Helper.GetImpressionExpected("semver_between", "mauro_test2");
 
             //Validate impressions sent to the be.

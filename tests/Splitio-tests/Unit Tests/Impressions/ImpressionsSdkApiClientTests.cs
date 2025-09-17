@@ -41,12 +41,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 new KeyImpression("matching-key", "feature-1", "treatment", 34534550, 3333444, "label", "bucketing-key", false, 34534546),
                 new KeyImpression("matching-key", "feature-2", "treatment", 34534546, 3333444, "label", "bucketing-key", false),
             };
-
+            impressions[2].properties = "{\"prop\":\"val\"}";
             // Act.
             var result = ImpressionsSdkApiClient.ConvertToJson(impressions);
 
             // Assert.
-            var expected = "[{\"f\":\"feature-1\",\"i\":[{\"k\":\"matching-key\",\"t\":\"treatment\",\"m\":34534546,\"c\":3333444,\"r\":\"label\",\"b\":\"bucketing-key\"},{\"k\":\"matching-key\",\"t\":\"treatment\",\"m\":34534550,\"c\":3333444,\"r\":\"label\",\"b\":\"bucketing-key\"}]},{\"f\":\"feature-2\",\"i\":[{\"k\":\"matching-key\",\"t\":\"treatment\",\"m\":34534546,\"c\":3333444,\"r\":\"label\",\"b\":\"bucketing-key\"}]}]";
+            var expected = "[{\"f\":\"feature-1\",\"i\":[{\"k\":\"matching-key\",\"t\":\"treatment\",\"m\":34534546,\"c\":3333444,\"r\":\"label\",\"b\":\"bucketing-key\"},{\"k\":\"matching-key\",\"t\":\"treatment\",\"m\":34534550,\"c\":3333444,\"r\":\"label\",\"b\":\"bucketing-key\"}]},{\"f\":\"feature-2\",\"i\":[{\"k\":\"matching-key\",\"t\":\"treatment\",\"m\":34534546,\"c\":3333444,\"r\":\"label\",\"b\":\"bucketing-key\",\"properties\":\"{\\\"prop\\\":\\\"val\\\"}\"}]}]";
             Assert.AreEqual(expected, result);
         }
     }

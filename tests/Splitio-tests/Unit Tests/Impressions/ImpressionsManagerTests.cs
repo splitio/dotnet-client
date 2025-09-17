@@ -5,6 +5,7 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
@@ -25,6 +26,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private readonly Mock<IUniqueKeysTracker> _uniqueKeysTracker;
         private readonly Mock<IStatusManager> _statusManager;
+        private readonly Mock<IPropertiesValidator> _propertiesValidator;
         private readonly ITasksManager _tasksManager;
 
         public ImpressionsManagerTests()
@@ -36,7 +38,15 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();
             _uniqueKeysTracker = new Mock<IUniqueKeysTracker>();
             _statusManager = new Mock<IStatusManager>();
+            _propertiesValidator = new Mock<IPropertiesValidator>();
             _tasksManager = new TasksManager(_statusManager.Object);
+
+            _propertiesValidator
+                .Setup(mock => mock.IsValid(It.IsAny<Dictionary<string, object>>()))
+                .Returns(new PropertiesValidatorResult
+                {
+                    Success = false,
+                });
         }
 
         [TestMethod]
@@ -53,7 +63,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 .Returns(ptTime);
 
             // Act.
-            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
+            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), null);
 
             // Assert.
             Assert.AreEqual("matching-key", result.keyName);
@@ -80,7 +90,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 .Returns((long?)null);
 
             // Act.
-            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
+            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), null);
 
             // Assert.
             Assert.AreEqual("matching-key", result.keyName);
@@ -103,7 +113,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
             // Act.
-            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
+            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), null);
 
             // Assert.
             Assert.AreEqual("matching-key", result.keyName);
@@ -118,6 +128,44 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
+        public void BuildImpressionWithOptimizedAndProperties()
+        {
+            // Arrange.
+            var impressionsManager = GetManager(_customerImpressionListener.Object, labelsEnabled: true);
+
+            var impTime = CurrentTimeHelper.CurrentTimeMillis();
+            var ptTime = impTime - 150;
+            var properties = new Dictionary<string, object> { { "prop", "val" } };
+
+            _impressionsObserver
+                .Setup(mock => mock.TestAndSet(It.IsAny<KeyImpression>()))
+                .Returns(ptTime);
+            _propertiesValidator
+                .Setup(mock => mock.IsValid(It.IsAny<Dictionary<string, object>>()))
+                .Returns(new PropertiesValidatorResult
+                {
+                    Success = true,
+                    Value = properties
+                });
+
+            // Act.
+            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), properties);
+
+            // Assert.
+            Assert.AreEqual("matching-key", result.keyName);
+            Assert.AreEqual("feature", result.feature);
+            Assert.AreEqual("off", result.treatment);
+            Assert.AreEqual("label", result.label);
+            Assert.AreEqual("bucketing-key", result.bucketingKey);
+            Assert.AreEqual(null, result.previousTime);
+            Assert.AreEqual("{\"prop\":\"val\"}", result.properties);
+
+            _impressionsObserver.Verify(mock => mock.TestAndSet(It.IsAny<KeyImpression>()), Times.Never);
+            _impressionsCounter.Verify(mock => mock.Inc("feature", impTime), Times.Never);
+        }
+
+
+        [TestMethod]
         public void BuildAndTrack()
         {
             // Arrange.
@@ -126,7 +174,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
             // Act.
-            var imp = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
+            var imp = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), null);
             impressionsManager.Track(new List<KeyImpression> { imp });
            
             // Assert.
@@ -147,7 +195,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
             // Act.
-            var imp = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
+            var imp = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), null);
             impressionsManager.Track(new List<KeyImpression> { imp });
 
             // Assert.
@@ -273,10 +321,10 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
             var impressions = new List<KeyImpression>
             {
-                impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"))
+                impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), null),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"), null),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"), null),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"), null)
             };
 
             var optimizedImpressions = impressions.Where(i => ImpressionsManager.ShouldQueueImpression(i)).ToList();
@@ -305,10 +353,10 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
             var impressions = new List<KeyImpression>
             {
-                impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"))
+                impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), null),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"), null),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"), null),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"), null)
             };
 
             // Act.
@@ -332,7 +380,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
             // Act.
-            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
+            var result = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), null);
 
             // Assert.
             Assert.AreEqual("matching-key", result.keyName);
@@ -355,7 +403,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
 
             // Act.
-            var imp = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"));
+            var imp = impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), null);
             impressionsManager.Track(new List<KeyImpression> { imp });
 
             // Assert.
@@ -374,10 +422,10 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             var impressions = new List<KeyImpression>
             {
-                impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key")),
-                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"))
+                impressionsManager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), null),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"), null),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"), null),
+                impressionsManager.Build(new TreatmentResult("feature-2", "label-2", "off", false, 432543, impTime: impTime), new Key("matching-key-2", "bucketing-key"), null)
             };
 
             // Act.
@@ -402,8 +450,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Act.
             await manager.TrackAsync(new List<KeyImpression>
             {
-                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
-                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"))
+                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), null),
+                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), null)
             });
 
             // Assert.
@@ -430,8 +478,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Act.
             await manager.TrackAsync(new List<KeyImpression>
             {
-                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
-                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"))
+                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), null),
+                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), null)
             });
 
             // Assert.
@@ -459,8 +507,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Act.
             await manager.TrackAsync(new List<KeyImpression>
             {
-                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key")),
-                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"))
+                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), null),
+                manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), null)
             });
 
             // Assert.
@@ -472,7 +520,89 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, 0), Times.Never);
         }
 
-        private ImpressionsManager GetManager(IImpressionListener impressionListener, ImpressionsMode mode = ImpressionsMode.Optimized, bool addPt = true, bool labelsEnabled = false, IImpressionsObserver impressionsObserver = null)
+        [TestMethod]
+        public async Task BuildAndTrackAsyncDebugdWithProperties()
+        {
+            // Arrange.
+            _propertiesValidator
+                .SetupSequence(mock => mock.IsValid(It.IsAny<Dictionary<string, object>>()))
+                .Returns(new PropertiesValidatorResult
+                {
+                    Success = true,
+                    Value = new Dictionary<string, object> { { "city", "mdp" } }
+                })
+                .Returns(new PropertiesValidatorResult
+                {
+                    Success = true,
+                    Value = new Dictionary<string, object>{ { "city", "tandil" } }
+                });
+
+            var manager = GetManager(_customerImpressionListener.Object, ImpressionsMode.Debug, addPt: true, labelsEnabled: true);
+            var impTime = CurrentTimeHelper.CurrentTimeMillis();
+
+            _impressionsObserver
+                .SetupSequence(mock => mock.TestAndSet(It.IsAny<KeyImpression>()))
+                .Returns((long?)null)
+                .Returns(100);
+
+            // Act.
+            var imp1 = manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), new Dictionary<string, object> { { "city", "mdp" } });
+            var imp2 = manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), new Dictionary<string, object> { { "city", "tandil" } });
+            await manager.TrackAsync(new List<KeyImpression>{ imp1, imp2 });
+
+            // Assert.
+            Assert.AreEqual("{\"city\":\"mdp\"}", imp1.properties);
+            Assert.AreEqual("{\"city\":\"tandil\"}", imp2.properties);
+            _impressionsCounter.Verify(mock => mock.Inc("feature", It.IsAny<long>()), Times.Never);
+            _impressionsObserver.Verify(mock => mock.TestAndSet(It.IsAny<KeyImpression>()), Times.Never);
+            _impressionsLog.Verify(mock => mock.LogAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
+            _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsQueued, 2), Times.Once);
+            _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, 0), Times.Once);
+            _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, 0), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task BuildAndTrackAsyncOptimizedWithProperties()
+        {
+            // Arrange.
+            _propertiesValidator
+                .SetupSequence(mock => mock.IsValid(It.IsAny<Dictionary<string, object>>()))
+                .Returns(new PropertiesValidatorResult
+                {
+                    Success = true,
+                    Value = new Dictionary<string, object> { { "city", "mdp" } }
+                })
+                .Returns(new PropertiesValidatorResult
+                {
+                    Success = true,
+                    Value = new Dictionary<string, object>{ { "city", "tandil" } }
+                });
+
+            var manager = GetManager(_customerImpressionListener.Object, ImpressionsMode.Optimized, addPt: true, labelsEnabled: true);
+            var impTime = CurrentTimeHelper.CurrentTimeMillis();
+
+            _impressionsObserver
+                .SetupSequence(mock => mock.TestAndSet(It.IsAny<KeyImpression>()))
+                .Returns((long?)null)
+                .Returns(100);
+
+            // Act.
+            var imp1 = manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), new Dictionary<string, object> { { "city", "mdp" } });
+            var imp2 = manager.Build(new TreatmentResult("feature", "label", "off", false, 432543, impTime: impTime), new Key("matching-key", "bucketing-key"), new Dictionary<string, object> { { "city", "tandil" } });
+            await manager.TrackAsync(new List<KeyImpression>{ imp1, imp2 });
+
+            // Assert.
+            Assert.AreEqual("{\"city\":\"mdp\"}", imp1.properties);
+            Assert.AreEqual("{\"city\":\"tandil\"}", imp2.properties);
+            _impressionsCounter.Verify(mock => mock.Inc("feature", It.IsAny<long>()), Times.Never);
+            _impressionsObserver.Verify(mock => mock.TestAndSet(It.IsAny<KeyImpression>()), Times.Never);
+            _impressionsLog.Verify(mock => mock.LogAsync(It.IsAny<List<KeyImpression>>()), Times.Once);
+            _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsQueued, 2), Times.Once);
+            _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDropped, 0), Times.Once);
+            _telemetryRuntimeProducer.Verify(mock => mock.RecordImpressionsStats(ImpressionsEnum.ImpressionsDeduped, 0), Times.Once);
+        }
+
+        private ImpressionsManager GetManager(IImpressionListener impressionListener, ImpressionsMode mode = ImpressionsMode.Optimized, bool addPt = true, bool labelsEnabled = false, IImpressionsObserver impressionsObserver = null, IPropertiesValidator propertiesValidator = null)
         {
             return new ImpressionsManager(_impressionsLog.Object,
                 impressionListener,
@@ -483,7 +613,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 _tasksManager,
                 _uniqueKeysTracker.Object,
                 impressionsObserver ?? _impressionsObserver.Object,
-                labelsEnabled);
+                labelsEnabled,
+                propertiesValidator ?? _propertiesValidator.Object);
         }
     }
 }
