@@ -61,7 +61,7 @@ namespace Splitio.Domain
         public FallbackTreatment GlobalFallbackTreatment { get; set; }
         public Dictionary<string, FallbackTreatment> ByFlagFallbackTreatment { get; set; }
 
-        private Dictionary<string, FallbackTreatment> buildByFlag(Dictionary<string, string> byFlagString)
+        private static Dictionary<string, FallbackTreatment> buildByFlag(Dictionary<string, string> byFlagString)
         {
             var byFlagFallbackTreatment = new Dictionary<string, FallbackTreatment>();
             foreach (var byflag in byFlagString)
