@@ -101,6 +101,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _cache.TryGetValue("feature-name-test-3", out HashSet<string> values3);
             Assert.AreEqual(1, values3.Count);
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test", "feature-name-test-5"));
+            Thread.Sleep(1000);
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-5"));
 
             Thread.Sleep(2000);
