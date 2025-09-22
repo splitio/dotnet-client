@@ -2,6 +2,7 @@
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -16,7 +17,7 @@ namespace Splitio.Services.InputValidation.Classes
 
         public FallbackTreatmentsConfiguration validate(FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration, Enums.API method)
         {
-            FallbackTreatmentsConfiguration processedFallback = new FallbackTreatmentsConfiguration(null, null);
+            FallbackTreatmentsConfiguration processedFallback = new FallbackTreatmentsConfiguration();
             if (fallbackTreatmentsConfiguration == null)
                 return processedFallback;
 
@@ -57,7 +58,7 @@ namespace Splitio.Services.InputValidation.Classes
                 return null;
             }
 
-            if ((!Regex.Match(name, TreatmentMatcher).Success))
+            if (!Regex.IsMatch(name, TreatmentMatcher, RegexOptions.None, TimeSpan.FromMilliseconds(100)))
             {
                 _log.Error($"{method}: you passed {name}, treatment must adhere to the regular expression {TreatmentMatcher}");
                 return null;

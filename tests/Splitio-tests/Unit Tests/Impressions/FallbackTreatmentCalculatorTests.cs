@@ -11,10 +11,10 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     {
 
         [TestMethod]
-        public async Task Works()
+        public void Works()
         {
             // Arrange.
-            FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on"), null);
+            FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on"));
             FallbackTreatmentCalculator fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
             Assert.AreEqual("on", fallbackTreatmentCalculator.resolve("anyflag", "exception").Treatment);
             Assert.AreEqual("fallback - exception", fallbackTreatmentCalculator.resolve("anyflag", "exception").Label);
@@ -27,7 +27,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Assert.AreEqual("off", fallbackTreatmentCalculator.resolve("flag", "exception").Treatment);
             Assert.AreEqual("fallback - exception", fallbackTreatmentCalculator.resolve("flag", "exception").Label);
 
-            fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(null,
+            fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(
                 new Dictionary<string, FallbackTreatment>() {{ "flag", new FallbackTreatment("off") }
             } );
             fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);

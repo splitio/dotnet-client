@@ -1,12 +1,11 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
-using System;
 
 namespace Splitio.Services.Impressions.Classes
 {
     public class FallbackTreatmentCalculator : IFallbackTreatmentCalculator
     {
-        FallbackTreatmentsConfiguration FallbackTreatmentsConfiguration;
+        readonly FallbackTreatmentsConfiguration FallbackTreatmentsConfiguration;
         const string labelPrefix = "fallback - ";
 
         public FallbackTreatmentCalculator(FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration)
@@ -38,7 +37,7 @@ namespace Splitio.Services.Impressions.Classes
             return new FallbackTreatment(Constants.Gral.Control, null, label);
         }
 
-        private String resolveLabel(String label)
+        private static string resolveLabel(string label)
         {
             if (label == null)
             {
@@ -47,7 +46,7 @@ namespace Splitio.Services.Impressions.Classes
             return labelPrefix + label;
         }
 
-        private FallbackTreatment copyWithLabel(FallbackTreatment fallbackTreatment, String label)
+        private static FallbackTreatment copyWithLabel(FallbackTreatment fallbackTreatment, string label)
         {
             return new FallbackTreatment(fallbackTreatment.Treatment, fallbackTreatment.Config, label);
         }
