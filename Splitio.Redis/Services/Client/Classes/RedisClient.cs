@@ -139,7 +139,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private void BuildEvaluator()
         {
             var splitter = new Splitter();
-            _evaluator = new Evaluator(_featureFlagCacheConsumer, splitter, _telemetryEvaluationProducer);
+            _evaluator = new Evaluator(_featureFlagCacheConsumer, splitter, _telemetryEvaluationProducer, new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration()));
         }
 
         private void BuildTelemetryStorage()

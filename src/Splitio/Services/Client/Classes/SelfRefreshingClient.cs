@@ -174,7 +174,7 @@ namespace Splitio.Services.Client.Classes
         private void BuildEvaluator()
         {
             var splitter = new Splitter();
-            _evaluator = new Evaluator.Evaluator(_featureFlagCache, splitter, _telemetryEvaluationProducer);
+            _evaluator = new Evaluator.Evaluator(_featureFlagCache, splitter, _telemetryEvaluationProducer, new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration()));
         }
 
         private static int Random(int refreshRate)
