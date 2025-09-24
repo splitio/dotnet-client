@@ -4,6 +4,7 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Evaluator;
+using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Parsing;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.Parsing.Matchers;
@@ -21,7 +22,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
         private readonly Mock<IFeatureFlagCacheConsumer> _splitCache;
         private readonly Mock<ITelemetryEvaluationProducer> _telemetryEvaluationProducer;
 
-        private readonly IEvaluator _evaluator;
+        private IEvaluator _evaluator;
 
         public EvaluatorAsyncTests()
         {
@@ -29,7 +30,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             _splitCache = new Mock<IFeatureFlagCacheConsumer>();
             _telemetryEvaluationProducer = new Mock<ITelemetryEvaluationProducer>();
 
-            _evaluator = new Splitio.Services.Evaluator.Evaluator(_splitCache.Object, _splitter.Object, _telemetryEvaluationProducer.Object);
+            _evaluator = new Splitio.Services.Evaluator.Evaluator(_splitCache.Object, _splitter.Object, _telemetryEvaluationProducer.Object, new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration()));
         }
 
         #region EvaluateFeature
@@ -699,6 +700,102 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             Assert.AreEqual("off", flag2.Treatment);
             var flag3 = results.First(x => x.FeatureFlagName.Equals("flag3"));
             Assert.AreEqual("off", flag3.Treatment);
+        }
+        #endregion
+
+        #region EvaluateWithFallbackTreatments
+        [TestMethod]
+        public async Task EvaluateWithFallbackTreatments()
+        {
+            string splitName = "test";
+            _splitCache
+                .Setup(mock => mock.FetchManyAsync(new List<string> { splitName }))
+                .ReturnsAsync(new List<ParsedSplit> { null });
+            FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on"));
+            FallbackTreatmentCalculator fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
+            _evaluator = new Splitio.Services.Evaluator.Evaluator(_splitCache.Object, _splitter.Object, _telemetryEvaluationProducer.Object, fallbackTreatmentCalculator);
+
+            List<TreatmentResult> result = await _evaluator.EvaluateFeaturesAsync(
+                                                    Splitio.Enums.API.GetTreatment,
+                                                    new Key("key", null),
+                                                    new List<string> { splitName }, null);
+            Assert.AreEqual("on", result[0].Treatment);
+            Assert.AreEqual("fallback - definition not found", result[0].Label);
+
+            ParsedSplit split = EvaluatorAsyncTests.FeatureFlagOn("flag1");
+            splitName = split.name;
+            split.conditions = null;
+            _splitCache
+                .Setup(mock => mock.FetchManyAsync(new List<string> { splitName }))
+                .ReturnsAsync(new List<ParsedSplit> { split });
+            result = await _evaluator.EvaluateFeaturesAsync(
+                                        Splitio.Enums.API.GetTreatment,
+                                        new Key("key", null),
+                                        new List<string> { splitName }, null);
+            Assert.AreEqual("on", result[0].Treatment);
+            Assert.AreEqual("fallback - exception", result[0].Label);
+
+            // using byflag only
+            _splitCache
+                .Setup(mock => mock.FetchManyAsync(new List<string> { splitName, "another_name" }))
+                .ReturnsAsync(new List<ParsedSplit> { null });
+            fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(
+                new Dictionary<string, FallbackTreatment>() { { splitName, new FallbackTreatment("off") } });
+            fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
+            _evaluator = new Splitio.Services.Evaluator.Evaluator(_splitCache.Object, _splitter.Object, _telemetryEvaluationProducer.Object, fallbackTreatmentCalculator);
+
+            result = await _evaluator.EvaluateFeaturesAsync(
+                                        Splitio.Enums.API.GetTreatment,
+                                        new Key("key", null),
+                                        new List<string> { splitName, "another_name" }, null);
+            Assert.AreEqual("off", result[0].Treatment);
+            Assert.AreEqual("fallback - definition not found", result[0].Label);
+            Assert.AreEqual("control", result[1].Treatment);
+            Assert.AreEqual("definition not found", result[1].Label);
+
+            ParsedSplit split2 = EvaluatorAsyncTests.FeatureFlagOn("flag1");
+            split2.name = "another_name";
+            split2.conditions = null;
+            _splitCache
+                .Setup(mock => mock.FetchManyAsync(new List<string> { splitName, "another_name" }))
+                .ReturnsAsync(new List<ParsedSplit> { split, split2 });
+            result = await _evaluator.EvaluateFeaturesAsync(
+                                        Splitio.Enums.API.GetTreatment,
+                                        new Key("key", null),
+                                        new List<string> { splitName, "another_name" }, null);
+            Assert.AreEqual("off", result[0].Treatment);
+            Assert.AreEqual("fallback - exception", result[0].Label);
+            Assert.AreEqual("control", result[1].Treatment);
+            Assert.AreEqual("exception", result[1].Label);
+
+            // with byflag
+            _splitCache
+                .Setup(mock => mock.FetchManyAsync(new List<string> { splitName, "another_name" }))
+                .ReturnsAsync(new List<ParsedSplit> { null });
+            fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on"), new Dictionary<string, FallbackTreatment>() { { splitName, new FallbackTreatment("off") } });
+            fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
+            _evaluator = new Splitio.Services.Evaluator.Evaluator(_splitCache.Object, _splitter.Object, _telemetryEvaluationProducer.Object, fallbackTreatmentCalculator);
+
+            result = await _evaluator.EvaluateFeaturesAsync(
+                                        Splitio.Enums.API.GetTreatment,
+                                        new Key("key", null),
+                                        new List<string> { splitName, "another_name" }, null);
+            Assert.AreEqual("off", result[0].Treatment);
+            Assert.AreEqual("fallback - definition not found", result[0].Label);
+            Assert.AreEqual("on", result[1].Treatment);
+            Assert.AreEqual("fallback - definition not found", result[1].Label);
+
+            _splitCache
+                .Setup(mock => mock.FetchManyAsync(new List<string> { splitName, "another_name" }))
+                .ReturnsAsync(new List<ParsedSplit> { split, split2 });
+            result = await _evaluator.EvaluateFeaturesAsync(
+                                        Splitio.Enums.API.GetTreatment,
+                                        new Key("key", null),
+                                        new List<string> { splitName, "another_name" }, null);
+            Assert.AreEqual("off", result[0].Treatment);
+            Assert.AreEqual("fallback - exception", result[0].Label);
+            Assert.AreEqual("on", result[1].Treatment);
+            Assert.AreEqual("fallback - exception", result[1].Label);
         }
         #endregion
 

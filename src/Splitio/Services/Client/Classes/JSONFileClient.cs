@@ -58,7 +58,7 @@ namespace Splitio.Services.Client.Classes
             _trafficTypeValidator = trafficTypeValidator;
             _blockUntilReadyService = new NoopBlockUntilReadyService();
             _manager = new SplitManager(_featureFlagCache, _blockUntilReadyService);
-            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter(), null);
+            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter(), null, new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration()));
             _uniqueKeysTracker = new NoopUniqueKeysTracker();
             _impressionsCounter = new NoopImpressionsCounter();
             _impressionsObserver = new NoopImpressionsObserver();
