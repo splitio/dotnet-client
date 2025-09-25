@@ -29,7 +29,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private ConnectionPoolManager _connectionPoolManager;
         private IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
 
-        public RedisClient(ConfigurationOptions config, string apiKey) : base(apiKey)
+        public RedisClient(ConfigurationOptions config, string apiKey) : base(apiKey, new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration()))
         {
             _config = new RedisConfig();
 

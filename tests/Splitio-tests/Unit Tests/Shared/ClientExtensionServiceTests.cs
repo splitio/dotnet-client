@@ -3,6 +3,7 @@ using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Filters;
+using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
@@ -47,7 +48,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             _flagSetsValidator = new FlagSetsValidator();
             _flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
 
-            _service = new ClientExtensionService(_blockUntilReadyService.Object, _statusManager.Object, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer.Object, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator, _flagSetsValidator, _flagSetsFilter);
+            _service = new ClientExtensionService(_blockUntilReadyService.Object, _statusManager.Object, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer.Object, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator, _flagSetsValidator, _flagSetsFilter, new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration()));
         }
 
         [TestMethod]
@@ -255,7 +256,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
         {
             // Arrange.
             var flagSetsFilter = new FlagSetsFilter(new HashSet<string> { "set1", "set2" });
-            var service = new ClientExtensionService(_blockUntilReadyService.Object, _statusManager.Object, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer.Object, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator, _flagSetsValidator, flagSetsFilter);
+            var service = new ClientExtensionService(_blockUntilReadyService.Object, _statusManager.Object, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer.Object, _eventTypeValidator, _eventPropertiesValidator, _trafficTypeValidator, _flagSetsValidator, flagSetsFilter, new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration()));
 
             var key = new Key("match-key", null);
             var flagSets = new List<string> { "set5", "set4", "set3", "set2", "set1", "set" };

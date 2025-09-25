@@ -1,12 +1,22 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using AnyOfTypes;
+using HandlebarsDotNet.Features;
+using Microsoft.CSharp.RuntimeBinder;
+using Microsoft.OpenApi.Any;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Client.Classes;
+using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Common;
+using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
+using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Telemetry.Storages;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -21,7 +31,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         private Mock<IEvaluator> _evaluatorMock;
         private Mock<IImpressionsManager> _impressionsManager;
         private Mock<ISyncManager> _syncManager;
-
+        private Mock<ITelemetryEvaluationProducer> _telemetryEvaluationProducer;
         private SplitClientForTesting _splitClientForTesting;
 
         [TestInitialize]
@@ -33,8 +43,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             _evaluatorMock = new Mock<IEvaluator>();
             _impressionsManager = new Mock<IImpressionsManager>();
             _syncManager = new Mock<ISyncManager>();
+            _telemetryEvaluationProducer = new Mock<ITelemetryEvaluationProducer>();
 
-            _splitClientForTesting = new SplitClientForTesting(_splitCacheMock.Object, _eventsLogMock.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluatorMock.Object, _impressionsManager.Object, _syncManager.Object);
+            _splitClientForTesting = new SplitClientForTesting(_splitCacheMock.Object, _eventsLogMock.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluatorMock.Object, _impressionsManager.Object, _syncManager.Object, new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration()), _telemetryEvaluationProducer.Object);
 
             _splitClientForTesting.BlockUntilReady(1000);
         }
@@ -746,6 +757,131 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
         #endregion
 
+        #region FallbackTreatments
+        [TestMethod]
+        public void FallbackTreatments_WhenFlagDoesNotExist()
+        {
+            Mock<ISplitter> _splitter = new Mock<ISplitter>();
+            Mock<IFeatureFlagCache> _splitCache = new Mock<IFeatureFlagCache>();
+            Mock<ITelemetryEvaluationProducer> _telemetryEvaluationProducer = new Mock<ITelemetryEvaluationProducer>();
+
+            string splitName = "test";
+            _splitCache
+                .Setup(mock => mock.FetchMany(new List<string> { splitName, "feature" }))
+                .Returns(new List<ParsedSplit> { null });
+            _splitCache
+                .Setup(mock => mock.GetNamesByFlagSets(new List<string> { "set" }))
+                .Returns(new Dictionary<string, HashSet<string>> { { "set", new HashSet<string>() { splitName, "feature" } } });
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on-global", "\"prop\":\"global\""), new Dictionary<string, FallbackTreatment>() { { splitName, new FallbackTreatment("off-local", "\"prop\":\"local\"") } });
+            FallbackTreatmentCalculator fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
+            IEvaluator _evaluator = new Splitio.Services.Evaluator.Evaluator(_splitCache.Object, _splitter.Object, _telemetryEvaluationProducer.Object, fallbackTreatmentCalculator);
+            _splitClientForTesting = new SplitClientForTesting(_splitCache.Object, _eventsLogMock.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluator, _impressionsManager.Object, _syncManager.Object, fallbackTreatmentCalculator, _telemetryEvaluationProducer.Object);
+            _splitClientForTesting.BlockUntilReady(1000);
+
+            string treatment = _splitClientForTesting.GetTreatment("key", splitName);
+            Assert.AreEqual("off-local", treatment);
+
+            SplitResult splitResult = _splitClientForTesting.GetTreatmentWithConfig("key", splitName);
+            Assert.AreEqual("off-local", splitResult.Treatment);
+            Assert.AreEqual("\"prop\":\"local\"", splitResult.Config);
+
+            Dictionary<string, string> treatments = _splitClientForTesting.GetTreatments("key", new List<string>() { splitName, "feature" } );
+            treatments.TryGetValue(splitName, out treatment);
+            Assert.AreEqual("off-local", treatment);
+            treatments.TryGetValue("feature", out treatment);
+            Assert.AreEqual("on-global", treatment);
+
+            Dictionary<string, SplitResult> splitResults = _splitClientForTesting.GetTreatmentsWithConfig("key", new List<string>() { splitName, "feature" });
+            splitResults.TryGetValue(splitName, out splitResult);
+            Assert.AreEqual("off-local", splitResult.Treatment);
+            Assert.AreEqual("\"prop\":\"local\"", splitResult.Config);
+            splitResults.TryGetValue("feature", out splitResult);
+            Assert.AreEqual("on-global", splitResult.Treatment);
+            Assert.AreEqual("\"prop\":\"global\"", splitResult.Config);
+
+            treatments = _splitClientForTesting.GetTreatmentsByFlagSet("key", "set");
+            treatments.TryGetValue(splitName, out treatment);
+            Assert.AreEqual("off-local", treatment);
+            treatments.TryGetValue("feature", out treatment);
+            Assert.AreEqual("on-global", treatment);
+
+            treatments = _splitClientForTesting.GetTreatmentsByFlagSets("key", new List<string>() { "set" });
+            treatments.TryGetValue(splitName, out treatment);
+            Assert.AreEqual("off-local", treatment);
+            treatments.TryGetValue("feature", out treatment);
+            Assert.AreEqual("on-global", treatment);
+
+            splitResults = _splitClientForTesting.GetTreatmentsWithConfigByFlagSet("key", "set");
+            splitResults.TryGetValue(splitName, out splitResult);
+            Assert.AreEqual("off-local", splitResult.Treatment);
+            Assert.AreEqual("\"prop\":\"local\"", splitResult.Config);
+            splitResults.TryGetValue("feature", out splitResult);
+            Assert.AreEqual("on-global", splitResult.Treatment);
+            Assert.AreEqual("\"prop\":\"global\"", splitResult.Config);
+
+            splitResults = _splitClientForTesting.GetTreatmentsWithConfigByFlagSets("key", new List<string>() { "set" });
+            splitResults.TryGetValue(splitName, out splitResult);
+            Assert.AreEqual("off-local", splitResult.Treatment);
+            Assert.AreEqual("\"prop\":\"local\"", splitResult.Config);
+            splitResults.TryGetValue("feature", out splitResult);
+            Assert.AreEqual("on-global", splitResult.Treatment);
+            Assert.AreEqual("\"prop\":\"global\"", splitResult.Config);
+        }
+
+        [TestMethod]
+        public void FallbackTreatments_WhenExceptionInClient()
+        {
+            Mock<ISplitter> _splitter = new Mock<ISplitter>();
+            Mock<IFeatureFlagCache> _splitCache = new Mock<IFeatureFlagCache>();
+            Mock<ITelemetryEvaluationProducer> _telemetryEvaluationProducer = new Mock<ITelemetryEvaluationProducer>();
+
+            string splitName = "test";
+            _splitCache
+                .Setup(mock => mock.FetchMany(new List<string> { splitName, "feature" }))
+                .Returns(new List<ParsedSplit> { null });
+            _splitCache
+                .Setup(mock => mock.GetNamesByFlagSets(new List<string> { "set" }))
+                .Returns(new Dictionary<string, HashSet<string>> { { "set", new HashSet<string>() { splitName, "feature" } } });
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on-global", "\"prop\":\"global\""), new Dictionary<string, FallbackTreatment>() { { splitName, new FallbackTreatment("off-local", "\"prop\":\"local\"") } });
+            FallbackTreatmentCalculator fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
+            _evaluatorMock = new Mock<IEvaluator>();
+            _evaluatorMock
+                .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
+                .Throws<Exception>();
+
+            _splitClientForTesting = new SplitClientForTesting(_splitCache.Object, _eventsLogMock.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluatorMock.Object, _impressionsManager.Object, _syncManager.Object, fallbackTreatmentCalculator, _telemetryEvaluationProducer.Object);
+            _splitClientForTesting.BlockUntilReady(1000);
+
+            string treatment = _splitClientForTesting.GetTreatment("key", splitName);
+            Assert.AreEqual("off-local", treatment);
+
+            SplitResult splitResult = _splitClientForTesting.GetTreatmentWithConfig("key", splitName);
+            Assert.AreEqual("off-local", splitResult.Treatment);
+            Assert.AreEqual("\"prop\":\"local\"", splitResult.Config);
+
+            Dictionary<string, string> treatments = _splitClientForTesting.GetTreatments("key", new List<string>() { splitName, "feature" });
+            treatments.TryGetValue(splitName, out treatment);
+            Assert.AreEqual("off-local", treatment);
+            treatments.TryGetValue("feature", out treatment);
+            Assert.AreEqual("on-global", treatment);
+
+            Dictionary<string, SplitResult> splitResults = _splitClientForTesting.GetTreatmentsWithConfig("key", new List<string>() { splitName, "feature" });
+            splitResults.TryGetValue(splitName, out splitResult);
+            Assert.AreEqual("off-local", splitResult.Treatment);
+            Assert.AreEqual("\"prop\":\"local\"", splitResult.Config);
+            splitResults.TryGetValue("feature", out splitResult);
+            Assert.AreEqual("on-global", splitResult.Treatment);
+            Assert.AreEqual("\"prop\":\"global\"", splitResult.Config);
+        }
+        #endregion
         #region Track
         [TestMethod]
         public void Track_ShouldReturnFalse_WithNullKey()
