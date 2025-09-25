@@ -25,12 +25,14 @@ namespace Splitio.Services.Client.Classes
         private readonly IFeatureFlagCache _featureFlagCache;
         private readonly ILocalhostFileSync _localhostFileSync;
         private readonly string _fullPath;
+        private readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
         private readonly object _lock = new object();
 
-        public LocalhostClient(ConfigurationOptions configurationOptions) : base("localhost", new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration()))
+        public LocalhostClient(ConfigurationOptions configurationOptions, FallbackTreatmentCalculator fallbackTreatmentCalculator) : base("localhost", fallbackTreatmentCalculator)
         {
             var configs = (LocalhostClientConfigurations)_configService.ReadConfig(configurationOptions, ConfigTypes.Localhost, _statusManager);
+            _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
 
             _fullPath = LookupFilePath(configs.FilePath);
 
@@ -63,7 +65,7 @@ namespace Splitio.Services.Client.Classes
             _blockUntilReadyService = new NoopBlockUntilReadyService();
             _manager = new SplitManager(_featureFlagCache, _blockUntilReadyService);
             _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCache, _blockUntilReadyService);
-            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter(), null, new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration()));
+            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter(), null, _fallbackTreatmentCalculator);
             _uniqueKeysTracker = new NoopUniqueKeysTracker();
             _impressionsCounter = new NoopImpressionsCounter();
             _impressionsObserver = new NoopImpressionsObserver();

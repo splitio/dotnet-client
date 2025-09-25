@@ -28,10 +28,12 @@ namespace Splitio.Redis.Services.Client.Classes
         private IImpressionsCache _impressionsCache;
         private ConnectionPoolManager _connectionPoolManager;
         private IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
+        private readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
-        public RedisClient(ConfigurationOptions config, string apiKey) : base(apiKey, new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration()))
+        public RedisClient(ConfigurationOptions config, string apiKey, FallbackTreatmentCalculator fallbackTreatmentCalculator) : base(apiKey, fallbackTreatmentCalculator)
         {
             _config = new RedisConfig();
+            _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
 
             ReadConfig(config);
 
@@ -139,7 +141,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private void BuildEvaluator()
         {
             var splitter = new Splitter();
-            _evaluator = new Evaluator(_featureFlagCacheConsumer, splitter, _telemetryEvaluationProducer, new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration()));
+            _evaluator = new Evaluator(_featureFlagCacheConsumer, splitter, _telemetryEvaluationProducer, _fallbackTreatmentCalculator);
         }
 
         private void BuildTelemetryStorage()

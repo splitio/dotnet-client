@@ -2,10 +2,12 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Tests.Common.Resources;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 
 namespace Splitio.Tests.Common
@@ -1148,6 +1150,91 @@ namespace Splitio.Tests.Common
             Assert.IsFalse(result.Any());
             Assert.IsFalse(result2.Any());
             Assert.AreEqual(0, impressionListener.Count(), $"{_mode}: Impression Listener not match");
+        }
+        #endregion
+
+        #region FallbackTreatments
+        [TestMethod]
+        public void FallbackTreatments_WhenFeatureDoesNotExist()
+        {
+            var features = new List<string> { "feature2", "feature" };
+            FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on-global", "\"prop\":\"global\""), new Dictionary<string, FallbackTreatment>() { { "feature", new FallbackTreatment("off-local", "\"prop\":\"local\"") } });
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+            configurations.FallbackTreatments = fallbackTreatmentsConfiguration;
+
+            var apikey = "base-apikey10";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = client.GetTreatmentsWithConfig("nico_test", features);
+            client.Destroy();
+
+            // Assert.
+            Assert.AreEqual("on-global", result["feature2"].Treatment);
+            Assert.AreEqual("off-local", result["feature"].Treatment);
+
+            Assert.AreEqual("\"prop\":\"global\"", result["feature2"].Config);
+            Assert.AreEqual("\"prop\":\"local\"", result["feature"].Config);
+
+            var impExp = GetImpressionExpected("feature2", "nico_test");
+            KeyImpression impExpected1 = new KeyImpression(impExp.keyName, impExp.feature, impExp.treatment, impExp.time, impExp.changeNumber, impExp.label, impExp.bucketingKey, impExp.ImpressionsDisabled, impExp.previousTime, impExp.optimized);
+            impExp = GetImpressionExpected("feature", "nico_test");
+            KeyImpression impExpected2 = new KeyImpression(impExp.keyName, impExp.feature, impExp.treatment, impExp.time, impExp.changeNumber, impExp.label, impExp.bucketingKey, impExp.ImpressionsDisabled, impExp.previousTime, impExp.optimized);
+
+            //Validate impressions sent to the be.
+            AssertSentImpressions(2, impExpected1, impExpected2);
+
+            // Validate impressions.
+            AssertImpressionListener(2, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("feature2", "nico_test"), impExpected1);
+            Helper.AssertImpression(impressionListener.Get("feature", "nico_test"), impExpected2);
+        }
+
+        [TestMethod]
+        public void FallbackTreatments_WhenExceptionOccurrs()
+        {
+            var features = new List<string> { "feature3" };
+            FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on-global", "\"prop\":\"global\""), new Dictionary<string, FallbackTreatment>() { { "feature", new FallbackTreatment("off-local", "\"prop\":\"local\"") } });
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+            configurations.FallbackTreatments = fallbackTreatmentsConfiguration;
+
+            var apikey = "base-apikey10";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+            
+            FieldInfo propertyInfo = client.GetType().GetField("_evaluator", BindingFlags.NonPublic | BindingFlags.Instance);
+            var currentEvaluator = propertyInfo.GetValue(client);
+
+            FieldInfo property2 = currentEvaluator.GetType().GetField("_featureFlagCacheConsumer", BindingFlags.NonPublic | BindingFlags.Instance);
+            property2.SetValue(currentEvaluator, null);
+
+            // Act.
+            var result = client.GetTreatmentsWithConfig("nico_test", features);
+            client.Destroy();
+
+            // Assert.
+            Assert.AreEqual("on-global", result["feature3"].Treatment);
+
+            Assert.AreEqual("\"prop\":\"global\"", result["feature3"].Config);
+
+            var impExp = GetImpressionExpected("feature3", "nico_test");
+            KeyImpression impExpected1 = new KeyImpression(impExp.keyName, impExp.feature, impExp.treatment, impExp.time, impExp.changeNumber, impExp.label, impExp.bucketingKey, impExp.ImpressionsDisabled, impExp.previousTime, impExp.optimized);
+
+            //Validate impressions sent to the be.
+            AssertSentImpressions(1, impExpected1);
+
+            // Validate impressions.
+            AssertImpressionListener(1, impressionListener);
+            Helper.AssertImpression(impressionListener.Get("feature3", "nico_test"), impExpected1);
         }
         #endregion
 
