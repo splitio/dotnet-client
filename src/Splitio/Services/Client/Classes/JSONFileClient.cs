@@ -20,7 +20,6 @@ namespace Splitio.Services.Client.Classes
     {
         private readonly IFeatureFlagCache _featureFlagCache;
         private readonly ISegmentCache _segmentCache;
-        private readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
         public JSONFileClient(string splitsFilePath,
             string segmentsFilePath,

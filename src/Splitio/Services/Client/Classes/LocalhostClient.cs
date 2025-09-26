@@ -25,7 +25,7 @@ namespace Splitio.Services.Client.Classes
         private readonly IFeatureFlagCache _featureFlagCache;
         private readonly ILocalhostFileSync _localhostFileSync;
         private readonly string _fullPath;
-        private readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
+        private readonly new FallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
         private readonly object _lock = new object();
 

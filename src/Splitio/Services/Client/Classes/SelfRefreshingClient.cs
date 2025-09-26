@@ -51,7 +51,7 @@ namespace Splitio.Services.Client.Classes
         private IUpdater<Split> _featureFlagUpdater;
         private IRuleBasedSegmentCache _ruleBasedSegmentCache;
         private IUpdater<RuleBasedSegmentDto> _ruleBasedSegmentUpdater;
-        private readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
+        private readonly new FallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config,
             FallbackTreatmentCalculator fallbackTreatmentCalculator) : base(apiKey, fallbackTreatmentCalculator)
