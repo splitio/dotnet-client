@@ -1,5 +1,6 @@
 using Splitio.Domain;
 using Splitio.Services.Client.Interfaces;
+using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Shared.Classes;
@@ -56,7 +57,8 @@ namespace Splitio.Services.Client.Classes
         }
 
         private void BuildSplitClient()
-        { 
+        {
+            FallbackTreatmentCalculator fallbackTreatmentCalculator = new FallbackTreatmentCalculator(_options.FallbackTreatments);
             switch (_options.Mode)
             {
                 case Mode.Standalone:
@@ -64,11 +66,11 @@ namespace Splitio.Services.Client.Classes
 
                     if (_apiKey == "localhost")
                     {
-                        _client = new LocalhostClient(_options);
+                        _client = new LocalhostClient(_options, fallbackTreatmentCalculator);
                     }
                     else
                     {
-                        _client = new SelfRefreshingClient(_apiKey, _options);
+                        _client = new SelfRefreshingClient(_apiKey, _options, fallbackTreatmentCalculator);
                     }
                     break;
                 case Mode.Consumer:
@@ -79,7 +81,7 @@ namespace Splitio.Services.Client.Classes
                         var redisAssembly = Assembly.Load(new AssemblyName("Splitio.Redis"));
                         var redisType = redisAssembly.GetType("Splitio.Redis.Services.Client.Classes.RedisClient");
 
-                        _client = (ISplitClient)Activator.CreateInstance(redisType, new object[] { _options, _apiKey });
+                        _client = (ISplitClient)Activator.CreateInstance(redisType, new object[] { _options, _apiKey, fallbackTreatmentCalculator });
                     }
                     catch (ArgumentException ex)
                     {

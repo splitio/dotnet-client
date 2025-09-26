@@ -23,6 +23,7 @@ namespace Splitio.Services.Client.Classes
 
         public JSONFileClient(string splitsFilePath,
             string segmentsFilePath,
+            FallbackTreatmentCalculator fallbackTreatmentCalculator,
             ISegmentCache segmentCacheInstance = null,
             IFeatureFlagCache featureFlagCacheInstance = null,
             IImpressionsLog impressionsLog = null,
@@ -30,7 +31,8 @@ namespace Splitio.Services.Client.Classes
             IEventsLog eventsLog = null,
             ITrafficTypeValidator trafficTypeValidator = null,
             IImpressionsManager impressionsManager = null,
-            IRuleBasedSegmentCache ruleBasedSegmentCache = null) : base("localhost", new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration()))
+            IRuleBasedSegmentCache ruleBasedSegmentCache = null
+            ) : base("localhost", fallbackTreatmentCalculator)
         {
             _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var rbsCache = ruleBasedSegmentCache ?? new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>());
@@ -58,7 +60,7 @@ namespace Splitio.Services.Client.Classes
             _trafficTypeValidator = trafficTypeValidator;
             _blockUntilReadyService = new NoopBlockUntilReadyService();
             _manager = new SplitManager(_featureFlagCache, _blockUntilReadyService);
-            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter(), null, new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration()));
+            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter(), null, fallbackTreatmentCalculator);
             _uniqueKeysTracker = new NoopUniqueKeysTracker();
             _impressionsCounter = new NoopImpressionsCounter();
             _impressionsObserver = new NoopImpressionsObserver();

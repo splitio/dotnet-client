@@ -70,7 +70,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _cache.Clear();
 
             var config = new ComponentConfig(10, 5);
-            var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 3);
+            var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 2);
             var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
             var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Enums.Task.MtkSendBulkData);
             _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask, sendBulkDataTask);
