@@ -28,7 +28,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private IImpressionsCache _impressionsCache;
         private ConnectionPoolManager _connectionPoolManager;
         private IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
-        private readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
+        private readonly new FallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
         public RedisClient(ConfigurationOptions config, string apiKey, FallbackTreatmentCalculator fallbackTreatmentCalculator) : base(apiKey, fallbackTreatmentCalculator)
         {
