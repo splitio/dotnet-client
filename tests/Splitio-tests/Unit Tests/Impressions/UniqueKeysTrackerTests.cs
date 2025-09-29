@@ -65,13 +65,13 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void Track_WithFullSize_ShouldSendTwoBulk()
         {
             // Arrange.
-            var _cache = new ConcurrentDictionary<string, HashSet<string>>();
+            var _cache3 = new ConcurrentDictionary<string, HashSet<string>>();
 
             var config = new ComponentConfig(10, 5);
             var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 2);
             var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
             var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Enums.Task.MtkSendBulkData);
-            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask, sendBulkDataTask);
+            _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache3, _senderAdapter.Object, task, cacheLongTermCleaningTask, sendBulkDataTask);
 
             _filterAdapter
                 .SetupSequence(mock => mock.Contains("feature-name-test", "key-test"))
@@ -91,12 +91,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Assert.IsFalse(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-2"));
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-3"));
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-4"));
-            Assert.AreEqual(4, _cache.Count);
-            _cache.TryGetValue("feature-name-test", out HashSet<string> values);
+            Assert.AreEqual(4, _cache3.Count);
+            _cache3.TryGetValue("feature-name-test", out HashSet<string> values);
             Assert.AreEqual(2, values.Count);
-            _cache.TryGetValue("feature-name-test-2", out HashSet<string> values2);
+            _cache3.TryGetValue("feature-name-test-2", out HashSet<string> values2);
             Assert.AreEqual(1, values2.Count);
-            _cache.TryGetValue("feature-name-test-3", out HashSet<string> values3);
+            _cache3.TryGetValue("feature-name-test-3", out HashSet<string> values3);
             Assert.AreEqual(1, values3.Count);
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test", "feature-name-test-5"));
             Thread.Sleep(1000);
@@ -104,8 +104,6 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             Thread.Sleep(3000);
             _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Exactly(2));
-
-            _cache.Clear();
         }
 
         [TestMethod]
