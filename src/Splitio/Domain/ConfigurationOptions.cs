@@ -32,6 +32,7 @@ namespace Splitio.Services.Client.Classes
         public bool RandomizeRefreshRates { get; set; }
         public ISplitLogger Logger { get; set; }
         public List<string> FlagSetsFilter { get; set; }
+        public FallbackTreatmentsConfiguration FallbackTreatments { get; set; }
 
         // Urls.
         public string Endpoint { get; set; }

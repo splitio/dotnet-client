@@ -1,5 +1,7 @@
 CHANGES
-7.12.0 (Sep 26, 2025)
+
+7.12.0 (Sep 30, 2025)
+- Added new configuration for Fallback Treatments, which allows setting a treatment value and optional config to be returned in place of "control", either globally or by flag. Read more in our docs.
 - Added a maximum size payload when posting unique keys telemetry in batches
 - Added a new optional argument to the client `getTreatment` methods to allow passing additional evaluation options, such as a map of properties to append to the generated impressions sent to Split backend. Read more in our docs.
 

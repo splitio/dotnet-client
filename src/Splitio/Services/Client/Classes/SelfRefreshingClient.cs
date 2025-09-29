@@ -51,10 +51,13 @@ namespace Splitio.Services.Client.Classes
         private IUpdater<Split> _featureFlagUpdater;
         private IRuleBasedSegmentCache _ruleBasedSegmentCache;
         private IUpdater<RuleBasedSegmentDto> _ruleBasedSegmentUpdater;
+        private readonly new FallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
-        public SelfRefreshingClient(string apiKey, ConfigurationOptions config) : base(apiKey)
+        public SelfRefreshingClient(string apiKey, ConfigurationOptions config,
+            FallbackTreatmentCalculator fallbackTreatmentCalculator) : base(apiKey, fallbackTreatmentCalculator)
         {
             _config = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfigTypes.InMemory);
+            _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
 
             BuildFlagSetsFilter(_config.FlagSetsFilter);
             BuildSplitCache();
@@ -174,7 +177,7 @@ namespace Splitio.Services.Client.Classes
         private void BuildEvaluator()
         {
             var splitter = new Splitter();
-            _evaluator = new Evaluator.Evaluator(_featureFlagCache, splitter, _telemetryEvaluationProducer);
+            _evaluator = new Evaluator.Evaluator(_featureFlagCache, splitter, _telemetryEvaluationProducer, _fallbackTreatmentCalculator);
         }
 
         private static int Random(int refreshRate)
