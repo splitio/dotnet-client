@@ -64,7 +64,7 @@ namespace Splitio.Services.Client.Classes
         protected IClientExtensionService _clientExtensionService;
         protected IFlagSetsFilter _flagSetsFilter;
 
-        public SplitClient(string apikey, FallbackTreatmentCalculator fallbackTreatmentCalculator)
+        protected SplitClient(string apikey, FallbackTreatmentCalculator fallbackTreatmentCalculator)
         {
             ApiKey = apikey;
 

@@ -22,7 +22,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
         private readonly Mock<IFeatureFlagCacheConsumer> _splitCache;
         private readonly Mock<ITelemetryEvaluationProducer> _telemetryEvaluationProducer;
 
-        private IEvaluator _evaluator;
+        private Splitio.Services.Evaluator.Evaluator _evaluator;
 
         public EvaluatorAsyncTests()
         {

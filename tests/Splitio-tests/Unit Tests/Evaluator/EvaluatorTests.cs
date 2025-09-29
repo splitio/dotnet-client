@@ -3,7 +3,6 @@ using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
-using Splitio.Services.Evaluator;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Parsing;
 using Splitio.Services.Parsing.Classes;
@@ -22,7 +21,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
         private readonly Mock<IFeatureFlagCache> _splitCache;
         private readonly Mock<ITelemetryEvaluationProducer> _telemetryEvaluationProducer;
 
-        private IEvaluator _evaluator;
+        private Splitio.Services.Evaluator.Evaluator _evaluator;
 
         public EvaluatorTests()
         {

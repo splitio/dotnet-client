@@ -28,7 +28,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         private readonly Mock<IImpressionsManager> _impressionsManager;
         private readonly Mock<ISyncManager> _syncManager;
         private Mock<ITelemetryEvaluationProducer> _telemetryEvaluationProducer;
-        private ISplitClient _splitClient;
+        private SplitClientForTesting _splitClient;
         public SplitClientAsyncTests()
         {
             _eventsLog = new Mock<IEventsLog>();
