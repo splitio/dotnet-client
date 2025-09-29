@@ -20,7 +20,6 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         private readonly Mock<IImpressionsSenderAdapter> _senderAdapter;
         private readonly Mock<IStatusManager> _statusManager;
         private readonly ITasksManager _tasksManager;
-        private readonly ConcurrentDictionary<string, HashSet<string>> _cache;
 
         private IUniqueKeysTracker _uniqueKeysTracker;
 
@@ -30,14 +29,13 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _senderAdapter = new Mock<IImpressionsSenderAdapter>();
             _statusManager = new Mock<IStatusManager>();
             _tasksManager = new TasksManager(_statusManager.Object);
-            _cache = new ConcurrentDictionary<string, HashSet<string>>();
         }
 
         [TestMethod]
         public async Task PeriodicTask_ShouldSendBulk()
         {
             // Arrange.
-            _cache.Clear();
+            var _cache = new ConcurrentDictionary<string, HashSet<string>>();
 
             var config = new ComponentConfig(5, 5);
             var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 1);
@@ -67,7 +65,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void Track_WithFullSize_ShouldSendTwoBulk()
         {
             // Arrange.
-            _cache.Clear();
+            var _cache = new ConcurrentDictionary<string, HashSet<string>>();
 
             var config = new ComponentConfig(10, 5);
             var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 2);
