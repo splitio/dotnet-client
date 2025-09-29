@@ -1,7 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
+using Splitio.Redis.Services.Client.Classes;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Classes;
+using Splitio.Telemetry.Domain;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -502,6 +504,30 @@ namespace Splitio_Tests.Integration_Tests
 
             Assert.AreEqual("off", results["testing_split_off_with_config"].Treatment);
             Assert.AreEqual("{\"color\": \"green\"}", results["testing_split_off_with_config"].Config);
+        }
+
+        [TestMethod]
+        public void FallbackTreatments_WhenFeatureDoesNotExist()
+        {
+            var features = new List<string> { "testing_split_on", "feature", "feature2" };
+            FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on-global", "\"prop\":\"global\""), new Dictionary<string, FallbackTreatment>() { { "feature", new FallbackTreatment("off-local", "\"prop\":\"local\"") } });
+            FallbackTreatmentCalculator fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
+
+            var config = GetConfiguration($"{rootFilePath}split.yml");
+            var client = new LocalhostClient(config, fallbackTreatmentCalculator);
+
+            client.BlockUntilReady(1000);
+
+            //Act           
+            var result = client.GetTreatmentsWithConfig("test", features, null);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("off-local", result["feature"].Treatment);
+            Assert.AreEqual("\"prop\":\"local\"", result["feature"].Config);
+            Assert.AreEqual("on", result["testing_split_on"].Treatment);
+            Assert.AreEqual("on-global", result["feature2"].Treatment);
+            Assert.AreEqual("\"prop\":\"global\"", result["feature2"].Config);
         }
 
         protected abstract ConfigurationOptions GetConfiguration(string fileName);
