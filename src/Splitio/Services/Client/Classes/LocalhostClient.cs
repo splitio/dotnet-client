@@ -6,7 +6,6 @@ using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Localhost;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Tasks;
 using System;
 using System.Collections.Generic;
 using System.IO;
