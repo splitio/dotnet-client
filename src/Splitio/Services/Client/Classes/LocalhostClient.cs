@@ -6,7 +6,6 @@ using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Localhost;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Tasks;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,7 +27,7 @@ namespace Splitio.Services.Client.Classes
 
         private readonly object _lock = new object();
 
-        public LocalhostClient(ConfigurationOptions configurationOptions) : base("localhost")
+        public LocalhostClient(ConfigurationOptions configurationOptions, FallbackTreatmentCalculator fallbackTreatmentCalculator) : base("localhost", fallbackTreatmentCalculator)
         {
             var configs = (LocalhostClientConfigurations)_configService.ReadConfig(configurationOptions, ConfigTypes.Localhost, _statusManager);
 
@@ -63,7 +62,7 @@ namespace Splitio.Services.Client.Classes
             _blockUntilReadyService = new NoopBlockUntilReadyService();
             _manager = new SplitManager(_featureFlagCache, _blockUntilReadyService);
             _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCache, _blockUntilReadyService);
-            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter(), null);
+            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter(), null, fallbackTreatmentCalculator);
             _uniqueKeysTracker = new NoopUniqueKeysTracker();
             _impressionsCounter = new NoopImpressionsCounter();
             _impressionsObserver = new NoopImpressionsObserver();

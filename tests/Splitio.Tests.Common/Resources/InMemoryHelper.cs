@@ -43,6 +43,9 @@ namespace Splitio.Tests.Common.Resources
             new KeyImpression("mauro@split.io", "always_on_if_prerequisite", "off", 0, 5, "prerequisites not met", null, false, null, false),
             new KeyImpression("bilal@split.io", "always_on_if_prerequisite", "on", 0, 5, "always_on_if_prerequisite label", null, false, null, false),
             new KeyImpression("other_key", "always_on_if_prerequisite", "off", 0, 5, "prerequisites not met", null, false, null, false),
+            new KeyImpression("nico_test", "feature2", "on-global", 0, null, "fallback - definition not found", null, false, null, false),
+            new KeyImpression("nico_test", "feature", "off-local", 0, null, "fallback - definition not found", null, false, null, false),
+            new KeyImpression("nico_test", "feature3", "on-global", 0, null, "fallback - exception", null, false, null, false),
         };
 
         public static KeyImpression GetImpressionExpected(string featureName, string key)

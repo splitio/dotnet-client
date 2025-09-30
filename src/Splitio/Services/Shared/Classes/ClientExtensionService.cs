@@ -4,10 +4,12 @@ using Splitio.Enums;
 using Splitio.Enums.Extensions;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Filters;
+using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Storages;
+using Splitio.Util;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -25,6 +27,7 @@ namespace Splitio.Services.Shared.Classes
         private readonly ITrafficTypeValidator _trafficTypeValidator;
         private readonly IFlagSetsValidator _flagSetsValidator;
         private readonly IFlagSetsFilter _flagSetsFilter;
+        private readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
         public ClientExtensionService(IBlockUntilReadyService blockUntilReadyService,
             IStatusManager statusManager,
@@ -35,7 +38,8 @@ namespace Splitio.Services.Shared.Classes
             IPropertiesValidator eventPropertiesValidator,
             ITrafficTypeValidator trafficTypeValidator,
             IFlagSetsValidator flagSetsValidator,
-            IFlagSetsFilter flagSetsFilter)
+            IFlagSetsFilter flagSetsFilter,
+            FallbackTreatmentCalculator fallbackTreatmentCalculator)
         {
             _blockUntilReadyService = blockUntilReadyService;
             _statusManager = statusManager;
@@ -47,6 +51,7 @@ namespace Splitio.Services.Shared.Classes
             _trafficTypeValidator = trafficTypeValidator;
             _flagSetsValidator = flagSetsValidator;
             _flagSetsFilter = flagSetsFilter;
+            _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
         }
 
         public bool TrackValidations(string key, string trafficType, string eventType, double? value, Dictionary<string, object> properties, out WrappedEvent wrappedEvent)
@@ -105,7 +110,14 @@ namespace Splitio.Services.Shared.Classes
         {
             result = null;
 
-            if (!IsClientReady(method, logger, features) || !_keyValidator.IsValid(key, method))
+            if (!IsClientReady(method, logger, features))
+            {
+                result = ReturnControl(features, Labels.ClientNotReady);
+
+                return new List<string>();
+            }
+
+            if (!_keyValidator.IsValid(key, method))
             {
                 result = ReturnControl(features);
 
@@ -143,13 +155,14 @@ namespace Splitio.Services.Shared.Classes
             await _telemetryEvaluationProducer.RecordLatencyAsync(method.ConvertToMethodEnum(), Util.Metrics.Bucket(latency));
         }
 
-        public List<TreatmentResult> ReturnControl(List<string> featureFlagNames)
+        public List<TreatmentResult> ReturnControl(List<string> featureFlagNames, string label=null)
         {
             var toReturn = new List<TreatmentResult>();
+            if (label==null) label = Labels.Exception;
 
             foreach (var item in featureFlagNames)
             {
-                toReturn.Add(new TreatmentResult(item, Labels.Exception, Constants.Gral.Control, false));
+                toReturn.Add(Helper.checkFallbackTreatment(item, label, true, _fallbackTreatmentCalculator));
             }
 
             return toReturn;

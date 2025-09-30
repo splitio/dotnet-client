@@ -4,6 +4,7 @@ using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Client.Classes;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Impressions.Classes;
 using Splitio.Tests.Common.Resources;
 using Splitio_Tests.Resources;
 using System.Collections.Generic;
@@ -23,6 +24,7 @@ namespace Splitio_Tests.Integration_Tests
 
         private ConfigurationOptions config;
         private RedisAdapterForTests _redisAdapter;
+        private FallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
         [TestInitialize]
         public void Initialization()
@@ -35,7 +37,7 @@ namespace Splitio_Tests.Integration_Tests
                 Database = DB,
                 UserPrefix = _prefix
             };
-
+            _fallbackTreatmentCalculator = new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration());
             config = new ConfigurationOptions
             {
                 CacheAdapterConfig = cacheAdapterConfig,
@@ -62,7 +64,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatment_WhenFeatureExists_ReturnsOn()
         {
             //Arrange
-            var client = new RedisClient(config, API_KEY);
+            var client = new RedisClient(config, API_KEY, _fallbackTreatmentCalculator);
 
             client.BlockUntilReady(5000);
 
@@ -73,7 +75,7 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsNotNull(result);
             Assert.AreEqual("on", result);
 
-            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(), API_KEY);
+            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(), API_KEY, _fallbackTreatmentCalculator);
 
             client2.BlockUntilReady(5000);
 
@@ -89,7 +91,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatment_WhenFeatureExists_ReturnsOff()
         {
             //Arrange
-            var client = new RedisClient(config, API_KEY);
+            var client = new RedisClient(config, API_KEY, _fallbackTreatmentCalculator);
 
             client.BlockUntilReady(5000);
 
@@ -100,7 +102,7 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsNotNull(result);
             Assert.AreEqual("off", result);
 
-            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(), API_KEY);
+            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(), API_KEY, _fallbackTreatmentCalculator);
 
             client2.BlockUntilReady(5000);
             result = client2.GetTreatment("test", "always_off", null);
@@ -114,7 +116,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatment_WhenFeatureDoenstExist_ReturnsControl()
         {
             //Arrange
-            var client = new RedisClient(config, API_KEY);
+            var client = new RedisClient(config, API_KEY, _fallbackTreatmentCalculator);
             client.BlockUntilReady(5000);
 
             //Act           
@@ -124,7 +126,7 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsNotNull(result);
             Assert.AreEqual("control", result);
 
-            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(), API_KEY);
+            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(), API_KEY, _fallbackTreatmentCalculator);
 
             client2.BlockUntilReady(5000);
             result = client2.GetTreatment("test", "always_control", null);
@@ -143,7 +145,7 @@ namespace Splitio_Tests.Integration_Tests
 
             var features = new List<string> { alwaysOn, alwaysOff };
 
-            var client = new RedisClient(config, API_KEY);
+            var client = new RedisClient(config, API_KEY, _fallbackTreatmentCalculator);
 
             client.BlockUntilReady(5000);
 
@@ -157,7 +159,7 @@ namespace Splitio_Tests.Integration_Tests
 
 
             var client2 = new RedisClient(GetRedisClusterConfigurationOptions(),
-                API_KEY);
+                API_KEY, _fallbackTreatmentCalculator);
 
             client2.BlockUntilReady(5000);
             result = client2.GetTreatments("test", features, null);
@@ -178,7 +180,7 @@ namespace Splitio_Tests.Integration_Tests
 
             var features = new List<string> { alwaysOn, alwaysOff, alwaysControl };
 
-            var client = new RedisClient(config, API_KEY);
+            var client = new RedisClient(config, API_KEY, _fallbackTreatmentCalculator);
 
             client.BlockUntilReady(5000);
 
@@ -192,7 +194,7 @@ namespace Splitio_Tests.Integration_Tests
             Assert.AreEqual("control", result[alwaysControl]);
 
             var client2 = new RedisClient(GetRedisClusterConfigurationOptions(),
-    API_KEY);
+    API_KEY, _fallbackTreatmentCalculator);
 
             client2.BlockUntilReady(5000);
             result = client2.GetTreatments("test", features, null);
@@ -208,7 +210,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentsWithConfig_WhenClientIsNotReady_ReturnsControl()
         {
             // Arrange.
-            var client = new RedisClient(config, API_KEY);
+            var client = new RedisClient(config, API_KEY, _fallbackTreatmentCalculator);
             
             // Act.
             var result = client.GetTreatmentsWithConfig("key", new List<string>());
@@ -221,7 +223,7 @@ namespace Splitio_Tests.Integration_Tests
             }
 
             var client2 = new RedisClient(GetRedisClusterConfigurationOptions(),
-API_KEY);
+API_KEY, _fallbackTreatmentCalculator);
 
             client2.BlockUntilReady(5000);
             result = client2.GetTreatmentsWithConfig("key", new List<string>());
@@ -238,7 +240,7 @@ API_KEY);
         public void GetTreatmentWithConfig_WhenClientIsNotReady_ReturnsControl()
         {
             // Arrange.
-            var client = new RedisClient(config, API_KEY);
+            var client = new RedisClient(config, API_KEY, _fallbackTreatmentCalculator);
 
             // Act.
             var result = client.GetTreatmentWithConfig("key", string.Empty);
@@ -248,7 +250,7 @@ API_KEY);
             Assert.IsNull(result.Config);
 
             var client2 = new RedisClient(GetRedisClusterConfigurationOptions(),
-API_KEY);
+API_KEY, _fallbackTreatmentCalculator);
 
             client2.BlockUntilReady(5000);
             result = client2.GetTreatmentWithConfig("key", string.Empty);
@@ -262,7 +264,7 @@ API_KEY);
         public void GetTreatment_WhenClientIsNotReady_ReturnsControl()
         {
             // Arrange.
-            var client = new RedisClient(config, API_KEY);
+            var client = new RedisClient(config, API_KEY, _fallbackTreatmentCalculator);
 
             // Act.
             var result = client.GetTreatment("key", string.Empty);
@@ -271,7 +273,7 @@ API_KEY);
             Assert.AreEqual("control", result);
 
             var client2 = new RedisClient(GetRedisClusterConfigurationOptions(),
-API_KEY);
+API_KEY, _fallbackTreatmentCalculator);
 
             client2.BlockUntilReady(5000);
             result = client2.GetTreatment("key", string.Empty);
@@ -285,7 +287,7 @@ API_KEY);
         {
             // Arrange.
             config.CacheAdapterConfig.Host = "fake-host";
-            var client = new RedisClient(config, API_KEY);
+            var client = new RedisClient(config, API_KEY, _fallbackTreatmentCalculator);
 
             // Act.
             var result = client.GetTreatments("key", new List<string>());
@@ -296,7 +298,7 @@ API_KEY);
                 Assert.AreEqual("control", res.Value);
             }
 
-            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(), API_KEY);
+            var client2 = new RedisClient(GetRedisClusterConfigurationOptions(), API_KEY, _fallbackTreatmentCalculator);
 
             client2.BlockUntilReady(5000);
             result = client2.GetTreatments("key", new List<string>());
@@ -312,7 +314,7 @@ API_KEY);
         public void Track_WhenClientIsNotReady_ReturnsTrue()
         {
             // Arrange.
-            var client = new RedisClient(config, API_KEY);
+            var client = new RedisClient(config, API_KEY, _fallbackTreatmentCalculator);
 
             // Act.
             var result = client.Track("key", "traffic_type", "event_type");
@@ -321,7 +323,7 @@ API_KEY);
             Assert.IsTrue(result);
 
             var client2 = new RedisClient(GetRedisClusterConfigurationOptions(),
-API_KEY);
+API_KEY, _fallbackTreatmentCalculator);
 
             client2.BlockUntilReady(5000);
             // Act.
@@ -330,10 +332,106 @@ API_KEY);
         }
 
         [TestMethod]
+        public void FallbackTreatments_WhenFeatureDoesNotExist()
+        {
+            //Arrange
+            var alwaysOn = "always_on";
+            var alwaysControl = "always_control";
+
+            var features = new List<string> { alwaysOn, "feature", alwaysControl };
+            FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on-global", "\"prop\":\"global\""), new Dictionary<string, FallbackTreatment>() { { "feature", new FallbackTreatment("off-local", "\"prop\":\"local\"") } });
+            FallbackTreatmentCalculator fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
+
+            var client = new RedisClient(config, API_KEY, fallbackTreatmentCalculator);
+
+            client.BlockUntilReady(5000);
+
+            //Act           
+            var result = client.GetTreatmentsWithConfig("test", features, null);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("off-local", result["feature"].Treatment);
+            Assert.AreEqual("\"prop\":\"local\"", result["feature"].Config);
+            Assert.AreEqual("on", result[alwaysOn].Treatment);
+            Assert.AreEqual("on-global", result[alwaysControl].Treatment);
+            Assert.AreEqual("\"prop\":\"global\"", result[alwaysControl].Config);
+
+            var impressions = _redisAdapter.ListRange($"{_prefix}.SPLITIO.impressions");
+            int flag = 0;
+            foreach( var impression in impressions )
+            {
+                if (impression.ToString().Contains("feature") || impression.ToString().Contains(alwaysControl))
+                {
+                    flag++;
+                    Assert.IsTrue(impression.ToString().Contains("fallback - definition not found"));
+                }
+            }
+            Assert.IsTrue(flag==2);
+        }
+
+        [TestMethod]
+        public void FallbackTreatments_WhenClientNotReady()
+        {
+            //Arrange
+
+            var features = new List<string> { "feature" };
+            FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on-global", "\"prop\":\"global\""), new Dictionary<string, FallbackTreatment>() { { "feature", new FallbackTreatment("off-local", "\"prop\":\"local\"") } });
+            FallbackTreatmentCalculator fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
+
+            config.CacheAdapterConfig.Host = "fake-host";
+            var client = new RedisClient(config, API_KEY, fallbackTreatmentCalculator);
+
+            //Act           
+            var result = client.GetTreatmentsWithConfig("test", features, null);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("off-local", result["feature"].Treatment);
+            Assert.AreEqual("\"prop\":\"local\"", result["feature"].Config);
+        }
+
+        [TestMethod]
+        public void FallbackTreatments_WhenExceptionOccurrs()
+        {
+            //Arrange
+            string AlwaysOff = "{\"trafficTypeName\":\"user\",\"name\":\"always_off\",\"trafficAllocation\":100,\"trafficAllocationSeed\":-1224384615,\"seed\":-1638900961,\"status\":\"ACTIVE\",\"killed\":false,\"defaultTreatment\":\"off\",\"changeNumber\":1548897742548,\"algo\":2,\"conditions\":[],\"label\":\"default rule\"}]}";
+            _redisAdapter.Set($"{_prefix}.SPLITIO.split.always_off", AlwaysOff);
+
+            var features = new List<string> { "always_off" };
+            FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on-global", "\"prop\":\"global\""), new Dictionary<string, FallbackTreatment>() { { "feature", new FallbackTreatment("off-local", "\"prop\":\"local\"") } });
+            FallbackTreatmentCalculator fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
+
+            var client = new RedisClient(config, API_KEY, fallbackTreatmentCalculator);
+
+            client.BlockUntilReady(5000);
+
+            //Act           
+            var result = client.GetTreatmentsWithConfig("test", features, null);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("on-global", result["always_off"].Treatment);
+            Assert.AreEqual("\"prop\":\"global\"", result["always_off"].Config);
+
+            var impressions = _redisAdapter.ListRange($"{_prefix}.SPLITIO.impressions");
+            int flag = 0;
+            foreach (var impression in impressions)
+            {
+                if (impression.ToString().Contains("always_off"))
+                {
+                    flag++;
+                    Assert.IsTrue(impression.ToString().Contains("fallback - exception"));
+                }
+            }
+            Assert.IsTrue(flag == 1);
+        }
+
+        [TestMethod]
         public void Destroy()
         {
             //Arrange
-            var client = new RedisClient(config, API_KEY);
+            var client = new RedisClient(config, API_KEY, _fallbackTreatmentCalculator);
             client.BlockUntilReady(5000);
 
             //Act

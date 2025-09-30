@@ -70,7 +70,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _cache.Clear();
 
             var config = new ComponentConfig(10, 5);
-            var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 1);
+            var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 2);
             var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
             var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Enums.Task.MtkSendBulkData);
             _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask, sendBulkDataTask);
@@ -101,9 +101,10 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _cache.TryGetValue("feature-name-test-3", out HashSet<string> values3);
             Assert.AreEqual(1, values3.Count);
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test", "feature-name-test-5"));
-            Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-5"));
+            Thread.Sleep(1000);
+            Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-6"));
 
-            Thread.Sleep(2000);
+            Thread.Sleep(3000);
             _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Exactly(2));
 
             _cache.Clear();

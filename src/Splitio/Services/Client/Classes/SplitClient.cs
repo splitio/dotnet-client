@@ -39,6 +39,7 @@ namespace Splitio.Services.Client.Classes
         protected readonly IConfigService _configService;
         protected readonly IFlagSetsValidator _flagSetsValidator;
         protected readonly string ApiKey;
+        protected readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
         protected ISplitManager _manager;
         protected IEventsLog _eventsLog;
@@ -63,10 +64,11 @@ namespace Splitio.Services.Client.Classes
         protected IClientExtensionService _clientExtensionService;
         protected IFlagSetsFilter _flagSetsFilter;
 
-        public SplitClient(string apikey)
+        protected SplitClient(string apikey, FallbackTreatmentCalculator fallbackTreatmentCalculator)
         {
             ApiKey = apikey;
 
+            _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
             _wrapperAdapter = WrapperAdapter.Instance();
             _keyValidator = new KeyValidator();
             _splitNameValidator = new SplitNameValidator();
@@ -412,7 +414,7 @@ namespace Splitio.Services.Client.Classes
 
         protected void BuildClientExtension()
         {
-            _clientExtensionService = new ClientExtensionService(_blockUntilReadyService, _statusManager, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer, _eventTypeValidator, _propertiesValidator, _trafficTypeValidator, _flagSetsValidator, _flagSetsFilter);
+            _clientExtensionService = new ClientExtensionService(_blockUntilReadyService, _statusManager, _keyValidator, _splitNameValidator, _telemetryEvaluationProducer, _eventTypeValidator, _propertiesValidator, _trafficTypeValidator, _flagSetsValidator, _flagSetsFilter, _fallbackTreatmentCalculator);
         }
 
         protected void BuildFlagSetsFilter(HashSet<string> sets)
