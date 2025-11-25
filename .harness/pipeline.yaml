@@ -50,3 +50,18 @@ pipeline:
                     command: |-
                       $env:PATH = "C:\dotnet;$env:PATH"
                       dotnet restore
+              - step:
+                  type: Run
+                  name: Run tests with coverage
+                  identifier: Run_tests_with_coverage
+                  spec:
+                    shell: Powershell
+                    command: |-
+                      $env:PATH = "C:\dotnet;$env:PATH"
+                      dotnet test .\tests\Splitio-tests\Splitio-tests.csproj `
+                        -c Release `
+                        -f net9.0 `
+                        --no-build `
+                        --collect:"XPlat Code Coverage" `
+                        --results-directory:"./TestResults" `
+                        -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
