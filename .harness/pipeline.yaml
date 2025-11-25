@@ -124,3 +124,22 @@ pipeline:
                       dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -c Release -f net9.0 --no-build
                       dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -c Release -f net9.0 --no-build
                       dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net9.0 --no-build
+              - step:
+                  type: Run
+                  name: Create Nuget
+                  identifier: Create_Nuget
+                  spec:
+                    shell: Powershell
+                    command: |-
+                      $env:PATH = "C:\dotnet;$env:PATH"
+                      if (!(Test-Path ".\nuget")) { mkdir .\nuget }
+                      dotnet pack .\src\Splitio --configuration Release --output .\nuget
+              - step:
+                  type: Run
+                  name: Upload Nuget
+                  identifier: Upload_Nuget
+                  spec:
+                    shell: Powershell
+                    command: |-
+                      $env:PATH = "C:\dotnet;$env:PATH"
+                      dotnet nuget push '.\nuget\*.nupkg' -k $Env:API_KEY -s 'https://harness0.harness.io/pkg/l7B_kbSEQD2wjrM7PShm5w/fme-nuget/nuget/'
