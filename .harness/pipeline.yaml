@@ -144,3 +144,5 @@ pipeline:
                     command: |-
                       $env:PATH = "C:\dotnet;$env:PATH"
                       dotnet nuget push '.\nuget\*.nupkg' -k $Env:API_KEY -s 'https://harness0.harness.io/pkg/l7B_kbSEQD2wjrM7PShm5w/fme-nuget/nuget/'
+                    envVariables:
+                      API_KEY: <+secrets.getValue("harness-ci-nuget-token")>
