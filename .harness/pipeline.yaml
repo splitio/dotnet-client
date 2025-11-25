@@ -1,0 +1,52 @@
+pipeline:
+  name: dotnet-client
+  identifier: dotnetclient
+  projectIdentifier: Harness_Split
+  orgIdentifier: PROD
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: fmegithubharnessgitops
+        repoName: dotnet-client
+        build: <+input>
+  stages:
+    - stage:
+        name: Build and Test
+        identifier: Build_and_Test
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          caching:
+            enabled: true
+            override: true
+          platform:
+            os: Windows
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Setup NET SDK
+                  identifier: Setup_NET_SDK
+                  spec:
+                    shell: Powershell
+                    command: |-
+                      # Install .NET SDK (adjust version as needed)
+                      Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.ps1" -OutFile "dotnet-install.ps1"
+                      .\dotnet-install.ps1 -Channel 9.0 -InstallDir "C:\dotnet"
+                      $env:PATH = "C:\dotnet;$env:PATH"
+                      dotnet --version
+              - step:
+                  type: Run
+                  name: Restore Dependencies
+                  identifier: Restore_Dependencies
+                  spec:
+                    shell: Powershell
+                    command: |-
+                      $env:PATH = "C:\dotnet;$env:PATH"
+                      dotnet restore
