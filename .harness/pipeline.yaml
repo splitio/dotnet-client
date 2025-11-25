@@ -41,6 +41,8 @@ pipeline:
                       .\dotnet-install.ps1 -Channel 9.0 -InstallDir "C:\dotnet"
                       $env:PATH = "C:\dotnet;$env:PATH"
                       dotnet --version
+                      nuget install redis-64 -excludeversion -source http://www.nuget.org/api/v2/
+                      Redis-64\tools\redis-server.exe --service-install
               - step:
                   type: Run
                   name: Restore Dependencies
