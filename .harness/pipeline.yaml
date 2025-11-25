@@ -52,6 +52,15 @@ pipeline:
                       dotnet restore
               - step:
                   type: Run
+                  name: Build
+                  identifier: Build
+                  spec:
+                    shell: Powershell
+                    command: |-
+                      $env:PATH = "C:\dotnet;$env:PATH"
+                      dotnet build --configuration Release --no-restore
+              - step:
+                  type: Run
                   name: Run tests with coverage
                   identifier: Run_tests_with_coverage
                   spec:
