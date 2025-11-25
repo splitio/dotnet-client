@@ -113,3 +113,14 @@ pipeline:
                     command: |-
                       $env:PATH = "C:\dotnet;$env:PATH"
                       dotnet sonarscanner end /d:sonar.token="<+secrets.getValue("sonarqube-token")>"
+              - step:
+                  type: Run
+                  name: Other Tests Runs
+                  identifier: Other_Tests_Runs
+                  spec:
+                    shell: Powershell
+                    command: |-
+                      dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj -c Release -f net9.0 --no-build
+                      dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -c Release -f net9.0 --no-build
+                      dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -c Release -f net9.0 --no-build
+                      dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net9.0 --no-build
