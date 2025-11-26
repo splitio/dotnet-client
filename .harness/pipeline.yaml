@@ -121,24 +121,158 @@ pipeline:
                   spec:
                     shell: Powershell
                     command: |-
-                      # Get SonarQube quality gate status
-                      QUALITY_GATE_STATUS=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/qualitygates/project_status?projectKey=$PROJECT_KEY" | jq -r '.projectStatus.status')
+                      $scriptContent = @'
+                      param(
+                          [Parameter(Mandatory=$true)]
+                          [string]$GitHubToken,
+                          
+                          [Parameter(Mandatory=$true)]
+                          [string]$GitHubRepo,  # Format: "owner/repo"
+                          
+                          [Parameter(Mandatory=$true)]
+                          [string]$CommitSha,
+                          
+                          [Parameter(Mandatory=$true)]
+                          [string]$SonarProjectKey,
+                          
+                          [Parameter(Mandatory=$true)]
+                          [string]$SonarToken,
+                          
+                          [Parameter(Mandatory=$true)]
+                          [string]$SonarUrl  # e.g., "https://sonarcloud.io" or your SonarQube server
+                      )
 
-                      # Post to GitHub
-                      if ( $QUALITY_GATE_STATUS -eq "OK" ) {
-                          STATE="success"
-                          DESCRIPTION="Quality gate passed"
-                      } else {
-                          STATE="failure"
-                          DESCRIPTION="Quality gate failed"
+                      # Function to get SonarQube quality gate status
+                      function Get-SonarQualityGate {
+                          param($ProjectKey, $Token, $ServerUrl)
+                          
+                          $headers = @{
+                              'Authorization' = "Bearer $Token"
+                              'Content-Type' = 'application/json'
+                          }
+                          
+                          try {
+                              # Get project status
+                              $statusUrl = "$ServerUrl/api/qualitygates/project_status?projectKey=$ProjectKey"
+                              $response = Invoke-RestMethod -Uri $statusUrl -Headers $headers -Method Get
+                              
+                              return $response.projectStatus
+                          }
+                          catch {
+                              Write-Error "Failed to get SonarQube quality gate status: $($_.Exception.Message)"
+                              return $null
+                          }
                       }
 
-                      curl -X POST -H "Authorization: token $GITHUB_TOKEN"  -H "Accept: application/vnd.github.v3+json"  "https://api.github.com/repos/$DRONE_REPO/statuses/$DRONE_COMMIT_SHA" -d "{\"state\":\"$STATE\",\"description\":\"$DESCRIPTION\",\"context\":\"sonarqube/qualitygate\"}"
+                      # Function to post status to GitHub
+                      function Post-GitHubStatus {
+                          param($Token, $Repo, $Sha, $State, $Description, $Context, $TargetUrl)
+                          
+                          $headers = @{
+                              'Authorization' = "token $Token"
+                              'Accept' = 'application/vnd.github.v3+json'
+                              'Content-Type' = 'application/json'
+                          }
+                          
+                          $body = @{
+                              state = $State
+                              description = $Description
+                              context = $Context
+                              target_url = $TargetUrl
+                          } | ConvertTo-Json
+                          
+                          $url = "https://api.github.com/repos/$Repo/statuses/$Sha"
+                          
+                          try {
+                              $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Post -Body $body
+                              Write-Host "✅ Successfully posted status to GitHub" -ForegroundColor Green
+                              return $response
+                          }
+                          catch {
+                              Write-Error "Failed to post status to GitHub: $($_.Exception.Message)"
+                              return $null
+                          }
+                      }
+
+                      # Main execution
+                      Write-Host "🔍 Fetching SonarQube quality gate status..." -ForegroundColor Blue
+
+                      $qualityGate = Get-SonarQualityGate -ProjectKey $SonarProjectKey -Token $SonarToken -ServerUrl $SonarUrl
+
+                      if ($null -eq $qualityGate) {
+                          Write-Error "Failed to retrieve quality gate status"
+                          exit 1
+                      }
+
+                      # Determine GitHub status based on SonarQube quality gate
+                      $githubState = switch ($qualityGate.status) {
+                          "OK" { "success" }
+                          "ERROR" { "failure" }
+                          "WARN" { "success" }  # You might want to change this to "failure" based on your requirements
+                          default { "pending" }
+                      }
+
+                      $description = switch ($qualityGate.status) {
+                          "OK" { "✅ Quality gate passed" }
+                          "ERROR" { "❌ Quality gate failed" }
+                          "WARN" { "⚠️ Quality gate passed with warnings" }
+                          default { "🔄 Quality gate status unknown" }
+                      }
+
+                      # Add conditions details if available
+                      if ($qualityGate.conditions) {
+                          $failedConditions = $qualityGate.conditions | Where-Object { $_.status -eq "ERROR" }
+                          if ($failedConditions.Count -gt 0) {
+                              $description += " ($($failedConditions.Count) condition(s) failed)"
+                          }
+                      }
+
+                      # Construct target URL
+                      $targetUrl = "$SonarUrl/dashboard?id=$SonarProjectKey"
+
+                      Write-Host "📊 Quality Gate Status: $($qualityGate.status)" -ForegroundColor Yellow
+                      Write-Host "🎯 GitHub State: $githubState" -ForegroundColor Yellow
+                      Write-Host "📝 Description: $description" -ForegroundColor Yellow
+
+                      # Post status to GitHub
+                      Write-Host "📤 Posting status to GitHub..." -ForegroundColor Blue
+
+                      $result = Post-GitHubStatus -Token $GitHubToken -Repo $GitHubRepo -Sha $CommitSha -State $githubState -Description $description -Context "sonarqube/quality-gate" -TargetUrl $targetUrl
+
+                      if ($null -eq $result) {
+                          Write-Error "Failed to post status to GitHub"
+                          exit 1
+                      }
+
+                      Write-Host "🎉 Successfully posted SonarQube quality gate status to GitHub!" -ForegroundColor Green
+
+                      # Optional: Create detailed comment with quality gate details
+                      if ($qualityGate.conditions) {
+                          Write-Host "📋 Quality Gate Conditions:" -ForegroundColor Cyan
+                          foreach ($condition in $qualityGate.conditions) {
+                              $status = switch ($condition.status) {
+                                  "OK" { "✅" }
+                                  "ERROR" { "❌" }
+                                  "WARN" { "⚠️" }
+                                  default { "❓" }
+                              }
+                              Write-Host "  $status $($condition.metricKey): $($condition.actualValue) (threshold: $($condition.errorThreshold))" -ForegroundColor White
+                          }
+                      }
+                      '@
+                      $scriptContent | Out-File -FilePath "sonar-github-status.ps1" -Encoding UTF8
+                              
+                      # Execute the script with parameters
+                      .\sonar-github-status.ps1 `
+                          -GitHubToken "<+secrets.getValue('github-devops-token')>" `
+                          -GitHubRepo "<+codebase.repoName>" `
+                          -CommitSha "<+codebase.commitSha>" `
+                          -SonarProjectKey "<+pipeline.variables.sonar_project_key>" `
+                          -SonarToken "<+secrets.getValue('sonarqube-token')>" `
+                          -SonarUrl "<+pipeline.variables.sonar_url>"
                     envVariables:
-                      SONAR_HOST_URL: https://sonar.harness.io/
-                      SONAR_TOKEN: <+secrets.getValue("sonarqube-token")>
-                      GITHUB_TOKEN: <+secrets.getValue("github-devops-token")>
-                      PROJECT_KEY: dotnet-client
+                      SONAR_URL: https://sonar.harness.io/
+                      SONAR_PROJECT_KEY: dotnet-client
               - step:
                   type: Run
                   name: Other Tests Runs
