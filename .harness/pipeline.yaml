@@ -181,9 +181,8 @@ pipeline:
                               target_url = $TargetUrl
                           } | ConvertTo-Json
                           Write-Host $Sha
-                          $url = "https://api.github.com/repos/$Repo/statuses/$Sha"
+                          $url = "https://api.github.com/repos/splitio/$Repo/statuses/$Sha"
 
-                          
                           try {
                               $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Post -Body $body
                               Write-Host "✅ Successfully posted status to GitHub" -ForegroundColor Green
