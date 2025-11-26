@@ -116,6 +116,37 @@ pipeline:
                       dotnet sonarscanner end /d:sonar.token="<+secrets.getValue("sonarqube-token")>"
               - step:
                   type: Run
+                  name: Post Quality Gate
+                  identifier: Post_Quality_Gate
+                  spec:
+                    shell: Powershell
+                    command: |-
+                      # Get SonarQube quality gate status
+                      QUALITY_GATE_STATUS=$(curl -s -u $SONAR_TOKEN: \
+                          "$SONAR_HOST_URL/api/qualitygates/project_status?projectKey=$PROJECT_KEY" \
+                          | jq -r '.projectStatus.status')
+
+                      # Post to GitHub
+                      if [ "$QUALITY_GATE_STATUS" = "OK" ]; then
+                          STATE="success"
+                          DESCRIPTION="Quality gate passed"
+                      else
+                          STATE="failure"
+                          DESCRIPTION="Quality gate failed"
+                      fi
+
+                      curl -X POST \
+                          -H "Authorization: token $GITHUB_TOKEN" \
+                          -H "Accept: application/vnd.github.v3+json" \
+                          "https://api.github.com/repos/$DRONE_REPO/statuses/$DRONE_COMMIT_SHA" \
+                          -d "{\"state\":\"$STATE\",\"description\":\"$DESCRIPTION\",\"context\":\"sonarqube/qualitygate\"}"
+                    envVariables:
+                      SONAR_HOST_URL: https://sonar.harness.io/
+                      SONAR_TOKEN: <+secrets.getValue("sonarqube-token")>
+                      GITHUB_TOKEN: <+secrets.getValue("github-devops-token")>
+                      PROJECT_KEY: dotnet-client
+              - step:
+                  type: Run
                   name: Other Tests Runs
                   identifier: Other_Tests_Runs
                   spec:
