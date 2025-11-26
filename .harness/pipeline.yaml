@@ -265,14 +265,11 @@ pipeline:
                       # Execute the script with parameters
                       .\sonar-github-status.ps1 `
                           -GitHubToken "<+secrets.getValue('github-devops-token')>" `
-                          -GitHubRepo "<+codebase.repoName>" `
+                          -GitHubRepo "https://github.com/splitio/dotnet-client" `
                           -CommitSha "<+codebase.commitSha>" `
                           -SonarProjectKey "dotnet-client" `
                           -SonarToken "<+secrets.getValue('sonarqube-token')>" `
                           -SonarUrl "https://sonar.harness.io/"
-                    envVariables:
-                      SONAR_URL: https://sonar.harness.io/
-                      SONAR_PROJECT_KEY: dotnet-client
               - step:
                   type: Run
                   name: Other Tests Runs
