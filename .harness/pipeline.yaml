@@ -267,9 +267,9 @@ pipeline:
                           -GitHubToken "<+secrets.getValue('github-devops-token')>" `
                           -GitHubRepo "<+codebase.repoName>" `
                           -CommitSha "<+codebase.commitSha>" `
-                          -SonarProjectKey "<+pipeline.variables.sonar_project_key>" `
+                          -SonarProjectKey "dotnet-client" `
                           -SonarToken "<+secrets.getValue('sonarqube-token')>" `
-                          -SonarUrl "<+pipeline.variables.sonar_url>"
+                          -SonarUrl "https://sonar.harness.io/"
                     envVariables:
                       SONAR_URL: https://sonar.harness.io/
                       SONAR_PROJECT_KEY: dotnet-client
