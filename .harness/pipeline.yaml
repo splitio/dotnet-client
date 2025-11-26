@@ -262,7 +262,6 @@ pipeline:
                       '@
                       $scriptContent | Out-File -FilePath "sonar-github-status.ps1" -Encoding UTF8
                               
-                      # Execute the script with parameters
                       .\sonar-github-status.ps1 `
                           -GitHubToken "<+secrets.getValue('github-devops-token')>" `
                           -GitHubRepo "dotnet-client" `
