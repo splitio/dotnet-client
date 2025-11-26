@@ -180,8 +180,9 @@ pipeline:
                               context = $Context
                               target_url = $TargetUrl
                           } | ConvertTo-Json
-                          
+                          Write-Host $Sha
                           $url = "https://api.github.com/repos/$Repo/statuses/$Sha"
+
                           
                           try {
                               $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Post -Body $body
@@ -265,7 +266,7 @@ pipeline:
                       # Execute the script with parameters
                       .\sonar-github-status.ps1 `
                           -GitHubToken "<+secrets.getValue('github-devops-token')>" `
-                          -GitHubRepo "https://github.com/splitio/dotnet-client" `
+                          -GitHubRepo "dotnet-client" `
                           -CommitSha "<+codebase.commitSha>" `
                           -SonarProjectKey "dotnet-client" `
                           -SonarToken "<+secrets.getValue('sonarqube-token')>" `
