@@ -291,6 +291,7 @@ pipeline:
                       $env:PATH = "C:\dotnet;$env:PATH"
                       if (!(Test-Path ".\nuget")) { mkdir .\nuget }
                       dotnet pack .\src\Splitio --configuration Release --output .\nuget
+                      dotnet pack .\Splitio.Redis --configuration Release --output .\nuget
               - step:
                   type: Run
                   name: Upload Nuget
