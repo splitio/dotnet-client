@@ -271,8 +271,8 @@ pipeline:
                           -SonarUrl "https://sonar.harness.io/"
               - step:
                   type: Run
-                  name: Other Tests Runs
-                  identifier: Other_Tests_Runs
+                  name: Run Other Tests Net 9
+                  identifier: Run_Other_Tests_Net_9
                   spec:
                     shell: Powershell
                     command: |-
@@ -281,6 +281,25 @@ pipeline:
                       dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -c Release -f net9.0 --no-build
                       dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -c Release -f net9.0 --no-build
                       dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net9.0 --no-build
+              - step:
+                  type: Run
+                  name: Install Net 8
+                  identifier: Install_Net_8
+                  spec:
+                    shell: Powershell
+                    command: .\dotnet-install.ps1 -Channel 8.0 -InstallDir "C:\dotnet"
+              - step:
+                  type: Run
+                  name: Other Tests Runs Net 8
+                  identifier: Other_Tests_Runs
+                  spec:
+                    shell: Powershell
+                    command: |-
+                      $env:PATH = "C:\dotnet;$env:PATH"
+                      dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj -c Release -f net8.0 --no-build
+                      dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -c Release -f net8.0 --no-build
+                      dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -c Release -f net8.0 --no-build
+                      dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net8.0 --no-build
               - step:
                   type: Run
                   name: Create Nuget
