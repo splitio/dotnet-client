@@ -47,6 +47,17 @@ pipeline:
                       Redis-64\tools\redis-server.exe --service-start
               - step:
                   type: Run
+                  name: Install Net 8
+                  identifier: Install_Net_8
+                  spec:
+                    shell: Powershell
+                    command: |-
+                      $env:PATH = "C:\dotnet;$env:PATH"
+                      Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.ps1" -OutFile "dotnet-install2.ps1"
+                      .\dotnet-install2.ps1 -Channel 8.0 -InstallDir "C:\dotnet"
+                contextType: Pipeline
+              - step:
+                  type: Run
                   name: Restore Dependencies
                   identifier: Restore_Dependencies
                   spec:
@@ -281,16 +292,6 @@ pipeline:
                       dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -c Release -f net9.0 --no-build
                       dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -c Release -f net9.0 --no-build
                       dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net9.0 --no-build
-              - step:
-                  type: Run
-                  name: Install Net 8
-                  identifier: Install_Net_8
-                  spec:
-                    shell: Powershell
-                    command: |-
-                      $env:PATH = "C:\dotnet;$env:PATH"
-                      Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.ps1" -OutFile "dotnet-install2.ps1"
-                      .\dotnet-install2.ps1 -Channel 8.0 -InstallDir "C:\dotnet"
               - step:
                   type: Run
                   name: Other Tests Runs Net 8
