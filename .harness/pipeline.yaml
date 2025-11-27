@@ -313,7 +313,7 @@ pipeline:
                       dotnet test .\tests\Splitio-tests\Splitio-tests.csproj `
                         -c Release `
                         -f net8.0 `
-                        --no-build `
+                        --no-build
               - step:
                   type: Run
                   name: Run Other Tests Net 8
