@@ -305,7 +305,18 @@ pipeline:
                       dotnet pack .\Splitio.Redis --configuration Release --output .\nuget
               - step:
                   type: Run
-                  name: Other Tests Runs Net 8
+                  name: Run unit tests Net 8
+                  identifier: Run_unit_tests_Net_8
+                  spec:
+                    shell: Powershell
+                    command: |-
+                      dotnet test .\tests\Splitio-tests\Splitio-tests.csproj `
+                        -c Release `
+                        -f net8.0 `
+                        --no-build `
+              - step:
+                  type: Run
+                  name: Run Other Tests Net 8
                   identifier: Other_Tests_Runs
                   spec:
                     shell: Powershell
