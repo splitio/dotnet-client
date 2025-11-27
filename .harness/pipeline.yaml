@@ -294,6 +294,17 @@ pipeline:
                       dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net9.0 --no-build
               - step:
                   type: Run
+                  name: Create Nuget
+                  identifier: Create_Nuget
+                  spec:
+                    shell: Powershell
+                    command: |-
+                      $env:PATH = "C:\dotnet;$env:PATH"
+                      if (!(Test-Path ".\nuget")) { mkdir .\nuget }
+                      dotnet pack .\src\Splitio --configuration Release --output .\nuget
+                      dotnet pack .\Splitio.Redis --configuration Release --output .\nuget
+              - step:
+                  type: Run
                   name: Other Tests Runs Net 8
                   identifier: Other_Tests_Runs
                   spec:
@@ -304,17 +315,7 @@ pipeline:
                       dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -c Release -f net8.0 --no-build
                       dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -c Release -f net8.0 --no-build
                       dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net8.0 --no-build
-              - step:
-                  type: Run
-                  name: Create Nuget
-                  identifier: Create_Nuget
-                  spec:
-                    shell: Powershell
-                    command: |-
-                      $env:PATH = "C:\dotnet;$env:PATH"
-                      if (!(Test-Path ".\nuget")) { mkdir .\nuget }
-                      dotnet pack .\src\Splitio --configuration Release --output .\nuget
-                      dotnet pack .\Splitio.Redis --configuration Release --output .\nuget
+                contextType: Pipeline
               - step:
                   type: Run
                   name: Upload Nuget
