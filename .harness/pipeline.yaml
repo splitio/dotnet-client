@@ -287,7 +287,10 @@ pipeline:
                   identifier: Install_Net_8
                   spec:
                     shell: Powershell
-                    command: .\dotnet-install.ps1 -Channel 8.0 -InstallDir "C:\dotnet"
+                    command: |-
+                      $env:PATH = "C:\dotnet;$env:PATH"
+                      Copy-Item -Path "C:\dotnet\dotnet-install.ps1" -Destination "C:\dotnet\dotnet-install2.ps1"
+                      .\dotnet-install2.ps1 -Channel 8.0 -InstallDir "C:\dotnet"
               - step:
                   type: Run
                   name: Other Tests Runs Net 8
