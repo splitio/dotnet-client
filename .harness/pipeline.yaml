@@ -47,17 +47,6 @@ pipeline:
                       Redis-64\tools\redis-server.exe --service-start
               - step:
                   type: Run
-                  name: Install Net 8
-                  identifier: Install_Net_8
-                  spec:
-                    shell: Powershell
-                    command: |-
-                      $env:PATH = "C:\dotnet;$env:PATH"
-                      Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.ps1" -OutFile "dotnet-install2.ps1"
-                      .\dotnet-install2.ps1 -Channel 8.0 -InstallDir "C:\dotnet"
-                contextType: Pipeline
-              - step:
-                  type: Run
                   name: Restore Dependencies
                   identifier: Restore_Dependencies
                   spec:
@@ -288,10 +277,10 @@ pipeline:
                     shell: Powershell
                     command: |-
                       $env:PATH = "C:\dotnet;$env:PATH"
-                      dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj -c Release -f net9.0 --no-build
-                      dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -c Release -f net9.0 --no-build
-                      dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -c Release -f net9.0 --no-build
-                      dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net9.0 --no-build
+                      dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj -c Release --no-build
+                      dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -c Release --no-build
+                      dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -c Release --no-build
+                      dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release --no-build
               - step:
                   type: Run
                   name: Create Nuget
@@ -312,21 +301,7 @@ pipeline:
                     command: |-
                       dotnet test .\tests\Splitio-tests\Splitio-tests.csproj `
                         -c Release `
-                        -f net8.0 `
                         --no-build
-              - step:
-                  type: Run
-                  name: Run Other Tests Net 8
-                  identifier: Other_Tests_Runs
-                  spec:
-                    shell: Powershell
-                    command: |-
-                      $env:PATH = "C:\dotnet;$env:PATH"
-                      dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj -c Release -f net8.0 --no-build
-                      dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -c Release -f net8.0 --no-build
-                      dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -c Release -f net8.0 --no-build
-                      dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net8.0 --no-build
-                contextType: Pipeline
               - step:
                   type: Run
                   name: Upload Nuget
