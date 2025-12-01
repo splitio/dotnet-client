@@ -277,10 +277,24 @@ pipeline:
                     shell: Powershell
                     command: |-
                       $env:PATH = "C:\dotnet;$env:PATH"
-                      dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj -c Release --no-build
-                      dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -c Release --no-build
-                      dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -c Release --no-build
-                      dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release --no-build
+                      dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj -f net9.0 -c Release --no-build
+                      dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -f net9.0 -c Release --no-build
+                      dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -f net9.0 -c Release --no-build
+                      dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net9.0 --no-build
+              - step:
+                  type: Run
+                  name: Run unit tests Net 472
+                  identifier: Run_unit_tests_Net_8
+                  spec:
+                    shell: Powershell
+                    command: |-
+                      $env:PATH = "C:\dotnet;$env:PATH"
+                      dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj -f net472 -c Release --no-build
+                      dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -f net472 -c Release --no-build
+                      dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -f net472 -c Release --no-build
+                      dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net472 --no-build
+                      dotnet test .\tests\Splitio-tests\Splitio-tests.csproj -f net472 -c Release --no-build
+                contextType: Pipeline
               - step:
                   type: Run
                   name: Create Nuget
@@ -292,16 +306,6 @@ pipeline:
                       if (!(Test-Path ".\nuget")) { mkdir .\nuget }
                       dotnet pack .\src\Splitio --configuration Release --output .\nuget
                       dotnet pack .\Splitio.Redis --configuration Release --output .\nuget
-              - step:
-                  type: Run
-                  name: Run unit tests Net 8
-                  identifier: Run_unit_tests_Net_8
-                  spec:
-                    shell: Powershell
-                    command: |-
-                      dotnet test .\tests\Splitio-tests\Splitio-tests.csproj `
-                        -c Release `
-                        --no-build
               - step:
                   type: Run
                   name: Upload Nuget
