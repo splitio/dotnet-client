@@ -283,7 +283,7 @@ pipeline:
                       dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net9.0 --no-build
               - step:
                   type: Run
-                  name: Run unit tests Net 472
+                  name: Run unit tests Net Framework 472
                   identifier: Run_unit_tests_Net_8
                   spec:
                     shell: Powershell
