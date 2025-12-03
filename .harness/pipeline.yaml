@@ -269,18 +269,46 @@ pipeline:
                           -SonarProjectKey "dotnet-client" `
                           -SonarToken "<+secrets.getValue('sonarqube-token')>" `
                           -SonarUrl "https://sonar.harness.io/"
-              - step:
-                  type: Run
-                  name: Run Other Tests Net 9
-                  identifier: Run_Other_Tests_Net_9
-                  spec:
-                    shell: Powershell
-                    command: |-
-                      $env:PATH = "C:\dotnet;$env:PATH"
-                      dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj -f net9.0 -c Release --no-build
-                      dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -f net9.0 -c Release --no-build
-                      dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -f net9.0 -c Release --no-build
-                      dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net9.0 --no-build
+              - parallel:
+                  - step:
+                      type: Run
+                      name: Run Other Tests Net 9
+                      identifier: Run_Other_Tests_Net_9
+                      spec:
+                        shell: Powershell
+                        command: |-
+                          $env:PATH = "C:\dotnet;$env:PATH"
+                          dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj -f net9.0 -c Release --no-build
+                          #dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -f net9.0 -c Release --no-build
+                          #dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -f net9.0 -c Release --no-build
+                          #dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net9.0 --no-build
+                  - step:
+                      type: Run
+                      name: Run other tests Net9 - 2
+                      identifier: Run_other_tests_Net9_2
+                      spec:
+                        shell: Powershell
+                        command: |-
+                          $env:PATH = "C:\dotnet;$env:PATH"
+                          dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -f net9.0 -c Release --no-build
+                  - step:
+                      type: Run
+                      name: Run Other tests Net 9 - 3
+                      identifier: Run_Other_tests_Net_9_3
+                      spec:
+                        shell: Powershell
+                        command: |-
+                          $env:PATH = "C:\dotnet;$env:PATH"
+                          dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -f net9.0 -c Release --no-build
+                  - step:
+                      type: Run
+                      name: Run Other Tests Net 9 - 4
+                      identifier: Run_Other_Tests_Net_9_4
+                      spec:
+                        shell: Powershell
+                        command: |-
+                          $env:PATH = "C:\dotnet;$env:PATH"
+                          dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net9.0 --no-build
               - step:
                   type: Run
                   name: Run unit tests Net 472
