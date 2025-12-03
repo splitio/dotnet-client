@@ -309,20 +309,53 @@ pipeline:
                         command: |-
                           $env:PATH = "C:\dotnet;$env:PATH"
                           dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net9.0 --no-build
-              - step:
-                  type: Run
-                  name: Run unit tests Net 472
-                  identifier: Run_unit_tests_Net_8
-                  spec:
-                    shell: Powershell
-                    command: |-
-                      $env:PATH = "C:\dotnet;$env:PATH"
-                      dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj -f net472 -c Release --no-build
-                      dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -f net472 -c Release --no-build
-                      dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -f net472 -c Release --no-build
-                      dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net472 --no-build
-                      dotnet test .\tests\Splitio-tests\Splitio-tests.csproj -f net472 -c Release --no-build
-                contextType: Pipeline
+              - parallel:
+                  - step:
+                      type: Run
+                      name: Run tests Net 472
+                      identifier: Run_unit_tests_Net_8
+                      spec:
+                        shell: Powershell
+                        command: |-
+                          $env:PATH = "C:\dotnet;$env:PATH"
+                          dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj -f net472 -c Release --no-build
+                    contextType: Pipeline
+                  - step:
+                      type: Run
+                      name: Run tests Net 472 - 2
+                      identifier: Run_tests_Net_472_2
+                      spec:
+                        shell: Powershell
+                        command: |-
+                          $env:PATH = "C:\dotnet;$env:PATH"
+                          dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -f net472 -c Release --no-build
+                  - step:
+                      type: Run
+                      name: Run tests Net 472 - 3
+                      identifier: Run_tests_Net_472_3
+                      spec:
+                        shell: Powershell
+                        command: |-
+                          $env:PATH = "C:\dotnet;$env:PATH"
+                          dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -f net472 -c Release --no-build
+                  - step:
+                      type: Run
+                      name: Run tests Net 472 - 4
+                      identifier: Run_tests_Net_472_4
+                      spec:
+                        shell: Powershell
+                        command: |-
+                          $env:PATH = "C:\dotnet;$env:PATH"
+                          dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net472 --no-build
+                  - step:
+                      type: Run
+                      name: Run tests Net 472 - 5
+                      identifier: Run_tests_Net_472_5
+                      spec:
+                        shell: Powershell
+                        command: |-
+                          $env:PATH = "C:\dotnet;$env:PATH"
+                          dotnet test .\tests\Splitio-tests\Splitio-tests.csproj -f net472 -c Release --no-build
               - step:
                   type: Run
                   name: Create Nuget
