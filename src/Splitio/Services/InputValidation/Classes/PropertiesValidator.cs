@@ -62,7 +62,7 @@ namespace Splitio.Services.InputValidation.Classes
             };
         }
 
-        private static bool IsNumeric(object value)
+        public static bool IsNumeric(object value)
         {
             if (value == null) return false;
 
