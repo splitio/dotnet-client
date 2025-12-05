@@ -33,7 +33,6 @@ namespace Splitio.Domain
                     {
                         SdkInternalEvent.RuleBasedSegmentsUpdated,
                         SdkInternalEvent.FlagsUpdated,
-                        SdkInternalEvent.LargeSegmentsUpdated,
                         SdkInternalEvent.SegmentsUpdated
                     }
                 }
@@ -54,7 +53,6 @@ namespace Splitio.Domain
                         SdkInternalEvent.RuleBasedSegmentsUpdated,
                         SdkInternalEvent.FlagsUpdated,
                         SdkInternalEvent.FlagKilledNotification,
-                        SdkInternalEvent.LargeSegmentsUpdated,
                         SdkInternalEvent.SegmentsUpdated
                     }
                 },
