@@ -7,6 +7,8 @@ namespace Splitio.Domain
         FlagKilledNotification,
         RuleBasedSegmentsUpdated,
         SegmentsUpdated,
-        LargeSegmentsUpdated
+        LargeSegmentsUpdated,
+        SdkTimedOut,
+        SdkReady
     }
 }
