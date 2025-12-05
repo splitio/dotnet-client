@@ -24,24 +24,43 @@ namespace Splitio.Domain
             ExecutionLimits = executionLimits;
         }
 
-        public static EventsManagerConfig BuildEventsManagerConfig() 
+        public static EventsManagerConfig BuildEventsManagerConfig()
         {
-            Dictionary<SdkEvent, HashSet<SdkInternalEvent>> requireAll = new Dictionary<SdkEvent, HashSet<SdkInternalEvent>>();
-            Dictionary<SdkEvent, HashSet<SdkInternalEvent>> prerequisites = new Dictionary<SdkEvent, HashSet<SdkInternalEvent>>();
+            Dictionary<SdkEvent, HashSet<SdkInternalEvent>> requireAll = new Dictionary<SdkEvent, HashSet<SdkInternalEvent>>
+            {
+                {
+                    SdkEvent.SdkReady, new HashSet<SdkInternalEvent>
+                    {
+                        SdkInternalEvent.RuleBasedSegmentsUpdated,
+                        SdkInternalEvent.FlagsUpdated,
+                        SdkInternalEvent.LargeSegmentsUpdated,
+                        SdkInternalEvent.SegmentsUpdated
+                    }
+                }
+            };
+            Dictionary<SdkEvent, HashSet<SdkInternalEvent>> prerequisites = new Dictionary<SdkEvent, HashSet<SdkInternalEvent>>
+            {
+                {
+                    SdkEvent.SdkUpdate, new HashSet<SdkInternalEvent>
+                    {
+                        SdkInternalEvent.SdkReady
+                    }
+                }
+            };
             Dictionary<SdkEvent, HashSet<SdkInternalEvent>> requireAny = new Dictionary<SdkEvent, HashSet<SdkInternalEvent>>
             {
                 { SdkEvent.SdkUpdate, new HashSet<SdkInternalEvent> 
                     {
-                            SdkInternalEvent.RuleBasedSegmentsUpdated,
-                            SdkInternalEvent.FlagsUpdated,
-                            SdkInternalEvent.FlagKilledNotification,
-                            SdkInternalEvent.LargeSegmentsUpdated,
-                            SdkInternalEvent.SegmentsUpdated
+                        SdkInternalEvent.RuleBasedSegmentsUpdated,
+                        SdkInternalEvent.FlagsUpdated,
+                        SdkInternalEvent.FlagKilledNotification,
+                        SdkInternalEvent.LargeSegmentsUpdated,
+                        SdkInternalEvent.SegmentsUpdated
                     }
                 },
-                { SdkEvent.SdkReadyTimeout, new HashSet<SdkInternalEvent> 
+                { SdkEvent.SdkReadyTimeout, new HashSet<SdkInternalEvent>
                     {
-                            SdkInternalEvent.SdkTimedOut
+                        SdkInternalEvent.SdkTimedOut
                     }
                 }
             };
@@ -55,6 +74,7 @@ namespace Splitio.Domain
             Dictionary<SdkEvent, int> executionLimits = new Dictionary<SdkEvent, int>
             {
                 { SdkEvent.SdkReadyTimeout, 1 },
+                { SdkEvent.SdkReady, 1 },
                 { SdkEvent.SdkUpdate, -1 }
             };
 
