@@ -1,28 +1,23 @@
 ﻿using Splitio.Domain;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
 {
     public class EventsManager : IEventsManager
     {
         EventsManagerConfig _config;
-        Dictionary<SdkEvent, Dictionary<string, object>> _activeEvents;
+        ConcurrentDictionary<SdkEvent, Dictionary<string, object>> _activeEvents;
         string Triggered = "Triggered";
         string EventHandler = "EventHandler";
-        Dictionary<SdkInternalEvent, bool> _internalEventsStatus;
+        ConcurrentDictionary<SdkInternalEvent, bool> _internalEventsStatus;
 
         public EventsManager(EventsManagerConfig eventsManagerConfig) 
         {
             _config = eventsManagerConfig;
-            _activeEvents = new Dictionary<SdkEvent, Dictionary<string, object>>();
-            _internalEventsStatus = new Dictionary<SdkInternalEvent, bool>();
-        }
-
-        public Task NotifyInternalEvent(SdkInternalEvent sdkInternalEvent, EventMetadata eventMetadata)
-        {
-            return Task.CompletedTask;
+            _activeEvents = new ConcurrentDictionary<SdkEvent, Dictionary<string, object>>();
+            _internalEventsStatus = new ConcurrentDictionary<SdkInternalEvent, bool>();
         }
 
         public bool EventAlreadyTriggered(SdkEvent sdkEvent)
@@ -39,32 +34,40 @@ namespace Splitio.Services.Common
 
         public void Register(SdkEvent sdkEvent, IEventHandler eventHandler)
         {
-            if (!_activeEvents.ContainsKey(sdkEvent))
+            if (_activeEvents.TryGetValue(sdkEvent, out var dict))
             {
-                _activeEvents[sdkEvent] = new Dictionary<string, object>()
+                if (dict.Count == 0)
                 {
-                    {Triggered, false},
-                    {EventHandler, eventHandler}
-                };
+                    _activeEvents.TryAdd(sdkEvent, new Dictionary<string, object>()
+                    {
+                        {Triggered, false},
+                        {EventHandler, eventHandler}
+                    });
+                }
             }
         }
 
         public void Unregister(SdkEvent sdkEvent)
         {
-            if (_activeEvents.ContainsKey(sdkEvent))
+            if (_activeEvents.TryGetValue(sdkEvent, out var dict))
             {
-                _activeEvents.Remove(sdkEvent);
+                if (dict.Count < 1)
+                {
+                    _activeEvents.TryRemove(sdkEvent, out _);
+                }
             }
         }
 
         public void UpdateSdkInternalEventStatus(SdkInternalEvent sdkInternalEvent, bool status)
         {
-            _internalEventsStatus[sdkInternalEvent] = status;
+            _internalEventsStatus.AddOrUpdate(sdkInternalEvent, status, 
+                (_, oldValue) => status);
         }
 
         public bool GetSdkInternalEventStatus(SdkInternalEvent sdkInternalEvent)
         { 
-            return _internalEventsStatus[sdkInternalEvent]; 
+            _internalEventsStatus.TryGetValue(sdkInternalEvent, out var status); 
+            return status;
         }
 
         public void Destroy()
