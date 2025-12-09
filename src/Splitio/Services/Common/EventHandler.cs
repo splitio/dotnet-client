@@ -1,10 +1,13 @@
 ﻿using Splitio.Domain;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Common
 {
     public class EventHandler : IEventHandler
     {
+        private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventHandler");
         EventsManagerConfig _config;
         EventsManager _eventsManager;
         EventDelivery _eventDelivery;
@@ -14,6 +17,7 @@ namespace Splitio.Services.Common
             public bool valid;
         }
 
+        #region Public Methods
         public EventHandler(EventsManagerConfig eventsManagerConfig, EventsManager eventsManager, EventDelivery eventDelivery)
         {
             _config = eventsManagerConfig;
@@ -30,14 +34,16 @@ namespace Splitio.Services.Common
 
         public void Handle(SdkEvent sdkEvent, EventMetadata eventMetadata)
         {
+            _logger.Debug($"EventHandler: Delivering notification for Event {sdkEvent}");
             _eventDelivery.Deliver(sdkEvent, eventMetadata);
         }
+        #endregion
 
-        void HandleInternalEvent(EventMetadata eventMetadata)
+        #region Private Methods
+        private void HandleInternalEvent(EventMetadata eventMetadata, SdkInternalEvent sdkInternalEvent)
         {
-            eventMetadata.GetData().TryGetValue("SdkInternalEvent", out var sdkInternalEvent);
-            
-            ValidSdkEvent eventToNotify = GetSdkEventIfApplicable((SdkInternalEvent)sdkInternalEvent);
+            _logger.Debug($"EventHandler: Handling internal event {sdkInternalEvent}");
+            ValidSdkEvent eventToNotify = GetSdkEventIfApplicable(sdkInternalEvent);
             if (eventToNotify.valid)
             {
                 Handle(eventToNotify.sdkEvent, eventMetadata);
@@ -56,9 +62,16 @@ namespace Splitio.Services.Common
             finalSdkEvent.sdkEvent = SdkEvent.SdkUpdate;
 
             ValidSdkEvent requireAnySdkEvent = CheckRequireAny(sdkInternalEvent);
+            if (!requireAnySdkEvent.valid)
+            {
+                _logger.Debug($"EventHandler: No Event available for internal event {sdkInternalEvent}");
+                return requireAnySdkEvent;
+            }
+
             if (requireAnySdkEvent.valid && !_eventsManager.EventAlreadyTriggered(requireAnySdkEvent.sdkEvent)
                 && ExecutionLimit(requireAnySdkEvent.sdkEvent) == 1)
             {
+                _logger.Debug($"EventHandler: Detected Event {requireAnySdkEvent.sdkEvent} is available for internal event {sdkInternalEvent}");
                 finalSdkEvent.sdkEvent = requireAnySdkEvent.sdkEvent;
             }
 
@@ -67,26 +80,31 @@ namespace Splitio.Services.Common
                 finalSdkEvent.valid = requireAnySdkEvent.valid;
             }
 
-            finalSdkEvent.valid = !CheckPrerequisites(finalSdkEvent.sdkEvent);
-
+            finalSdkEvent.valid = CheckPrerequisites(finalSdkEvent.sdkEvent);
+            if (finalSdkEvent.valid)
+            {
+                _logger.Debug($"EventHandler: Event {requireAnySdkEvent.sdkEvent} is eligable for notification.");
+            }
             return finalSdkEvent;
         }
 
         private List<SdkEvent> CheckRequireAll()
         {
             List<SdkEvent> events = new List<SdkEvent>();
-            foreach (KeyValuePair<SdkEvent, HashSet<SdkInternalEvent>> kvp in _config.RequireAny)
+            foreach (KeyValuePair<SdkEvent, HashSet<SdkInternalEvent>> kvp in _config.RequireAll)
             {
-                bool finalStatus = false;
+                bool finalStatus = true;
                 foreach (var val in kvp.Value)
                 {
                     finalStatus &= _eventsManager.GetSdkInternalEventStatus(val);
                 }
                 if (finalStatus && _eventsManager.IsEventRegistered(kvp.Key) 
                     && CheckPrerequisites(kvp.Key)
-                    && ExecutionLimit(kvp.Key) == 1
-                    && !_eventsManager.EventAlreadyTriggered(kvp.Key))
+                    && ((ExecutionLimit(kvp.Key) == 1 && !_eventsManager.EventAlreadyTriggered(kvp.Key)) 
+                        || (ExecutionLimit(kvp.Key) == -1))
+                    && kvp.Value.Count > 0)
                 {
+                    _logger.Debug($"EventHandler: Event {kvp.Key} is eligable as require all for notification.");
                     events.Add(kvp.Key);
                 }
             }
@@ -114,7 +132,7 @@ namespace Splitio.Services.Common
 
         private int ExecutionLimit(SdkEvent sdkEvent)
         {
-            if (_config.ExecutionLimits.ContainsKey(sdkEvent))
+            if (!_config.ExecutionLimits.ContainsKey(sdkEvent))
                 return -1;
 
             _config.ExecutionLimits.TryGetValue(sdkEvent, out int limit);
@@ -145,37 +163,38 @@ namespace Splitio.Services.Common
         void EventManager_RuleBasedSegmentsUpdatedHandler(object sender, EventMetadata eventMetadata)
         {
             _eventsManager.UpdateSdkInternalEventStatus(SdkInternalEvent.RuleBasedSegmentsUpdated, true);    
-            HandleInternalEvent(eventMetadata);
+            HandleInternalEvent(eventMetadata, SdkInternalEvent.RuleBasedSegmentsUpdated);
         }
 
         void EventManager_FlagsUpdatedHandler(object sender, EventMetadata eventMetadata)
         {
             _eventsManager.UpdateSdkInternalEventStatus(SdkInternalEvent.FlagsUpdated, true);
-            HandleInternalEvent(eventMetadata);
+            HandleInternalEvent(eventMetadata, SdkInternalEvent.FlagsUpdated);
         }
 
         void EventManager_FlagKilledNotificationHandler(object sender, EventMetadata eventMetadata)
         {
             _eventsManager.UpdateSdkInternalEventStatus(SdkInternalEvent.FlagKilledNotification, true);
-            HandleInternalEvent(eventMetadata);
+            HandleInternalEvent(eventMetadata, SdkInternalEvent.FlagKilledNotification);
         }
 
         void EventManager_SegmentsUpdatedHandler(object sender, EventMetadata eventMetadata)
         {
             _eventsManager.UpdateSdkInternalEventStatus(SdkInternalEvent.SegmentsUpdated, true);
-            HandleInternalEvent(eventMetadata);
+            HandleInternalEvent(eventMetadata, SdkInternalEvent.SegmentsUpdated);
         }
 
         void EventManager_SdkReadyHandler(object sender, EventMetadata eventMetadata)
         {
             _eventsManager.UpdateSdkInternalEventStatus(SdkInternalEvent.SdkReady, true);
-            HandleInternalEvent(eventMetadata);
+            HandleInternalEvent(eventMetadata, SdkInternalEvent.SdkReady);
         }
 
         void EventManager_SdkTimedOutHandler(object sender, EventMetadata eventMetadata)
         {
             _eventsManager.UpdateSdkInternalEventStatus(SdkInternalEvent.SdkTimedOut, true);
-            HandleInternalEvent(eventMetadata);
+            HandleInternalEvent(eventMetadata, SdkInternalEvent.SdkTimedOut);
         }
+        #endregion
     }
 }
