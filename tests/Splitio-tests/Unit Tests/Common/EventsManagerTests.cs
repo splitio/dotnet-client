@@ -15,6 +15,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         private bool SegmentsUpdated = false;
         private bool SdkReady = false;
         private bool SdkTimedOut = false;
+        private bool SdkUpdate = false;
         private EventMetadata eMetadata = null;
 
         [TestMethod]
@@ -28,6 +29,10 @@ namespace Splitio_Tests.Unit_Tests.Common
             eventsManager.SegmentsUpdatedHandler += EventManager_SegmentsUpdatedHandler;
             eventsManager.SdkReadyHandler += EventManager_SdkReadyHandler;
             eventsManager.SdkTimedOutHandler += EventManager_SdkTimedOutHandler;
+
+            eventsManager.PublicSdkReadyHandler += sdkReady_callback;
+            eventsManager.PublicSdkUpdateHandler += sdkUpdate_callback;
+            eventsManager.PublicSdkTimedOutHandler += sdkTimedOut_callback;
 
             Dictionary<string, object> metaData = new Dictionary<string, object>
             {
@@ -68,35 +73,26 @@ namespace Splitio_Tests.Unit_Tests.Common
             Thread.Sleep(1000);
             Assert.IsTrue(SegmentsUpdated);
             VerifyMetadata(eMetadata);
+
+            ResetAllVariables();
+            eventsManager.OnSdkEvent(SdkEvent.SdkReady, new EventMetadata(metaData));
+            Thread.Sleep(1000);
+            Assert.IsTrue(SdkReady);
+            VerifyMetadata(eMetadata);
+
+            ResetAllVariables();
+            eventsManager.OnSdkEvent(SdkEvent.SdkUpdate, new EventMetadata(metaData));
+            Thread.Sleep(1000);
+            Assert.IsTrue(SdkUpdate);
+            VerifyMetadata(eMetadata);
+
+            ResetAllVariables();
+            eventsManager.OnSdkEvent(SdkEvent.SdkReadyTimeout, new EventMetadata(metaData));
+            Thread.Sleep(1000);
+            Assert.IsTrue(SdkTimedOut);
+            VerifyMetadata(eMetadata);
         }
 
-        [TestMethod]
-        public void TestRegisterEvents()
-        {
-            EventsManager eventsManager = new EventsManager();
-            eventsManager.Register(SdkEvent.SdkUpdate, sdkUpdate_callback);
-            eventsManager.Register(SdkEvent.SdkReady, sdkReady_callback);
-
-            Assert.IsFalse(eventsManager.EventAlreadyTriggered(SdkEvent.SdkReady));
-            Assert.IsFalse(eventsManager.EventAlreadyTriggered(SdkEvent.SdkUpdate));
-            Assert.IsTrue(eventsManager.IsEventRegistered(SdkEvent.SdkUpdate));
-            Assert.IsTrue(eventsManager.IsEventRegistered(SdkEvent.SdkReady));
-            Assert.IsFalse(eventsManager.IsEventRegistered(SdkEvent.SdkReadyTimeout));
-            Assert.IsTrue(eventsManager.GetCallbackAction(SdkEvent.SdkUpdate) == sdkUpdate_callback);
-            Assert.IsTrue(eventsManager.GetCallbackAction(SdkEvent.SdkReady) == sdkReady_callback);
-            Assert.IsTrue(eventsManager.GetCallbackAction(SdkEvent.SdkReadyTimeout) == null);
-
-            eventsManager.SetSdkEventTriggered(SdkEvent.SdkReady);
-            Assert.IsTrue(eventsManager.EventAlreadyTriggered(SdkEvent.SdkReady));
-            Assert.IsFalse(eventsManager.EventAlreadyTriggered(SdkEvent.SdkUpdate));
-
-            eventsManager.Unregister(SdkEvent.SdkUpdate);
-            Assert.IsFalse(eventsManager.IsEventRegistered(SdkEvent.SdkUpdate));
-            Assert.IsTrue(eventsManager.GetCallbackAction(SdkEvent.SdkUpdate) == null);
-
-            eventsManager.Destroy();
-            Assert.IsFalse(eventsManager.IsEventRegistered(SdkEvent.SdkReady));
-        }
 
         [TestMethod]
         public void TestEventsStatus()
@@ -108,6 +104,9 @@ namespace Splitio_Tests.Unit_Tests.Common
             Assert.IsFalse(eventsManager.GetSdkInternalEventStatus(SdkInternalEvent.RuleBasedSegmentsUpdated));
             Assert.IsFalse(eventsManager.GetSdkInternalEventStatus(SdkInternalEvent.SdkTimedOut));
             Assert.IsFalse(eventsManager.GetSdkInternalEventStatus(SdkInternalEvent.SegmentsUpdated));
+            Assert.IsFalse(eventsManager.GetSdkEventStatus(SdkEvent.SdkReady));
+            Assert.IsFalse(eventsManager.GetSdkEventStatus(SdkEvent.SdkUpdate));
+            Assert.IsFalse(eventsManager.GetSdkEventStatus(SdkEvent.SdkReadyTimeout));
 
             eventsManager.UpdateSdkInternalEventStatus(SdkInternalEvent.SdkReady, true);
             Assert.IsTrue(eventsManager.GetSdkInternalEventStatus(SdkInternalEvent.SdkReady));
@@ -129,6 +128,15 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             eventsManager.UpdateSdkInternalEventStatus(SdkInternalEvent.SdkReady, false);
             Assert.IsFalse(eventsManager.GetSdkInternalEventStatus(SdkInternalEvent.SdkReady));
+
+            eventsManager.UpdateSdkEventStatus(SdkEvent.SdkReady, true);
+            Assert.IsTrue(eventsManager.GetSdkEventStatus(SdkEvent.SdkReady));
+
+            eventsManager.UpdateSdkEventStatus(SdkEvent.SdkUpdate, true);
+            Assert.IsTrue(eventsManager.GetSdkEventStatus(SdkEvent.SdkUpdate));
+
+            eventsManager.UpdateSdkEventStatus(SdkEvent.SdkReadyTimeout, true);
+            Assert.IsTrue(eventsManager.GetSdkEventStatus(SdkEvent.SdkReadyTimeout));
         }
 
         void ResetAllVariables()
@@ -140,7 +148,9 @@ namespace Splitio_Tests.Unit_Tests.Common
             SdkReady = false;
             SdkTimedOut = false;
             eMetadata = null;
+            SdkUpdate = false;
         }
+
         void VerifyMetadata(EventMetadata eMetdata)
         {
             Assert.IsTrue(eMetadata.ContainKey("flags"));
@@ -185,14 +195,22 @@ namespace Splitio_Tests.Unit_Tests.Common
             eMetadata = eventMetadata;
         }
 
-        private void sdkUpdate_callback(EventMetadata metadata)
+        private void sdkUpdate_callback(object sender, EventMetadata metadata)
         {
-            SdkReady = true;
+            SdkUpdate = true;
+            eMetadata = metadata;
         }
 
-        private void sdkReady_callback(EventMetadata metadata)
+        private void sdkReady_callback(object sender, EventMetadata metadata)
         {
             SdkReady = true;
+            eMetadata = metadata;
+        }
+
+        private void sdkTimedOut_callback(object sender, EventMetadata metadata)
+        {
+            SdkTimedOut = true;
+            eMetadata = metadata;
         }
     }
 }

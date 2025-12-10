@@ -3,15 +3,12 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 
 namespace Splitio.Services.Common
 {
-    public class EventsManager : IEventsManager
+    public class EventsManager
     {
-        ConcurrentDictionary<SdkEvent, Dictionary<string, object>> _activeEvents;
-        readonly string Triggered = "Triggered";
-        readonly string EventHandler = "EventHandler";
+        ConcurrentDictionary<SdkEvent, bool> _eventsStatus;
         ConcurrentDictionary<SdkInternalEvent, bool> _internalEventsStatus;
         private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventsManager");
 
@@ -22,81 +19,28 @@ namespace Splitio.Services.Common
         public event EventHandler<EventMetadata> SdkReadyHandler;
         public event EventHandler<EventMetadata> SdkTimedOutHandler;
 
+        public event EventHandler<EventMetadata> PublicSdkReadyHandler;
+        public event EventHandler<EventMetadata> PublicSdkUpdateHandler;
+        public event EventHandler<EventMetadata> PublicSdkTimedOutHandler;
+
         #region Public Methods
         public EventsManager() 
         {
-            _activeEvents = new ConcurrentDictionary<SdkEvent, Dictionary<string, object>>();
+            _eventsStatus = BuildSdkEventStatus();
             _internalEventsStatus = BuildInternalSdkEventStatus();
         }
 
-        public bool EventAlreadyTriggered(SdkEvent sdkEvent)
+        public void UpdateSdkEventStatus(SdkEvent sdkEvent, bool status)
         {
-            if (_activeEvents.TryGetValue(sdkEvent, out Dictionary<string, object> triggered))
-            { 
-                triggered.TryGetValue(Triggered, out var trig);
-                return (bool)trig;
-            }
-
-            return false;
+            _eventsStatus.AddOrUpdate(sdkEvent, status,
+                (_, oldValue) => status);
+            _logger.Debug($"EventManager: Sdk Event {sdkEvent} status is updated to {status}");
         }
 
-        public bool IsEventRegistered(SdkEvent sdkEvent)
+        public bool GetSdkEventStatus(SdkEvent sdkEvent)
         {
-            return _activeEvents.ContainsKey(sdkEvent);
-        }
-
-        public Action<EventMetadata> GetCallbackAction(SdkEvent sdkEvent)
-        {
-            if (_activeEvents.TryGetValue(sdkEvent, out var dict))
-            {
-                dict.TryGetValue(EventHandler, out var callbackAction);
-                return (Action<EventMetadata>)callbackAction;
-            }
-
-            return null;
-        }
-
-        public void Register(SdkEvent sdkEvent, Action<EventMetadata> callbackAction)
-        {
-            _activeEvents.TryGetValue(sdkEvent, out var dict);            
-            if (dict == null)
-            {
-                _activeEvents.TryAdd(sdkEvent, new Dictionary<string, object>()
-                {
-                    {Triggered, false},
-                    {EventHandler, callbackAction}
-                });
-                _logger.Debug($"EventManager: Event {sdkEvent} is registered");
-            }
-        }
-        
-        public void Unregister(SdkEvent sdkEvent)
-        {
-            if (_activeEvents.TryGetValue(sdkEvent, out var dict))
-            {
-                if (dict.Count > 0)
-                {
-                    _activeEvents.TryRemove(sdkEvent, out _);
-                    _logger.Debug($"EventManager: Event {sdkEvent} is unregistered");
-                }
-            }
-        }
-
-        public void SetSdkEventTriggered(SdkEvent sdkEvent)
-        {
-            if (!_activeEvents.TryGetValue(sdkEvent, out var dict))
-            {
-                return;
-            }
-
-            if ((bool)dict[Triggered])
-            {
-                return;
-            }
-
-            Dictionary<string, object> dict2 = new Dictionary<string, object>(dict);
-            dict2[Triggered] = true;
-            _activeEvents.TryUpdate(sdkEvent, dict2, dict);
+            _eventsStatus.TryGetValue(sdkEvent, out var status);
+            return status;
         }
 
         public void UpdateSdkInternalEventStatus(SdkInternalEvent sdkInternalEvent, bool status)
@@ -112,20 +56,37 @@ namespace Splitio.Services.Common
             return status;
         }
 
-        public void Destroy()
-        { 
-            _activeEvents.Clear();
-            _internalEventsStatus.Clear();
-            _logger.Debug("EventManager is destroyed.");
-        }
-
         public virtual void OnSdkInternalEvent(SdkInternalEvent sdkInternalEvent, EventMetadata eventMetadata)
         {
             EventHandler<EventMetadata> handler = GetEventHandler(sdkInternalEvent);
             if (handler != null)
             {
                 _logger.Debug($"EventManager: Triggering handle for Internal Event {sdkInternalEvent}");
-                handler(this, eventMetadata);
+                try
+                {
+                    handler(this, eventMetadata);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error($"EventManager: Failed to run internal event {sdkInternalEvent} handler {e.Message}", e);
+                }
+            }
+        }
+
+        public virtual void OnSdkEvent(SdkEvent sdkEvent, EventMetadata eventMetadata)
+        {
+            EventHandler<EventMetadata> handler = GetPublicEventHandler(sdkEvent);
+            if (handler != null)
+            {
+                _logger.Debug($"EventManager: Triggering handle for Sdk Event {sdkEvent}");
+                try
+                {
+                    handler(this, eventMetadata);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error($"EventManager: Failed to run event {sdkEvent} handler {e.Message}", e);
+                }
             }
         }
         #endregion
@@ -142,6 +103,16 @@ namespace Splitio.Services.Common
             statuses.TryAdd(SdkInternalEvent.FlagsUpdated, false);
             return statuses;
         }
+
+        private ConcurrentDictionary<SdkEvent, bool> BuildSdkEventStatus()
+        {
+            ConcurrentDictionary<SdkEvent, bool> statuses = new ConcurrentDictionary<SdkEvent, bool>();
+            statuses.TryAdd(SdkEvent.SdkReady, false);
+            statuses.TryAdd(SdkEvent.SdkUpdate, false);
+            statuses.TryAdd(SdkEvent.SdkReadyTimeout, false);
+            return statuses;
+        }
+
         private EventHandler<EventMetadata> GetEventHandler(SdkInternalEvent sdkInternalEvent)
         {
             switch (sdkInternalEvent)
@@ -152,6 +123,18 @@ namespace Splitio.Services.Common
                 case SdkInternalEvent.SegmentsUpdated: return SegmentsUpdatedHandler;
                 case SdkInternalEvent.SdkReady: return SdkReadyHandler;
                 case SdkInternalEvent.SdkTimedOut: return SdkTimedOutHandler;
+            }
+
+            return null;
+        }
+
+        private EventHandler<EventMetadata> GetPublicEventHandler(SdkEvent sdkEvent)
+        {
+            switch (sdkEvent)
+            {
+                case SdkEvent.SdkReady: return PublicSdkReadyHandler;
+                case SdkEvent.SdkReadyTimeout: return PublicSdkTimedOutHandler;
+                case SdkEvent.SdkUpdate: return PublicSdkUpdateHandler;
             }
 
             return null;

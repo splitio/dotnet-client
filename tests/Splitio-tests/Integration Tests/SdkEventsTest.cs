@@ -24,11 +24,11 @@ namespace Splitio_Tests.Integration_Tests
             //Arrange
             EventsManagerConfig config = EventsManagerConfig.BuildEventsManagerConfig();
             EventsManager eventsManager = new EventsManager();
-            EventDelivery eventDelivery = new EventDelivery(eventsManager);
-            eventDelivery.Start();
-            EventHandler eventHandler = new EventHandler(config, eventsManager, eventDelivery);
-            eventsManager.Register(SdkEvent.SdkUpdate, sdkUpdate_callback);
-            eventsManager.Register(SdkEvent.SdkReady, sdkReady_callback);
+            EventHandler eventHandler = new EventHandler(config, eventsManager);
+            eventHandler.SubscribeInternalEvents();
+
+            eventsManager.PublicSdkUpdateHandler += sdkUpdate_callback;
+            eventsManager.PublicSdkReadyHandler += sdkReady_callback;
 
             Dictionary<string, object> metaData = new Dictionary<string, object>
             {
@@ -59,18 +59,15 @@ namespace Splitio_Tests.Integration_Tests
             Thread.Sleep(2000);
             Assert.IsTrue(_sdkUpdate);
             Assert.IsFalse(_sdkReady);
-
-            eventDelivery.Stop();
-            eventsManager.Destroy();
         }
 
-        private void sdkUpdate_callback(EventMetadata metadata) 
+        private void sdkUpdate_callback(object sender, EventMetadata metadata) 
         {
             _sdkUpdate = true;
             _eventMetadata = metadata;
         }
 
-        private void sdkReady_callback(EventMetadata metadata)
+        private void sdkReady_callback(object sender, EventMetadata metadata)
         {
             _sdkReady = true;
             _eventMetadata = metadata;
