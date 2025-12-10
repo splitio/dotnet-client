@@ -15,10 +15,8 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             //Assert
             config.RequireAll.TryGetValue(SdkEvent.SdkReady, out var require1);
-            Assert.AreEqual(4, require1.Count);
-            Assert.IsTrue(require1.Contains(SdkInternalEvent.SegmentsUpdated));
-            Assert.IsTrue(require1.Contains(SdkInternalEvent.RuleBasedSegmentsUpdated));
-            Assert.IsTrue(require1.Contains(SdkInternalEvent.FlagsUpdated));
+            Assert.AreEqual(1, require1.Count);
+            Assert.IsTrue(require1.Contains(SdkInternalEvent.SdkReady));
 
             config.Prerequisites.TryGetValue(SdkEvent.SdkUpdate, out var ready2);
             Assert.IsTrue(ready2.Contains(SdkInternalEvent.SdkReady));

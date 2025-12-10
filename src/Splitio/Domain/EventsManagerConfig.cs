@@ -31,9 +31,6 @@ namespace Splitio.Domain
                 {
                     SdkEvent.SdkReady, new HashSet<SdkInternalEvent>
                     {
-                        SdkInternalEvent.RuleBasedSegmentsUpdated,
-                        SdkInternalEvent.FlagsUpdated,
-                        SdkInternalEvent.SegmentsUpdated,
                         SdkInternalEvent.SdkReady
                     }
                 }
