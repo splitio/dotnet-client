@@ -10,7 +10,7 @@ namespace Splitio.Services.Common
         private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventHandler");
         EventsManagerConfig _config;
         EventsManager _eventsManager;
-        EventDelivery _eventDelivery;
+        IEventDelivery _eventDelivery;
         struct ValidSdkEvent
         {
             public SdkEvent sdkEvent;
@@ -18,7 +18,7 @@ namespace Splitio.Services.Common
         }
 
         #region Public Methods
-        public EventHandler(EventsManagerConfig eventsManagerConfig, EventsManager eventsManager, EventDelivery eventDelivery)
+        public EventHandler(EventsManagerConfig eventsManagerConfig, EventsManager eventsManager, IEventDelivery eventDelivery)
         {
             _config = eventsManagerConfig;
             _eventsManager = eventsManager;
