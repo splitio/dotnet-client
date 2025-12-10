@@ -8,8 +8,8 @@ namespace Splitio.Services.Common
 {
     public class EventsManager : IEventsManager
     {
-        ConcurrentDictionary<SdkEvent, bool> _eventsStatus;
-        ConcurrentDictionary<SdkInternalEvent, bool> _internalEventsStatus;
+        private readonly ConcurrentDictionary<SdkEvent, bool> _eventsStatus;
+        private readonly ConcurrentDictionary<SdkInternalEvent, bool> _internalEventsStatus;
         private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventsManager");
 
         public event EventHandler<EventMetadata> RuleBasedSegmentsUpdatedHandler;
@@ -92,7 +92,7 @@ namespace Splitio.Services.Common
         #endregion
 
         #region Private Methods
-        private ConcurrentDictionary<SdkInternalEvent, bool> BuildInternalSdkEventStatus()
+        private static ConcurrentDictionary<SdkInternalEvent, bool> BuildInternalSdkEventStatus()
         {
             ConcurrentDictionary<SdkInternalEvent, bool> statuses = new ConcurrentDictionary<SdkInternalEvent, bool>();
             statuses.TryAdd(SdkInternalEvent.SdkReady, false);
@@ -104,7 +104,7 @@ namespace Splitio.Services.Common
             return statuses;
         }
 
-        private ConcurrentDictionary<SdkEvent, bool> BuildSdkEventStatus()
+        private static ConcurrentDictionary<SdkEvent, bool> BuildSdkEventStatus()
         {
             ConcurrentDictionary<SdkEvent, bool> statuses = new ConcurrentDictionary<SdkEvent, bool>();
             statuses.TryAdd(SdkEvent.SdkReady, false);

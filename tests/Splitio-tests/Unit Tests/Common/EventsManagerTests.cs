@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Services.Common;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -40,55 +41,55 @@ namespace Splitio_Tests.Unit_Tests.Common
             };
 
             eventsManager.OnSdkInternalEvent(SdkInternalEvent.RuleBasedSegmentsUpdated, new EventMetadata(metaData));
-            Thread.Sleep(1000);
+            System.Threading.SpinWait.SpinUntil(() => RuleBasedSegmentsUpdated, TimeSpan.FromMilliseconds(500));
             Assert.IsTrue(RuleBasedSegmentsUpdated);
             VerifyMetadata(eMetadata);
 
             ResetAllVariables();
             eventsManager.OnSdkInternalEvent(SdkInternalEvent.FlagKilledNotification, new EventMetadata(metaData));
-            Thread.Sleep(1000);
+            System.Threading.SpinWait.SpinUntil(() => FlagKilledNotification, TimeSpan.FromMilliseconds(500));
             Assert.IsTrue(FlagKilledNotification);
             VerifyMetadata(eMetadata);
 
             ResetAllVariables();
             eventsManager.OnSdkInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(metaData));
-            Thread.Sleep(1000);
+            System.Threading.SpinWait.SpinUntil(() => SdkReady, TimeSpan.FromMilliseconds(500));
             Assert.IsTrue(SdkReady);
             VerifyMetadata(eMetadata);
 
             ResetAllVariables();
             eventsManager.OnSdkInternalEvent(SdkInternalEvent.SdkTimedOut, new EventMetadata(metaData));
-            Thread.Sleep(1000);
+            System.Threading.SpinWait.SpinUntil(() => SdkTimedOut, TimeSpan.FromMilliseconds(500));
             Assert.IsTrue(SdkTimedOut);
             VerifyMetadata(eMetadata);
 
             ResetAllVariables();
             eventsManager.OnSdkInternalEvent(SdkInternalEvent.FlagsUpdated, new EventMetadata(metaData));
-            Thread.Sleep(1000);
+            System.Threading.SpinWait.SpinUntil(() => FlagsUpdated, TimeSpan.FromMilliseconds(500));
             Assert.IsTrue(FlagsUpdated);
             VerifyMetadata(eMetadata);
 
             ResetAllVariables();
             eventsManager.OnSdkInternalEvent(SdkInternalEvent.SegmentsUpdated, new EventMetadata(metaData));
-            Thread.Sleep(1000);
+            System.Threading.SpinWait.SpinUntil(() => SegmentsUpdated, TimeSpan.FromMilliseconds(500));
             Assert.IsTrue(SegmentsUpdated);
             VerifyMetadata(eMetadata);
 
             ResetAllVariables();
             eventsManager.OnSdkEvent(SdkEvent.SdkReady, new EventMetadata(metaData));
-            Thread.Sleep(1000);
+            System.Threading.SpinWait.SpinUntil(() => SdkReady, TimeSpan.FromMilliseconds(500));
             Assert.IsTrue(SdkReady);
             VerifyMetadata(eMetadata);
 
             ResetAllVariables();
             eventsManager.OnSdkEvent(SdkEvent.SdkUpdate, new EventMetadata(metaData));
-            Thread.Sleep(1000);
+            System.Threading.SpinWait.SpinUntil(() => SdkUpdate, TimeSpan.FromMilliseconds(500));
             Assert.IsTrue(SdkUpdate);
             VerifyMetadata(eMetadata);
 
             ResetAllVariables();
             eventsManager.OnSdkEvent(SdkEvent.SdkReadyTimeout, new EventMetadata(metaData));
-            Thread.Sleep(1000);
+            System.Threading.SpinWait.SpinUntil(() => SdkTimedOut, TimeSpan.FromMilliseconds(500));
             Assert.IsTrue(SdkTimedOut);
             VerifyMetadata(eMetadata);
         }

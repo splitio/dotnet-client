@@ -2,6 +2,7 @@
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Splitio.Services.Common
 {
@@ -9,8 +10,8 @@ namespace Splitio.Services.Common
     public class EventHandler : IEventHandler
     {
         private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventHandler");
-        EventsManagerConfig _config;
-        EventsManager _eventsManager;
+        private readonly EventsManagerConfig _config;
+        private readonly EventsManager _eventsManager;
         struct ValidSdkEvent
         {
             public SdkEvent sdkEvent;
@@ -125,11 +126,11 @@ namespace Splitio.Services.Common
             {
                 if (kvp.Key == sdkEvent)
                 {
-                    foreach (var val in kvp.Value)
+                    foreach (var val in kvp.Value.Where(x => !_eventsManager.GetSdkInternalEventStatus(x)))
                     {
-                        if (!_eventsManager.GetSdkInternalEventStatus(val))
-                            return false;
+                        return false;
                     }
+
                     return true;
                 }
             }
@@ -153,14 +154,11 @@ namespace Splitio.Services.Common
             validSdkEvent.sdkEvent = SdkEvent.SdkUpdate;
             foreach (KeyValuePair<SdkEvent, HashSet<SdkInternalEvent>> kvp in _config.RequireAny)
             {
-                foreach (var val in kvp.Value)
+                foreach (var val in kvp.Value.Where(x => x == sdkInternalEvent))
                 {
-                    if (val == sdkInternalEvent)
-                    {
-                        validSdkEvent.valid = true;
-                        validSdkEvent.sdkEvent = kvp.Key;
-                        return validSdkEvent;
-                    }
+                    validSdkEvent.valid = true;
+                    validSdkEvent.sdkEvent = kvp.Key;
+                    return validSdkEvent;
                 }
             }
 

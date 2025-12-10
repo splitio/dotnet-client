@@ -32,7 +32,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             result.GetData().TryGetValue("strValue", out var svalue);
 
             Assert.AreEqual(10, timeout);
-            Assert.AreEqual(true, bvalue);
+            Assert.IsTrue((bool)bvalue);
             Assert.AreEqual("value", svalue);
             Assert.IsTrue(featureList.Count == 1);
             Assert.IsTrue(featureList.Contains("feature1"));

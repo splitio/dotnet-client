@@ -6,7 +6,7 @@ namespace Splitio.Domain
 {
     public class EventMetadata
     {
-        private Dictionary<string, object> _data;
+        private readonly Dictionary<string, object> _data;
 
         public EventMetadata(Dictionary<string, object> data) 
         {
@@ -27,18 +27,15 @@ namespace Splitio.Domain
         private Dictionary<string, object> Santize(Dictionary<string, object> data)
         {
             Dictionary<string, object> santizedData = new Dictionary<string, object>();
-            foreach (var item in data) 
+            foreach (var item in data.Where(x => ValueIsValid(x.Value))) 
             {
-                if (ValueIsValid(item.Value))
-                {
-                    santizedData.Add(item.Key, item.Value);
-                }
+                santizedData.Add(item.Key, item.Value);
             }
 
             return santizedData;
         }
 
-        private bool ValueIsValid(object value)
+        private static bool ValueIsValid(object value)
         {
             if (!(value is null) && (PropertiesValidator.IsNumeric(value) || (value is bool) || (value is string) || (value is List<string>)))
             {

@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Services.Common;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using EventHandler = Splitio.Services.Common.EventHandler;
@@ -43,7 +44,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             ResetAllVariables();
             eventsManager.OnSdkInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(metaData));
-            Thread.Sleep(500);
+            System.Threading.SpinWait.SpinUntil(() => SdkReady, TimeSpan.FromMilliseconds(500));
             Assert.IsTrue(SdkReady);
             Assert.IsFalse(SdkUpdate);
             Assert.IsFalse(SdkTimedOut);
@@ -51,7 +52,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             ResetAllVariables();
             eventsManager.OnSdkInternalEvent(SdkInternalEvent.FlagsUpdated, new EventMetadata(metaData));
-            Thread.Sleep(500);
+            System.Threading.SpinWait.SpinUntil(() => SdkUpdate, TimeSpan.FromMilliseconds(500));
             Assert.IsTrue(SdkUpdate);
             Assert.IsFalse(SdkReady);
             Assert.IsFalse(SdkTimedOut);
@@ -59,7 +60,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             ResetAllVariables();
             eventsManager.OnSdkInternalEvent(SdkInternalEvent.FlagKilledNotification, new EventMetadata(metaData));
-            Thread.Sleep(500);
+            System.Threading.SpinWait.SpinUntil(() => SdkUpdate, TimeSpan.FromMilliseconds(500));
             Assert.IsTrue(SdkUpdate);
             Assert.IsFalse(SdkReady);
             Assert.IsFalse(SdkTimedOut);
@@ -67,7 +68,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             ResetAllVariables();
             eventsManager.OnSdkInternalEvent(SdkInternalEvent.SegmentsUpdated, new EventMetadata(metaData));
-            Thread.Sleep(500);
+            System.Threading.SpinWait.SpinUntil(() => SdkUpdate, TimeSpan.FromMilliseconds(500));
             Assert.IsTrue(SdkUpdate);
             Assert.IsFalse(SdkReady);
             Assert.IsFalse(SdkTimedOut);
@@ -75,7 +76,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             ResetAllVariables();
             eventsManager.OnSdkInternalEvent(SdkInternalEvent.RuleBasedSegmentsUpdated, new EventMetadata(metaData));
-            Thread.Sleep(500);
+            System.Threading.SpinWait.SpinUntil(() => SdkUpdate, TimeSpan.FromMilliseconds(500));
             Assert.IsTrue(SdkUpdate);
             Assert.IsFalse(SdkReady);
             Assert.IsFalse(SdkTimedOut);
@@ -83,7 +84,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             ResetAllVariables();
             eventsManager.OnSdkInternalEvent(SdkInternalEvent.SdkTimedOut, new EventMetadata(metaData));
-            Thread.Sleep(500);
+            System.Threading.SpinWait.SpinUntil(() => SdkTimedOut, TimeSpan.FromMilliseconds(500));
             Assert.IsFalse(SdkUpdate);
             Assert.IsFalse(SdkReady);
             Assert.IsTrue(SdkTimedOut);

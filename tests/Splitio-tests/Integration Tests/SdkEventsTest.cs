@@ -43,20 +43,20 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsFalse(_sdkReady);
 
             eventsManager.OnSdkInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(metaData2));
-            Thread.Sleep(2000);
+            System.Threading.SpinWait.SpinUntil(() => _sdkReady, TimeSpan.FromMilliseconds(500));
             Assert.IsTrue(_sdkReady);
             Assert.IsFalse(_sdkUpdate);
 
             _sdkReady = false;
             _sdkUpdate = false;
             eventsManager.OnSdkInternalEvent(SdkInternalEvent.FlagsUpdated, new EventMetadata(metaData));
-            Thread.Sleep(2000);
+            System.Threading.SpinWait.SpinUntil(() => _sdkUpdate, TimeSpan.FromMilliseconds(500));
             Assert.IsTrue(_sdkUpdate);
             Assert.IsFalse(_sdkReady);
 
             _sdkUpdate = false;
             eventsManager.OnSdkInternalEvent(SdkInternalEvent.FlagKilledNotification, new EventMetadata(metaData));
-            Thread.Sleep(2000);
+            System.Threading.SpinWait.SpinUntil(() => _sdkUpdate, TimeSpan.FromMilliseconds(500));
             Assert.IsTrue(_sdkUpdate);
             Assert.IsFalse(_sdkReady);
         }
