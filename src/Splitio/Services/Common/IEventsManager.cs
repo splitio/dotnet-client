@@ -5,9 +5,7 @@ namespace Splitio.Services.Common
 {
     public interface IEventsManager
     {
-        bool EventAlreadyTriggered(SdkEvent sdkEvent);
-        void Register(SdkEvent sdkEvent, Action<EventMetadata> callbackAction);
-        void Unregister(SdkEvent sdkEvent);
-        void Destroy();
+        void OnSdkInternalEvent(SdkInternalEvent sdkInternalEvent, EventMetadata eventMetadata);
+        void OnSdkEvent(SdkEvent sdkEvent, EventMetadata eventMetadata);
     }
 }

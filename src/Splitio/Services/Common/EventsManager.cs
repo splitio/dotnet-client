@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 
 namespace Splitio.Services.Common
 {
-    public class EventsManager
+    public class EventsManager : IEventsManager
     {
         ConcurrentDictionary<SdkEvent, bool> _eventsStatus;
         ConcurrentDictionary<SdkInternalEvent, bool> _internalEventsStatus;
