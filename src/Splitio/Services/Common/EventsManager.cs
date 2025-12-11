@@ -10,9 +10,9 @@ namespace Splitio.Services.Common
 {
     public class EventsManager : IEventsManager
     {
-        ConcurrentDictionary<SdkEvent, Dictionary<string, object>> _activeEvents;
-        string Triggered = "Triggered";
-        string EventHandler = "EventHandler"; 
+        private readonly ConcurrentDictionary<SdkEvent, Dictionary<string, object>> _activeEvents;
+        private readonly string Triggered = "Triggered";
+        private readonly string EventHandler = "EventHandler"; 
         private readonly ConcurrentDictionary<SdkInternalEvent, bool> _internalEventsStatus;
         private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventsManager");
         private readonly EventsManagerConfig _config;
@@ -51,12 +51,9 @@ namespace Splitio.Services.Common
         {
             if (_activeEvents.ContainsKey(sdkEvent))
             { 
-                if (_activeEvents.TryGetValue(sdkEvent, out var dict))
+                if (_activeEvents.TryGetValue(sdkEvent, out var dict) && dict.Count > 0)
                 {
-                    if (dict.Count > 0)
-                    {
-                        _activeEvents.TryRemove(sdkEvent, out _);
-                    }
+                    _activeEvents.TryRemove(sdkEvent, out _);
                 }
             }
         }
