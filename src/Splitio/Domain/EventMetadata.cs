@@ -24,7 +24,7 @@ namespace Splitio.Domain
             return _data.ContainsKey(key);
         }
 
-        private Dictionary<string, object> Santize(Dictionary<string, object> data)
+        private static Dictionary<string, object> Santize(Dictionary<string, object> data)
         {
             Dictionary<string, object> santizedData = new Dictionary<string, object>();
             foreach (var item in data.Where(x => ValueIsValid(x.Value))) 

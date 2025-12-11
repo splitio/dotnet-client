@@ -126,7 +126,7 @@ namespace Splitio.Services.Common
             {
                 if (kvp.Key == sdkEvent)
                 {
-                    foreach (var val in kvp.Value.Where(x => !_eventsManager.GetSdkInternalEventStatus(x)))
+                    if (kvp.Value.Where(x => !_eventsManager.GetSdkInternalEventStatus(x)).Count() > 0)
                     {
                         return false;
                     }
@@ -154,7 +154,7 @@ namespace Splitio.Services.Common
             validSdkEvent.sdkEvent = SdkEvent.SdkUpdate;
             foreach (KeyValuePair<SdkEvent, HashSet<SdkInternalEvent>> kvp in _config.RequireAny)
             {
-                foreach (var val in kvp.Value.Where(x => x == sdkInternalEvent))
+                if (kvp.Value.Where(x => x == sdkInternalEvent).Count() > 0)
                 {
                     validSdkEvent.valid = true;
                     validSdkEvent.sdkEvent = kvp.Key;
