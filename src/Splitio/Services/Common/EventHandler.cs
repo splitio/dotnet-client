@@ -154,7 +154,7 @@ namespace Splitio.Services.Common
             validSdkEvent.sdkEvent = SdkEvent.SdkUpdate;
             foreach (KeyValuePair<SdkEvent, HashSet<SdkInternalEvent>> kvp in _config.RequireAny)
             {
-                if (kvp.Value.Any(x => x == sdkInternalEvent))
+                if (kvp.Value.Contains(sdkInternalEvent))
                 {
                     validSdkEvent.valid = true;
                     validSdkEvent.sdkEvent = kvp.Key;
