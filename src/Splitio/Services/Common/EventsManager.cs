@@ -49,12 +49,11 @@ namespace Splitio.Services.Common
 
         public void Unregister(SdkEvent sdkEvent)
         {
-            if (_activeEvents.ContainsKey(sdkEvent))
+            if (_activeEvents.ContainsKey(sdkEvent)
+                && _activeEvents.TryGetValue(sdkEvent, out var dict) 
+                && dict.Count > 0)
             { 
-                if (_activeEvents.TryGetValue(sdkEvent, out var dict) && dict.Count > 0)
-                {
-                    _activeEvents.TryRemove(sdkEvent, out _);
-                }
+                _activeEvents.TryRemove(sdkEvent, out _);
             }
         }
 
