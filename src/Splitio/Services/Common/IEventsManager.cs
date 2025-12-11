@@ -1,10 +1,12 @@
 ﻿using Splitio.Domain;
+using System;
 
 namespace Splitio.Services.Common
 {
     public interface IEventsManager
     {
-        void OnSdkInternalEvent(SdkInternalEvent sdkInternalEvent, EventMetadata eventMetadata);
-        void OnSdkEvent(SdkEvent sdkEvent, EventMetadata eventMetadata);
+        void NotifyInternalEvent(SdkInternalEvent sdkInternalEvent, EventMetadata eventMetadata);
+        void Register(SdkEvent sdkEvent, EventHandler<EventMetadata> handler);
+        void Unregister(SdkEvent sdkEvent);
     }
 }

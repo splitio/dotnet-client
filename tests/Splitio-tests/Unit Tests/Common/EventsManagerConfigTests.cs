@@ -19,7 +19,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             Assert.IsTrue(require1.Contains(SdkInternalEvent.SdkReady));
 
             config.Prerequisites.TryGetValue(SdkEvent.SdkUpdate, out var ready2);
-            Assert.IsTrue(ready2.Contains(SdkInternalEvent.SdkReady));
+            Assert.IsTrue(ready2.Contains(SdkEvent.SdkReady));
 
             config.ExecutionLimits.TryGetValue(SdkEvent.SdkReadyTimeout, out var timout);
             Assert.AreEqual(1, timout);

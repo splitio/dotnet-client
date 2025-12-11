@@ -3,95 +3,139 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Splitio.Services.Common
 {
     public class EventsManager : IEventsManager
     {
-        private readonly ConcurrentDictionary<SdkEvent, bool> _eventsStatus;
+        ConcurrentDictionary<SdkEvent, Dictionary<string, object>> _activeEvents;
+        string Triggered = "Triggered";
+        string EventHandler = "EventHandler"; 
         private readonly ConcurrentDictionary<SdkInternalEvent, bool> _internalEventsStatus;
         private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventsManager");
+        private readonly EventsManagerConfig _config;
+        private readonly EventDelivery _eventDelivery;
+        private readonly object _lock = new object();
+        struct ValidSdkEvent
+        {
+            public SdkEvent sdkEvent;
+            public bool valid;
+        }
 
-        public event EventHandler<EventMetadata> RuleBasedSegmentsUpdatedHandler;
-        public event EventHandler<EventMetadata> FlagsUpdatedHandler;
-        public event EventHandler<EventMetadata> FlagKilledNotificationHandler;
-        public event EventHandler<EventMetadata> SegmentsUpdatedHandler;
-        public event EventHandler<EventMetadata> SdkReadyHandler;
-        public event EventHandler<EventMetadata> SdkTimedOutHandler;
-
-        public event EventHandler<EventMetadata> PublicSdkReadyHandler;
-        public event EventHandler<EventMetadata> PublicSdkUpdateHandler;
-        public event EventHandler<EventMetadata> PublicSdkTimedOutHandler;
-
-        #region Public Methods
         public EventsManager() 
         {
-            _eventsStatus = BuildSdkEventStatus();
+            _activeEvents = new ConcurrentDictionary<SdkEvent, Dictionary<string, object>>();
             _internalEventsStatus = BuildInternalSdkEventStatus();
+            _config = EventsManagerConfig.BuildEventsManagerConfig();
+            _eventDelivery = new EventDelivery();
         }
 
-        public void UpdateSdkEventStatus(SdkEvent sdkEvent, bool status)
+        #region Public Methods
+        public void Register(SdkEvent sdkEvent, EventHandler<EventMetadata> handler)
         {
-            _eventsStatus.AddOrUpdate(sdkEvent, status,
-                (_, oldValue) => status);
-            _logger.Debug($"EventManager: Sdk Event {sdkEvent} status is updated to {status}");
-        }
-
-        public bool GetSdkEventStatus(SdkEvent sdkEvent)
-        {
-            _eventsStatus.TryGetValue(sdkEvent, out var status);
-            return status;
-        }
-
-        public void UpdateSdkInternalEventStatus(SdkInternalEvent sdkInternalEvent, bool status)
-        {
-            _internalEventsStatus.AddOrUpdate(sdkInternalEvent, status, 
-                (_, oldValue) => status);
-            _logger.Debug($"EventManager: Internal Event {sdkInternalEvent} status is updated to {status}");
-        }
-
-        public bool GetSdkInternalEventStatus(SdkInternalEvent sdkInternalEvent)
-        { 
-            _internalEventsStatus.TryGetValue(sdkInternalEvent, out var status); 
-            return status;
-        }
-
-        public virtual void OnSdkInternalEvent(SdkInternalEvent sdkInternalEvent, EventMetadata eventMetadata)
-        {
-            EventHandler<EventMetadata> handler = GetEventHandler(sdkInternalEvent);
-            if (handler != null)
+            _activeEvents.TryGetValue(sdkEvent, out var dict);
+            if (dict == null)
             {
-                _logger.Debug($"EventManager: Triggering handle for Internal Event {sdkInternalEvent}");
-                try
+                _activeEvents.TryAdd(sdkEvent, new Dictionary<string, object>()
                 {
-                    handler(this, eventMetadata);
-                }
-                catch (Exception e)
+                    {Triggered, false},
+                    {EventHandler, handler}
+                });
+                _logger.Debug($"EventManager: Event {sdkEvent} is registered");
+            }
+        }
+
+        public void Unregister(SdkEvent sdkEvent)
+        {
+            if (_activeEvents.ContainsKey(sdkEvent))
+            { 
+                if (_activeEvents.TryGetValue(sdkEvent, out var dict))
                 {
-                    _logger.Error($"EventManager: Failed to run internal event {sdkInternalEvent} handler {e.Message}", e);
+                    if (dict.Count > 0)
+                    {
+                        _activeEvents.TryRemove(sdkEvent, out _);
+                    }
                 }
             }
         }
 
-        public virtual void OnSdkEvent(SdkEvent sdkEvent, EventMetadata eventMetadata)
+        public void NotifyInternalEvent(SdkInternalEvent sdkInternalEvent, EventMetadata eventMetadata)
         {
-            EventHandler<EventMetadata> handler = GetPublicEventHandler(sdkEvent);
-            if (handler != null)
+            lock (_lock)
             {
-                _logger.Debug($"EventManager: Triggering handle for Sdk Event {sdkEvent}");
-                try
+                _logger.Debug($"EventHandler: Handling internal event {sdkInternalEvent}");
+                UpdateSdkInternalEventStatus(sdkInternalEvent, true);
+                ValidSdkEvent eventToNotify = GetSdkEventIfApplicable(sdkInternalEvent);
+                if (eventToNotify.valid)
                 {
-                    handler(this, eventMetadata);
+                    _logger.Debug($"EventHandler: Firing Sdk event {eventToNotify.sdkEvent}");
+                    _eventDelivery.Deliver(eventToNotify.sdkEvent, eventMetadata, GetEventHandler(eventToNotify.sdkEvent));
+                    SetSdkEventTriggered(eventToNotify.sdkEvent);
                 }
-                catch (Exception e)
+
+                foreach (SdkEvent sdkEvent in CheckRequireAll())
                 {
-                    _logger.Error($"EventManager: Failed to run event {sdkEvent} handler {e.Message}", e);
+                    _logger.Debug($"EventHandler: Firing Sdk event {sdkEvent}");
+                    _eventDelivery.Deliver(sdkEvent, eventMetadata, GetEventHandler(sdkEvent));
+                    SetSdkEventTriggered(sdkEvent);
                 }
             }
         }
         #endregion
 
         #region Private Methods
+        private void SetSdkEventTriggered(SdkEvent sdkEvent)
+        {
+            if (!_activeEvents.TryGetValue(sdkEvent, out var dict))
+            {
+                return;
+            }
+
+            if ((bool)dict[Triggered])
+            {
+                return;
+            }
+
+            Dictionary<string, object> dict2 = new Dictionary<string, object>(dict);
+            dict2[Triggered] = true;
+            _activeEvents.TryUpdate(sdkEvent, dict2, dict);
+        }
+
+        private bool EventAlreadyTriggered(SdkEvent sdkEvent)
+        {
+            if (_activeEvents.TryGetValue(sdkEvent, out Dictionary<string, object> triggered))
+            {
+                triggered.TryGetValue(Triggered, out var trig);
+                return (bool)trig;
+            }
+            return false;
+        }
+
+        private EventHandler<EventMetadata> GetEventHandler(SdkEvent sdkEvent)
+        {
+            if (_activeEvents.TryGetValue(sdkEvent, out var dict))
+            {
+                dict.TryGetValue(EventHandler, out var handler);
+                return (EventHandler<EventMetadata>)handler;
+            }
+            return null;
+        }
+
+        private void UpdateSdkInternalEventStatus(SdkInternalEvent sdkInternalEvent, bool status)
+        {
+            _internalEventsStatus.AddOrUpdate(sdkInternalEvent, status,
+                (_, oldValue) => status);
+            _logger.Debug($"EventManager: Internal Event {sdkInternalEvent} status is updated to {status}");
+        }
+
+        private bool GetSdkInternalEventStatus(SdkInternalEvent sdkInternalEvent)
+        {
+            _internalEventsStatus.TryGetValue(sdkInternalEvent, out var status);
+            return status;
+        }
+
         private static ConcurrentDictionary<SdkInternalEvent, bool> BuildInternalSdkEventStatus()
         {
             ConcurrentDictionary<SdkInternalEvent, bool> statuses = new ConcurrentDictionary<SdkInternalEvent, bool>();
@@ -104,40 +148,101 @@ namespace Splitio.Services.Common
             return statuses;
         }
 
-        private static ConcurrentDictionary<SdkEvent, bool> BuildSdkEventStatus()
+        private ValidSdkEvent GetSdkEventIfApplicable(SdkInternalEvent sdkInternalEvent)
         {
-            ConcurrentDictionary<SdkEvent, bool> statuses = new ConcurrentDictionary<SdkEvent, bool>();
-            statuses.TryAdd(SdkEvent.SdkReady, false);
-            statuses.TryAdd(SdkEvent.SdkUpdate, false);
-            statuses.TryAdd(SdkEvent.SdkReadyTimeout, false);
-            return statuses;
-        }
+            ValidSdkEvent finalSdkEvent;
+            finalSdkEvent.valid = false;
+            finalSdkEvent.sdkEvent = SdkEvent.SdkUpdate;
 
-        private EventHandler<EventMetadata> GetEventHandler(SdkInternalEvent sdkInternalEvent)
-        {
-            switch (sdkInternalEvent)
+            ValidSdkEvent requireAnySdkEvent = CheckRequireAny(sdkInternalEvent);
+            if (!requireAnySdkEvent.valid)
             {
-                case SdkInternalEvent.RuleBasedSegmentsUpdated: return RuleBasedSegmentsUpdatedHandler;
-                case SdkInternalEvent.FlagsUpdated: return FlagsUpdatedHandler;
-                case SdkInternalEvent.FlagKilledNotification: return FlagKilledNotificationHandler;
-                case SdkInternalEvent.SegmentsUpdated: return SegmentsUpdatedHandler;
-                case SdkInternalEvent.SdkReady: return SdkReadyHandler;
-                case SdkInternalEvent.SdkTimedOut: return SdkTimedOutHandler;
+                _logger.Debug($"EventHandler: No Event available for internal event {sdkInternalEvent}");
+                return requireAnySdkEvent;
             }
 
-            return null;
-        }
-
-        private EventHandler<EventMetadata> GetPublicEventHandler(SdkEvent sdkEvent)
-        {
-            switch (sdkEvent)
+            if (requireAnySdkEvent.valid && !EventAlreadyTriggered(requireAnySdkEvent.sdkEvent)
+                && ExecutionLimit(requireAnySdkEvent.sdkEvent) == 1)
             {
-                case SdkEvent.SdkReady: return PublicSdkReadyHandler;
-                case SdkEvent.SdkReadyTimeout: return PublicSdkTimedOutHandler;
-                case SdkEvent.SdkUpdate: return PublicSdkUpdateHandler;
+                _logger.Debug($"EventHandler: Detected Event {requireAnySdkEvent.sdkEvent} is available for internal event {sdkInternalEvent}");
+                finalSdkEvent.sdkEvent = requireAnySdkEvent.sdkEvent;
             }
 
-            return null;
+            finalSdkEvent.valid = CheckPrerequisites(finalSdkEvent.sdkEvent);
+            if (finalSdkEvent.valid)
+            {
+                _logger.Debug($"EventHandler: Event {requireAnySdkEvent.sdkEvent} is eligable for notification.");
+            }
+            return finalSdkEvent;
+        }
+
+        private List<SdkEvent> CheckRequireAll()
+        {
+            List<SdkEvent> events = new List<SdkEvent>();
+            foreach (KeyValuePair<SdkEvent, HashSet<SdkInternalEvent>> kvp in _config.RequireAll)
+            {
+                bool finalStatus = true;
+                foreach (var val in kvp.Value)
+                {
+                    finalStatus &= GetSdkInternalEventStatus(val);
+                }
+                if (finalStatus
+                    && CheckPrerequisites(kvp.Key)
+                    && ((ExecutionLimit(kvp.Key) == 1 && !EventAlreadyTriggered(kvp.Key))
+                        || (ExecutionLimit(kvp.Key) == -1))
+                    && kvp.Value.Count > 0)
+                {
+                    _logger.Debug($"EventHandler: Event {kvp.Key} is eligable as require all for notification.");
+                    events.Add(kvp.Key);
+                }
+            }
+
+            return events;
+        }
+
+        private bool CheckPrerequisites(SdkEvent sdkEvent)
+        {
+            foreach (KeyValuePair<SdkEvent, HashSet<SdkEvent>> kvp in _config.Prerequisites)
+            {
+                if (kvp.Key == sdkEvent)
+                {
+                    if (kvp.Value.Any(x => !EventAlreadyTriggered(x)))
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+            }
+
+            return true;
+        }
+
+        private int ExecutionLimit(SdkEvent sdkEvent)
+        {
+            if (!_config.ExecutionLimits.ContainsKey(sdkEvent))
+                return -1;
+
+            _config.ExecutionLimits.TryGetValue(sdkEvent, out int limit);
+            return limit;
+        }
+
+        private ValidSdkEvent CheckRequireAny(SdkInternalEvent sdkInternalEvent)
+        {
+            ValidSdkEvent validSdkEvent;
+            validSdkEvent.valid = false;
+            validSdkEvent.sdkEvent = SdkEvent.SdkUpdate;
+            foreach (KeyValuePair<SdkEvent, HashSet<SdkInternalEvent>> kvp in _config.RequireAny)
+            {
+                if (kvp.Value.Contains(sdkInternalEvent))
+                {
+                    validSdkEvent.valid = true;
+                    validSdkEvent.sdkEvent = kvp.Key;
+                    return validSdkEvent;
+                }
+            }
+
+            return validSdkEvent;
         }
         #endregion
     }

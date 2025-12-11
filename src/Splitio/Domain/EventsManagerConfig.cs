@@ -6,14 +6,14 @@ namespace Splitio.Domain
     {
         public Dictionary<SdkEvent, HashSet<SdkInternalEvent>> RequireAll { get; private set; }
         public Dictionary<SdkEvent, HashSet<SdkInternalEvent>> RequireAny { get; private set; }
-        public Dictionary<SdkEvent, HashSet<SdkInternalEvent>> Prerequisites { get; private set; }
+        public Dictionary<SdkEvent, HashSet<SdkEvent>> Prerequisites { get; private set; }
         public Dictionary<SdkEvent, HashSet<SdkInternalEvent>> SuppressedBy { get; private set; }
         public Dictionary<SdkEvent, int> ExecutionLimits { get; private set; }
 
         private EventsManagerConfig(
             Dictionary<SdkEvent, HashSet<SdkInternalEvent>> requireAll,
             Dictionary<SdkEvent, HashSet<SdkInternalEvent>> requireAny,
-            Dictionary<SdkEvent, HashSet<SdkInternalEvent>> prerequisites,
+            Dictionary<SdkEvent, HashSet<SdkEvent>> prerequisites,
             Dictionary<SdkEvent, HashSet<SdkInternalEvent>> suppressedBy,
             Dictionary<SdkEvent, int> executionLimits)
         { 
@@ -36,12 +36,12 @@ namespace Splitio.Domain
                 }
             };
 
-            Dictionary<SdkEvent, HashSet<SdkInternalEvent>> prerequisites = new Dictionary<SdkEvent, HashSet<SdkInternalEvent>>
+            Dictionary<SdkEvent, HashSet<SdkEvent>> prerequisites = new Dictionary<SdkEvent, HashSet<SdkEvent>>
             {
                 {
-                    SdkEvent.SdkUpdate, new HashSet<SdkInternalEvent>
+                    SdkEvent.SdkUpdate, new HashSet<SdkEvent>
                     {
-                        SdkInternalEvent.SdkReady
+                        SdkEvent.SdkReady
                     }
                 }
             };
