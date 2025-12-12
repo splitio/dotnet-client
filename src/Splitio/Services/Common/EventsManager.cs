@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Splitio.Services.Common
 {
-    public class EventsManager : IEventsManager
+    public class EventsManager : IEventsManager<SdkEvent, SdkInternalEvent>
     {
         private readonly ConcurrentDictionary<SdkEvent, Dictionary<string, object>> _activeSubscriptions;
         private readonly string Triggered = "Triggered";

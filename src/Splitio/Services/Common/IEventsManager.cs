@@ -3,10 +3,10 @@ using System;
 
 namespace Splitio.Services.Common
 {
-    public interface IEventsManager
+    public interface IEventsManager<E, I>
     {
-        void NotifyInternalEvent(SdkInternalEvent sdkInternalEvent, EventMetadata eventMetadata);
-        void Register(SdkEvent sdkEvent, EventHandler<EventMetadata> handler);
-        void Unregister(SdkEvent sdkEvent);
+        void NotifyInternalEvent(I sdkInternalEvent, EventMetadata eventMetadata);
+        void Register(E sdkEvent, EventHandler<EventMetadata> handler);
+        void Unregister(E sdkEvent);
     }
 }

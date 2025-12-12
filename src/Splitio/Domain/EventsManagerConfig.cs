@@ -4,6 +4,16 @@ namespace Splitio.Domain
 {
     public class EventsManagerConfig
     {
+        public struct EventsManagerConfigStruct<E, I>
+        {
+            public Dictionary<E, HashSet<I>> RequireAll;
+            public Dictionary<E, HashSet<I>> RequireAny;
+            public Dictionary<E, HashSet<E>> Prerequisites;
+            public Dictionary<E, HashSet<E>> SuppressedBy;
+            public Dictionary<E, int> ExecutionLimits;
+        }
+        public EventsManagerConfigStruct<SdkEvent, SdkInternalEvent> ConfigManagerStruct { get; private set; }
+
         public Dictionary<SdkEvent, HashSet<SdkInternalEvent>> RequireAll { get; private set; }
         public Dictionary<SdkEvent, HashSet<SdkInternalEvent>> RequireAny { get; private set; }
         public Dictionary<SdkEvent, HashSet<SdkEvent>> Prerequisites { get; private set; }
@@ -11,17 +21,13 @@ namespace Splitio.Domain
         public Dictionary<SdkEvent, int> ExecutionLimits { get; private set; }
 
         private EventsManagerConfig(
-            Dictionary<SdkEvent, HashSet<SdkInternalEvent>> requireAll,
-            Dictionary<SdkEvent, HashSet<SdkInternalEvent>> requireAny,
-            Dictionary<SdkEvent, HashSet<SdkEvent>> prerequisites,
-            Dictionary<SdkEvent, HashSet<SdkEvent>> suppressedBy,
-            Dictionary<SdkEvent, int> executionLimits)
-        { 
-            RequireAll = requireAll;
-            RequireAny = requireAny;
-            Prerequisites = prerequisites;
-            SuppressedBy = suppressedBy;
-            ExecutionLimits = executionLimits;
+            EventsManagerConfigStruct<SdkEvent, SdkInternalEvent> configManagerStruct)
+        {
+            RequireAll = configManagerStruct.RequireAll;
+            RequireAny = configManagerStruct.RequireAny;
+            Prerequisites = configManagerStruct.Prerequisites;
+            SuppressedBy = configManagerStruct.SuppressedBy;
+            ExecutionLimits = configManagerStruct.ExecutionLimits;
         }
 
         public static EventsManagerConfig BuildEventsManagerConfig()
@@ -77,8 +83,14 @@ namespace Splitio.Domain
                 { SdkEvent.SdkReady, 1 },
                 { SdkEvent.SdkUpdate, -1 }
             };
-
-            return new EventsManagerConfig(requireAll, requireAny, prerequisites, suppressedBy, executionLimits);
+            return new EventsManagerConfig(new EventsManagerConfigStruct<SdkEvent, SdkInternalEvent>
+            {
+                Prerequisites = prerequisites,
+                ExecutionLimits = executionLimits,
+                SuppressedBy = suppressedBy,
+                RequireAll = requireAll,
+                RequireAny = requireAny
+            });
         }
     }
 }
