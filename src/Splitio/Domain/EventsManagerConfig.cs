@@ -7,14 +7,14 @@ namespace Splitio.Domain
         public Dictionary<SdkEvent, HashSet<SdkInternalEvent>> RequireAll { get; private set; }
         public Dictionary<SdkEvent, HashSet<SdkInternalEvent>> RequireAny { get; private set; }
         public Dictionary<SdkEvent, HashSet<SdkEvent>> Prerequisites { get; private set; }
-        public Dictionary<SdkEvent, HashSet<SdkInternalEvent>> SuppressedBy { get; private set; }
+        public Dictionary<SdkEvent, HashSet<SdkEvent>> SuppressedBy { get; private set; }
         public Dictionary<SdkEvent, int> ExecutionLimits { get; private set; }
 
         private EventsManagerConfig(
             Dictionary<SdkEvent, HashSet<SdkInternalEvent>> requireAll,
             Dictionary<SdkEvent, HashSet<SdkInternalEvent>> requireAny,
             Dictionary<SdkEvent, HashSet<SdkEvent>> prerequisites,
-            Dictionary<SdkEvent, HashSet<SdkInternalEvent>> suppressedBy,
+            Dictionary<SdkEvent, HashSet<SdkEvent>> suppressedBy,
             Dictionary<SdkEvent, int> executionLimits)
         { 
             RequireAll = requireAll;
@@ -63,17 +63,17 @@ namespace Splitio.Domain
                 }
             };
 
-            Dictionary<SdkEvent, HashSet<SdkInternalEvent>> suppressedBy = new Dictionary<SdkEvent, HashSet<SdkInternalEvent>>
+            Dictionary<SdkEvent, HashSet<SdkEvent>> suppressedBy = new Dictionary<SdkEvent, HashSet<SdkEvent>>
             {
-                { SdkEvent.SdkReadyTimeout, new HashSet<SdkInternalEvent>
-                    { SdkInternalEvent.SdkReady }
+                { SdkEvent.SdkReadyTimeout, new HashSet<SdkEvent>
+                    { SdkEvent.SdkReady }
 
                 }
             };
 
             Dictionary<SdkEvent, int> executionLimits = new Dictionary<SdkEvent, int>
             {
-                { SdkEvent.SdkReadyTimeout, 1 },
+                { SdkEvent.SdkReadyTimeout, -1 },
                 { SdkEvent.SdkReady, 1 },
                 { SdkEvent.SdkUpdate, -1 }
             };
