@@ -15,8 +15,8 @@ namespace Splitio.Util
     {
         public struct ValidSdkEvent
         {
-            public SdkEvent SdkEvent;
-            public bool Valid;
+            public SdkEvent SdkEvent { get; set; }
+            public bool Valid { get; set; }
         }
 
         public static List<T> TakeFromList<T>(List<T> items, int size)
