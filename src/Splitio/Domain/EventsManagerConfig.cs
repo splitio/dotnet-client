@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Splitio.Domain
 {
     public class EventsManagerConfig
     {
+
         public struct EventsManagerConfigStruct<E, I>
         {
             public Dictionary<E, HashSet<I>> RequireAll;
@@ -13,13 +17,12 @@ namespace Splitio.Domain
             public Dictionary<E, int> ExecutionLimits;
         }
         public EventsManagerConfigStruct<SdkEvent, SdkInternalEvent> ConfigManagerStruct { get; private set; }
-
         public Dictionary<SdkEvent, HashSet<SdkInternalEvent>> RequireAll { get; private set; }
         public Dictionary<SdkEvent, HashSet<SdkInternalEvent>> RequireAny { get; private set; }
         public Dictionary<SdkEvent, HashSet<SdkEvent>> Prerequisites { get; private set; }
         public Dictionary<SdkEvent, HashSet<SdkEvent>> SuppressedBy { get; private set; }
         public Dictionary<SdkEvent, int> ExecutionLimits { get; private set; }
-
+ 
         private EventsManagerConfig(
             EventsManagerConfigStruct<SdkEvent, SdkInternalEvent> configManagerStruct)
         {

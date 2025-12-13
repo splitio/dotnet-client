@@ -5,11 +5,11 @@ using System;
 
 namespace Splitio.Services.Common
 {
-    public class EventDelivery : IEventDelivery
+    public class EventDelivery<E, M> : IEventDelivery<E, M>
     {
         private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventsManager");
 
-        public virtual void Deliver(SdkEvent sdkEvent, EventMetadata eventMetadata, EventHandler<EventMetadata> handler)
+        public virtual void Deliver(E sdkEvent, M eventMetadata, EventHandler<M> handler)
         {
             if (handler != null)
             {

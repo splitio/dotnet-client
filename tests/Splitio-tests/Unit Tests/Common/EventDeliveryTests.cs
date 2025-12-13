@@ -17,7 +17,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         public void TestFiringEvents()
         {
             //Act
-            EventDelivery eventDelivery = new EventDelivery();
+            EventDelivery<SdkEvent, EventMetadata> eventDelivery = new EventDelivery<SdkEvent, EventMetadata>();
 
             PublicSdkReadyHandler += sdkReady_callback;
 

@@ -3,8 +3,8 @@ using System;
 
 namespace Splitio.Services.Common
 {
-    public interface IEventDelivery
+    public interface IEventDelivery<E, M>
     {
-        void Deliver(SdkEvent sdkEvent, EventMetadata eventMetadata, EventHandler<EventMetadata> handler);
+        void Deliver(E sdkEvent, M eventMetadata, EventHandler<M> handler);
     }
 }
