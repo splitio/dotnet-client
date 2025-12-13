@@ -5,7 +5,6 @@ using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Logger;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -204,9 +203,12 @@ namespace Splitio.Util
 
         private static ValidSdkEvent CheckRequireAny(SdkInternalEvent sdkInternalEvent, EventsManagerConfig eventsManagerConfig)
         {
-            ValidSdkEvent validSdkEvent;
-            validSdkEvent.Valid = false;
-            validSdkEvent.SdkEvent = SdkEvent.SdkUpdate;
+            ValidSdkEvent validSdkEvent = new ValidSdkEvent
+            {
+                Valid = false,
+                SdkEvent = SdkEvent.SdkUpdate
+            };
+
             foreach (KeyValuePair<SdkEvent, HashSet<SdkInternalEvent>> kvp in eventsManagerConfig.RequireAny)
             {
                 if (kvp.Value.Contains(sdkInternalEvent))
