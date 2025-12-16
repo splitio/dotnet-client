@@ -26,23 +26,23 @@ namespace Splitio.Services.Common
         #region Public Methods
         public void Register(E sdkEvent, EventHandler<M> handler)
         {
-            _activeSubscriptions.TryGetValue(sdkEvent, out var dict);
-            if (dict == null)
+            _activeSubscriptions.TryGetValue(sdkEvent, out var eventValues);
+            if (eventValues == null)
             {
                 _activeSubscriptions.TryAdd(sdkEvent, new Dictionary<string, object>()
                 {
                     {Triggered, false},
                     {EventHandler, handler}
                 });
-                _logger.Debug($"EventManager: Event {sdkEvent} is registered");
+                _logger.Debug($"EventsManager: Event {sdkEvent} is registered");
             }
         }
 
         public void Unregister(E sdkEvent)
         {
             if (_activeSubscriptions.ContainsKey(sdkEvent)
-                && _activeSubscriptions.TryGetValue(sdkEvent, out var dict) 
-                && dict.Count > 0)
+                && _activeSubscriptions.TryGetValue(sdkEvent, out var eventValues) 
+                && eventValues.Count > 0)
             {
                 _activeSubscriptions.TryRemove(sdkEvent, out _);
             }
@@ -52,11 +52,11 @@ namespace Splitio.Services.Common
         {
             lock (_lock)
             {
-                _logger.Debug($"EventHandler: Handling internal event {sdkInternalEvent}");
+                _logger.Debug($"EventsManager: Handling internal event {sdkInternalEvent}");
 
                 foreach (E sdkEvent in eventsToNotify)
                 {
-                    _logger.Debug($"EventHandler: Firing Sdk event {sdkEvent}");
+                    _logger.Debug($"EventsManager: Firing Sdk event {sdkEvent}");
                     _eventDelivery.Deliver(sdkEvent, eventMetadata, GetEventHandler(sdkEvent));
                     SetSdkEventTriggered(sdkEvent);
                 }
@@ -83,7 +83,7 @@ namespace Splitio.Services.Common
         {
             _internalEventsStatus.AddOrUpdate(sdkInternalEvent, status,
                 (_, oldValue) => status);
-            _logger.Debug($"EventManager: Internal Event {sdkInternalEvent} status is updated to {status}");
+            _logger.Debug($"EventsManager: Internal Event {sdkInternalEvent} status is updated to {status}");
         }
         #endregion
 

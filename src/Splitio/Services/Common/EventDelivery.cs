@@ -13,14 +13,14 @@ namespace Splitio.Services.Common
         {
             if (handler != null)
             {
-                _logger.Debug($"EventManager: Triggering handle for Sdk Event {sdkEvent}");
+                _logger.Debug($"EventDelivery: Triggering handle for Sdk Event {sdkEvent}");
                 try
                 {
                     handler(this, eventMetadata);
                 }
                 catch (Exception e)
                 {
-                    _logger.Error($"EventManager: Failed to run event {sdkEvent} handler {e.Message}", e);
+                    _logger.Error($"EventDelivery: Failed to run event {sdkEvent} handler {e.Message}", e);
                 }
             }
         }

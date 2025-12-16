@@ -4,16 +4,6 @@ namespace Splitio.Domain
 {
     public class EventsManagerConfig
     {
-
-        public struct EventsManagerConfigStruct<E, I>
-        {
-            public Dictionary<E, HashSet<I>> RequireAll { get; set; }
-            public Dictionary<E, HashSet<I>> RequireAny { get; set; }
-            public Dictionary<E, HashSet<E>> Prerequisites { get; set; }
-            public Dictionary<E, HashSet<E>> SuppressedBy { get; set; }
-            public Dictionary<E, int> ExecutionLimits { get; set; }
-        }
-        public EventsManagerConfigStruct<SdkEvent, SdkInternalEvent> ConfigManagerStruct { get; set; }
         public Dictionary<SdkEvent, HashSet<SdkInternalEvent>> RequireAll { get; private set; }
         public Dictionary<SdkEvent, HashSet<SdkInternalEvent>> RequireAny { get; private set; }
         public Dictionary<SdkEvent, HashSet<SdkEvent>> Prerequisites { get; private set; }
@@ -21,13 +11,13 @@ namespace Splitio.Domain
         public Dictionary<SdkEvent, int> ExecutionLimits { get; private set; }
  
         private EventsManagerConfig(
-            EventsManagerConfigStruct<SdkEvent, SdkInternalEvent> configManagerStruct)
+            EventManagerConfigData<SdkEvent, SdkInternalEvent> configManagerData)
         {
-            RequireAll = configManagerStruct.RequireAll;
-            RequireAny = configManagerStruct.RequireAny;
-            Prerequisites = configManagerStruct.Prerequisites;
-            SuppressedBy = configManagerStruct.SuppressedBy;
-            ExecutionLimits = configManagerStruct.ExecutionLimits;
+            RequireAll = configManagerData.RequireAll;
+            RequireAny = configManagerData.RequireAny;
+            Prerequisites = configManagerData.Prerequisites;
+            SuppressedBy = configManagerData.SuppressedBy;
+            ExecutionLimits = configManagerData.ExecutionLimits;
         }
 
         public static EventsManagerConfig BuildEventsManagerConfig()
@@ -83,7 +73,7 @@ namespace Splitio.Domain
                 { SdkEvent.SdkReady, 1 },
                 { SdkEvent.SdkUpdate, -1 }
             };
-            return new EventsManagerConfig(new EventsManagerConfigStruct<SdkEvent, SdkInternalEvent>
+            return new EventsManagerConfig(new EventManagerConfigData<SdkEvent, SdkInternalEvent>
             {
                 Prerequisites = prerequisites,
                 ExecutionLimits = executionLimits,
