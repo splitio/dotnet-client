@@ -26,25 +26,24 @@ namespace Splitio.Services.Common
         #region Public Methods
         public void Register(E sdkEvent, EventHandler<M> handler)
         {
-            _activeSubscriptions.TryGetValue(sdkEvent, out var eventValues);
-            if (eventValues == null)
+            if (_activeSubscriptions.TryGetValue(sdkEvent, out var _))
             {
-                _activeSubscriptions.TryAdd(sdkEvent, new Dictionary<string, object>()
-                {
-                    {Triggered, false},
-                    {EventHandler, handler}
-                });
-                _logger.Debug($"EventsManager: Event {sdkEvent} is registered");
+                return;
             }
+
+            _activeSubscriptions.TryAdd(sdkEvent, new Dictionary<string, object>()
+            {
+                {Triggered, false},
+                {EventHandler, handler}
+            });
+            _logger.Debug($"EventsManager: Event {sdkEvent} is registered");
         }
 
         public void Unregister(E sdkEvent)
         {
-            if (_activeSubscriptions.ContainsKey(sdkEvent)
-                && _activeSubscriptions.TryGetValue(sdkEvent, out var eventValues) 
-                && eventValues.Count > 0)
+            if (_activeSubscriptions.TryRemove(sdkEvent, out _))
             {
-                _activeSubscriptions.TryRemove(sdkEvent, out _);
+                _logger.Debug($"EventsManager: Event {sdkEvent} is Unregistered");
             }
         }
 

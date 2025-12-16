@@ -11,7 +11,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         public void BuildInstance()
         {
             //Act
-            EventsManagerConfig config = EventsManagerConfig.BuildEventsManagerConfig();
+            EventsManagerConfig config = new EventsManagerConfig();
 
             //Assert
             config.RequireAll.TryGetValue(SdkEvent.SdkReady, out var require1);

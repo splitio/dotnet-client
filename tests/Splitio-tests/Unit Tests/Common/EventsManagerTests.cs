@@ -1,10 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
-using Splitio.Redis.Services.Shared;
 using Splitio.Services.Common;
 using System;
 using System.Collections.Generic;
-using Splitio.Util;
 
 namespace Splitio_Tests.Unit_Tests.Common
 {
@@ -23,7 +21,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         public void TestFiringEvents()
         {
             //Act
-            EventsManagerConfig config = EventsManagerConfig.BuildEventsManagerConfig();
+            EventsManagerConfig config = new EventsManagerConfig();
             EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>();
             Splitio.Util.Helper.BuildInternalSdkEventStatus(eventsManager);
 
@@ -136,6 +134,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             VerifyMetadata(eMetadata);
 
             eventsManager.Unregister(SdkEvent.SdkUpdate);
+            eventsManager.Unregister(SdkEvent.SdkUpdate); // should not cause exception
             ResetAllVariables();
             eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagsUpdated, new EventMetadata(metaData),
                 Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.FlagsUpdated,
