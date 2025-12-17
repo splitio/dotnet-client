@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
+using Splitio.Services.Common;
 using Splitio.Services.Parsing;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -22,7 +23,8 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             };
 
             var segmentName = "test-segment";
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
+            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
             segmentCache.AddToSegment(segmentName, keys);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
@@ -45,7 +47,8 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             };
 
             var segmentName = "test-segment";
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
+            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
             segmentCache.AddToSegment(segmentName, keys);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
@@ -62,7 +65,8 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var segmentName = "test-segment";
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
+            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
             segmentCache.AddToSegment(segmentName, null);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
@@ -79,7 +83,8 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var segmentName = "test-segment";
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
+            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
@@ -101,7 +106,8 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             };
 
             var segmentName = "test-segment";
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
+            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
             segmentCache.AddToSegment(segmentName, keys);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
@@ -124,7 +130,8 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             };
 
             var segmentName = "test-segment";
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
+            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
             segmentCache.AddToSegment(segmentName, keys);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
@@ -141,7 +148,8 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var segmentName = "test-segment";
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
+            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
             segmentCache.AddToSegment(segmentName, null);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
@@ -158,7 +166,8 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var segmentName = "test-segment";
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
+            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 

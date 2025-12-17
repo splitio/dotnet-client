@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
+using Splitio.Services.Common;
 using Splitio.Services.SegmentFetcher.Classes;
 using System.Collections.Concurrent;
 
@@ -26,7 +27,8 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetSuccessfulWithResultsFromJSONFile()
         {
             //Arrange
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
+            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
 
             var segmentFetcher = new JSONFileSegmentFetcher($"{rootFilePath}segment_payed.json", segmentCache);
 

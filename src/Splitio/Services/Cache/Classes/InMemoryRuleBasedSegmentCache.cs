@@ -1,5 +1,7 @@
-﻿using Splitio.Domain;
+﻿using Splitio.Constants;
+using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Common;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -10,12 +12,15 @@ namespace Splitio.Services.Cache.Classes
     {
         private readonly ConcurrentDictionary<string, RuleBasedSegment> _cache;
         private long _changeNumber;
+        private readonly EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
         public InMemoryRuleBasedSegmentCache(ConcurrentDictionary<string, RuleBasedSegment> cache,
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManger,
             long changeNumber = -1)
         {
             _cache = cache;
             _changeNumber = changeNumber;
+            _eventsManager = eventsManger;
         }
 
         #region Sync Methods
@@ -45,9 +50,11 @@ namespace Splitio.Services.Cache.Classes
         // Producer
         public void Update(List<RuleBasedSegment> toAdd, List<string> toRemove, long till)
         {
+            List<string> toNotify = new List<string>();
             foreach (var rbSegment in toAdd)
             {
                 _cache.AddOrUpdate(rbSegment.Name, rbSegment, (key, oldValue) => rbSegment);
+                toNotify.Add(rbSegment.Name);
             }
 
             foreach (var name in toRemove)
@@ -56,6 +63,10 @@ namespace Splitio.Services.Cache.Classes
             }
 
             SetChangeNumber(till);
+            _eventsManager.NotifyInternalEvent(SdkInternalEvent.RuleBasedSegmentsUpdated,
+                new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.RuleBasedSegments, toNotify } }),
+            Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.RuleBasedSegmentsUpdated,
+                _eventsManager));
         }
 
         public void SetChangeNumber(long changeNumber)

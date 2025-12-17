@@ -25,7 +25,6 @@ namespace Splitio.Services.Client.Classes
         private readonly IFeatureFlagCache _featureFlagCache;
         private readonly ILocalhostFileSync _localhostFileSync;
         private readonly string _fullPath;
-        private EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
         private readonly object _lock = new object();
 
@@ -48,9 +47,9 @@ namespace Splitio.Services.Client.Classes
 
             BuildFlagSetsFilter(new HashSet<string>());
 
-            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
             var splits = _localhostFileService.ParseSplitFile(_fullPath);
-            _featureFlagCache = new InMemorySplitCache(splits, _flagSetsFilter, _eventsManager);
+            _featureFlagCache = new InMemorySplitCache(splits, _flagSetsFilter, eventsManager);
 
 
             if (configs.FileSync != null)
