@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Logger;
+﻿using Splitio.Domain;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Concurrent;
@@ -15,12 +16,14 @@ namespace Splitio.Services.Common
         private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventsManager");
         private readonly EventDelivery<E, M> _eventDelivery;
         private readonly object _lock = new object();
+        public EventsManagerConfig ManagerConfig { get; private set; }
 
-        public EventsManager() 
+        public EventsManager(EventsManagerConfig eventsManagerConfig) 
         {
             _activeSubscriptions = new ConcurrentDictionary<E, Dictionary<string, object>>();
             _internalEventsStatus = new ConcurrentDictionary<I, bool>();
             _eventDelivery = new EventDelivery<E, M>();
+            ManagerConfig = eventsManagerConfig;
         }
 
         #region Public Methods

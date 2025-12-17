@@ -92,8 +92,7 @@ namespace Splitio.Util
             return null;
         }
 
-        public static List<SdkEvent> GetSdkEventIfApplicable(SdkInternalEvent sdkInternalEvent, 
-            EventsManagerConfig eventsManagerConfig, 
+        public static List<SdkEvent> GetSdkEventIfApplicable(SdkInternalEvent sdkInternalEvent,  
             EventsManager<SdkEvent,SdkInternalEvent,EventMetadata> eventsManager)
         {
             ValidSdkEvent finalSdkEvent = new ValidSdkEvent
@@ -104,17 +103,17 @@ namespace Splitio.Util
             eventsManager.UpdateSdkInternalEventStatus(sdkInternalEvent, true);
             List<SdkEvent> eventsToFire = new List<SdkEvent>();
 
-            ValidSdkEvent requireAnySdkEvent = CheckRequireAny(sdkInternalEvent, eventsManagerConfig);
+            ValidSdkEvent requireAnySdkEvent = CheckRequireAny(sdkInternalEvent, eventsManager.ManagerConfig);
             if (requireAnySdkEvent.Valid)
             {
                 if ((!eventsManager.EventAlreadyTriggered(requireAnySdkEvent.SdkEvent)
-                    && ExecutionLimit(requireAnySdkEvent.SdkEvent, eventsManagerConfig) == 1) || ExecutionLimit(requireAnySdkEvent.SdkEvent, eventsManagerConfig) == -1)
+                    && ExecutionLimit(requireAnySdkEvent.SdkEvent, eventsManager.ManagerConfig) == 1) || ExecutionLimit(requireAnySdkEvent.SdkEvent, eventsManager.ManagerConfig) == -1)
                 {
                     finalSdkEvent.SdkEvent = requireAnySdkEvent.SdkEvent;
                 }
 
-                finalSdkEvent.Valid = CheckPrerequisites(finalSdkEvent.SdkEvent, eventsManagerConfig, eventsManager) 
-                    && CheckSuppressedBy(finalSdkEvent.SdkEvent, eventsManagerConfig, eventsManager);
+                finalSdkEvent.Valid = CheckPrerequisites(finalSdkEvent.SdkEvent, eventsManager) 
+                    && CheckSuppressedBy(finalSdkEvent.SdkEvent, eventsManager);
             }
 
             if (finalSdkEvent.Valid)
@@ -122,7 +121,7 @@ namespace Splitio.Util
                 eventsToFire.Add(finalSdkEvent.SdkEvent);
             }
 
-            foreach (SdkEvent sdkEvent in CheckRequireAll(eventsManagerConfig, eventsManager))
+            foreach (SdkEvent sdkEvent in CheckRequireAll(eventsManager))
             {
                 eventsToFire.Add(sdkEvent);
             }
@@ -130,11 +129,11 @@ namespace Splitio.Util
             return eventsToFire;
         }
 
-        private static List<SdkEvent> CheckRequireAll(EventsManagerConfig eventsManagerConfig,
+        private static List<SdkEvent> CheckRequireAll(
             EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager)
         {
             List<SdkEvent> events = new List<SdkEvent>();
-            foreach (KeyValuePair<SdkEvent, HashSet<SdkInternalEvent>> kvp in eventsManagerConfig.RequireAll)
+            foreach (KeyValuePair<SdkEvent, HashSet<SdkInternalEvent>> kvp in eventsManager.ManagerConfig.RequireAll)
             {
                 bool finalStatus = true;
                 foreach (var val in kvp.Value)
@@ -142,9 +141,9 @@ namespace Splitio.Util
                     finalStatus &= eventsManager.GetSdkInternalEventStatus(val);
                 }
                 if (finalStatus
-                    && CheckPrerequisites(kvp.Key, eventsManagerConfig, eventsManager)
-                    && ((ExecutionLimit(kvp.Key, eventsManagerConfig) == 1 && !eventsManager.EventAlreadyTriggered(kvp.Key))
-                        || (ExecutionLimit(kvp.Key, eventsManagerConfig) == -1))
+                    && CheckPrerequisites(kvp.Key, eventsManager)
+                    && ((ExecutionLimit(kvp.Key, eventsManager.ManagerConfig) == 1 && !eventsManager.EventAlreadyTriggered(kvp.Key))
+                        || (ExecutionLimit(kvp.Key, eventsManager.ManagerConfig) == -1))
                     && kvp.Value.Count > 0)
                 {
                     events.Add(kvp.Key);
@@ -154,10 +153,10 @@ namespace Splitio.Util
             return events;
         }
 
-        private static bool CheckPrerequisites(SdkEvent sdkEvent, EventsManagerConfig eventsManagerConfig,
+        private static bool CheckPrerequisites(SdkEvent sdkEvent,
             EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager)
         {
-            foreach (KeyValuePair<SdkEvent, HashSet<SdkEvent>> kvp in eventsManagerConfig.Prerequisites)
+            foreach (KeyValuePair<SdkEvent, HashSet<SdkEvent>> kvp in eventsManager.ManagerConfig.Prerequisites)
             {
                 if (kvp.Key == sdkEvent)
                 {
@@ -173,10 +172,10 @@ namespace Splitio.Util
             return true;
         }
 
-        private static bool CheckSuppressedBy(SdkEvent sdkEvent, EventsManagerConfig eventsManagerConfig,
+        private static bool CheckSuppressedBy(SdkEvent sdkEvent,
             EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager)
         {
-            foreach (KeyValuePair<SdkEvent, HashSet<SdkEvent>> kvp in eventsManagerConfig.SuppressedBy)
+            foreach (KeyValuePair<SdkEvent, HashSet<SdkEvent>> kvp in eventsManager.ManagerConfig.SuppressedBy)
             {
                 if (kvp.Key == sdkEvent)
                 {
