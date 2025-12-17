@@ -89,26 +89,26 @@ namespace Splitio.Services.Common
         #region Private Methods
         private void SetSdkEventTriggered(E sdkEvent)
         {
-            if (!_activeSubscriptions.TryGetValue(sdkEvent, out var dict))
+            if (!_activeSubscriptions.TryGetValue(sdkEvent, out var eventData))
             {
                 return;
             }
 
-            if ((bool)dict[Triggered])
+            if ((bool)eventData[Triggered])
             {
                 return;
             }
 
-            Dictionary<string, object> dict2 = new Dictionary<string, object>(dict);
-            dict2[Triggered] = true;
-            _activeSubscriptions.TryUpdate(sdkEvent, dict2, dict);
+            Dictionary<string, object> newEventData = new Dictionary<string, object>(eventData);
+            newEventData[Triggered] = true;
+            _activeSubscriptions.TryUpdate(sdkEvent, newEventData, eventData);
         }
 
         private EventHandler<M> GetEventHandler(E sdkEvent)
         {
-            if (_activeSubscriptions.TryGetValue(sdkEvent, out var dict))
+            if (_activeSubscriptions.TryGetValue(sdkEvent, out var eventData))
             {
-                dict.TryGetValue(EventHandler, out var handler);
+                eventData.TryGetValue(EventHandler, out var handler);
                 return (EventHandler<M>)handler;
             }
             return null;

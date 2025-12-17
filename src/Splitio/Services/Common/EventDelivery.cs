@@ -6,7 +6,7 @@ namespace Splitio.Services.Common
 {
     public class EventDelivery<E, M> : IEventDelivery<E, M>
     {
-        private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventsManager");
+        private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventDelivery");
 
         public virtual void Deliver(E sdkEvent, M eventMetadata, EventHandler<M> handler)
         {
