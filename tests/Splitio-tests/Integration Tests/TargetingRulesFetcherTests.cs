@@ -44,7 +44,8 @@ namespace Splitio_Tests.Integration_Tests
             var splitParser = new FeatureFlagParser(segmentCache, segmentFetcher);
             var splitChangeFetcher = new JSONFileSplitChangeFetcher($"{rootFilePath}splits_staging.json");
             var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), flagSetsFilter);
+            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), flagSetsFilter, eventsManager);
             var gates = new InMemoryReadinessGatesCache();
             var taskManager = new TasksManager(gates);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.FeatureFlagsFetcher, 250);
@@ -89,7 +90,8 @@ namespace Splitio_Tests.Integration_Tests
             var splitParser = new FeatureFlagParser(segmentCache, segmentFetcher);
             var splitChangeFetcher = new JSONFileSplitChangeFetcher($"{rootFilePath}splits_staging_4.json");
             var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), flagSetsFilter);
+            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), flagSetsFilter, eventsManager);
             var gates = new InMemoryReadinessGatesCache();
             var taskManager = new TasksManager(gates);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.FeatureFlagsFetcher, 250);
@@ -149,7 +151,8 @@ namespace Splitio_Tests.Integration_Tests
             var segmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, segmentCache, segmentsQueue, segmentsTask, gates);
             var rbsCache = new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>());
             var splitParser = new FeatureFlagParser(segmentCache, segmentFetcher);
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), flagSetsFilter);
+            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), flagSetsFilter, eventsManager);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.FeatureFlagsFetcher, 3000);
             var featureFlagSyncService = new FeatureFlagUpdater(splitParser, splitCache, flagSetsFilter, rbsCache);
             var rbsParser = new RuleBasedSegmentParser(segmentCache, segmentFetcher);

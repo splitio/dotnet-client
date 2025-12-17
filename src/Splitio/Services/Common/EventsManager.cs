@@ -9,9 +9,12 @@ namespace Splitio.Services.Common
 {
     public class EventsManager<E, I, M> : IEventsManager<E, I, M>
     {
-        private readonly ConcurrentDictionary<E, Dictionary<string, object>> _activeSubscriptions;
-        private readonly string Triggered = "Triggered";
-        private readonly string EventHandler = "EventHandler"; 
+        private struct PublicEventProperties
+        {
+            public bool Triggered;
+            public EventHandler<M> EventHandler;
+        }
+        private readonly ConcurrentDictionary<E, PublicEventProperties> _activeSubscriptions;
         private readonly ConcurrentDictionary<I, bool> _internalEventsStatus;
         private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventsManager");
         private readonly EventDelivery<E, M> _eventDelivery;
@@ -20,7 +23,7 @@ namespace Splitio.Services.Common
 
         public EventsManager(EventsManagerConfig eventsManagerConfig) 
         {
-            _activeSubscriptions = new ConcurrentDictionary<E, Dictionary<string, object>>();
+            _activeSubscriptions = new ConcurrentDictionary<E, PublicEventProperties>();
             _internalEventsStatus = new ConcurrentDictionary<I, bool>();
             _eventDelivery = new EventDelivery<E, M>();
             ManagerConfig = eventsManagerConfig;
@@ -34,10 +37,10 @@ namespace Splitio.Services.Common
                 return;
             }
 
-            _activeSubscriptions.TryAdd(sdkEvent, new Dictionary<string, object>()
+            _activeSubscriptions.TryAdd(sdkEvent, new PublicEventProperties
             {
-                {Triggered, false},
-                {EventHandler, handler}
+                Triggered = false,
+                EventHandler = handler
             });
             _logger.Debug($"EventsManager: Event {sdkEvent} is registered");
         }
@@ -67,10 +70,9 @@ namespace Splitio.Services.Common
 
         public bool EventAlreadyTriggered(E sdkEvent)
         {
-            if (_activeSubscriptions.TryGetValue(sdkEvent, out Dictionary<string, object> triggered))
+            if (_activeSubscriptions.TryGetValue(sdkEvent, out PublicEventProperties eventProperties))
             {
-                triggered.TryGetValue(Triggered, out var trig);
-                return (bool)trig;
+                return eventProperties.Triggered;
             }
             return false;
         }
@@ -97,24 +99,24 @@ namespace Splitio.Services.Common
                 return;
             }
 
-            if ((bool)eventData[Triggered])
+            if (eventData.Triggered)
             {
                 return;
             }
 
-            Dictionary<string, object> newEventData = new Dictionary<string, object>(eventData);
-            newEventData[Triggered] = true;
+            PublicEventProperties newEventData = eventData;
+            newEventData.Triggered = true;
             _activeSubscriptions.TryUpdate(sdkEvent, newEventData, eventData);
         }
 
         private EventHandler<M> GetEventHandler(E sdkEvent)
         {
-            if (_activeSubscriptions.TryGetValue(sdkEvent, out var eventData))
+            if (!_activeSubscriptions.TryGetValue(sdkEvent, out var eventData))
             {
-                eventData.TryGetValue(EventHandler, out var handler);
-                return (EventHandler<M>)handler;
+                return null;
             }
-            return null;
+
+            return eventData.EventHandler;
         }
         #endregion
     }

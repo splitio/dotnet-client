@@ -155,8 +155,8 @@ namespace Splitio_Tests.Unit_Tests.Common
 
         void VerifyMetadata(EventMetadata eMetdata)
         {
-            Assert.IsTrue(eMetadata.ContainKey("flags"));
-            List<string> flags = (List<string>)eMetadata.GetData()["flags"];
+            Assert.IsTrue(eMetadata.ContainKey(Splitio.Constants.EventMetadataKeys.Flags));
+            List<string> flags = (List<string>)eMetadata.GetData()[Splitio.Constants.EventMetadataKeys.Flags];
             Assert.IsTrue(flags.Count == 1);
             Assert.IsTrue(flags.Contains("flag1"));
         }

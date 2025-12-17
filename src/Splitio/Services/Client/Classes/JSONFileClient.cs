@@ -1,6 +1,7 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Common;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
@@ -20,6 +21,7 @@ namespace Splitio.Services.Client.Classes
     {
         private readonly IFeatureFlagCache _featureFlagCache;
         private readonly ISegmentCache _segmentCache;
+        private EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
         public JSONFileClient(string splitsFilePath,
             string segmentsFilePath,
@@ -53,8 +55,9 @@ namespace Splitio.Services.Client.Classes
             }
 
             BuildFlagSetsFilter(new HashSet<string>());
+            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
 
-            _featureFlagCache = featureFlagCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits), _flagSetsFilter);
+            _featureFlagCache = featureFlagCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits), _flagSetsFilter, _eventsManager);
             _impressionsLog = impressionsLog;
             _eventsLog = eventsLog;
             _trafficTypeValidator = trafficTypeValidator;

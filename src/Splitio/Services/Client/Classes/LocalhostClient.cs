@@ -1,6 +1,7 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Common;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
@@ -24,6 +25,7 @@ namespace Splitio.Services.Client.Classes
         private readonly IFeatureFlagCache _featureFlagCache;
         private readonly ILocalhostFileSync _localhostFileSync;
         private readonly string _fullPath;
+        private EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
         private readonly object _lock = new object();
 
@@ -46,8 +48,9 @@ namespace Splitio.Services.Client.Classes
 
             BuildFlagSetsFilter(new HashSet<string>());
 
+            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
             var splits = _localhostFileService.ParseSplitFile(_fullPath);
-            _featureFlagCache = new InMemorySplitCache(splits, _flagSetsFilter);
+            _featureFlagCache = new InMemorySplitCache(splits, _flagSetsFilter, _eventsManager);
 
 
             if (configs.FileSync != null)
