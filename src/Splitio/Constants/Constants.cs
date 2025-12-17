@@ -1,7 +1,7 @@
 ﻿namespace Splitio.Constants
 {
     public static class Push
-    {        
+    {
         public static string ControlPri => "control_pri";
         public static string ControlSec => "control_sec";
         public static string OccupancyPrefix => "[?occupancy=metrics.publishers]";
@@ -60,5 +60,10 @@
     {
         public static string Spec1_1 => "1.1";
         public static string LatestFlagsSpec => "1.3";
+    }
+
+    public static class EventMetadataKeys
+    {
+        public static string Flags => "flags";
     }
 }

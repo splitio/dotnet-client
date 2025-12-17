@@ -52,6 +52,7 @@ namespace Splitio.Services.Client.Classes
         private IRuleBasedSegmentCache _ruleBasedSegmentCache;
         private IUpdater<RuleBasedSegmentDto> _ruleBasedSegmentUpdater;
         private readonly new FallbackTreatmentCalculator _fallbackTreatmentCalculator;
+        private EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config,
             FallbackTreatmentCalculator fallbackTreatmentCalculator) : base(apiKey, fallbackTreatmentCalculator)
@@ -60,6 +61,7 @@ namespace Splitio.Services.Client.Classes
             _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
 
             BuildFlagSetsFilter(_config.FlagSetsFilter);
+            BuildEventsManager();
             BuildSplitCache();
             BuildSegmentCache();
             BuildRuleBasedSegmentCache();
@@ -88,9 +90,13 @@ namespace Splitio.Services.Client.Classes
         }
 
         #region Private Methods
+        private void BuildEventsManager()
+        {
+            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+        }
         private void BuildSplitCache()
         {
-            _featureFlagCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(_config.ConcurrencyLevel, InitialCapacity), _flagSetsFilter);
+            _featureFlagCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(_config.ConcurrencyLevel, InitialCapacity), _flagSetsFilter, _eventsManager);
         }
 
         private void BuildSegmentCache()
