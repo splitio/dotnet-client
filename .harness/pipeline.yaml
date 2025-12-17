@@ -268,7 +268,7 @@ pipeline:
                           -CommitSha "<+codebase.commitSha>" `
                           -SonarProjectKey "dotnet-client" `
                           -SonarToken "<+secrets.getValue('sonarqube-token')>" `
-                          -SonarUrl "https://sonar.harness.io/"
+                          -SonarUrl "https://sonar.harness.io"
               - parallel:
                   - step:
                       type: Run

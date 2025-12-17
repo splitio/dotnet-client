@@ -1,0 +1,123 @@
+﻿using Splitio.Domain;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+
+namespace Splitio.Services.Common
+{
+    public class EventsManager<E, I, M> : IEventsManager<E, I, M>
+    {
+        private struct PublicEventProperties
+        {
+            public bool Triggered;
+            public EventHandler<M> EventHandler;
+        }
+        private readonly ConcurrentDictionary<E, PublicEventProperties> _activeSubscriptions;
+        private readonly ConcurrentDictionary<I, bool> _internalEventsStatus;
+        private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventsManager");
+        private readonly EventDelivery<E, M> _eventDelivery;
+        private readonly object _lock = new object();
+        public EventsManagerConfig ManagerConfig { get; private set; }
+
+        public EventsManager(EventsManagerConfig eventsManagerConfig) 
+        {
+            _activeSubscriptions = new ConcurrentDictionary<E, PublicEventProperties>();
+            _internalEventsStatus = new ConcurrentDictionary<I, bool>();
+            _eventDelivery = new EventDelivery<E, M>();
+            ManagerConfig = eventsManagerConfig;
+        }
+
+        #region Public Methods
+        public void Register(E sdkEvent, EventHandler<M> handler)
+        {
+            if (_activeSubscriptions.TryGetValue(sdkEvent, out var _))
+            {
+                return;
+            }
+
+            _activeSubscriptions.TryAdd(sdkEvent, new PublicEventProperties
+            {
+                Triggered = false,
+                EventHandler = handler
+            });
+            _logger.Debug($"EventsManager: Event {sdkEvent} is registered");
+        }
+
+        public void Unregister(E sdkEvent)
+        {
+            if (_activeSubscriptions.TryRemove(sdkEvent, out _))
+            {
+                _logger.Debug($"EventsManager: Event {sdkEvent} is Unregistered");
+            }
+        }
+
+        public void NotifyInternalEvent(I sdkInternalEvent, M eventMetadata, List<E> eventsToNotify)
+        {
+            lock (_lock)
+            {
+                _logger.Debug($"EventsManager: Handling internal event {sdkInternalEvent}");
+
+                foreach (E sdkEvent in eventsToNotify)
+                {
+                    _logger.Debug($"EventsManager: Firing Sdk event {sdkEvent}");
+                    _eventDelivery.Deliver(sdkEvent, eventMetadata, GetEventHandler(sdkEvent));
+                    SetSdkEventTriggered(sdkEvent);
+                }
+            }
+        }
+
+        public bool EventAlreadyTriggered(E sdkEvent)
+        {
+            if (_activeSubscriptions.TryGetValue(sdkEvent, out PublicEventProperties eventProperties))
+            {
+                return eventProperties.Triggered;
+            }
+            return false;
+        }
+
+        public bool GetSdkInternalEventStatus(I sdkInternalEvent)
+        {
+            _internalEventsStatus.TryGetValue(sdkInternalEvent, out var status);
+            return status;
+        }
+
+        public void UpdateSdkInternalEventStatus(I sdkInternalEvent, bool status)
+        {
+            _internalEventsStatus.AddOrUpdate(sdkInternalEvent, status,
+                (_, oldValue) => status);
+            _logger.Debug($"EventsManager: Internal Event {sdkInternalEvent} status is updated to {status}");
+        }
+        #endregion
+
+        #region Private Methods
+        private void SetSdkEventTriggered(E sdkEvent)
+        {
+            if (!_activeSubscriptions.TryGetValue(sdkEvent, out var eventData))
+            {
+                return;
+            }
+
+            if (eventData.Triggered)
+            {
+                return;
+            }
+
+            PublicEventProperties newEventData = eventData;
+            newEventData.Triggered = true;
+            _activeSubscriptions.TryUpdate(sdkEvent, newEventData, eventData);
+        }
+
+        private EventHandler<M> GetEventHandler(E sdkEvent)
+        {
+            if (!_activeSubscriptions.TryGetValue(sdkEvent, out var eventData))
+            {
+                return null;
+            }
+
+            return eventData.EventHandler;
+        }
+        #endregion
+    }
+}
