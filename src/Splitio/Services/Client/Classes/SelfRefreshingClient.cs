@@ -52,7 +52,7 @@ namespace Splitio.Services.Client.Classes
         private IRuleBasedSegmentCache _ruleBasedSegmentCache;
         private IUpdater<RuleBasedSegmentDto> _ruleBasedSegmentUpdater;
         private readonly new FallbackTreatmentCalculator _fallbackTreatmentCalculator;
-        private EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        private readonly EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config,
             FallbackTreatmentCalculator fallbackTreatmentCalculator,
