@@ -64,9 +64,11 @@ namespace Splitio.Services.Client.Classes
         protected IClientExtensionService _clientExtensionService;
         protected IFlagSetsFilter _flagSetsFilter;
 
-        protected SplitClient(string apikey, FallbackTreatmentCalculator fallbackTreatmentCalculator)
+        protected SplitClient(string apikey, FallbackTreatmentCalculator fallbackTreatmentCalculator,
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager)
         {
             ApiKey = apikey;
+            Splitio.Util.Helper.BuildInternalSdkEventStatus(eventsManager);
 
             _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
             _wrapperAdapter = WrapperAdapter.Instance();
@@ -77,7 +79,7 @@ namespace Splitio.Services.Client.Classes
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
             _flagSetsValidator = new FlagSetsValidator();
             _configService = new ConfigService(_wrapperAdapter, _flagSetsValidator, new SdkMetadataValidator());
-            _statusManager = new InMemoryReadinessGatesCache();
+            _statusManager = new InMemoryReadinessGatesCache(eventsManager);
             _tasksManager = new TasksManager(_statusManager);
         }
 

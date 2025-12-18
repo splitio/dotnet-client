@@ -55,13 +55,14 @@ namespace Splitio.Services.Client.Classes
         private EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config,
-            FallbackTreatmentCalculator fallbackTreatmentCalculator) : base(apiKey, fallbackTreatmentCalculator)
+            FallbackTreatmentCalculator fallbackTreatmentCalculator,
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager) : base(apiKey, fallbackTreatmentCalculator, eventsManager)
         {
             _config = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfigTypes.InMemory);
             _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
+            _eventsManager = eventsManager;
 
             BuildFlagSetsFilter(_config.FlagSetsFilter);
-            BuildEventsManager();
             BuildSplitCache();
             BuildSegmentCache();
             BuildRuleBasedSegmentCache();
@@ -90,10 +91,6 @@ namespace Splitio.Services.Client.Classes
         }
 
         #region Private Methods
-        private void BuildEventsManager()
-        {
-            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
-        }
         private void BuildSplitCache()
         {
             _featureFlagCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(_config.ConcurrencyLevel, InitialCapacity), _flagSetsFilter, _eventsManager);
@@ -218,7 +215,7 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildBlockUntilReadyService()
         {
-            _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(_statusManager, _telemetryInitProducer);
+            _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(_statusManager, _telemetryInitProducer, _eventsManager);
         }
 
         private void BuildTelemetrySyncTask()

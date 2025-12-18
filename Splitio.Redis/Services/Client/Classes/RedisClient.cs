@@ -9,6 +9,7 @@ using Splitio.Redis.Services.Shared;
 using Splitio.Redis.Telemetry.Storages;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Common;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Impressions.Classes;
@@ -30,7 +31,8 @@ namespace Splitio.Redis.Services.Client.Classes
         private IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
         private readonly new FallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
-        public RedisClient(ConfigurationOptions config, string apiKey, FallbackTreatmentCalculator fallbackTreatmentCalculator) : base(apiKey, fallbackTreatmentCalculator)
+        public RedisClient(ConfigurationOptions config, string apiKey, FallbackTreatmentCalculator fallbackTreatmentCalculator,
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager) : base(apiKey, fallbackTreatmentCalculator, eventsManager)
         {
             _config = new RedisConfig();
             _fallbackTreatmentCalculator = fallbackTreatmentCalculator;

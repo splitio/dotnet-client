@@ -25,6 +25,7 @@ namespace Splitio.Services.Client.Classes
         public JSONFileClient(string splitsFilePath,
             string segmentsFilePath,
             FallbackTreatmentCalculator fallbackTreatmentCalculator,
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager,
             ISegmentCache segmentCacheInstance = null,
             IFeatureFlagCache featureFlagCacheInstance = null,
             IImpressionsLog impressionsLog = null,
@@ -33,9 +34,8 @@ namespace Splitio.Services.Client.Classes
             ITrafficTypeValidator trafficTypeValidator = null,
             IImpressionsManager impressionsManager = null,
             IRuleBasedSegmentCache ruleBasedSegmentCache = null
-            ) : base("localhost", fallbackTreatmentCalculator)
+            ) : base("localhost", fallbackTreatmentCalculator, eventsManager)
         {
-            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
             _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
             var rbsCache = ruleBasedSegmentCache ?? new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>(), eventsManager);
 

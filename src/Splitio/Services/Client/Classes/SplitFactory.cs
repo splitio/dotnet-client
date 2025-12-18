@@ -1,5 +1,6 @@
 using Splitio.Domain;
 using Splitio.Services.Client.Interfaces;
+using Splitio.Services.Common;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
@@ -59,6 +60,8 @@ namespace Splitio.Services.Client.Classes
         private void BuildSplitClient()
         {
             FallbackTreatmentCalculator fallbackTreatmentCalculator = new FallbackTreatmentCalculator(_options.FallbackTreatments);
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+
             switch (_options.Mode)
             {
                 case Mode.Standalone:
@@ -66,11 +69,11 @@ namespace Splitio.Services.Client.Classes
 
                     if (_apiKey == "localhost")
                     {
-                        _client = new LocalhostClient(_options, fallbackTreatmentCalculator);
+                        _client = new LocalhostClient(_options, fallbackTreatmentCalculator, eventsManager);
                     }
                     else
                     {
-                        _client = new SelfRefreshingClient(_apiKey, _options, fallbackTreatmentCalculator);
+                        _client = new SelfRefreshingClient(_apiKey, _options, fallbackTreatmentCalculator, eventsManager);
                     }
                     break;
                 case Mode.Consumer:
@@ -81,7 +84,7 @@ namespace Splitio.Services.Client.Classes
                         var redisAssembly = Assembly.Load(new AssemblyName("Splitio.Redis"));
                         var redisType = redisAssembly.GetType("Splitio.Redis.Services.Client.Classes.RedisClient");
 
-                        _client = (ISplitClient)Activator.CreateInstance(redisType, new object[] { _options, _apiKey, fallbackTreatmentCalculator });
+                        _client = (ISplitClient)Activator.CreateInstance(redisType, new object[] { _options, _apiKey, fallbackTreatmentCalculator, eventsManager });
                     }
                     catch (ArgumentException ex)
                     {

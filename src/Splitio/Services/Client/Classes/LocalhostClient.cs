@@ -28,7 +28,8 @@ namespace Splitio.Services.Client.Classes
 
         private readonly object _lock = new object();
 
-        public LocalhostClient(ConfigurationOptions configurationOptions, FallbackTreatmentCalculator fallbackTreatmentCalculator) : base("localhost", fallbackTreatmentCalculator)
+        public LocalhostClient(ConfigurationOptions configurationOptions, FallbackTreatmentCalculator fallbackTreatmentCalculator,
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager) : base("localhost", fallbackTreatmentCalculator, eventsManager)
         {
             var configs = (LocalhostClientConfigurations)_configService.ReadConfig(configurationOptions, ConfigTypes.Localhost, _statusManager);
 
@@ -47,7 +48,6 @@ namespace Splitio.Services.Client.Classes
 
             BuildFlagSetsFilter(new HashSet<string>());
 
-            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
             var splits = _localhostFileService.ParseSplitFile(_fullPath);
             _featureFlagCache = new InMemorySplitCache(splits, _flagSetsFilter, eventsManager);
 

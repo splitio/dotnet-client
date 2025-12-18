@@ -46,7 +46,7 @@ namespace Splitio_Tests.Integration_Tests
             var splitChangeFetcher = new JSONFileSplitChangeFetcher($"{rootFilePath}splits_staging.json");
             var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), flagSetsFilter, eventsManager);
-            var gates = new InMemoryReadinessGatesCache();
+            var gates = new InMemoryReadinessGatesCache(eventsManager);
             var taskManager = new TasksManager(gates);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.FeatureFlagsFetcher, 250);
             var featureFlagSyncService = new FeatureFlagUpdater(splitParser, splitCache, flagSetsFilter, rbsCache);
@@ -92,7 +92,7 @@ namespace Splitio_Tests.Integration_Tests
             var splitChangeFetcher = new JSONFileSplitChangeFetcher($"{rootFilePath}splits_staging_4.json");
             var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), flagSetsFilter, eventsManager);
-            var gates = new InMemoryReadinessGatesCache();
+            var gates = new InMemoryReadinessGatesCache(eventsManager);
             var taskManager = new TasksManager(gates);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.FeatureFlagsFetcher, 250);
             var featureFlagSyncService = new FeatureFlagUpdater(splitParser, splitCache, flagSetsFilter, rbsCache);
@@ -141,8 +141,8 @@ namespace Splitio_Tests.Integration_Tests
             var apiSplitChangeFetcher = new ApiSplitChangeFetcher(sdkApiClient);
             var sdkSegmentApiClient = new SegmentSdkApiClient(httpClient, telemetryStorage, baseUrl);
             var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkSegmentApiClient);
-            var gates = new InMemoryReadinessGatesCache();
             var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            var gates = new InMemoryReadinessGatesCache(eventsManager);
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
             var segmentsQueue = new SplitQueue<SelfRefreshingSegment>();
             var taskManager = new TasksManager(gates);

@@ -27,7 +27,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         public void InitializeSegmentNotExistent()
         {
             // Arrange
-            var gates = new InMemoryReadinessGatesCache();
+            var gates = new InMemoryReadinessGatesCache(new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig()));
             gates.SetReady();
             var apiClient = new Mock<ISegmentSdkApiClient>();            
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);

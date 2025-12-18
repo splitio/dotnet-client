@@ -3,6 +3,7 @@ using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Common;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
@@ -19,12 +20,14 @@ namespace Splitio_Tests.Integration_Tests
     {
         private readonly string rootFilePath;
         private readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
+        private readonly EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
         public JSONFileClientTests()
         {
             // This line is to clean the warnings.
             rootFilePath = string.Empty;
             _fallbackTreatmentCalculator = new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration());
+            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
 
 #if NET_LATEST
             rootFilePath = @"Resources\";
@@ -37,7 +40,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnFailedParsingSplitShouldReturnControl()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             //Act           
             var result = client.GetTreatment("test", "fail", null);
@@ -52,7 +55,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnFailedParsingSplitShouldNotAffectOtherSplits()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             client.BlockUntilReady(1000);
 
@@ -69,7 +72,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnDeletedSplitShouldReturnControl()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             client.BlockUntilReady(1000);
 
@@ -97,7 +100,7 @@ namespace Splitio_Tests.Integration_Tests
                 .Setup(x => x.GetSplit(It.IsAny<string>()))
                 .Throws<Exception>();
 
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, null, splitCacheMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager, null, splitCacheMock.Object);
 
             //Act           
             var result = client.GetTreatment("test", "asd", null);
@@ -113,7 +116,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnRemovedUserFromSegmentShouldReturnOff()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", $"{rootFilePath}segment_payed.json", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", $"{rootFilePath}segment_payed.json", _fallbackTreatmentCalculator, _eventsManager);
 
             client.BlockUntilReady(1000);
 
@@ -135,7 +138,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithOnOffOnPartition()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_4.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_4.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             client.BlockUntilReady(1000);
 
@@ -159,7 +162,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithTrafficAllocation()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_4.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_4.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             client.BlockUntilReady(1000);
 
@@ -183,7 +186,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithTrafficAllocationWhenAllocationIsDifferentThan100()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_4.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_4.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             client.BlockUntilReady(1000);
 
@@ -207,7 +210,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithTrafficAllocationWhenAllocationIs1ReturnsRolloutTreatment()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_7.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_7.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             client.BlockUntilReady(1000);
 
@@ -223,7 +226,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithTrafficAllocationWhenAllocationIs1ReturnsDefaultTreatment()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_7.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_7.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             client.BlockUntilReady(1000);
 
@@ -239,7 +242,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithSegmentNotInitialized()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             client.BlockUntilReady(1000);
 
@@ -259,7 +262,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var impressionsLogMock = new Mock<IImpressionsLog>();
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, impressionsLog: impressionsLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager, impressionsLog: impressionsLogMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -283,7 +286,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var impressionsLogMock = new Mock<IImpressionsLog>();
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, impressionsLog: impressionsLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager, impressionsLog: impressionsLogMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -307,7 +310,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var impressionsLogMock = new Mock<IImpressionsLog>();
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, impressionsLog: impressionsLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager, impressionsLog: impressionsLogMock.Object);
 
             //Act           
             client.RemoveSplitFromCache("asd");
@@ -336,7 +339,7 @@ namespace Splitio_Tests.Integration_Tests
                 .Setup(x => x.GetSplit(It.IsAny<string>()))
                 .Throws<Exception>();
 
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, featureFlagCacheInstance: splitCacheMock.Object, impressionsLog: impressionsLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager, featureFlagCacheInstance: splitCacheMock.Object, impressionsLog: impressionsLogMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -360,7 +363,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var impressionsLogMock = new Mock<IImpressionsLog>();
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_4.json", "", _fallbackTreatmentCalculator, impressionsLog: impressionsLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_4.json", "", _fallbackTreatmentCalculator, _eventsManager, impressionsLog: impressionsLogMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -383,7 +386,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var impressionsLogMock = new Mock<IImpressionsLog>();
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, impressionsLog: impressionsLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager, impressionsLog: impressionsLogMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -406,7 +409,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWhenUnknownMatcherIsIncluded()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             //Act           
             var result = client.GetTreatment("xs", "Unknown_Matcher", null);
@@ -421,7 +424,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var impressionsLogMock = new Mock<IImpressionsLog>();
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, impressionsLog: impressionsLogMock.Object, isLabelsEnabled: false);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager, impressionsLog: impressionsLogMock.Object, isLabelsEnabled: false);
 
             client.BlockUntilReady(1000);
 
@@ -444,7 +447,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var impressionsLogMock = new Mock<IImpressionsLog>();
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, impressionsLog: impressionsLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager, impressionsLog: impressionsLogMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -468,7 +471,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWithBooleanAttribute()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_4.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_4.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             var attributes = new Dictionary<string, object>
             {
@@ -490,7 +493,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWithSetMatcherReturnsOff()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_5.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_5.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             var attributes = new Dictionary<string, object>
             {
@@ -512,7 +515,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWithSetMatcherReturnsOn()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_5.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_5.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             var attributes = new Dictionary<string, object>
             {
@@ -534,7 +537,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWithStringMatcherReturnsOff()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_5.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_5.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             var attributes = new Dictionary<string, object>
             {
@@ -556,7 +559,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWithStringMatcherReturnsOn()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_5.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_5.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             var attributes = new Dictionary<string, object>
             {
@@ -578,7 +581,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWithDependencyMatcherReturnsOn()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_6.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_6.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             client.BlockUntilReady(1000);
 
@@ -595,7 +598,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWithDependencyMatcherReturnsOff()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_6.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_6.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             client.BlockUntilReady(1000);
 
@@ -613,7 +616,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var impressionsLogMock = new Mock<IImpressionsLog>();
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_6.json", "", _fallbackTreatmentCalculator, impressionsLog: impressionsLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_6.json", "", _fallbackTreatmentCalculator, _eventsManager,impressionsLog: impressionsLogMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -631,7 +634,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var impressionsLogMock = new Mock<IImpressionsLog>();
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, impressionsLog: impressionsLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager, impressionsLog: impressionsLogMock.Object);
             var splitName = "not_exist";
 
             client.BlockUntilReady(1000);
@@ -649,7 +652,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatment_WithoutBlockUntiltReady_ReturnsOff()
         {
             // Arrange.
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             // Act.
             var result = client.GetTreatment("key", "anding");
@@ -665,7 +668,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatments()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager);
             List<string> features = new List<string>
             {
                 "fail",
@@ -696,7 +699,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentsWithBucketing()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager);
             List<string> features = new List<string>
             {
                 "fail",
@@ -728,7 +731,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentsWithDependencyMatcherReturnsOn()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_6.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_6.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             client.BlockUntilReady(1000);
 
@@ -751,7 +754,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentsWithDependencyMatcherWithAttributesReturnsOn()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_6.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_6.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             client.BlockUntilReady(1000);
 
@@ -779,7 +782,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var impressionsLogMock = new Mock<IImpressionsLog>();
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, impressionsLog: impressionsLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager, impressionsLog: impressionsLogMock.Object);
             var splitNames = new List<string> { "not_exist", "not_exist_1" };
 
             client.BlockUntilReady(1000);
@@ -801,7 +804,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatments_WithoutBlockUntiltReady_ReturnsEmptyList()
         {
             // Arrange.
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             // Act.
             var result = client.GetTreatments("key", new List<string>());
@@ -815,7 +818,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatments_WithoutBlockUntiltReady_ReturnsTreatments()
         {
             // Arrange.
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             // Act.
             var result = client.GetTreatments("key", new List<string> { "anding", "in_ten_keys" });
@@ -833,7 +836,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatments_WhenClientIsReadyAndFeaturesIsEmpty_ReturnsEmptyList()
         {
             // Arrange.
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager);
             client.BlockUntilReady(100);
 
             // Act.
@@ -850,7 +853,7 @@ namespace Splitio_Tests.Integration_Tests
         public void DestroySucessfully()
         {
             //Arrange
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_5.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_5.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             var attributes = new Dictionary<string, object>
             {
@@ -886,7 +889,7 @@ namespace Splitio_Tests.Integration_Tests
             // Arrange.
             var trafficTypeValidator = new Mock<ITrafficTypeValidator>();
             var eventLog = new Mock<IEventsLog>();
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, trafficTypeValidator: trafficTypeValidator.Object, eventsLog: eventLog.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager, trafficTypeValidator: trafficTypeValidator.Object, eventsLog: eventLog.Object);
 
             trafficTypeValidator
                 .Setup(mock => mock.IsValid(It.IsAny<string>(), It.IsAny<Splitio.Enums.API>()))
@@ -907,7 +910,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var impressionsLogMock = new Mock<IImpressionsLog>();
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, impressionsLog: impressionsLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager, impressionsLog: impressionsLogMock.Object);
             var splitName = "not_exist";
 
             client.BlockUntilReady(1000);
@@ -926,7 +929,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentWithConfig_WithoutBlockUntiltReady_ReturnsOff()
         {
             // Arrange.
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             // Act.
             var result = client.GetTreatmentWithConfig("key", "anding");
@@ -944,7 +947,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var impressionsLogMock = new Mock<IImpressionsLog>();
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, impressionsLog: impressionsLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager, impressionsLog: impressionsLogMock.Object);
             var splitNames = new List<string> { "not_exist", "not_exist_1" };
 
             client.BlockUntilReady(1000);
@@ -967,7 +970,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentsWithConfig_WithoutBlockUntiltReady_ReturnsEmptyList()
         {
             // Arrange.
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             // Act.
             var result = client.GetTreatmentsWithConfig("anding", new List<string>());
@@ -981,7 +984,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentsWithConfig_WithoutBlockUntiltReady_ReturnsTreatments()
         {
             // Arrange.
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager);
 
             // Act.
             var result = client.GetTreatmentsWithConfig("key", new List<string> { "anding", "whitelisting_elements" });
@@ -1001,7 +1004,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentsWithConfig_WhenClientIsReadyAndFeaturesIsEmpty_ReturnsEmptyList()
         {
             // Arrange.
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager);
             client.BlockUntilReady(100);
 
             // Act.
@@ -1018,7 +1021,7 @@ namespace Splitio_Tests.Integration_Tests
         public void Split_Manager_WhenNameDoesntExist_ReturnsNull()
         {
             // Arrange.
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager);
             var manager = client.GetSplitManager();
             var splitName = "not_exist";
 

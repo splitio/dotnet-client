@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Domain;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
 using Splitio.Services.Evaluator;
@@ -22,7 +23,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             ISyncManager syncManager,
             FallbackTreatmentCalculator fallbackTreatmentCalculator,
             ITelemetryEvaluationProducer telemetryEvaluationProducer)
-            : base("SplitClientForTesting", fallbackTreatmentCalculator)
+            : base("SplitClientForTesting", fallbackTreatmentCalculator, new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig()))
         {
             _eventsLog = eventsLog;
             _impressionsLog = impressionsLog;

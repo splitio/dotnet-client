@@ -1,8 +1,11 @@
-﻿using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Domain;
+using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Storages;
 using System;
+using System.Collections.Generic;
 
 namespace Splitio.Services.Shared.Classes
 {
@@ -12,11 +15,14 @@ namespace Splitio.Services.Shared.Classes
 
         private readonly IStatusManager _statusManager;
         private readonly ITelemetryInitProducer _telemetryInitProducer;
+        private readonly EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
-        public SelfRefreshingBlockUntilReadyService(IStatusManager statusManager, ITelemetryInitProducer telemetryInitProducer)
+        public SelfRefreshingBlockUntilReadyService(IStatusManager statusManager, ITelemetryInitProducer telemetryInitProducer,
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager)
         {
             _statusManager = statusManager;
             _telemetryInitProducer = telemetryInitProducer;
+            _eventsManager = eventsManager;
         }
 
         public void BlockUntilReady(int blockMilisecondsUntilReady)
@@ -30,6 +36,10 @@ namespace Splitio.Services.Shared.Classes
                 
             if (!_statusManager.WaitUntilReady(blockMilisecondsUntilReady))
             {
+                _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkTimedOut,
+                    new EventMetadata(new Dictionary<string, object>()),
+                Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.SdkTimedOut,
+                    _eventsManager));
                 _telemetryInitProducer.RecordBURTimeout();
                 throw new TimeoutException($"SDK was not ready in {blockMilisecondsUntilReady} milliseconds");
             }
