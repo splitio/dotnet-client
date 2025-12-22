@@ -7,7 +7,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using WireMock.Pact.Models.V2;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
@@ -60,13 +59,11 @@ namespace Splitio_Tests.Unit_Tests.Cache
         {
             //Arrange
             var segmentName = "segment_test";
-            Splitio.Util.Helper.BuildInternalSdkEventStatus(_eventsManager);
             var toNotify = new List<string> { { segmentName } };
             PublicSdkUpdateHandler += sdkUpdate_callback;
             _eventsManager.Register(SdkEvent.SdkUpdate, sdkUpdate_callback);
             _eventsManager.Register(SdkEvent.SdkReady, sdkUpdate_callback);
-            _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(new Dictionary<string, object>()),
-                Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.SdkReady, _eventsManager));
+            _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(new Dictionary<string, object>()));
 
             //Act
             SdkUpdate = false;

@@ -105,7 +105,6 @@ namespace Splitio_Tests.Unit_Tests.Cache
         {
             //Arrange
             var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
-            Splitio.Util.Helper.BuildInternalSdkEventStatus(eventsManager);
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
             var keys = new List<string> { "1234" };
             var segmentName = "test";
@@ -113,8 +112,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             PublicSdkUpdateHandler += sdkUpdate_callback;
             eventsManager.Register(SdkEvent.SdkUpdate, sdkUpdate_callback);
             eventsManager.Register(SdkEvent.SdkReady, sdkUpdate_callback);
-            eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(new Dictionary<string, object>()),
-                Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.SdkReady, eventsManager));
+            eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(new Dictionary<string, object>()));
 
             // Act
             SdkUpdate = false;

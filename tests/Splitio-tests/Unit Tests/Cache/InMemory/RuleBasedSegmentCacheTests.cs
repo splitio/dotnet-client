@@ -154,7 +154,6 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
         public void Update_ShouldNotifyEvent()
         {
             // Arrange
-            Splitio.Util.Helper.BuildInternalSdkEventStatus(_eventsManager);
 
             var segmentToAdd = new RuleBasedSegment { Name = "segment-to-add" };
             var segmentToRemove = new RuleBasedSegment { Name = "segment-to-remove" };
@@ -163,8 +162,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
             PublicSdkUpdateHandler += sdkUpdate_callback;
             _eventsManager.Register(SdkEvent.SdkUpdate, sdkUpdate_callback);
             _eventsManager.Register(SdkEvent.SdkReady, sdkUpdate_callback);
-            _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(new Dictionary<string, object>()),
-                Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.SdkReady, _eventsManager));
+            _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(new Dictionary<string, object>()));
 
             // Act
             SdkUpdate = false;

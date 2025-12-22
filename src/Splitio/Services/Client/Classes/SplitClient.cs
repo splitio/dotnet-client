@@ -63,6 +63,9 @@ namespace Splitio.Services.Client.Classes
         protected IImpressionsObserver _impressionsObserver;
         protected IClientExtensionService _clientExtensionService;
         protected IFlagSetsFilter _flagSetsFilter;
+        public event EventHandler<EventMetadata> PublicSdkReadyHandler;
+        public event EventHandler<EventMetadata> PublicSdkUpdateHandler;
+        public event EventHandler<EventMetadata> PublicSdkTimedOutHandler;
 
         protected SplitClient(string apikey, FallbackTreatmentCalculator fallbackTreatmentCalculator)
         {
