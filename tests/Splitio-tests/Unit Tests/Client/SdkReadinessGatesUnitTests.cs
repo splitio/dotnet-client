@@ -31,10 +31,9 @@ namespace Splitio_Tests.Unit_Tests.Client
         {
             //Arrange
             EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
-            Splitio.Util.Helper.BuildInternalSdkEventStatus(eventsManager);
             var gates = new InMemoryReadinessGatesCache(eventsManager);
             PublicSdkUpdateHandler += sdkReady_callback;
-            eventsManager.Register(SdkEvent.SdkReady, sdkReady_callback);
+            eventsManager.Register(SdkEvent.SdkReady, PublicSdkUpdateHandler);
 
             //Act
             gates.SetReady();

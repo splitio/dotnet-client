@@ -60,13 +60,12 @@ namespace Splitio.Services.Cache.Classes
             foreach (var name in toRemove)
             {
                 _cache.TryRemove(name, out var _);
+                toNotify.Add(name);
             }
 
             SetChangeNumber(till);
             _eventsManager.NotifyInternalEvent(SdkInternalEvent.RuleBasedSegmentsUpdated,
-                new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.RuleBasedSegments, toNotify } }),
-            Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.RuleBasedSegmentsUpdated,
-                _eventsManager));
+                new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.RuleBasedSegments, toNotify } }));
         }
 
         public void SetChangeNumber(long changeNumber)

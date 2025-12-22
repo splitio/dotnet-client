@@ -36,9 +36,7 @@ namespace Splitio.Services.Cache.Classes
 
             segment.AddKeys(segmentKeys);
             _eventsManager.NotifyInternalEvent(SdkInternalEvent.SegmentsUpdated,
-                new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.Segments, segmentName } }),
-            Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.SegmentsUpdated,
-                _eventsManager));
+                new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.Segments, segmentName } }));
         }
 
         public void RemoveFromSegment(string segmentName, List<string> segmentKeys)
@@ -47,9 +45,7 @@ namespace Splitio.Services.Cache.Classes
             {
                 segment.RemoveKeys(segmentKeys);
                 _eventsManager.NotifyInternalEvent(SdkInternalEvent.SegmentsUpdated,
-                    new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.Segments, segmentName } }),
-                Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.SegmentsUpdated,
-                    _eventsManager));
+                    new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.Segments, segmentName } }));
             }
         }
 

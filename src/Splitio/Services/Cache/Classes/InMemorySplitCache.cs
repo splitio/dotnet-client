@@ -79,9 +79,7 @@ namespace Splitio.Services.Cache.Classes
 
             SetChangeNumber(till);
             _eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagsUpdated, 
-                new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.Flags, eventsFlags } }),
-            Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.FlagsUpdated,
-                _eventsManager));
+                new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.Flags, eventsFlags } }));
         }
 
         public void SetChangeNumber(long changeNumber)
@@ -154,9 +152,7 @@ namespace Splitio.Services.Cache.Classes
 
             _featureFlags.AddOrUpdate(featureFlag.name, featureFlag, (key, oldValue) => featureFlag);
             _eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagKilledNotification,
-                new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.Flags, new List<string> { { featureFlag.name } } } }),
-            Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.FlagKilledNotification,
-                _eventsManager));
+                new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.Flags, new List<string> { { featureFlag.name } } } }));
 
         }
 

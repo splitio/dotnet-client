@@ -31,9 +31,7 @@ namespace Splitio.Services.Client.Classes
         {
             _sdkReady.Signal();
             _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady,
-                new EventMetadata(new Dictionary<string, object>()),
-            Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.SdkReady,
-                _eventsManager));
+                new EventMetadata(new Dictionary<string, object>()));
         }
 
         public void SetDestroy()

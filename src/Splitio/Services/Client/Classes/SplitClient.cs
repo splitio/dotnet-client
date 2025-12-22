@@ -63,12 +63,16 @@ namespace Splitio.Services.Client.Classes
         protected IImpressionsObserver _impressionsObserver;
         protected IClientExtensionService _clientExtensionService;
         protected IFlagSetsFilter _flagSetsFilter;
+        protected EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        public event EventHandler<EventMetadata> PublicSdkReadyHandler;
+        public event EventHandler<EventMetadata> PublicSdkUpdateHandler;
+        public event EventHandler<EventMetadata> PublicSdkTimedOutHandler;
 
         protected SplitClient(string apikey, FallbackTreatmentCalculator fallbackTreatmentCalculator,
             EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager)
         {
             ApiKey = apikey;
-            Splitio.Util.Helper.BuildInternalSdkEventStatus(eventsManager);
+            _eventsManager = eventsManager;
 
             _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
             _wrapperAdapter = WrapperAdapter.Instance();

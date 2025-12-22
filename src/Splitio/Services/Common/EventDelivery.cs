@@ -15,7 +15,7 @@ namespace Splitio.Services.Common
                 _logger.Debug($"EventDelivery: Triggering handle for Sdk Event {sdkEvent}");
                 try
                 {
-                    handler(this, eventMetadata);
+                    handler.Invoke(this, eventMetadata);
                 }
                 catch (Exception e)
                 {

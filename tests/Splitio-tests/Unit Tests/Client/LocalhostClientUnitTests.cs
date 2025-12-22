@@ -4,15 +4,17 @@ using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Shared.Classes;
+using WireMock.Pact.Models.V2;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {
     [TestClass]
     public class LocalhostClientUnitTests
-    {        
+    {
         private readonly string rootFilePath;
         private readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
         private readonly EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        private bool SdkReady = false;
 
         public LocalhostClientUnitTests()
         {
@@ -62,7 +64,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Arrange
             var splitClient = new LocalhostClientForTesting($"{rootFilePath}test.splits", _fallbackTreatmentCalculator);
             splitClient.BlockUntilReady(1000);
-                      
+
             //Act
             var result = splitClient.Track("test", "test", "test");
 

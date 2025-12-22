@@ -23,10 +23,9 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Mock<IStatusManager> statusManager = new Mock<IStatusManager>();
             Mock<ITelemetryInitProducer> telemetryProducer = new Mock<ITelemetryInitProducer>();
             EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
-            Splitio.Util.Helper.BuildInternalSdkEventStatus(eventsManager);
             var bur = new SelfRefreshingBlockUntilReadyService(statusManager.Object, telemetryProducer.Object, eventsManager);
             PublicSdkUpdateHandler += SdkTimedOut_callback;
-            eventsManager.Register(SdkEvent.SdkReadyTimeout, SdkTimedOut_callback);
+            eventsManager.Register(SdkEvent.SdkReadyTimeout, PublicSdkUpdateHandler);
             statusManager
                 .Setup(mock => mock.WaitUntilReady(1))
                 .Returns(false);
