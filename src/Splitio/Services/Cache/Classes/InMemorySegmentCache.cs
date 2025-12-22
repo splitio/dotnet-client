@@ -17,7 +17,7 @@ namespace Splitio.Services.Cache.Classes
         private readonly ConcurrentDictionary<string, Segment> _segments;
         private readonly IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
-        public InMemorySegmentCache(ConcurrentDictionary<string, Segment> segments, EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManger)
+        public InMemorySegmentCache(ConcurrentDictionary<string, Segment> segments, IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManger)
         {
             _segments = segments;
             _eventsManager = eventsManger;
