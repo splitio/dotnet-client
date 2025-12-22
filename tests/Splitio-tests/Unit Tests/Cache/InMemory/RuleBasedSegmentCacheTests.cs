@@ -159,7 +159,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
             var segmentToAdd = new RuleBasedSegment { Name = "segment-to-add" };
             var segmentToRemove = new RuleBasedSegment { Name = "segment-to-remove" };
             var till = 67890;
-            var toNotify = new List<string> { { "segment-to-add" } };
+            var toNotify = new List<string> { { "segment-to-add" }, { "segment-to-remove" } };
             PublicSdkUpdateHandler += sdkUpdate_callback;
             _eventsManager.Register(SdkEvent.SdkUpdate, sdkUpdate_callback);
             _eventsManager.Register(SdkEvent.SdkReady, sdkUpdate_callback);
@@ -174,7 +174,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
             Assert.IsTrue(SdkUpdate);
             Assert.IsTrue(eMetadata.ContainKey(Splitio.Constants.EventMetadataKeys.RuleBasedSegments));
             List<string> rbsegments = (List<string>)eMetadata.GetData()[Splitio.Constants.EventMetadataKeys.RuleBasedSegments];
-            Assert.IsTrue(rbsegments.Count == 2);
+            Assert.IsTrue(rbsegments.Count == 3);
             Assert.IsTrue(rbsegments.Contains("segment-to-add"));
             Assert.IsTrue(rbsegments.Contains("segment-to-remove"));
         }
