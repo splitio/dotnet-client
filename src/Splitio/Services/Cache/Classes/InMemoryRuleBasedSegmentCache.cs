@@ -15,7 +15,7 @@ namespace Splitio.Services.Cache.Classes
         private readonly EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
         public InMemoryRuleBasedSegmentCache(ConcurrentDictionary<string, RuleBasedSegment> cache,
-            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManger,
+            IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManger,
             long changeNumber = -1)
         {
             _cache = cache;
