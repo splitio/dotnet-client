@@ -2,6 +2,7 @@
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
+using Splitio.Services.SegmentFetcher.Interfaces;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,10 +13,10 @@ namespace Splitio.Services.Cache.Classes
     {
         private readonly ConcurrentDictionary<string, RuleBasedSegment> _cache;
         private long _changeNumber;
-        private readonly IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        private readonly EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
         public InMemoryRuleBasedSegmentCache(ConcurrentDictionary<string, RuleBasedSegment> cache,
-            IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManger,
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManger,
             long changeNumber = -1)
         {
             _cache = cache;
@@ -60,6 +61,7 @@ namespace Splitio.Services.Cache.Classes
             foreach (var name in toRemove)
             {
                 _cache.TryRemove(name, out var _);
+                toNotify.Add(name);
             }
 
             SetChangeNumber(till);
