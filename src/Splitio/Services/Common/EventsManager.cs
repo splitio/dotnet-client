@@ -186,8 +186,8 @@ namespace Splitio.Services.Common
 
         private bool CheckPrerequisites(E sdkEvent)
         {
-            foreach (var item in _managerConfig.Prerequisites.Where(kvp => kvp.Key.Equals(sdkEvent) &&
-                kvp.Value.Any(x => !EventAlreadyTriggered(x))))
+            if (_managerConfig.Prerequisites.Where(kvp => kvp.Key.Equals(sdkEvent) &&
+                kvp.Value.Any(x => !EventAlreadyTriggered(x))).Count() > 0)
             {
                 return false;
             }
@@ -197,8 +197,8 @@ namespace Splitio.Services.Common
 
         private bool CheckSuppressedBy(E sdkEvent)
         {
-            foreach (var item in _managerConfig.SuppressedBy.Where(kvp => kvp.Key.Equals(sdkEvent) &&
-                kvp.Value.Any(x => EventAlreadyTriggered(x))))
+            if (_managerConfig.SuppressedBy.Where(kvp => kvp.Key.Equals(sdkEvent) &&
+                kvp.Value.Any(x => EventAlreadyTriggered(x))).Count() > 0)
             {
                 return false;
             }
@@ -222,10 +222,11 @@ namespace Splitio.Services.Common
                 Valid = false
             };
 
-            foreach (var item in _managerConfig.RequireAny.Where(kvp => kvp.Value.Contains(sdkInternalEvent)))
+            var sdkEvent = _managerConfig.RequireAny.Where(kvp => kvp.Value.Contains(sdkInternalEvent));
+            if (sdkEvent.Count() > 0)
             {
                 validSdkEvent.Valid = true;
-                validSdkEvent.SdkEvent = item.Key;
+                validSdkEvent.SdkEvent = sdkEvent.First().Key;
                 return validSdkEvent;
             }
 
