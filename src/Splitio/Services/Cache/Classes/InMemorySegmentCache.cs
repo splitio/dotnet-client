@@ -15,9 +15,9 @@ namespace Splitio.Services.Cache.Classes
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemorySegmentCache));
 
         private readonly ConcurrentDictionary<string, Segment> _segments;
-        private readonly EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        private readonly IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
-        public InMemorySegmentCache(ConcurrentDictionary<string, Segment> segments, EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManger)
+        public InMemorySegmentCache(ConcurrentDictionary<string, Segment> segments, IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManger)
         {
             _segments = segments;
             _eventsManager = eventsManger;
