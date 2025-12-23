@@ -47,7 +47,7 @@ namespace Splitio.Services.Client.Classes
 
             BuildFlagSetsFilter(new HashSet<string>());
 
-            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
             var splits = _localhostFileService.ParseSplitFile(_fullPath);
             _featureFlagCache = new InMemorySplitCache(splits, _flagSetsFilter, eventsManager);
 

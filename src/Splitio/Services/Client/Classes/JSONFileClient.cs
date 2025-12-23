@@ -35,7 +35,7 @@ namespace Splitio.Services.Client.Classes
             IRuleBasedSegmentCache ruleBasedSegmentCache = null
             ) : base("localhost", fallbackTreatmentCalculator)
         {
-            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
             _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
             var rbsCache = ruleBasedSegmentCache ?? new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>(), eventsManager);
 

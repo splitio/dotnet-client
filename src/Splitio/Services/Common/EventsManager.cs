@@ -24,15 +24,15 @@ namespace Splitio.Services.Common
         private readonly ConcurrentDictionary<E, PublicEventProperties> _activeSubscriptions;
         private readonly ConcurrentDictionary<I, bool> _internalEventsStatus;
         private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventsManager");
-        private readonly EventDelivery<E, M> _eventDelivery;
+        private readonly IEventDelivery<E, M> _eventDelivery;
         private readonly object _lock = new object();
         public EventManagerConfigData<E, I> _managerConfig { get; private set; }
 
-        public EventsManager(EventManagerConfigData<E, I> eventsManagerConfig) 
+        public EventsManager(EventManagerConfigData<E, I> eventsManagerConfig, IEventDelivery<E, M> eventDelivery) 
         {
             _activeSubscriptions = new ConcurrentDictionary<E, PublicEventProperties>();
             _internalEventsStatus = new ConcurrentDictionary<I, bool>();
-            _eventDelivery = new EventDelivery<E, M>();
+            _eventDelivery = eventDelivery;
             _managerConfig = eventsManagerConfig;
         }
 

@@ -23,7 +23,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             //Act
             EventsManagerConfig config = new EventsManagerConfig();
-            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(config);
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(config, new EventDelivery<SdkEvent, EventMetadata>());
 
             SdkReady += sdkReady_callback;
             SdkReady += sdkReady_callback2;

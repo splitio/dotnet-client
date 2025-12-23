@@ -92,7 +92,7 @@ namespace Splitio.Services.Client.Classes
         #region Private Methods
         private void BuildEventsManager()
         {
-            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
         }
         private void BuildSplitCache()
         {
