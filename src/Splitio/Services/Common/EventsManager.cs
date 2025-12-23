@@ -24,7 +24,7 @@ namespace Splitio.Services.Common
         private readonly ConcurrentDictionary<E, PublicEventProperties> _activeSubscriptions;
         private readonly ConcurrentDictionary<I, bool> _internalEventsStatus;
         private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventsManager");
-        public readonly EventDelivery<E, M> _eventDelivery;
+        private readonly EventDelivery<E, M> _eventDelivery;
         private readonly object _lock = new object();
         public EventManagerConfigData<E, I> _managerConfig { get; private set; }
 
@@ -186,8 +186,8 @@ namespace Splitio.Services.Common
 
         private bool CheckPrerequisites(E sdkEvent)
         {
-            if (_managerConfig.Prerequisites.Where(kvp => kvp.Key.Equals(sdkEvent) &&
-                kvp.Value.Any(x => !EventAlreadyTriggered(x))).Count() > 0)
+            if (_managerConfig.Prerequisites.Any(kvp => kvp.Key.Equals(sdkEvent) &&
+                kvp.Value.Any(x => !EventAlreadyTriggered(x))))
             {
                 return false;
             }
@@ -197,8 +197,8 @@ namespace Splitio.Services.Common
 
         private bool CheckSuppressedBy(E sdkEvent)
         {
-            if (_managerConfig.SuppressedBy.Where(kvp => kvp.Key.Equals(sdkEvent) &&
-                kvp.Value.Any(x => EventAlreadyTriggered(x))).Count() > 0)
+            if (_managerConfig.SuppressedBy.Any(kvp => kvp.Key.Equals(sdkEvent) &&
+                kvp.Value.Any(x => EventAlreadyTriggered(x))))
             {
                 return false;
             }
@@ -208,10 +208,11 @@ namespace Splitio.Services.Common
 
         private int ExecutionLimit(E sdkEvent)
         {
-            if (!_managerConfig.ExecutionLimits.ContainsKey(sdkEvent))
+            if (!_managerConfig.ExecutionLimits.TryGetValue(sdkEvent, out int limit))
+            {
                 return -1;
+            }
 
-            _managerConfig.ExecutionLimits.TryGetValue(sdkEvent, out int limit);
             return limit;
         }
 
@@ -223,7 +224,7 @@ namespace Splitio.Services.Common
             };
 
             var sdkEvent = _managerConfig.RequireAny.Where(kvp => kvp.Value.Contains(sdkInternalEvent));
-            if (sdkEvent.Count() > 0)
+            if (sdkEvent.Any())
             {
                 validSdkEvent.Valid = true;
                 validSdkEvent.SdkEvent = sdkEvent.First().Key;
