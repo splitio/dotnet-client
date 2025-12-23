@@ -131,7 +131,6 @@ namespace Splitio.Services.Common
             ValidSdkEvent finalSdkEvent = new ValidSdkEvent
             {
                 Valid = false
-//                SdkEvent = SdkEvent.SdkReady
             };
             UpdateSdkInternalEventStatus(sdkInternalEvent, true);
             List<E> eventsToFire = new List<E>();
@@ -147,11 +146,11 @@ namespace Splitio.Services.Common
 
                 finalSdkEvent.Valid = CheckPrerequisites(finalSdkEvent.SdkEvent)
                     && CheckSuppressedBy(finalSdkEvent.SdkEvent);
-            }
 
-            if (finalSdkEvent.Valid)
-            {
-                eventsToFire.Add(finalSdkEvent.SdkEvent);
+                if (finalSdkEvent.Valid)
+                {
+                    eventsToFire.Add(finalSdkEvent.SdkEvent);
+                }
             }
 
             foreach (E sdkEvent in CheckRequireAll())
@@ -235,7 +234,6 @@ namespace Splitio.Services.Common
             ValidSdkEvent validSdkEvent = new ValidSdkEvent
             {
                 Valid = false
-//                SdkEvent = SdkEvent.SdkUpdate
             };
 
             foreach (KeyValuePair<E, HashSet<I>> kvp in _managerConfig.RequireAny)
