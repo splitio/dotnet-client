@@ -15,9 +15,10 @@ namespace Splitio_Tests.Unit_Tests.Cache
     {
         private readonly ISegmentCache _cache;
         private EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
-        private bool SdkUpdate = false;
+        private bool SdkUpdateFlag = false;
         private EventMetadata eMetadata = null;
-        public event EventHandler<EventMetadata> PublicSdkUpdateHandler;
+        public event EventHandler<EventMetadata> SdkUpdate;
+        public event EventHandler<EventMetadata> SdkReady;
 
         public SegmentCacheAsyncTests()
         {
@@ -60,17 +61,17 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Arrange
             var segmentName = "segment_test";
             var toNotify = new List<string> { { segmentName } };
-            PublicSdkUpdateHandler += sdkUpdate_callback;
-            _eventsManager.Register(SdkEvent.SdkUpdate, sdkUpdate_callback);
-            _eventsManager.Register(SdkEvent.SdkReady, sdkUpdate_callback);
+            SdkUpdate += sdkUpdate_callback;
+            _eventsManager.Register(SdkEvent.SdkUpdate, TriggerSdkUpdate);
+            _eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReady);
             _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(new Dictionary<string, object>()));
 
             //Act
-            SdkUpdate = false;
+            SdkUpdateFlag = false;
             _cache.AddToSegment(segmentName, new List<string> { "abcd", "zzzzf" });
 
             //Assert
-            Assert.IsTrue(SdkUpdate);
+            Assert.IsTrue(SdkUpdateFlag);
             Assert.IsTrue(eMetadata.ContainKey(Splitio.Constants.EventMetadataKeys.Segments));
             string segment = (string)eMetadata.GetData()[Splitio.Constants.EventMetadataKeys.Segments];
             Assert.AreEqual(segmentName, segment);
@@ -78,8 +79,18 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
         private void sdkUpdate_callback(object sender, EventMetadata metadata)
         {
-            SdkUpdate = true;
+            SdkUpdateFlag = true;
             eMetadata = metadata;
+        }
+
+        private void TriggerSdkReady(EventMetadata metaData)
+        {
+            SdkReady?.Invoke(this, metaData);
+        }
+
+        private void TriggerSdkUpdate(EventMetadata metaData)
+        {
+            SdkUpdate?.Invoke(this, metaData);
         }
     }
 }

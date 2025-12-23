@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Services.Common;
-using System;
 using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Common
@@ -11,7 +10,6 @@ namespace Splitio_Tests.Unit_Tests.Common
     {
         private bool SdkReady = false;
         private EventMetadata eMetadata = null;
-        public event EventHandler<EventMetadata> PublicSdkReadyHandler;
 
         [TestMethod]
         public void TestFiringEvents()
@@ -19,14 +17,12 @@ namespace Splitio_Tests.Unit_Tests.Common
             //Act
             EventDelivery<SdkEvent, EventMetadata> eventDelivery = new EventDelivery<SdkEvent, EventMetadata>();
 
-            PublicSdkReadyHandler += sdkReady_callback;
-
             Dictionary<string, object> metaData = new Dictionary<string, object>
             {
                 { "flags", new List<string> {{ "flag1" }} }
             };
 
-            eventDelivery.Deliver(SdkEvent.SdkReady, new EventMetadata(metaData), PublicSdkReadyHandler);
+            eventDelivery.Deliver(SdkEvent.SdkReady, new EventMetadata(metaData), sdkReady_callback);
 
             Assert.IsTrue(SdkReady);
             VerifyMetadata(eMetadata);
@@ -40,7 +36,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             Assert.IsTrue(flags.Contains("flag1"));
         }
 
-        private void sdkReady_callback(object sender, EventMetadata metadata)
+        private void sdkReady_callback(EventMetadata metadata)
         {
             SdkReady = true;
             eMetadata = metadata;
