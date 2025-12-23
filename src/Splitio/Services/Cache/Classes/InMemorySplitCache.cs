@@ -74,6 +74,7 @@ namespace Splitio.Services.Cache.Classes
                 {
                     DecreaseTrafficTypeCount(removedSplit);
                     RemoveFromFlagSets(removedSplit.name, removedSplit.Sets);
+                    eventsFlags.Add(featureFlagName);
                 }
             }
 

@@ -9,9 +9,9 @@ namespace Splitio_Tests.Unit_Tests.Client
     [TestClass]
     public class InMemoryReadinessGatesCacheUnitTests
     {
-        private bool SdkReady = false;
+        private bool SdkReadyFlag = false;
         private EventMetadata eMetadata = null;
-        public event EventHandler<EventMetadata> PublicSdkUpdateHandler;
+        public event EventHandler<EventMetadata> SdkReady;
 
         [TestMethod]
         public void IsSDKReadyShouldReturnFalseIfSplitsAreNotReady()
@@ -32,21 +32,26 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Arrange
             EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
             var gates = new InMemoryReadinessGatesCache(eventsManager);
-            PublicSdkUpdateHandler += sdkReady_callback;
-            eventsManager.Register(SdkEvent.SdkReady, PublicSdkUpdateHandler);
+            SdkReady += sdkReady_callback;
+            eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReady);
 
             //Act
             gates.SetReady();
 
             // Assert.
-            Assert.IsTrue(SdkReady);
+            Assert.IsTrue(SdkReadyFlag);
             Assert.AreEqual(0, eMetadata.GetData().Count);
         }
 
         private void sdkReady_callback(object sender, EventMetadata metadata)
         {
-            SdkReady = true;
+            SdkReadyFlag = true;
             eMetadata = metadata;
+        }
+
+        private void TriggerSdkReady(EventMetadata metaData)
+        {
+            SdkReady?.Invoke(this, metaData);
         }
     }
 }
