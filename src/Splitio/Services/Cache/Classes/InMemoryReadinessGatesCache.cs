@@ -10,9 +10,9 @@ namespace Splitio.Services.Client.Classes
     {
         private readonly CountdownEvent _sdkReady = new CountdownEvent(1);
         private readonly CountdownEvent _sdkDestroyed = new CountdownEvent(1);
-        private readonly EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        private readonly IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
-        public InMemoryReadinessGatesCache(EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager) 
+        public InMemoryReadinessGatesCache(IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager) 
         {
             _eventsManager = eventsManager;
         }

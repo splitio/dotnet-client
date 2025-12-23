@@ -15,10 +15,10 @@ namespace Splitio.Services.Shared.Classes
 
         private readonly IStatusManager _statusManager;
         private readonly ITelemetryInitProducer _telemetryInitProducer;
-        private readonly EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        private readonly IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
         public SelfRefreshingBlockUntilReadyService(IStatusManager statusManager, ITelemetryInitProducer telemetryInitProducer,
-            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager)
+            IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager)
         {
             _statusManager = statusManager;
             _telemetryInitProducer = telemetryInitProducer;
