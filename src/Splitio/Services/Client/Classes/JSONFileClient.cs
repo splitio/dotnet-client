@@ -55,7 +55,6 @@ namespace Splitio.Services.Client.Classes
             }
 
             BuildFlagSetsFilter(new HashSet<string>());
-
             _featureFlagCache = featureFlagCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits), _flagSetsFilter, eventsManager);
             _impressionsLog = impressionsLog;
             _eventsLog = eventsLog;
