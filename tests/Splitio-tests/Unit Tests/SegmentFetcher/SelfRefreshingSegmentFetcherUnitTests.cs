@@ -11,6 +11,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Services.Tasks;
+using Splitio.Telemetry.Domain;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -27,13 +28,13 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         public void InitializeSegmentNotExistent()
         {
             // Arrange
-            var gates = new InMemoryReadinessGatesCache(new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig()));
+            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
+            var gates = new InMemoryReadinessGatesCache(eventsManager.Object);
             gates.SetReady();
             var apiClient = new Mock<ISegmentSdkApiClient>();            
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments = new ConcurrentDictionary<string, Segment>();
-            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
-            var cache = new InMemorySegmentCache(segments, eventsManager);
+            var cache = new InMemorySegmentCache(segments, eventsManager.Object);
             var segmentsQueue = new SplitQueue<SelfRefreshingSegment>();
             var taskManager = new TasksManager(gates);
             var worker = new SegmentTaskWorker(5, segmentsQueue);

@@ -18,16 +18,16 @@ namespace Splitio_Tests.Unit_Tests.Cache
         private readonly IFlagSetsFilter _flagSetsFilter;
         private readonly IFeatureFlagCache _cache;
         private readonly EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
-        private bool SdkUpdate = false;
+        private bool SdkUpdateFlag = false;
         private EventMetadata eMetadata = null;
-        public event EventHandler<EventMetadata> PublicSdkUpdateHandler;
+        public event EventHandler<EventMetadata> SdkUpdate;
+        public event EventHandler<EventMetadata> SdkReady;
 
         public SplitCacheAsyncTests()
         {
             _flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
             var splits = new ConcurrentDictionary<string, ParsedSplit>();
-            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
-
+            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
             _cache = new InMemorySplitCache(splits, _flagSetsFilter, _eventsManager);
         }
 
@@ -193,12 +193,12 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 });
                 toNotify.Add($"feature-flag-{i}");
             }
-            PublicSdkUpdateHandler += sdkUpdate_callback;
-            _eventsManager.Register(SdkEvent.SdkUpdate, sdkUpdate_callback);
-            _eventsManager.Register(SdkEvent.SdkReady, sdkUpdate_callback);
+            SdkUpdate += sdkUpdate_callback;
+            _eventsManager.Register(SdkEvent.SdkUpdate, TriggerSdkUpdate);
+            _eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReady);
             _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(new Dictionary<string, object>()));
            
-            SdkUpdate = false;
+            SdkUpdateFlag = false;
             _cache.Update(toAdd, new List<string>(), -1);
 
             // Act.
@@ -206,7 +206,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             // Assert.
             Assert.AreEqual(5, result.Count);
-            Assert.IsTrue(SdkUpdate);
+            Assert.IsTrue(SdkUpdateFlag);
             Assert.IsTrue(eMetadata.ContainKey(Splitio.Constants.EventMetadataKeys.Flags));
             List<string> flags = (List<string>)eMetadata.GetData()[Splitio.Constants.EventMetadataKeys.Flags];
             Assert.IsTrue(flags.Count == 5);
@@ -215,11 +215,11 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 Assert.IsTrue(flags.Contains($"feature-flag-{i}"));
             }
 
-            SdkUpdate = false;
+            SdkUpdateFlag = false;
             eMetadata = null;
             _cache.Kill(123, "feature-flag-1", "off");
 
-            Assert.IsTrue(SdkUpdate);
+            Assert.IsTrue(SdkUpdateFlag);
             Assert.IsTrue(eMetadata.ContainKey(Splitio.Constants.EventMetadataKeys.Flags));
             flags = (List<string>)eMetadata.GetData()[Splitio.Constants.EventMetadataKeys.Flags];
             Assert.IsTrue(flags.Count == 1);
@@ -228,8 +228,18 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
         private void sdkUpdate_callback(object sender, EventMetadata metadata)
         {
-            SdkUpdate = true;
+            SdkUpdateFlag = true;
             eMetadata = metadata;
+        }
+
+        private void TriggerSdkReady(EventMetadata metaData)
+        {
+            SdkReady?.Invoke(this, metaData);
+        }
+
+        private void TriggerSdkUpdate(EventMetadata metaData)
+        {
+            SdkUpdate?.Invoke(this, metaData);
         }
     }
 }

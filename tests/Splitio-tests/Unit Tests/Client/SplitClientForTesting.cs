@@ -23,7 +23,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             ISyncManager syncManager,
             FallbackTreatmentCalculator fallbackTreatmentCalculator,
             ITelemetryEvaluationProducer telemetryEvaluationProducer)
-            : base("SplitClientForTesting", fallbackTreatmentCalculator, new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig()))
+            : base("SplitClientForTesting", fallbackTreatmentCalculator, new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>()))
         {
             _eventsLog = eventsLog;
             _impressionsLog = impressionsLog;

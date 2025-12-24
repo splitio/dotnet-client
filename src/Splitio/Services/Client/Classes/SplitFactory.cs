@@ -60,7 +60,7 @@ namespace Splitio.Services.Client.Classes
         private void BuildSplitClient()
         {
             FallbackTreatmentCalculator fallbackTreatmentCalculator = new FallbackTreatmentCalculator(_options.FallbackTreatments);
-            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
 
             switch (_options.Mode)
             {

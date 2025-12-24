@@ -1,4 +1,5 @@
 ﻿using Splitio.Domain;
+using System;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Client.Interfaces

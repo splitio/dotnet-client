@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Logger;
+﻿using Splitio.Domain;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
 
@@ -8,14 +9,14 @@ namespace Splitio.Services.Common
     {
         private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventDelivery");
 
-        public virtual void Deliver(E sdkEvent, M eventMetadata, EventHandler<M> handler)
+        public virtual void Deliver(E sdkEvent, M eventMetadata, Action<M> handler)
         {
             if (handler != null)
             {
                 _logger.Debug($"EventDelivery: Triggering handle for Sdk Event {sdkEvent}");
                 try
                 {
-                    handler.Invoke(this, eventMetadata);
+                    handler.Invoke(eventMetadata);
                 }
                 catch (Exception e)
                 {

@@ -27,7 +27,7 @@ namespace Splitio_Tests.Integration_Tests
             // This line is to clean the warnings.
             rootFilePath = string.Empty;
             _fallbackTreatmentCalculator = new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration());
-            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
 
 #if NET_LATEST
             rootFilePath = @"Resources\";

@@ -55,7 +55,7 @@ namespace Splitio.Services.Client.Classes
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config,
             FallbackTreatmentCalculator fallbackTreatmentCalculator,
-            IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager) : base(apiKey, fallbackTreatmentCalculator, eventsManager)
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager) : base(apiKey, fallbackTreatmentCalculator, eventsManager)
         {
             _config = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfigTypes.InMemory);
             _fallbackTreatmentCalculator = fallbackTreatmentCalculator;

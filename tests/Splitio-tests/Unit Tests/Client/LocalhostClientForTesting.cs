@@ -7,7 +7,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 {
     public class LocalhostClientForTesting : LocalhostClient
     {
-        public LocalhostClientForTesting(string filePath, FallbackTreatmentCalculator fallbackTreatmentCalculator) : base(new ConfigurationOptions { LocalhostFilePath = filePath }, fallbackTreatmentCalculator, new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig()))
+        public LocalhostClientForTesting(string filePath, FallbackTreatmentCalculator fallbackTreatmentCalculator) : base(new ConfigurationOptions { LocalhostFilePath = filePath }, fallbackTreatmentCalculator, new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>()))
         { }
     }
 }

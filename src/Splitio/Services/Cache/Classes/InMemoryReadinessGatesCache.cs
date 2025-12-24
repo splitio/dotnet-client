@@ -30,6 +30,7 @@ namespace Splitio.Services.Client.Classes
         public void SetReady()
         {
             _sdkReady.Signal();
+            Thread.Sleep(1000);
             _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady,
                 new EventMetadata(new Dictionary<string, object>()));
         }

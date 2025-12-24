@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Common;
@@ -11,16 +12,17 @@ namespace Splitio_Tests.Unit_Tests.Cache
     [TestClass]
     public class SegmentCacheTests
     {
-        private bool SdkUpdate = false;
+        private bool SdkUpdateFlag = false;
         private EventMetadata eMetadata = null;
-        public event EventHandler<EventMetadata> PublicSdkUpdateHandler;
+        public event EventHandler<EventMetadata> SdkUpdate;
+        public event EventHandler<EventMetadata> SdkReady;
 
         [TestMethod]
         public void RegisterSegmentTest()
         {
             //Arrange
-            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
+            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager.Object);
             var keys = new List<string> { "abcd", "1234" };
             var segmentName = "test";
 
@@ -36,8 +38,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public void IsNotInSegmentTest()
         {
             //Arrange
-            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
+            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager.Object);
             var keys = new List<string> { "1234" };
             var segmentName = "test";
 
@@ -53,8 +55,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public void IsInSegmentWithInexistentSegmentTest()
         {
             //Arrange
-            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
+            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager.Object);
 
             //Act
             var result = segmentCache.IsInSegment("test", "abcd");
@@ -67,8 +69,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public void RemoveKeyFromSegmentTest()
         {
             //Arrange
-            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
+            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager.Object);
             var keys = new List<string> { "1234" };
             var segmentName = "test";
 
@@ -87,8 +89,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public void SetAndGetChangeNumberTest()
         {
             //Arrange
-            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
+            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager.Object);
             var segmentName = "test";
 
             //Act
@@ -104,33 +106,33 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public void NotifyEventsTest()
         {
             //Arrange
-            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
             var keys = new List<string> { "1234" };
             var segmentName = "test";
             var toNotify = new List<string> { { segmentName } };
-            PublicSdkUpdateHandler += sdkUpdate_callback;
-            eventsManager.Register(SdkEvent.SdkUpdate, sdkUpdate_callback);
-            eventsManager.Register(SdkEvent.SdkReady, sdkUpdate_callback);
+            SdkUpdate += sdkUpdate_callback;
+            eventsManager.Register(SdkEvent.SdkUpdate, TriggerSdkUpdate);
+            eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReady);
             eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(new Dictionary<string, object>()));
 
             // Act
-            SdkUpdate = false;
+            SdkUpdateFlag = false;
             segmentCache.AddToSegment(segmentName, keys);
 
             //Assert
-            Assert.IsTrue(SdkUpdate);
+            Assert.IsTrue(SdkUpdateFlag);
             Assert.IsTrue(eMetadata.ContainKey(Splitio.Constants.EventMetadataKeys.Segments));
             string segment = (string) eMetadata.GetData()[Splitio.Constants.EventMetadataKeys.Segments];
             Assert.AreEqual(segmentName, segment);
 
             // Act
-            SdkUpdate = false;
+            SdkUpdateFlag = false;
             eMetadata = null;
             segmentCache.RemoveFromSegment(segmentName, keys);
 
             //Assert
-            Assert.IsTrue(SdkUpdate);
+            Assert.IsTrue(SdkUpdateFlag);
             Assert.IsTrue(eMetadata.ContainKey(Splitio.Constants.EventMetadataKeys.Segments));
             segment = (string)eMetadata.GetData()[Splitio.Constants.EventMetadataKeys.Segments];
             Assert.AreEqual(segmentName, segment);
@@ -138,8 +140,18 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
         private void sdkUpdate_callback(object sender, EventMetadata metadata)
         {
-            SdkUpdate = true;
+            SdkUpdateFlag = true;
             eMetadata = metadata;
+        }
+
+        private void TriggerSdkReady(EventMetadata metaData)
+        {
+            SdkReady?.Invoke(this, metaData);
+        }
+
+        private void TriggerSdkUpdate(EventMetadata metaData)
+        {
+            SdkUpdate?.Invoke(this, metaData);
         }
     }
 }

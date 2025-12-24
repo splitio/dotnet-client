@@ -18,6 +18,7 @@ namespace Splitio.Integration_tests
     public class PollingClientTests : BaseIntegrationTests
     {
         private static readonly HttpClientMock httpClientMock = new HttpClientMock("PollingClientTests");
+        private bool SdkTimeout = false;
 
         public PollingClientTests() : base("Polling")
         { }
@@ -161,7 +162,8 @@ namespace Splitio.Integration_tests
             var apikey = "apikey5";
 
             var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
+            var client = (SplitClient)splitFactory.Client();
+            client.SdkTimedOut += sdkTimeout_callback;
 
             // Act.
             var exceptionMessage = "";
@@ -178,6 +180,7 @@ namespace Splitio.Integration_tests
             }
 
             // Assert.
+            Assert.IsTrue(SdkTimeout);
             Assert.IsFalse(isSdkReady);
             Assert.AreEqual("SDK was not ready in 0 milliseconds", exceptionMessage);
 
@@ -400,7 +403,7 @@ namespace Splitio.Integration_tests
 
             try
             {
-                client.BlockUntilReady(0);
+                client.BlockUntilReady(1);
             }
             catch
             {
@@ -412,7 +415,8 @@ namespace Splitio.Integration_tests
 
             // Assert.
             Assert.AreEqual("on", result);
-
+            
+            System.Threading.SpinWait.SpinUntil(() => (GetMetricsConfigSentBackend(httpClientMock) != null) , TimeSpan.FromMilliseconds(1000));
             var sentConfig = GetMetricsConfigSentBackend(httpClientMock);
             Assert.IsNotNull(sentConfig);
             Assert.AreEqual(configurations.StreamingEnabled, sentConfig.StreamingEnabled);
@@ -723,6 +727,11 @@ namespace Splitio.Integration_tests
             }
 
             return impressions;
+        }
+
+        private void sdkTimeout_callback(object sender, EventMetadata metadata)
+        {
+            SdkTimeout = true;
         }
         #endregion
     }

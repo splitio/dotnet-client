@@ -33,7 +33,7 @@ namespace Splitio_Tests.Integration_Tests
             rootFilePath = string.Empty;
             _mode = mode;
             _fallbackTreatmentCalculator = new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration());
-            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
 
 #if NET_LATEST
             rootFilePath = @"Resources\";

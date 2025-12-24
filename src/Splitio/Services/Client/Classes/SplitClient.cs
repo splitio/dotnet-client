@@ -63,16 +63,33 @@ namespace Splitio.Services.Client.Classes
         protected IImpressionsObserver _impressionsObserver;
         protected IClientExtensionService _clientExtensionService;
         protected IFlagSetsFilter _flagSetsFilter;
-        protected IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
-        public event EventHandler<EventMetadata> PublicSdkReadyHandler;
-        public event EventHandler<EventMetadata> PublicSdkUpdateHandler;
-        public event EventHandler<EventMetadata> PublicSdkTimedOutHandler;
+        public IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        private EventHandler<EventMetadata> SdkReadyEvent;
+        public event EventHandler<EventMetadata> SdkReady
+        {
+            add
+            {
+                SdkReadyEvent = (EventHandler<EventMetadata>)Delegate.Combine(SdkReadyEvent, value);
+                if (_eventsManager.EventAlreadyTriggered(SdkEvent.SdkReady))
+                {
+                    SdkReadyEvent.Invoke(this, null);
+                }
+            }
+
+            remove
+            {
+                SdkReadyEvent = (EventHandler<EventMetadata>)Delegate.Remove(SdkReadyEvent, value);
+            }
+        }
+        public event EventHandler<EventMetadata> SdkUpdate;
+        public event EventHandler<EventMetadata> SdkTimedOut;
 
         protected SplitClient(string apikey, FallbackTreatmentCalculator fallbackTreatmentCalculator,
             IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager)
         {
             ApiKey = apikey;
             _eventsManager = eventsManager;
+            RegisterEvents();
 
             _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
             _wrapperAdapter = WrapperAdapter.Instance();
@@ -83,7 +100,7 @@ namespace Splitio.Services.Client.Classes
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
             _flagSetsValidator = new FlagSetsValidator();
             _configService = new ConfigService(_wrapperAdapter, _flagSetsValidator, new SdkMetadataValidator());
-            _statusManager = new InMemoryReadinessGatesCache(eventsManager);
+            _statusManager = new InMemoryReadinessGatesCache(_eventsManager);
             _tasksManager = new TasksManager(_statusManager);
         }
 
@@ -305,6 +322,7 @@ namespace Splitio.Services.Client.Classes
             _factoryInstantiationsService.Decrease(ApiKey);
             _statusManager.SetDestroy();
             await _syncManager.ShutdownAsync();
+            UnregisterEvents();
 
             _log.Info(Messages.Destroyed);
         }
@@ -318,6 +336,7 @@ namespace Splitio.Services.Client.Classes
             _factoryInstantiationsService.Decrease(ApiKey);
             _statusManager.SetDestroy();
             _syncManager.Shutdown();
+            UnregisterEvents();
 
             _log.Info(Messages.Destroyed);
         }
@@ -488,6 +507,18 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Private Methods
+        private void RegisterEvents()
+        {
+            _eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReady);
+            _eventsManager.Register(SdkEvent.SdkUpdate, TriggerSdkUpdate);
+            _eventsManager.Register(SdkEvent.SdkReadyTimeout, TriggerSdkTimeout);
+        }
+        private void UnregisterEvents()
+        {
+            _eventsManager.Unregister(SdkEvent.SdkReady);
+            _eventsManager.Unregister(SdkEvent.SdkUpdate);
+            _eventsManager.Unregister(SdkEvent.SdkReadyTimeout);
+        }
         private List<TreatmentResult> GetTreatmentsSync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
             try
@@ -574,6 +605,21 @@ namespace Splitio.Services.Client.Classes
             if (result == null) return new SplitResult(Gral.Control, null);
 
             return new SplitResult(result.Treatment, result.Config);
+        }
+
+        private void TriggerSdkReady(EventMetadata metaData)
+        {
+            SdkReadyEvent?.Invoke(this, metaData);
+        }
+
+        private void TriggerSdkUpdate(EventMetadata metaData)
+        {
+            SdkUpdate?.Invoke(this, metaData);
+        }
+
+        private void TriggerSdkTimeout(EventMetadata metaData)
+        {
+            SdkTimedOut?.Invoke(this, metaData);
         }
         #endregion
     }
