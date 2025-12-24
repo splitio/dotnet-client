@@ -22,6 +22,10 @@ namespace Splitio.Integration_tests
     public class StreamingClientTests
     {
         public static string EventSourcePath => "/eventsource";
+        private bool SdkReadyFlag = false;
+        private bool SdkReadyFlag2 = false;
+        private bool SdkUpdateFlag = false;
+        private EventMetadata eMetadata;
 
         [TestMethod]
         public void GetTreatment_SplitUpdate_ShouldFetch()
@@ -60,14 +64,17 @@ namespace Splitio.Integration_tests
                 };
 
                 var apikey = "apikey1";
-
                 var splitFactory = new SplitFactory(apikey, config);
-                var client = splitFactory.Client();
+                var client = (SplitClient)splitFactory.Client();
+                client.SdkReady += sdkReady_callback;
+                client.SdkReady += sdkReady_callback2;
 
                 client.BlockUntilReady(10000);
 
                 var result = EvaluateWithDelay("admin", "push_test", "after_fetch", client);
                 Assert.AreEqual("after_fetch", result);
+                Assert.IsTrue(SdkReadyFlag);
+                Assert.IsTrue(SdkReadyFlag2);
 
                 client.Destroy();
             }
@@ -169,7 +176,6 @@ namespace Splitio.Integration_tests
                 Thread.Sleep(5000);
 
                 var result = client.GetTreatment("admin", "push_test");
-
                 Assert.AreEqual("after_fetch", result);
 
                 client.Destroy();
@@ -764,6 +770,16 @@ namespace Splitio.Integration_tests
             }
 
             return result;
+        }
+
+        private void sdkReady_callback(object sender, EventMetadata metadata)
+        {
+            SdkReadyFlag = true;
+        }
+
+        private void sdkReady_callback2(object sender, EventMetadata metadata)
+        {
+            SdkReadyFlag2 = true;
         }
     }
 }

@@ -23,8 +23,8 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var statusManager = new Mock<IStatusManager>();
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments  = new ConcurrentDictionary<string, Segment>();
-            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
-            var cache = new InMemorySegmentCache(segments, eventsManager);
+            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
+            var cache = new InMemorySegmentCache(segments, eventsManager.Object);
             var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, cache, statusManager.Object);
 
             apiClient
@@ -46,8 +46,8 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var statusManager = new Mock<IStatusManager>();
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments = new ConcurrentDictionary<string, Segment>();
-            var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
-            var cache = new InMemorySegmentCache(segments, eventsManager);
+            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
+            var cache = new InMemorySegmentCache(segments, eventsManager.Object);
             var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, cache, statusManager.Object);
 
             apiClient

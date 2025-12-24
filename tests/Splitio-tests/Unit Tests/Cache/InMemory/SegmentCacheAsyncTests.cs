@@ -23,7 +23,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public SegmentCacheAsyncTests()
         {
             var segments = new ConcurrentDictionary<string, Segment>();
-            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
             _cache = new InMemorySegmentCache(segments, _eventsManager);
         }
 

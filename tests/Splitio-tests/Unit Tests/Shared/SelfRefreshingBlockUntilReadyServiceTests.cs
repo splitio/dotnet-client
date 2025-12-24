@@ -22,7 +22,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             //Arrange
             Mock<IStatusManager> statusManager = new Mock<IStatusManager>();
             Mock<ITelemetryInitProducer> telemetryProducer = new Mock<ITelemetryInitProducer>();
-            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
             var bur = new SelfRefreshingBlockUntilReadyService(statusManager.Object, telemetryProducer.Object, eventsManager);
             SdkTimedOut += sdkTimeout_callback;
             eventsManager.Register(SdkEvent.SdkReadyTimeout, TriggerSdkTimedOut);

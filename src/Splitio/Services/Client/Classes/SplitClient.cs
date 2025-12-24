@@ -73,6 +73,10 @@ namespace Splitio.Services.Client.Classes
         {
             ApiKey = apikey;
             _eventsManager = eventsManager;
+            _eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReadyEvent);
+            _eventsManager.Register(SdkEvent.SdkUpdate, TriggerSdkUpdateEvent);
+            _eventsManager.Register(SdkEvent.SdkReadyTimeout, TriggerSdkTimeoutEvent);
+
             _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
             _wrapperAdapter = WrapperAdapter.Instance();
             _keyValidator = new KeyValidator();
@@ -573,6 +577,21 @@ namespace Splitio.Services.Client.Classes
             if (result == null) return new SplitResult(Gral.Control, null);
 
             return new SplitResult(result.Treatment, result.Config);
+        }
+
+        private void TriggerSdkReadyEvent(EventMetadata metadata)
+        {
+            SdkReady?.Invoke(this, metadata);
+        }
+
+        private void TriggerSdkUpdateEvent(EventMetadata metadata)
+        {
+            SdkUpdate?.Invoke(this, metadata);
+        }
+
+        private void TriggerSdkTimeoutEvent(EventMetadata metadata)
+        {
+            SdkTimedOut?.Invoke(this, metadata);
         }
         #endregion
     }

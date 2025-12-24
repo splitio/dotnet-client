@@ -17,7 +17,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void IsSDKReadyShouldReturnFalseIfSplitsAreNotReady()
         {
             //Arrange
-            var gates = new InMemoryReadinessGatesCache(new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig()));
+            var gates = new InMemoryReadinessGatesCache(new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>()));
 
             //Act
             var result = gates.IsReady();
@@ -30,7 +30,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void TestFireReadyEvent()
         {
             //Arrange
-            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
             var gates = new InMemoryReadinessGatesCache(eventsManager);
             SdkReady += sdkReady_callback;
             eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReady);

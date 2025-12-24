@@ -23,7 +23,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
         public void Setup()
         {
             var cache = new ConcurrentDictionary<string, RuleBasedSegment>();
-            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
             _segmentCache = new InMemoryRuleBasedSegmentCache(cache, _eventsManager);
         }
 
@@ -155,7 +155,6 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
         public void Update_ShouldNotifyEvent()
         {
             // Arrange
-
             var segmentToAdd = new RuleBasedSegment { Name = "segment-to-add" };
             var segmentToRemove = new RuleBasedSegment { Name = "segment-to-remove" };
             var till = 67890;

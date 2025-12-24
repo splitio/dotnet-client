@@ -40,7 +40,7 @@ namespace Splitio_Tests.Integration_Tests
                 UserPrefix = _prefix
             };
             _fallbackTreatmentCalculator = new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration());
-            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
             config = new ConfigurationOptions
             {
                 CacheAdapterConfig = cacheAdapterConfig,

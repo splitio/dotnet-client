@@ -11,7 +11,7 @@ namespace Splitio.Services.Client.Classes
         private readonly Dictionary<string, string> _tests;
 
         public SplitClientForTest() : base("SplitClientForTest", new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration()),
-            new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig()))
+            new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>()))
         {
             _tests = new Dictionary<string, string>();
         }

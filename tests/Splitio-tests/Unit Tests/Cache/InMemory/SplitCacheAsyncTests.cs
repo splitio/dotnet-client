@@ -27,8 +27,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         {
             _flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
             var splits = new ConcurrentDictionary<string, ParsedSplit>();
-            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
-
+            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
             _cache = new InMemorySplitCache(splits, _flagSetsFilter, _eventsManager);
         }
 
