@@ -65,7 +65,6 @@ namespace Splitio.Integration_tests
                 };
 
                 var apikey = "apikey1";
-
                 var splitFactory = new SplitFactory(apikey, config);
                 var client = (SplitClient)splitFactory.Client();
                 client.SdkReady += sdkReady_callback;
@@ -181,7 +180,6 @@ namespace Splitio.Integration_tests
                 Thread.Sleep(5000);
 
                 var result = client.GetTreatment("admin", "push_test");
-
                 Assert.AreEqual("after_fetch", result);
 
                 client.Destroy();
