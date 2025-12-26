@@ -92,7 +92,7 @@ namespace Splitio.Services.Client.Classes
         #region Private Methods
         private void BuildEventsManager()
         {
-            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig());
+            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
         }
         private void BuildSplitCache()
         {
@@ -101,12 +101,12 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildSegmentCache()
         {
-            _segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(_config.ConcurrencyLevel, InitialCapacity));
+            _segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(_config.ConcurrencyLevel, InitialCapacity), _eventsManager);
         }
 
         private void BuildRuleBasedSegmentCache()
         {
-            _ruleBasedSegmentCache = new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>(_config.ConcurrencyLevel, InitialCapacity));
+            _ruleBasedSegmentCache = new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>(_config.ConcurrencyLevel, InitialCapacity), _eventsManager);
         }
 
         private void BuildTelemetryStorage()

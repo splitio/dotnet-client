@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
+using Splitio.Services.Common;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,12 +13,18 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
     public class RuleBasedSegmentCacheTests
     {
         private InMemoryRuleBasedSegmentCache _segmentCache;
+        private EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        private bool SdkUpdateFlag = false;
+        private EventMetadata eMetadata = null;
+        public event EventHandler<EventMetadata> SdkUpdate;
+        public event EventHandler<EventMetadata> SdkReady;
 
         [TestInitialize]
         public void Setup()
         {
             var cache = new ConcurrentDictionary<string, RuleBasedSegment>();
-            _segmentCache = new InMemoryRuleBasedSegmentCache(cache);
+            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
+            _segmentCache = new InMemoryRuleBasedSegmentCache(cache, _eventsManager);
         }
 
         [TestMethod]
@@ -141,6 +149,48 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
             Assert.IsTrue(_segmentCache.Contains(new List<string> { "segment1" }));
             Assert.IsFalse(_segmentCache.Contains(new List<string> { "segment1", "segment3" }));
             Assert.IsTrue(_segmentCache.Contains(new List<string> { "segment1", "segment2" }));
+        }
+
+        [TestMethod]
+        public void Update_ShouldNotifyEvent()
+        {
+            // Arrange
+            var segmentToAdd = new RuleBasedSegment { Name = "segment-to-add" };
+            var segmentToRemove = new RuleBasedSegment { Name = "segment-to-remove" };
+            var till = 67890;
+            var toNotify = new List<string> { { "segment-to-add" }, { "segment-to-remove" } };
+            SdkUpdate += sdkUpdate_callback;
+            _eventsManager.Register(SdkEvent.SdkUpdate, TriggerSdkUpdate);
+            _eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReady);
+            _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(new Dictionary<string, object>()));
+
+            // Act
+            SdkUpdateFlag = false;
+            _segmentCache.Update(new List<RuleBasedSegment> { segmentToAdd, segmentToRemove }, new List<string> { segmentToRemove.Name }, till);
+
+            // Assert
+            Assert.IsTrue(SdkUpdateFlag);
+            Assert.IsTrue(eMetadata.ContainKey(Splitio.Constants.EventMetadataKeys.RuleBasedSegments));
+            List<string> rbsegments = (List<string>)eMetadata.GetData()[Splitio.Constants.EventMetadataKeys.RuleBasedSegments];
+            Assert.IsTrue(rbsegments.Count == 3);
+            Assert.IsTrue(rbsegments.Contains("segment-to-add"));
+            Assert.IsTrue(rbsegments.Contains("segment-to-remove"));
+        }
+
+        private void sdkUpdate_callback(object sender, EventMetadata metadata)
+        {
+            SdkUpdateFlag = true;
+            eMetadata = metadata;
+        }
+
+        private void TriggerSdkReady(EventMetadata metaData)
+        {
+            SdkReady?.Invoke(this, metaData);
+        }
+
+        private void TriggerSdkUpdate(EventMetadata metaData)
+        {
+            SdkUpdate?.Invoke(this, metaData);
         }
     }
 }

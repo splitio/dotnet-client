@@ -1,5 +1,7 @@
-﻿using Splitio.Domain;
+﻿using Splitio.Constants;
+using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
@@ -13,10 +15,12 @@ namespace Splitio.Services.Cache.Classes
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemorySegmentCache));
 
         private readonly ConcurrentDictionary<string, Segment> _segments;
+        private readonly IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
-        public InMemorySegmentCache(ConcurrentDictionary<string, Segment> segments)
+        public InMemorySegmentCache(ConcurrentDictionary<string, Segment> segments, IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManger)
         {
             _segments = segments;
+            _eventsManager = eventsManger;
         }
 
         #region Methods Sync
@@ -31,6 +35,8 @@ namespace Splitio.Services.Cache.Classes
             }
 
             segment.AddKeys(segmentKeys);
+            _eventsManager.NotifyInternalEvent(SdkInternalEvent.SegmentsUpdated,
+                new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.Segments, segmentName } }));
         }
 
         public void RemoveFromSegment(string segmentName, List<string> segmentKeys)
@@ -38,6 +44,8 @@ namespace Splitio.Services.Cache.Classes
             if (_segments.TryGetValue(segmentName, out Segment segment))
             {
                 segment.RemoveKeys(segmentKeys);
+                _eventsManager.NotifyInternalEvent(SdkInternalEvent.SegmentsUpdated,
+                    new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.Segments, segmentName } }));
             }
         }
 

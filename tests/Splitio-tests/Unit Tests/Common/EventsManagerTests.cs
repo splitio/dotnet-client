@@ -9,148 +9,123 @@ namespace Splitio_Tests.Unit_Tests.Common
     [TestClass]
     public class EventsManagerTests
     {
-        private bool SdkReady = false;
-        private bool SdkTimedOut = false;
-        private bool SdkUpdate = false;
+        private bool SdkReadyFlag = false;
+        private bool SdkReadyFlag2 = false;
+        private bool SdkTimedOutFlag = false;
+        private bool SdkUpdateFlag = false;
         private EventMetadata eMetadata = null;
-        public event EventHandler<EventMetadata> PublicSdkReadyHandler;
-        public event EventHandler<EventMetadata> PublicSdkUpdateHandler;
-        public event EventHandler<EventMetadata> PublicSdkTimedOutHandler;
+        public event EventHandler<EventMetadata> SdkReady;
+        public event EventHandler<EventMetadata> SdkUpdate;
+        public event EventHandler<EventMetadata> SdkTimedOut;
 
         [TestMethod]
         public void TestFiringEvents()
         {
             //Act
             EventsManagerConfig config = new EventsManagerConfig();
-            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(config);
-            Splitio.Util.Helper.BuildInternalSdkEventStatus(eventsManager);
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(config, new EventDelivery<SdkEvent, EventMetadata>());
 
-            PublicSdkReadyHandler += sdkReady_callback;
-            PublicSdkUpdateHandler += sdkUpdate_callback;
-            PublicSdkTimedOutHandler += sdkTimedOut_callback;
-
+            SdkReady += sdkReady_callback;
+            SdkReady += sdkReady_callback2;
+            SdkUpdate += sdkUpdate_callback;
+            SdkTimedOut += sdkTimedOut_callback;
             Dictionary<string, object> metaData = new Dictionary<string, object>
             {
                 { "flags", new List<string> {{ "flag1" }} }
             };
 
-            eventsManager.Register(SdkEvent.SdkReady, sdkReady_callback);
-            eventsManager.Register(SdkEvent.SdkUpdate, sdkUpdate_callback);
+            eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReady);
+            eventsManager.Register(SdkEvent.SdkUpdate, TriggerSdkUpdate);
 
-            eventsManager.NotifyInternalEvent(SdkInternalEvent.RuleBasedSegmentsUpdated, new EventMetadata(metaData),
-                Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.RuleBasedSegmentsUpdated,
-                    eventsManager));
-            eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagKilledNotification, new EventMetadata(metaData),
-                Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.FlagKilledNotification,
-                    eventsManager));
-            eventsManager.NotifyInternalEvent(SdkInternalEvent.SegmentsUpdated, new EventMetadata(metaData),
-                Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.SegmentsUpdated,
-                    eventsManager));
-            eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagsUpdated, new EventMetadata(metaData),
-                Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.FlagsUpdated,
-                    eventsManager));
-            Assert.IsFalse(SdkReady);
-            Assert.IsFalse(SdkUpdate);
-            Assert.IsFalse(SdkTimedOut);
+            eventsManager.NotifyInternalEvent(SdkInternalEvent.RuleBasedSegmentsUpdated, new EventMetadata(metaData));
+            eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagKilledNotification, new EventMetadata(metaData));
+            eventsManager.NotifyInternalEvent(SdkInternalEvent.SegmentsUpdated, new EventMetadata(metaData));
+            eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagsUpdated, new EventMetadata(metaData));
+            Assert.IsFalse(SdkReadyFlag);
+            Assert.IsFalse(SdkUpdateFlag);
+            Assert.IsFalse(SdkTimedOutFlag);
 
             ResetAllVariables();
-            eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkTimedOut, new EventMetadata(metaData),
-                Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.SdkTimedOut,
-                    eventsManager));
-            System.Threading.SpinWait.SpinUntil(() => SdkTimedOut, TimeSpan.FromMilliseconds(500));
-            Assert.IsFalse(SdkReady);
-            Assert.IsFalse(SdkUpdate);
-            Assert.IsFalse(SdkTimedOut); // not fired as it is not registered yet
+            eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkTimedOut, new EventMetadata(metaData));
+            System.Threading.SpinWait.SpinUntil(() => SdkTimedOutFlag, TimeSpan.FromMilliseconds(500));
+            Assert.IsFalse(SdkReadyFlag);
+            Assert.IsFalse(SdkUpdateFlag);
+            Assert.IsFalse(SdkTimedOutFlag); // not fired as it is not registered yet
 
-            eventsManager.Register(SdkEvent.SdkReadyTimeout, sdkTimedOut_callback);
-            eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkTimedOut, new EventMetadata(metaData),
-                Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.SdkTimedOut,
-                    eventsManager));
-            System.Threading.SpinWait.SpinUntil(() => SdkTimedOut, TimeSpan.FromMilliseconds(500));
-            Assert.IsFalse(SdkReady);
-            Assert.IsFalse(SdkUpdate);
-            Assert.IsTrue(SdkTimedOut);
+            eventsManager.Register(SdkEvent.SdkReadyTimeout, TriggerSdkTimeout);
+            eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkTimedOut, new EventMetadata(metaData));
+            System.Threading.SpinWait.SpinUntil(() => SdkTimedOutFlag, TimeSpan.FromMilliseconds(500));
+            Assert.IsFalse(SdkReadyFlag);
+            Assert.IsFalse(SdkUpdateFlag);
+            Assert.IsTrue(SdkTimedOutFlag);
             VerifyMetadata(eMetadata);
 
             ResetAllVariables();
-            List<SdkEvent> eventsToNotify = Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.SdkReady,
-                    eventsManager);
-            eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(metaData),
-                eventsToNotify);
-            System.Threading.SpinWait.SpinUntil(() => SdkReady, TimeSpan.FromMilliseconds(500));
-            Assert.IsTrue(SdkReady);
-            Assert.IsFalse(SdkUpdate);
-            Assert.IsFalse(SdkTimedOut);
+            eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(metaData));
+            System.Threading.SpinWait.SpinUntil(() => SdkReadyFlag, TimeSpan.FromMilliseconds(500));
+            Assert.IsTrue(SdkReadyFlag);
+            Assert.IsTrue(SdkReadyFlag2);
+            Assert.IsFalse(SdkUpdateFlag);
+            Assert.IsFalse(SdkTimedOutFlag);
             VerifyMetadata(eMetadata);
 
             ResetAllVariables();
-            eventsManager.Register(SdkEvent.SdkReadyTimeout, sdkTimedOut_callback);
-            eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkTimedOut, new EventMetadata(metaData),
-                Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.SdkTimedOut,
-                    eventsManager));
-            System.Threading.SpinWait.SpinUntil(() => SdkTimedOut, TimeSpan.FromMilliseconds(500));
-            Assert.IsFalse(SdkReady);
-            Assert.IsFalse(SdkUpdate);
-            Assert.IsFalse(SdkTimedOut); // not fired as suppressed by sdkReady
+            eventsManager.Register(SdkEvent.SdkReadyTimeout, TriggerSdkTimeout);
+            eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkTimedOut, new EventMetadata(metaData));
+            System.Threading.SpinWait.SpinUntil(() => SdkTimedOutFlag, TimeSpan.FromMilliseconds(500));
+            Assert.IsFalse(SdkReadyFlag);
+            Assert.IsFalse(SdkUpdateFlag);
+            Assert.IsFalse(SdkTimedOutFlag); // not fired as suppressed by sdkReady
 
             ResetAllVariables();
-            eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagKilledNotification, new EventMetadata(metaData),
-                Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.FlagKilledNotification,
-                    eventsManager));
-            System.Threading.SpinWait.SpinUntil(() => SdkUpdate, TimeSpan.FromMilliseconds(500));
-            Assert.IsFalse(SdkTimedOut);
-            Assert.IsFalse(SdkReady);
-            Assert.IsTrue(SdkUpdate);
+            eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagKilledNotification, new EventMetadata(metaData));
+            System.Threading.SpinWait.SpinUntil(() => SdkUpdateFlag, TimeSpan.FromMilliseconds(500));
+            Assert.IsFalse(SdkTimedOutFlag);
+            Assert.IsFalse(SdkReadyFlag);
+            Assert.IsTrue(SdkUpdateFlag);
             VerifyMetadata(eMetadata);
 
             ResetAllVariables();
-            eventsManager.NotifyInternalEvent(SdkInternalEvent.SegmentsUpdated, new EventMetadata(metaData),
-                Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.SegmentsUpdated,
-                    eventsManager));
-            System.Threading.SpinWait.SpinUntil(() => SdkUpdate, TimeSpan.FromMilliseconds(500));
-            Assert.IsFalse(SdkTimedOut);
-            Assert.IsFalse(SdkReady);
-            Assert.IsTrue(SdkUpdate);
+            eventsManager.NotifyInternalEvent(SdkInternalEvent.SegmentsUpdated, new EventMetadata(metaData));
+            System.Threading.SpinWait.SpinUntil(() => SdkUpdateFlag, TimeSpan.FromMilliseconds(500));
+            Assert.IsFalse(SdkTimedOutFlag);
+            Assert.IsFalse(SdkReadyFlag);
+            Assert.IsTrue(SdkUpdateFlag);
             VerifyMetadata(eMetadata);
 
             ResetAllVariables();
-            eventsManager.NotifyInternalEvent(SdkInternalEvent.RuleBasedSegmentsUpdated, new EventMetadata(metaData),
-                Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.RuleBasedSegmentsUpdated,
-                    eventsManager));
-            System.Threading.SpinWait.SpinUntil(() => SdkUpdate, TimeSpan.FromMilliseconds(500));
-            Assert.IsFalse(SdkTimedOut);
-            Assert.IsFalse(SdkReady);
-            Assert.IsTrue(SdkUpdate);
+            eventsManager.NotifyInternalEvent(SdkInternalEvent.RuleBasedSegmentsUpdated, new EventMetadata(metaData));
+            System.Threading.SpinWait.SpinUntil(() => SdkUpdateFlag, TimeSpan.FromMilliseconds(500));
+            Assert.IsFalse(SdkTimedOutFlag);
+            Assert.IsFalse(SdkReadyFlag);
+            Assert.IsTrue(SdkUpdateFlag);
             VerifyMetadata(eMetadata);
 
             ResetAllVariables();
-            eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagsUpdated, new EventMetadata(metaData),
-                Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.FlagsUpdated,
-                    eventsManager));
-            System.Threading.SpinWait.SpinUntil(() => SdkUpdate, TimeSpan.FromMilliseconds(500));
-            Assert.IsFalse(SdkTimedOut);
-            Assert.IsFalse(SdkReady);
-            Assert.IsTrue(SdkUpdate);
+            eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagsUpdated, new EventMetadata(metaData));
+            System.Threading.SpinWait.SpinUntil(() => SdkUpdateFlag, TimeSpan.FromMilliseconds(500));
+            Assert.IsFalse(SdkTimedOutFlag);
+            Assert.IsFalse(SdkReadyFlag);
+            Assert.IsTrue(SdkUpdateFlag);
             VerifyMetadata(eMetadata);
 
             eventsManager.Unregister(SdkEvent.SdkUpdate);
             eventsManager.Unregister(SdkEvent.SdkUpdate); // should not cause exception
             ResetAllVariables();
-            eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagsUpdated, new EventMetadata(metaData),
-                Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.FlagsUpdated,
-                    eventsManager));
-            System.Threading.SpinWait.SpinUntil(() => SdkUpdate, TimeSpan.FromMilliseconds(500));
-            Assert.IsFalse(SdkTimedOut);
-            Assert.IsFalse(SdkReady);
-            Assert.IsFalse(SdkUpdate);
+            eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagsUpdated, new EventMetadata(metaData));
+            System.Threading.SpinWait.SpinUntil(() => SdkUpdateFlag, TimeSpan.FromMilliseconds(500));
+            Assert.IsFalse(SdkTimedOutFlag);
+            Assert.IsFalse(SdkReadyFlag);
+            Assert.IsFalse(SdkUpdateFlag);
         }
 
         void ResetAllVariables()
         {
-            SdkReady = false;
-            SdkTimedOut = false;
+            SdkReadyFlag = false;
+            SdkReadyFlag2 = false;
+            SdkTimedOutFlag = false;
             eMetadata = null;
-            SdkUpdate = false;
+            SdkUpdateFlag = false;
         }
 
         void VerifyMetadata(EventMetadata eMetdata)
@@ -163,20 +138,42 @@ namespace Splitio_Tests.Unit_Tests.Common
 
         private void sdkUpdate_callback(object sender, EventMetadata metadata)
         {
-            SdkUpdate = true;
+            SdkUpdateFlag = true;
             eMetadata = metadata;
         }
 
         private void sdkReady_callback(object sender, EventMetadata metadata)
         {
-            SdkReady = true;
+            SdkReadyFlag = true;
+            eMetadata = metadata;
+        }
+
+        private void sdkReady_callback2(object sender, EventMetadata metadata)
+        {
+            SdkReadyFlag2 = true;
             eMetadata = metadata;
         }
 
         private void sdkTimedOut_callback(object sender, EventMetadata metadata)
         {
-            SdkTimedOut = true;
+            SdkTimedOutFlag = true;
             eMetadata = metadata;
         }
+
+        private void TriggerSdkReady(EventMetadata metaData)
+        {
+            SdkReady?.Invoke(this, metaData);
+        }
+
+        private void TriggerSdkUpdate(EventMetadata metaData)
+        {
+            SdkUpdate?.Invoke(this, metaData);
+        }
+
+        private void TriggerSdkTimeout(EventMetadata metaData)
+        {
+            SdkTimedOut?.Invoke(this, metaData);
+        }
+
     }
 }

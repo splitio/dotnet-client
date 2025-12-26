@@ -64,6 +64,10 @@ namespace Splitio.Services.Client.Classes
         protected IClientExtensionService _clientExtensionService;
         protected IFlagSetsFilter _flagSetsFilter;
 
+        public event EventHandler<EventMetadata> SdkReady;
+        public event EventHandler<EventMetadata> SdkUpdate;
+        public event EventHandler<EventMetadata> SdkTimedOut;
+
         protected SplitClient(string apikey, FallbackTreatmentCalculator fallbackTreatmentCalculator)
         {
             ApiKey = apikey;

@@ -20,12 +20,12 @@ namespace Splitio.Services.Cache.Classes
         private readonly ConcurrentDictionary<string, ParsedSplit> _featureFlags;
         private readonly ConcurrentDictionary<string, int> _trafficTypes;
         private readonly ConcurrentDictionary<string, HashSet<string>> _flagSets;
-        private readonly EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        private readonly IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
         private long _changeNumber;
 
         public InMemorySplitCache(ConcurrentDictionary<string, ParsedSplit> featureFlags,
-            IFlagSetsFilter flagSetsFilter, EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManger,
+            IFlagSetsFilter flagSetsFilter, IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManger,
             long changeNumber = -1)
         {
             _featureFlags = featureFlags;
@@ -74,14 +74,13 @@ namespace Splitio.Services.Cache.Classes
                 {
                     DecreaseTrafficTypeCount(removedSplit);
                     RemoveFromFlagSets(removedSplit.name, removedSplit.Sets);
+                    eventsFlags.Add(featureFlagName);
                 }
             }
 
             SetChangeNumber(till);
             _eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagsUpdated, 
-                new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.Flags, eventsFlags } }),
-            Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.FlagsUpdated,
-                _eventsManager));
+                new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.Flags, eventsFlags } }));
         }
 
         public void SetChangeNumber(long changeNumber)
@@ -154,9 +153,7 @@ namespace Splitio.Services.Cache.Classes
 
             _featureFlags.AddOrUpdate(featureFlag.name, featureFlag, (key, oldValue) => featureFlag);
             _eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagKilledNotification,
-                new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.Flags, new List<string> { { featureFlag.name } } } }),
-            Splitio.Util.Helper.GetSdkEventIfApplicable(SdkInternalEvent.FlagKilledNotification,
-                _eventsManager));
+                new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.Flags, new List<string> { { featureFlag.name } } } }));
 
         }
 

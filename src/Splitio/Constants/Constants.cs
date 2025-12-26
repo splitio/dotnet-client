@@ -65,5 +65,7 @@
     public static class EventMetadataKeys
     {
         public static string Flags => "flags";
+        public static string Segments => "segments";
+        public static string RuleBasedSegments => "ruleBasedSegments";
     }
 }
