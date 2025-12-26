@@ -12,15 +12,11 @@ namespace Splitio_Tests.Integration_Tests
     public class InMemoryClientTests
     {
         private readonly string rootFilePath;
-        private readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
-        private readonly EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
         public InMemoryClientTests()
         {
             // This line is to clean the warnings.
             rootFilePath = string.Empty;
-            _fallbackTreatmentCalculator = new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration());
-            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
 
 #if NET_LATEST
             rootFilePath = @"Resources\";
@@ -39,7 +35,7 @@ namespace Splitio_Tests.Integration_Tests
                     NamingStrategy = new SnakeCaseNamingStrategy()
                 }
             };
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator, _eventsManager);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", new ConfigurationOptions());
             client.BlockUntilReady(1000);
 
             //Act           

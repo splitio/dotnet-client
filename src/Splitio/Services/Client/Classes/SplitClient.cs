@@ -69,15 +69,16 @@ namespace Splitio.Services.Client.Classes
         public event EventHandler<EventMetadata> SdkUpdate;
         public event EventHandler<EventMetadata> SdkTimedOut;
 
-        protected SplitClient(string apikey, FallbackTreatmentCalculator fallbackTreatmentCalculator, IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager)
+        protected SplitClient(string apikey, ConfigurationOptions options)
         {
             ApiKey = apikey;
-            _eventsManager = eventsManager;
+            _fallbackTreatmentCalculator = new FallbackTreatmentCalculator(options.FallbackTreatments);
+            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
+
             _eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReadyEvent);
             _eventsManager.Register(SdkEvent.SdkUpdate, TriggerSdkUpdateEvent);
             _eventsManager.Register(SdkEvent.SdkReadyTimeout, TriggerSdkTimeoutEvent);
 
-            _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
             _wrapperAdapter = WrapperAdapter.Instance();
             _keyValidator = new KeyValidator();
             _splitNameValidator = new SplitNameValidator();
@@ -86,7 +87,7 @@ namespace Splitio.Services.Client.Classes
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
             _flagSetsValidator = new FlagSetsValidator();
             _configService = new ConfigService(_wrapperAdapter, _flagSetsValidator, new SdkMetadataValidator());
-            _statusManager = new InMemoryReadinessGatesCache(eventsManager);
+            _statusManager = new InMemoryReadinessGatesCache(_eventsManager);
             _tasksManager = new TasksManager(_statusManager);
         }
 

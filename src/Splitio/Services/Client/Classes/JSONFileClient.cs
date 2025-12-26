@@ -24,8 +24,7 @@ namespace Splitio.Services.Client.Classes
 
         public JSONFileClient(string splitsFilePath,
             string segmentsFilePath,
-            FallbackTreatmentCalculator fallbackTreatmentCalculator,
-            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager,
+            ConfigurationOptions config,
             ISegmentCache segmentCacheInstance = null,
             IFeatureFlagCache featureFlagCacheInstance = null,
             IImpressionsLog impressionsLog = null,
@@ -34,10 +33,10 @@ namespace Splitio.Services.Client.Classes
             ITrafficTypeValidator trafficTypeValidator = null,
             IImpressionsManager impressionsManager = null,
             IRuleBasedSegmentCache ruleBasedSegmentCache = null
-            ) : base("localhost", fallbackTreatmentCalculator, eventsManager)
+            ) : base("localhost", config)
         {
-            _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager);
-            var rbsCache = ruleBasedSegmentCache ?? new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>(), eventsManager);
+            _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), _eventsManager);
+            var rbsCache = ruleBasedSegmentCache ?? new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>(), _eventsManager);
 
             var segmentFetcher = new JSONFileSegmentFetcher(segmentsFilePath, _segmentCache);
             var splitChangeFetcher = new JSONFileSplitChangeFetcher(splitsFilePath);
@@ -55,13 +54,13 @@ namespace Splitio.Services.Client.Classes
             }
 
             BuildFlagSetsFilter(new HashSet<string>());
-            _featureFlagCache = featureFlagCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits), _flagSetsFilter, eventsManager);
+            _featureFlagCache = featureFlagCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits), _flagSetsFilter, _eventsManager);
             _impressionsLog = impressionsLog;
             _eventsLog = eventsLog;
             _trafficTypeValidator = trafficTypeValidator;
             _blockUntilReadyService = new NoopBlockUntilReadyService();
             _manager = new SplitManager(_featureFlagCache, _blockUntilReadyService);
-            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter(), null, fallbackTreatmentCalculator);
+            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter(), null, _fallbackTreatmentCalculator);
             _uniqueKeysTracker = new NoopUniqueKeysTracker();
             _impressionsCounter = new NoopImpressionsCounter();
             _impressionsObserver = new NoopImpressionsObserver();

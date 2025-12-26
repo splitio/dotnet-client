@@ -4,7 +4,6 @@ using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Shared.Classes;
-using WireMock.Pact.Models.V2;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {
@@ -33,7 +32,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void GetTreatmentShouldReturnControlIfSplitNotFound()
         {
             //Arrange
-            var splitClient = new LocalhostClient(new ConfigurationOptions { LocalhostFilePath = $"{rootFilePath}test.splits" }, _fallbackTreatmentCalculator, _eventsManager);
+            var splitClient = new LocalhostClient(new ConfigurationOptions { LocalhostFilePath = $"{rootFilePath}test.splits" });
 
             //Act
             var result = splitClient.GetTreatment("test", "test");
@@ -46,7 +45,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         [DeploymentItem(@"Resources\test.splits")]
         public void GetTreatmentShouldRunAsSingleKeyUsingNullBucketingKey()
         {
-            var splitClient = new LocalhostClient(new ConfigurationOptions { LocalhostFilePath = $"{rootFilePath}test.splits" }, _fallbackTreatmentCalculator, _eventsManager);
+            var splitClient = new LocalhostClient(new ConfigurationOptions { LocalhostFilePath = $"{rootFilePath}test.splits" });
             splitClient.BlockUntilReady(1000);
 
             //Act
@@ -62,7 +61,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void TrackShouldNotStoreEvents()
         {
             //Arrange
-            var splitClient = new LocalhostClientForTesting($"{rootFilePath}test.splits", _fallbackTreatmentCalculator);
+            var splitClient = new LocalhostClientForTesting($"{rootFilePath}test.splits");
             splitClient.BlockUntilReady(1000);
 
             //Act
@@ -78,7 +77,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         {
             //Arrange
             var _factoryInstantiationsService = FactoryInstantiationsService.Instance();
-            var splitClient = new LocalhostClientForTesting($"{rootFilePath}test.splits", _fallbackTreatmentCalculator);
+            var splitClient = new LocalhostClientForTesting($"{rootFilePath}test.splits");
 
             //Act
             splitClient.BlockUntilReady(10000);
