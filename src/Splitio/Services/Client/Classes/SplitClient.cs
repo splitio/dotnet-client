@@ -84,20 +84,13 @@ namespace Splitio.Services.Client.Classes
         public event EventHandler<EventMetadata> SdkUpdate;
         public event EventHandler<EventMetadata> SdkTimedOut;
 
-        public event EventHandler<EventMetadata> SdkReady;
-        public event EventHandler<EventMetadata> SdkUpdate;
-        public event EventHandler<EventMetadata> SdkTimedOut;
-
         protected SplitClient(string apikey, ConfigurationOptions options)
         {
             ApiKey = apikey;
             _fallbackTreatmentCalculator = new FallbackTreatmentCalculator(options.FallbackTreatments);
             _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-
-            _eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReadyEvent);
-            _eventsManager.Register(SdkEvent.SdkUpdate, TriggerSdkUpdateEvent);
-            _eventsManager.Register(SdkEvent.SdkReadyTimeout, TriggerSdkTimeoutEvent);
-
+            RegisterEvents();
+            
             _wrapperAdapter = WrapperAdapter.Instance();
             _keyValidator = new KeyValidator();
             _splitNameValidator = new SplitNameValidator();
