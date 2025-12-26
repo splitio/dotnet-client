@@ -51,14 +51,10 @@ namespace Splitio.Services.Client.Classes
         private IUpdater<Split> _featureFlagUpdater;
         private IRuleBasedSegmentCache _ruleBasedSegmentCache;
         private IUpdater<RuleBasedSegmentDto> _ruleBasedSegmentUpdater;
-        private readonly new FallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
-        public SelfRefreshingClient(string apiKey, ConfigurationOptions config,
-            FallbackTreatmentCalculator fallbackTreatmentCalculator,
-            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager) : base(apiKey, fallbackTreatmentCalculator, eventsManager)
+        public SelfRefreshingClient(string apiKey, ConfigurationOptions config) : base(apiKey, config)
         {
             _config = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfigTypes.InMemory);
-            _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
 
             BuildFlagSetsFilter(_config.FlagSetsFilter);
             BuildSplitCache();

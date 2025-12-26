@@ -1,7 +1,6 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Common;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
@@ -28,8 +27,7 @@ namespace Splitio.Services.Client.Classes
 
         private readonly object _lock = new object();
 
-        public LocalhostClient(ConfigurationOptions configurationOptions, FallbackTreatmentCalculator fallbackTreatmentCalculator,
-            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager) : base("localhost", fallbackTreatmentCalculator, eventsManager)
+        public LocalhostClient(ConfigurationOptions configurationOptions) : base("localhost", configurationOptions)
         {
             var configs = (LocalhostClientConfigurations)_configService.ReadConfig(configurationOptions, ConfigTypes.Localhost, _statusManager);
 
@@ -49,7 +47,7 @@ namespace Splitio.Services.Client.Classes
             BuildFlagSetsFilter(new HashSet<string>());
 
             var splits = _localhostFileService.ParseSplitFile(_fullPath);
-            _featureFlagCache = new InMemorySplitCache(splits, _flagSetsFilter, eventsManager);
+            _featureFlagCache = new InMemorySplitCache(splits, _flagSetsFilter, _eventsManager);
 
 
             if (configs.FileSync != null)
@@ -64,7 +62,7 @@ namespace Splitio.Services.Client.Classes
             _blockUntilReadyService = new NoopBlockUntilReadyService();
             _manager = new SplitManager(_featureFlagCache, _blockUntilReadyService);
             _trafficTypeValidator = new TrafficTypeValidator(_featureFlagCache, _blockUntilReadyService);
-            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter(), null, fallbackTreatmentCalculator);
+            _evaluator = new Evaluator.Evaluator(_featureFlagCache, new Splitter(), null, _fallbackTreatmentCalculator);
             _uniqueKeysTracker = new NoopUniqueKeysTracker();
             _impressionsCounter = new NoopImpressionsCounter();
             _impressionsObserver = new NoopImpressionsObserver();

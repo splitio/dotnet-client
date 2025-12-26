@@ -45,7 +45,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             _syncManager = new Mock<ISyncManager>();
             _telemetryEvaluationProducer = new Mock<ITelemetryEvaluationProducer>();
 
-            _splitClientForTesting = new SplitClientForTesting(_splitCacheMock.Object, _eventsLogMock.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluatorMock.Object, _impressionsManager.Object, _syncManager.Object, new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration()), _telemetryEvaluationProducer.Object);
+            _splitClientForTesting = new SplitClientForTesting(_splitCacheMock.Object, _eventsLogMock.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluatorMock.Object, _impressionsManager.Object, _syncManager.Object, _telemetryEvaluationProducer.Object, new ConfigurationOptions());
 
             _splitClientForTesting.BlockUntilReady(1000);
         }
@@ -779,7 +779,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on-global", "\"prop\":\"global\""), new Dictionary<string, FallbackTreatment>() { { splitName, new FallbackTreatment("off-local", "\"prop\":\"local\"") } });
             FallbackTreatmentCalculator fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
             IEvaluator _evaluator = new Splitio.Services.Evaluator.Evaluator(_splitCache.Object, _splitter.Object, _telemetryEvaluationProducer.Object, fallbackTreatmentCalculator);
-            _splitClientForTesting = new SplitClientForTesting(_splitCache.Object, _eventsLogMock.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluator, _impressionsManager.Object, _syncManager.Object, fallbackTreatmentCalculator, _telemetryEvaluationProducer.Object);
+            _splitClientForTesting = new SplitClientForTesting(_splitCache.Object, _eventsLogMock.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluator, _impressionsManager.Object, _syncManager.Object, _telemetryEvaluationProducer.Object,
+                new ConfigurationOptions { FallbackTreatments = fallbackTreatmentsConfiguration });
             _splitClientForTesting.BlockUntilReady(1000);
 
             string treatment = _splitClientForTesting.GetTreatment("key", splitName);
@@ -851,13 +852,13 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on-global", "\"prop\":\"global\""), new Dictionary<string, FallbackTreatment>() { { splitName, new FallbackTreatment("off-local", "\"prop\":\"local\"") } });
-            FallbackTreatmentCalculator fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
             _evaluatorMock = new Mock<IEvaluator>();
             _evaluatorMock
                 .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
                 .Throws<Exception>();
 
-            _splitClientForTesting = new SplitClientForTesting(_splitCache.Object, _eventsLogMock.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluatorMock.Object, _impressionsManager.Object, _syncManager.Object, fallbackTreatmentCalculator, _telemetryEvaluationProducer.Object);
+            _splitClientForTesting = new SplitClientForTesting(_splitCache.Object, _eventsLogMock.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluatorMock.Object, _impressionsManager.Object, _syncManager.Object, _telemetryEvaluationProducer.Object,
+                new ConfigurationOptions { FallbackTreatments = fallbackTreatmentsConfiguration });
             _splitClientForTesting.BlockUntilReady(1000);
 
             string treatment = _splitClientForTesting.GetTreatment("key", splitName);
