@@ -1,5 +1,4 @@
-﻿using Splitio.Domain;
-using System;
+﻿using System;
 
 namespace Splitio.Services.Common
 {
