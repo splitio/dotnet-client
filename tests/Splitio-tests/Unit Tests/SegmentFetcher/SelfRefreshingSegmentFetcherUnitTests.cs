@@ -8,7 +8,6 @@ using Splitio.Services.Common;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Services.Tasks;
 using System.Collections.Concurrent;
@@ -27,7 +26,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         public void InitializeSegmentNotExistent()
         {
             // Arrange
-            var gates = new InMemoryReadinessGatesCache();
+            var gates = new InMemoryReadinessGatesCache(new EventsManager<SdkEvent,SdkInternalEvent,EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>()));
             gates.SetReady();
             var apiClient = new Mock<ISegmentSdkApiClient>();            
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
