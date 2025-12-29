@@ -22,10 +22,10 @@ namespace Splitio.Integration_tests
     public class StreamingClientTests
     {
         public static string EventSourcePath => "/eventsource";
-        private bool SdkReadyFlag = false;
-        private bool SdkReadyFlag2 = false;
-        private bool SdkUpdateFlag = false;
-        private EventMetadata eMetadata;
+        private bool SdkReady = false;
+        private bool SdkReady2 = false;
+        private bool SdkReady3 = false;
+        private bool SdkUpdate = false;
 
         [TestMethod]
         public void GetTreatment_SplitUpdate_ShouldFetch()
@@ -60,7 +60,8 @@ namespace Splitio.Integration_tests
                     SegmentsRefreshRate = 3000,
                     AuthServiceURL = $"{url}/api/auth",
                     StreamingServiceURL = $"{url}{EventSourcePath}",
-                    StreamingEnabled = true
+                    StreamingEnabled = true,
+                    Logger = SplitLogger.Console(Level.Debug)
                 };
 
                 var apikey = "apikey1";
@@ -68,13 +69,18 @@ namespace Splitio.Integration_tests
                 var client = (SplitClient)splitFactory.Client();
                 client.SdkReady += sdkReady_callback;
                 client.SdkReady += sdkReady_callback2;
+                client.SdkUpdate += sdkUpdate_callback;
 
                 client.BlockUntilReady(10000);
 
                 var result = EvaluateWithDelay("admin", "push_test", "after_fetch", client);
+                client.SdkReady += sdkReady_callback3;
+
                 Assert.AreEqual("after_fetch", result);
-                Assert.IsTrue(SdkReadyFlag);
-                Assert.IsTrue(SdkReadyFlag2);
+                Assert.IsTrue(SdkReady);
+                Assert.IsTrue(SdkReady2);
+                Assert.IsTrue(SdkReady3);
+                Assert.IsTrue(SdkUpdate);
 
                 client.Destroy();
             }
@@ -119,13 +125,11 @@ namespace Splitio.Integration_tests
 
                 var splitFactory = new SplitFactory(apikey, config);
                 var client = splitFactory.Client();
-
                 client.BlockUntilReady(10000);
 
                 var result = EvaluateWithDelay("admin", "push_test", "on", client);
 
                 Assert.AreEqual("on", result);
-
                 client.Destroy();
             }
         }
@@ -774,12 +778,22 @@ namespace Splitio.Integration_tests
 
         private void sdkReady_callback(object sender, EventMetadata metadata)
         {
-            SdkReadyFlag = true;
+            SdkReady = true;
         }
 
         private void sdkReady_callback2(object sender, EventMetadata metadata)
         {
-            SdkReadyFlag2 = true;
+            SdkReady2 = true;
+        }
+
+        private void sdkReady_callback3(object sender, EventMetadata metadata)
+        {
+            SdkReady3 = true;
+        }
+
+        private void sdkUpdate_callback(object sender, EventMetadata metadata)
+        {
+            SdkUpdate = true;
         }
     }
 }
