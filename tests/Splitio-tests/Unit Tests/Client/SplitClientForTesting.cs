@@ -21,8 +21,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             ISyncManager syncManager,
             ITelemetryEvaluationProducer telemetryEvaluationProducer,
             ConfigurationOptions config)
-            : base("SplitClientForTesting", config)
+            : base("SplitClientForTesting")
         {
+            BuildFallbackCalculator(config.FallbackTreatments);
             _eventsLog = eventsLog;
             _impressionsLog = impressionsLog;
             _blockUntilReadyService = blockUntilReadyService;
