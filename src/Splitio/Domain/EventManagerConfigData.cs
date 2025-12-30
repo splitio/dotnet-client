@@ -9,5 +9,6 @@ namespace Splitio.Domain
         public Dictionary<E, HashSet<E>> Prerequisites { get; protected set; }
         public Dictionary<E, HashSet<E>> SuppressedBy { get; protected set; }
         public Dictionary<E, int> ExecutionLimits { get; protected set; }
+        public HashSet<E> EvaluationOrder { get; protected set; }
     }
 }

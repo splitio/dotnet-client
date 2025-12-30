@@ -3,6 +3,7 @@ using Splitio.Domain;
 using Splitio.Services.Common;
 using System;
 using System.Collections.Generic;
+using WireMock.Pact.Models.V2;
 
 namespace Splitio_Tests.Unit_Tests.Common
 {
@@ -13,6 +14,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         private bool SdkReadyFlag2 = false;
         private bool SdkTimedOutFlag = false;
         private bool SdkUpdateFlag = false;
+        private string FireFirst = "";
         private EventMetadata eMetadata = null;
         public event EventHandler<EventMetadata> SdkReady;
         public event EventHandler<EventMetadata> SdkUpdate;
@@ -119,7 +121,28 @@ namespace Splitio_Tests.Unit_Tests.Common
             Assert.IsFalse(SdkUpdateFlag);
         }
 
-        void ResetAllVariables()
+        [TestMethod]
+        public void TestFireOrderEvents()
+        {
+            //Act
+            EventsManagerConfig config = new EventsManagerConfig();
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(config, new EventDelivery<SdkEvent, EventMetadata>());
+
+            SdkReady += sdkReady_callback;
+            SdkTimedOut += sdkTimedOut_callback;
+
+            eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReady);
+            eventsManager.Register(SdkEvent.SdkReadyTimeout, TriggerSdkTimeout);
+
+            ResetAllVariables();
+            eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkTimedOut, new EventMetadata(new Dictionary<string, object>()));
+            eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(new Dictionary<string, object>()));
+            System.Threading.SpinWait.SpinUntil(() => SdkTimedOutFlag, TimeSpan.FromMilliseconds(500));
+            Assert.IsTrue(SdkReadyFlag);
+            Assert.IsTrue(SdkTimedOutFlag);
+            Assert.AreEqual("SdkTimeout", FireFirst);
+        }
+            void ResetAllVariables()
         {
             SdkReadyFlag = false;
             SdkReadyFlag2 = false;
@@ -146,6 +169,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             SdkReadyFlag = true;
             eMetadata = metadata;
+            if (FireFirst.Equals("")) FireFirst = "SdkReady";
         }
 
         private void sdkReady_callback2(object sender, EventMetadata metadata)
@@ -158,6 +182,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             SdkTimedOutFlag = true;
             eMetadata = metadata;
+            if (FireFirst.Equals("")) FireFirst = "SdkTimeout";
         }
 
         private void TriggerSdkReady(EventMetadata metaData)

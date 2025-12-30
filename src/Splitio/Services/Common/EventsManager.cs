@@ -65,12 +65,11 @@ namespace Splitio.Services.Common
             lock (_lock)
             {
                 _logger.Debug($"EventsManager: Handling internal event {sdkInternalEvent}");
-
-                foreach (E sdkEvent in GetSdkEventIfApplicable(sdkInternalEvent))
+                foreach (E sortedEvent in _managerConfig.EvaluationOrder.Where(x => GetSdkEventIfApplicable(sdkInternalEvent).Contains(x)))
                 {
-                    _logger.Debug($"EventsManager: Firing Sdk event {sdkEvent}");
-                    _eventDelivery.Deliver(sdkEvent, eventMetadata, GetEventHandler(sdkEvent));
-                    SetSdkEventTriggered(sdkEvent);
+                    _logger.Debug($"EventsManager: Firing Sdk event {sortedEvent}");
+                    _eventDelivery.Deliver(sortedEvent, eventMetadata, GetEventHandler(sortedEvent));
+                    SetSdkEventTriggered(sortedEvent);
                 }
             }
         }
