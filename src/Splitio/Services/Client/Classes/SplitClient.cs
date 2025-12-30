@@ -63,9 +63,9 @@ namespace Splitio.Services.Client.Classes
         protected IClientExtensionService _clientExtensionService;
         protected IFlagSetsFilter _flagSetsFilter;
         protected FallbackTreatmentCalculator _fallbackTreatmentCalculator;
-
-        public IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        protected IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
         private EventHandler<EventMetadata> SdkReadyEvent;
+
         public event EventHandler<EventMetadata> SdkReady
         {
             add
@@ -73,7 +73,7 @@ namespace Splitio.Services.Client.Classes
                 SdkReadyEvent = (EventHandler<EventMetadata>)Delegate.Combine(SdkReadyEvent, value);
                 if (_eventsManager.EventAlreadyTriggered(SdkEvent.SdkReady))
                 {
-                    SdkReadyEvent.Invoke(this, null);
+                    SdkReadyEvent.Invoke(this, new EventMetadata(new Dictionary<string, object>()));
                 }
             }
 
