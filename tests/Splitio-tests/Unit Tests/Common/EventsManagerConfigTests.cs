@@ -41,6 +41,25 @@ namespace Splitio_Tests.Unit_Tests.Common
             config.SuppressedBy.TryGetValue(SdkEvent.SdkReadyTimeout, out var require4);
             Assert.AreEqual(1, require3.Count);
             Assert.IsTrue(require4.Contains(SdkEvent.SdkReady));
+
+            int order = 0;
+            Assert.AreEqual(3, config.EvaluationOrder.Count);
+            foreach (var sdkEvent in config.EvaluationOrder)
+            {
+                order++;
+                switch (order)
+                {
+                    case 1:
+                        Assert.AreEqual(SdkEvent.SdkReadyTimeout, sdkEvent);
+                        break;
+                    case 2:
+                        Assert.AreEqual(SdkEvent.SdkReady, sdkEvent);
+                        break;
+                    case 3:
+                        Assert.AreEqual(SdkEvent.SdkUpdate, sdkEvent);
+                        break;
+                }
+            }
         }
     }
 }
