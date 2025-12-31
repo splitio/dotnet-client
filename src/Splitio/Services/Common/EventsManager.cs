@@ -64,7 +64,6 @@ namespace Splitio.Services.Common
         {
             lock (_lock)
             {
-                _logger.Debug($"EventsManager: Handling internal event {sdkInternalEvent}");
                 foreach (E sortedEvent in _managerConfig.EvaluationOrder.Where(x => GetSdkEventIfApplicable(sdkInternalEvent).Contains(x)))
                 {
                     _logger.Debug($"EventsManager: Firing Sdk event {sortedEvent}");
@@ -93,7 +92,6 @@ namespace Splitio.Services.Common
         {
             _internalEventsStatus.AddOrUpdate(sdkInternalEvent, status,
                 (_, oldValue) => status);
-            _logger.Debug($"EventsManager: Internal Event {sdkInternalEvent} status is updated to {status}");
         }
         #endregion
 
