@@ -448,8 +448,7 @@ namespace Splitio.Services.Client.Classes
 
         protected void BuildFallbackCalculator(FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration)
         {
-            FallbackTreatmentsValidator fallbackTreatmentsValidator = new FallbackTreatmentsValidator();
-            _fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsValidator.validate(fallbackTreatmentsConfiguration));
+            _fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
         }
         #endregion
 

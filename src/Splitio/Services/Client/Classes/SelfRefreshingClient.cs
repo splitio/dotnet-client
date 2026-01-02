@@ -56,7 +56,7 @@ namespace Splitio.Services.Client.Classes
         {
             _config = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfigTypes.InMemory);
 
-            BuildFallbackCalculator(config.FallbackTreatments);
+            BuildFallbackCalculator(_config.FallbackTreatments);
             BuildFlagSetsFilter(_config.FlagSetsFilter);
             BuildSplitCache();
             BuildSegmentCache();

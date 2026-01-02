@@ -44,7 +44,7 @@ namespace Splitio.Services.Client.Classes
                 _localhostFileService = new LocalhostFileService();
             }
 
-            BuildFallbackCalculator(configurationOptions.FallbackTreatments);
+            BuildFallbackCalculator(configs.FallbackTreatments);
             BuildFlagSetsFilter(new HashSet<string>());
 
             var splits = _localhostFileService.ParseSplitFile(_fullPath);

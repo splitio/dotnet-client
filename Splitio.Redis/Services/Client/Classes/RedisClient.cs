@@ -35,7 +35,7 @@ namespace Splitio.Redis.Services.Client.Classes
 
             ReadConfig(config);
 
-            BuildFallbackCalculator(config.FallbackTreatments);
+            BuildFallbackCalculator(_config.FallbackTreatments);
             BuildRedisCache();
             BuildTreatmentLog(config.ImpressionListener);
 
@@ -76,6 +76,7 @@ namespace Splitio.Redis.Services.Client.Classes
             _config.FlagSetsInvalid = baseConfig.FlagSetsInvalid;
             _config.Mode = config.Mode;
             _config.FromCacheAdapterConfig(config.CacheAdapterConfig);
+            _config.FallbackTreatments = baseConfig.FallbackTreatments;
         }
 
         private void BuildRedisCache()
