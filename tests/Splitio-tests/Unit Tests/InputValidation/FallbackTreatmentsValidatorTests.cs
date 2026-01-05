@@ -15,30 +15,30 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             FallbackTreatmentsValidator fallbackTreatmentsValidator = new FallbackTreatmentsValidator();
 
             FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("12#2"));
-            Assert.AreEqual(null, fallbackTreatmentsValidator.validate(fallbackTreatmentsConfiguration, Splitio.Enums.API.GetTreatment).GlobalFallbackTreatment.Treatment);
+            Assert.AreEqual(null, fallbackTreatmentsValidator.validate(fallbackTreatmentsConfiguration).GlobalFallbackTreatment);
 
             fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration("12#2");
-            Assert.AreEqual(null, fallbackTreatmentsValidator.validate(fallbackTreatmentsConfiguration, Splitio.Enums.API.GetTreatment).GlobalFallbackTreatment.Treatment);
+            Assert.AreEqual(null, fallbackTreatmentsValidator.validate(fallbackTreatmentsConfiguration).GlobalFallbackTreatment);
 
             fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(
                 new Dictionary<string, FallbackTreatment>() { { "flag", new FallbackTreatment("12#2") } });
-            Assert.AreEqual(0, fallbackTreatmentsValidator.validate(fallbackTreatmentsConfiguration, Splitio.Enums.API.GetTreatment).ByFlagFallbackTreatment.Count);
+            Assert.AreEqual(0, fallbackTreatmentsValidator.validate(fallbackTreatmentsConfiguration).ByFlagFallbackTreatment.Count);
 
             fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(
                 new Dictionary<string, string>() { { "flag", "12#2" } });
-            Assert.AreEqual(0, fallbackTreatmentsValidator.validate(fallbackTreatmentsConfiguration, Splitio.Enums.API.GetTreatment).ByFlagFallbackTreatment.Count);
+            Assert.AreEqual(0, fallbackTreatmentsValidator.validate(fallbackTreatmentsConfiguration).ByFlagFallbackTreatment.Count);
 
             fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(
                         new FallbackTreatment("on"),
                         new Dictionary<string, FallbackTreatment>() { { "flag", new FallbackTreatment("off") } });
-            var processed = fallbackTreatmentsValidator.validate(fallbackTreatmentsConfiguration, Splitio.Enums.API.GetTreatment);
+            var processed = fallbackTreatmentsValidator.validate(fallbackTreatmentsConfiguration);
             Assert.AreEqual("on", processed.GlobalFallbackTreatment.Treatment);
             processed.ByFlagFallbackTreatment.TryGetValue("flag", out FallbackTreatment fallbackTreatment);
             Assert.AreEqual("off", fallbackTreatment.Treatment);
 
             fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration("on",
                         new Dictionary<string, FallbackTreatment>() { { "flag", new FallbackTreatment("off") } });
-            processed = fallbackTreatmentsValidator.validate(fallbackTreatmentsConfiguration, Splitio.Enums.API.GetTreatment);
+            processed = fallbackTreatmentsValidator.validate(fallbackTreatmentsConfiguration);
             Assert.AreEqual("on", processed.GlobalFallbackTreatment.Treatment);
             processed.ByFlagFallbackTreatment.TryGetValue("flag", out FallbackTreatment fallbackTreatment2);
             Assert.AreEqual("off", fallbackTreatment2.Treatment);
@@ -46,7 +46,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(
                         new FallbackTreatment("on"),
                         new Dictionary<string, string>() { { "flag", "off" } });
-            processed = fallbackTreatmentsValidator.validate(fallbackTreatmentsConfiguration, Splitio.Enums.API.GetTreatment);
+            processed = fallbackTreatmentsValidator.validate(fallbackTreatmentsConfiguration);
             Assert.AreEqual("on", processed.GlobalFallbackTreatment.Treatment);
             processed.ByFlagFallbackTreatment.TryGetValue("flag", out fallbackTreatment);
             Assert.AreEqual("off", fallbackTreatment.Treatment);
@@ -54,7 +54,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(
                         new FallbackTreatment("on"),
                         new Dictionary<string, string>() { { "flag", "off" } });
-            processed = fallbackTreatmentsValidator.validate(fallbackTreatmentsConfiguration, Splitio.Enums.API.GetTreatment);
+            processed = fallbackTreatmentsValidator.validate(fallbackTreatmentsConfiguration);
             Assert.AreEqual("on", processed.GlobalFallbackTreatment.Treatment);
             processed.ByFlagFallbackTreatment.TryGetValue("flag", out  fallbackTreatment);
             Assert.AreEqual("off", fallbackTreatment.Treatment);

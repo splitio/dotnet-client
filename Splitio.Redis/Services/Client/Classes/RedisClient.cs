@@ -29,12 +29,13 @@ namespace Splitio.Redis.Services.Client.Classes
         private ConnectionPoolManager _connectionPoolManager;
         private IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
 
-        public RedisClient(ConfigurationOptions config, string apiKey) : base(apiKey, config)
+        public RedisClient(ConfigurationOptions config, string apiKey) : base(apiKey)
         {
             _config = new RedisConfig();
 
             ReadConfig(config);
 
+            BuildFallbackCalculator(_config.FallbackTreatments);
             BuildRedisCache();
             BuildTreatmentLog(config.ImpressionListener);
 
@@ -75,6 +76,7 @@ namespace Splitio.Redis.Services.Client.Classes
             _config.FlagSetsInvalid = baseConfig.FlagSetsInvalid;
             _config.Mode = config.Mode;
             _config.FromCacheAdapterConfig(config.CacheAdapterConfig);
+            _config.FallbackTreatments = baseConfig.FallbackTreatments;
         }
 
         private void BuildRedisCache()

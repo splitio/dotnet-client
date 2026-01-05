@@ -27,7 +27,7 @@ namespace Splitio.Services.Client.Classes
 
         private readonly object _lock = new object();
 
-        public LocalhostClient(ConfigurationOptions configurationOptions) : base("localhost", configurationOptions)
+        public LocalhostClient(ConfigurationOptions configurationOptions) : base("localhost")
         {
             var configs = (LocalhostClientConfigurations)_configService.ReadConfig(configurationOptions, ConfigTypes.Localhost, _statusManager);
 
@@ -44,6 +44,7 @@ namespace Splitio.Services.Client.Classes
                 _localhostFileService = new LocalhostFileService();
             }
 
+            BuildFallbackCalculator(configs.FallbackTreatments);
             BuildFlagSetsFilter(new HashSet<string>());
 
             var splits = _localhostFileService.ParseSplitFile(_fullPath);

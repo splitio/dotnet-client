@@ -1,6 +1,4 @@
 ﻿using Splitio.Domain;
-using Splitio.Services.Common;
-using Splitio.Services.Impressions.Classes;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -10,8 +8,9 @@ namespace Splitio.Services.Client.Classes
     {
         private readonly Dictionary<string, string> _tests;
 
-        public SplitClientForTest(ConfigurationOptions config) : base("SplitClientForTest", config)
+        public SplitClientForTest(ConfigurationOptions config) : base("SplitClientForTest")
         {
+            BuildFallbackCalculator(config.FallbackTreatments);
             _tests = new Dictionary<string, string>();
         }
 

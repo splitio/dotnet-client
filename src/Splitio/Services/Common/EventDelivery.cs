@@ -13,7 +13,6 @@ namespace Splitio.Services.Common
         {
             if (handler != null)
             {
-                _logger.Debug($"EventDelivery: Triggering handle for Sdk Event {sdkEvent}");
                 try
                 {
                     handler.Invoke(eventMetadata);

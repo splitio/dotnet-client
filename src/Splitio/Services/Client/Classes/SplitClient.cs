@@ -39,7 +39,6 @@ namespace Splitio.Services.Client.Classes
         protected readonly IConfigService _configService;
         protected readonly IFlagSetsValidator _flagSetsValidator;
         protected readonly string ApiKey;
-        protected readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
         protected ISplitManager _manager;
         protected IEventsLog _eventsLog;
@@ -63,8 +62,10 @@ namespace Splitio.Services.Client.Classes
         protected IImpressionsObserver _impressionsObserver;
         protected IClientExtensionService _clientExtensionService;
         protected IFlagSetsFilter _flagSetsFilter;
-        public IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        protected IFallbackTreatmentCalculator _fallbackTreatmentCalculator;
+        protected IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
         private EventHandler<EventMetadata> SdkReadyEvent;
+
         public event EventHandler<EventMetadata> SdkReady
         {
             add
@@ -72,7 +73,7 @@ namespace Splitio.Services.Client.Classes
                 SdkReadyEvent = (EventHandler<EventMetadata>)Delegate.Combine(SdkReadyEvent, value);
                 if (_eventsManager.EventAlreadyTriggered(SdkEvent.SdkReady))
                 {
-                    SdkReadyEvent.Invoke(this, null);
+                    SdkReadyEvent.Invoke(this, new EventMetadata(new Dictionary<string, object>()));
                 }
             }
 
@@ -84,10 +85,9 @@ namespace Splitio.Services.Client.Classes
         public event EventHandler<EventMetadata> SdkUpdate;
         public event EventHandler<EventMetadata> SdkTimedOut;
 
-        protected SplitClient(string apikey, ConfigurationOptions options)
+        protected SplitClient(string apikey)
         {
             ApiKey = apikey;
-            _fallbackTreatmentCalculator = new FallbackTreatmentCalculator(options.FallbackTreatments);
             _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
             RegisterEvents();
             
@@ -444,6 +444,11 @@ namespace Splitio.Services.Client.Classes
         protected void BuildFlagSetsFilter(HashSet<string> sets)
         {
             _flagSetsFilter = new FlagSetsFilter(sets);
+        }
+
+        protected void BuildFallbackCalculator(FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration)
+        {
+            _fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
         }
         #endregion
 
