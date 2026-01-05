@@ -62,7 +62,7 @@ namespace Splitio.Services.Client.Classes
         protected IImpressionsObserver _impressionsObserver;
         protected IClientExtensionService _clientExtensionService;
         protected IFlagSetsFilter _flagSetsFilter;
-        protected FallbackTreatmentCalculator _fallbackTreatmentCalculator;
+        protected IFallbackTreatmentCalculator _fallbackTreatmentCalculator;
         protected IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
         private EventHandler<EventMetadata> SdkReadyEvent;
 

@@ -3,6 +3,7 @@ using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
+using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Shared.Interfaces;
@@ -20,10 +21,10 @@ namespace Splitio_Tests.Unit_Tests.Client
             IImpressionsManager impressionsManager,
             ISyncManager syncManager,
             ITelemetryEvaluationProducer telemetryEvaluationProducer,
-            ConfigurationOptions config)
+            IFallbackTreatmentCalculator fallbackTreatmentCalculator)
             : base("SplitClientForTesting")
         {
-            BuildFallbackCalculator(config.FallbackTreatments);
+            _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
             _eventsLog = eventsLog;
             _impressionsLog = impressionsLog;
             _blockUntilReadyService = blockUntilReadyService;

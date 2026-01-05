@@ -1,6 +1,6 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
-using Splitio.Services.Impressions.Classes;
+using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
@@ -62,7 +62,7 @@ namespace Splitio.Util
                 .ToList();
         }
 
-        public static TreatmentResult checkFallbackTreatment(string featureName, string label, bool exception, FallbackTreatmentCalculator fallbackTreatmentCalculator)
+        public static TreatmentResult CheckFallbackTreatment(string featureName, string label, bool exception, IFallbackTreatmentCalculator fallbackTreatmentCalculator)
         {
             FallbackTreatment fallbackTreatment = fallbackTreatmentCalculator.resolve(featureName, label);
             return new TreatmentResult(featureName,
@@ -70,12 +70,12 @@ namespace Splitio.Util
                 fallbackTreatment.Treatment,
                 false,
                 null,
-                getFallbackConfig(fallbackTreatment),
+                GetFallbackConfig(fallbackTreatment),
                 exception
             );
         }
 
-        public static string getFallbackConfig(FallbackTreatment fallbackTreatment)
+        public static string GetFallbackConfig(FallbackTreatment fallbackTreatment)
         {
             if (fallbackTreatment.Config != null)
             {

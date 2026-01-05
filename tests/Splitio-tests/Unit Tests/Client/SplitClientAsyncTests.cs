@@ -2,8 +2,6 @@
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Client.Classes;
-using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Evaluator;
@@ -29,6 +27,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         private readonly Mock<IImpressionsManager> _impressionsManager;
         private readonly Mock<ISyncManager> _syncManager;
         private Mock<ITelemetryEvaluationProducer> _telemetryEvaluationProducer;
+        private readonly Mock<IFallbackTreatmentCalculator> _fallbackTreatmentCalculation;
         private SplitClientForTesting _splitClient;
         public SplitClientAsyncTests()
         {
@@ -40,8 +39,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             _impressionsManager = new Mock<IImpressionsManager>();
             _syncManager = new Mock<ISyncManager>();
             _telemetryEvaluationProducer = new Mock<ITelemetryEvaluationProducer>();
-
-            _splitClient = new SplitClientForTesting(_splitCache.Object, _eventsLog.Object, _impressionsLog.Object, _blockUntilReadyService.Object, _evaluator.Object, _impressionsManager.Object, _syncManager.Object, _telemetryEvaluationProducer.Object, new ConfigurationOptions());
+            _fallbackTreatmentCalculation = new Mock<IFallbackTreatmentCalculator>();
+            _splitClient = new SplitClientForTesting(_splitCache.Object, _eventsLog.Object, _impressionsLog.Object, _blockUntilReadyService.Object, _evaluator.Object, _impressionsManager.Object, _syncManager.Object, _telemetryEvaluationProducer.Object, _fallbackTreatmentCalculation.Object);
         }
 
         #region GetTreatmentAsync
@@ -52,6 +51,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
+            _fallbackTreatmentCalculation
+                .Setup(mock => mock.resolve(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(new FallbackTreatment("control"));
 
             // Act
             var result = await _splitClient.GetTreatmentAsync((string)null, string.Empty);
@@ -67,6 +69,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
+            _fallbackTreatmentCalculation
+                .Setup(mock => mock.resolve(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(new FallbackTreatment("control"));
 
             _evaluator
                 .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
@@ -89,6 +94,10 @@ namespace Splitio_Tests.Unit_Tests.Client
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
+
+            _fallbackTreatmentCalculation
+                .Setup(mock => mock.resolve(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(new FallbackTreatment("control"));
 
             _evaluator
                 .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<Splitio.Enums.API>(), It.IsAny<Key>(), new List<string>() { "feature_flag_test" }, It.IsAny<Dictionary<string, object>>(), true))
@@ -119,6 +128,10 @@ namespace Splitio_Tests.Unit_Tests.Client
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
+
+            _fallbackTreatmentCalculation
+                .Setup(mock => mock.resolve(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(new FallbackTreatment("control"));
 
             // Act
             var results = await _splitClient.GetTreatmentsAsync(string.Empty, new List<string> { string.Empty });
@@ -248,6 +261,10 @@ namespace Splitio_Tests.Unit_Tests.Client
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
+
+            _fallbackTreatmentCalculation
+                .Setup(mock => mock.resolve(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(new FallbackTreatment("control"));
 
             // Act
             var result = await _splitClient.GetTreatmentWithConfigAsync(string.Empty, string.Empty);
@@ -586,6 +603,10 @@ namespace Splitio_Tests.Unit_Tests.Client
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
+
+            _fallbackTreatmentCalculation
+                .Setup(mock => mock.resolve(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(new FallbackTreatment("control"));
 
             // Act
             var results = await _splitClient.GetTreatmentsWithConfigAsync(string.Empty, new List<string> { string.Empty });
@@ -1007,7 +1028,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             FallbackTreatmentCalculator fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
             IEvaluator _evaluator = new Splitio.Services.Evaluator.Evaluator(_splitCache.Object, _splitter.Object, _telemetryEvaluationProducer.Object, fallbackTreatmentCalculator);
             _splitClient = new SplitClientForTesting(_splitCache.Object, _eventsLog.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluator, _impressionsManager.Object, _syncManager.Object, _telemetryEvaluationProducer.Object,
-                new ConfigurationOptions { FallbackTreatments = fallbackTreatmentsConfiguration });
+                fallbackTreatmentCalculator);
             _splitClient.BlockUntilReady(1000);
 
             string treatment = await _splitClient.GetTreatmentAsync("key", splitName);
@@ -1085,7 +1106,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Throws<Exception>();
 
             _splitClient = new SplitClientForTesting(_splitCache.Object, _eventsLog.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluator.Object, _impressionsManager.Object, _syncManager.Object, _telemetryEvaluationProducer.Object,
-                new ConfigurationOptions { FallbackTreatments = fallbackTreatmentsConfiguration });
+                new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration));
             _splitClient.BlockUntilReady(1000);
 
             string treatment = await _splitClient.GetTreatmentAsync("key", splitName);

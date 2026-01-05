@@ -4,7 +4,7 @@ using Splitio.Enums;
 using Splitio.Enums.Extensions;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Filters;
-using Splitio.Services.Impressions.Classes;
+using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
@@ -27,7 +27,7 @@ namespace Splitio.Services.Shared.Classes
         private readonly ITrafficTypeValidator _trafficTypeValidator;
         private readonly IFlagSetsValidator _flagSetsValidator;
         private readonly IFlagSetsFilter _flagSetsFilter;
-        private readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
+        private readonly IFallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
         public ClientExtensionService(IBlockUntilReadyService blockUntilReadyService,
             IStatusManager statusManager,
@@ -39,7 +39,7 @@ namespace Splitio.Services.Shared.Classes
             ITrafficTypeValidator trafficTypeValidator,
             IFlagSetsValidator flagSetsValidator,
             IFlagSetsFilter flagSetsFilter,
-            FallbackTreatmentCalculator fallbackTreatmentCalculator)
+            IFallbackTreatmentCalculator fallbackTreatmentCalculator)
         {
             _blockUntilReadyService = blockUntilReadyService;
             _statusManager = statusManager;
@@ -162,7 +162,7 @@ namespace Splitio.Services.Shared.Classes
 
             foreach (var item in featureFlagNames)
             {
-                toReturn.Add(Helper.checkFallbackTreatment(item, label, true, _fallbackTreatmentCalculator));
+                toReturn.Add(Helper.CheckFallbackTreatment(item, label, true, _fallbackTreatmentCalculator));
             }
 
             return toReturn;
