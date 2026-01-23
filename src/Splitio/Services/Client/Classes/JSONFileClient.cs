@@ -34,8 +34,8 @@ namespace Splitio.Services.Client.Classes
             IRuleBasedSegmentCache ruleBasedSegmentCache = null
             ) : base("localhost")
         {
-            _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), _eventsManager);
-            var rbsCache = ruleBasedSegmentCache ?? new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>(), _eventsManager);
+            _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), _internalEventsTask);
+            var rbsCache = ruleBasedSegmentCache ?? new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>(), _internalEventsTask);
 
             var segmentFetcher = new JSONFileSegmentFetcher(segmentsFilePath, _segmentCache);
             var splitChangeFetcher = new JSONFileSplitChangeFetcher(splitsFilePath);
@@ -54,7 +54,7 @@ namespace Splitio.Services.Client.Classes
 
             BuildFallbackCalculator(config.FallbackTreatments);
             BuildFlagSetsFilter(new HashSet<string>());
-            _featureFlagCache = featureFlagCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits), _flagSetsFilter, _eventsManager);
+            _featureFlagCache = featureFlagCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits), _flagSetsFilter, _internalEventsTask);
             _impressionsLog = impressionsLog;
             _eventsLog = eventsLog;
             _trafficTypeValidator = trafficTypeValidator;

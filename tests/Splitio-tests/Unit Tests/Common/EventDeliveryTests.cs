@@ -1,7 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Services.Common;
-using System.Collections.Generic;
+using System;
+using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.Common
 {
@@ -18,6 +19,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             EventDelivery<SdkEvent, EventMetadata> eventDelivery = new EventDelivery<SdkEvent, EventMetadata>();
 
             eventDelivery.Deliver(SdkEvent.SdkReady, null, sdkReady_callback);
+            SpinWait.SpinUntil(() => SdkReady, TimeSpan.FromMilliseconds(1000));
 
             Assert.IsTrue(SdkReady);
         }

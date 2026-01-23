@@ -10,7 +10,6 @@ using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Services.Tasks;
-using Splitio.Telemetry.Domain;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -28,12 +27,14 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         {
             // Arrange
             Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var gates = new InMemoryReadinessGatesCache(eventsManager.Object);
+            var internalEventsTask = new InternalEventsTask(eventsManager.Object, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            var statusManager = new InMemoryReadinessGatesCache(internalEventsTask);
+            var gates = new InMemoryReadinessGatesCache(internalEventsTask);
             gates.SetReady();
             var apiClient = new Mock<ISegmentSdkApiClient>();            
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments = new ConcurrentDictionary<string, Segment>();
-            var cache = new InMemorySegmentCache(segments, eventsManager.Object);
+            var cache = new InMemorySegmentCache(segments, internalEventsTask);
             var segmentsQueue = new SplitQueue<SelfRefreshingSegment>();
             var taskManager = new TasksManager(gates);
             var worker = new SegmentTaskWorker(5, segmentsQueue);

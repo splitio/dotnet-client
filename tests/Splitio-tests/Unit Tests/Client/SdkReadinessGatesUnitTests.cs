@@ -1,8 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using BitFaster.Caching;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
+using Splitio.Services.Shared.Classes;
+using Splitio.Services.Tasks;
 using System;
+using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {
@@ -17,7 +21,9 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void IsSDKReadyShouldReturnFalseIfSplitsAreNotReady()
         {
             //Arrange
-            var gates = new InMemoryReadinessGatesCache(new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>()));
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
+            var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            var gates = new InMemoryReadinessGatesCache(internalEventsTask);
 
             //Act
             var result = gates.IsReady();
@@ -31,12 +37,15 @@ namespace Splitio_Tests.Unit_Tests.Client
         {
             //Arrange
             EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-            var gates = new InMemoryReadinessGatesCache(eventsManager);
+            var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            var gates = new InMemoryReadinessGatesCache(internalEventsTask);
+            internalEventsTask.Start();
             SdkReady += sdkReady_callback;
             eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReady);
 
             //Act
             gates.SetReady();
+            SpinWait.SpinUntil(() => SdkReadyFlag, TimeSpan.FromMilliseconds(1000));
 
             // Assert.
             Assert.IsTrue(SdkReadyFlag);

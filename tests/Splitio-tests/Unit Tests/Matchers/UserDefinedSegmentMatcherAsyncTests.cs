@@ -2,8 +2,8 @@
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
-using Splitio.Services.Common;
 using Splitio.Services.Parsing;
+using Splitio.Services.Tasks;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -24,8 +24,8 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             };
 
             var segmentName = "test-segment";
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), internalEventsTask.Object);
             segmentCache.AddToSegment(segmentName, keys);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
@@ -48,8 +48,8 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             };
 
             var segmentName = "test-segment";
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), internalEventsTask.Object);
             segmentCache.AddToSegment(segmentName, keys);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
@@ -66,8 +66,8 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var segmentName = "test-segment";
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), internalEventsTask.Object);
             segmentCache.AddToSegment(segmentName, null);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
@@ -84,8 +84,8 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var segmentName = "test-segment";
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), internalEventsTask.Object);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 
@@ -107,8 +107,8 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             };
 
             var segmentName = "test-segment";
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), internalEventsTask.Object);
             segmentCache.AddToSegment(segmentName, keys);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
@@ -131,8 +131,8 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             };
 
             var segmentName = "test-segment";
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), internalEventsTask.Object);
             segmentCache.AddToSegment(segmentName, keys);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
@@ -149,8 +149,8 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var segmentName = "test-segment";
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), internalEventsTask.Object);
             segmentCache.AddToSegment(segmentName, null);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
@@ -167,8 +167,8 @@ namespace Splitio_Tests.Unit_Tests.Matchers
         {
             //Arrange
             var segmentName = "test-segment";
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), internalEventsTask.Object);
 
             var matcher = new UserDefinedSegmentMatcher(segmentName, segmentCache);
 

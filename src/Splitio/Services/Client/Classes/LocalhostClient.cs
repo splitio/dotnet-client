@@ -48,7 +48,7 @@ namespace Splitio.Services.Client.Classes
             BuildFlagSetsFilter(new HashSet<string>());
 
             var splits = _localhostFileService.ParseSplitFile(_fullPath);
-            _featureFlagCache = new InMemorySplitCache(splits, _flagSetsFilter, _eventsManager);
+            _featureFlagCache = new InMemorySplitCache(splits, _flagSetsFilter, _internalEventsTask);
 
 
             if (configs.FileSync != null)

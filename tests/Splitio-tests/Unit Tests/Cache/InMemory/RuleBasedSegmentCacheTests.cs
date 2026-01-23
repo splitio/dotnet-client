@@ -2,9 +2,12 @@
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Common;
+using Splitio.Services.Shared.Classes;
+using Splitio.Services.Tasks;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Cache.InMemory
@@ -16,6 +19,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
         private EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
         private bool SdkUpdateFlag = false;
         private EventMetadata eMetadata = null;
+        private IInternalEventsTask _internalEventsTask;
         public event EventHandler<EventMetadata> SdkUpdate;
         public event EventHandler<EventMetadata> SdkReady;
 
@@ -24,7 +28,9 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
         {
             var cache = new ConcurrentDictionary<string, RuleBasedSegment>();
             _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-            _segmentCache = new InMemoryRuleBasedSegmentCache(cache, _eventsManager);
+            _internalEventsTask = new InternalEventsTask(_eventsManager, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            _internalEventsTask.Start();
+            _segmentCache = new InMemoryRuleBasedSegmentCache(cache, _internalEventsTask);
         }
 
         [TestMethod]
@@ -167,6 +173,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
             // Act
             SdkUpdateFlag = false;
             _segmentCache.Update(new List<RuleBasedSegment> { segmentToAdd, segmentToRemove }, new List<string> { segmentToRemove.Name }, till);
+            SpinWait.SpinUntil(() => SdkUpdateFlag, TimeSpan.FromMilliseconds(1000));
 
             // Assert
             Assert.IsTrue(SdkUpdateFlag);

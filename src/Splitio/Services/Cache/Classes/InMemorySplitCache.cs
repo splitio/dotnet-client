@@ -7,7 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Splitio.Services.Common;
+using Splitio.Services.Tasks;
 
 namespace Splitio.Services.Cache.Classes
 {
@@ -19,12 +19,12 @@ namespace Splitio.Services.Cache.Classes
         private readonly ConcurrentDictionary<string, ParsedSplit> _featureFlags;
         private readonly ConcurrentDictionary<string, int> _trafficTypes;
         private readonly ConcurrentDictionary<string, HashSet<string>> _flagSets;
-        private readonly IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        private readonly IInternalEventsTask _internalEventsTask;
 
         private long _changeNumber;
 
         public InMemorySplitCache(ConcurrentDictionary<string, ParsedSplit> featureFlags,
-            IFlagSetsFilter flagSetsFilter, IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManger,
+            IFlagSetsFilter flagSetsFilter, IInternalEventsTask internalEventsTask,
             long changeNumber = -1)
         {
             _featureFlags = featureFlags;
@@ -32,7 +32,7 @@ namespace Splitio.Services.Cache.Classes
             _changeNumber = changeNumber;
             _trafficTypes = new ConcurrentDictionary<string, int>();
             _flagSets = new ConcurrentDictionary<string, HashSet<string>>();
-            _eventsManager = eventsManger;
+            _internalEventsTask = internalEventsTask;
 
             if (!_featureFlags.IsEmpty)
             {
@@ -78,7 +78,7 @@ namespace Splitio.Services.Cache.Classes
             }
 
             SetChangeNumber(till);
-            _eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagsUpdated, 
+            _internalEventsTask.AddToQueue(SdkInternalEvent.FlagsUpdated, 
                 new EventMetadata(SdkEventType.FlagsUpdate, eventsFlags));
         }
 
@@ -151,7 +151,7 @@ namespace Splitio.Services.Cache.Classes
             featureFlag.changeNumber = changeNumber;
 
             _featureFlags.AddOrUpdate(featureFlag.name, featureFlag, (key, oldValue) => featureFlag);
-            _eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagKilledNotification,
+            _internalEventsTask.AddToQueue(SdkInternalEvent.FlagKilledNotification,
                 new EventMetadata(SdkEventType.FlagsUpdate,  new List<string> { { featureFlag.name } }));
 
         }

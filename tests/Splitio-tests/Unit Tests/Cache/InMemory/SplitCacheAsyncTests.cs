@@ -4,10 +4,12 @@ using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.Filters;
+using Splitio.Services.Tasks;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Cache
@@ -18,6 +20,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         private readonly IFlagSetsFilter _flagSetsFilter;
         private readonly IFeatureFlagCache _cache;
         private readonly EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        private readonly IInternalEventsTask _internalEventsTask;
         private bool SdkUpdateFlag = false;
         private EventMetadata eMetadata = null;
         public event EventHandler<EventMetadata> SdkUpdate;
@@ -28,7 +31,9 @@ namespace Splitio_Tests.Unit_Tests.Cache
             _flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
             var splits = new ConcurrentDictionary<string, ParsedSplit>();
             _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-            _cache = new InMemorySplitCache(splits, _flagSetsFilter, _eventsManager);
+            _internalEventsTask = new InternalEventsTask(_eventsManager, new Splitio.Services.Shared.Classes.SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            _internalEventsTask.Start();
+            _cache = new InMemorySplitCache(splits, _flagSetsFilter, _internalEventsTask);
         }
 
         [TestMethod]
@@ -200,6 +205,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
            
             SdkUpdateFlag = false;
             _cache.Update(toAdd, new List<string>(), -1);
+            SpinWait.SpinUntil(() => SdkUpdateFlag, TimeSpan.FromMilliseconds(1000));
 
             // Act.
             var result = await _cache.GetSplitNamesAsync();
@@ -217,6 +223,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             SdkUpdateFlag = false;
             eMetadata = null;
             _cache.Kill(123, "feature-flag-1", "off");
+            SpinWait.SpinUntil(() => SdkUpdateFlag, TimeSpan.FromMilliseconds(1000));
 
             Assert.IsTrue(SdkUpdateFlag);
             Assert.AreEqual(SdkEventType.FlagsUpdate, eMetadata.GetEventType());

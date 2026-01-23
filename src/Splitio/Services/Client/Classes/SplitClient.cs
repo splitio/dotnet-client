@@ -64,6 +64,7 @@ namespace Splitio.Services.Client.Classes
         protected IFlagSetsFilter _flagSetsFilter;
         protected IFallbackTreatmentCalculator _fallbackTreatmentCalculator;
         protected IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        protected IInternalEventsTask _internalEventsTask;
         private EventHandler<EventMetadata> SdkReadyEvent;
 
         public event EventHandler<EventMetadata> SdkReady
@@ -89,6 +90,8 @@ namespace Splitio.Services.Client.Classes
         {
             ApiKey = apikey;
             _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
+            _internalEventsTask = new InternalEventsTask(_eventsManager, new SplitQueue<EventSource.Workers.SdkEventNotification>());
+            _internalEventsTask.Start();
             RegisterEvents();
             
             _wrapperAdapter = WrapperAdapter.Instance();
@@ -99,7 +102,7 @@ namespace Splitio.Services.Client.Classes
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
             _flagSetsValidator = new FlagSetsValidator();
             _configService = new ConfigService(_wrapperAdapter, _flagSetsValidator, new SdkMetadataValidator());
-            _statusManager = new InMemoryReadinessGatesCache(_eventsManager);
+            _statusManager = new InMemoryReadinessGatesCache(_internalEventsTask);
             _tasksManager = new TasksManager(_statusManager);
         }
 
@@ -317,7 +320,7 @@ namespace Splitio.Services.Client.Classes
             if (_statusManager.IsDestroyed()) return;
 
             _log.Info(Messages.InitDestroy);
-
+            _internalEventsTask.Stop();
             _factoryInstantiationsService.Decrease(ApiKey);
             _statusManager.SetDestroy();
             await _syncManager.ShutdownAsync();
@@ -332,6 +335,7 @@ namespace Splitio.Services.Client.Classes
 
             _log.Info(Messages.InitDestroy);
 
+            _internalEventsTask.Stop();
             _factoryInstantiationsService.Decrease(ApiKey);
             _statusManager.SetDestroy();
             _syncManager.Shutdown();

@@ -1,7 +1,7 @@
-﻿using Splitio.Domain;
-using Splitio.Services.Logger;
+﻿using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
+using System.Threading;
 
 namespace Splitio.Services.Common
 {
@@ -9,18 +9,18 @@ namespace Splitio.Services.Common
     {
         private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventDelivery");
 
-        public virtual void Deliver(E sdkEvent, M eventMetadata, Action<M> handler)
+        public void Deliver(E sdkEvent, M eventMetadata, Action<M> callbackAction)
         {
-            if (handler != null)
+            try
             {
-                try
-                {
-                    handler.Invoke(eventMetadata);
-                }
-                catch (Exception e)
-                {
-                    _logger.Error($"EventDelivery: Failed to run event {sdkEvent} handler {e.Message}", e);
-                }
+                Thread eventCallbackThread = new Thread(() => callbackAction(eventMetadata));
+                eventCallbackThread.Start();
+            }
+            catch (Exception ex)
+            {
+                if (ex is OperationCanceledException) return;
+
+                _logger.Debug($"EventDelivery worker Execute exception", ex);
             }
         }
     }

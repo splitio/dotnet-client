@@ -4,10 +4,12 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Common;
 using Splitio.Services.Filters;
+using Splitio.Services.Tasks;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
@@ -29,8 +31,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public void AddAndGetSplitTest()
         {
             //Arrange
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object, eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object, internalEventsTask.Object);
             var splitName = "test1";
 
             //Act
@@ -45,8 +47,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public void AddDuplicateSplitTest()
         {
             //Arrange
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object, eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object, internalEventsTask.Object);
             var splitName = "test1";
 
             //Act
@@ -66,8 +68,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public void GetInexistentSplitTest()
         {
             //Arrange
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object, eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object, internalEventsTask.Object);
             var splitName = "test1";
 
             //Act
@@ -84,8 +86,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var splitName = "test1";
             var splits = new ConcurrentDictionary<string, ParsedSplit>();
             splits.TryAdd(splitName, new ParsedSplit() { name = splitName });
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var splitCache = new InMemorySplitCache(splits, _flagSetsFilter.Object, eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var splitCache = new InMemorySplitCache(splits, _flagSetsFilter.Object, internalEventsTask.Object);
             
             //Act
             splitCache.Update(new List<ParsedSplit>(), new List<string> { splitName }, -1);
@@ -99,8 +101,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public void SetAndGetChangeNumberTest()
         {
             //Arrange
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object, eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object, internalEventsTask.Object);
             var changeNumber = 1234;
 
             //Act
@@ -115,8 +117,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public void GetAllSplitsTest()
         {
             //Arrange
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object, eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object, internalEventsTask.Object);
             var splitName = "test1";
             var splitName2 = "test2";
 
@@ -135,8 +137,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
         public void AddOrUpdate_WhenUpdateTraffictType_ReturnsTrue()
         {
             // Arrange 
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object, eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object, internalEventsTask.Object);
 
             var splitName = "split_1";
             var splitName2 = "split_2";
@@ -178,8 +180,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 Sets = new HashSet<string> { "set1", "set2" }
             });
 
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var splitCache = new InMemorySplitCache(featureFlags, new FlagSetsFilter(new HashSet<string>()), eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var splitCache = new InMemorySplitCache(featureFlags, new FlagSetsFilter(new HashSet<string>()), internalEventsTask.Object);
             var flagSetNames = new List<string> { "set1", "set2", "set3", "set4" };
 
             // Act.
@@ -222,8 +224,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 defaultTreatment = "on",
                 Sets = new HashSet<string> { "set1", "set2" }
             });
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var splitCache = new InMemorySplitCache(featureFlags, new FlagSetsFilter(new HashSet<string>() { "set1", "set2" }), eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var splitCache = new InMemorySplitCache(featureFlags, new FlagSetsFilter(new HashSet<string>() { "set1", "set2" }), internalEventsTask.Object);
             var flagSetNames = new List<string> { "set1", "set2", "set3", "set4" };
 
             // Act.
@@ -246,7 +248,9 @@ namespace Splitio_Tests.Unit_Tests.Cache
         {
             // Arrange.
             var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object, eventsManager);
+            var internalEventsTask = new InternalEventsTask(eventsManager, new Splitio.Services.Shared.Classes.SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            internalEventsTask.Start();
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object, internalEventsTask);
             var splitName = "test1";
 
             var toNotify = new List<string> { { splitName } };
@@ -258,6 +262,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             // Act.
             SdkUpdateFlag = false;
             splitCache.Update(new List<ParsedSplit> { new ParsedSplit() { name = splitName } }, new List<string>(), -1);
+            SpinWait.SpinUntil(() => SdkUpdateFlag, TimeSpan.FromMilliseconds(1000));
 
             // Assert.
             Assert.IsTrue(SdkUpdateFlag);
@@ -269,6 +274,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             SdkUpdateFlag = false;
             eMetadata = null;
             splitCache.Kill(123, splitName, "off");
+            SpinWait.SpinUntil(() => SdkUpdateFlag, TimeSpan.FromMilliseconds(1000));
 
             // Assert.
             Assert.IsTrue(SdkUpdateFlag);
