@@ -49,22 +49,19 @@ namespace Splitio.Services.Cache.Classes
         // Producer
         public void Update(List<RuleBasedSegment> toAdd, List<string> toRemove, long till)
         {
-            List<string> toNotify = new List<string>();
             foreach (var rbSegment in toAdd)
             {
                 _cache.AddOrUpdate(rbSegment.Name, rbSegment, (key, oldValue) => rbSegment);
-                toNotify.Add(rbSegment.Name);
             }
 
             foreach (var name in toRemove)
             {
                 _cache.TryRemove(name, out var _);
-                toNotify.Add(name);
             }
 
             SetChangeNumber(till);
             _eventsManager.NotifyInternalEvent(SdkInternalEvent.RuleBasedSegmentsUpdated,
-                new EventMetadata(SdkEventType.SegmentsUpdate, toNotify));
+                new EventMetadata(SdkEventType.SegmentsUpdate, new List<string>()));
         }
 
         public void SetChangeNumber(long changeNumber)
