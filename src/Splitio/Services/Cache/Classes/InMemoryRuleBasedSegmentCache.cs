@@ -1,5 +1,4 @@
-﻿using Splitio.Constants;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using System.Collections.Concurrent;
@@ -65,7 +64,7 @@ namespace Splitio.Services.Cache.Classes
 
             SetChangeNumber(till);
             _eventsManager.NotifyInternalEvent(SdkInternalEvent.RuleBasedSegmentsUpdated,
-                new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.RuleBasedSegments, toNotify } }));
+                new EventMetadata(SdkEventType.SegmentsUpdate, toNotify));
         }
 
         public void SetChangeNumber(long changeNumber)

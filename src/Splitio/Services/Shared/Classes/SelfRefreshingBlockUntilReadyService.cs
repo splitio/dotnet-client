@@ -36,8 +36,7 @@ namespace Splitio.Services.Shared.Classes
                 
             if (!_statusManager.WaitUntilReady(blockMilisecondsUntilReady))
             {
-                _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkTimedOut,
-                    new EventMetadata(new Dictionary<string, object>()));
+                _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkTimedOut, null);
                 _telemetryInitProducer.RecordBURTimeout();
                 throw new TimeoutException($"SDK was not ready in {blockMilisecondsUntilReady} milliseconds");
             }

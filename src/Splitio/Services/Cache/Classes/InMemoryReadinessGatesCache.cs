@@ -1,7 +1,6 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
-using System.Collections.Generic;
 using System.Threading;
 
 namespace Splitio.Services.Client.Classes
@@ -30,8 +29,7 @@ namespace Splitio.Services.Client.Classes
         public void SetReady()
         {
             _sdkReady.Signal();
-            _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady,
-                new EventMetadata(new Dictionary<string, object>()));
+            _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, null);
         }
 
         public void SetDestroy()

@@ -61,11 +61,4 @@
         public static string Spec1_1 => "1.1";
         public static string LatestFlagsSpec => "1.3";
     }
-
-    public static class EventMetadataKeys
-    {
-        public static string Flags => "flags";
-        public static string Segments => "segments";
-        public static string RuleBasedSegments => "ruleBasedSegments";
-    }
 }

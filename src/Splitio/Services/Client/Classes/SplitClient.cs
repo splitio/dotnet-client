@@ -73,7 +73,7 @@ namespace Splitio.Services.Client.Classes
                 SdkReadyEvent = (EventHandler<EventMetadata>)Delegate.Combine(SdkReadyEvent, value);
                 if (_eventsManager.EventAlreadyTriggered(SdkEvent.SdkReady))
                 {
-                    SdkReadyEvent.Invoke(this, new EventMetadata(new Dictionary<string, object>()));
+                    SdkReadyEvent.Invoke(this, null);
                 }
             }
 
