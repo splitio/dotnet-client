@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Splitio.Services.Common;
-using Splitio.Constants;
 
 namespace Splitio.Services.Cache.Classes
 {
@@ -80,7 +79,7 @@ namespace Splitio.Services.Cache.Classes
 
             SetChangeNumber(till);
             _eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagsUpdated, 
-                new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.Flags, eventsFlags } }));
+                new EventMetadata(SdkEventType.FlagsUpdate, eventsFlags));
         }
 
         public void SetChangeNumber(long changeNumber)
@@ -153,7 +152,7 @@ namespace Splitio.Services.Cache.Classes
 
             _featureFlags.AddOrUpdate(featureFlag.name, featureFlag, (key, oldValue) => featureFlag);
             _eventsManager.NotifyInternalEvent(SdkInternalEvent.FlagKilledNotification,
-                new EventMetadata(new Dictionary<string, object> { { EventMetadataKeys.Flags, new List<string> { { featureFlag.name } } } }));
+                new EventMetadata(SdkEventType.FlagsUpdate,  new List<string> { { featureFlag.name } }));
 
         }
 

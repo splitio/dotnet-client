@@ -253,7 +253,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             SdkUpdate += sdkUpdate_callback;
             eventsManager.Register(SdkEvent.SdkUpdate, TriggerSdkUpdate);
             eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReady);
-            eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(new Dictionary<string, object>()));
+            eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, null);
 
             // Act.
             SdkUpdateFlag = false;
@@ -261,10 +261,9 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             // Assert.
             Assert.IsTrue(SdkUpdateFlag);
-            Assert.IsTrue(eMetadata.ContainKey(Splitio.Constants.EventMetadataKeys.Flags));
-            List<string> flags = (List<string>)eMetadata.GetData()[Splitio.Constants.EventMetadataKeys.Flags];
-            Assert.IsTrue(flags.Count == 1);
-            Assert.IsTrue(flags.Contains(splitName));
+            Assert.AreEqual(SdkEventType.FlagsUpdate, eMetadata.GetEventType());
+            Assert.IsTrue(eMetadata.GetNames().Count == 1);
+            Assert.IsTrue(eMetadata.GetNames().Contains(splitName));
 
             // Act.
             SdkUpdateFlag = false;
@@ -273,10 +272,9 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             // Assert.
             Assert.IsTrue(SdkUpdateFlag);
-            Assert.IsTrue(eMetadata.ContainKey(Splitio.Constants.EventMetadataKeys.Flags));
-            flags = (List<string>)eMetadata.GetData()[Splitio.Constants.EventMetadataKeys.Flags];
-            Assert.IsTrue(flags.Count == 1);
-            Assert.IsTrue(flags.Contains(splitName));
+            Assert.AreEqual(SdkEventType.FlagsUpdate, eMetadata.GetEventType());
+            Assert.IsTrue(eMetadata.GetNames().Count == 1);
+            Assert.IsTrue(eMetadata.GetNames().Contains(splitName));
         }
 
         private void sdkUpdate_callback(object sender, EventMetadata metadata)

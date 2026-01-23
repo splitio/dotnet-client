@@ -39,7 +39,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
 
             // Assert.
             Assert.IsTrue(SdkTimedOutFlag);
-            Assert.AreEqual(0, eMetadata.GetData().Count);
+            Assert.AreEqual(null, eMetadata);
         }
 
         private void sdkTimeout_callback(object sender, EventMetadata metadata)

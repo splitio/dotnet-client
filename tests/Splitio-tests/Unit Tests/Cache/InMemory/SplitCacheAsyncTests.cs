@@ -196,7 +196,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             SdkUpdate += sdkUpdate_callback;
             _eventsManager.Register(SdkEvent.SdkUpdate, TriggerSdkUpdate);
             _eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReady);
-            _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(new Dictionary<string, object>()));
+            _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, null);
            
             SdkUpdateFlag = false;
             _cache.Update(toAdd, new List<string>(), -1);
@@ -207,12 +207,11 @@ namespace Splitio_Tests.Unit_Tests.Cache
             // Assert.
             Assert.AreEqual(5, result.Count);
             Assert.IsTrue(SdkUpdateFlag);
-            Assert.IsTrue(eMetadata.ContainKey(Splitio.Constants.EventMetadataKeys.Flags));
-            List<string> flags = (List<string>)eMetadata.GetData()[Splitio.Constants.EventMetadataKeys.Flags];
-            Assert.IsTrue(flags.Count == 5);
+            Assert.AreEqual(SdkEventType.FlagsUpdate, eMetadata.GetEventType());
+            Assert.IsTrue(eMetadata.GetNames().Count == 5);
             for (int i = 1; i <= 5; i++)
             {
-                Assert.IsTrue(flags.Contains($"feature-flag-{i}"));
+                Assert.IsTrue(eMetadata.GetNames().Contains($"feature-flag-{i}"));
             }
 
             SdkUpdateFlag = false;
@@ -220,10 +219,9 @@ namespace Splitio_Tests.Unit_Tests.Cache
             _cache.Kill(123, "feature-flag-1", "off");
 
             Assert.IsTrue(SdkUpdateFlag);
-            Assert.IsTrue(eMetadata.ContainKey(Splitio.Constants.EventMetadataKeys.Flags));
-            flags = (List<string>)eMetadata.GetData()[Splitio.Constants.EventMetadataKeys.Flags];
-            Assert.IsTrue(flags.Count == 1);
-            Assert.IsTrue(flags.Contains($"feature-flag-1"));
+            Assert.AreEqual(SdkEventType.FlagsUpdate, eMetadata.GetEventType());
+            Assert.IsTrue(eMetadata.GetNames().Count == 1);
+            Assert.IsTrue(eMetadata.GetNames().Contains($"feature-flag-1"));
         }
 
         private void sdkUpdate_callback(object sender, EventMetadata metadata)

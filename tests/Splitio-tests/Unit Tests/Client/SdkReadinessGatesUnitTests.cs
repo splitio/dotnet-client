@@ -40,7 +40,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert.
             Assert.IsTrue(SdkReadyFlag);
-            Assert.AreEqual(0, eMetadata.GetData().Count);
+            Assert.AreEqual(null, eMetadata);
         }
 
         private void sdkReady_callback(object sender, EventMetadata metadata)

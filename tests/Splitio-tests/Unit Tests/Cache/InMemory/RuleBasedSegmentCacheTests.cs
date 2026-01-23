@@ -162,7 +162,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
             SdkUpdate += sdkUpdate_callback;
             _eventsManager.Register(SdkEvent.SdkUpdate, TriggerSdkUpdate);
             _eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReady);
-            _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, new EventMetadata(new Dictionary<string, object>()));
+            _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, null);
 
             // Act
             SdkUpdateFlag = false;
@@ -170,11 +170,7 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
 
             // Assert
             Assert.IsTrue(SdkUpdateFlag);
-            Assert.IsTrue(eMetadata.ContainKey(Splitio.Constants.EventMetadataKeys.RuleBasedSegments));
-            List<string> rbsegments = (List<string>)eMetadata.GetData()[Splitio.Constants.EventMetadataKeys.RuleBasedSegments];
-            Assert.IsTrue(rbsegments.Count == 3);
-            Assert.IsTrue(rbsegments.Contains("segment-to-add"));
-            Assert.IsTrue(rbsegments.Contains("segment-to-remove"));
+            Assert.AreEqual(SdkEventType.SegmentsUpdate, eMetadata.GetEventType());
         }
 
         private void sdkUpdate_callback(object sender, EventMetadata metadata)
