@@ -35,7 +35,7 @@ namespace Splitio.Services.Cache.Classes
 
             segment.AddKeys(segmentKeys);
             _internalEventsTask.AddToQueue(SdkInternalEvent.SegmentsUpdated,
-                new EventMetadata(SdkEventType.SegmentsUpdate, new List<string>()));
+                new EventMetadata(SdkEventType.SegmentsUpdate, new List<string>())).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
         }
 
         public void RemoveFromSegment(string segmentName, List<string> segmentKeys)
@@ -44,7 +44,7 @@ namespace Splitio.Services.Cache.Classes
             {
                 segment.RemoveKeys(segmentKeys);
                 _internalEventsTask.AddToQueue(SdkInternalEvent.SegmentsUpdated,
-                    new EventMetadata(SdkEventType.SegmentsUpdate, new List<string>()));
+                    new EventMetadata(SdkEventType.SegmentsUpdate, new List<string>())).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
             }
         }
 
@@ -115,5 +115,10 @@ namespace Splitio.Services.Cache.Classes
             return Task.FromResult(IsInSegment(segmentName, key));
         }
         #endregion
+
+        public void OnAddToQueueFailed(Task task)
+        {
+            _log.Error($"Failed to add internal event to queue: {task.Exception.Message}");
+        }
     }
 }

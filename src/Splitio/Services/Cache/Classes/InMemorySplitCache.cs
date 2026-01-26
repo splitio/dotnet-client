@@ -79,7 +79,7 @@ namespace Splitio.Services.Cache.Classes
 
             SetChangeNumber(till);
             _internalEventsTask.AddToQueue(SdkInternalEvent.FlagsUpdated, 
-                new EventMetadata(SdkEventType.FlagsUpdate, eventsFlags));
+                new EventMetadata(SdkEventType.FlagsUpdate, eventsFlags)).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
         }
 
         public void SetChangeNumber(long changeNumber)
@@ -152,7 +152,7 @@ namespace Splitio.Services.Cache.Classes
 
             _featureFlags.AddOrUpdate(featureFlag.name, featureFlag, (key, oldValue) => featureFlag);
             _internalEventsTask.AddToQueue(SdkInternalEvent.FlagKilledNotification,
-                new EventMetadata(SdkEventType.FlagsUpdate,  new List<string> { { featureFlag.name } }));
+                new EventMetadata(SdkEventType.FlagsUpdate,  new List<string> { { featureFlag.name } })).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
 
         }
 
@@ -275,5 +275,10 @@ namespace Splitio.Services.Cache.Classes
             if (names.Count == 0) _flagSets.TryRemove(key, out HashSet<string> _);
         }
         #endregion
+
+        public void OnAddToQueueFailed(Task task)
+        {
+            _log.Error($"Failed to add internal event to queue: {task.Exception.Message}");
+        }
     }
 }

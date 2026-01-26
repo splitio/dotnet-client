@@ -1,5 +1,7 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.Tasks;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -12,6 +14,7 @@ namespace Splitio.Services.Cache.Classes
         private readonly ConcurrentDictionary<string, RuleBasedSegment> _cache;
         private long _changeNumber;
         private readonly IInternalEventsTask _internalEventsTask;
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemoryRuleBasedSegmentCache));
 
         public InMemoryRuleBasedSegmentCache(ConcurrentDictionary<string, RuleBasedSegment> cache,
             IInternalEventsTask internalEventsTask,
@@ -61,7 +64,7 @@ namespace Splitio.Services.Cache.Classes
 
             SetChangeNumber(till);
             _internalEventsTask.AddToQueue(SdkInternalEvent.RuleBasedSegmentsUpdated,
-                new EventMetadata(SdkEventType.SegmentsUpdate, new List<string>()));
+                new EventMetadata(SdkEventType.SegmentsUpdate, new List<string>())).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
         }
 
         public void SetChangeNumber(long changeNumber)
@@ -81,5 +84,10 @@ namespace Splitio.Services.Cache.Classes
             return Task.FromResult(Get(name));
         }
         #endregion
+
+        public void OnAddToQueueFailed(Task task)
+        {
+            _log.Error($"Failed to add internal event to queue: {task.Exception.Message}");
+        }
     }
 }
