@@ -78,12 +78,13 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
         }
 
-        private RedisValue[] GetImpressions(IList<KeyImpression> items)
+        // Public for tests
+        public RedisValue[] GetImpressions(IList<KeyImpression> items)
         {
-            var impressions = items.Select(item => JsonConvertWrapper.SerializeObject(new
+            var impressions = items.Select(item => JsonConvertWrapper.SerializeObjectIgnoreNullValue(new
             {
                 m = new { s = SdkVersion, i = MachineIp, n = MachineName },
-                i = new { k = item.keyName, b = item.bucketingKey, f = item.feature, t = item.treatment, r = item.label, c = item.changeNumber, m = item.time, pt = item.previousTime }
+                i = new { k = item.keyName, b = item.bucketingKey, f = item.feature, t = item.treatment, r = item.label, c = item.changeNumber, m = item.time, pt = item.previousTime, properties = item.properties }
             }));
 
             return impressions
