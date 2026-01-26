@@ -180,6 +180,7 @@ namespace Splitio.Integration_tests
             }
 
             // Assert.
+            SpinWait.SpinUntil(() => SdkTimeout, TimeSpan.FromMilliseconds(1000));
             Assert.IsTrue(SdkTimeout);
             Assert.IsFalse(isSdkReady);
             Assert.AreEqual("SDK was not ready in 0 milliseconds", exceptionMessage);

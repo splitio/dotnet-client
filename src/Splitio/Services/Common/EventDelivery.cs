@@ -13,8 +13,8 @@ namespace Splitio.Services.Common
         {
             try
             {
-                Thread eventCallbackThread = new Thread(() => RunCallbackAction(handler, eventMetadata));
-                eventCallbackThread.Start();
+                object[] parameters = new object[] { handler, eventMetadata };
+                ThreadPool.QueueUserWorkItem(RunCallbackAction, parameters);
             }
             catch (Exception ex)
             {
@@ -24,11 +24,16 @@ namespace Splitio.Services.Common
             }
         }
 
-        private void RunCallbackAction(Action<M> callbackAction, M eventMetadata)
+        private void RunCallbackAction(object state)
         {
             try
             {
-                callbackAction(eventMetadata);
+                if (state is object[] parameters)
+                {
+                    Action<M> callbackAction = (Action<M>)parameters[0];
+                    M eventMetadata = (M)parameters[1];
+                    callbackAction(eventMetadata);
+                }
             }
             catch (Exception ex)
             {
