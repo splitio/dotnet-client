@@ -13,7 +13,7 @@ namespace Splitio.Services.Common
         {
             try
             {
-                Thread eventCallbackThread = new Thread(() => callbackAction(eventMetadata));
+                Thread eventCallbackThread = new Thread(() => RunCallbackAction(callbackAction, eventMetadata));
                 eventCallbackThread.Start();
             }
             catch (Exception ex)
@@ -21,6 +21,20 @@ namespace Splitio.Services.Common
                 if (ex is OperationCanceledException) return;
 
                 _logger.Debug($"EventDelivery worker Execute exception", ex);
+            }
+        }
+
+        private void RunCallbackAction(Action<M> callbackAction, M eventMetadata)
+        {
+            try
+            {
+                callbackAction(eventMetadata);
+            }
+            catch (Exception ex)
+            {
+                if (ex is OperationCanceledException) return;
+
+                _logger.Debug($"Exception in callback", ex);
             }
         }
     }
