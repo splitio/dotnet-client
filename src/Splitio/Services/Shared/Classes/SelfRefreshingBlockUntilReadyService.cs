@@ -1,11 +1,11 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Tasks;
 using Splitio.Telemetry.Storages;
 using System;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Shared.Classes
 {
@@ -14,15 +14,15 @@ namespace Splitio.Services.Shared.Classes
         private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SelfRefreshingBlockUntilReadyService));
 
         private readonly IStatusManager _statusManager;
+        private readonly IInternalEventsTask _internalEventsTask;
         private readonly ITelemetryInitProducer _telemetryInitProducer;
-        private readonly IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
 
         public SelfRefreshingBlockUntilReadyService(IStatusManager statusManager, ITelemetryInitProducer telemetryInitProducer,
-            IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager)
+            IInternalEventsTask internalEventsTask)
         {
             _statusManager = statusManager;
             _telemetryInitProducer = telemetryInitProducer;
-            _eventsManager = eventsManager;
+            _internalEventsTask = internalEventsTask;
         }
 
         public void BlockUntilReady(int blockMilisecondsUntilReady)
@@ -36,7 +36,7 @@ namespace Splitio.Services.Shared.Classes
                 
             if (!_statusManager.WaitUntilReady(blockMilisecondsUntilReady))
             {
-                _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkTimedOut, null);
+                _internalEventsTask.AddToQueue(SdkInternalEvent.SdkTimedOut, null).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
                 _telemetryInitProducer.RecordBURTimeout();
                 throw new TimeoutException($"SDK was not ready in {blockMilisecondsUntilReady} milliseconds");
             }
@@ -53,6 +53,11 @@ namespace Splitio.Services.Shared.Classes
                 _log.Error("Somenthing went wrong in checking if the sdk is ready.", ex);
                 return false;
             }
+        }
+
+        public void OnAddToQueueFailed(Task task)
+        {
+            _log.Error($"Failed to add internal event to queue: {task.Exception.Message}");
         }
     }
 }
