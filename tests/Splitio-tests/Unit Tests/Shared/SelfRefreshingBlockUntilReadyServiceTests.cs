@@ -25,7 +25,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Mock<IStatusManager> statusManager = new Mock<IStatusManager>();
             Mock<ITelemetryInitProducer> telemetryProducer = new Mock<ITelemetryInitProducer>();
             EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-            IInternalEventsTask internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            InternalEventsTask internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
             var bur = new SelfRefreshingBlockUntilReadyService(statusManager.Object, telemetryProducer.Object, internalEventsTask);
             internalEventsTask.Start(); 
 

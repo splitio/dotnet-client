@@ -20,7 +20,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         private readonly IFlagSetsFilter _flagSetsFilter;
         private readonly IFeatureFlagCache _cache;
         private readonly EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
-        private readonly IInternalEventsTask _internalEventsTask;
+        private readonly InternalEventsTask _internalEventsTask;
         private bool SdkUpdateFlag = false;
         private EventMetadata eMetadata = null;
         public event EventHandler<EventMetadata> SdkUpdate;

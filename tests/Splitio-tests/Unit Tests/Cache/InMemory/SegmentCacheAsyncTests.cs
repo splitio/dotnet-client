@@ -20,7 +20,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         private EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
         private bool SdkUpdateFlag = false;
         private EventMetadata eMetadata = null;
-        private IInternalEventsTask _internalEventsTask;
+        private InternalEventsTask _internalEventsTask;
         public event EventHandler<EventMetadata> SdkUpdate;
         public event EventHandler<EventMetadata> SdkReady;
 

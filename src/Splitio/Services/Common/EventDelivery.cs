@@ -9,11 +9,11 @@ namespace Splitio.Services.Common
     {
         private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("EventDelivery");
 
-        public void Deliver(E sdkEvent, M eventMetadata, Action<M> callbackAction)
+        public void Deliver(E sdkEvent, M eventMetadata, Action<M> handler)
         {
             try
             {
-                Thread eventCallbackThread = new Thread(() => RunCallbackAction(callbackAction, eventMetadata));
+                Thread eventCallbackThread = new Thread(() => RunCallbackAction(handler, eventMetadata));
                 eventCallbackThread.Start();
             }
             catch (Exception ex)

@@ -149,7 +149,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             SdkUpdateFlag = false;
         }
 
-        void VerifyMetadata(EventMetadata eMetdata)
+        static void VerifyMetadata(EventMetadata eMetdata)
         {
             Assert.IsTrue(eMetdata.GetNames().Count == 1);
             Assert.IsTrue(eMetdata.GetNames().Contains("flag1"));

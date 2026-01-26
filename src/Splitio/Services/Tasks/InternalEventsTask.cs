@@ -10,7 +10,7 @@ namespace Splitio.Services.Tasks
 {
     public class InternalEventsTask : BaseWorker, IQueueObserver, IInternalEventsTask
     {
-        IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        private readonly IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
         private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger("InternalEventsTask");
         private readonly SplitQueue<SdkEventNotification> _queue;
 
