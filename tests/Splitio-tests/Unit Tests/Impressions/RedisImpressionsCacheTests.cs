@@ -107,47 +107,16 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             };
             impressions[2].properties = "{\"prop\":\"val\"}";
 
-            var config = new RedisConfig
-            {
-                RedisHost = "localhost",
-                RedisPort = "6379",
-                RedisPassword = "",
-                RedisDatabase = 0,
-                RedisConnectTimeout = 1000,
-                RedisConnectRetry = 5,
-                RedisSyncTimeout = 1000,
-                RedisUserPrefix = "test-pre:",
-                PoolSize = 1,
-                SdkMachineIP = "ip",
-                SdkVersion = "version",
-                SdkMachineName = "mm"
-            };
-            var pool = new ConnectionPoolManager(config);
-            var adapter = new RedisAdapterForTests(config, pool);
-            var producer = new RedisAdapterProducer(config, pool);
-
-            _cache = new RedisImpressionsCache(producer, config, false);
-            CleanKeys(adapter);
-
             // Act.
-            _cache.Add(impressions);
             var result = _cache.GetImpressions(impressions);
+            var impression1 = "{\"m\":{\"s\":\"version\",\"i\":\"ip\",\"n\":\"mm\"},\"i\":{\"k\":\"matching-key\",\"b\":\"bucketing-key\",\"f\":\"feature-1\",\"t\":\"treatment\",\"r\":\"label\",\"c\":3333444,\"m\":34534546}}";
+            var impression2 = "{\"m\":{\"s\":\"version\",\"i\":\"ip\",\"n\":\"mm\"},\"i\":{\"k\":\"matching-key\",\"b\":\"bucketing-key\",\"f\":\"feature-1\",\"t\":\"treatment\",\"r\":\"label\",\"c\":3333444,\"m\":34534550,\"pt\":34534546}}";
+            var impression3 = "{\"m\":{\"s\":\"version\",\"i\":\"ip\",\"n\":\"mm\"},\"i\":{\"k\":\"matching-key\",\"b\":\"bucketing-key\",\"f\":\"feature-2\",\"t\":\"treatment\",\"r\":\"label\",\"c\":3333444,\"m\":34534546,\"properties\":\"{\\\"prop\\\":\\\"val\\\"}\"}}";
 
-            // Assert.
-            var actual = adapter.ListRange("test-pre:.SPLITIO.impressions");
-            Assert.AreEqual(_cache.GetImpressions(impressions)[0], result[0]);
-            Assert.AreEqual(_cache.GetImpressions(impressions)[1], result[1]);
-            Assert.AreEqual(_cache.GetImpressions(impressions)[2], result[2]);
+           // Assert.
+            Assert.AreEqual(impression1, result[0].ToString());
+            Assert.AreEqual(impression2, result[1].ToString());
+            Assert.AreEqual(impression3, result[2].ToString());
         }
-
-        public static void CleanKeys(RedisAdapterForTests adapter)
-        {
-            var keys = adapter.Keys($"*");
-            adapter.Del(keys);
-
-            keys = adapter.Keys($"{{SPLITIO}}*");
-            adapter.Del(keys);
-        }
-
     }
 }

@@ -33,10 +33,6 @@ namespace Splitio.Tests.Common.Resources
         public static void AssertSentImpressions(IRedisAdapterConsumer redisAdapter, string userPrefix, int sentImpressionsCount, params KeyImpression[] expectedImpressions)
         {
             Thread.Sleep(1000);
-            foreach(RedisKey Key in redisAdapter.Keys("*").ToList())
-            {
-                Console.WriteLine(Key.ToString());
-            }
             
             var redisImpressions = redisAdapter.ListRange($"{userPrefix}.SPLITIO.impressions");
 
