@@ -6,6 +6,7 @@ using Splitio.Tests.Common.Resources;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Tests.Common
@@ -681,7 +682,7 @@ namespace Splitio.Tests.Common
             var impExpected2 = Helper.GetImpressionExpected("Test_Save_1", "nico_test");
             var impExpected3 = Helper.GetImpressionExpected("MAURO_TEST", "mauro");
             var impExpected4 = Helper.GetImpressionExpected("Test_Save_1", "mauro");
-
+            Thread.Sleep(1000);
             //Validate impressions sent to the be.
             AssertSentImpressions(4, impExpected1, impExpected2, impExpected3, impExpected4);
 
