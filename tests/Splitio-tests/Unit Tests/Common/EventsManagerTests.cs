@@ -140,13 +140,15 @@ namespace Splitio_Tests.Unit_Tests.Common
             Assert.IsTrue(SdkTimedOutFlag);
             Assert.AreEqual("SdkTimeout", FireFirst);
         }
-            void ResetAllVariables()
+
+        void ResetAllVariables()
         {
             SdkReadyFlag = false;
             SdkReadyFlag2 = false;
             SdkTimedOutFlag = false;
             eMetadata = null;
             SdkUpdateFlag = false;
+            FireFirst = "";
         }
 
         static void VerifyMetadata(EventMetadata eMetdata)

@@ -667,6 +667,7 @@ namespace Splitio.Tests.Common
             var result1 = await client.GetTreatmentsAsync("nico_test", new List<string> { "FACUNDO_TEST", string.Empty, "Test_Save_1" });
             var result2 = await client.GetTreatmentsAsync("mauro", new List<string> { string.Empty, "MAURO_TEST", "Test_Save_1" });
             var result3 = await client.GetTreatmentsAsync(string.Empty, new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+            Thread.Sleep(1000);
             await client.DestroyAsync();
 
             // Assert.
@@ -682,7 +683,6 @@ namespace Splitio.Tests.Common
             var impExpected2 = Helper.GetImpressionExpected("Test_Save_1", "nico_test");
             var impExpected3 = Helper.GetImpressionExpected("MAURO_TEST", "mauro");
             var impExpected4 = Helper.GetImpressionExpected("Test_Save_1", "mauro");
-            Thread.Sleep(1000);
             //Validate impressions sent to the be.
             AssertSentImpressions(4, impExpected1, impExpected2, impExpected3, impExpected4);
 
