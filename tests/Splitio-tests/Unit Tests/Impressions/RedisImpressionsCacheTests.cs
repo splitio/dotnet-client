@@ -140,7 +140,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Assert.AreEqual(_cache.GetImpressions(impressions)[2], result[2]);
         }
 
-        public void CleanKeys(RedisAdapterForTests adapter)
+        public static void CleanKeys(RedisAdapterForTests adapter)
         {
             var keys = adapter.Keys($"*");
             adapter.Del(keys);
