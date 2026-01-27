@@ -2,6 +2,8 @@
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Shared.Classes;
+using StackExchange.Redis;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -31,7 +33,11 @@ namespace Splitio.Tests.Common.Resources
         public static void AssertSentImpressions(IRedisAdapterConsumer redisAdapter, string userPrefix, int sentImpressionsCount, params KeyImpression[] expectedImpressions)
         {
             Thread.Sleep(1000);
-
+            foreach(RedisKey Key in redisAdapter.Keys("*").ToList())
+            {
+                Console.WriteLine(Key.ToString());
+            }
+            
             var redisImpressions = redisAdapter.ListRange($"{userPrefix}.SPLITIO.impressions");
 
             Assert.AreEqual(sentImpressionsCount, redisImpressions.Length);
