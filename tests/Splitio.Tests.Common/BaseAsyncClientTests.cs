@@ -3,6 +3,7 @@ using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Tests.Common.Resources;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -667,7 +668,7 @@ namespace Splitio.Tests.Common
             var result1 = await client.GetTreatmentsAsync("nico_test", new List<string> { "FACUNDO_TEST", string.Empty, "Test_Save_1" });
             var result2 = await client.GetTreatmentsAsync("mauro", new List<string> { string.Empty, "MAURO_TEST", "Test_Save_1" });
             var result3 = await client.GetTreatmentsAsync(string.Empty, new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
-            Thread.Sleep(1000);
+            SpinWait.SpinUntil(() => impressionListener.Count() > 0, TimeSpan.FromMilliseconds(2000));
             await client.DestroyAsync();
 
             // Assert.
