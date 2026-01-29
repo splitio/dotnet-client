@@ -36,31 +36,19 @@ namespace Splitio.Domain
                         SdkInternalEvent.FlagKilledNotification,
                         SdkInternalEvent.SegmentsUpdated
                     }
-                },
-                { SdkEvent.SdkReadyTimeout, new HashSet<SdkInternalEvent>
-                    {
-                        SdkInternalEvent.SdkTimedOut
-                    }
                 }
             };
 
-            SuppressedBy = new Dictionary<SdkEvent, HashSet<SdkEvent>>
-            {
-                { SdkEvent.SdkReadyTimeout, new HashSet<SdkEvent>
-                    { SdkEvent.SdkReady }
-
-                }
-            };
+            SuppressedBy = new Dictionary<SdkEvent, HashSet<SdkEvent>>();
 
             ExecutionLimits = new Dictionary<SdkEvent, int>
             {
-                { SdkEvent.SdkReadyTimeout, -1 },
                 { SdkEvent.SdkReady, 1 },
                 { SdkEvent.SdkUpdate, -1 }
             };
 
             HashSet<SdkEvent> sortedEvents = new HashSet<SdkEvent>();
-            foreach (SdkEvent sdkEvent in new List<SdkEvent> { SdkEvent.SdkReady, SdkEvent.SdkReadyTimeout, SdkEvent.SdkUpdate }) 
+            foreach (SdkEvent sdkEvent in new List<SdkEvent> { SdkEvent.SdkReady, SdkEvent.SdkUpdate }) 
             {
                 sortedEvents = DFSRecursive(sdkEvent, sortedEvents);
             }

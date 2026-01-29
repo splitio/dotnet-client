@@ -63,8 +63,12 @@ namespace Splitio.Services.Cache.Classes
             }
 
             SetChangeNumber(till);
-            _internalEventsTask.AddToQueue(SdkInternalEvent.RuleBasedSegmentsUpdated,
+            Task task = new Task(() =>
+            {
+                _internalEventsTask.AddToQueue(SdkInternalEvent.RuleBasedSegmentsUpdated,
                 new EventMetadata(SdkEventType.SegmentsUpdate, new List<string>())).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
+            });
+            task.Start();
         }
 
         public void SetChangeNumber(long changeNumber)

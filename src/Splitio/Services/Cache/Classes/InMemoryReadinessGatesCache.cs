@@ -33,7 +33,11 @@ namespace Splitio.Services.Client.Classes
         public void SetReady()
         {
             _sdkReady.Signal();
-            _internalEventsTask.AddToQueue(SdkInternalEvent.SdkReady, null).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
+            Task task = new Task(() =>
+            {
+                _internalEventsTask.AddToQueue(SdkInternalEvent.SdkReady, null).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
+            });
+            task.Start();
         }
 
         public void SetDestroy()

@@ -36,7 +36,6 @@ namespace Splitio.Services.Shared.Classes
                 
             if (!_statusManager.WaitUntilReady(blockMilisecondsUntilReady))
             {
-                _internalEventsTask.AddToQueue(SdkInternalEvent.SdkTimedOut, null).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
                 _telemetryInitProducer.RecordBURTimeout();
                 throw new TimeoutException($"SDK was not ready in {blockMilisecondsUntilReady} milliseconds");
             }

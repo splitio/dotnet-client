@@ -78,8 +78,12 @@ namespace Splitio.Services.Cache.Classes
             }
 
             SetChangeNumber(till);
-            _internalEventsTask.AddToQueue(SdkInternalEvent.FlagsUpdated, 
+            Task task = new Task(() =>
+            {
+                _internalEventsTask.AddToQueue(SdkInternalEvent.FlagsUpdated, 
                 new EventMetadata(SdkEventType.FlagsUpdate, eventsFlags)).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
+            });
+            task.Start();
         }
 
         public void SetChangeNumber(long changeNumber)
@@ -151,9 +155,12 @@ namespace Splitio.Services.Cache.Classes
             featureFlag.changeNumber = changeNumber;
 
             _featureFlags.AddOrUpdate(featureFlag.name, featureFlag, (key, oldValue) => featureFlag);
-            _internalEventsTask.AddToQueue(SdkInternalEvent.FlagKilledNotification,
+            Task task = new Task(() =>
+            {
+                _internalEventsTask.AddToQueue(SdkInternalEvent.FlagKilledNotification,
                 new EventMetadata(SdkEventType.FlagsUpdate,  new List<string> { { featureFlag.name } })).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
-
+            });
+            task.Start();
         }
 
         public List<string> GetSplitNames()

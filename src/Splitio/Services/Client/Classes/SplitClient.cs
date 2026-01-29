@@ -84,7 +84,6 @@ namespace Splitio.Services.Client.Classes
             }
         }
         public event EventHandler<EventMetadata> SdkUpdate;
-        public event EventHandler<EventMetadata> SdkTimedOut;
 
         protected SplitClient(string apikey)
         {
@@ -519,13 +518,11 @@ namespace Splitio.Services.Client.Classes
         {
             _eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReady);
             _eventsManager.Register(SdkEvent.SdkUpdate, TriggerSdkUpdate);
-            _eventsManager.Register(SdkEvent.SdkReadyTimeout, TriggerSdkTimeout);
         }
         private void UnregisterEvents()
         {
             _eventsManager.Unregister(SdkEvent.SdkReady);
             _eventsManager.Unregister(SdkEvent.SdkUpdate);
-            _eventsManager.Unregister(SdkEvent.SdkReadyTimeout);
         }
         private List<TreatmentResult> GetTreatmentsSync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
@@ -623,11 +620,6 @@ namespace Splitio.Services.Client.Classes
         private void TriggerSdkUpdate(EventMetadata metaData)
         {
             SdkUpdate?.Invoke(this, metaData);
-        }
-
-        private void TriggerSdkTimeout(EventMetadata metaData)
-        {
-            SdkTimedOut?.Invoke(this, metaData);
         }
         #endregion
     }

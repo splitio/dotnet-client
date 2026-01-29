@@ -8,7 +8,6 @@ namespace Splitio.Domain
         RuleBasedSegmentsUpdated,
         SegmentsUpdated,
         LargeSegmentsUpdated,
-        SdkTimedOut,
         SdkReady
     }
 }

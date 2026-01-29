@@ -34,8 +34,12 @@ namespace Splitio.Services.Cache.Classes
             }
 
             segment.AddKeys(segmentKeys);
-            _internalEventsTask.AddToQueue(SdkInternalEvent.SegmentsUpdated,
+            Task task = new Task(() =>
+            {
+                _internalEventsTask.AddToQueue(SdkInternalEvent.SegmentsUpdated,
                 new EventMetadata(SdkEventType.SegmentsUpdate, new List<string>())).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
+            });
+            task.Start();
         }
 
         public void RemoveFromSegment(string segmentName, List<string> segmentKeys)
@@ -43,8 +47,12 @@ namespace Splitio.Services.Cache.Classes
             if (_segments.TryGetValue(segmentName, out Segment segment))
             {
                 segment.RemoveKeys(segmentKeys);
-                _internalEventsTask.AddToQueue(SdkInternalEvent.SegmentsUpdated,
+                Task task = new Task(() =>
+                {
+                    _internalEventsTask.AddToQueue(SdkInternalEvent.SegmentsUpdated,
                     new EventMetadata(SdkEventType.SegmentsUpdate, new List<string>())).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
+                });
+                task.Start();
             }
         }
 
