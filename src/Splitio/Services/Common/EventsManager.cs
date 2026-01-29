@@ -81,21 +81,21 @@ namespace Splitio.Services.Common
             }
             return false;
         }
+        #endregion
 
-        public bool GetSdkInternalEventStatus(I sdkInternalEvent)
+        #region Private Methods
+        private bool GetSdkInternalEventStatus(I sdkInternalEvent)
         {
             _internalEventsStatus.TryGetValue(sdkInternalEvent, out var status);
             return status;
         }
 
-        public void UpdateSdkInternalEventStatus(I sdkInternalEvent, bool status)
+        private void UpdateSdkInternalEventStatus(I sdkInternalEvent, bool status)
         {
             _internalEventsStatus.AddOrUpdate(sdkInternalEvent, status,
                 (_, oldValue) => status);
         }
-        #endregion
 
-        #region Private Methods
         private void SetSdkEventTriggered(E sdkEvent)
         {
             if (!_activeSubscriptions.TryGetValue(sdkEvent, out var eventData))
