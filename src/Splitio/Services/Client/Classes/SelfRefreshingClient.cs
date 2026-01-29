@@ -210,7 +210,7 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildBlockUntilReadyService()
         {
-            _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(_statusManager, _telemetryInitProducer, _internalEventsTask);
+            _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(_statusManager, _telemetryInitProducer);
         }
 
         private void BuildTelemetrySyncTask()
