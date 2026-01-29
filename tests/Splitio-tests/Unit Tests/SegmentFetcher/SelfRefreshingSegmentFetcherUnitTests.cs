@@ -28,8 +28,8 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             // Arrange
             Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
             var internalEventsTask = new InternalEventsTask(eventsManager.Object, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
-            var statusManager = new InMemoryReadinessGatesCache(internalEventsTask);
-            var gates = new InMemoryReadinessGatesCache(internalEventsTask);
+            var statusManager = new InMemoryReadinessGatesCache();
+            var gates = new InMemoryReadinessGatesCache();
             gates.SetReady();
             var apiClient = new Mock<ISegmentSdkApiClient>();            
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);

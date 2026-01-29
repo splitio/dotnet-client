@@ -1,4 +1,5 @@
 ﻿using Splitio.CommonLibraries;
+using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EventSource;
 using Splitio.Services.Logger;
@@ -11,9 +12,7 @@ using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
-using YamlDotNet.Serialization.NodeTypeResolvers;
 
 namespace Splitio.Services.Common
 {
@@ -32,6 +31,7 @@ namespace Splitio.Services.Common
         private readonly IBackOff _backOff;
         private readonly ISplitTask _startupTask;
         private readonly SplitQueue<StreamingStatus> _streamingStatusQueue;
+        private readonly IInternalEventsTask _internalEventsTask;
 
         private long _startSessionMs;
         private bool _streamingOff;
@@ -46,7 +46,8 @@ namespace Splitio.Services.Common
             ITelemetrySyncTask telemetrySyncTask,
             IBackOff backOff,
             SplitQueue<StreamingStatus> streamingStatusQueue,
-            ISplitTask startupTask)
+            ISplitTask startupTask,
+            IInternalEventsTask internalEventsTask)
         {
             _streamingEnabled = streamingEnabled;
             _synchronizer = synchronizer;
@@ -60,6 +61,7 @@ namespace Splitio.Services.Common
             _backOff = backOff;
             _streamingStatusQueue = streamingStatusQueue;
             _streamingStatusQueue.AddObserver(this);
+            _internalEventsTask = internalEventsTask;
             _startupTask = startupTask;
             _startupTask.SetFunction(StartupLogicAsync);
         }
@@ -185,6 +187,7 @@ namespace Splitio.Services.Common
                 if (_statusManager.IsDestroyed()) return;
 
                 _statusManager.SetReady();
+                await _internalEventsTask.AddToQueue(SdkInternalEvent.SdkReady, null);
                 clock.Stop();
                 _log.Debug($"Time until SDK ready: {clock.ElapsedMilliseconds} ms.");
                 _telemetrySyncTask.RecordConfigInit(clock.ElapsedMilliseconds);

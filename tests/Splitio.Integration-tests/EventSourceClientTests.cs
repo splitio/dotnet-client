@@ -372,7 +372,7 @@ namespace Splitio.Integration_tests
             var notificationManagerKeeper = new NotificationManagerKeeper(telemetryRuntimeProducer, streamingStatusQueue);
             EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
             var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
-            var statusManager = new InMemoryReadinessGatesCache(internalEventsTask);
+            var statusManager = new InMemoryReadinessGatesCache();
             var tasksManager = new TasksManager(statusManager);
             var task = tasksManager.NewOnTimeTask(Enums.Task.SSEConnect);
 

@@ -270,7 +270,7 @@ namespace Splitio.Services.Client.Classes
                 // SyncManager
                 var streamingbackoff = new BackOff(_config.StreamingReconnectBackoffBase, attempt: 1);
                 var startupTask = _tasksManager.NewOnTimeTask(Enums.Task.SDKInitialization);
-                _syncManager = new SyncManager(_config.StreamingEnabled, synchronizer, pushManager, sseHandler, _telemetryRuntimeProducer, _statusManager, _tasksManager, _telemetrySyncTask, streamingbackoff, streamingStatusQueue, startupTask);
+                _syncManager = new SyncManager(_config.StreamingEnabled, synchronizer, pushManager, sseHandler, _telemetryRuntimeProducer, _statusManager, _tasksManager, _telemetrySyncTask, streamingbackoff, streamingStatusQueue, startupTask, _internalEventsTask);
             }
             catch (Exception ex)
             {

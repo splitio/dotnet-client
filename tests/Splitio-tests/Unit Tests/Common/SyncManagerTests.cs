@@ -24,7 +24,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<IStatusManager> _statusManager;
         private readonly Mock<ITelemetrySyncTask> _telemetrySyncTask;
         private readonly Mock<IBackOff> _backoff;
-
+        private readonly Mock<IInternalEventsTask> _internalEventsTask;
         private readonly SplitQueue<StreamingStatus> _streamingStatusQueue;
 
         public SyncManagerTests()
@@ -38,6 +38,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _telemetrySyncTask = new Mock<ITelemetrySyncTask>();
             _backoff = new Mock<IBackOff>();
             _streamingStatusQueue = new SplitQueue<StreamingStatus>();
+            _internalEventsTask = new Mock<IInternalEventsTask>();
         }
 
         [TestMethod]
@@ -232,6 +233,29 @@ namespace Splitio_Tests.Unit_Tests.Common
             _pushManager.Verify(mock => mock.StartAsync(), Times.Exactly(2));
         }
 
+        [TestMethod]
+        public void TestSdkReadyEventIsFiredWhenReady()
+        {
+            // Arrange.
+            _synchronizer
+                .Setup(mock => mock.SyncAllAsync())
+                .ReturnsAsync(true);
+
+            _statusManager
+                .Setup(mock => mock.IsDestroyed())
+                .Returns(false);
+
+            var syncManager = GetSyncManager(false);
+
+            // Act.
+            syncManager.Start();
+
+            // Assert.            
+            Thread.Sleep(3000);
+            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Once);
+            _internalEventsTask.Verify(mock => mock.AddToQueue(Splitio.Domain.SdkInternalEvent.SdkReady, null), Times.Once);
+        }
+
         private SyncManager GetSyncManager(bool streamingEnabled)
         {
             var startupTask = _taskManager.NewOnTimeTask(Splitio.Enums.Task.SDKInitialization);
@@ -246,7 +270,8 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _telemetrySyncTask.Object,
                 _backoff.Object,
                 _streamingStatusQueue,
-                startupTask);
+                startupTask,
+                _internalEventsTask.Object);
         }
     }
 }

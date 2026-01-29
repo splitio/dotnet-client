@@ -101,7 +101,7 @@ namespace Splitio.Services.Client.Classes
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
             _flagSetsValidator = new FlagSetsValidator();
             _configService = new ConfigService(_wrapperAdapter, _flagSetsValidator, new SdkMetadataValidator());
-            _statusManager = new InMemoryReadinessGatesCache(_internalEventsTask);
+            _statusManager = new InMemoryReadinessGatesCache();
             _tasksManager = new TasksManager(_statusManager);
         }
 
