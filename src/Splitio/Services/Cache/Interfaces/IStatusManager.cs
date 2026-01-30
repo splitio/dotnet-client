@@ -1,10 +1,12 @@
-﻿namespace Splitio.Services.Cache.Interfaces
+﻿using System.Threading.Tasks;
+
+namespace Splitio.Services.Cache.Interfaces
 {
     public interface IStatusManager
     {
         bool IsReady();
         bool WaitUntilReady(int milliseconds);
-        void SetReady();
+        Task SetReadyAsync();
         void SetDestroy();
         bool IsDestroyed();
     }

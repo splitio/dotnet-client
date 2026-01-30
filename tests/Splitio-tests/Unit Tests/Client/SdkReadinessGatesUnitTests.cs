@@ -1,5 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {
@@ -11,7 +13,8 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void IsSDKReadyShouldReturnFalseIfSplitsAreNotReady()
         {
             //Arrange
-            var gates = new InMemoryReadinessGatesCache();
+            var internalEventsTask = new Mock<IInternalEventsTask>();
+            var gates = new InMemoryReadinessGatesCache(internalEventsTask.Object);
 
             //Act
             var result = gates.IsReady();

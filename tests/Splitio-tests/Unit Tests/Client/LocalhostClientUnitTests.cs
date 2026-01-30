@@ -1,8 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
-using Splitio.Services.Common;
-using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Shared.Classes;
 
 namespace Splitio_Tests.Unit_Tests.Client
@@ -11,16 +9,11 @@ namespace Splitio_Tests.Unit_Tests.Client
     public class LocalhostClientUnitTests
     {
         private readonly string rootFilePath;
-        private readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
-        private readonly EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
-        private bool SdkReady = false;
 
         public LocalhostClientUnitTests()
         {
             // This line is to clean the warnings.
             rootFilePath = string.Empty;
-            _fallbackTreatmentCalculator = new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration());
-            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
 
 #if NET_LATEST
             rootFilePath = @"Resources\";

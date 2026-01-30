@@ -62,7 +62,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
-        public async Task NotifyEventsTest()
+        public void NotifyEventsTest()
         {
             //Arrange
             var segmentName = "segment_test";
