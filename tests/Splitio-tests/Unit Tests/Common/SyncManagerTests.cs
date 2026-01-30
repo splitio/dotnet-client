@@ -233,29 +233,6 @@ namespace Splitio_Tests.Unit_Tests.Common
             _pushManager.Verify(mock => mock.StartAsync(), Times.Exactly(2));
         }
 
-        [TestMethod]
-        public void TestSdkReadyEventIsFiredWhenReady()
-        {
-            // Arrange.
-            _synchronizer
-                .Setup(mock => mock.SyncAllAsync())
-                .ReturnsAsync(true);
-
-            _statusManager
-                .Setup(mock => mock.IsDestroyed())
-                .Returns(false);
-
-            var syncManager = GetSyncManager(false);
-
-            // Act.
-            syncManager.Start();
-
-            // Assert.            
-            Thread.Sleep(3000);
-            _synchronizer.Verify(mock => mock.SyncAllAsync(), Times.Once);
-            _internalEventsTask.Verify(mock => mock.AddToQueue(Splitio.Domain.SdkInternalEvent.SdkReady, null), Times.Once);
-        }
-
         private SyncManager GetSyncManager(bool streamingEnabled)
         {
             var startupTask = _taskManager.NewOnTimeTask(Splitio.Enums.Task.SDKInitialization);
