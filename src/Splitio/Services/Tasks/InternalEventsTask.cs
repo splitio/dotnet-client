@@ -43,22 +43,22 @@ namespace Splitio.Services.Tasks
 
         public async Task Notify()
         {
-            try
+            await Task.Run(() =>
             {
-                await Task.Run(() =>
+                try
                 {
                     if (!_queue.TryDequeue(out SdkEventNotification sdkEventDto)) return;
 
                     _logger.Debug($"InternalEventTask: SdkEvent dequeue: {sdkEventDto.SdkInternalEvent}");
                     _eventsManager.NotifyInternalEvent(sdkEventDto.SdkInternalEvent, sdkEventDto.EventMetadata);
-                });
-            }
-            catch (Exception ex)
-            {
-                if (ex is OperationCanceledException) return;
+                }
+                catch (Exception ex)
+                {
+                    if (ex is OperationCanceledException) return;
 
-                _logger.Debug($"InternalEventTask worker Execute exception", ex);
-            }
+                    _logger.Debug($"InternalEventTask worker Execute exception", ex);
+                }
+            });
         }
     }
 }
