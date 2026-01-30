@@ -1,6 +1,8 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Common;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
+using Splitio.Services.Tasks;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,15 +13,16 @@ namespace Splitio.Services.Cache.Classes
     {
         private readonly ConcurrentDictionary<string, RuleBasedSegment> _cache;
         private long _changeNumber;
-        private readonly IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        private readonly IInternalEventsTask _internalEventsTask;
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemoryRuleBasedSegmentCache));
 
         public InMemoryRuleBasedSegmentCache(ConcurrentDictionary<string, RuleBasedSegment> cache,
-            IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManger,
+            IInternalEventsTask internalEventsTask,
             long changeNumber = -1)
         {
             _cache = cache;
             _changeNumber = changeNumber;
-            _eventsManager = eventsManger;
+            _internalEventsTask = internalEventsTask;
         }
 
         #region Sync Methods
@@ -60,8 +63,12 @@ namespace Splitio.Services.Cache.Classes
             }
 
             SetChangeNumber(till);
-            _eventsManager.NotifyInternalEvent(SdkInternalEvent.RuleBasedSegmentsUpdated,
-                new EventMetadata(SdkEventType.SegmentsUpdate, new List<string>()));
+            Task task = new Task(() =>
+            {
+                _internalEventsTask.AddToQueue(SdkInternalEvent.RuleBasedSegmentsUpdated,
+                new EventMetadata(SdkEventType.SegmentsUpdate, new List<string>())).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
+            });
+            task.Start();
         }
 
         public void SetChangeNumber(long changeNumber)
@@ -81,5 +88,10 @@ namespace Splitio.Services.Cache.Classes
             return Task.FromResult(Get(name));
         }
         #endregion
+
+        public void OnAddToQueueFailed(Task task)
+        {
+            _log.Error($"Failed to add internal event to queue: {task.Exception.Message}");
+        }
     }
 }

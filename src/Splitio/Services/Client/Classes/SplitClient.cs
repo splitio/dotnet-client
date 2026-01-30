@@ -64,6 +64,7 @@ namespace Splitio.Services.Client.Classes
         protected IFlagSetsFilter _flagSetsFilter;
         protected IFallbackTreatmentCalculator _fallbackTreatmentCalculator;
         protected IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        protected IInternalEventsTask _internalEventsTask;
         private EventHandler<EventMetadata> SdkReadyEvent;
 
         public event EventHandler<EventMetadata> SdkReady
@@ -83,12 +84,13 @@ namespace Splitio.Services.Client.Classes
             }
         }
         public event EventHandler<EventMetadata> SdkUpdate;
-        public event EventHandler<EventMetadata> SdkTimedOut;
 
         protected SplitClient(string apikey)
         {
             ApiKey = apikey;
             _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
+            _internalEventsTask = new InternalEventsTask(_eventsManager, new SplitQueue<EventSource.Workers.SdkEventNotification>());
+            _internalEventsTask.Start();
             RegisterEvents();
             
             _wrapperAdapter = WrapperAdapter.Instance();
@@ -99,7 +101,7 @@ namespace Splitio.Services.Client.Classes
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
             _flagSetsValidator = new FlagSetsValidator();
             _configService = new ConfigService(_wrapperAdapter, _flagSetsValidator, new SdkMetadataValidator());
-            _statusManager = new InMemoryReadinessGatesCache(_eventsManager);
+            _statusManager = new InMemoryReadinessGatesCache(_internalEventsTask);
             _tasksManager = new TasksManager(_statusManager);
         }
 
@@ -317,7 +319,7 @@ namespace Splitio.Services.Client.Classes
             if (_statusManager.IsDestroyed()) return;
 
             _log.Info(Messages.InitDestroy);
-
+            _internalEventsTask.Stop();
             _factoryInstantiationsService.Decrease(ApiKey);
             _statusManager.SetDestroy();
             await _syncManager.ShutdownAsync();
@@ -332,6 +334,7 @@ namespace Splitio.Services.Client.Classes
 
             _log.Info(Messages.InitDestroy);
 
+            _internalEventsTask.Stop();
             _factoryInstantiationsService.Decrease(ApiKey);
             _statusManager.SetDestroy();
             _syncManager.Shutdown();
@@ -515,13 +518,11 @@ namespace Splitio.Services.Client.Classes
         {
             _eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReady);
             _eventsManager.Register(SdkEvent.SdkUpdate, TriggerSdkUpdate);
-            _eventsManager.Register(SdkEvent.SdkReadyTimeout, TriggerSdkTimeout);
         }
         private void UnregisterEvents()
         {
             _eventsManager.Unregister(SdkEvent.SdkReady);
             _eventsManager.Unregister(SdkEvent.SdkUpdate);
-            _eventsManager.Unregister(SdkEvent.SdkReadyTimeout);
         }
         private List<TreatmentResult> GetTreatmentsSync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
@@ -619,11 +620,6 @@ namespace Splitio.Services.Client.Classes
         private void TriggerSdkUpdate(EventMetadata metaData)
         {
             SdkUpdate?.Invoke(this, metaData);
-        }
-
-        private void TriggerSdkTimeout(EventMetadata metaData)
-        {
-            SdkTimedOut?.Invoke(this, metaData);
         }
         #endregion
     }

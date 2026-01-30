@@ -88,17 +88,17 @@ namespace Splitio.Services.Client.Classes
         #region Private Methods
         private void BuildSplitCache()
         {
-            _featureFlagCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(_config.ConcurrencyLevel, InitialCapacity), _flagSetsFilter, _eventsManager);
+            _featureFlagCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(_config.ConcurrencyLevel, InitialCapacity), _flagSetsFilter, _internalEventsTask);
         }
 
         private void BuildSegmentCache()
         {
-            _segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(_config.ConcurrencyLevel, InitialCapacity), _eventsManager);
+            _segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(_config.ConcurrencyLevel, InitialCapacity), _internalEventsTask);
         }
 
         private void BuildRuleBasedSegmentCache()
         {
-            _ruleBasedSegmentCache = new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>(_config.ConcurrencyLevel, InitialCapacity), _eventsManager);
+            _ruleBasedSegmentCache = new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>(_config.ConcurrencyLevel, InitialCapacity), _internalEventsTask);
         }
 
         private void BuildTelemetryStorage()
@@ -210,7 +210,7 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildBlockUntilReadyService()
         {
-            _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(_statusManager, _telemetryInitProducer, _eventsManager);
+            _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(_statusManager, _telemetryInitProducer);
         }
 
         private void BuildTelemetrySyncTask()

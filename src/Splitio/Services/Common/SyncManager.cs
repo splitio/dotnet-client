@@ -11,9 +11,7 @@ using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
-using YamlDotNet.Serialization.NodeTypeResolvers;
 
 namespace Splitio.Services.Common
 {
@@ -32,7 +30,7 @@ namespace Splitio.Services.Common
         private readonly IBackOff _backOff;
         private readonly ISplitTask _startupTask;
         private readonly SplitQueue<StreamingStatus> _streamingStatusQueue;
-
+        
         private long _startSessionMs;
         private bool _streamingOff;
 
@@ -184,7 +182,7 @@ namespace Splitio.Services.Common
 
                 if (_statusManager.IsDestroyed()) return;
 
-                _statusManager.SetReady();
+                await _statusManager.SetReadyAsync();
                 clock.Stop();
                 _log.Debug($"Time until SDK ready: {clock.ElapsedMilliseconds} ms.");
                 _telemetrySyncTask.RecordConfigInit(clock.ElapsedMilliseconds);

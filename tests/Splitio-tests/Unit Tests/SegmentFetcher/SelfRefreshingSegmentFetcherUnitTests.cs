@@ -10,7 +10,6 @@ using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Services.Tasks;
-using Splitio.Telemetry.Domain;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -24,16 +23,17 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         private static readonly string PayedSplitJson = @"{'name': 'payed','added': ['abcdz','bcadz','xzydz'],'removed': [],'since': -1,'till': 10001}";
 
         [TestMethod]
-        public void InitializeSegmentNotExistent()
+        public async Task InitializeSegmentNotExistent()
         {
             // Arrange
             Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var gates = new InMemoryReadinessGatesCache(eventsManager.Object);
-            gates.SetReady();
+            var internalEventsTask = new InternalEventsTask(eventsManager.Object, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            var gates = new InMemoryReadinessGatesCache(internalEventsTask);
+            await gates.SetReadyAsync();
             var apiClient = new Mock<ISegmentSdkApiClient>();            
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments = new ConcurrentDictionary<string, Segment>();
-            var cache = new InMemorySegmentCache(segments, eventsManager.Object);
+            var cache = new InMemorySegmentCache(segments, internalEventsTask);
             var segmentsQueue = new SplitQueue<SelfRefreshingSegment>();
             var taskManager = new TasksManager(gates);
             var worker = new SegmentTaskWorker(5, segmentsQueue);

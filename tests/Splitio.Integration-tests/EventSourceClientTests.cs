@@ -370,7 +370,9 @@ namespace Splitio.Integration_tests
             var sseHttpClient = new SplitioHttpClient("api-key", config, new Dictionary<string, string>());
             var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
             var notificationManagerKeeper = new NotificationManagerKeeper(telemetryRuntimeProducer, streamingStatusQueue);
-            var statusManager = new InMemoryReadinessGatesCache(new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>()));
+            EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
+            var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            var statusManager = new InMemoryReadinessGatesCache(internalEventsTask);
             var tasksManager = new TasksManager(statusManager);
             var task = tasksManager.NewOnTimeTask(Enums.Task.SSEConnect);
 

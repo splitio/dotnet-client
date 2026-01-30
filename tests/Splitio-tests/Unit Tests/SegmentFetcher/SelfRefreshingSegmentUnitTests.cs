@@ -3,9 +3,9 @@ using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Common;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
+using Splitio.Services.Tasks;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
@@ -23,8 +23,8 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var statusManager = new Mock<IStatusManager>();
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments  = new ConcurrentDictionary<string, Segment>();
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var cache = new InMemorySegmentCache(segments, eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var cache = new InMemorySegmentCache(segments, internalEventsTask.Object);
             var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, cache, statusManager.Object);
 
             apiClient
@@ -46,8 +46,8 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var statusManager = new Mock<IStatusManager>();
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments = new ConcurrentDictionary<string, Segment>();
-            Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var cache = new InMemorySegmentCache(segments, eventsManager.Object);
+            Mock<IInternalEventsTask> internalEventsTask = new Mock<IInternalEventsTask>();
+            var cache = new InMemorySegmentCache(segments, internalEventsTask.Object);
             var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, cache, statusManager.Object);
 
             apiClient

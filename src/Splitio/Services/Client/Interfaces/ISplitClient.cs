@@ -8,7 +8,6 @@ namespace Splitio.Services.Client.Interfaces
     {
         event EventHandler<EventMetadata> SdkReady;
         event EventHandler<EventMetadata> SdkUpdate;
-        event EventHandler<EventMetadata> SdkTimedOut;
 
         /// <summary>
         /// Returns the treatment to show this key for this feature flag.

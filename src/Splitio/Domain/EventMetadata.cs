@@ -1,13 +1,11 @@
 ﻿using System.Collections.Generic;
-using Splitio.Services.InputValidation.Classes;
-using System.Linq;
 
 namespace Splitio.Domain
 {
     public class EventMetadata
     {
-        private List<string> _names;
-        private SdkEventType _type;
+        private readonly List<string> _names;
+        private readonly SdkEventType _type;
 
         public EventMetadata(SdkEventType type, List<string> names) 
         {
