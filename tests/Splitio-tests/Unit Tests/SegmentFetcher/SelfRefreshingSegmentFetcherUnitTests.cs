@@ -23,14 +23,13 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         private static readonly string PayedSplitJson = @"{'name': 'payed','added': ['abcdz','bcadz','xzydz'],'removed': [],'since': -1,'till': 10001}";
 
         [TestMethod]
-        public void InitializeSegmentNotExistent()
+        public async Task InitializeSegmentNotExistent()
         {
             // Arrange
             Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
             var internalEventsTask = new InternalEventsTask(eventsManager.Object, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
-            var statusManager = new InMemoryReadinessGatesCache();
-            var gates = new InMemoryReadinessGatesCache();
-            gates.SetReady();
+            var gates = new InMemoryReadinessGatesCache(internalEventsTask);
+            await gates.SetReadyAsync();
             var apiClient = new Mock<ISegmentSdkApiClient>();            
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments = new ConcurrentDictionary<string, Segment>();

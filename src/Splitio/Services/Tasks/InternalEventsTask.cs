@@ -45,10 +45,13 @@ namespace Splitio.Services.Tasks
         {
             try
             {
-                if (!_queue.TryDequeue(out SdkEventNotification sdkEventDto)) return;
+                await Task.Run(() =>
+                {
+                    if (!_queue.TryDequeue(out SdkEventNotification sdkEventDto)) return;
 
-                _logger.Debug($"InternalEventTask: SdkEvent dequeue: {sdkEventDto.SdkInternalEvent}");
-                _eventsManager.NotifyInternalEvent(sdkEventDto.SdkInternalEvent, sdkEventDto.EventMetadata);
+                    _logger.Debug($"InternalEventTask: SdkEvent dequeue: {sdkEventDto.SdkInternalEvent}");
+                    _eventsManager.NotifyInternalEvent(sdkEventDto.SdkInternalEvent, sdkEventDto.EventMetadata);
+                });
             }
             catch (Exception ex)
             {

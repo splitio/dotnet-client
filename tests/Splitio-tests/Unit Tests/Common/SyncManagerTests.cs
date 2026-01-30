@@ -270,8 +270,7 @@ namespace Splitio_Tests.Unit_Tests.Common
                 _telemetrySyncTask.Object,
                 _backoff.Object,
                 _streamingStatusQueue,
-                startupTask,
-                _internalEventsTask.Object);
+                startupTask);
         }
     }
 }
