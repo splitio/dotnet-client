@@ -24,7 +24,6 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<IStatusManager> _statusManager;
         private readonly Mock<ITelemetrySyncTask> _telemetrySyncTask;
         private readonly Mock<IBackOff> _backoff;
-        private readonly Mock<IInternalEventsTask> _internalEventsTask;
         private readonly SplitQueue<StreamingStatus> _streamingStatusQueue;
 
         public SyncManagerTests()
@@ -38,7 +37,6 @@ namespace Splitio_Tests.Unit_Tests.Common
             _telemetrySyncTask = new Mock<ITelemetrySyncTask>();
             _backoff = new Mock<IBackOff>();
             _streamingStatusQueue = new SplitQueue<StreamingStatus>();
-            _internalEventsTask = new Mock<IInternalEventsTask>();
         }
 
         [TestMethod]
