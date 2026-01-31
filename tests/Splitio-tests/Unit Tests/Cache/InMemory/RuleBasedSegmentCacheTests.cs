@@ -178,6 +178,13 @@ namespace Splitio_Tests.Unit_Tests.Cache.InMemory
             // Assert
             Assert.IsTrue(SdkUpdateFlag);
             Assert.AreEqual(SdkEventType.SegmentsUpdate, eMetadata.GetEventType());
+
+            // Act
+            SdkUpdateFlag = false;
+            _segmentCache.Update(new List<RuleBasedSegment>(), new List<string>(), 12345);
+
+            // Assert
+            Assert.IsFalse(SdkUpdateFlag);
         }
 
         private void sdkUpdate_callback(object sender, EventMetadata metadata)

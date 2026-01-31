@@ -281,6 +281,13 @@ namespace Splitio_Tests.Unit_Tests.Cache
             Assert.AreEqual(SdkEventType.FlagsUpdate, eMetadata.GetEventType());
             Assert.IsTrue(eMetadata.GetNames().Count == 1);
             Assert.IsTrue(eMetadata.GetNames().Contains(splitName));
+
+            // Act.
+            SdkUpdateFlag = false;
+            splitCache.Update(new List<ParsedSplit>(), new List<string>(), 1234);
+
+            // Assert.
+            Assert.IsFalse(SdkUpdateFlag);
         }
 
         private void sdkUpdate_callback(object sender, EventMetadata metadata)
