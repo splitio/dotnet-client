@@ -27,7 +27,7 @@ namespace Splitio.Services.Client.Classes
 
         private readonly object _lock = new object();
 
-        public LocalhostClient(ConfigurationOptions configurationOptions) : base("localhost")
+        public LocalhostClient(ConfigurationOptions configurationOptions) : base("localhost", configurationOptions.Mode)
         {
             var configs = (LocalhostClientConfigurations)_configService.ReadConfig(configurationOptions, ConfigTypes.Localhost, _statusManager);
 

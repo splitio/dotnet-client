@@ -66,6 +66,7 @@ namespace Splitio.Services.Client.Classes
         protected IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
         protected IInternalEventsTask _internalEventsTask;
         private EventHandler<EventMetadata> SdkReadyEvent;
+        private Mode _configMode;
 
         public event EventHandler<EventMetadata> SdkReady
         {
@@ -85,14 +86,24 @@ namespace Splitio.Services.Client.Classes
         }
         public event EventHandler<EventMetadata> SdkUpdate;
 
-        protected SplitClient(string apikey)
+        protected SplitClient(string apikey, Mode configMode)
         {
             ApiKey = apikey;
-            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-            _internalEventsTask = new InternalEventsTask(_eventsManager, new SplitQueue<EventSource.Workers.SdkEventNotification>());
-            _internalEventsTask.Start();
-            RegisterEvents();
-            
+            _configMode = configMode;
+
+            if (configMode == Mode.Standalone)
+            {
+                _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
+                _internalEventsTask = new InternalEventsTask(_eventsManager, new SplitQueue<EventSource.Workers.SdkEventNotification>());
+                _internalEventsTask.Start();
+                RegisterEvents();
+            } 
+            else
+            {
+                _eventsManager = null;
+                _internalEventsTask = new NoOpInternalEventsTask();
+            }
+
             _wrapperAdapter = WrapperAdapter.Instance();
             _keyValidator = new KeyValidator();
             _splitNameValidator = new SplitNameValidator();
@@ -521,8 +532,11 @@ namespace Splitio.Services.Client.Classes
         }
         private void UnregisterEvents()
         {
-            _eventsManager.Unregister(SdkEvent.SdkReady);
-            _eventsManager.Unregister(SdkEvent.SdkUpdate);
+            if (_configMode == Mode.Standalone)
+            {
+                _eventsManager.Unregister(SdkEvent.SdkReady);
+                _eventsManager.Unregister(SdkEvent.SdkUpdate);
+            }
         }
         private List<TreatmentResult> GetTreatmentsSync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {

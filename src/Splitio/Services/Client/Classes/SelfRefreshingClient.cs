@@ -52,7 +52,7 @@ namespace Splitio.Services.Client.Classes
         private IRuleBasedSegmentCache _ruleBasedSegmentCache;
         private IUpdater<RuleBasedSegmentDto> _ruleBasedSegmentUpdater;
 
-        public SelfRefreshingClient(string apiKey, ConfigurationOptions config) : base(apiKey)
+        public SelfRefreshingClient(string apiKey, ConfigurationOptions config) : base(apiKey, config.Mode)
         {
             _config = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfigTypes.InMemory);
 

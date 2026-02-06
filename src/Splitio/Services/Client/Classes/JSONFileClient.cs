@@ -32,7 +32,7 @@ namespace Splitio.Services.Client.Classes
             ITrafficTypeValidator trafficTypeValidator = null,
             IImpressionsManager impressionsManager = null,
             IRuleBasedSegmentCache ruleBasedSegmentCache = null
-            ) : base("localhost")
+            ) : base("localhost", config.Mode)
         {
             _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), _internalEventsTask);
             var rbsCache = ruleBasedSegmentCache ?? new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>(), _internalEventsTask);
