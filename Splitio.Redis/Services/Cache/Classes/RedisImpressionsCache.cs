@@ -1,5 +1,4 @@
 ﻿using Splitio.Domain;
-using Splitio.Redis.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Shared.Classes;
@@ -82,7 +81,8 @@ namespace Splitio.Redis.Services.Cache.Classes
         // public for tests
         public RedisValue[] GetImpressions(IList<KeyImpression> items)
         {
-            var impressions = items.Select(item => new RedisKeyImpression(item, SdkVersion, MachineIp, MachineName).ExportJson());
+            var impressions = items
+                .Select(item => JsonConvertWrapper.SerializeObject(new KeyImpressionDTO(item, SdkVersion, MachineIp, MachineName)));
 
             return impressions
                 .Select(i => (RedisValue)i)
