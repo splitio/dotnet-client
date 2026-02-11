@@ -1,10 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Telemetry.Domain;
 using Splitio.Tests.Common.Resources;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Integration_Tests.Impressions
@@ -94,36 +96,61 @@ namespace Splitio_Tests.Integration_Tests.Impressions
             Clean();
         }
 
-        private static RedisAdapterForTests GetRedisClusterAdapter()
+        [TestMethod]
+        public async Task RecordImpressionWithProperties()
+        {
+            // Arrange.
+            var cache = GetRedisClusterImpressionsCache("Prop-Test:");
+            var impressions = new List<KeyImpression>
+            {
+                new KeyImpression("matching-key", "feature-1", "treatment", 34534546, 3333444, "label", "bucketing-key", false),
+                new KeyImpression("matching-key", "feature-1", "treatment", 34534550, 3333444, "label", "bucketing-key", false, 34534546),
+                new KeyImpression("matching-key", "feature-2", "treatment", 34534546, 3333444, "label", "bucketing-key", false, properties: "{\"prop\":\"val\"}"),
+            };
+
+            // Act.
+            await _impressionsCache.AddAsync(impressions);
+            var result = await _redisAdapter.ListRangeAsync("test-mtks:.SPLITIO.impressions");
+
+            // Assert.
+            Assert.AreEqual(3, result.Count());
+            Assert.AreEqual("{\"m\":{\"s\":\"version\",\"i\":\"ip\",\"n\":\"mm\"},\"i\":{\"f\":\"feature-1\",\"k\":\"matching-key\",\"t\":\"treatment\",\"m\":34534546,\"c\":3333444,\"r\":\"label\",\"b\":\"bucketing-key\",\"pt\":null}}", result[0].ToString());
+            Assert.AreEqual("{\"m\":{\"s\":\"version\",\"i\":\"ip\",\"n\":\"mm\"},\"i\":{\"f\":\"feature-1\",\"k\":\"matching-key\",\"t\":\"treatment\",\"m\":34534550,\"c\":3333444,\"r\":\"label\",\"b\":\"bucketing-key\",\"pt\":34534546}}", result[1].ToString());
+            Assert.AreEqual("{\"m\":{\"s\":\"version\",\"i\":\"ip\",\"n\":\"mm\"},\"i\":{\"f\":\"feature-2\",\"k\":\"matching-key\",\"t\":\"treatment\",\"m\":34534546,\"c\":3333444,\"r\":\"label\",\"b\":\"bucketing-key\",\"pt\":null,\"properties\":\"{\\\"prop\\\":\\\"val\\\"}\"}}", result[2].ToString());
+
+            Clean();
+        }
+
+        private static RedisAdapterForTests GetRedisClusterAdapter(string prefix = null)
         {
             var config = new RedisConfig
             {
-                ClusterNodes = new Splitio.Domain.ClusterNodes( new List<string>() { "localhost:6379" }, "{SPLITIO}"),
+                ClusterNodes = new ClusterNodes( new List<string>() { "localhost:6379" }, "{SPLITIO}"),
                 RedisPassword = "",
                 RedisDatabase = 0,
                 RedisConnectTimeout = 1000,
                 RedisConnectRetry = 5,
                 RedisSyncTimeout = 1000,
                 PoolSize = 1,
-                RedisUserPrefix = RedisPrefix
+                RedisUserPrefix = prefix ?? RedisPrefix
             };
 
             var pool = new ConnectionPoolManager(config);
             return new RedisAdapterForTests(config, pool);
         }
 
-        private static RedisImpressionsCache GetRedisClusterImpressionsCache()
+        private static RedisImpressionsCache GetRedisClusterImpressionsCache(string prefix = null)
         {
             var config = new RedisConfig
             {
-                ClusterNodes = new Splitio.Domain.ClusterNodes(new List<string>() { "localhost:6379" }, "{SPLITIO}"),
+                ClusterNodes = new ClusterNodes(new List<string>() { "localhost:6379" }, "{SPLITIO}"),
                 RedisPassword = "",
                 RedisDatabase = 0,
                 RedisConnectTimeout = 1000,
                 RedisConnectRetry = 5,
                 RedisSyncTimeout = 1000,
                 PoolSize = 1,
-                RedisUserPrefix = RedisPrefix,
+                RedisUserPrefix = prefix ?? RedisPrefix,
                 SdkMachineIP = "ip",
                 SdkVersion = "version",
                 SdkMachineName = "mm"

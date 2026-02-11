@@ -1,9 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Telemetry.Domain;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -90,6 +92,26 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _redisAdapter.Verify(mock => mock.ListRightPushAsync(key, expected1), Times.Once);
             _redisAdapter.Verify(mock => mock.ListRightPushAsync(key, expected2), Times.Once);
             _redisAdapter.Verify(mock => mock.KeyExpireAsync(key, new TimeSpan(0, 0, 3600)), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task CorrectFormatStoreImpressions()
+        {
+            // Arrange.
+            var impressions = new List<KeyImpression>
+            {
+                new KeyImpression("matching-key", "feature-1", "treatment", 34534546, 3333444, "label", "bucketing-key", false),
+                new KeyImpression("matching-key", "feature-1", "treatment", 34534550, 3333444, "label", "bucketing-key", false, 34534546),
+                new KeyImpression("matching-key", "feature-2", "treatment", 34534546, 3333444, "label", "bucketing-key", false, properties: "{\"prop\":\"val\"}"),
+            };
+
+            // Act.
+            var result = await _cache.AddAsync(impressions);
+
+            // Assert.
+            _redisAdapter.Verify(mock => mock.ListRightPushAsync("test-pre:.SPLITIO.impressions", It.IsAny<RedisValue[]>()), Times.Once);
+
+            //IRedisAdapterProducer.ListRightPushAsync("test-pre:.SPLITIO.impressions", [{"m":{"s":"version","i":"ip","n":"mm"},"i":{"f":"feature-1","k":"matching-key","t":"treatment","m":34534546,"c":3333444,"r":"label","b":"bucketing-key","pt":null}}, {"m":{"s":"version","i":"ip","n":"mm"},"i":{"f":"feature-1","k":"matching-key","t":"treatment","m":34534550,"c":3333444,"r":"label","b":"bucketing-key","pt":34534546}}, {"m":{"s":"version","i":"ip","n":"mm"},"i":{"f":"feature-2","k":"matching-key","t":"treatment","m":34534546,"c":3333444,"r":"label","b":"bucketing-key","pt":null,"properties":"{\"prop\":\"val\"}"}}])
         }
     }
 }

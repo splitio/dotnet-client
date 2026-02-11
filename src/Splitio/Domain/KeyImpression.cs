@@ -6,7 +6,7 @@ namespace Splitio.Domain
     {
         public KeyImpression() { }
 
-        public KeyImpression(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey, bool impressionsDisabled, long? previousTime = null, bool optimized = false)
+        public KeyImpression(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey, bool impressionsDisabled, long? previousTime = null, bool optimized = false, string properties = null)
         {
             this.feature = feature;
             keyName = matchingKey;
@@ -18,6 +18,7 @@ namespace Splitio.Domain
             this.previousTime = previousTime;
             ImpressionsDisabled = impressionsDisabled;
             this.optimized = optimized;
+            this.properties = properties;
         }
 
         [JsonIgnore]
