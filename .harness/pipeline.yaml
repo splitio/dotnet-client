@@ -75,7 +75,7 @@ pipeline:
                       $env:PATH = "C:\dotnet;C:\dotnet\tools;$env:PATH"
                       dotnet-sonarscanner begin `
                         /k:"dotnet-client" `
-                        /d:sonar.host.url="https://sonar.harness.io/" `
+                        /d:sonar.host.url="https://sonar.harness.io" `
                         /d:sonar.token="<+secrets.getValue("sonarqube-token")>" `
                         /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" `
                         /d:sonar.coverage.exclusions="**/*Tests*/**,**/bin/**,**/obj/**" `
@@ -268,7 +268,7 @@ pipeline:
                           -CommitSha "<+codebase.commitSha>" `
                           -SonarProjectKey "dotnet-client" `
                           -SonarToken "<+secrets.getValue('sonarqube-token')>" `
-                          -SonarUrl "https://sonar.harness.io/"
+                          -SonarUrl "https://sonar.harness.io"
               - parallel:
                   - step:
                       type: Run
