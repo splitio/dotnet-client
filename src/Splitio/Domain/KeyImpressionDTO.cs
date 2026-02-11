@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace Splitio.Domain
 {
-    public class KeyImpressionMetadataDTO
+    public class KeyImpressionMetadataDto
     {
         [JsonProperty("s")]
         private readonly string _sdkVersion;
@@ -11,7 +11,7 @@ namespace Splitio.Domain
         [JsonProperty("n")]
         private readonly string _machineName;
 
-        public KeyImpressionMetadataDTO(string sdkVersion, string machineIp, string machineName)
+        public KeyImpressionMetadataDto(string sdkVersion, string machineIp, string machineName)
         {
             _sdkVersion = sdkVersion;
             _machineIp = machineIp;
@@ -19,7 +19,7 @@ namespace Splitio.Domain
         }
     }
 
-    public class KeyImpressionItemDTO
+    public class KeyImpressionItemDto
     {
         [JsonProperty("f")]
         private readonly string _feature;
@@ -41,7 +41,7 @@ namespace Splitio.Domain
         [JsonProperty(PropertyName = "properties", NullValueHandling = NullValueHandling.Ignore)]
         private readonly string _properties;
 
-        public KeyImpressionItemDTO(KeyImpression impression)
+        public KeyImpressionItemDto(KeyImpression impression)
         {
             _feature = impression.feature;
             _keyName = impression.keyName;
@@ -55,17 +55,17 @@ namespace Splitio.Domain
         }
     }
 
-    public class KeyImpressionDTO
+    public class KeyImpressionDto
     {
         [JsonProperty("m")]
-        private readonly KeyImpressionMetadataDTO _metadata;
+        private readonly KeyImpressionMetadataDto _metadata;
         [JsonProperty("i")]
-        private readonly KeyImpressionItemDTO _item;
+        private readonly KeyImpressionItemDto _item;
 
-        public KeyImpressionDTO(KeyImpression impression, string sdkVersion, string machineIp, string machineName)
+        public KeyImpressionDto(KeyImpression impression, string sdkVersion, string machineIp, string machineName)
         {
-            _metadata = new KeyImpressionMetadataDTO(sdkVersion, machineIp, machineName);
-            _item = new KeyImpressionItemDTO(impression);
+            _metadata = new KeyImpressionMetadataDto(sdkVersion, machineIp, machineName);
+            _item = new KeyImpressionItemDto(impression);
         }
     }
 }

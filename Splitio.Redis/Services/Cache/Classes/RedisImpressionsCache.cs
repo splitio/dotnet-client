@@ -81,7 +81,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         private RedisValue[] GetImpressions(IList<KeyImpression> items)
         {
             var impressions = items
-                .Select(item => JsonConvertWrapper.SerializeObject(new KeyImpressionDTO(item, SdkVersion, MachineIp, MachineName)));
+                .Select(item => JsonConvertWrapper.SerializeObject(new KeyImpressionDto(item, SdkVersion, MachineIp, MachineName)));
 
             return impressions
                 .Select(i => (RedisValue)i)
