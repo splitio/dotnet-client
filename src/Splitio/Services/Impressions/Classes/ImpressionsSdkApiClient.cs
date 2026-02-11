@@ -81,16 +81,7 @@ namespace Splitio.Services.Impressions.Classes
                 .Select(group => new
                 {
                     f = group.Key,
-                    i = group.Select(x => new
-                    {
-                        k = x.keyName,
-                        t = x.treatment,
-                        m = x.time,
-                        c = x.changeNumber,
-                        r = x.label,
-                        b = x.bucketingKey,
-                        properties = x.properties
-                    })
+                    i = group.Select(x => new KeyImpressionItemDTO(x))
                 });
             return JsonConvertWrapper.SerializeObjectIgnoreNullValue(impressionsPerFeature);
         }
