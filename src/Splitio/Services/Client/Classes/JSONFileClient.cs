@@ -32,7 +32,7 @@ namespace Splitio.Services.Client.Classes
             ITrafficTypeValidator trafficTypeValidator = null,
             IImpressionsManager impressionsManager = null,
             IRuleBasedSegmentCache ruleBasedSegmentCache = null
-            ) : base("localhost", config.Mode)
+            ) : base("localhost")
         {
             _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), _internalEventsTask);
             var rbsCache = ruleBasedSegmentCache ?? new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>(), _internalEventsTask);
@@ -52,6 +52,8 @@ namespace Splitio.Services.Client.Classes
                 parsedSplits.TryAdd(split.name, _splitParser.Parse(split, rbsCache));
             }
 
+            BuildEventsManager();
+            BuildStatusAndTaskManager();
             BuildFallbackCalculator(config.FallbackTreatments);
             BuildFlagSetsFilter(new HashSet<string>());
             _featureFlagCache = featureFlagCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits), _flagSetsFilter, _internalEventsTask);
