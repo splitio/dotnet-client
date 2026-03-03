@@ -36,9 +36,7 @@ namespace Splitio.Redis.Services.Client.Classes
 
             ReadConfig(config);
   
-            _eventsManager = null;
-            _internalEventsTask = new NoOpInternalEventsTask();
-//            BuildEventsManager();
+            BuildEventsManager();
             BuildStatusAndTaskManager();
             BuildFallbackCalculator(_config.FallbackTreatments);
             BuildRedisCache();
