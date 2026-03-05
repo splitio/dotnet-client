@@ -66,7 +66,6 @@ namespace Splitio.Services.Client.Classes
         protected IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
         protected IInternalEventsTask _internalEventsTask;
         private EventHandler<EventMetadata> SdkReadyEvent;
-        private Mode _configMode;
 
         public event EventHandler<EventMetadata> SdkReady
         {
@@ -464,7 +463,6 @@ namespace Splitio.Services.Client.Classes
             _internalEventsTask = new InternalEventsTask(_eventsManager, new SplitQueue<EventSource.Workers.SdkEventNotification>());
             _internalEventsTask.Start();
             RegisterEvents();
-            _configMode = Mode.Standalone;
         }
         #endregion
 
@@ -534,11 +532,8 @@ namespace Splitio.Services.Client.Classes
         }
         private void UnregisterEvents()
         {
-            if (_configMode == Mode.Standalone)
-            {
-                _eventsManager.Unregister(SdkEvent.SdkReady);
-                _eventsManager.Unregister(SdkEvent.SdkUpdate);
-            }
+            _eventsManager.Unregister(SdkEvent.SdkReady);
+            _eventsManager.Unregister(SdkEvent.SdkUpdate);
         }
         private List<TreatmentResult> GetTreatmentsSync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
