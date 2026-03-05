@@ -8,8 +8,9 @@ namespace Splitio.Services.Client.Classes
     {
         private readonly Dictionary<string, string> _tests;
 
-        public SplitClientForTest(ConfigurationOptions config) : base("SplitClientForTest", config.Mode)
+        public SplitClientForTest(ConfigurationOptions config) : base("SplitClientForTest")
         {
+            BuildEventsManager();
             BuildFallbackCalculator(config.FallbackTreatments);
             _tests = new Dictionary<string, string>();
         }

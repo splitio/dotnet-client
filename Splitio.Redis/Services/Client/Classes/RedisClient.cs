@@ -16,6 +16,7 @@ using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Parsing;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Tasks;
 
 namespace Splitio.Redis.Services.Client.Classes
 {
@@ -29,12 +30,14 @@ namespace Splitio.Redis.Services.Client.Classes
         private ConnectionPoolManager _connectionPoolManager;
         private IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
 
-        public RedisClient(ConfigurationOptions config, string apiKey) : base(apiKey, config.Mode)
+        public RedisClient(ConfigurationOptions config, string apiKey) : base(apiKey)
         {
             _config = new RedisConfig();
 
             ReadConfig(config);
-
+  
+            BuildRedisEventsManager();
+            BuildStatusAndTaskManager();
             BuildFallbackCalculator(_config.FallbackTreatments);
             BuildRedisCache();
             BuildTreatmentLog(config.ImpressionListener);
@@ -56,6 +59,12 @@ namespace Splitio.Redis.Services.Client.Classes
         }
 
         #region Private Methods
+        private void BuildRedisEventsManager()
+        {
+            _eventsManager = null;
+            _internalEventsTask = new NoOpInternalEventsTask();
+        }
+
         private void ReadConfig(ConfigurationOptions config)
         {            
             var baseConfig = _configService.ReadConfig(config, ConfigTypes.Redis);

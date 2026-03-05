@@ -5,15 +5,15 @@ namespace Splitio.Services.Tasks
 {
     public class NoOpInternalEventsTask : IInternalEventsTask
     {
-        public NoOpInternalEventsTask()
-        {
-            return;
-        }
+        public NoOpInternalEventsTask() {}
         public async Task AddToQueue(SdkInternalEvent sdkInternalEvent, EventMetadata eventMetadata)
-        { return; }
+        { await DoNothing(); }
 
-        public void Start() { return; }
+        public void Start() { }
 
-        public void Stop() { return; }
+        public void Stop() { }
+
+        public static Task<bool> DoNothing()
+        { return Task.FromResult(true); }
     }
 }
