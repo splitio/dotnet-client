@@ -458,12 +458,13 @@ namespace Splitio.Services.Client.Classes
             _fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
         }
 
-        protected virtual void BuildEventsManager()
+        protected void BuildEventsManager()
         {
             _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
             _internalEventsTask = new InternalEventsTask(_eventsManager, new SplitQueue<EventSource.Workers.SdkEventNotification>());
             _internalEventsTask.Start();
             RegisterEvents();
+            _configMode = Mode.Standalone;
         }
         #endregion
 

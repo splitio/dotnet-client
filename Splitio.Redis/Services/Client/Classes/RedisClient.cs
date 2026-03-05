@@ -36,7 +36,7 @@ namespace Splitio.Redis.Services.Client.Classes
 
             ReadConfig(config);
   
-            BuildEventsManager();
+            BuildRedisEventsManager();
             BuildStatusAndTaskManager();
             BuildFallbackCalculator(_config.FallbackTreatments);
             BuildRedisCache();
@@ -57,14 +57,14 @@ namespace Splitio.Redis.Services.Client.Classes
 
             _syncManager.Start();
         }
-        
-        override protected void BuildEventsManager()
+
+        #region Private Methods
+        private void BuildRedisEventsManager()
         {
             _eventsManager = null;
             _internalEventsTask = new NoOpInternalEventsTask();
         }
 
-        #region Private Methods
         private void ReadConfig(ConfigurationOptions config)
         {            
             var baseConfig = _configService.ReadConfig(config, ConfigTypes.Redis);

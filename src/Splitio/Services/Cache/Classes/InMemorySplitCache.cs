@@ -78,7 +78,7 @@ namespace Splitio.Services.Cache.Classes
             }
 
             SetChangeNumber(till);
-            if (eventsFlags.Any())
+            if (eventsFlags.Count > 0)
             {
                 Task task = new Task(() =>
                 {

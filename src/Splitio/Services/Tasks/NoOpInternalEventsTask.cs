@@ -10,10 +10,13 @@ namespace Splitio.Services.Tasks
             return;
         }
         public async Task AddToQueue(SdkInternalEvent sdkInternalEvent, EventMetadata eventMetadata)
-        { return; }
+        { await DoNothing(); }
 
-        public void Start() { return; }
+        public void Start() { }
 
-        public void Stop() { return; }
+        public void Stop() { }
+
+        public Task<bool> DoNothing()
+        { return Task.FromResult(true); }
     }
 }
