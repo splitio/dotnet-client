@@ -29,6 +29,8 @@ namespace Splitio.Services.Client.Classes
 
         public LocalhostClient(ConfigurationOptions configurationOptions) : base("localhost")
         {
+            BuildEventsManager();
+            BuildStatusAndTaskManager();
             var configs = (LocalhostClientConfigurations)_configService.ReadConfig(configurationOptions, ConfigTypes.Localhost, _statusManager);
 
             _fullPath = LookupFilePath(configs.FilePath);

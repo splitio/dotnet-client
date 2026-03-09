@@ -24,6 +24,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             IFallbackTreatmentCalculator fallbackTreatmentCalculator)
             : base("SplitClientForTesting")
         {
+            BuildEventsManager();
+            BuildStatusAndTaskManager();
             _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
             _eventsLog = eventsLog;
             _impressionsLog = impressionsLog;
@@ -33,7 +35,6 @@ namespace Splitio_Tests.Unit_Tests.Client
             _impressionsManager = impressionsManager;
             _syncManager = syncManager;
             _telemetryEvaluationProducer = telemetryEvaluationProducer;
-
             BuildClientExtension();
         }
     }

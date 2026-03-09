@@ -10,6 +10,7 @@ namespace Splitio.Services.Client.Classes
 
         public SplitClientForTest(ConfigurationOptions config) : base("SplitClientForTest")
         {
+            BuildEventsManager();
             BuildFallbackCalculator(config.FallbackTreatments);
             _tests = new Dictionary<string, string>();
         }
