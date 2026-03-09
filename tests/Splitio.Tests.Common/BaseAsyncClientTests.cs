@@ -1001,7 +1001,7 @@ namespace Splitio.Tests.Common
             }
 
             //Validate Events sent to the be.
-            await Task.Delay(1000);
+//            await Task.Delay(1000);
             AssertSentEvents(events);
             await client.DestroyAsync();
         }
@@ -1043,7 +1043,7 @@ namespace Splitio.Tests.Common
             }
 
             //Validate Events sent to the be.
-            await Task.Delay(1000);
+//            await Task.Delay(1000);
             AssertSentEvents(events);
             await client.DestroyAsync();
         }
@@ -1093,7 +1093,7 @@ namespace Splitio.Tests.Common
                 .ToList();
 
             //Validate Events sent to the be.
-            await Task.Delay(1000);
+//            await Task.Delay(1000);
             AssertSentEvents(events);
             await client.DestroyAsync();
         }
@@ -1138,7 +1138,7 @@ namespace Splitio.Tests.Common
             }
 
             //Validate Events sent to the be.
-            await Task.Delay(1000);
+//            await Task.Delay(1000);
             AssertSentEvents(events, eventsCount: 3, validateEvents: false);
             await client.DestroyAsync();
         }
