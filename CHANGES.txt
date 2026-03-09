@@ -1,6 +1,6 @@
 CHANGES
 
-7.13.0 (Feb 2, 2026)
+7.13.0 (Mar 10, 2026)
 - Fixed impressions properties format in redis mode.
 - Added the ability to listen to different events triggered by the SDK. Read more in our docs.
    - SDK_UPDATE notify when a flag or user segment has changed
