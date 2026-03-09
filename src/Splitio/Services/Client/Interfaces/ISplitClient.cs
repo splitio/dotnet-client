@@ -1,10 +1,14 @@
 ﻿using Splitio.Domain;
+using System;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Client.Interfaces
 {
     public interface ISplitClient : ISplitClientAsync
     {
+        event EventHandler<EventMetadata> SdkReady;
+        event EventHandler<EventMetadata> SdkUpdate;
+
         /// <summary>
         /// Returns the treatment to show this key for this feature flag.
         /// The set of treatments for a feature flag can be configured on the Split user interface.

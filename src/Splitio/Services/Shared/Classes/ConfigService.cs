@@ -19,6 +19,7 @@ namespace Splitio.Services.Shared.Classes
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly IFlagSetsValidator _flagSetsValidator;
         private readonly ISdkMetadataValidator _sdkMetadataValidator;
+        private readonly FallbackTreatmentsValidator _fallbackTreatmentsValidator = new FallbackTreatmentsValidator();
 
         public ConfigService(IWrapperAdapter wrapperAdapter,
             IFlagSetsValidator flagSetsValidator,
@@ -59,6 +60,7 @@ namespace Splitio.Services.Shared.Classes
             }
 
             localhostClientConfigurations.FileSync = fileSync;
+            localhostClientConfigurations.FallbackTreatments = new FallbackTreatmentsValidator().validate(config.FallbackTreatments);
 
             return localhostClientConfigurations;            
         }
@@ -124,7 +126,8 @@ namespace Splitio.Services.Shared.Classes
                 OnDemandFetchMaxRetries = 10,
                 OnDemandFetchRetryDelayMs = 50,
                 ProxyHost = config.ProxyHost,
-                ProxyPort = config.ProxyPort
+                ProxyPort = config.ProxyPort,
+                FallbackTreatments = baseConfig.FallbackTreatments
             };
 
             selfRefreshingConfig.ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Optimized;
@@ -151,7 +154,8 @@ namespace Splitio.Services.Shared.Classes
                 UniqueKeysCacheMaxSize = 50000,
                 ImpressionsCounterCacheMaxSize = 50000,
                 FlagSetsFilter = flagSetsResult.FlagSets,
-                FlagSetsInvalid = flagSetsResult.Invalid
+                FlagSetsInvalid = flagSetsResult.Invalid,
+                FallbackTreatments = _fallbackTreatmentsValidator.validate(config.FallbackTreatments)
             };
         }
 

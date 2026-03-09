@@ -6,6 +6,7 @@ using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -51,8 +52,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Assert.
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test", "feature-name-test"));
 
-            Thread.Sleep(2000);
-
+            System.Threading.SpinWait.SpinUntil(() => _cache.IsEmpty, TimeSpan.FromMilliseconds(5000));
             _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Once);
 
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test", "feature-name-test"));
@@ -104,7 +104,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Thread.Sleep(1000);
             Assert.IsTrue(_uniqueKeysTracker.Track("key-test-2", "feature-name-test-6"));
 
-            Thread.Sleep(3000);
+            System.Threading.SpinWait.SpinUntil(() => _cache.IsEmpty, TimeSpan.FromMilliseconds(5000));
             _senderAdapter.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Exactly(2));
 
             _cache.Clear();
@@ -143,8 +143,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-4", "feature-name-test-2"));
             Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-5", "feature-name-test-2"));
             Assert.IsTrue(_uniqueKeysTracker2.Track("key-test-6", "feature-name-test-2"));
-            Thread.Sleep(1000);
 
+            System.Threading.SpinWait.SpinUntil(() => _cache2.IsEmpty, TimeSpan.FromMilliseconds(5000));
             _senderAdapter2.Verify(mock => mock.RecordUniqueKeysAsync(It.IsAny<List<Mtks>>()), Times.Exactly(4));
 
             _cache2.Clear();

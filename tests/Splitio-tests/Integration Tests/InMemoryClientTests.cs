@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Common;
 using Splitio.Services.Impressions.Classes;
 
 namespace Splitio_Tests.Integration_Tests
@@ -11,13 +12,11 @@ namespace Splitio_Tests.Integration_Tests
     public class InMemoryClientTests
     {
         private readonly string rootFilePath;
-        private readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
         public InMemoryClientTests()
         {
             // This line is to clean the warnings.
             rootFilePath = string.Empty;
-            _fallbackTreatmentCalculator = new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration());
 
 #if NET_LATEST
             rootFilePath = @"Resources\";
@@ -36,7 +35,7 @@ namespace Splitio_Tests.Integration_Tests
                     NamingStrategy = new SnakeCaseNamingStrategy()
                 }
             };
-            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _fallbackTreatmentCalculator);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", new ConfigurationOptions());
             client.BlockUntilReady(1000);
 
             //Act           

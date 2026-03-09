@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Splitio.Services.Tasks;
 
 namespace Splitio.Services.Cache.Classes
 {
@@ -18,11 +19,12 @@ namespace Splitio.Services.Cache.Classes
         private readonly ConcurrentDictionary<string, ParsedSplit> _featureFlags;
         private readonly ConcurrentDictionary<string, int> _trafficTypes;
         private readonly ConcurrentDictionary<string, HashSet<string>> _flagSets;
+        private readonly IInternalEventsTask _internalEventsTask;
 
         private long _changeNumber;
 
         public InMemorySplitCache(ConcurrentDictionary<string, ParsedSplit> featureFlags,
-            IFlagSetsFilter flagSetsFilter,
+            IFlagSetsFilter flagSetsFilter, IInternalEventsTask internalEventsTask,
             long changeNumber = -1)
         {
             _featureFlags = featureFlags;
@@ -30,6 +32,7 @@ namespace Splitio.Services.Cache.Classes
             _changeNumber = changeNumber;
             _trafficTypes = new ConcurrentDictionary<string, int>();
             _flagSets = new ConcurrentDictionary<string, HashSet<string>>();
+            _internalEventsTask = internalEventsTask;
 
             if (!_featureFlags.IsEmpty)
             {
@@ -47,6 +50,8 @@ namespace Splitio.Services.Cache.Classes
         #region Sync Methods
         public void Update(List<ParsedSplit> toAdd, List<string> toRemove, long till)
         {
+            List<string> eventsFlags = new List<string>();
+
             foreach (var featureFlag in toAdd)
             {
                 if (_featureFlags.TryGetValue(featureFlag.name, out ParsedSplit existing))
@@ -56,6 +61,7 @@ namespace Splitio.Services.Cache.Classes
                 }
 
                 _featureFlags.AddOrUpdate(featureFlag.name, featureFlag, (key, oldValue) => featureFlag);
+                eventsFlags.Add(featureFlag.name);
 
                 IncreaseTrafficTypeCount(featureFlag.trafficTypeName);
                 AddToFlagSets(featureFlag);
@@ -67,10 +73,20 @@ namespace Splitio.Services.Cache.Classes
                 {
                     DecreaseTrafficTypeCount(removedSplit);
                     RemoveFromFlagSets(removedSplit.name, removedSplit.Sets);
+                    eventsFlags.Add(featureFlagName);
                 }
             }
 
             SetChangeNumber(till);
+            if (eventsFlags.Count > 0)
+            {
+                Task task = new Task(() =>
+                {
+                    _internalEventsTask.AddToQueue(SdkInternalEvent.FlagsUpdated,
+                    new EventMetadata(SdkEventType.FlagsUpdate, eventsFlags)).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
+                });
+                task.Start();
+            }
         }
 
         public void SetChangeNumber(long changeNumber)
@@ -142,6 +158,12 @@ namespace Splitio.Services.Cache.Classes
             featureFlag.changeNumber = changeNumber;
 
             _featureFlags.AddOrUpdate(featureFlag.name, featureFlag, (key, oldValue) => featureFlag);
+            Task task = new Task(() =>
+            {
+                _internalEventsTask.AddToQueue(SdkInternalEvent.FlagKilledNotification,
+                new EventMetadata(SdkEventType.FlagsUpdate,  new List<string> { { featureFlag.name } })).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
+            });
+            task.Start();
         }
 
         public List<string> GetSplitNames()
@@ -263,5 +285,10 @@ namespace Splitio.Services.Cache.Classes
             if (names.Count == 0) _flagSets.TryRemove(key, out HashSet<string> _);
         }
         #endregion
+
+        public void OnAddToQueueFailed(Task task)
+        {
+            _log.Error($"Failed to add internal event to queue: {task.Exception.Message}");
+        }
     }
 }

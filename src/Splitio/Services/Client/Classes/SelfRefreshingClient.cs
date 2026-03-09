@@ -51,14 +51,14 @@ namespace Splitio.Services.Client.Classes
         private IUpdater<Split> _featureFlagUpdater;
         private IRuleBasedSegmentCache _ruleBasedSegmentCache;
         private IUpdater<RuleBasedSegmentDto> _ruleBasedSegmentUpdater;
-        private readonly new FallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
-        public SelfRefreshingClient(string apiKey, ConfigurationOptions config,
-            FallbackTreatmentCalculator fallbackTreatmentCalculator) : base(apiKey, fallbackTreatmentCalculator)
+        public SelfRefreshingClient(string apiKey, ConfigurationOptions config) : base(apiKey)
         {
             _config = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfigTypes.InMemory);
-            _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
 
+            BuildEventsManager();
+            BuildStatusAndTaskManager();
+            BuildFallbackCalculator(_config.FallbackTreatments);
             BuildFlagSetsFilter(_config.FlagSetsFilter);
             BuildSplitCache();
             BuildSegmentCache();
@@ -90,17 +90,17 @@ namespace Splitio.Services.Client.Classes
         #region Private Methods
         private void BuildSplitCache()
         {
-            _featureFlagCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(_config.ConcurrencyLevel, InitialCapacity), _flagSetsFilter);
+            _featureFlagCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(_config.ConcurrencyLevel, InitialCapacity), _flagSetsFilter, _internalEventsTask);
         }
 
         private void BuildSegmentCache()
         {
-            _segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(_config.ConcurrencyLevel, InitialCapacity));
+            _segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(_config.ConcurrencyLevel, InitialCapacity), _internalEventsTask);
         }
 
         private void BuildRuleBasedSegmentCache()
         {
-            _ruleBasedSegmentCache = new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>(_config.ConcurrencyLevel, InitialCapacity));
+            _ruleBasedSegmentCache = new InMemoryRuleBasedSegmentCache(new ConcurrentDictionary<string, RuleBasedSegment>(_config.ConcurrencyLevel, InitialCapacity), _internalEventsTask);
         }
 
         private void BuildTelemetryStorage()

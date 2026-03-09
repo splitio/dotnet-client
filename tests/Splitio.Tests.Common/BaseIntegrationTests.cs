@@ -1155,6 +1155,31 @@ namespace Splitio.Tests.Common
 
         #region FallbackTreatments
         [TestMethod]
+        public void FallbackTreatmentsIgnored_WithInvalidConfig()
+        {
+            var features = new List<string> { "feature2", "feature" };
+            FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on-gl^^obal", "\"prop\":\"global\""), new Dictionary<string, FallbackTreatment>() { { "feature", new FallbackTreatment("off-l###ocal", "\"prop\":\"local\"") } });
+            var impressionListener = new IntegrationTestsImpressionListener(50);
+            var configurations = GetConfigurationOptions(impressionListener: impressionListener);
+            configurations.FallbackTreatments = fallbackTreatmentsConfiguration;
+
+            var apikey = "base-apikey10";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var result = client.GetTreatment("nico_test", "feature");
+            var result2 = client.GetTreatment("nico_test", "feature2");
+            client.Destroy();
+
+            // Assert.
+            Assert.AreEqual("control", result);
+            Assert.AreEqual("control", result2);
+        }
+            [TestMethod]
         public void FallbackTreatments_WhenFeatureDoesNotExist()
         {
             var features = new List<string> { "feature2", "feature" };

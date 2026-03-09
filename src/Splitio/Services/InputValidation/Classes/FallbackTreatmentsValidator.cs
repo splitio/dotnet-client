@@ -15,7 +15,7 @@ namespace Splitio.Services.InputValidation.Classes
 
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(FallbackTreatmentsValidator));
 
-        public FallbackTreatmentsConfiguration validate(FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration, Enums.API method)
+        public FallbackTreatmentsConfiguration validate(FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration)
         {
             FallbackTreatmentsConfiguration processedFallback = new FallbackTreatmentsConfiguration();
             if (fallbackTreatmentsConfiguration == null)
@@ -27,29 +27,33 @@ namespace Splitio.Services.InputValidation.Classes
             if (fallbackTreatmentsConfiguration.GlobalFallbackTreatment != null)
             {
                 processedGlobalFallbackTreatment = new FallbackTreatment(
-                        IsValidTreatment(fallbackTreatmentsConfiguration.GlobalFallbackTreatment.Treatment, method),
+                        IsValidTreatment(fallbackTreatmentsConfiguration.GlobalFallbackTreatment.Treatment),
                         fallbackTreatmentsConfiguration.GlobalFallbackTreatment.Config);
+                if (processedGlobalFallbackTreatment.Treatment == null)
+                {
+                    processedGlobalFallbackTreatment = null;
+                }
             }
 
             if (fallbackTreatmentsConfiguration.ByFlagFallbackTreatment != null)
             {
-                processedByFlagFallbackTreatment = IsValidByFlagTreatment(fallbackTreatmentsConfiguration.ByFlagFallbackTreatment, method);
+                processedByFlagFallbackTreatment = IsValidByFlagTreatment(fallbackTreatmentsConfiguration.ByFlagFallbackTreatment);
             }
             return new FallbackTreatmentsConfiguration(processedGlobalFallbackTreatment, processedByFlagFallbackTreatment);
         }
 
-        public string IsValidTreatment(string name, Enums.API method)
+        public string IsValidTreatment(string name)
         {
             if (string.IsNullOrEmpty(name))
             {
-                _log.Error($"{method}: you passed a null or empty treatment, fallback treatment must be a non-empty string");
+                _log.Error($"FallbackTreatments: you passed a null or empty treatment, fallback treatment must be a non-empty string");
                 return null;
             }
 
             string trimmed = name.Trim();
             if (!trimmed.Equals(name))
             {
-                _log.Warn($"{method}: fallback treatment %s has extra whitespace, trimming");
+                _log.Warn($"FallbackTreatments: fallback treatment %s has extra whitespace, trimming");
                 name = trimmed;
             }
 
@@ -60,26 +64,26 @@ namespace Splitio.Services.InputValidation.Classes
 
             if (!Regex.IsMatch(name, TreatmentMatcher, RegexOptions.None, TimeSpan.FromMilliseconds(100)))
             {
-                _log.Error($"{method}: you passed {name}, treatment must adhere to the regular expression {TreatmentMatcher}");
+                _log.Error($"FallbackTreatments: you passed {name}, treatment must adhere to the regular expression {TreatmentMatcher}");
                 return null;
             }
 
             return name;
         }
 
-        public Dictionary<string, FallbackTreatment> IsValidByFlagTreatment(Dictionary<string, FallbackTreatment> byFlagTreatment, Enums.API method)
+        public Dictionary<string, FallbackTreatment> IsValidByFlagTreatment(Dictionary<string, FallbackTreatment> byFlagTreatment)
         {
             Dictionary<string, FallbackTreatment> result = new Dictionary<string, FallbackTreatment>();
             foreach (var entry in byFlagTreatment)
             {
-                string featureName = new SplitNameValidator(_log).SplitNameIsValid(entry.Key, method).Value;
+                string featureName = new SplitNameValidator(_log).SplitNameIsValid(entry.Key, Enums.API.Split).Value;
                 if (string.IsNullOrEmpty(featureName))
                 {
                     continue;
                 }
 
                 FallbackTreatment fallbackTreatment = entry.Value;
-                string treatment = IsValidTreatment(fallbackTreatment.Treatment, method);
+                string treatment = IsValidTreatment(fallbackTreatment.Treatment);
                 if (treatment != null)
                 {
                     result.Add(featureName, new FallbackTreatment(treatment, fallbackTreatment.Config));

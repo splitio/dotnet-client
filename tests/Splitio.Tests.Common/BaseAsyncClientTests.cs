@@ -984,7 +984,7 @@ namespace Splitio.Tests.Common
                 new EventBackend { Key = "key_4", TrafficTypeName = "traffic_type_4", EventTypeId = "event_type_4", Value = 444, Properties = properties }
             };
 
-            var apikey = "base-apikey17";
+            var apikey = "base-apikey20";
 
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
@@ -1001,6 +1001,7 @@ namespace Splitio.Tests.Common
             }
 
             //Validate Events sent to the be.
+//            await Task.Delay(1000);
             AssertSentEvents(events);
             await client.DestroyAsync();
         }
@@ -1042,6 +1043,7 @@ namespace Splitio.Tests.Common
             }
 
             //Validate Events sent to the be.
+//            await Task.Delay(1000);
             AssertSentEvents(events);
             await client.DestroyAsync();
         }
@@ -1091,6 +1093,7 @@ namespace Splitio.Tests.Common
                 .ToList();
 
             //Validate Events sent to the be.
+//            await Task.Delay(1000);
             AssertSentEvents(events);
             await client.DestroyAsync();
         }
@@ -1135,7 +1138,7 @@ namespace Splitio.Tests.Common
             }
 
             //Validate Events sent to the be.
-            await Task.Delay(1000);
+//            await Task.Delay(1000);
             AssertSentEvents(events, eventsCount: 3, validateEvents: false);
             await client.DestroyAsync();
         }

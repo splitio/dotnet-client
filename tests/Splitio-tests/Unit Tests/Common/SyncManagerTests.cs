@@ -24,7 +24,6 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<IStatusManager> _statusManager;
         private readonly Mock<ITelemetrySyncTask> _telemetrySyncTask;
         private readonly Mock<IBackOff> _backoff;
-
         private readonly SplitQueue<StreamingStatus> _streamingStatusQueue;
 
         public SyncManagerTests()

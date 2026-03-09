@@ -2,6 +2,7 @@
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Tasks;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,10 +14,12 @@ namespace Splitio.Services.Cache.Classes
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemorySegmentCache));
 
         private readonly ConcurrentDictionary<string, Segment> _segments;
+        private readonly IInternalEventsTask _internalEventsTask;
 
-        public InMemorySegmentCache(ConcurrentDictionary<string, Segment> segments)
+        public InMemorySegmentCache(ConcurrentDictionary<string, Segment> segments, IInternalEventsTask internalEventsTask)
         {
             _segments = segments;
+            _internalEventsTask = internalEventsTask;
         }
 
         #region Methods Sync
@@ -31,6 +34,12 @@ namespace Splitio.Services.Cache.Classes
             }
 
             segment.AddKeys(segmentKeys);
+            Task task = new Task(() =>
+            {
+                _internalEventsTask.AddToQueue(SdkInternalEvent.SegmentsUpdated,
+                new EventMetadata(SdkEventType.SegmentsUpdate, new List<string>())).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
+            });
+            task.Start();
         }
 
         public void RemoveFromSegment(string segmentName, List<string> segmentKeys)
@@ -38,6 +47,12 @@ namespace Splitio.Services.Cache.Classes
             if (_segments.TryGetValue(segmentName, out Segment segment))
             {
                 segment.RemoveKeys(segmentKeys);
+                Task task = new Task(() =>
+                {
+                    _internalEventsTask.AddToQueue(SdkInternalEvent.SegmentsUpdated,
+                    new EventMetadata(SdkEventType.SegmentsUpdate, new List<string>())).ContinueWith(OnAddToQueueFailed, TaskContinuationOptions.OnlyOnFaulted);
+                });
+                task.Start();
             }
         }
 
@@ -108,5 +123,10 @@ namespace Splitio.Services.Cache.Classes
             return Task.FromResult(IsInSegment(segmentName, key));
         }
         #endregion
+
+        public void OnAddToQueueFailed(Task task)
+        {
+            _log.Error($"Failed to add internal event to queue: {task.Exception.Message}");
+        }
     }
 }
