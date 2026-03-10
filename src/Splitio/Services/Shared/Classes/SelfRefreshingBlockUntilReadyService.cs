@@ -3,6 +3,7 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Storages;
 using System;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Shared.Classes
 {

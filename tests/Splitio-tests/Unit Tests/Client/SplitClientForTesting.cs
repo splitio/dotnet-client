@@ -20,10 +20,13 @@ namespace Splitio_Tests.Unit_Tests.Client
             IEvaluator evaluator,
             IImpressionsManager impressionsManager,
             ISyncManager syncManager,
-            FallbackTreatmentCalculator fallbackTreatmentCalculator,
-            ITelemetryEvaluationProducer telemetryEvaluationProducer)
-            : base("SplitClientForTesting", fallbackTreatmentCalculator)
+            ITelemetryEvaluationProducer telemetryEvaluationProducer,
+            IFallbackTreatmentCalculator fallbackTreatmentCalculator)
+            : base("SplitClientForTesting")
         {
+            BuildEventsManager();
+            BuildStatusAndTaskManager();
+            _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
             _eventsLog = eventsLog;
             _impressionsLog = impressionsLog;
             _blockUntilReadyService = blockUntilReadyService;
@@ -32,7 +35,6 @@ namespace Splitio_Tests.Unit_Tests.Client
             _impressionsManager = impressionsManager;
             _syncManager = syncManager;
             _telemetryEvaluationProducer = telemetryEvaluationProducer;
-
             BuildClientExtension();
         }
     }

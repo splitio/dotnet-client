@@ -2,10 +2,14 @@
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Common;
 using Splitio.Services.Filters;
+using Splitio.Services.Tasks;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Cache
@@ -15,13 +19,21 @@ namespace Splitio_Tests.Unit_Tests.Cache
     {
         private readonly IFlagSetsFilter _flagSetsFilter;
         private readonly IFeatureFlagCache _cache;
+        private readonly EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        private readonly InternalEventsTask _internalEventsTask;
+        private bool SdkUpdateFlag = false;
+        private EventMetadata eMetadata = null;
+        public event EventHandler<EventMetadata> SdkUpdate;
+        public event EventHandler<EventMetadata> SdkReady;
 
         public SplitCacheAsyncTests()
         {
             _flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
             var splits = new ConcurrentDictionary<string, ParsedSplit>();
-
-            _cache = new InMemorySplitCache(splits, _flagSetsFilter);
+            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
+            _internalEventsTask = new InternalEventsTask(_eventsManager, new Splitio.Services.Shared.Classes.SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            _internalEventsTask.Start();
+            _cache = new InMemorySplitCache(splits, _flagSetsFilter, _internalEventsTask);
         }
 
         [TestMethod]
@@ -168,6 +180,71 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             // Assert.
             Assert.AreEqual(5, result.Count);
+        }
+
+        [TestMethod]
+        public async Task NotifyUpdateEventTest()
+        {
+            // Arrange.
+            var toAdd = new List<ParsedSplit>();
+            var toNotify = new List<string>();
+            for (int i = 1; i <= 5; i++)
+            {
+                toAdd.Add(new ParsedSplit
+                {
+                    name = $"feature-flag-{i}",
+                    defaultTreatment = "on",
+                    changeNumber = i
+                });
+                toNotify.Add($"feature-flag-{i}");
+            }
+            SdkUpdate += sdkUpdate_callback;
+            _eventsManager.Register(SdkEvent.SdkUpdate, TriggerSdkUpdate);
+            _eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReady);
+            _eventsManager.NotifyInternalEvent(SdkInternalEvent.SdkReady, null);
+           
+            SdkUpdateFlag = false;
+            _cache.Update(toAdd, new List<string>(), -1);
+            SpinWait.SpinUntil(() => SdkUpdateFlag, TimeSpan.FromMilliseconds(1000));
+
+            // Act.
+            var result = await _cache.GetSplitNamesAsync();
+
+            // Assert.
+            Assert.AreEqual(5, result.Count);
+            Assert.IsTrue(SdkUpdateFlag);
+            Assert.AreEqual(SdkEventType.FlagsUpdate, eMetadata.GetEventType());
+            Assert.IsTrue(eMetadata.GetNames().Count == 5);
+            for (int i = 1; i <= 5; i++)
+            {
+                Assert.IsTrue(eMetadata.GetNames().Contains($"feature-flag-{i}"));
+            }
+
+            SdkUpdateFlag = false;
+            eMetadata = null;
+            _cache.Kill(123, "feature-flag-1", "off");
+            SpinWait.SpinUntil(() => SdkUpdateFlag, TimeSpan.FromMilliseconds(1000));
+
+            Assert.IsTrue(SdkUpdateFlag);
+            Assert.AreEqual(SdkEventType.FlagsUpdate, eMetadata.GetEventType());
+            Assert.IsTrue(eMetadata.GetNames().Count == 1);
+            Assert.IsTrue(eMetadata.GetNames().Contains($"feature-flag-1"));
+        }
+
+        private void sdkUpdate_callback(object sender, EventMetadata metadata)
+        {
+            SdkUpdateFlag = true;
+            eMetadata = metadata;
+        }
+
+        private void TriggerSdkReady(EventMetadata metaData)
+        {
+            SdkReady?.Invoke(this, metaData);
+        }
+
+        private void TriggerSdkUpdate(EventMetadata metaData)
+        {
+            SdkUpdate?.Invoke(this, metaData);
         }
     }
 }

@@ -39,7 +39,6 @@ namespace Splitio.Services.Client.Classes
         protected readonly IConfigService _configService;
         protected readonly IFlagSetsValidator _flagSetsValidator;
         protected readonly string ApiKey;
-        protected readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
         protected ISplitManager _manager;
         protected IEventsLog _eventsLog;
@@ -63,12 +62,32 @@ namespace Splitio.Services.Client.Classes
         protected IImpressionsObserver _impressionsObserver;
         protected IClientExtensionService _clientExtensionService;
         protected IFlagSetsFilter _flagSetsFilter;
+        protected IFallbackTreatmentCalculator _fallbackTreatmentCalculator;
+        protected IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata> _eventsManager;
+        protected IInternalEventsTask _internalEventsTask;
+        private EventHandler<EventMetadata> SdkReadyEvent;
 
-        protected SplitClient(string apikey, FallbackTreatmentCalculator fallbackTreatmentCalculator)
+        public event EventHandler<EventMetadata> SdkReady
+        {
+            add
+            {
+                SdkReadyEvent = (EventHandler<EventMetadata>)Delegate.Combine(SdkReadyEvent, value);
+                if (_eventsManager.EventAlreadyTriggered(SdkEvent.SdkReady))
+                {
+                    SdkReadyEvent.Invoke(this, null);
+                }
+            }
+
+            remove
+            {
+                SdkReadyEvent = (EventHandler<EventMetadata>)Delegate.Remove(SdkReadyEvent, value);
+            }
+        }
+        public event EventHandler<EventMetadata> SdkUpdate;
+
+        protected SplitClient(string apikey)
         {
             ApiKey = apikey;
-
-            _fallbackTreatmentCalculator = fallbackTreatmentCalculator;
             _wrapperAdapter = WrapperAdapter.Instance();
             _keyValidator = new KeyValidator();
             _splitNameValidator = new SplitNameValidator();
@@ -77,8 +96,6 @@ namespace Splitio.Services.Client.Classes
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
             _flagSetsValidator = new FlagSetsValidator();
             _configService = new ConfigService(_wrapperAdapter, _flagSetsValidator, new SdkMetadataValidator());
-            _statusManager = new InMemoryReadinessGatesCache();
-            _tasksManager = new TasksManager(_statusManager);
         }
 
         #region GetTreatment
@@ -295,11 +312,14 @@ namespace Splitio.Services.Client.Classes
             if (_statusManager.IsDestroyed()) return;
 
             _log.Info(Messages.InitDestroy);
-
             _factoryInstantiationsService.Decrease(ApiKey);
             _statusManager.SetDestroy();
             await _syncManager.ShutdownAsync();
-
+            if (_eventsManager != null)
+            {
+                _internalEventsTask.Stop();
+                UnregisterEvents();
+            }
             _log.Info(Messages.Destroyed);
         }
 
@@ -312,7 +332,11 @@ namespace Splitio.Services.Client.Classes
             _factoryInstantiationsService.Decrease(ApiKey);
             _statusManager.SetDestroy();
             _syncManager.Shutdown();
-
+            if (_eventsManager != null)
+            {
+                _internalEventsTask.Stop();
+                UnregisterEvents();
+            }
             _log.Info(Messages.Destroyed);
         }
         #endregion
@@ -389,6 +413,12 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Protected Methods
+        protected void BuildStatusAndTaskManager()
+        {
+            _statusManager = new InMemoryReadinessGatesCache(_internalEventsTask);
+            _tasksManager = new TasksManager(_statusManager);
+        }
+
         protected void BuildUniqueKeysTracker(BaseConfig config)
         {
             var bloomFilter = new BloomFilter(config.BfExpectedElements, config.BfErrorRate);
@@ -420,6 +450,19 @@ namespace Splitio.Services.Client.Classes
         protected void BuildFlagSetsFilter(HashSet<string> sets)
         {
             _flagSetsFilter = new FlagSetsFilter(sets);
+        }
+
+        protected void BuildFallbackCalculator(FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration)
+        {
+            _fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
+        }
+
+        protected void BuildEventsManager()
+        {
+            _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
+            _internalEventsTask = new InternalEventsTask(_eventsManager, new SplitQueue<EventSource.Workers.SdkEventNotification>());
+            _internalEventsTask.Start();
+            RegisterEvents();
         }
         #endregion
 
@@ -482,6 +525,16 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Private Methods
+        private void RegisterEvents()
+        {
+            _eventsManager.Register(SdkEvent.SdkReady, TriggerSdkReady);
+            _eventsManager.Register(SdkEvent.SdkUpdate, TriggerSdkUpdate);
+        }
+        private void UnregisterEvents()
+        {
+            _eventsManager.Unregister(SdkEvent.SdkReady);
+            _eventsManager.Unregister(SdkEvent.SdkUpdate);
+        }
         private List<TreatmentResult> GetTreatmentsSync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
             try
@@ -568,6 +621,16 @@ namespace Splitio.Services.Client.Classes
             if (result == null) return new SplitResult(Gral.Control, null);
 
             return new SplitResult(result.Treatment, result.Config);
+        }
+
+        private void TriggerSdkReady(EventMetadata metaData)
+        {
+            SdkReadyEvent?.Invoke(this, metaData);
+        }
+
+        private void TriggerSdkUpdate(EventMetadata metaData)
+        {
+            SdkUpdate?.Invoke(this, metaData);
         }
         #endregion
     }

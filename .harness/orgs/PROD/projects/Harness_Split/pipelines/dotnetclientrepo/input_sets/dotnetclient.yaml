@@ -1,0 +1,14 @@
+inputSet:
+  name: dotnet-client
+  identifier: dotnetclient
+  orgIdentifier: PROD
+  projectIdentifier: Harness_Split
+  pipeline:
+    identifier: dotnetclientrepo
+    properties:
+      ci:
+        codebase:
+          build:
+            type: PR
+            spec:
+              number: <+trigger.prNumber>

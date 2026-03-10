@@ -1,6 +1,4 @@
-﻿using Moq;
-using Splitio.Services.Client.Classes;
-using Splitio.Services.Logger;
+﻿using Splitio.Services.Client.Classes;
 using Xunit;
 
 namespace Splitio.TestSupport.Samples
@@ -11,7 +9,7 @@ namespace Splitio.TestSupport.Samples
 
         public SampleTest()
         {
-            splitClient = new SplitClientForTest();
+            splitClient = new SplitClientForTest(new ConfigurationOptions());
         }
 
         [Theory]

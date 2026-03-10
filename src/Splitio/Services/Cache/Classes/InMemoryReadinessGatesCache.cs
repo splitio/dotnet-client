@@ -1,5 +1,8 @@
-﻿using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Domain;
+using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -7,6 +10,12 @@ namespace Splitio.Services.Client.Classes
     {
         private readonly CountdownEvent _sdkReady = new CountdownEvent(1);
         private readonly CountdownEvent _sdkDestroyed = new CountdownEvent(1);
+        private readonly IInternalEventsTask _internalEventsTask;
+
+        public InMemoryReadinessGatesCache(IInternalEventsTask internalEventsTask)
+        {
+            _internalEventsTask = internalEventsTask;
+        }
 
         public bool IsReady()
         {
@@ -18,9 +27,10 @@ namespace Splitio.Services.Client.Classes
             return _sdkReady.Wait(milliseconds);
         }
 
-        public void SetReady()
+        public async Task SetReadyAsync()
         {
             _sdkReady.Signal();
+            await _internalEventsTask.AddToQueue(SdkInternalEvent.SdkReady, null);
         }
 
         public void SetDestroy()

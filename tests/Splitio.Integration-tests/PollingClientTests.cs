@@ -161,7 +161,7 @@ namespace Splitio.Integration_tests
             var apikey = "apikey5";
 
             var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
+            var client = (SplitClient)splitFactory.Client();
 
             // Act.
             var exceptionMessage = "";
@@ -400,7 +400,7 @@ namespace Splitio.Integration_tests
 
             try
             {
-                client.BlockUntilReady(0);
+                client.BlockUntilReady(1);
             }
             catch
             {
@@ -412,7 +412,8 @@ namespace Splitio.Integration_tests
 
             // Assert.
             Assert.AreEqual("on", result);
-
+            
+            System.Threading.SpinWait.SpinUntil(() => (GetMetricsConfigSentBackend(httpClientMock) != null) , TimeSpan.FromMilliseconds(1000));
             var sentConfig = GetMetricsConfigSentBackend(httpClientMock);
             Assert.IsNotNull(sentConfig);
             Assert.AreEqual(configurations.StreamingEnabled, sentConfig.StreamingEnabled);

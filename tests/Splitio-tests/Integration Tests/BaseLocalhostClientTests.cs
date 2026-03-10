@@ -1,9 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
-using Splitio.Redis.Services.Client.Classes;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Classes;
-using Splitio.Telemetry.Domain;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,14 +21,12 @@ namespace Splitio_Tests.Integration_Tests
     {
         private readonly string rootFilePath;
         private readonly string _mode;
-        private readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
         public BaseLocalhostClientTests(string mode)
         {
             // This line is to clean the warnings.
             rootFilePath = string.Empty;
             _mode = mode;
-            _fallbackTreatmentCalculator = new FallbackTreatmentCalculator(new FallbackTreatmentsConfiguration());
 
 #if NET_LATEST
             rootFilePath = @"Resources\";
@@ -42,7 +38,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var config = GetConfiguration($"{rootFilePath}test.splits");
-            var client = new LocalhostClient(config, _fallbackTreatmentCalculator);
+            var client = new LocalhostClient(config);
 
             client.BlockUntilReady(1000);
 
@@ -81,7 +77,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var config = GetConfiguration($"{rootFilePath}test.splits");
-            var client = new LocalhostClient(config, _fallbackTreatmentCalculator);
+            var client = new LocalhostClient(config);
 
             client.BlockUntilReady(1000);
 
@@ -105,7 +101,7 @@ namespace Splitio_Tests.Integration_Tests
             // Arrange
             var filePath = $"{rootFilePath}test2-{_mode}.splits";
             var config = GetConfiguration(filePath);
-            var client = new LocalhostClient(config, _fallbackTreatmentCalculator);
+            var client = new LocalhostClient(config);
 
             client.BlockUntilReady(1000);
 
@@ -148,7 +144,7 @@ namespace Splitio_Tests.Integration_Tests
             Thread.Sleep(1000);
 
             var config = GetConfiguration(filePath);
-            var client = new LocalhostClient(config, _fallbackTreatmentCalculator);
+            var client = new LocalhostClient(config);
 
             client.BlockUntilReady(1000);
 
@@ -171,7 +167,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var config = GetConfiguration($"{rootFilePath}test.splits");
-            var client = new LocalhostClient(config, _fallbackTreatmentCalculator);
+            var client = new LocalhostClient(config);
 
             client.BlockUntilReady(1000);
 
@@ -193,7 +189,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var config = GetConfiguration($"{rootFilePath}split.yml");
-            var client = new LocalhostClient(config, _fallbackTreatmentCalculator);
+            var client = new LocalhostClient(config);
 
             client.BlockUntilReady(1000);
 
@@ -225,7 +221,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var config = GetConfiguration($"{rootFilePath}split.yml");
-            var client = new LocalhostClient(config, _fallbackTreatmentCalculator);
+            var client = new LocalhostClient(config);
 
             client.BlockUntilReady(1000);
 
@@ -264,7 +260,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var config = GetConfiguration($"{rootFilePath}split.yml");
-            var client = new LocalhostClient(config, _fallbackTreatmentCalculator);
+            var client = new LocalhostClient(config);
 
             client.BlockUntilReady(1000);
 
@@ -296,7 +292,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var config = GetConfiguration($"{rootFilePath}split.yml");
-            var client = new LocalhostClient(config, _fallbackTreatmentCalculator);
+            var client = new LocalhostClient(config);
 
             client.BlockUntilReady(1000);
 
@@ -335,7 +331,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var config = GetConfiguration($"{rootFilePath}split.yml");
-            var client = new LocalhostClient(config, _fallbackTreatmentCalculator);
+            var client = new LocalhostClient(config);
 
             client.BlockUntilReady(1000);
 
@@ -372,7 +368,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var config = GetConfiguration($"{rootFilePath}split.yml");
-            var client = new LocalhostClient(config, _fallbackTreatmentCalculator);
+            var client = new LocalhostClient(config);
 
             client.BlockUntilReady(1000);
 
@@ -423,7 +419,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var config = GetConfiguration($"{rootFilePath}split.yml");
-            var client = new LocalhostClient(config, _fallbackTreatmentCalculator);
+            var client = new LocalhostClient(config);
 
             client.BlockUntilReady(1000);
 
@@ -460,7 +456,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var config = GetConfiguration($"{rootFilePath}split.yml");
-            var client = new LocalhostClient(config, _fallbackTreatmentCalculator);
+            var client = new LocalhostClient(config);
 
             client.BlockUntilReady(1000);
 
@@ -511,10 +507,10 @@ namespace Splitio_Tests.Integration_Tests
         {
             var features = new List<string> { "testing_split_on", "feature", "feature2" };
             FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on-global", "\"prop\":\"global\""), new Dictionary<string, FallbackTreatment>() { { "feature", new FallbackTreatment("off-local", "\"prop\":\"local\"") } });
-            FallbackTreatmentCalculator fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
 
             var config = GetConfiguration($"{rootFilePath}split.yml");
-            var client = new LocalhostClient(config, fallbackTreatmentCalculator);
+            config.FallbackTreatments = fallbackTreatmentsConfiguration;
+            var client = new LocalhostClient(config);
 
             client.BlockUntilReady(1000);
 

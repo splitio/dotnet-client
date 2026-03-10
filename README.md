@@ -1,7 +1,6 @@
 # Split SDK for .NET
 
-![CI Status](https://ci.appveyor.com/api/projects/status/hi6g2vl7s34vc225/branch/main?svg=true)
-[![Documentation](https://img.shields.io/badge/dotnet_client-documentation-informational)](https://help.split.io/hc/en-us/articles/360020240172--NET-SDK)
+[![Documentation](https://img.shields.io/badge/dotnet_client-documentation-informational)](https://developer.harness.io/docs/feature-management-experimentation/sdks-and-infrastructure/server-side-sdks/net-sdk/)
 
 ## Overview
 This SDK is designed to work with Split, the platform for controlled rollouts, which serves features to your users via feature flags to manage your complete customer experience.

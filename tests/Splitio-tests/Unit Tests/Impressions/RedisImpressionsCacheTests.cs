@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
@@ -14,8 +15,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     public class RedisImpressionsCacheTests
     {
         private Mock<IRedisAdapterProducer> _redisAdapter;
-        
-        private IImpressionsCache _cache;
+
+        private RedisImpressionsCache _cache;
 
         [TestInitialize]
         public void Initialization()
@@ -90,6 +91,30 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _redisAdapter.Verify(mock => mock.ListRightPushAsync(key, expected1), Times.Once);
             _redisAdapter.Verify(mock => mock.ListRightPushAsync(key, expected2), Times.Once);
             _redisAdapter.Verify(mock => mock.KeyExpireAsync(key, new TimeSpan(0, 0, 3600)), Times.Never);
+        }
+
+        [TestMethod]
+        public void CorrectFormatStoreImpressions()
+        {
+            // Arrange.
+            var impressions = new List<KeyImpression>
+            {
+                new KeyImpression("matching-key", "feature-1", "treatment", 34534546, 3333444, "label", "bucketing-key", false),
+                new KeyImpression("matching-key", "feature-1", "treatment", 34534550, 3333444, "label", "bucketing-key", false, 34534546),
+                new KeyImpression("matching-key", "feature-2", "treatment", 34534546, 3333444, "label", "bucketing-key", false),
+            };
+            impressions[2].properties = "{\"prop\":\"val\"}";
+
+            // Act.
+            var result = _cache.GetImpressions(impressions);
+            var impression1 = "{\"m\":{\"s\":\"version\",\"i\":\"ip\",\"n\":\"mm\"},\"i\":{\"k\":\"matching-key\",\"b\":\"bucketing-key\",\"f\":\"feature-1\",\"t\":\"treatment\",\"r\":\"label\",\"c\":3333444,\"m\":34534546}}";
+            var impression2 = "{\"m\":{\"s\":\"version\",\"i\":\"ip\",\"n\":\"mm\"},\"i\":{\"k\":\"matching-key\",\"b\":\"bucketing-key\",\"f\":\"feature-1\",\"t\":\"treatment\",\"r\":\"label\",\"c\":3333444,\"m\":34534550,\"pt\":34534546}}";
+            var impression3 = "{\"m\":{\"s\":\"version\",\"i\":\"ip\",\"n\":\"mm\"},\"i\":{\"k\":\"matching-key\",\"b\":\"bucketing-key\",\"f\":\"feature-2\",\"t\":\"treatment\",\"r\":\"label\",\"c\":3333444,\"m\":34534546,\"properties\":\"{\\\"prop\\\":\\\"val\\\"}\"}}";
+
+            // Assert.
+            Assert.AreEqual(impression1, result[0].ToString());
+            Assert.AreEqual(impression2, result[1].ToString());
+            Assert.AreEqual(impression3, result[2].ToString());
         }
     }
 }

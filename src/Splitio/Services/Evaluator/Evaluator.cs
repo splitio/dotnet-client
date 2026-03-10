@@ -3,7 +3,7 @@ using Splitio.Enums;
 using Splitio.Enums.Extensions;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
-using Splitio.Services.Impressions.Classes;
+using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Storages;
@@ -23,12 +23,12 @@ namespace Splitio.Services.Evaluator
         private readonly ISplitter _splitter;
         private readonly IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
         private readonly ITelemetryEvaluationProducer _telemetryEvaluationProducer;
-        private readonly FallbackTreatmentCalculator _fallbackTreatmentCalculator;
+        private readonly IFallbackTreatmentCalculator _fallbackTreatmentCalculator;
 
         public Evaluator(IFeatureFlagCacheConsumer featureFlagCache,
             ISplitter splitter,
             ITelemetryEvaluationProducer telemetryEvaluationProducer,
-            FallbackTreatmentCalculator fallbackTreatmentCalculator)
+            IFallbackTreatmentCalculator fallbackTreatmentCalculator)
         {
             _featureFlagCacheConsumer = featureFlagCache;
             _splitter = splitter;
@@ -63,7 +63,7 @@ namespace Splitio.Services.Evaluator
                         _log.Error($"{method}: Something went wrong evaluation feature: {feature}", e);
 
                         _telemetryEvaluationProducer?.RecordException(method.ConvertToMethodEnum());
-                        treatmentsForFeatures.Add(Helper.checkFallbackTreatment(feature, Labels.Exception, true, _fallbackTreatmentCalculator));
+                        treatmentsForFeatures.Add(Helper.CheckFallbackTreatment(feature, Labels.Exception, true, _fallbackTreatmentCalculator));
                     }
                 }
 
@@ -137,7 +137,7 @@ namespace Splitio.Services.Evaluator
                         if (_telemetryEvaluationProducer != null)
                             await _telemetryEvaluationProducer.RecordExceptionAsync(method.ConvertToMethodEnum());
 
-                        treatmentsForFeatures.Add(Helper.checkFallbackTreatment(feature, Labels.Exception, true, _fallbackTreatmentCalculator));
+                        treatmentsForFeatures.Add(Helper.CheckFallbackTreatment(feature, Labels.Exception, true, _fallbackTreatmentCalculator));
                     }
                 }
 
@@ -345,7 +345,7 @@ namespace Splitio.Services.Evaluator
         {
             _log.Error($"Exception caught getting treatment for feature flag: {featureName}", e);
 
-            return Helper.checkFallbackTreatment(featureName, Labels.Exception, true, _fallbackTreatmentCalculator);
+            return Helper.CheckFallbackTreatment(featureName, Labels.Exception, true, _fallbackTreatmentCalculator);
         }
 
         private List<TreatmentResult> EvaluateFeaturesException(Exception e, List<string> featureNames)
@@ -356,7 +356,7 @@ namespace Splitio.Services.Evaluator
 
             foreach (var name in featureNames)
             {
-                toReturn.Add(Helper.checkFallbackTreatment(name, Labels.Exception, true, _fallbackTreatmentCalculator));
+                toReturn.Add(Helper.CheckFallbackTreatment(name, Labels.Exception, true, _fallbackTreatmentCalculator));
             }
 
             return toReturn;
@@ -371,7 +371,7 @@ namespace Splitio.Services.Evaluator
 
             _log.Warn($"{method}: you passed {featureFlagName} that does not exist in this environment, please double check what feature flags exist in the Split user interface.");
 
-            result = Helper.checkFallbackTreatment(featureFlagName, Labels.SplitNotFound, false, _fallbackTreatmentCalculator);
+            result = Helper.CheckFallbackTreatment(featureFlagName, Labels.SplitNotFound, false, _fallbackTreatmentCalculator);
 
             return true;
         }

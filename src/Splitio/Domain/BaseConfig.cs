@@ -11,6 +11,7 @@ namespace Splitio.Domain
         public ImpressionsMode ImpressionsMode { get; set; }
         public HashSet<string> FlagSetsFilter { get; set; }
         public int FlagSetsInvalid { get; set; }
+        public FallbackTreatmentsConfiguration FallbackTreatments { get; set; }
 
         // Bloom Filter
         public int BfExpectedElements { get; set; }
