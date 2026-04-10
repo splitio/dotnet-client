@@ -93,9 +93,16 @@ namespace Splitio.Services.Client.Classes
         public bool RandomizeRefreshRates { get; set; }
 
         /// <summary>
-        /// Set a custom logger class implementing ISplitLogger 
+        /// Set a custom logger class implementing ISplitLogger
         /// </summary>
         public ISplitLogger Logger { get; set; }
+
+        /// <summary>
+        /// Set a custom logger builder function that creates ISplitLogger instances.
+        /// This builder will be invoked to create the logger when the SDK initializes.
+        /// Note: If both Logger and LoggerBuilder are set, Logger takes precedence.
+        /// </summary>
+        public SplitLoggerBuilder LoggerBuilder { get; set; }
 
         /// <summary>
         /// This setting allows the SDK to only synchronize the feature flags in the specified flag sets.

@@ -19,14 +19,18 @@ namespace Splitio.Services.Client.Classes
         private ISplitManager _manager;
         private ConfigurationOptions _options;
 
-        public SplitFactory(string apiKey, 
+        public SplitFactory(string apiKey,
             ConfigurationOptions options = null)
         {
             _apiKey = apiKey;
             _options = options ?? new ConfigurationOptions();
 
             var wrapperAdapter = WrapperAdapter.Instance();
-            wrapperAdapter.SetCustomerLogger(_options.Logger);
+
+            // Set custom logger - Logger takes precedence over LoggerBuilder
+            var logger = _options.Logger ?? _options.LoggerBuilder?.Invoke();
+            wrapperAdapter.SetCustomerLogger(logger);
+
             _apiKeyValidator = new ApiKeyValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
 
