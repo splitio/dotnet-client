@@ -23,61 +23,49 @@ namespace Microsoft.Extensions.Logging
 
         /// <summary>
         /// Configures Split logs for ASP.NET Core applications.
-        /// The logger factory will be captured when logging is first used in the application.
+        /// The logger factory will be captured when it is first resolved from DI.
+        /// Only wraps the default ASP.NET Core factory registration.
         /// </summary>
         public static ILoggingBuilder AddSplitLogs(this ILoggingBuilder builder)
         {
-            // Replace the ILoggerFactory registration with a capturing wrapper
-            var descriptor = new ServiceDescriptor(
-                typeof(ILoggerFactory),
-                sp =>
-                {
-                    // Get the original logger factory
-                    var loggerFactory = LoggerFactory.Create(loggingBuilder =>
-                    {
-                        // Copy all the logging configuration from the builder
-                        foreach (var service in sp.GetServices<ILoggerProvider>())
-                        {
-                            // Logger providers are already registered, LoggerFactory will pick them up
-                        }
-                    });
-
-                    // This is a simpler approach - just capture when resolved
-                    loggerFactory.AddSplitLogs();
-
-                    return loggerFactory;
-                },
-                ServiceLifetime.Singleton);
-
-            // Remove existing ILoggerFactory registration and add ours
-            for (int i = builder.Services.Count - 1; i >= 0; i--)
+            // Find and wrap only the default ILoggerFactory registration
+            ServiceDescriptor loggerFactoryDescriptor = null;
+            for (int i = 0; i < builder.Services.Count; i++)
             {
                 if (builder.Services[i].ServiceType == typeof(ILoggerFactory))
                 {
-                    var existing = builder.Services[i];
-                    builder.Services[i] = new ServiceDescriptor(
+                    loggerFactoryDescriptor = builder.Services[i];
+
+                    // Wrap this specific registration to capture the factory when resolved
+                    var wrappedDescriptor = ServiceDescriptor.Describe(
                         typeof(ILoggerFactory),
                         sp =>
                         {
                             ILoggerFactory factory;
-                            if (existing.ImplementationFactory != null)
+
+                            // Resolve the original factory based on how it was registered
+                            if (loggerFactoryDescriptor.ImplementationFactory != null)
                             {
-                                factory = (ILoggerFactory)existing.ImplementationFactory(sp);
+                                factory = (ILoggerFactory)loggerFactoryDescriptor.ImplementationFactory(sp);
                             }
-                            else if (existing.ImplementationInstance != null)
+                            else if (loggerFactoryDescriptor.ImplementationInstance != null)
                             {
-                                factory = (ILoggerFactory)existing.ImplementationInstance;
+                                factory = (ILoggerFactory)loggerFactoryDescriptor.ImplementationInstance;
                             }
                             else
                             {
-                                factory = (ILoggerFactory)ActivatorUtilities.CreateInstance(sp, existing.ImplementationType);
+                                factory = (ILoggerFactory)ActivatorUtilities.CreateInstance(sp, loggerFactoryDescriptor.ImplementationType);
                             }
 
-                            // Capture the factory
+                            // Capture the factory for Split logging
                             factory.AddSplitLogs();
+
                             return factory;
                         },
-                        existing.Lifetime);
+                        loggerFactoryDescriptor.Lifetime);
+
+                    // Replace only this registration
+                    builder.Services[i] = wrappedDescriptor;
                     break;
                 }
             }
