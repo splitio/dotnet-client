@@ -134,7 +134,12 @@ namespace Splitio.Services.EventSource
                 _disconnectSignal.Signal();
 
                 _log.Debug("Finished Event Source client ConnectAsync.");
-            }            
+                if (!_statusManager.IsDestroyed())
+                {
+                    _log.Debug("Stream closed unexpectedly, proceeding to reconnect.");
+                    await _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
+                }
+            }
         }
 
         private async Task ReadStreamAsync()
