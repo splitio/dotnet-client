@@ -128,17 +128,16 @@ namespace Splitio.Services.EventSource
             catch (Exception ex)
             {
                 _log.Debug($"Error connecting to {_url}.", ex);
-            }
-            finally
-            {
-                _disconnectSignal.Signal();
-
-                _log.Debug("Finished Event Source client ConnectAsync.");
                 if (!_statusManager.IsDestroyed())
                 {
                     _log.Debug("Stream closed unexpectedly, proceeding to reconnect.");
                     await _notificationManagerKeeper.HandleSseStatus(SSEClientStatusMessage.RETRYABLE_ERROR);
                 }
+            }
+            finally
+            {
+                _disconnectSignal.Signal();
+                _log.Debug("Finished Event Source client ConnectAsync.");
             }
         }
 
