@@ -28,10 +28,27 @@ namespace Splitio.Services.Common
 #if NET45
             ServicePointManager.SecurityProtocol = (SecurityProtocolType)12288 | (SecurityProtocolType)3072;
 #endif
+
+#if NET5_0_OR_GREATER
+            // Use SocketsHttpHandler on modern .NET to configure connection pooling.
+            // This prevents "The response ended prematurely" (HttpIOException) errors
+            // caused by stale keep-alive connections. When the server or load balancer
+            // closes an idle connection, the client may try to reuse it for a POST request.
+            // .NET does NOT auto-retry POST requests on connection failures (unlike GET),
+            // so the request fails. PooledConnectionLifetime and PooledConnectionIdleTimeout
+            // ensure connections are recycled before server-side timeouts close them.
+            var handler = new SocketsHttpHandler()
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                PooledConnectionLifetime = TimeSpan.FromMinutes(10),
+                PooledConnectionIdleTimeout = TimeSpan.FromSeconds(30),
+            };
+#else
             var handler = new HttpClientHandler()
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
             };
+#endif
 
             if (!string.IsNullOrEmpty(config.ProxyHost))
             {
@@ -102,6 +119,10 @@ namespace Splitio.Services.Common
                     result.Content = await response.Content.ReadAsStringAsync();
                     result.IsSuccessStatusCode = response.IsSuccessStatusCode;
                 }
+            }
+            catch (HttpRequestException e) when (e.InnerException is System.IO.IOException)
+            {
+                _log.Warn($"Transient connection error executing POST {url}. The request will be retried.", e);
             }
             catch (Exception e)
             {
