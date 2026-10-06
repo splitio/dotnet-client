@@ -1,4 +1,5 @@
 ﻿using Splitio.Services.Localhost;
+using Splitio.Commons.Dto;
 
 namespace Splitio.Domain
 {

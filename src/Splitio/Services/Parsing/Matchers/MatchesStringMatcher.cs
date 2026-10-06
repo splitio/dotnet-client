@@ -1,4 +1,4 @@
-﻿using Splitio.Domain;
+﻿using Splitio.Commons.Dto;
 using Splitio.Services.Evaluator;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;

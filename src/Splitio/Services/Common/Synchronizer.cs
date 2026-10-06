@@ -1,4 +1,5 @@
-﻿using Splitio.Domain;
+﻿using Splitio.Commons.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;

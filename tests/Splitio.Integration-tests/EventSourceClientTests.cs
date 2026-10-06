@@ -1,4 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Splitio.Commons.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
@@ -371,7 +373,7 @@ namespace Splitio.Integration_tests
             var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
             var notificationManagerKeeper = new NotificationManagerKeeper(telemetryRuntimeProducer, streamingStatusQueue);
             EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-            var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<SdkEventNotification>());
             var statusManager = new InMemoryReadinessGatesCache(internalEventsTask);
             var tasksManager = new TasksManager(statusManager);
             var task = tasksManager.NewOnTimeTask(Enums.Task.SSEConnect);

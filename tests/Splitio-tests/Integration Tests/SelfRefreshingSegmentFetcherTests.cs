@@ -1,4 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Splitio.Commons.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Common;
@@ -29,7 +31,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-            var internalEventsTask = new InternalEventsTask(eventsManager, new Splitio.Services.Shared.Classes.SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            var internalEventsTask = new InternalEventsTask(eventsManager, new Splitio.Services.Shared.Classes.SplitQueue<SdkEventNotification>());
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), internalEventsTask);
 
             var segmentFetcher = new JSONFileSegmentFetcher($"{rootFilePath}segment_payed.json", segmentCache);

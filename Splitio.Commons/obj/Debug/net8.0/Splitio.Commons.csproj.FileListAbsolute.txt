@@ -1,0 +1,13 @@
+C:\Users\chill\source\repos\commons\dto\dotnet-client\Splitio.Commons\bin\Debug\net8.0\Splitio.Commons.deps.json
+C:\Users\chill\source\repos\commons\dto\dotnet-client\Splitio.Commons\bin\Debug\net8.0\Splitio.Commons.dll
+C:\Users\chill\source\repos\commons\dto\dotnet-client\Splitio.Commons\bin\Debug\net8.0\Splitio.Commons.pdb
+C:\Users\chill\source\repos\commons\dto\dotnet-client\Splitio.Commons\obj\Debug\net8.0\Splitio.Commons.csproj.AssemblyReference.cache
+C:\Users\chill\source\repos\commons\dto\dotnet-client\Splitio.Commons\obj\Debug\net8.0\Splitio.Commons.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\chill\source\repos\commons\dto\dotnet-client\Splitio.Commons\obj\Debug\net8.0\Splitio.Commons.AssemblyInfoInputs.cache
+C:\Users\chill\source\repos\commons\dto\dotnet-client\Splitio.Commons\obj\Debug\net8.0\Splitio.Commons.AssemblyInfo.cs
+C:\Users\chill\source\repos\commons\dto\dotnet-client\Splitio.Commons\obj\Debug\net8.0\Splitio.Commons.csproj.CoreCompileInputs.cache
+C:\Users\chill\source\repos\commons\dto\dotnet-client\Splitio.Commons\obj\Debug\net8.0\Splitio.Commons.sourcelink.json
+C:\Users\chill\source\repos\commons\dto\dotnet-client\Splitio.Commons\obj\Debug\net8.0\Splitio.Commons.dll
+C:\Users\chill\source\repos\commons\dto\dotnet-client\Splitio.Commons\obj\Debug\net8.0\refint\Splitio.Commons.dll
+C:\Users\chill\source\repos\commons\dto\dotnet-client\Splitio.Commons\obj\Debug\net8.0\Splitio.Commons.pdb
+C:\Users\chill\source\repos\commons\dto\dotnet-client\Splitio.Commons\obj\Debug\net8.0\ref\Splitio.Commons.dll

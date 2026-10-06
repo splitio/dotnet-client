@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Domain;
+using Splitio.Commons.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Impressions.Classes;
 using System;

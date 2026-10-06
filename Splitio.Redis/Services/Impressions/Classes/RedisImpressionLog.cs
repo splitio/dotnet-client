@@ -1,4 +1,5 @@
-﻿using Splitio.Domain;
+﻿using Splitio.Commons.Domain;
+using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using System.Collections.Generic;

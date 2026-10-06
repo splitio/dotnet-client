@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Splitio.Commons.Dto;
+using System.Collections.Generic;
 
 namespace Splitio.Domain
 {

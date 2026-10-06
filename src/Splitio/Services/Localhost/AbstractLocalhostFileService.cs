@@ -1,4 +1,5 @@
 ﻿using Splitio.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Services.Logger;
 using Splitio.Services.Parsing;
 using Splitio.Services.Shared.Classes;

@@ -8,6 +8,7 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Storages;
 using Splitio.Util;
+using Splitio.Commons.Dto;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

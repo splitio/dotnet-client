@@ -3,6 +3,7 @@ using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
+using Splitio.Commons.Dto;
 using Splitio.Services.EventSource;
 using Splitio.Services.EventSource.Workers;
 using Splitio.Services.SegmentFetcher.Interfaces;

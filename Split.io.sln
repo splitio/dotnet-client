@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Splitio.Integration-events-
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A0383A7D-2DD4-4ED7-9610-CF7BF61FD654}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Splitio.Commons", "Splitio.Commons\Splitio.Commons.csproj", "{E1CDCCC1-4081-43F9-AA07-11905890B899}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,6 +62,10 @@ Global
 		{8E99A750-87FC-49BF-B998-5C5C8539FC52}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E99A750-87FC-49BF-B998-5C5C8539FC52}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E99A750-87FC-49BF-B998-5C5C8539FC52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1CDCCC1-4081-43F9-AA07-11905890B899}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1CDCCC1-4081-43F9-AA07-11905890B899}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1CDCCC1-4081-43F9-AA07-11905890B899}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1CDCCC1-4081-43F9-AA07-11905890B899}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -73,6 +79,7 @@ Global
 		{1303D5B7-0661-4B8E-A8C3-C5136027C10C} = {A0383A7D-2DD4-4ED7-9610-CF7BF61FD654}
 		{F525AF94-B3D7-4296-9F14-92DE2671D18A} = {A0383A7D-2DD4-4ED7-9610-CF7BF61FD654}
 		{8E99A750-87FC-49BF-B998-5C5C8539FC52} = {A0383A7D-2DD4-4ED7-9610-CF7BF61FD654}
+		{E1CDCCC1-4081-43F9-AA07-11905890B899} = {79B9E308-3F0F-441F-92B6-18C73B5CA3ED}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {83DB339B-3FB3-49B4-88E3-3CBB30269A1A}

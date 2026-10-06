@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Logger;
 

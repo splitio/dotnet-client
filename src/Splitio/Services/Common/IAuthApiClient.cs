@@ -1,4 +1,4 @@
-﻿using Splitio.Domain;
+﻿using Splitio.Commons.Domain;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Common

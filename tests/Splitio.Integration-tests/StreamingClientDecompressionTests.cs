@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Domain;
+using Splitio.Commons.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Shared.Classes;
 using Splitio.Tests.Common;

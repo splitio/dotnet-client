@@ -1,5 +1,5 @@
 ﻿using Murmur;
-using Splitio.Domain;
+using Splitio.Commons.Domain;
 using Splitio.Services.Impressions.Interfaces;
 using System;
 using System.Text;

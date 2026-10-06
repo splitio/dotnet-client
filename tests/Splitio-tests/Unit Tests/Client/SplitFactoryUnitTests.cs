@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Redis.Services.Client.Classes;
 using Splitio.Services.Client.Classes;
+using Splitio.Commons.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -156,7 +157,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             var configurationOptions = new ConfigurationOptions
             {
                 Mode = Mode.Consumer,
-                CacheAdapterConfig = new CacheAdapterConfigurationOptions { RedisClusterNodes = new Splitio.Domain.ClusterNodes(new List<string>() { }, "") }
+                CacheAdapterConfig = new CacheAdapterConfigurationOptions { RedisClusterNodes = new Splitio.Commons.Domain.ClusterNodes(new List<string>() { }, "") }
             };
 
             var factory = new SplitFactory("any", configurationOptions);
@@ -172,7 +173,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             var configurationOptions = new ConfigurationOptions
             {
                 Mode = Mode.Consumer,
-                CacheAdapterConfig = new CacheAdapterConfigurationOptions { RedisClusterNodes = new Splitio.Domain.ClusterNodes(new List<string>() { "localhost:6379" }, null) }
+                CacheAdapterConfig = new CacheAdapterConfigurationOptions { RedisClusterNodes = new Splitio.Commons.Domain.ClusterNodes(new List<string>() { "localhost:6379" }, null) }
             };
             var factory = new SplitFactory("any", configurationOptions);
 

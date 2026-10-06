@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
+using Splitio.Commons.Dto;
 using System.Collections.Generic;
 using Moq;
 

@@ -1,7 +1,7 @@
 ﻿#if NET_LATEST
 using Microsoft.Extensions.Logging;
 #endif
-using Splitio.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;

@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Domain;
+using Splitio.Commons.Domain;
 using Splitio.Services.InputValidation.Classes;
 using System.Collections.Generic;
 

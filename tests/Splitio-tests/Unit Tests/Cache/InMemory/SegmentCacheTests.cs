@@ -1,5 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Common;
@@ -110,7 +112,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         {
             //Arrange
             var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-            var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<SdkEventNotification>());
             internalEventsTask.Start();
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(), internalEventsTask);
             var keys = new List<string> { "1234" };

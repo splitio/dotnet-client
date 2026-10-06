@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using Splitio.Domain;
+using Splitio.Commons.Dto;
+using Splitio.Commons.Domain;
 
 namespace Splitio_Tests.Unit_Tests.Common
 {

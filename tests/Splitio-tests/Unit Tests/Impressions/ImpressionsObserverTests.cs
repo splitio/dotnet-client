@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Domain;
+using Splitio.Commons.Domain;
 using Splitio.Services.Impressions.Classes;
 
 namespace Splitio_Tests.Unit_Tests.Impressions

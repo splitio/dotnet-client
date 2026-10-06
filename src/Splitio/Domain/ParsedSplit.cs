@@ -1,5 +1,6 @@
 ﻿using Splitio.Services.Parsing;
 using Splitio.Services.Parsing.Matchers;
+using Splitio.Commons.Dto;
 using System.Collections.Generic;
 using System.Linq;
 

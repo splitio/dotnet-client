@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using Splitio.Domain;
+using Splitio.Commons.Dto;
 using System.Collections.Generic;
 
 namespace Splitio.Telemetry.Domain

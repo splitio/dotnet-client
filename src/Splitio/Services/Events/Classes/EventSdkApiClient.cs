@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using Splitio.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Services.Common;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Logger;

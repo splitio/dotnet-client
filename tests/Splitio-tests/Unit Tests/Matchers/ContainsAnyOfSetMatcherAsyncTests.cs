@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
 using Splitio.Services.Parsing;
-using Splitio.Domain;
+using Splitio.Commons.Dto;
 
 namespace Splitio_Tests.Unit_Tests.Matchers
 {

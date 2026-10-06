@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Splitio.Commons.Domain;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Shared.Classes;

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Splitio.Commons.Dto;
+using Newtonsoft.Json;
 using Splitio.Domain;
 
 namespace Splitio.Services.EventSource

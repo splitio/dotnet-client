@@ -44,4 +44,8 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Splitio.Commons\Splitio.Commons.csproj" />
+  </ItemGroup>
+
 </Project>
