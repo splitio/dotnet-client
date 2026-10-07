@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Splitio.Services.Logger
+namespace Splitio.Commons.Shared.Logger
 {
     public class NoopLogging : ISplitLogger
     {

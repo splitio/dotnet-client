@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Splitio.CommonLibraries
+namespace Splitio.Commons.Shared.Utils
 {
     public class HTTPResult
     {

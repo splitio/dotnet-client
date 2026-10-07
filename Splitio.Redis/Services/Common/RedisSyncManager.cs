@@ -51,7 +51,7 @@ namespace Splitio.Redis.Services.Common
                 _impressionsCounter.StopAsync()
             };
 
-            Task.WaitAll(task.ToArray(), Constants.Gral.DestroyTimeount);
+            Task.WaitAll(task.ToArray(), Commons.Shared.Constants.Gral.DestroyTimeount);
             _connectionPoolManager.Dispose();
         }
 
@@ -67,7 +67,7 @@ namespace Splitio.Redis.Services.Common
             var config = new Config
             {
                 OperationMode = (int)Mode.Consumer,
-                Storage = Constants.StorageType.Redis,
+                Storage = Commons.Shared.Constants.StorageType.Redis,
                 ActiveFactories = _factoryInstantiationsService.GetActiveFactories(),
                 RedundantActiveFactories = _factoryInstantiationsService.GetRedundantActiveFactories()
             };

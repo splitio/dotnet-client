@@ -5,11 +5,12 @@ using Splitio.Commons.Dto;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Shared.Logger;
 
 namespace Splitio_Tests.Unit_Tests.Shared
 {
@@ -34,7 +35,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
         {
             // Arrange.
             _wrapperAdapter
-                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool?>(), null, It.IsAny<ISplitLogger>()))
                 .Returns(new SdkMetadata
                 {
                     MachineIP = "ip-test",
@@ -81,7 +82,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
         {
             // Arrange.
             _wrapperAdapter
-                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool?>(), null, It.IsAny<ISplitLogger>()))
                 .Returns(new SdkMetadata
                 {
                     MachineIP = "ip-test",
@@ -140,7 +141,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
         {
             // Arrange.
             _wrapperAdapter
-                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool?>(), null, It.IsAny<ISplitLogger>()))
                 .Returns(new SdkMetadata
                 {
                     MachineIP = "ip-test",
@@ -163,7 +164,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
         {
             // Arrange.
             _wrapperAdapter
-                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool?>(), null, It.IsAny<ISplitLogger>()))
                 .Returns(new SdkMetadata
                 {
                     MachineIP = "ip-test",
@@ -198,7 +199,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
         {
             // Arrange.
             _wrapperAdapter
-                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool?>(), null, It.IsAny<ISplitLogger>()))
                 .Returns(new SdkMetadata
                 {
                     MachineIP = "ip-test",
@@ -233,7 +234,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
         {
             // Arrange.
             _wrapperAdapter
-                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool?>(), null, It.IsAny<ISplitLogger>()))
                 .Returns(new SdkMetadata
                 {
                     MachineIP = "ip-test",
@@ -255,7 +256,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
         {
             // Arrange.
             _wrapperAdapter
-                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool?>(), null, It.IsAny<ISplitLogger>()))
                 .Returns(new SdkMetadata
                 {
                     MachineIP = "ip-test",
@@ -280,7 +281,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
         {
             // Arrange.
             _wrapperAdapter
-                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Setup(mock => mock.BuildSdkMetadata(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool?>(), null, It.IsAny<ISplitLogger>()))
                 .Returns(new SdkMetadata
                 {
                     MachineIP = "ip-test",

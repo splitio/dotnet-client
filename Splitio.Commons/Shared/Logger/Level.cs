@@ -1,4 +1,4 @@
-﻿namespace Splitio.Services.Logger
+﻿namespace Splitio.Commons.Shared.Logger
 {
     public enum Level
     {

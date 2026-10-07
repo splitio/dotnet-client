@@ -1,5 +1,5 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Commons.Dto;
+﻿using Splitio.Commons.Dto;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Services.Evaluator;
 using System;
 using System.Collections.Generic;

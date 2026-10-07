@@ -2,9 +2,8 @@
 using Moq;
 using Splitio.Services.Client.Classes;
 using Splitio.Commons.Dto;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Shared.Logger;
 
 namespace Splitio_Tests.Unit_Tests.Shared
 {
@@ -24,12 +23,13 @@ namespace Splitio_Tests.Unit_Tests.Shared
         public void ReadConfigReturnsMachineName()
         {
             // Act.
-            var result = _adapter.BuildSdkMetadata(new ConfigurationOptions(), _log.Object);
+            var config = new ConfigurationOptions();
+            var result = _adapter.BuildSdkMetadata(config.SdkMachineName, config.SdkMachineIP, config.IPAddressesEnabled, null, _log.Object);
 
             // Assert.
             Assert.IsFalse(string.IsNullOrEmpty(result.MachineName));
-            Assert.AreNotEqual(Splitio.Constants.Gral.NA, result.MachineName);
-            Assert.AreNotEqual(Splitio.Constants.Gral.Unknown, result.MachineName);
+            Assert.AreNotEqual(Splitio.Commons.Shared.Constants.Gral.NA, result.MachineName);
+            Assert.AreNotEqual(Splitio.Commons.Shared.Constants.Gral.Unknown, result.MachineName);
         }
 
         [TestMethod]
@@ -42,10 +42,10 @@ namespace Splitio_Tests.Unit_Tests.Shared
             };
 
             // Act.
-            var result = _adapter.BuildSdkMetadata(config, _log.Object);
+            var result = _adapter.BuildSdkMetadata(config.SdkMachineName, config.SdkMachineIP, config.IPAddressesEnabled, null, _log.Object);
 
             // Assert.
-            Assert.AreEqual(Splitio.Constants.Gral.Unknown, result.MachineName);
+            Assert.AreEqual(Splitio.Commons.Shared.Constants.Gral.Unknown, result.MachineName);
         }
 
         [TestMethod]
@@ -62,10 +62,10 @@ namespace Splitio_Tests.Unit_Tests.Shared
             };
 
             // Act.
-            var result = _adapter.BuildSdkMetadata(config, _log.Object);
+            var result = _adapter.BuildSdkMetadata(config.SdkMachineName, config.SdkMachineIP, config.IPAddressesEnabled, config.CacheAdapterConfig.Type, _log.Object);
 
             // Assert.
-            Assert.AreEqual(Splitio.Constants.Gral.NA, result.MachineName);
+            Assert.AreEqual(Splitio.Commons.Shared.Constants.Gral.NA, result.MachineName);
         }
     }
 }

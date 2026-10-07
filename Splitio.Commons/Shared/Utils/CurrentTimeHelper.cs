@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Splitio.CommonLibraries
+namespace Splitio.Commons.Shared.Utils
 {
     public static class CurrentTimeHelper
     {

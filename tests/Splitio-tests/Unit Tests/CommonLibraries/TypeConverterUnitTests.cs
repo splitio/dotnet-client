@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.CommonLibraries;
+using Splitio.Commons.Shared.Utils;
 
 namespace Splitio_Tests.Unit_Tests.CommonLibraries
 {

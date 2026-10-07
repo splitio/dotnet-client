@@ -7,6 +7,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Reflection;
+using Splitio.Commons.Shared.Utils;
 
 namespace Splitio.Services.Client.Classes
 {

@@ -1,5 +1,6 @@
-﻿using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Logger;
+﻿using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Storages;
 using System;

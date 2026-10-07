@@ -1,4 +1,4 @@
-﻿namespace Splitio.Constants
+﻿namespace Splitio.Commons.Shared.Constants
 {
     public static class Push
     {

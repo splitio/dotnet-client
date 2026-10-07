@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace Splitio.Services.Logger
+namespace Splitio.Commons.Shared.Logger
 {
     public class SplitLogging : ISplitLogger
     {

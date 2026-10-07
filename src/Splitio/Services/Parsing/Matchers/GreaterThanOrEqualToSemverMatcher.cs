@@ -1,7 +1,7 @@
-﻿using Splitio.Services.Evaluator;
-using Splitio.Services.Logger;
+﻿using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Services.Evaluator;
 using Splitio.Services.SemverImp;
-using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Parsing.Classes

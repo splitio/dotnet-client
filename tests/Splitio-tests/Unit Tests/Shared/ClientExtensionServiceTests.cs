@@ -7,12 +7,12 @@ using Splitio.Services.Filters;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
+using Splitio.Commons.Shared.Logger;
 
 namespace Splitio_Tests.Unit_Tests.Shared
 {

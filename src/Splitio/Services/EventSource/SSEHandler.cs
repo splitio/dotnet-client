@@ -1,6 +1,6 @@
-﻿using Splitio.Services.EventSource.Workers;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
+﻿using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Services.EventSource.Workers;
 using System;
 using System.Threading.Tasks;
 

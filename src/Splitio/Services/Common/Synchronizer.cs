@@ -1,11 +1,11 @@
 ﻿using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
+using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
-using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Common;
 using System;

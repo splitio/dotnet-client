@@ -2,12 +2,12 @@
 using Splitio.Commons.Dto;
 using Splitio.Commons.Domain;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
 using Splitio.Services.Tasks;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Shared.Logger;
 
 namespace Splitio.Services.Cache.Classes
 {
@@ -16,7 +16,7 @@ namespace Splitio.Services.Cache.Classes
         private readonly ConcurrentDictionary<string, RuleBasedSegment> _cache;
         private long _changeNumber;
         private readonly IInternalEventsTask _internalEventsTask;
-        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemoryRuleBasedSegmentCache));
+        private readonly Splitio.Commons.Shared.Logger.ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(InMemoryRuleBasedSegmentCache));
 
         public InMemoryRuleBasedSegmentCache(ConcurrentDictionary<string, RuleBasedSegment> cache,
             IInternalEventsTask internalEventsTask,

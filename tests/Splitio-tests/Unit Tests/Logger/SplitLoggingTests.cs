@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Logger;
+using Splitio.Commons.Shared.Logger;
 using System.IO;
 
 namespace Splitio_Tests.Unit_Tests.Logger

@@ -1,15 +1,14 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Constants;
-using Splitio.Commons.Dto;
+﻿using Splitio.Commons.Dto;
 using Splitio.Services.Common;
 using Splitio.Services.Filters;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System;
 using System.Threading.Tasks;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Constants;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {

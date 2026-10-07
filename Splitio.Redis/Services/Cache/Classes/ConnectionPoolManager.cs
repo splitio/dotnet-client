@@ -1,8 +1,8 @@
-﻿using Splitio.Redis.Services.Cache.Interfaces;
+﻿using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Redis.Services.Shared;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;

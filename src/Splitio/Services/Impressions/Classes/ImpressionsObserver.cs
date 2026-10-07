@@ -6,8 +6,8 @@ using BitFaster.Caching.Lru;
 using Splitio.Commons.Domain;
 using Splitio.Services.Impressions.Interfaces;
 using System;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Shared.Logger;
 
 namespace Splitio.Services.Impressions.Classes
 {

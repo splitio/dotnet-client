@@ -1,6 +1,6 @@
-﻿using Splitio.Redis.Services.Domain;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
+﻿using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Redis.Services.Domain;
 using StackExchange.Redis;
 using System;
 using System.Linq;

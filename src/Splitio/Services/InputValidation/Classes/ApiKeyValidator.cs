@@ -1,6 +1,6 @@
-﻿using Splitio.Services.InputValidation.Interfaces;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
+﻿using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Services.InputValidation.Interfaces;
 using System;
 
 namespace Splitio.Services.InputValidation.Classes

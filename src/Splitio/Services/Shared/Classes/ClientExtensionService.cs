@@ -1,5 +1,4 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Enums;
 using Splitio.Enums.Extensions;
@@ -7,12 +6,13 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Filters;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Telemetry.Storages;
 using Splitio.Util;
 using System.Collections.Generic;
 using System.Linq;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Shared.Logger;
 
 namespace Splitio.Services.Shared.Classes
 {

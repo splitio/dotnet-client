@@ -1,14 +1,14 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
-using Splitio.Services.Shared.Classes;
 using Splitio.Commons.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Shared.Logger;
 
 namespace Splitio.Services.Parsing
 {

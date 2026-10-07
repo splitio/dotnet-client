@@ -1,7 +1,7 @@
-﻿using Splitio.Domain;
+﻿using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain;
@@ -84,11 +84,11 @@ namespace Splitio.Telemetry.Common
                     },
                     UrlOverrides = new UrlOverrides
                     {
-                        Sdk = !_configurationOptions.BaseUrl.Equals(Constants.Urls.BaseUrl),
-                        Events = !_configurationOptions.EventsBaseUrl.Equals(Constants.Urls.EventsBaseUrl),
-                        Auth = !_configurationOptions.AuthServiceURL.Equals(Constants.Urls.AuthServiceURL),
-                        Stream = !_configurationOptions.StreamingServiceURL.Equals(Constants.Urls.StreamingServiceURL),
-                        Telemetry = !_configurationOptions.TelemetryServiceURL.Equals(Constants.Urls.TelemetryServiceURL)
+                        Sdk = !_configurationOptions.BaseUrl.Equals(Commons.Shared.Constants.Urls.BaseUrl),
+                        Events = !_configurationOptions.EventsBaseUrl.Equals(Commons.Shared.Constants.Urls.EventsBaseUrl),
+                        Auth = !_configurationOptions.AuthServiceURL.Equals(Commons.Shared.Constants.Urls.AuthServiceURL),
+                        Stream = !_configurationOptions.StreamingServiceURL.Equals(Commons.Shared.Constants.Urls.StreamingServiceURL),
+                        Telemetry = !_configurationOptions.TelemetryServiceURL.Equals(Commons.Shared.Constants.Urls.TelemetryServiceURL)
                     },
                     StreamingEnabled = _configurationOptions.StreamingEnabled,
                     ImpressionsMode = _configurationOptions.ImpressionsMode,
@@ -99,7 +99,7 @@ namespace Splitio.Telemetry.Common
                     TimeUntilSDKReady = timeUntilSDKReady,
                     ActiveFactories = _factoryInstantiationsService.GetActiveFactories(),
                     RedundantActiveFactories = _factoryInstantiationsService.GetRedundantActiveFactories(),
-                    Storage = Constants.StorageType.Memory,
+                    Storage = Commons.Shared.Constants.StorageType.Memory,
                     SDKNotReadyUsage = _telemetryStorageConsumer.GetNonReadyUsages(),
                     HTTPProxyDetected = IsHTTPProxyDetected(),
                     FlagSetsTotal = _configurationOptions.FlagSetsFilter.Count,

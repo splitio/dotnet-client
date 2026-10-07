@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
+using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Services.Common;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;

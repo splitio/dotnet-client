@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Common;
+﻿using Splitio.Commons.Shared.Utils;
+using Splitio.Services.Common;
 using Splitio.Services.Shared.Classes;
 using System;
 using System.Threading.Tasks;

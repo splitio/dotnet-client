@@ -1,8 +1,10 @@
 ﻿#if NET_LATEST
 using Microsoft.Extensions.Logging;
+using Splitio;
+using Splitio.Commons.Shared.Logger;
 #endif
 
-namespace Splitio.Services.Logger
+namespace Splitio.Commons.Shared.Logger
 {
     public static class SplitLogger
     {

@@ -1,16 +1,16 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Localhost;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Shared.Logger;
 
 namespace Splitio.Services.Shared.Classes
 {
@@ -118,11 +118,11 @@ namespace Splitio.Services.Shared.Classes
                 StreamingReconnectBackoffBase = GetMinimunAllowed(config.StreamingReconnectBackoffBase ?? 1, 1, "StreamingReconnectBackoffBase"),
                 TelemetryRefreshRate = GetMinimunAllowed(config.TelemetryRefreshRate ?? 3600, 60, "TelemetryRefreshRate"),
                 ImpressionListener = config.ImpressionListener,
-                AuthServiceURL = string.IsNullOrEmpty(config.AuthServiceURL) ? Constants.Urls.AuthServiceURL : config.AuthServiceURL,
-                BaseUrl = string.IsNullOrEmpty(config.Endpoint) ? Constants.Urls.BaseUrl : config.Endpoint,
-                EventsBaseUrl = string.IsNullOrEmpty(config.EventsEndpoint) ? Constants.Urls.EventsBaseUrl : config.EventsEndpoint,
-                StreamingServiceURL = string.IsNullOrEmpty(config.StreamingServiceURL) ? Constants.Urls.StreamingServiceURL : config.StreamingServiceURL,
-                TelemetryServiceURL = string.IsNullOrEmpty(config.TelemetryServiceURL) ? Constants.Urls.TelemetryServiceURL : config.TelemetryServiceURL,
+                AuthServiceURL = string.IsNullOrEmpty(config.AuthServiceURL) ? Commons.Shared.Constants.Urls.AuthServiceURL : config.AuthServiceURL,
+                BaseUrl = string.IsNullOrEmpty(config.Endpoint) ? Commons.Shared.Constants.Urls.BaseUrl : config.Endpoint,
+                EventsBaseUrl = string.IsNullOrEmpty(config.EventsEndpoint) ? Commons.Shared.Constants.Urls.EventsBaseUrl : config.EventsEndpoint,
+                StreamingServiceURL = string.IsNullOrEmpty(config.StreamingServiceURL) ? Commons.Shared.Constants.Urls.StreamingServiceURL : config.StreamingServiceURL,
+                TelemetryServiceURL = string.IsNullOrEmpty(config.TelemetryServiceURL) ? Commons.Shared.Constants.Urls.TelemetryServiceURL : config.TelemetryServiceURL,
                 SdkStartTime = CurrentTimeHelper.CurrentTimeMillis(),
                 OnDemandFetchMaxRetries = 10,
                 OnDemandFetchRetryDelayMs = 50,
@@ -141,7 +141,8 @@ namespace Splitio.Services.Shared.Classes
         #region Private Methods
         private BaseConfig ReadBaseConfig(ConfigurationOptions config, ConfigTypes type)
         {
-            var metadata = _wrapperAdapter.BuildSdkMetadata(config, _log);
+            var adapterType = (config.CacheAdapterConfig != null) ? config.CacheAdapterConfig?.Type : null;
+            var metadata = _wrapperAdapter.BuildSdkMetadata(config.SdkMachineName, config.SdkMachineIP, config.IPAddressesEnabled, adapterType, _log);
             var flagSetsResult = FlagSetsValidations(config.FlagSetsFilter, type);
 
             return new BaseConfig

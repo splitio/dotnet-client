@@ -1,8 +1,7 @@
-﻿using Splitio.CommonLibraries;
+﻿using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EventSource;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
 using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;

@@ -193,8 +193,9 @@ namespace Splitio.Services.Client.Classes
         private void BuildSdkApiClients()
         {
             var headers = GetHeaders();
-            headers.Add(Constants.Http.AcceptEncoding, Constants.Http.Gzip);
-            headers.Add(Constants.Http.KeepAlive, "true");
+
+            headers.Add(Commons.Shared.Constants.Http.AcceptEncoding, Commons.Shared.Constants.Http.Gzip);
+            headers.Add(Commons.Shared.Constants.Http.KeepAlive, "true");
 
             var sdkHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
             _splitSdkApiClient = new SplitSdkApiClient(sdkHttpClient, _telemetryRuntimeProducer, _config.BaseUrl, _flagSetsFilter, IsHTTPProxyDetected());
@@ -256,7 +257,8 @@ namespace Splitio.Services.Client.Classes
 
                 // EventSourceClient
                 var headers = GetHeaders();
-                headers.Add(Constants.Http.SplitSDKClientKey, ApiKey.Substring(ApiKey.Length - 4));
+
+                headers.Add(Commons.Shared.Constants.Http.SplitSDKClientKey, ApiKey.Substring(ApiKey.Length - 4));
                 var sseHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
                 var connectTask = _tasksManager.NewOnTimeTask(Enums.Task.SSEConnect);
                 var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, _telemetryRuntimeProducer, notificationManagerKeeper, _statusManager, connectTask);
@@ -288,18 +290,18 @@ namespace Splitio.Services.Client.Classes
         {
             var headers = new Dictionary<string, string>
             {
-                { Constants.Http.SplitSDKVersion, _config.SdkVersion },
-                { Constants.Http.SplitSDKImpressionsMode, _config.ImpressionsMode.ToString() }
+                { Commons.Shared.Constants.Http.SplitSDKVersion, _config.SdkVersion },
+                { Commons.Shared.Constants.Http.SplitSDKImpressionsMode, _config.ImpressionsMode.ToString() }
             };
 
-            if (!_config.SdkMachineName.Equals(Constants.Gral.Unknown))
+            if (!_config.SdkMachineName.Equals(Commons.Shared.Constants.Gral.Unknown))
             {
-                headers.Add(Constants.Http.SplitSDKMachineName, _config.SdkMachineName);
+                headers.Add(Commons.Shared.Constants.Http.SplitSDKMachineName, _config.SdkMachineName);
             }
 
-            if (!string.IsNullOrEmpty(_config.SdkMachineIP) && !_config.SdkMachineIP.Equals(Constants.Gral.Unknown))
+            if (!string.IsNullOrEmpty(_config.SdkMachineIP) && !_config.SdkMachineIP.Equals(Commons.Shared.Constants.Gral.Unknown))
             {
-                headers.Add(Constants.Http.SplitSDKMachineIP, _config.SdkMachineIP);
+                headers.Add(Commons.Shared.Constants.Http.SplitSDKMachineIP, _config.SdkMachineIP);
             }
 
             return headers;
@@ -310,7 +312,7 @@ namespace Splitio.Services.Client.Classes
             return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HTTP_PROXY")) ||
                 !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HTTPS_PROXY")) ||
                 !string.IsNullOrEmpty(_config.ProxyHost) ||
-                _config.BaseUrl != Constants.Urls.BaseUrl;
+                _config.BaseUrl != Commons.Shared.Constants.Urls.BaseUrl;
         }
         #endregion
     }

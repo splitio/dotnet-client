@@ -1,4 +1,4 @@
-﻿using Splitio.Services.Logger;
+﻿using Splitio.Commons.Shared.Logger;
 
 namespace Splitio.Services.EventSource.Workers
 {

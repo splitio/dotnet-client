@@ -4,8 +4,6 @@ using Splitio.Enums.Extensions;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Storages;
 using Splitio.Util;
 using Splitio.Commons.Dto;
@@ -14,6 +12,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Shared.Logger;
 
 namespace Splitio.Services.Evaluator
 {

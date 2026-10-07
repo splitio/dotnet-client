@@ -1,7 +1,7 @@
 ﻿using Splitio.Commons.Dto;
-using Splitio.Services.Logger;
+using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Services.SegmentFetcher.Interfaces;
-using Splitio.Services.Shared.Classes;
 using System;
 using System.Threading.Tasks;
 

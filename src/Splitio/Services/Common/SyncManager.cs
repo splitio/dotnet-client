@@ -1,7 +1,7 @@
-﻿using Splitio.CommonLibraries;
+﻿using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EventSource;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Tasks;
 using Splitio.Telemetry.Common;
@@ -77,7 +77,7 @@ namespace Splitio.Services.Common
 
                 _sseHandler.StopWorkers();
 
-                Task.WaitAll(task.ToArray(), Constants.Gral.DestroyTimeount);
+                Task.WaitAll(task.ToArray(), Commons.Shared.Constants.Gral.DestroyTimeount);
 
                 _synchronizer.ClearFetchersCache();
             }

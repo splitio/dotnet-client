@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.Shared.Logger;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.InputValidation.Classes;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 
 namespace Splitio_Tests.Unit_Tests.InputValidation

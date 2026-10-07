@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Globalization;
 
-namespace Splitio.CommonLibraries
+namespace Splitio.Commons.Shared.Utils
 {
     public static class TypeConverter
     {
-        private static readonly DateTime date = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+        private static readonly DateTime date = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
 
         public static DateTime ToDateTime(this long timestamp)
         {
