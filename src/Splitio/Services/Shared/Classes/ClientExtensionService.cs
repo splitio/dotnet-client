@@ -1,5 +1,6 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Enums;
 using Splitio.Enums.Extensions;
 using Splitio.Services.Cache.Interfaces;

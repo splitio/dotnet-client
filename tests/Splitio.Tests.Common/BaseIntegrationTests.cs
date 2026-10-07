@@ -1,6 +1,7 @@
 ﻿using HandlebarsDotNet.Features;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Domain;
+using Splitio.Commons.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;

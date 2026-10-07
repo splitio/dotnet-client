@@ -1,4 +1,6 @@
 ﻿using Splitio.Domain;
+using Splitio.Commons.Dto;
+using Splitio.Commons.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
@@ -18,6 +20,8 @@ using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Common;
 using Splitio.Telemetry.Storages;
+using Splitio.Commons.Dto;
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

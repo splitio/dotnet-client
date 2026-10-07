@@ -1,6 +1,6 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Constants;
-using Splitio.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Services.Common;
 using Splitio.Services.Filters;
 using Splitio.Services.Logger;

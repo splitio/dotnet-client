@@ -471,7 +471,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             var config = new RedisConfig
             {
-                ClusterNodes = new Splitio.Domain.ClusterNodes(new List<string>() { "localhost:6379" }, "{SPLITIO}"),
+                ClusterNodes = new Splitio.Commons.Domain.ClusterNodes(new List<string>() { "localhost:6379" }, "{SPLITIO}"),
                 RedisPassword = "",
                 RedisDatabase = 0,
                 RedisConnectTimeout = 1000,
@@ -489,7 +489,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             var config = new RedisConfig
             {
-                ClusterNodes = new Splitio.Domain.ClusterNodes(new List<string>() { "localhost:6379" }, "{SPLITIO}"),
+                ClusterNodes = new Splitio.Commons.Domain.ClusterNodes(new List<string>() { "localhost:6379" }, "{SPLITIO}"),
                 RedisPassword = "",
                 RedisDatabase = 0,
                 RedisConnectTimeout = 1000,

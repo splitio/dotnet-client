@@ -1,6 +1,7 @@
-﻿using Splitio.Services.Client.Classes;
-using Splitio.Services.Logger;
+﻿using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Dto;
+
 using System;
 
 namespace Splitio.Domain

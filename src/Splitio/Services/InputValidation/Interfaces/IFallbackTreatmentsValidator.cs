@@ -1,4 +1,4 @@
-﻿using Splitio.Domain;
+﻿using Splitio.Commons.Domain;
 using System.Collections.Generic;
 
 namespace Splitio.Services.InputValidation.Interfaces

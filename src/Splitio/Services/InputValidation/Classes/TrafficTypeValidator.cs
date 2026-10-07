@@ -1,4 +1,4 @@
-﻿using Splitio.Domain;
+﻿using Splitio.Commons.Dto;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;

@@ -1,4 +1,4 @@
-﻿using Splitio.Domain;
+﻿using Splitio.Commons.Domain;
 using Splitio.Services.Impressions.Interfaces;
 
 namespace Splitio.Services.Impressions.Classes

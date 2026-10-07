@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Domain;
+using Splitio.Commons.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
 using Splitio.Services.Impressions.Classes;
@@ -31,7 +32,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Arrange.
             var config = new ComponentConfig(5, 5);
             EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-            var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<SdkEventNotification>());
             var statusManager = new InMemoryReadinessGatesCache(internalEventsTask);
             var taskManager = new TasksManager(statusManager);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.ImpressionsCountSender, 1);
@@ -57,7 +58,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Arrange.
             var config = new ComponentConfig(5, 5);
             EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-            var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<SdkEventNotification>());
             var statusManager = new InMemoryReadinessGatesCache(internalEventsTask);
             var taskManager = new TasksManager(statusManager);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.ImpressionsCountSender, 1);
@@ -78,7 +79,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             // Arrange.
             var config = new ComponentConfig(5, 5);
             EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-            var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<SdkEventNotification>());
             var statusManager = new InMemoryReadinessGatesCache(internalEventsTask);
             var taskManager = new TasksManager(statusManager);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.ImpressionsCountSender, 100);
@@ -104,7 +105,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         {
             var config = new ComponentConfig(6, 3);
             EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-            var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<SdkEventNotification>());
             var statusManager = new InMemoryReadinessGatesCache(internalEventsTask);
             var taskManager = new TasksManager(statusManager);
             var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.ImpressionsCountSender, 100);

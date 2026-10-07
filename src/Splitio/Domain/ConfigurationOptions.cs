@@ -1,9 +1,10 @@
-﻿using Splitio.Domain;
-using Splitio.Services.Impressions.Interfaces;
+﻿using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using System;
 using System.Collections.Generic;
 using Splitio.Services.Localhost;
+using Splitio.Commons.Domain;
+using Splitio.Commons.Dto;
 
 namespace Splitio.Services.Client.Classes
 {

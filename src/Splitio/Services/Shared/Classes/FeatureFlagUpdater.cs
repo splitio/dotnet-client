@@ -4,6 +4,7 @@ using Splitio.Services.Filters;
 using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Commons.Dto;
 using System.Collections.Generic;
 using System.Linq;
 

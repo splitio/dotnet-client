@@ -1,4 +1,5 @@
-﻿using Splitio.Domain;
+﻿using Splitio.Commons.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource.Workers;
 using Splitio.Services.Logger;

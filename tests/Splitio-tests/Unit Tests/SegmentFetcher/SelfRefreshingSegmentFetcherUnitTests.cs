@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.Domain;
 using Splitio.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
@@ -27,7 +29,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         {
             // Arrange
             Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>> eventsManager = new Mock<IEventsManager<SdkEvent, SdkInternalEvent, EventMetadata>>();
-            var internalEventsTask = new InternalEventsTask(eventsManager.Object, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            var internalEventsTask = new InternalEventsTask(eventsManager.Object, new SplitQueue<SdkEventNotification>());
             var gates = new InMemoryReadinessGatesCache(internalEventsTask);
             await gates.SetReadyAsync();
             var apiClient = new Mock<ISegmentSdkApiClient>();            

@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Domain;
+using Splitio.Commons.Domain;
 using Splitio.Redis.Services.Domain;
 using Splitio.Redis.Services.Shared;
 using System.Collections.Generic;
@@ -64,7 +64,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             // Arrange.
             var config = new RedisConfig
             {
-                ClusterNodes = new Splitio.Domain.ClusterNodes(
+                ClusterNodes = new Splitio.Commons.Domain.ClusterNodes(
                     new List<string>() { "localhost:6379", "localhost:6380" }, "{split}"
                 ),
                 RedisPassword = "mypass",

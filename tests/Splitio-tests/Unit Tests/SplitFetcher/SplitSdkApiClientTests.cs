@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.CommonLibraries;
-using Splitio.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Services.Common;
 using Splitio.Services.Filters;
 using Splitio.Services.SplitFetcher.Classes;

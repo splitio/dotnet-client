@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Domain;
+using Splitio.Commons.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Services.Common;
-using Splitio.Services.EventSource.Workers;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Tasks;
 using System;

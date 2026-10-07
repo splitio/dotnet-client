@@ -3,7 +3,7 @@ using Splitio.Services.Cache.Lru;
 #else
 using BitFaster.Caching.Lru;
 #endif
-using Splitio.Domain;
+using Splitio.Commons.Domain;
 using Splitio.Services.Impressions.Interfaces;
 using System;
 using Splitio.Services.Logger;

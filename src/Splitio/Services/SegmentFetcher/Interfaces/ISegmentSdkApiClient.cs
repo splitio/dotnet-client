@@ -1,4 +1,4 @@
-﻿using Splitio.Domain;
+﻿using Splitio.Commons.Dto;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Interfaces

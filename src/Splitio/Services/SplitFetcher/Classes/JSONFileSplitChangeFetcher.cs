@@ -1,4 +1,5 @@
 ﻿using Splitio.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System.IO;

@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Services.EventSource;
 
 namespace Splitio_Tests.Unit_Tests.EventSource

@@ -5,6 +5,7 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Services.Tasks;
+using Splitio.Commons.Dto;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

@@ -1,4 +1,5 @@
 ﻿using Splitio.Services.Evaluator;
+using Splitio.Commons.Dto;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;

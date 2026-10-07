@@ -1,0 +1,8 @@
+﻿namespace Splitio.Commons.Dto
+{
+    public class ValidatorResult
+    {
+        public bool Success { get; set; }
+        public string Value { get; set; }
+    }
+}

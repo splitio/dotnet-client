@@ -1,4 +1,6 @@
-﻿using Splitio.Constants;
+﻿using Splitio.Commons.Domain;
+using Splitio.Commons.Dto;
+using Splitio.Constants;
 using Splitio.Domain;
 using Splitio.Enums.Extensions;
 using Splitio.Services.Cache.Filter;
@@ -460,7 +462,7 @@ namespace Splitio.Services.Client.Classes
         protected void BuildEventsManager()
         {
             _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-            _internalEventsTask = new InternalEventsTask(_eventsManager, new SplitQueue<EventSource.Workers.SdkEventNotification>());
+            _internalEventsTask = new InternalEventsTask(_eventsManager, new SplitQueue<SdkEventNotification>());
             _internalEventsTask.Start();
             RegisterEvents();
         }

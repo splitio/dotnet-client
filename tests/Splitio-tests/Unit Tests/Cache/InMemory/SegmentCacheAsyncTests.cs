@@ -1,4 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Splitio.Commons.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
@@ -28,7 +30,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         {
             var segments = new ConcurrentDictionary<string, Segment>();
             _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-            _internalEventsTask = new InternalEventsTask(_eventsManager, new SplitQueue<Splitio.Services.EventSource.Workers.SdkEventNotification>());
+            _internalEventsTask = new InternalEventsTask(_eventsManager, new SplitQueue<SdkEventNotification>());
             _internalEventsTask.Start();
             _cache = new InMemorySegmentCache(segments, _internalEventsTask);
         }

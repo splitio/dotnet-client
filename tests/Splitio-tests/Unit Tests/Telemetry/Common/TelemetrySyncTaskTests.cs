@@ -2,6 +2,7 @@
 using Moq;
 using Splitio.CommonLibraries;
 using Splitio.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.Tasks;
@@ -143,7 +144,7 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
                 SplitsRefreshRate = 60,
                 TelemetryRefreshRate = 60,
                 ImpressionsMode = ImpressionsMode.Optimized,
-                Mode = Splitio.Services.Client.Classes.Mode.Standalone,
+                Mode = Splitio.Commons.Dto.Mode.Standalone,
                 TreatmentLogSize = 4,
                 SdkStartTime = CurrentTimeHelper.CurrentTimeMillis(),
                 BaseUrl = "https://sdk.split.io",

@@ -74,7 +74,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             // Arrange.
             var config = new RedisConfig
             {
-                ClusterNodes = new Splitio.Domain.ClusterNodes(new List<string>() { "localhost:6379" }, "{SPLITIO}"),
+                ClusterNodes = new Splitio.Commons.Domain.ClusterNodes(new List<string>() { "localhost:6379" }, "{SPLITIO}"),
                 RedisDatabase = 0,
                 RedisConnectTimeout = 1000,
                 RedisConnectRetry = 5,
@@ -129,7 +129,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             config = new RedisConfig
             {
                 ConnectionString = "localhost:6379,DefaultDatabase=0",
-                ClusterNodes = new Splitio.Domain.ClusterNodes(new List<string>() { "invalid:0000" }, "{SPLITIO}"),
+                ClusterNodes = new Splitio.Commons.Domain.ClusterNodes(new List<string>() { "invalid:0000" }, "{SPLITIO}"),
                 PoolSize = 5
             };
             var pool2 = new ConnectionPoolManager(config);

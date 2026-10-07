@@ -1,4 +1,6 @@
 ﻿using Splitio.Domain;
+using Splitio.Commons.Dto;
+using Splitio.Commons.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Filters;
 using Splitio.Services.Logger;

@@ -5,6 +5,7 @@ using Splitio.Services.Parsing.Classes;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;

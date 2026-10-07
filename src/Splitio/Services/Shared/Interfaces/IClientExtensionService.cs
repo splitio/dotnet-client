@@ -1,4 +1,5 @@
 ﻿using Splitio.Domain;
+using Splitio.Commons.Dto;
 using Splitio.Services.Logger;
 using System.Collections.Generic;
 using System.Threading.Tasks;
