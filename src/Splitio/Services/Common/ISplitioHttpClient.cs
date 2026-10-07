@@ -1,4 +1,4 @@
-﻿using Splitio.CommonLibraries;
+﻿using Splitio.Commons.Shared.Utils;
 using System;
 using System.Net.Http;
 using System.Threading;

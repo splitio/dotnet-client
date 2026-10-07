@@ -1,7 +1,8 @@
 ﻿using Newtonsoft.Json.Linq;
 using Splitio.Commons.Domain;
-using Splitio.Constants;
-using Splitio.Services.Logger;
+using Splitio.Commons.Shared.Constants;
+using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
@@ -103,15 +104,15 @@ namespace Splitio.Services.Common
         private static string AddPrefixControlChannels(string channels)
         {
             channels = channels
-                .Replace(Constants.Push.ControlPri, $"{Constants.Push.OccupancyPrefix}{Constants.Push.ControlPri}")
-                .Replace(Constants.Push.ControlSec, $"{Constants.Push.OccupancyPrefix}{Constants.Push.ControlSec}");
+                .Replace(Push.ControlPri, $"{Push.OccupancyPrefix}{Push.ControlPri}")
+                .Replace(Push.ControlSec, $"{Push.OccupancyPrefix}{Push.ControlSec}");
 
             return channels;
         }
 
         private static double GetExpirationSeconds(Jwt token)
         {
-            return token.Expiration - token.IssuedAt - Constants.Push.SecondsBeforeExpiration;
+            return token.Expiration - token.IssuedAt - Push.SecondsBeforeExpiration;
         }
 
         private static string DecodeJwt(string token)

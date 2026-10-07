@@ -3,7 +3,6 @@ using Splitio.Commons.Dto;
 using Splitio.Commons.Domain;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Tasks;
 using Splitio.Telemetry.Domain.Enums;
@@ -12,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Shared.Logger;
 
 namespace Splitio.Services.Impressions.Classes
 {

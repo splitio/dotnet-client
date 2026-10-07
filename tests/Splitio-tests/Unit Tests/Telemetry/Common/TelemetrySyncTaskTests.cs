@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Services.Cache.Interfaces;
@@ -13,6 +12,7 @@ using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Splitio.Commons.Shared.Utils;
 
 namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 {

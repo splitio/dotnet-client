@@ -1,8 +1,9 @@
 ﻿#if NET45 || NET461
 using Common.Logging;
+using Splitio.Commons.Shared.Logger;
 using System; 
 
-namespace Splitio.Services.Logger
+namespace Splitio.Commons.Shared.Logger
 {
     public class CommonLogging : ISplitLogger
     {

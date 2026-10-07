@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Splitio.Commons.Shared.Logger;
 using Splitio.Services.Client.Classes;
-using Splitio.Services.Logger;
 
 namespace Splitio_Tests.Integration_Tests
 {

@@ -1,7 +1,5 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Services.Tasks;
@@ -9,6 +7,8 @@ using Splitio.Commons.Dto;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Shared.Logger;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {

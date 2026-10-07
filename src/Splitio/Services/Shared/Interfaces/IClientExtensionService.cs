@@ -1,8 +1,8 @@
 ﻿using Splitio.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Logger;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Splitio.Commons.Shared.Logger;
 
 namespace Splitio.Services.Shared.Interfaces
 {

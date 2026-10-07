@@ -1,6 +1,6 @@
-﻿using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
+﻿using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Services.Impressions.Interfaces;
 using Splitio.Telemetry.Common;
 using Splitio.Telemetry.Domain;
 using System;

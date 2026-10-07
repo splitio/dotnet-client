@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Logger;
+﻿using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Services.Shared.Classes;
 using Splitio.Telemetry.Domain;
 using Splitio.Telemetry.Domain.Enums;
@@ -154,14 +155,14 @@ namespace Splitio.Services.EventSource
 
         private void UpdatePublishers(string channel, int publishers)
         {
-            if (channel.Equals(Constants.Push.ControlPri))
+            if (channel.Equals(Commons.Shared.Constants.Push.ControlPri))
             {
                 _publishersPri = publishers;
                 _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.OccupancyPri, publishers));
                 return;
             }
 
-            if (channel.Equals(Constants.Push.ControlSec))
+            if (channel.Equals(Commons.Shared.Constants.Push.ControlSec))
             {
                 _publishersSec = publishers;
                 _telemetryRuntimeProducer.RecordStreamingEvent(new StreamingEvent(EventTypeEnum.OccupancySec, publishers));

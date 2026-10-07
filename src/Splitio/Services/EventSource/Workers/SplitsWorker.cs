@@ -10,6 +10,7 @@ using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Splitio.Commons.Shared.Utils;
 
 namespace Splitio.Services.EventSource.Workers
 {

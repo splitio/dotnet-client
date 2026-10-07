@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.Shared.Logger;
 using Splitio.Services.InputValidation.Classes;
-using Splitio.Services.Logger;
 using System.Collections.Generic;
 using System.Linq;
 

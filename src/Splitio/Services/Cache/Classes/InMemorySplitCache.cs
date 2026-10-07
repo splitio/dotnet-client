@@ -3,13 +3,13 @@ using Splitio.Commons.Dto;
 using Splitio.Commons.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Filters;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Splitio.Services.Tasks;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Shared.Logger;
 
 namespace Splitio.Services.Cache.Classes
 {

@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
+using Splitio.Commons.Shared.Logger;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Tests.Common;
 using Splitio.Tests.Common.Resources;

@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System;
 
-namespace Splitio.Services.Logger
+namespace Splitio.Commons.Shared.Logger
 {
     public class MicrosoftExtensionsLogging : ISplitLogger
     {

@@ -1,4 +1,4 @@
-﻿using Splitio.CommonLibraries;
+﻿using Splitio.Commons.Shared.Utils;
 
 namespace Splitio.Domain
 {

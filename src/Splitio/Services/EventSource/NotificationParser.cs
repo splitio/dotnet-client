@@ -1,10 +1,11 @@
 ﻿using Splitio.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Util;
 using System;
 using System.Text;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Shared.Logger;
 
 namespace Splitio.Services.EventSource
 {
@@ -23,7 +24,7 @@ namespace Splitio.Services.EventSource
             {
                 if (notification.Contains(EventMessageType) || notification.Contains(EventMessageWsType))
                 {
-                    if (notification.Contains(Constants.Push.OccupancyPrefix))
+                    if (notification.Contains(Commons.Shared.Constants.Push.OccupancyPrefix))
                     {
                         return ParseControlChannelMessage(notification);
                     }
@@ -79,7 +80,7 @@ namespace Splitio.Services.EventSource
         private static IncomingNotification ParseControlChannelMessage(string notificationString)
         {
             var notificationData = GetNotificationData<NotificationData>(notificationString);
-            var channel = notificationData.Channel.Replace(Constants.Push.OccupancyPrefix, string.Empty);
+            var channel = notificationData.Channel.Replace(Commons.Shared.Constants.Push.OccupancyPrefix, string.Empty);
 
             if (notificationData.Data.Contains("controlType"))
             {

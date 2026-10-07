@@ -1,8 +1,8 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Commons.Domain;
+﻿using Splitio.Commons.Domain;
+using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Logger;
 using Splitio.Telemetry.Domain.Enums;
 using Splitio.Telemetry.Storages;
 using System.Collections.Generic;

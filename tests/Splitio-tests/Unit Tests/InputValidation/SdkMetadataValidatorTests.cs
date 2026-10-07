@@ -21,7 +21,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             var result = _sdkMetadataValidator.MachineNameValidation("Test", "TEST-志");
 
             // Assert.
-            Assert.AreEqual(Splitio.Constants.Gral.Unknown, result);
+            Assert.AreEqual(Splitio.Commons.Shared.Constants.Gral.Unknown, result);
         }
 
         [TestMethod]
@@ -31,7 +31,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             var result = _sdkMetadataValidator.MachineNameValidation("Test", string.Empty);
 
             // Assert.
-            Assert.AreEqual(Splitio.Constants.Gral.Unknown, result);
+            Assert.AreEqual(Splitio.Commons.Shared.Constants.Gral.Unknown, result);
         }
 
         [TestMethod]

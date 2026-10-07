@@ -1,8 +1,9 @@
 ﻿using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
+using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource.Workers;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
 using System.Threading.Tasks;

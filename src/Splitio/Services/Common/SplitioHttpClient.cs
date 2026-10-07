@@ -1,7 +1,6 @@
-﻿using Splitio.CommonLibraries;
+﻿using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Domain;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -43,8 +42,8 @@ namespace Splitio.Services.Common
                 Timeout = TimeSpan.FromMilliseconds(config.HttpConnectionTimeout + config.HttpReadTimeout)
             };
 
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Constants.Http.Bearer, apiKey);
-            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(Constants.Http.MediaTypeJson));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Commons.Shared.Constants.Http.Bearer, apiKey);
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(Commons.Shared.Constants.Http.MediaTypeJson));
 
             foreach (var header in headers)
             {
@@ -62,7 +61,7 @@ namespace Splitio.Services.Common
             };
 
             if (cacheControlHeadersEnabled)
-                request.Headers.Add(Constants.Http.CacheControlKey, Constants.Http.CacheControlValue);
+                request.Headers.Add(Commons.Shared.Constants.Http.CacheControlKey, Commons.Shared.Constants.Http.CacheControlValue);
 
             try
             {

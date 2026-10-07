@@ -1,12 +1,12 @@
 using Splitio.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.Parsing.Matchers;
 using Splitio.Services.SegmentFetcher.Interfaces;
-using Splitio.Services.Shared.Classes;
 using System;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Shared.Logger;
 
 namespace Splitio.Services.Parsing
 {

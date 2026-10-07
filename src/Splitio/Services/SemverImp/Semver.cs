@@ -1,5 +1,5 @@
-﻿using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
+﻿using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
 using System.Linq;
 
 namespace Splitio.Services.SemverImp

@@ -20,7 +20,7 @@ namespace Splitio.Services.Parsing.Classes
                         new PartitionDefinition
                         {
                             size = 100,
-                            treatment = Constants.Gral.Control
+                            treatment = Commons.Shared.Constants.Gral.Control
                         }
                     },
                     matcher = new CombiningMatcher

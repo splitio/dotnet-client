@@ -1,10 +1,10 @@
 ﻿#if NET_LATEST
 using Microsoft.Extensions.Logging;
+using Splitio;
+
 #endif
 using Splitio.Commons.Dto;
-using Splitio.Services.Client.Classes;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Interfaces;
+using Splitio.Commons.Shared.Logger;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -13,7 +13,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.Shared.Classes
+namespace Splitio.Commons.Shared.Utils
 {
     public class WrapperAdapter : IWrapperAdapter
     {
@@ -38,18 +38,18 @@ namespace Splitio.Services.Shared.Classes
             return _instance;
         }
 
-        public SdkMetadata BuildSdkMetadata(ConfigurationOptions config, ISplitLogger log)
+        public SdkMetadata BuildSdkMetadata(string sdkMachineName, string sdkMachineIp, bool? ipAddressEnabled, AdapterType? adapterType, ISplitLogger log)
         {
             var metadata = new SdkMetadata();
-            var ipAddressesEnabled = config.IPAddressesEnabled ?? true;
+            var ipAddressesEnabled = ipAddressEnabled ?? true;
 
 #if NET_LATEST
             metadata.Version = ".NET_CORE-" + SplitSdkVersion(log);
 #else
             metadata.Version = ".NET-" + SplitSdkVersion(log);
 #endif
-            metadata.MachineName = GetSdkMachineName(config, ipAddressesEnabled, log);
-            metadata.MachineIP = GetSdkMachineIP(config, ipAddressesEnabled, log);
+            metadata.MachineName = GetSdkMachineName(sdkMachineName, ipAddressesEnabled, adapterType, log);
+            metadata.MachineIP = GetSdkMachineIP(sdkMachineIp, ipAddressesEnabled, adapterType, log);
 
             return metadata;
         }
@@ -74,7 +74,7 @@ namespace Splitio.Services.Shared.Classes
                 log.Warn("Exception retrieving sdk version", ex);
             }
 
-            return Constants.Gral.SdkVersion;
+            return Shared.Constants.Gral.SdkVersion;
         }
 
         public void SetCustomerLogger(ISplitLogger splitLogger)
@@ -117,17 +117,17 @@ namespace Splitio.Services.Shared.Classes
         }
 
         #region Private Methods
-        private static string GetSdkMachineName(ConfigurationOptions config, bool ipAddressesEnabled, ISplitLogger log)
+        private static string GetSdkMachineName(string sdkMachineName, bool ipAddressesEnabled, AdapterType? adapterType, ISplitLogger log)
         {
             try
             {
                 if (ipAddressesEnabled)
                 {
-                    return config.SdkMachineName ?? Environment.MachineName;
+                    return sdkMachineName ?? Environment.MachineName;
                 }
-                else if (config.CacheAdapterConfig?.Type == AdapterType.Redis)
+                else if (adapterType == AdapterType.Redis)
                 {
-                    return Constants.Gral.NA;
+                    return Shared.Constants.Gral.NA;
                 }
             }
             catch (Exception e)
@@ -135,10 +135,10 @@ namespace Splitio.Services.Shared.Classes
                 log.Warn("Exception retrieving machine name.", e);
             }
 
-            return Constants.Gral.Unknown;
+            return Shared.Constants.Gral.Unknown;
         }
 
-        private static string GetSdkMachineIP(ConfigurationOptions config, bool ipAddressesEnabled, ISplitLogger log)
+        private static string GetSdkMachineIP(string sdkMachineIp, bool ipAddressesEnabled, AdapterType? adapterType, ISplitLogger log)
         {
             if (ipAddressesEnabled)
             {
@@ -146,20 +146,20 @@ namespace Splitio.Services.Shared.Classes
                 {
 #if NET_LATEST
                     var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
-                    return config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
+                    return sdkMachineIp ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
 #else
-                    return config.SdkMachineIP ?? Dns.GetHostAddresses(Environment.MachineName).Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
+                    return sdkMachineIp ?? Dns.GetHostAddresses(Environment.MachineName).Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
 #endif
                 }
                 catch (Exception e)
                 {
                     log.Warn("Exception retrieving machine IP.", e);
-                    return Constants.Gral.Unknown;
+                    return Shared.Constants.Gral.Unknown;
                 }
             }
-            else if (config.CacheAdapterConfig?.Type == AdapterType.Redis)
+            else if (adapterType == AdapterType.Redis)
             {
-                return Constants.Gral.NA;
+                return Shared.Constants.Gral.NA;
             }
 
             return string.Empty;

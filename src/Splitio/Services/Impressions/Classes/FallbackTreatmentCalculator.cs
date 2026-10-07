@@ -34,7 +34,7 @@ namespace Splitio.Services.Impressions.Classes
                 }
             }
 
-            return new FallbackTreatment(Constants.Gral.Control, null, label);
+            return new FallbackTreatment(Commons.Shared.Constants.Gral.Control, null, label);
         }
 
         private static string resolveLabel(string label)

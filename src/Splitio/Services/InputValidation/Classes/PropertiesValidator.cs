@@ -1,7 +1,7 @@
 ﻿using Splitio.Commons.Dto;
+using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Services.InputValidation.Interfaces;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
 

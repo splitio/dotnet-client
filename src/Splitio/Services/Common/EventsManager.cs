@@ -1,6 +1,6 @@
 ﻿using Splitio.Commons.Dto;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

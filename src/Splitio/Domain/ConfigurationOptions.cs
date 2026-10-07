@@ -1,10 +1,10 @@
 ﻿using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Logger;
 using System;
 using System.Collections.Generic;
 using Splitio.Services.Localhost;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
+using Splitio.Commons.Shared.Logger;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -96,7 +96,7 @@ namespace Splitio.Services.Client.Classes
         /// <summary>
         /// Set a custom logger class implementing ISplitLogger 
         /// </summary>
-        public ISplitLogger Logger { get; set; }
+        public Splitio.Commons.Shared.Logger.ISplitLogger Logger { get; set; }
 
         /// <summary>
         /// This setting allows the SDK to only synchronize the feature flags in the specified flag sets.

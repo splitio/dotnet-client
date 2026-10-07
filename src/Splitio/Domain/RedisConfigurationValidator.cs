@@ -1,8 +1,8 @@
-﻿using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
-using Splitio.Commons.Dto;
+﻿using Splitio.Commons.Dto;
 
 using System;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Shared.Logger;
 
 namespace Splitio.Domain
 {
@@ -12,7 +12,7 @@ namespace Splitio.Domain
         private const string StartHashTag = "{";
         private const string EndHashTag = "}";
 
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(RedisConfigurationValidator));
+        private static readonly Splitio.Commons.Shared.Logger.ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(RedisConfigurationValidator));
 
         public static void Validate(CacheAdapterConfigurationOptions config)
         {

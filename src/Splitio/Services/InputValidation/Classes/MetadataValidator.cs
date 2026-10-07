@@ -1,6 +1,6 @@
-﻿using Splitio.Services.InputValidation.Interfaces;
-using Splitio.Services.Logger;
-using Splitio.Services.Shared.Classes;
+﻿using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
+using Splitio.Services.InputValidation.Interfaces;
 
 namespace Splitio.Services.InputValidation.Classes
 {
@@ -14,14 +14,14 @@ namespace Splitio.Services.InputValidation.Classes
             {
                 _log.Warn($"{method}: Machine name must be a non-empty string.");
 
-                return Constants.Gral.Unknown;
+                return Commons.Shared.Constants.Gral.Unknown;
             }
 
             if (Util.Helper.HasNonASCIICharacters(machineName))
             {
                 _log.Warn($"{method}: Machine name contains non-ASCII characters.");
 
-                return Constants.Gral.Unknown;
+                return Commons.Shared.Constants.Gral.Unknown;
             }
 
             return machineName;
