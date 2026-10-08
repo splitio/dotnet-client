@@ -2,6 +2,7 @@
 using Moq;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
+using Splitio.Commons.Telemetry.Storages;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
@@ -9,7 +10,6 @@ using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Parsing;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.Parsing.Matchers;
-using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Linq;

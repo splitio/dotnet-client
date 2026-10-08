@@ -2,6 +2,7 @@
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Telemetry.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
@@ -685,7 +686,7 @@ namespace Splitio.Integration_tests
         #endregion
 
         #region Private Methods
-        private static Telemetry.Domain.Config GetMetricsConfigSentBackend(HttpClientMock httpClientMock)
+        private static Commons.Telemetry.Domain.Config GetMetricsConfigSentBackend(HttpClientMock httpClientMock)
         {
             Thread.Sleep(1000);
 
@@ -694,17 +695,17 @@ namespace Splitio.Integration_tests
             if (logs.FirstOrDefault() == null)
                 return null;
 
-            return JsonConvertWrapper.DeserializeObject<Telemetry.Domain.Config>(logs.FirstOrDefault().RequestMessage.Body);
+            return JsonConvertWrapper.DeserializeObject<Commons.Telemetry.Domain.Config>(logs.FirstOrDefault().RequestMessage.Body);
         }
 
-        private static List<Telemetry.Domain.Stats> GetMetricsStatsSentBackend(HttpClientMock httpClientMock)
+        private static List<Stats> GetMetricsStatsSentBackend(HttpClientMock httpClientMock)
         {
-            var stats = new List<Telemetry.Domain.Stats>();
+            var stats = new List<Stats>();
             var logs = httpClientMock.GetMetricsUsageLog();
 
             foreach (var item in logs)
             {
-                var stat = JsonConvertWrapper.DeserializeObject<Telemetry.Domain.Stats>(item.RequestMessage.Body);
+                var stat = JsonConvertWrapper.DeserializeObject<Stats>(item.RequestMessage.Body);
 
                 stats.Add(stat);
             }

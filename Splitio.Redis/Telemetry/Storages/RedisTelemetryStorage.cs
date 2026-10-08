@@ -1,10 +1,10 @@
-﻿using Splitio.Redis.Services.Cache.Classes;
+﻿using Splitio.Commons.Telemetry.Domain;
+using Splitio.Commons.Telemetry.Domain.Enums;
+using Splitio.Commons.Telemetry.Storages;
+using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Shared.Classes;
-using Splitio.Telemetry.Domain;
-using Splitio.Telemetry.Domain.Enums;
-using Splitio.Telemetry.Storages;
 using System.Threading.Tasks;
 
 namespace Splitio.Redis.Telemetry.Storages

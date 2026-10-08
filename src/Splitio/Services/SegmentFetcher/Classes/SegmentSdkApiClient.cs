@@ -1,10 +1,10 @@
 ﻿using Splitio.Commons.Dto;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Telemetry.Domain.Enums;
+using Splitio.Commons.Telemetry.Storages;
 using Splitio.Services.Common;
 using Splitio.Services.SplitFetcher.Interfaces;
-using Splitio.Telemetry.Domain.Enums;
-using Splitio.Telemetry.Storages;
 using System;
 using System.Net;
 using System.Threading.Tasks;
@@ -30,7 +30,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
         public async Task<string> FetchSegmentChangesAsync(string name, long since, FetchOptions fetchOptions)
         {
-            using (var clock = new Util.SplitStopwatch())
+            using (var clock = new SplitStopwatch())
             {
                 clock.Start();
 
@@ -39,7 +39,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
                     var requestUri = GetRequestUri(name, since, fetchOptions.Till);
                     var response = await _httpClient.GetAsync(requestUri, fetchOptions.CacheControlHeaders);
 
-                    Util.Helper.RecordTelemetrySync(nameof(FetchSegmentChangesAsync), response, ResourceEnum.SegmentSync, clock, _telemetryRuntimeProducer, _log);
+                    Commons.Shared.Utils.Helper.RecordTelemetrySync(nameof(FetchSegmentChangesAsync), response, ResourceEnum.SegmentSync, clock, _telemetryRuntimeProducer, _log);
 
                     if (response.IsSuccessStatusCode)
                     {

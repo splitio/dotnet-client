@@ -1,11 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.Telemetry.Domain;
 using Splitio.Services.Cache.Filter;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Tasks;
-using Splitio.Telemetry.Domain;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

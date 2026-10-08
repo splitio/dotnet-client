@@ -4,12 +4,12 @@ using Splitio.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Services.Common;
 using Splitio.Services.Events.Classes;
-using Splitio.Telemetry.Storages;
 using Splitio.Tests.Common;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Splitio.Commons.Telemetry.Storages;
 
 namespace Splitio.Integration_events_tests
 {

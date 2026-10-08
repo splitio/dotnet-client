@@ -103,10 +103,10 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             if (string.IsNullOrEmpty(redisCfg.ConnectionString)) 
             {
-                return Helper.ParseFromRedisConfig(redisCfg, ref _isClusterMode);
+                return Splitio.Redis.Services.Shared.Helper.ParseFromRedisConfig(redisCfg, ref _isClusterMode);
             }
 
-            return Helper.ParseFromConnectionString(redisCfg, ref _isClusterMode);
+            return Splitio.Redis.Services.Shared.Helper.ParseFromConnectionString(redisCfg, ref _isClusterMode);
         }
     }
 }

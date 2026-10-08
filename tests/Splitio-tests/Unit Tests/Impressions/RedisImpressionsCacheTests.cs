@@ -1,11 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Commons.Domain;
+using Splitio.Commons.Telemetry.Domain;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
-using Splitio.Telemetry.Domain;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

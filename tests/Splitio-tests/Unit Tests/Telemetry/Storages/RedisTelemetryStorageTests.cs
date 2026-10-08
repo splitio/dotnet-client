@@ -2,13 +2,13 @@
 using Moq;
 using Newtonsoft.Json;
 using Splitio.Commons.Dto;
+using Splitio.Commons.Telemetry.Domain.Enums;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Redis.Telemetry.Storages;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Shared.Classes;
-using Splitio.Telemetry.Domain;
-using Splitio.Telemetry.Domain.Enums;
+using Splitio.Commons.Telemetry.Domain;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Telemetry.Storages

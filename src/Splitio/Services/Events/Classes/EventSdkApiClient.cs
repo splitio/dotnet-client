@@ -2,11 +2,11 @@
 using Splitio.Commons.Dto;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Telemetry.Domain.Enums;
+using Splitio.Commons.Telemetry.Storages;
 using Splitio.Services.Common;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Shared.Classes;
-using Splitio.Telemetry.Domain.Enums;
-using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -39,7 +39,7 @@ namespace Splitio.Services.Events.Classes
         {
             try
             {
-                using (var clock = new Util.SplitStopwatch())
+                using (var clock = new SplitStopwatch())
                 {
                     clock.Start();
 
@@ -51,7 +51,7 @@ namespace Splitio.Services.Events.Classes
 
                     while (events.Count > 0)
                     {
-                        var bulkToPost = Util.Helper.TakeFromList(events, _maxBulkSize);
+                        var bulkToPost = Commons.Shared.Utils.Helper.TakeFromList(events, _maxBulkSize);
 
                         await BuildJsonAndPostAsync(bulkToPost, clock);
                     }
@@ -64,7 +64,7 @@ namespace Splitio.Services.Events.Classes
         }
         
         #region Private Methods
-        private async Task BuildJsonAndPostAsync(List<Event> events, Util.SplitStopwatch clock)
+        private async Task BuildJsonAndPostAsync(List<Event> events, Commons.Shared.Utils.SplitStopwatch clock)
         {
             var eventsJson = JsonConvertWrapper.SerializeObjectIgnoreNullValue(events);
 
@@ -74,7 +74,7 @@ namespace Splitio.Services.Events.Classes
 
                 var response = await _httpClient.PostAsync(EventsUrl, eventsJson);
 
-                Util.Helper.RecordTelemetrySync(nameof(SendBulkEventsAsync), response, ResourceEnum.EventSync, clock, _telemetryRuntimeProducer, _log);
+                Commons.Shared.Utils.Helper.RecordTelemetrySync(nameof(SendBulkEventsAsync), response, ResourceEnum.EventSync, clock, _telemetryRuntimeProducer, _log);
 
                 if (response.IsSuccessStatusCode)
                 {

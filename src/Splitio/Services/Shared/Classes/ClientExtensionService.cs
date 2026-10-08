@@ -1,18 +1,17 @@
-﻿using Splitio.Domain;
+﻿using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Enums;
 using Splitio.Enums.Extensions;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Filters;
-using Splitio.Services.Impressions.Interfaces;
+using Splitio.Commons.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Shared.Interfaces;
-using Splitio.Telemetry.Storages;
-using Splitio.Util;
 using System.Collections.Generic;
 using System.Linq;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Telemetry.Storages;
 
 namespace Splitio.Services.Shared.Classes
 {
@@ -139,7 +138,7 @@ namespace Splitio.Services.Shared.Classes
         {
             if (_telemetryEvaluationProducer == null) return;
 
-            _telemetryEvaluationProducer.RecordLatency(method.ConvertToMethodEnum(), Util.Metrics.Bucket(latency));
+            _telemetryEvaluationProducer.RecordLatency(method.ConvertToMethodEnum(), Commons.Shared.Utils.Metrics.Bucket(latency));
         }
 
         public async System.Threading.Tasks.Task RecordExceptionAsync(API method)
@@ -153,7 +152,7 @@ namespace Splitio.Services.Shared.Classes
         {
             if (_telemetryEvaluationProducer == null) return;
 
-            await _telemetryEvaluationProducer.RecordLatencyAsync(method.ConvertToMethodEnum(), Util.Metrics.Bucket(latency));
+            await _telemetryEvaluationProducer.RecordLatencyAsync(method.ConvertToMethodEnum(), Commons.Shared.Utils.Metrics.Bucket(latency));
         }
 
         public List<TreatmentResult> ReturnControl(List<string> featureFlagNames, string label=null)

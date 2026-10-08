@@ -9,10 +9,10 @@ using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
-using Splitio.Telemetry.Domain.Enums;
-using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Telemetry.Storages;
+using Splitio.Commons.Telemetry.Domain.Enums;
 
 namespace Splitio_Tests.Unit_Tests.Shared
 {

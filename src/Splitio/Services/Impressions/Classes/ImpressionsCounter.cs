@@ -62,7 +62,7 @@ namespace Splitio.Services.Impressions.Classes
 
                 while (values.Count > 0)
                 {
-                    var bulkToPost = Util.Helper.TakeFromList(values, _maxBulkSize);
+                    var bulkToPost = Commons.Shared.Utils.Helper.TakeFromList(values, _maxBulkSize);
 
                     await _senderAdapter.RecordImpressionsCountAsync(bulkToPost);
                 }

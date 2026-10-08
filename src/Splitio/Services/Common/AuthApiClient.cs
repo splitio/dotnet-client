@@ -3,9 +3,9 @@ using Splitio.Commons.Domain;
 using Splitio.Commons.Shared.Constants;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Telemetry.Domain.Enums;
+using Splitio.Commons.Telemetry.Storages;
 using Splitio.Services.Shared.Classes;
-using Splitio.Telemetry.Domain.Enums;
-using Splitio.Telemetry.Storages;
 using System;
 using System.Linq;
 using System.Net;
@@ -33,7 +33,7 @@ namespace Splitio.Services.Common
         #region Public Methods
         public async Task<AuthenticationResponse> AuthenticateAsync()
         {
-            using (var clock = new Util.SplitStopwatch())
+            using (var clock = new SplitStopwatch())
             {
                 clock.Start();
 
@@ -41,7 +41,7 @@ namespace Splitio.Services.Common
                 {
                     var response = await _splitioHttpClient.GetAsync(_url).ConfigureAwait(false);
 
-                    Util.Helper.RecordTelemetrySync(nameof(AuthenticateAsync), response, ResourceEnum.TokenSync, clock, _telemetryRuntimeProducer, _log);
+                    Commons.Shared.Utils.Helper.RecordTelemetrySync(nameof(AuthenticateAsync), response, ResourceEnum.TokenSync, clock, _telemetryRuntimeProducer, _log);
 
                     if (response.IsSuccessStatusCode)
                     {

@@ -1,6 +1,6 @@
 ﻿using HandlebarsDotNet.Collections;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Util;
+using Splitio.Commons.Shared.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;

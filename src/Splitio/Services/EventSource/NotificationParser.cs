@@ -1,7 +1,6 @@
 ﻿using Splitio.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Services.Shared.Classes;
-using Splitio.Util;
 using System;
 using System.Text;
 using Splitio.Commons.Shared.Utils;

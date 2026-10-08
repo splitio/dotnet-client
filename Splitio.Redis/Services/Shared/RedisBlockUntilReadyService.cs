@@ -1,5 +1,6 @@
 ﻿using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Commons.Shared.Utils;
 using System;
 using System.Threading;
 
@@ -19,7 +20,7 @@ namespace Splitio.Redis.Services.Shared
             if (!IsSdkReady())
             {
                 var ready = false;
-                using(var clock = new Util.SplitStopwatch())
+                using(var clock = new SplitStopwatch())
                 {
                     clock.Start();
 

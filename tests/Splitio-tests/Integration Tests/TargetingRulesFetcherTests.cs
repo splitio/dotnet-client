@@ -11,7 +11,7 @@ using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.Tasks;
-using Splitio.Telemetry.Storages;
+using Splitio.Commons.Telemetry.Storages;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
