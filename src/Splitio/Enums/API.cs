@@ -1,4 +1,4 @@
-﻿using Splitio.Telemetry.Domain.Enums;
+﻿using Splitio.Commons.Telemetry.Domain.Enums;
 using System;
 
 namespace Splitio.Enums

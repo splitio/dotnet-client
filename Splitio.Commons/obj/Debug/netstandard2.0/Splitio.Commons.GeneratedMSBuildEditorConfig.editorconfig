@@ -1,8 +1,0 @@
-is_global = true
-build_property.RootNamespace = Splitio.Commons
-build_property.ProjectDir = C:\Users\chill\source\repos\commons\dto\dotnet-client\Splitio.Commons\
-build_property.EnableComHosting = 
-build_property.EnableGeneratedComInterfaceComImportInterop = 
-build_property.CsWinRTUseWindowsUIXamlProjections = false
-build_property.EffectiveAnalysisLevelStyle = 
-build_property.EnableCodeStyleSeverity = 

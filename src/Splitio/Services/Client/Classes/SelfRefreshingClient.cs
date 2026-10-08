@@ -19,12 +19,13 @@ using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Common;
-using Splitio.Telemetry.Storages;
 using Splitio.Commons.Dto;
 
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Splitio.Commons.Telemetry.Common;
+using Splitio.Commons.Telemetry.Storages;
 
 namespace Splitio.Services.Client.Classes
 {

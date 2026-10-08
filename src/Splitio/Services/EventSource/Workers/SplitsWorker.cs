@@ -5,12 +5,12 @@ using Splitio.Services.Common;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
-using Splitio.Telemetry.Domain.Enums;
-using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Telemetry.Domain.Enums;
+using Splitio.Commons.Telemetry.Storages;
 
 namespace Splitio.Services.EventSource.Workers
 {

@@ -2,10 +2,10 @@
 using Moq;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Telemetry.Storages;
 using Splitio.Domain;
 using Splitio.Services.Common;
 using Splitio.Services.Impressions.Classes;
-using Splitio.Telemetry.Storages;
 using Splitio.Tests.Common;
 using System.Collections.Generic;
 using System.Linq;

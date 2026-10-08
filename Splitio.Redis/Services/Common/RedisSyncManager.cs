@@ -5,10 +5,10 @@ using Splitio.Commons.Dto;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.Tasks;
-using Splitio.Telemetry.Domain;
-using Splitio.Telemetry.Storages;
+using Splitio.Commons.Telemetry.Domain;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Splitio.Commons.Telemetry.Storages;
 
 namespace Splitio.Redis.Services.Common
 {

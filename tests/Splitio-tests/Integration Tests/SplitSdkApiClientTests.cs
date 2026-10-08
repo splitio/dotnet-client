@@ -4,7 +4,7 @@ using Splitio.Commons.Dto;
 using Splitio.Services.Common;
 using Splitio.Services.Filters;
 using Splitio.Services.SplitFetcher.Classes;
-using Splitio.Telemetry.Storages;
+using Splitio.Commons.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

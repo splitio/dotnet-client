@@ -1,13 +1,13 @@
-﻿using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Commons.Telemetry.Storages;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
-using Splitio.Services.Impressions.Classes;
+using Splitio.Commons.Impressions.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Shared.Interfaces;
-using Splitio.Telemetry.Storages;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {

@@ -17,7 +17,7 @@ namespace Splitio.Services.InputValidation.Classes
                 return Commons.Shared.Constants.Gral.Unknown;
             }
 
-            if (Util.Helper.HasNonASCIICharacters(machineName))
+            if (Commons.Shared.Utils.Helper.HasNonASCIICharacters(machineName))
             {
                 _log.Warn($"{method}: Machine name contains non-ASCII characters.");
 

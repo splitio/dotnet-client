@@ -1,4 +1,4 @@
-﻿using Splitio.Telemetry.Domain;
+﻿using Splitio.Commons.Telemetry.Domain;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

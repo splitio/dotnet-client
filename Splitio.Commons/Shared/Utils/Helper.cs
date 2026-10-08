@@ -1,0 +1,87 @@
+﻿using Splitio.Commons.Domain;
+using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Telemetry.Domain.Enums;
+using Splitio.Commons.Telemetry.Storages;
+using Splitio.Commons.Impressions.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Splitio.Commons.Shared.Utils
+{
+    public class Helper
+    {
+        public static List<T> TakeFromList<T>(List<T> items, int size)
+        {
+            if (items == null) return new List<T>();
+
+            var count = size;
+
+            if (items.Count < size)
+            {
+                count = items.Count;
+            }
+
+            var bulk = items.GetRange(0, count);
+            items.RemoveRange(0, count);
+
+            return bulk;
+        }
+
+        public static void RecordTelemetrySync(string method, HTTPResult response, ResourceEnum resource, SplitStopwatch clock, ITelemetryRuntimeProducer telemetryRuntimeProducer, ISplitLogger log)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                telemetryRuntimeProducer.RecordSyncLatency(resource, Metrics.Bucket(clock.ElapsedMilliseconds));
+                telemetryRuntimeProducer.RecordSuccessfulSync(resource, CurrentTimeHelper.CurrentTimeMillis());
+            }
+            else
+            {
+                telemetryRuntimeProducer.RecordSyncError(resource, (int)response.StatusCode);
+            }
+
+            log.Debug($"Http status executing {method}: {response.StatusCode}");
+        }
+
+        public static bool HasNonASCIICharacters(string input)
+        {
+            foreach (var c in input)
+            {
+                if (c > 127) return true;
+            }
+
+            return false;
+        }
+
+        public static List<List<T>> ChunkBy<T>(List<T> source, int chunkSize)
+        {
+            return source
+                .Select((x, i) => new { Index = i, Value = x })
+                .GroupBy(x => x.Index / chunkSize)
+                .Select(x => x.Select(v => v.Value).ToList())
+                .ToList();
+        }
+
+        public static TreatmentResult CheckFallbackTreatment(string featureName, string label, bool exception, IFallbackTreatmentCalculator fallbackTreatmentCalculator)
+        {
+            FallbackTreatment fallbackTreatment = fallbackTreatmentCalculator.resolve(featureName, label);
+            return new TreatmentResult(featureName,
+                fallbackTreatment.Label,
+                fallbackTreatment.Treatment,
+                false,
+                null,
+                GetFallbackConfig(fallbackTreatment),
+                exception
+            );
+        }
+
+        public static string GetFallbackConfig(FallbackTreatment fallbackTreatment)
+        {
+            if (fallbackTreatment.Config != null)
+            {
+                return fallbackTreatment.Config;
+            }
+
+            return null;
+        }
+    }
+}

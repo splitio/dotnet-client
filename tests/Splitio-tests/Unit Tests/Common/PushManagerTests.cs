@@ -1,11 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Commons.Domain;
+using Splitio.Commons.Telemetry.Storages;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource;
 using Splitio.Services.Tasks;
-using Splitio.Telemetry.Storages;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Common

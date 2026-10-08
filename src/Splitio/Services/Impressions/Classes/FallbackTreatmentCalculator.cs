@@ -1,5 +1,5 @@
 ﻿using Splitio.Commons.Domain;
-using Splitio.Services.Impressions.Interfaces;
+using Splitio.Commons.Impressions.Interfaces;
 
 namespace Splitio.Services.Impressions.Classes
 {

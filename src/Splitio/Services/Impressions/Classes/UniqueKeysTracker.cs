@@ -1,9 +1,9 @@
 ﻿using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Telemetry.Domain;
 using Splitio.Services.Cache.Filter;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Tasks;
-using Splitio.Telemetry.Domain;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -137,7 +137,7 @@ namespace Splitio.Services.Impressions.Classes
             {
                 List<Mtks> chunks = new List<Mtks>();
                 var uniqueTemp = new List<String>(unique.Keys.ToArray());
-                var bulks = Util.Helper.ChunkBy(uniqueTemp, _maxBulkSize);
+                var bulks = Commons.Shared.Utils.Helper.ChunkBy(uniqueTemp, _maxBulkSize);
                 foreach (var bulk in bulks)
                 {
                     chunks.Add(new Mtks(unique.Feature, new HashSet<string>(bulk)));

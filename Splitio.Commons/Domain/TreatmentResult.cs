@@ -1,0 +1,28 @@
+﻿using Splitio.Commons.Shared.Utils;
+
+namespace Splitio.Commons.Domain
+{
+    public class TreatmentResult
+    {
+        public string FeatureFlagName { get; set; }
+        public string Label { get; set; }
+        public string Treatment { get; set; }
+        public long? ChangeNumber { get; set; }
+        public string Config { get; set; }
+        public bool Exception { get; set; }
+        public long ImpTime { get; set; }
+        public bool ImpressionsDisabled { get; set; }
+
+        public TreatmentResult(string featureFlagName, string label, string treatment, bool impressionsDisabled, long? changeNumber = null, string config = null, bool exception = false, long? impTime = null)
+        {
+            FeatureFlagName = featureFlagName;
+            Label = label;
+            Treatment = treatment;
+            ChangeNumber = changeNumber;
+            Config = config;
+            Exception = exception;
+            ImpTime = impTime ?? CurrentTimeHelper.CurrentTimeMillis();
+            ImpressionsDisabled = impressionsDisabled;
+        }
+    }
+}

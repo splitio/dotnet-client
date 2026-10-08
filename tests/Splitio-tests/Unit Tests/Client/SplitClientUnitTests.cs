@@ -2,6 +2,8 @@
 using Moq;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
+using Splitio.Commons.Telemetry.Storages;
+using Splitio.Commons.Impressions.Interfaces;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
@@ -11,7 +13,6 @@ using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Interfaces;
-using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Threading;

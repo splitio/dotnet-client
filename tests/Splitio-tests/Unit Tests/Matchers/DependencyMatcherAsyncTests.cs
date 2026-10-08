@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Domain;
+using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Parsing.Classes;

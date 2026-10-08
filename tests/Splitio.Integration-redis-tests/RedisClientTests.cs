@@ -1,12 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
+using Splitio.Commons.Telemetry.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
-using Splitio.Telemetry.Domain;
 using Splitio.Tests.Common;
 using Splitio.Tests.Common.Resources;
 using System.Collections.Generic;

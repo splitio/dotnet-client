@@ -1,9 +1,9 @@
 ﻿using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Telemetry.Domain.Enums;
+using Splitio.Commons.Telemetry.Storages;
 using Splitio.Services.Shared.Classes;
-using Splitio.Telemetry.Domain;
-using Splitio.Telemetry.Domain.Enums;
-using Splitio.Telemetry.Storages;
+using Splitio.Commons.Telemetry.Domain;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource

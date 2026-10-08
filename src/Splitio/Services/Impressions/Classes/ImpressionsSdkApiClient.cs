@@ -1,11 +1,11 @@
 ﻿using Splitio.Commons.Domain;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Telemetry.Domain.Enums;
+using Splitio.Commons.Telemetry.Storages;
 using Splitio.Services.Common;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
-using Splitio.Telemetry.Domain.Enums;
-using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -39,7 +39,7 @@ namespace Splitio.Services.Impressions.Classes
 
         public async Task SendBulkImpressionsAsync(List<KeyImpression> impressions)
         {
-            using (var clock = new Util.SplitStopwatch())
+            using (var clock = new SplitStopwatch())
             {
                 clock.Start();
 
@@ -51,7 +51,7 @@ namespace Splitio.Services.Impressions.Classes
 
                 while (impressions.Count > 0)
                 {
-                    var bulkToPost = Util.Helper.TakeFromList(impressions, _maxBulkSize);
+                    var bulkToPost = Commons.Shared.Utils.Helper.TakeFromList(impressions, _maxBulkSize);
 
                     await BuildJsonAndPostAsync(bulkToPost, clock);
                 }
@@ -60,7 +60,7 @@ namespace Splitio.Services.Impressions.Classes
 
         public async Task SendBulkImpressionsCountAsync(List<ImpressionsCountModel> impressionsCount)
         {
-            using (var clock = new Util.SplitStopwatch())
+            using (var clock = new SplitStopwatch())
             {
                 clock.Start();
 
@@ -68,7 +68,7 @@ namespace Splitio.Services.Impressions.Classes
 
                 var response = await _httpClient.PostAsync(ImpressionsCountUrl, json);
 
-                Util.Helper.RecordTelemetrySync(nameof(SendBulkImpressionsCountAsync), response, ResourceEnum.ImpressionCountSync, clock, _telemetryRuntimeProducer, _log);
+                Commons.Shared.Utils.Helper.RecordTelemetrySync(nameof(SendBulkImpressionsCountAsync), response, ResourceEnum.ImpressionCountSync, clock, _telemetryRuntimeProducer, _log);
             }
         }
 
@@ -100,7 +100,7 @@ namespace Splitio.Services.Impressions.Classes
             return JsonConvertWrapper.SerializeObject(new { pf = impressionsCount });
         }
 
-        private async Task BuildJsonAndPostAsync(List<KeyImpression> impressions, Util.SplitStopwatch clock)
+        private async Task BuildJsonAndPostAsync(List<KeyImpression> impressions, Commons.Shared.Utils.SplitStopwatch clock)
         {
             var impressionsJson = ConvertToJson(impressions);
 
@@ -110,7 +110,7 @@ namespace Splitio.Services.Impressions.Classes
 
                 var response = await _httpClient.PostAsync(TestImpressionsUrl, impressionsJson);
 
-                Util.Helper.RecordTelemetrySync(nameof(SendBulkImpressionsAsync), response, ResourceEnum.ImpressionSync, clock, _telemetryRuntimeProducer, _log);
+                Commons.Shared.Utils.Helper.RecordTelemetrySync(nameof(SendBulkImpressionsAsync), response, ResourceEnum.ImpressionSync, clock, _telemetryRuntimeProducer, _log);
 
                 if (response.IsSuccessStatusCode)
                 {

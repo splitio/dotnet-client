@@ -5,14 +5,14 @@ using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Tasks;
-using Splitio.Telemetry.Domain.Enums;
-using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Telemetry.Storages;
+using Splitio.Commons.Telemetry.Domain.Enums;
 
 namespace Splitio.Services.Impressions.Classes
 {

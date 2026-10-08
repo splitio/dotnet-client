@@ -6,13 +6,14 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.Tasks;
 using Splitio.Telemetry.Common;
-using Splitio.Telemetry.Domain;
-using Splitio.Telemetry.Domain.Enums;
-using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Telemetry.Common;
+using Splitio.Commons.Telemetry.Domain;
+using Splitio.Commons.Telemetry.Storages;
+using Splitio.Commons.Telemetry.Domain.Enums;
 
 namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 {

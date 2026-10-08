@@ -1,12 +1,12 @@
 ﻿using Splitio.Commons.Dto;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Telemetry.Domain.Enums;
+using Splitio.Commons.Telemetry.Storages;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.Tasks;
-using Splitio.Telemetry.Domain.Enums;
-using Splitio.Telemetry.Storages;
 using System;
 using System.Collections.Generic;
 using System.Linq;

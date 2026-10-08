@@ -8,7 +8,7 @@ using Splitio.Services.Common;
 using Splitio.Services.EventSource;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Tasks;
-using Splitio.Telemetry.Storages;
+using Splitio.Commons.Telemetry.Storages;
 using Splitio.Tests.Common;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

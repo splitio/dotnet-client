@@ -8,11 +8,11 @@ using Splitio.Services.EventSource;
 using Splitio.Services.EventSource.Workers;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Interfaces;
-using Splitio.Telemetry.Domain.Enums;
-using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Splitio.Commons.Telemetry.Domain.Enums;
+using Splitio.Commons.Telemetry.Storages;
 
 namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 {

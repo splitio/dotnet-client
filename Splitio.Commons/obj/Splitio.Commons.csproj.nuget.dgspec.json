@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\chill\\source\\repos\\commons\\dto\\dotnet-client\\Splitio.Commons\\Splitio.Commons.csproj": {}
+    "C:\\Users\\chill\\source\\repos\\commons\\telemetry\\dotnet-client\\Splitio.Commons\\Splitio.Commons.csproj": {}
   },
   "projects": {
-    "C:\\Users\\chill\\source\\repos\\commons\\dto\\dotnet-client\\Splitio.Commons\\Splitio.Commons.csproj": {
+    "C:\\Users\\chill\\source\\repos\\commons\\telemetry\\dotnet-client\\Splitio.Commons\\Splitio.Commons.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\chill\\source\\repos\\commons\\dto\\dotnet-client\\Splitio.Commons\\Splitio.Commons.csproj",
+        "projectUniqueName": "C:\\Users\\chill\\source\\repos\\commons\\telemetry\\dotnet-client\\Splitio.Commons\\Splitio.Commons.csproj",
         "projectName": "Splitio.Commons",
-        "projectPath": "C:\\Users\\chill\\source\\repos\\commons\\dto\\dotnet-client\\Splitio.Commons\\Splitio.Commons.csproj",
+        "projectPath": "C:\\Users\\chill\\source\\repos\\commons\\telemetry\\dotnet-client\\Splitio.Commons\\Splitio.Commons.csproj",
         "packagesPath": "C:\\Users\\chill\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\chill\\source\\repos\\commons\\dto\\dotnet-client\\Splitio.Commons\\obj\\",
+        "outputPath": "C:\\Users\\chill\\source\\repos\\commons\\telemetry\\dotnet-client\\Splitio.Commons\\obj\\",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
         "fallbackFolders": [
@@ -87,6 +87,18 @@
         "net5.0": {
           "targetAlias": "net5.0",
           "dependencies": {
+            "Common.Logging": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Common.Logging.Core": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[3.1.32, )"
+            },
             "Newtonsoft.Json": {
               "target": "Package",
               "version": "[13.0.1, )"
@@ -127,6 +139,18 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "Common.Logging": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Common.Logging.Core": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[3.1.32, )"
+            },
             "Newtonsoft.Json": {
               "target": "Package",
               "version": "[13.0.1, )"
@@ -153,6 +177,18 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "dependencies": {
+            "Common.Logging": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Common.Logging.Core": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[3.1.32, )"
+            },
             "Newtonsoft.Json": {
               "target": "Package",
               "version": "[13.0.1, )"
@@ -179,6 +215,18 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Common.Logging": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Common.Logging.Core": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[3.1.32, )"
+            },
             "Newtonsoft.Json": {
               "target": "Package",
               "version": "[13.0.1, )"
@@ -205,6 +253,18 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "Common.Logging": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Common.Logging.Core": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[3.1.32, )"
+            },
             "Newtonsoft.Json": {
               "target": "Package",
               "version": "[13.0.1, )"
@@ -231,6 +291,14 @@
         "net45": {
           "targetAlias": "net45",
           "dependencies": {
+            "Common.Logging": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Common.Logging.Core": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
             "Microsoft.NETFramework.ReferenceAssemblies": {
               "suppressParent": "All",
               "target": "Package",
@@ -247,6 +315,18 @@
         "net461": {
           "targetAlias": "net461",
           "dependencies": {
+            "Common.Logging": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Common.Logging.Core": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[3.1.32, )"
+            },
             "Microsoft.NETFramework.ReferenceAssemblies": {
               "suppressParent": "All",
               "target": "Package",
@@ -263,6 +343,18 @@
         "netstandard2.0": {
           "targetAlias": "netstandard2.0",
           "dependencies": {
+            "Common.Logging": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Common.Logging.Core": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[3.1.32, )"
+            },
             "NETStandard.Library": {
               "suppressParent": "All",
               "target": "Package",

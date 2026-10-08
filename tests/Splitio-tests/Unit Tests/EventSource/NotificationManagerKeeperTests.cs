@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.Telemetry.Storages;
 using Splitio.Services.EventSource;
 using Splitio.Services.Shared.Classes;
-using Splitio.Telemetry.Storages;
 
 namespace Splitio_Tests.Unit_Tests.EventSource
 {

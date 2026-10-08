@@ -2,13 +2,13 @@
 using Splitio.Services.Common;
 using Splitio.Services.Filters;
 using Splitio.Services.SplitFetcher.Interfaces;
-using Splitio.Telemetry.Domain.Enums;
-using Splitio.Telemetry.Storages;
 using System;
 using System.Threading.Tasks;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Constants;
+using Splitio.Commons.Telemetry.Storages;
+using Splitio.Commons.Telemetry.Domain.Enums;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {
@@ -44,7 +44,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 
         public async Task<ApiFetchResult> FetchSplitChangesAsync(FetchOptions fetchOptions)
         {
-            using (var clock = new Util.SplitStopwatch())
+            using (var clock = new SplitStopwatch())
             {
                 clock.Start();
 
@@ -62,7 +62,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                     var response = await _httpClient.GetAsync(requestUri, fetchOptions.CacheControlHeaders);
 
                     clock.Stop();
-                    Util.Helper.RecordTelemetrySync(nameof(FetchSplitChangesAsync), response, ResourceEnum.SplitSync, clock, _telemetryRuntimeProducer, _log);
+                    Commons.Shared.Utils.Helper.RecordTelemetrySync(nameof(FetchSplitChangesAsync), response, ResourceEnum.SplitSync, clock, _telemetryRuntimeProducer, _log);
 
                     if (response.IsSuccessStatusCode)
                     {

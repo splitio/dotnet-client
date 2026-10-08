@@ -65,7 +65,7 @@ namespace Splitio.Services.Parsing
                 toReturn.Add(new CombiningMatcher()
                 {
                     delegates = delegates,
-                    combiner = Helper.ParseCombiner(condition.matcherGroup.combiner)
+                    combiner = Splitio.Services.Parsing.Classes.Helper.ParseCombiner(condition.matcherGroup.combiner)
                 });
             }
 

@@ -77,7 +77,7 @@ namespace Splitio.Services.Parsing
             {
                 _log.Error(ex.Message);
 
-                parsedSplit.conditions = Helper.GetDefaultConditions();
+                parsedSplit.conditions = Splitio.Services.Parsing.Classes.Helper.GetDefaultConditions();
             }
 
             return parsedSplit;
@@ -98,7 +98,7 @@ namespace Splitio.Services.Parsing
             return new CombiningMatcher()
             {
                 delegates = delegates,
-                combiner = Helper.ParseCombiner(matcherGroupDefinition.combiner)
+                combiner = Splitio.Services.Parsing.Classes.Helper.ParseCombiner(matcherGroupDefinition.combiner)
             };
         }
     }

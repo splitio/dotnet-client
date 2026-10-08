@@ -5,11 +5,11 @@ using Splitio.Commons.Dto;
 using Splitio.Services.Common;
 using Splitio.Services.Filters;
 using Splitio.Services.SplitFetcher.Classes;
-using Splitio.Telemetry.Storages;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Splitio.Commons.Telemetry.Storages;
 
 namespace Splitio_Tests.Unit_Tests.SplitFetcher
 {
