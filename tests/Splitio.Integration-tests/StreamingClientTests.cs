@@ -5,7 +5,7 @@ using Splitio.Commons.Shared.Logger;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Client.Interfaces;
-using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Tests.Common;
 using System.Collections.Generic;
 using System.Threading;

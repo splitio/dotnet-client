@@ -1,15 +1,14 @@
-﻿using Splitio.Commons.Dto;
+﻿using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.Dto;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Telemetry.Domain.Enums;
 using Splitio.Commons.Telemetry.Storages;
-using Splitio.Services.Common;
-using Splitio.Services.SplitFetcher.Interfaces;
 using System;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.SegmentFetcher.Classes
+namespace Splitio.Commons.api.Classes
 {
     public class SegmentSdkApiClient : ISegmentSdkApiClient
     {
@@ -39,7 +38,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
                     var requestUri = GetRequestUri(name, since, fetchOptions.Till);
                     var response = await _httpClient.GetAsync(requestUri, fetchOptions.CacheControlHeaders);
 
-                    Commons.Shared.Utils.Helper.RecordTelemetrySync(nameof(FetchSegmentChangesAsync), response, ResourceEnum.SegmentSync, clock, _telemetryRuntimeProducer, _log);
+                    Helper.RecordTelemetrySync(nameof(FetchSegmentChangesAsync), response, ResourceEnum.SegmentSync, clock, _telemetryRuntimeProducer, _log);
 
                     if (response.IsSuccessStatusCode)
                     {

@@ -2,11 +2,11 @@
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Commons.Telemetry.Domain;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Shared.Classes;
 using Splitio.Tests.Common;
 using Splitio.Tests.Common.Resources;
 using System.Collections.Generic;
@@ -96,9 +96,9 @@ namespace Splitio.Integration_redis_tests
             //Validate impressions sent to the be.            
             AssertSentImpressions(3, impressionExpected1, impressionExpected2, impressionExpected3);
             AssertImpressionListener(3, impressionListener);
-            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
-            Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "nico_test"), impressionExpected2);
-            Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impressionExpected3);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "nico_test"), impressionExpected2);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impressionExpected3);
 
             impressionListener = new IntegrationTestsImpressionListener(50);
             configurations = GetClusterConfigurationOptions(impressionListener: impressionListener);
@@ -128,9 +128,9 @@ namespace Splitio.Integration_redis_tests
             //Validate impressions sent to the be.            
             AssertSentImpressions(3, impressionExpected1, impressionExpected2, impressionExpected3);
             AssertImpressionListener(3, impressionListener);
-            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
-            Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "nico_test"), impressionExpected2);
-            Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impressionExpected3);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "nico_test"), impressionExpected2);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impressionExpected3);
         }
 
         [TestMethod]
@@ -507,7 +507,7 @@ namespace Splitio.Integration_redis_tests
             //Validate impressions sent to the be.
             AssertSentImpressions(1, impressionExpected1);
             Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
-            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
 
             configurations = GetClusterConfigurationOptions(impressionListener: impressionListener);
 
@@ -529,7 +529,7 @@ namespace Splitio.Integration_redis_tests
             //Validate impressions sent to the be.
             AssertSentImpressions(1, impressionExpected1);
             Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
-            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
         }
 
         [TestMethod]
@@ -563,7 +563,7 @@ namespace Splitio.Integration_redis_tests
             AssertSentImpressions(1, impressionExpected1);
 
             Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
-            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
 
             configurations = GetClusterConfigurationOptions(impressionListener: impressionListener);
 
@@ -586,7 +586,7 @@ namespace Splitio.Integration_redis_tests
             AssertSentImpressions(1, impressionExpected1);
 
             Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
-            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
         }
 
         [TestMethod]
@@ -620,7 +620,7 @@ namespace Splitio.Integration_redis_tests
             AssertSentImpressions(1, impressionExpected1);
 
             Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
-            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
 
             configurations = GetClusterConfigurationOptions(impressionListener: impressionListener);
 
@@ -643,7 +643,7 @@ namespace Splitio.Integration_redis_tests
             AssertSentImpressions(1, impressionExpected1);
 
             Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
-            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
         }
 
         [TestMethod]
@@ -677,7 +677,7 @@ namespace Splitio.Integration_redis_tests
             AssertSentImpressions(1, impressionExpected1);
 
             Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
-            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
 
             configurations = GetClusterConfigurationOptions(impressionListener: impressionListener);
 
@@ -700,7 +700,7 @@ namespace Splitio.Integration_redis_tests
             AssertSentImpressions(1, impressionExpected1);
 
             Assert.AreEqual(1, impressionListener.Count(), $"Redis: Impression Listener not match");
-            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
         }
 
         [TestMethod]

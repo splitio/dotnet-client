@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.Common
+namespace Splitio.Commons.api.Interfaces
 {
     public interface ISplitioHttpClient : IDisposable
     {

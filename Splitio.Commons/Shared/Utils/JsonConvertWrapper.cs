@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace Splitio.Services.Shared.Classes
+namespace Splitio.Commons.Shared.Utils
 {
     public static class JsonConvertWrapper
     {

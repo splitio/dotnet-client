@@ -8,6 +8,7 @@ using Splitio.Services.Tasks;
 using Splitio.Commons.Telemetry.Domain;
 using System;
 using System.Threading.Tasks;
+using Splitio.Commons.api.Interfaces;
 
 namespace Splitio.Services.Common
 {

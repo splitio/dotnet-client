@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Impressions.Classes;
+using Splitio.Commons.Impressions.Classes;
 using Splitio_Tests.Resources;
 using System;
 

@@ -1,9 +1,8 @@
 ﻿using Splitio.Commons.Domain;
-using Splitio.Services.Impressions.Classes;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.Impressions.Interfaces
+namespace Splitio.Commons.api.Interfaces
 {
     public interface IImpressionsSdkApiClient
     {

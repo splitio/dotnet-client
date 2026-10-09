@@ -1,14 +1,13 @@
 ﻿using Newtonsoft.Json;
+using Splitio.Commons.api.Interfaces;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Telemetry.Domain;
 using Splitio.Commons.Telemetry.Domain.Enums;
 using Splitio.Commons.Telemetry.Storages;
-using Splitio.Services.Common;
-using Splitio.Services.Shared.Classes;
 using System.Threading.Tasks;
 
-namespace Splitio.Commons.Telemetry.Common
+namespace Splitio.Commons.api.Classes
 {
     public class TelemetryAPI : ITelemetryAPI
     {
@@ -59,7 +58,7 @@ namespace Splitio.Commons.Telemetry.Common
 
                 var response = await _splitioHttpClient.PostAsync($"{_telemetryURL}{url}", jsonData);
 
-                Shared.Utils.Helper.RecordTelemetrySync(method, response, ResourceEnum.TelemetrySync, clock, _telemetryRuntimeProducer, _log);
+                Helper.RecordTelemetrySync(method, response, ResourceEnum.TelemetrySync, clock, _telemetryRuntimeProducer, _log);
             }
         }
         #endregion

@@ -10,10 +10,10 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Splitio.Commons.Shared.Utils;
-using Splitio.Commons.Telemetry.Common;
 using Splitio.Commons.Telemetry.Domain;
 using Splitio.Commons.Telemetry.Storages;
 using Splitio.Commons.Telemetry.Domain.Enums;
+using Splitio.Commons.api.Interfaces;
 
 namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 {

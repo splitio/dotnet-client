@@ -1,7 +1,7 @@
-﻿using Splitio.Commons.Dto;
+﻿using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.Dto;
 using Splitio.Services.SegmentFetcher.Interfaces;
-using Splitio.Services.Shared.Classes;
-using Splitio.Services.SplitFetcher.Interfaces;
+using Splitio.Commons.Shared.Utils;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SegmentFetcher.Classes

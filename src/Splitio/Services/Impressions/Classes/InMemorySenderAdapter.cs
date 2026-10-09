@@ -1,6 +1,7 @@
-﻿using Splitio.Commons.Shared.Logger;
+﻿using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
-using Splitio.Commons.Telemetry.Common;
+using Splitio.Commons.Domain;
 using Splitio.Commons.Telemetry.Domain;
 using Splitio.Services.Impressions.Interfaces;
 using System;

@@ -5,7 +5,7 @@ using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Telemetry.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Tests.Common;
 using Splitio.Tests.Common.Resources;
 using System;
@@ -63,9 +63,9 @@ namespace Splitio.Integration_tests
             AssertSentImpressions(3, impressionExpected1, impressionExpected2, impressionExpected3);
             AssertImpressionListener(3, impressionListener);
 
-            Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
-            Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "nico_test"), impressionExpected2);
-            Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impressionExpected3);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("FACUNDO_TEST", "nico_test"), impressionExpected1);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("MAURO_TEST", "nico_test"), impressionExpected2);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("Test_Save_1", "nico_test"), impressionExpected3);
         }
 
         [TestMethod]
@@ -573,9 +573,9 @@ namespace Splitio.Integration_tests
 
             // Validate impressions in listener.
             AssertImpressionListener(3, impressionListener);
-            Helper.AssertImpression(impressionListener.Get("with_track_enabled", "test1"), impressionExpected1);
-            Helper.AssertImpression(impressionListener.Get("with_track_disabled", "test2"), impressionExpected2);
-            Helper.AssertImpression(impressionListener.Get("without_track", "test3"), impressionExpected3);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("with_track_enabled", "test1"), impressionExpected1);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("with_track_disabled", "test2"), impressionExpected2);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("without_track", "test3"), impressionExpected3);
         }
 
         [TestMethod]
@@ -612,9 +612,9 @@ namespace Splitio.Integration_tests
 
             // Validate impressions in listener.
             AssertImpressionListener(3, impressionListener);
-            Helper.AssertImpression(impressionListener.Get("with_track_enabled", "test1"), impressionExpected1);
-            Helper.AssertImpression(impressionListener.Get("with_track_disabled", "test2"), impressionExpected2);
-            Helper.AssertImpression(impressionListener.Get("without_track", "test3"), impressionExpected3);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("with_track_enabled", "test1"), impressionExpected1);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("with_track_disabled", "test2"), impressionExpected2);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("without_track", "test3"), impressionExpected3);
         }
 
         [TestMethod]
@@ -651,9 +651,9 @@ namespace Splitio.Integration_tests
 
             // Validate impressions in listener.
             AssertImpressionListener(3, impressionListener);
-            Helper.AssertImpression(impressionListener.Get("with_track_enabled", "test1"), impressionExpected1);
-            Helper.AssertImpression(impressionListener.Get("with_track_disabled", "test2"), impressionExpected2);
-            Helper.AssertImpression(impressionListener.Get("without_track", "test3"), impressionExpected3);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("with_track_enabled", "test1"), impressionExpected1);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("with_track_disabled", "test2"), impressionExpected2);
+            Splitio.Tests.Common.Resources.Helper.AssertImpression(impressionListener.Get("without_track", "test3"), impressionExpected3);
         }
         #region Protected Methods
         protected override ConfigurationOptions GetConfigurationOptions(int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null, IImpressionListener impressionListener = null)

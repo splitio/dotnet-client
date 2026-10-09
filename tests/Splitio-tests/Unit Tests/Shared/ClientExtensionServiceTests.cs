@@ -3,7 +3,6 @@ using Moq;
 using Splitio.Commons.Dto;
 using Splitio.Commons.Domain;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Filters;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
@@ -13,6 +12,7 @@ using System.Collections.Generic;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Telemetry.Storages;
 using Splitio.Commons.Telemetry.Domain.Enums;
+using Splitio.Commons.Engine.Filters;
 
 namespace Splitio_Tests.Unit_Tests.Shared
 {

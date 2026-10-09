@@ -1,11 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
+using Splitio.Commons.api.Classes;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
-using Splitio.Services.Filters;
+using Splitio.Commons.Engine.Filters;
 using Splitio.Services.Parsing;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.Shared.Classes;
@@ -139,7 +140,7 @@ namespace Splitio_Tests.Integration_Tests
                 HttpConnectionTimeout = 10000,
                 HttpReadTimeout = 10000
             };
-            var httpClient = new SplitioHttpClient("0", config, headers);
+            var httpClient = new SplitioHttpClient("0", config.ProxyHost, config.ProxyPort, config.HttpConnectionTimeout, config.HttpReadTimeout, headers);
             var flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
             var sdkApiClient = new SplitSdkApiClient(httpClient, telemetryStorage, baseUrl, flagSetsFilter, false);
             var apiSplitChangeFetcher = new ApiSplitChangeFetcher(sdkApiClient);

@@ -1,7 +1,7 @@
 ﻿using Splitio.Commons.Dto;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.SplitFetcher.Interfaces
+namespace Splitio.Commons.api.Interfaces
 {
     public interface ISplitSdkApiClient
     {

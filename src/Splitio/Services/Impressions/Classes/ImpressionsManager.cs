@@ -3,7 +3,7 @@ using Splitio.Commons.Dto;
 using Splitio.Commons.Domain;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
-using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Impressions.Classes;
 using Splitio.Services.Tasks;
 using System;
 using System.Collections.Generic;

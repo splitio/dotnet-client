@@ -1,5 +1,5 @@
 ﻿using Splitio.Commons.Telemetry.Domain;
-using Splitio.Services.Impressions.Classes;
+using Splitio.Commons.Domain;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

@@ -1,7 +1,7 @@
 ﻿using Splitio.Commons.Telemetry.Domain;
 using System.Threading.Tasks;
 
-namespace Splitio.Commons.Telemetry.Common
+namespace Splitio.Commons.api.Interfaces
 {
     public interface ITelemetryAPI
     {

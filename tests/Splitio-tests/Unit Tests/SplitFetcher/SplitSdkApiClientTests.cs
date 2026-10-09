@@ -2,14 +2,14 @@
 using Moq;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Dto;
-using Splitio.Services.Common;
-using Splitio.Services.Filters;
-using Splitio.Services.SplitFetcher.Classes;
+using Splitio.Commons.Engine.Filters;
+using Splitio.Commons.api.Classes;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Splitio.Commons.Telemetry.Storages;
+using Splitio.Commons.api.Interfaces;
 
 namespace Splitio_Tests.Unit_Tests.SplitFetcher
 {

@@ -1,6 +1,5 @@
 ﻿using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
-using Splitio.Commons.Telemetry.Common;
 using Splitio.Commons.Telemetry.Domain.Enums;
 using Splitio.Commons.Telemetry.Storages;
 using Splitio.Domain;
@@ -11,6 +10,7 @@ using Splitio.Commons.Telemetry.Domain;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Splitio.Commons.api.Interfaces;
 
 namespace Splitio.Telemetry.Common
 {

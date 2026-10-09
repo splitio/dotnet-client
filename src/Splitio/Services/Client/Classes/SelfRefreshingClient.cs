@@ -6,7 +6,6 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Events.Classes;
-using Splitio.Services.Events.Interfaces;
 using Splitio.Services.EventSource;
 using Splitio.Services.EventSource.Workers;
 using Splitio.Services.Impressions.Classes;
@@ -19,13 +18,13 @@ using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Telemetry.Common;
-using Splitio.Commons.Dto;
+using Splitio.Commons.api.Classes;
 
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Splitio.Commons.Telemetry.Common;
 using Splitio.Commons.Telemetry.Storages;
+using Splitio.Commons.api.Interfaces;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -198,16 +197,16 @@ namespace Splitio.Services.Client.Classes
             headers.Add(Commons.Shared.Constants.Http.AcceptEncoding, Commons.Shared.Constants.Http.Gzip);
             headers.Add(Commons.Shared.Constants.Http.KeepAlive, "true");
 
-            var sdkHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
+            var sdkHttpClient = new SplitioHttpClient(ApiKey, _config.ProxyHost, _config.ProxyPort, _config.HttpConnectionTimeout, _config.HttpReadTimeout, headers);
             _splitSdkApiClient = new SplitSdkApiClient(sdkHttpClient, _telemetryRuntimeProducer, _config.BaseUrl, _flagSetsFilter, IsHTTPProxyDetected());
 
-            var segmentsHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
+            var segmentsHttpClient = new SplitioHttpClient(ApiKey, _config.ProxyHost, _config.ProxyPort, _config.HttpConnectionTimeout, _config.HttpReadTimeout, headers);
             _segmentSdkApiClient = new SegmentSdkApiClient(segmentsHttpClient, _telemetryRuntimeProducer, _config.BaseUrl);
 
-            var impressionsHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
+            var impressionsHttpClient = new SplitioHttpClient(ApiKey, _config.ProxyHost, _config.ProxyPort, _config.HttpConnectionTimeout, _config.HttpReadTimeout, headers);
             _impressionsSdkApiClient = new ImpressionsSdkApiClient(impressionsHttpClient, _telemetryRuntimeProducer, _config.EventsBaseUrl, _wrapperAdapter, _config.ImpressionsBulkSize);
 
-            var eventsHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
+            var eventsHttpClient = new SplitioHttpClient(ApiKey, _config.ProxyHost, _config.ProxyPort, _config.HttpConnectionTimeout, _config.HttpReadTimeout, headers);
             _eventSdkApiClient = new EventSdkApiClient(eventsHttpClient, _telemetryRuntimeProducer, _config.EventsBaseUrl, _config.EventsBulkSize);
         }
 
@@ -223,7 +222,7 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildTelemetrySyncTask()
         {
-            var httpClient = new SplitioHttpClient(ApiKey, _config, GetHeaders());
+            var httpClient = new SplitioHttpClient(ApiKey, _config.ProxyHost, _config.ProxyPort, _config.HttpConnectionTimeout, _config.HttpReadTimeout, GetHeaders());
             var telemetryStatsSubmitterTask = _tasksManager.NewPeriodicTask(Enums.Task.TelemetryStats, _config.TelemetryRefreshRate * 1000);
             var telemetryInitSubmitterTask = _tasksManager.NewOnTimeTask(Enums.Task.TelemetryInit);
 
@@ -260,7 +259,7 @@ namespace Splitio.Services.Client.Classes
                 var headers = GetHeaders();
 
                 headers.Add(Commons.Shared.Constants.Http.SplitSDKClientKey, ApiKey.Substring(ApiKey.Length - 4));
-                var sseHttpClient = new SplitioHttpClient(ApiKey, _config, headers);
+                var sseHttpClient = new SplitioHttpClient(ApiKey, _config.ProxyHost, _config.ProxyPort, _config.HttpConnectionTimeout, _config.HttpReadTimeout, headers);
                 var connectTask = _tasksManager.NewOnTimeTask(Enums.Task.SSEConnect);
                 var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, _telemetryRuntimeProducer, notificationManagerKeeper, _statusManager, connectTask);
 
@@ -268,7 +267,7 @@ namespace Splitio.Services.Client.Classes
                 var sseHandler = new SSEHandler(_config.StreamingServiceURL, splitsWorker, segmentsWorker, notificationProcessor, notificationManagerKeeper, eventSourceClient: eventSourceClient);
 
                 // AuthApiClient
-                var httpClient = new SplitioHttpClient(ApiKey, _config, GetHeaders());
+                var httpClient = new SplitioHttpClient(ApiKey, _config.ProxyHost, _config.ProxyPort, _config.HttpConnectionTimeout, _config.HttpReadTimeout, GetHeaders());
                 var authApiClient = new AuthApiClient(_config.AuthServiceURL, httpClient, _telemetryRuntimeProducer);
 
                 // PushManager

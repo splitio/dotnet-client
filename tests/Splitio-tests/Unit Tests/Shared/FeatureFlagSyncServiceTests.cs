@@ -3,12 +3,12 @@ using Moq;
 using Splitio.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Filters;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
+using Splitio.Commons.Engine.Filters;
 
 namespace Splitio_Tests.Unit_Tests.Shared
 {

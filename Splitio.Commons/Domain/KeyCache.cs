@@ -1,6 +1,7 @@
 ﻿using System;
+using Splitio.Commons.Impressions.Classes;
 
-namespace Splitio.Services.Impressions.Classes
+namespace Splitio.Commons.Domain
 {
     public class KeyCache
     {

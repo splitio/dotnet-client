@@ -7,7 +7,7 @@ using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
-using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Shared.Utils;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;

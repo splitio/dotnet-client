@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Splitio.Services.Impressions.Classes
+namespace Splitio.Commons.Domain
 {
     public class ImpressionsCountModel
     {

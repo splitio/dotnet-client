@@ -1,7 +1,7 @@
 ﻿using Splitio.Commons.Domain;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.Common
+namespace Splitio.Commons.api.Interfaces
 {
     public interface IAuthApiClient
     {

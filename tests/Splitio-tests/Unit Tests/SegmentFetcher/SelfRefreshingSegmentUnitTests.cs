@@ -5,11 +5,11 @@ using Splitio.Commons.Dto;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.SegmentFetcher.Classes;
-using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Services.Tasks;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using Splitio.Commons.api.Interfaces;
 
 namespace Splitio_Tests.Unit_Tests.SegmentFetcher
 {

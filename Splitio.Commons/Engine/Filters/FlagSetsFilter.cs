@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Splitio.Services.Filters
+namespace Splitio.Commons.Engine.Filters
 {
     public class FlagSetsFilter : IFlagSetsFilter
     {

@@ -3,7 +3,7 @@ using Splitio.Commons.Telemetry.Domain;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
-using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Shared.Utils;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;

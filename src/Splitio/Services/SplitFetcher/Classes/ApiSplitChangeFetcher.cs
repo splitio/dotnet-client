@@ -1,9 +1,10 @@
 ﻿using Splitio.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System.Threading.Tasks;
 using Splitio.Commons.Shared.Constants;
+using Splitio.Commons.api.Interfaces;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {

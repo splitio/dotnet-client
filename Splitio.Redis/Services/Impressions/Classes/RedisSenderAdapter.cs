@@ -2,7 +2,7 @@
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Telemetry.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
-using Splitio.Services.Impressions.Classes;
+using Splitio.Commons.Domain;
 using Splitio.Services.Impressions.Interfaces;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,5 @@
-﻿using Splitio.Commons.Dto;
+﻿using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.Dto;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Telemetry.Domain.Enums;

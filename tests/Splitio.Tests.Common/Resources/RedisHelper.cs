@@ -2,7 +2,7 @@
 using Splitio.Commons.Domain;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
-using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Shared.Utils;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

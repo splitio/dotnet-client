@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Impressions.Interfaces;
+﻿using Splitio.Commons.Domain;
+using Splitio.Services.Impressions.Interfaces;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 

@@ -1,6 +1,6 @@
-﻿using Splitio.Commons.Shared.Logger;
+﻿using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
-using Splitio.Domain;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.Common
+namespace Splitio.Commons.api.Classes
 {
     public class SplitioHttpClient : ISplitioHttpClient
     {
@@ -21,7 +21,8 @@ namespace Splitio.Services.Common
         private bool _disposed;
 
         public SplitioHttpClient(string apiKey,
-            SelfRefreshingConfig config,
+            string proxyHost, int proxyPort,
+            long httpConnectionTimeout, long httpReadTimeout,
             Dictionary<string, string> headers)
         {
 #if NET45
@@ -32,18 +33,18 @@ namespace Splitio.Services.Common
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
             };
 
-            if (!string.IsNullOrEmpty(config.ProxyHost))
+            if (!string.IsNullOrEmpty(proxyHost))
             {
-                handler.Proxy = new WebProxy(config.ProxyHost, config.ProxyPort);
+                handler.Proxy = new WebProxy(proxyHost, proxyPort);
             }
 
             _httpClient = new HttpClient(handler)
             {
-                Timeout = TimeSpan.FromMilliseconds(config.HttpConnectionTimeout + config.HttpReadTimeout)
+                Timeout = TimeSpan.FromMilliseconds(httpConnectionTimeout + httpReadTimeout)
             };
 
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Commons.Shared.Constants.Http.Bearer, apiKey);
-            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(Commons.Shared.Constants.Http.MediaTypeJson));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Shared.Constants.Http.Bearer, apiKey);
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(Shared.Constants.Http.MediaTypeJson));
 
             foreach (var header in headers)
             {
@@ -61,7 +62,7 @@ namespace Splitio.Services.Common
             };
 
             if (cacheControlHeadersEnabled)
-                request.Headers.Add(Commons.Shared.Constants.Http.CacheControlKey, Commons.Shared.Constants.Http.CacheControlValue);
+                request.Headers.Add(Shared.Constants.Http.CacheControlKey, Shared.Constants.Http.CacheControlValue);
 
             try
             {
