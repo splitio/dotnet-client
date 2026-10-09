@@ -1,16 +1,14 @@
-﻿using Splitio.Commons.Domain;
+﻿using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.Domain;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Telemetry.Domain.Enums;
 using Splitio.Commons.Telemetry.Storages;
-using Splitio.Services.Common;
-using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.Impressions.Classes
+namespace Splitio.Commons.api.Classes
 {
     public class ImpressionsSdkApiClient : IImpressionsSdkApiClient
     {
@@ -51,7 +49,7 @@ namespace Splitio.Services.Impressions.Classes
 
                 while (impressions.Count > 0)
                 {
-                    var bulkToPost = Commons.Shared.Utils.Helper.TakeFromList(impressions, _maxBulkSize);
+                    var bulkToPost = Helper.TakeFromList(impressions, _maxBulkSize);
 
                     await BuildJsonAndPostAsync(bulkToPost, clock);
                 }
@@ -68,7 +66,7 @@ namespace Splitio.Services.Impressions.Classes
 
                 var response = await _httpClient.PostAsync(ImpressionsCountUrl, json);
 
-                Commons.Shared.Utils.Helper.RecordTelemetrySync(nameof(SendBulkImpressionsCountAsync), response, ResourceEnum.ImpressionCountSync, clock, _telemetryRuntimeProducer, _log);
+                Helper.RecordTelemetrySync(nameof(SendBulkImpressionsCountAsync), response, ResourceEnum.ImpressionCountSync, clock, _telemetryRuntimeProducer, _log);
             }
         }
 
@@ -89,7 +87,7 @@ namespace Splitio.Services.Impressions.Classes
                         c = x.changeNumber,
                         r = x.label,
                         b = x.bucketingKey,
-                        properties = x.properties
+                        x.properties
                     })
                 });
             return JsonConvertWrapper.SerializeObjectIgnoreNullValue(impressionsPerFeature);
@@ -100,7 +98,7 @@ namespace Splitio.Services.Impressions.Classes
             return JsonConvertWrapper.SerializeObject(new { pf = impressionsCount });
         }
 
-        private async Task BuildJsonAndPostAsync(List<KeyImpression> impressions, Commons.Shared.Utils.SplitStopwatch clock)
+        private async Task BuildJsonAndPostAsync(List<KeyImpression> impressions, SplitStopwatch clock)
         {
             var impressionsJson = ConvertToJson(impressions);
 
@@ -110,7 +108,7 @@ namespace Splitio.Services.Impressions.Classes
 
                 var response = await _httpClient.PostAsync(TestImpressionsUrl, impressionsJson);
 
-                Commons.Shared.Utils.Helper.RecordTelemetrySync(nameof(SendBulkImpressionsAsync), response, ResourceEnum.ImpressionSync, clock, _telemetryRuntimeProducer, _log);
+                Helper.RecordTelemetrySync(nameof(SendBulkImpressionsAsync), response, ResourceEnum.ImpressionSync, clock, _telemetryRuntimeProducer, _log);
 
                 if (response.IsSuccessStatusCode)
                 {

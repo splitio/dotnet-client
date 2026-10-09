@@ -1,4 +1,4 @@
-﻿using Splitio.Services.Filters;
+﻿using Splitio.Commons.Engine.Filters;
 using System.Collections.Generic;
 
 namespace Splitio.Services.InputValidation.Interfaces

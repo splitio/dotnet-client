@@ -3,14 +3,13 @@ using Moq;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Dto;
 using Splitio.Services.Client.Classes;
-using Splitio.Services.Common;
-using Splitio.Telemetry.Common;
+using Splitio.Commons.api.Classes;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Splitio.Commons.Telemetry.Common;
 using Splitio.Commons.Telemetry.Domain;
 using Splitio.Commons.Telemetry.Storages;
 using Splitio.Commons.Telemetry.Domain.Enums;
+using Splitio.Commons.api.Interfaces;
 
 namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 {

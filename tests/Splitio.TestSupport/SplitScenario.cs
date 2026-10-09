@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Shared.Utils;
 using System;
 using System.Collections.Generic;
 using System.Reflection;

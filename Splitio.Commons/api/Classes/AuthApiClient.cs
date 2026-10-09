@@ -1,17 +1,17 @@
 ﻿using Newtonsoft.Json.Linq;
+using Splitio.Commons.api.Interfaces;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Shared.Constants;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Telemetry.Domain.Enums;
 using Splitio.Commons.Telemetry.Storages;
-using Splitio.Services.Shared.Classes;
 using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.Common
+namespace Splitio.Commons.api.Classes
 {
     public class AuthApiClient : IAuthApiClient
     {
@@ -41,7 +41,7 @@ namespace Splitio.Services.Common
                 {
                     var response = await _splitioHttpClient.GetAsync(_url).ConfigureAwait(false);
 
-                    Commons.Shared.Utils.Helper.RecordTelemetrySync(nameof(AuthenticateAsync), response, ResourceEnum.TokenSync, clock, _telemetryRuntimeProducer, _log);
+                    Helper.RecordTelemetrySync(nameof(AuthenticateAsync), response, ResourceEnum.TokenSync, clock, _telemetryRuntimeProducer, _log);
 
                     if (response.IsSuccessStatusCode)
                     {

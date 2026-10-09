@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.api.Interfaces;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Telemetry.Storages;
 using Splitio.Services.Cache.Interfaces;

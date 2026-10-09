@@ -2,7 +2,6 @@
 using Splitio.Commons.Dto;
 using Splitio.Commons.Domain;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Filters;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +9,7 @@ using System.Threading.Tasks;
 using Splitio.Services.Tasks;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Engine.Filters;
 
 namespace Splitio.Services.Cache.Classes
 {

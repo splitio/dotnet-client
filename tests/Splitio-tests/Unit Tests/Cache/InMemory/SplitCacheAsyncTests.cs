@@ -4,7 +4,6 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
-using Splitio.Services.Filters;
 using Splitio.Services.Tasks;
 using System;
 using Splitio.Commons.Dto;
@@ -13,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Splitio.Commons.Engine.Filters;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {

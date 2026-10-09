@@ -1,5 +1,6 @@
 ﻿using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Domain;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Tasks;
 using System;

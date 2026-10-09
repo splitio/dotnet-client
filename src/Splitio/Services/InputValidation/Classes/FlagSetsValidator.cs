@@ -1,6 +1,6 @@
-﻿using Splitio.Commons.Shared.Logger;
+﻿using Splitio.Commons.Engine.Filters;
+using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
-using Splitio.Services.Filters;
 using Splitio.Services.InputValidation.Interfaces;
 using System.Collections.Generic;
 using System.Linq;

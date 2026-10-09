@@ -1,10 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.api.Interfaces;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Impressions.Classes;
-using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Tasks;
 using System.Collections.Generic;

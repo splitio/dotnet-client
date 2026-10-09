@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Splitio.Services.Filters
+namespace Splitio.Commons.Engine.Filters
 {
     public interface IFlagSetsFilter
     {

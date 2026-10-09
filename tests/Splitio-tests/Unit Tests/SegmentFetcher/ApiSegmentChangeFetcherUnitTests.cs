@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.api.Interfaces;
 using Splitio.Commons.Dto;
 using Splitio.Services.SegmentFetcher.Classes;
-using Splitio.Services.SplitFetcher.Interfaces;
 using System;
 using System.Threading.Tasks;
 

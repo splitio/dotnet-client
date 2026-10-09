@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Splitio.Services.Impressions.Classes
+namespace Splitio.Commons.Impressions.Classes
 {
     public class ImpressionsHelper
     {

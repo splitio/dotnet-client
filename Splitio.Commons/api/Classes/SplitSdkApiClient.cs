@@ -1,7 +1,4 @@
 ﻿using Splitio.Commons.Dto;
-using Splitio.Services.Common;
-using Splitio.Services.Filters;
-using Splitio.Services.SplitFetcher.Interfaces;
 using System;
 using System.Threading.Tasks;
 using Splitio.Commons.Shared.Utils;
@@ -9,8 +6,10 @@ using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Constants;
 using Splitio.Commons.Telemetry.Storages;
 using Splitio.Commons.Telemetry.Domain.Enums;
+using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.Engine.Filters;
 
-namespace Splitio.Services.SplitFetcher.Classes
+namespace Splitio.Commons.api.Classes
 {
     public class SplitSdkApiClient : ISplitSdkApiClient
     {
@@ -62,7 +61,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                     var response = await _httpClient.GetAsync(requestUri, fetchOptions.CacheControlHeaders);
 
                     clock.Stop();
-                    Commons.Shared.Utils.Helper.RecordTelemetrySync(nameof(FetchSplitChangesAsync), response, ResourceEnum.SplitSync, clock, _telemetryRuntimeProducer, _log);
+                    Helper.RecordTelemetrySync(nameof(FetchSplitChangesAsync), response, ResourceEnum.SplitSync, clock, _telemetryRuntimeProducer, _log);
 
                     if (response.IsSuccessStatusCode)
                     {

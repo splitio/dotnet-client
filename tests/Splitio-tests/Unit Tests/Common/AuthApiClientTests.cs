@@ -1,8 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.api.Classes;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Telemetry.Storages;
-using Splitio.Services.Common;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Common

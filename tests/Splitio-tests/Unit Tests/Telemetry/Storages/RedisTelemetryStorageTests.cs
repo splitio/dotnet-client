@@ -7,7 +7,7 @@ using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Redis.Telemetry.Storages;
 using Splitio.Services.Client.Classes;
-using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Telemetry.Domain;
 using System.Threading.Tasks;
 

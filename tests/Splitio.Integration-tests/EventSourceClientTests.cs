@@ -2,6 +2,7 @@
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.api.Classes;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
@@ -370,7 +371,7 @@ namespace Splitio.Integration_tests
                 HttpConnectionTimeout = 5000,
                 HttpReadTimeout = 5000
             };
-            var sseHttpClient = new SplitioHttpClient("api-key", config, new Dictionary<string, string>());
+            var sseHttpClient = new SplitioHttpClient("api-key", config.ProxyHost, config.ProxyPort, config.HttpConnectionTimeout, config.HttpReadTimeout, new Dictionary<string, string>());
             var telemetryRuntimeProducer = new InMemoryTelemetryStorage();
             var notificationManagerKeeper = new NotificationManagerKeeper(telemetryRuntimeProducer, streamingStatusQueue);
             EventsManager<SdkEvent, SdkInternalEvent, EventMetadata> eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());

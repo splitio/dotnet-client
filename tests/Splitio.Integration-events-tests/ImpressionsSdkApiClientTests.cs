@@ -1,11 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.api.Interfaces;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Telemetry.Storages;
 using Splitio.Domain;
 using Splitio.Services.Common;
-using Splitio.Services.Impressions.Classes;
+using Splitio.Commons.api.Classes;
 using Splitio.Tests.Common;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +31,7 @@ namespace Splitio.Integration_events_tests
                 HttpConnectionTimeout = 10000,
                 HttpReadTimeout = 10000
             };
-            _splitioHttpClient = new SplitioHttpClient("api-key-test", config, new Dictionary<string, string>());
+            _splitioHttpClient = new SplitioHttpClient("api-key-test", config.ProxyHost, config.ProxyPort, config.HttpConnectionTimeout, config.HttpReadTimeout, new Dictionary<string, string>());
         }
 
         [TestMethod]

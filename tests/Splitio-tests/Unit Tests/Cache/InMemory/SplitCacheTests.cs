@@ -2,10 +2,10 @@
 using Moq;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
+using Splitio.Commons.Engine.Filters;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Common;
-using Splitio.Services.Filters;
 using Splitio.Services.Tasks;
 using System;
 using System.Collections.Concurrent;

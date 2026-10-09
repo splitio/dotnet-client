@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Commons.Domain;
 using Splitio.Services.Client.Classes;
-using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Tests.Common;
 
 namespace Splitio.Integration_tests

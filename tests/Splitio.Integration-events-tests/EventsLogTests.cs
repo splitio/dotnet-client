@@ -3,13 +3,14 @@ using Moq;
 using Splitio.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Services.Common;
-using Splitio.Services.Events.Classes;
+using Splitio.Commons.api.Classes;
 using Splitio.Tests.Common;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Splitio.Commons.Telemetry.Storages;
+using Splitio.Commons.api.Interfaces;
 
 namespace Splitio.Integration_events_tests
 {
@@ -29,7 +30,7 @@ namespace Splitio.Integration_events_tests
                 HttpReadTimeout = 10000
             };
 
-            _splitioHttpClient = new SplitioHttpClient("api-key-test", config, new Dictionary<string, string>());
+            _splitioHttpClient = new SplitioHttpClient("api-key-test", config.ProxyHost, config.ProxyPort, config.HttpConnectionTimeout, config.HttpReadTimeout, new Dictionary<string, string>());
         }
 
         [TestMethod]

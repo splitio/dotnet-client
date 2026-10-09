@@ -13,7 +13,6 @@ using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
-using Splitio.Services.Filters;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
@@ -28,6 +27,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Splitio.Commons.Engine.Filters;
 
 namespace Splitio.Services.Client.Classes
 {

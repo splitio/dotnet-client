@@ -1,4 +1,5 @@
-﻿using Splitio.Commons.Domain;
+﻿using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.Domain;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Services.Impressions.Interfaces;

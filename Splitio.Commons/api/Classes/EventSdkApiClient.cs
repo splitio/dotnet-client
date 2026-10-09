@@ -1,17 +1,15 @@
 ﻿using Newtonsoft.Json;
+using Splitio.Commons.api.Interfaces;
 using Splitio.Commons.Dto;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Telemetry.Domain.Enums;
 using Splitio.Commons.Telemetry.Storages;
-using Splitio.Services.Common;
-using Splitio.Services.Events.Interfaces;
-using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.Events.Classes
+namespace Splitio.Commons.api.Classes
 {
     public class EventSdkApiClient : IEventSdkApiClient
     {
@@ -51,7 +49,7 @@ namespace Splitio.Services.Events.Classes
 
                     while (events.Count > 0)
                     {
-                        var bulkToPost = Commons.Shared.Utils.Helper.TakeFromList(events, _maxBulkSize);
+                        var bulkToPost = Helper.TakeFromList(events, _maxBulkSize);
 
                         await BuildJsonAndPostAsync(bulkToPost, clock);
                     }
@@ -64,7 +62,7 @@ namespace Splitio.Services.Events.Classes
         }
         
         #region Private Methods
-        private async Task BuildJsonAndPostAsync(List<Event> events, Commons.Shared.Utils.SplitStopwatch clock)
+        private async Task BuildJsonAndPostAsync(List<Event> events, SplitStopwatch clock)
         {
             var eventsJson = JsonConvertWrapper.SerializeObjectIgnoreNullValue(events);
 
@@ -74,7 +72,7 @@ namespace Splitio.Services.Events.Classes
 
                 var response = await _httpClient.PostAsync(EventsUrl, eventsJson);
 
-                Commons.Shared.Utils.Helper.RecordTelemetrySync(nameof(SendBulkEventsAsync), response, ResourceEnum.EventSync, clock, _telemetryRuntimeProducer, _log);
+                Helper.RecordTelemetrySync(nameof(SendBulkEventsAsync), response, ResourceEnum.EventSync, clock, _telemetryRuntimeProducer, _log);
 
                 if (response.IsSuccessStatusCode)
                 {
