@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Tasks;
 
 namespace Splitio.Services.Common
 {

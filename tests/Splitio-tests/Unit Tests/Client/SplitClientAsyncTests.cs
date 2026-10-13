@@ -7,7 +7,6 @@ using Splitio.Commons.Impressions.Interfaces;
 using Splitio.Domain;
 using Splitio.Services.Common;
 using Splitio.Services.EngineEvaluator;
-using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Interfaces;
@@ -22,9 +21,9 @@ namespace Splitio_Tests.Unit_Tests.Client
     [TestClass]
     public class SplitClientAsyncTests
     {
-        private readonly Mock<IEventsLog> _eventsLog;
+        private readonly Mock<IEventsCache> _eventsLog;
         private readonly Mock<IFeatureFlagCache> _splitCache;
-        private readonly Mock<IImpressionsLog> _impressionsLog;
+        private readonly Mock<IImpressionsCache> _impressionsLog;
         private readonly Mock<IBlockUntilReadyService> _blockUntilReadyService;
         private Mock<IEvaluator> _evaluator;
         private readonly Mock<IImpressionsManager> _impressionsManager;
@@ -34,9 +33,9 @@ namespace Splitio_Tests.Unit_Tests.Client
         private SplitClientForTesting _splitClient;
         public SplitClientAsyncTests()
         {
-            _eventsLog = new Mock<IEventsLog>();
+            _eventsLog = new Mock<IEventsCache>();
             _splitCache = new Mock<IFeatureFlagCache>();
-            _impressionsLog = new Mock<IImpressionsLog>();
+            _impressionsLog = new Mock<IImpressionsCache>();
             _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
             _evaluator = new Mock<IEvaluator>();
             _impressionsManager = new Mock<IImpressionsManager>();
@@ -1030,7 +1029,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on-global", "\"prop\":\"global\""), new Dictionary<string, FallbackTreatment>() { { splitName, new FallbackTreatment("off-local", "\"prop\":\"local\"") } });
             FallbackTreatmentCalculator fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
             IEvaluator _evaluator = new Splitio.Services.Evaluator.Evaluator(_splitCache.Object, _splitter.Object, _telemetryEvaluationProducer.Object, fallbackTreatmentCalculator);
-            _splitClient = new SplitClientForTesting(_splitCache.Object, _eventsLog.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluator, _impressionsManager.Object, _syncManager.Object, _telemetryEvaluationProducer.Object,
+            _splitClient = new SplitClientForTesting(_splitCache.Object, _eventsLog.Object, new Mock<IImpressionsCache>().Object, _blockUntilReadyService.Object, _evaluator, _impressionsManager.Object, _syncManager.Object, _telemetryEvaluationProducer.Object,
                 fallbackTreatmentCalculator);
             _splitClient.BlockUntilReady(1000);
 
@@ -1108,7 +1107,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.EvaluateFeaturesAsync(It.IsAny<API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
                 .Throws<Exception>();
 
-            _splitClient = new SplitClientForTesting(_splitCache.Object, _eventsLog.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluator.Object, _impressionsManager.Object, _syncManager.Object, _telemetryEvaluationProducer.Object,
+            _splitClient = new SplitClientForTesting(_splitCache.Object, _eventsLog.Object, new Mock<IImpressionsCache>().Object, _blockUntilReadyService.Object, _evaluator.Object, _impressionsManager.Object, _syncManager.Object, _telemetryEvaluationProducer.Object,
                 new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration));
             _splitClient.BlockUntilReady(1000);
 

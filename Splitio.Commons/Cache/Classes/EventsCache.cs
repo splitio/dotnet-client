@@ -1,25 +1,23 @@
 ﻿using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.Cache.Interfaces;
 using Splitio.Commons.Dto;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Telemetry.Domain.Enums;
 using Splitio.Commons.Telemetry.Storages;
-using Splitio.Services.Events.Interfaces;
-using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
-using Splitio.Services.Tasks;
+using Splitio.Commons.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.Events.Classes
+namespace Splitio.Commons.Cache.Classes
 {
-    public class EventsLog : IEventsLog
+    public class EventsCache : IEventsCache
     {
         private static readonly long MAX_SIZE_BYTES = 5 * 1024 * 1024L;
         
-        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(EventsLog));
+        private static readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(EventsCache));
 
         private readonly IEventSdkApiClient _apiClient;
         private readonly ISimpleProducerCache<WrappedEvent> _wrappedEventsCache;
@@ -29,14 +27,14 @@ namespace Splitio.Services.Events.Classes
 
         private long _acumulateSize;
         
-        public EventsLog(IEventSdkApiClient apiClient,
+        public EventsCache(IEventSdkApiClient apiClient,
             ISimpleCache<WrappedEvent> eventsCache,
             ITelemetryRuntimeProducer telemetryRuntimeProducer,
             ISplitTask task,
             ISplitTask sendBulkDataTask,
             int maximumNumberOfKeysToCache = -1)
         {
-            _wrappedEventsCache = (eventsCache as ISimpleProducerCache<WrappedEvent>) ?? new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(maximumNumberOfKeysToCache));
+            _wrappedEventsCache = eventsCache as ISimpleProducerCache<WrappedEvent> ?? new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(maximumNumberOfKeysToCache));
             _apiClient = apiClient;
             _telemetryRuntimeProducer = telemetryRuntimeProducer;
             _task = task;

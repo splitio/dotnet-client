@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.Tasks
+namespace Splitio.Commons.Tasks
 {
     public interface ISplitTask
     {

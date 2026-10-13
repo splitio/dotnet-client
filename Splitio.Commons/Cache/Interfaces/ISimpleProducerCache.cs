@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Splitio.Services.Shared.Interfaces
+namespace Splitio.Commons.Cache.Interfaces
 {
     public interface ISimpleProducerCache<T> : ISimpleCache<T>
     {

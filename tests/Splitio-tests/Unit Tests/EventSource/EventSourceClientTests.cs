@@ -2,6 +2,7 @@
 using Moq;
 using Splitio.Commons.api.Interfaces;
 using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Tasks;
 using Splitio.Commons.Telemetry.Storages;
 using Splitio.Services.EventSource;
 using Splitio.Services.Tasks;

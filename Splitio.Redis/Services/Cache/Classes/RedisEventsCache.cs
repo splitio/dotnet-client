@@ -3,10 +3,10 @@ using Splitio.Commons.Dto;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Commons.Shared.Utils;
-using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Splitio.Commons.Cache.Interfaces;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {

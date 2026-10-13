@@ -26,7 +26,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private IRedisAdapterConsumer _redisAdapterConsumer;
         private IRedisAdapterProducer _redisAdapterProducer;
         
-        private IImpressionsCache _impressionsCache;
+        private Splitio.Redis.Services.Cache.Interfaces.IImpressionsCache _impressionsCache;
         private ConnectionPoolManager _connectionPoolManager;
         private IFeatureFlagCacheConsumer _featureFlagCacheConsumer;
 

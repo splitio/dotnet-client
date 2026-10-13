@@ -1,17 +1,16 @@
 ﻿using Splitio.Commons.Domain;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
-using Splitio.Services.Impressions.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Impressions.Classes
 {
-    public class RedisImpressionLog : IImpressionsLog
+    public class RedisImpressionLog : Commons.Cache.Interfaces.IImpressionsCache
     {
-        private readonly IImpressionsCache _impressionsCache;
+        private readonly Cache.Interfaces.IImpressionsCache _impressionsCache;
 
-        public RedisImpressionLog(IImpressionsCache impressionsCache)
+        public RedisImpressionLog(Cache.Interfaces.IImpressionsCache impressionsCache)
         {
             _impressionsCache = impressionsCache;
         }

@@ -10,7 +10,6 @@ using Splitio.Enums.Extensions;
 using Splitio.Commons.Cache.Filter;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Common;
-using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
@@ -48,7 +47,7 @@ namespace Splitio.Services.Client.Classes
         protected readonly string ApiKey;
 
         protected ISplitManager _manager;
-        protected IEventsLog _eventsLog;
+        protected IEventsCache _eventsLog;
         protected ITrafficTypeValidator _trafficTypeValidator;
         protected IBlockUntilReadyService _blockUntilReadyService;
         protected IFactoryInstantiationsService _factoryInstantiationsService;
@@ -60,7 +59,7 @@ namespace Splitio.Services.Client.Classes
         protected ITasksManager _tasksManager;
         protected IStatusManager _statusManager;
         protected ISyncManager _syncManager;
-        protected IImpressionsLog _impressionsLog;
+        protected IImpressionsCache _impressionsLog;
         protected IUniqueKeysTracker _uniqueKeysTracker;
         protected IImpressionListener _customerImpressionListener;
         protected IImpressionsManager _impressionsManager;

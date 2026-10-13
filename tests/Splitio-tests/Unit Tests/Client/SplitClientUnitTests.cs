@@ -7,7 +7,6 @@ using Splitio.Commons.Impressions.Interfaces;
 using Splitio.Domain;
 using Splitio.Services.Common;
 using Splitio.Services.EngineEvaluator;
-using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Interfaces;
@@ -22,7 +21,7 @@ namespace Splitio_Tests.Unit_Tests.Client
     [TestClass]
     public class SplitClientUnitTests
     {
-        private Mock<IEventsLog> _eventsLogMock;
+        private Mock<IEventsCache> _eventsLogMock;
         private Mock<IFeatureFlagCache> _splitCacheMock;
         private Mock<IBlockUntilReadyService> _blockUntilReadyService;
         private Mock<IEvaluator> _evaluatorMock;
@@ -36,7 +35,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void TestInitialize()
         {
             _splitCacheMock = new Mock<IFeatureFlagCache>();
-            _eventsLogMock = new Mock<IEventsLog>();
+            _eventsLogMock = new Mock<IEventsCache>();
             _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
             _evaluatorMock = new Mock<IEvaluator>();
             _impressionsManager = new Mock<IImpressionsManager>();
@@ -44,7 +43,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             _telemetryEvaluationProducer = new Mock<ITelemetryEvaluationProducer>();
             _fallbackTreatmentCalculation = new Mock<IFallbackTreatmentCalculator>();
 
-            _splitClientForTesting = new SplitClientForTesting(_splitCacheMock.Object, _eventsLogMock.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluatorMock.Object, _impressionsManager.Object, _syncManager.Object, _telemetryEvaluationProducer.Object, _fallbackTreatmentCalculation.Object);
+            _splitClientForTesting = new SplitClientForTesting(_splitCacheMock.Object, _eventsLogMock.Object, new Mock<IImpressionsCache>().Object, _blockUntilReadyService.Object, _evaluatorMock.Object, _impressionsManager.Object, _syncManager.Object, _telemetryEvaluationProducer.Object, _fallbackTreatmentCalculation.Object);
 
             _splitClientForTesting.BlockUntilReady(1000);
         }
@@ -806,7 +805,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             FallbackTreatmentsConfiguration fallbackTreatmentsConfiguration = new FallbackTreatmentsConfiguration(new FallbackTreatment("on-global", "\"prop\":\"global\""), new Dictionary<string, FallbackTreatment>() { { splitName, new FallbackTreatment("off-local", "\"prop\":\"local\"") } });
             FallbackTreatmentCalculator fallbackTreatmentCalculator = new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration);
             IEvaluator _evaluator = new Splitio.Services.Evaluator.Evaluator(_splitCache.Object, _splitter.Object, _telemetryEvaluationProducer.Object, fallbackTreatmentCalculator);
-            _splitClientForTesting = new SplitClientForTesting(_splitCache.Object, _eventsLogMock.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluator, _impressionsManager.Object, _syncManager.Object, _telemetryEvaluationProducer.Object,
+            _splitClientForTesting = new SplitClientForTesting(_splitCache.Object, _eventsLogMock.Object, new Mock<IImpressionsCache>().Object, _blockUntilReadyService.Object, _evaluator, _impressionsManager.Object, _syncManager.Object, _telemetryEvaluationProducer.Object,
                 fallbackTreatmentCalculator);
             _splitClientForTesting.BlockUntilReady(1000);
 
@@ -884,7 +883,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.EvaluateFeatures(It.IsAny<API>(), It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>(), true))
                 .Throws<Exception>();
 
-            _splitClientForTesting = new SplitClientForTesting(_splitCache.Object, _eventsLogMock.Object, new Mock<IImpressionsLog>().Object, _blockUntilReadyService.Object, _evaluatorMock.Object, _impressionsManager.Object, _syncManager.Object, _telemetryEvaluationProducer.Object,
+            _splitClientForTesting = new SplitClientForTesting(_splitCache.Object, _eventsLogMock.Object, new Mock<IImpressionsCache>().Object, _blockUntilReadyService.Object, _evaluatorMock.Object, _impressionsManager.Object, _syncManager.Object, _telemetryEvaluationProducer.Object,
                 new FallbackTreatmentCalculator(fallbackTreatmentsConfiguration));
             _splitClientForTesting.BlockUntilReady(1000);
 

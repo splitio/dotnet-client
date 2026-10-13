@@ -1,10 +1,10 @@
 ﻿using Splitio.Commons.Dto;
-using Splitio.Services.Shared.Interfaces;
+using Splitio.Commons.Tasks;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.Events.Interfaces
+namespace Splitio.Commons.Cache.Interfaces
 {
-    public interface IEventsLog : IPeriodicTask
+    public interface IEventsCache : IPeriodicTask
     {
         void Log(WrappedEvent wrappedEvent);
         Task LogAsync(WrappedEvent wrappedEvent);

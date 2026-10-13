@@ -3,7 +3,6 @@ using Moq;
 using Splitio.Commons.Cache.Interfaces;
 using Splitio.Commons.Dto;
 using Splitio.Redis.Services.Events.Classes;
-using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.Tasks;
 using System;
 using System.Collections.Generic;

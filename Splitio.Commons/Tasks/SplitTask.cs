@@ -6,13 +6,13 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.Tasks
+namespace Splitio.Commons.Tasks
 {
-    internal abstract class SplitTask : ISplitTask
+    public abstract class SplitTask : ISplitTask
     {
         protected readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitTask));
 
-        protected readonly Commons.Dto.SplitTaskName _taskName;
+        protected readonly SplitTaskName _taskName;
         protected readonly IStatusManager _statusManager;
         
         protected CancellationTokenSource _cts;
@@ -23,7 +23,7 @@ namespace Splitio.Services.Tasks
         protected int _interval;
         protected bool _running;
 
-        public SplitTask(Commons.Dto.SplitTaskName taskName, int interval, IStatusManager statusManager)
+        public SplitTask(SplitTaskName taskName, int interval, IStatusManager statusManager)
         {
             _taskName = taskName;
             _interval = interval;

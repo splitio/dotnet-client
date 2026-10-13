@@ -1,13 +1,12 @@
-﻿using Splitio.Commons.Dto;
-using Splitio.Services.Events.Interfaces;
-using Splitio.Services.Shared.Interfaces;
+﻿using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Dto;
 using Splitio.Services.Tasks;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Events.Classes
 {
-    public class RedisEvenstLog : IEventsLog
+    public class RedisEvenstLog : IEventsCache
     {
         private readonly ISimpleCache<WrappedEvent> _eventsCache;
         private readonly ITasksManager _tasksManager;

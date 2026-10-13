@@ -1,7 +1,6 @@
 ﻿using Splitio.Commons.Telemetry.Storages;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
-using Splitio.Services.Events.Interfaces;
 using Splitio.Commons.Impressions.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
@@ -14,8 +13,8 @@ namespace Splitio_Tests.Unit_Tests.Client
     public class SplitClientForTesting : SplitClient
     {
         public SplitClientForTesting(IFeatureFlagCacheConsumer featureFlagCacheConsumer,
-            IEventsLog eventsLog,
-            IImpressionsLog impressionsLog,
+            IEventsCache eventsLog,
+            IImpressionsCache impressionsLog,
             IBlockUntilReadyService blockUntilReadyService,
             IEvaluator evaluator,
             IImpressionsManager impressionsManager,

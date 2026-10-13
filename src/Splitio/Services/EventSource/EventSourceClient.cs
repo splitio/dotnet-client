@@ -2,7 +2,6 @@
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Telemetry.Domain.Enums;
 using Splitio.Commons.Telemetry.Storages;
-using Splitio.Services.Tasks;
 using Splitio.Commons.Telemetry.Domain;
 using System;
 using System.Collections.Generic;
@@ -13,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Splitio.Commons.api.Interfaces;
 using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Tasks;
 
 namespace Splitio.Services.EventSource
 {

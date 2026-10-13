@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.Shared.Interfaces
+namespace Splitio.Commons.Cache.Interfaces
 {
     public interface ISimpleCache<T>
     {

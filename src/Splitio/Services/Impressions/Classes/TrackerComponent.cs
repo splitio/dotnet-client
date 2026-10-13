@@ -1,4 +1,4 @@
-﻿using Splitio.Services.Tasks;
+﻿using Splitio.Commons.Tasks;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Impressions.Classes

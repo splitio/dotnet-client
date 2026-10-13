@@ -1,13 +1,13 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.Cache.Classes;
 using Splitio.Commons.Cache.Interfaces;
 using Splitio.Commons.Dto;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Telemetry.Domain.Enums;
 using Splitio.Commons.Telemetry.Storages;
-using Splitio.Services.Events.Classes;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.Tasks;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +23,7 @@ namespace Splitio_Tests.Unit_Tests.Events
         private Mock<IEventSdkApiClient> _apiClientMock;
         private Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
         private Mock<IStatusManager> _statusManager;
-        private EventsLog _eventLog;
+        private EventsCache _eventLog;
 
         [TestInitialize]
         public void Initialize()
@@ -38,7 +38,7 @@ namespace Splitio_Tests.Unit_Tests.Events
             var task = tasksManager.NewPeriodicTask(SplitTaskName.EventsSender, 1);
             var sendBulkDataTask = tasksManager.NewOnTimeTask(SplitTaskName.EventsSendBulkData);
 
-            _eventLog = new EventsLog(_apiClientMock.Object, _eventsCache, _telemetryRuntimeProducer.Object, task, sendBulkDataTask, 10);
+            _eventLog = new EventsCache(_apiClientMock.Object, _eventsCache, _telemetryRuntimeProducer.Object, task, sendBulkDataTask, 10);
         }
 
         [TestMethod]
@@ -221,7 +221,7 @@ namespace Splitio_Tests.Unit_Tests.Events
             var task = tasksManager.NewPeriodicTask(SplitTaskName.EventsSender, 1);
             var sendBulkDataTask = tasksManager.NewOnTimeTask(SplitTaskName.EventsSendBulkData);
 
-            var eventLog = new EventsLog(_apiClientMock.Object, wrappedEventsCache.Object, _telemetryRuntimeProducer.Object, task, sendBulkDataTask, 10);
+            var eventLog = new EventsCache(_apiClientMock.Object, wrappedEventsCache.Object, _telemetryRuntimeProducer.Object, task, sendBulkDataTask, 10);
 
             wrappedEventsCache
                 .Setup(mock => mock.AddItems(It.IsAny<List<WrappedEvent>>()))

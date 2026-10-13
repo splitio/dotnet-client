@@ -3,10 +3,10 @@ using Moq;
 using Splitio.Commons.api.Interfaces;
 using Splitio.Commons.Cache.Interfaces;
 using Splitio.Commons.Domain;
+using Splitio.Commons.Tasks;
 using Splitio.Commons.Telemetry.Storages;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource;
-using Splitio.Services.Tasks;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Common

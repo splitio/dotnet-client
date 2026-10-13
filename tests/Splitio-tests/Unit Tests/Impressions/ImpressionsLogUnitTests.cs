@@ -1,10 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.Cache.Classes;
 using Splitio.Commons.Cache.Interfaces;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Impressions.Classes;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Tasks;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         private Mock<IStatusManager> _statusManager;
         private BlockingQueue<KeyImpression> _queue;
         private InMemorySimpleCache<KeyImpression> _impressionsCache;
-        private ImpressionsLog _impressionsLog;
+        private ImpressionsCache _impressionsLog;
 
         [TestInitialize]
         public void Initialize()
@@ -32,7 +33,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var tasksManager = new TasksManager(_statusManager.Object);
             var task = tasksManager.NewPeriodicTask(SplitTaskName.ImpressionsSender, 1);
 
-            _impressionsLog = new ImpressionsLog(_apiClientMock.Object, _impressionsCache, task, 10);
+            _impressionsLog = new ImpressionsCache(_apiClientMock.Object, _impressionsCache, task, 10);
         }
 
         [TestMethod]

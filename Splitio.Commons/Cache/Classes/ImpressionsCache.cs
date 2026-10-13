@@ -1,32 +1,30 @@
 ﻿using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.Cache.Interfaces;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
-using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
-using Splitio.Services.Tasks;
+using Splitio.Commons.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.Impressions.Classes
+namespace Splitio.Commons.Cache.Classes
 {
-    public class ImpressionsLog : IImpressionsLog
+    public class ImpressionsCache : IImpressionsCache
     {
-        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsLog));
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsCache));
 
         private readonly IImpressionsSdkApiClient _apiClient;
         private readonly ISimpleProducerCache<KeyImpression> _impressionsCache;
         private readonly ISplitTask _task;
 
-        public ImpressionsLog(IImpressionsSdkApiClient apiClient,
+        public ImpressionsCache(IImpressionsSdkApiClient apiClient,
             ISimpleCache<KeyImpression> impressionsCache,
             ISplitTask task,
             int maximumNumberOfKeysToCache = -1)
         {
             _apiClient = apiClient;
-            _impressionsCache = (impressionsCache as ISimpleProducerCache<KeyImpression>) ?? new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(maximumNumberOfKeysToCache));            
+            _impressionsCache = impressionsCache as ISimpleProducerCache<KeyImpression> ?? new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(maximumNumberOfKeysToCache));            
             _task = task;
             _task.SetFunction(SendBulkImpressionsAsync);
             _task.OnStop(SendBulkImpressionsAsync);

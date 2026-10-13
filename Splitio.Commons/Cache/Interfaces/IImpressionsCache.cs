@@ -1,11 +1,11 @@
 ﻿using Splitio.Commons.Domain;
-using Splitio.Services.Shared.Interfaces;
+using Splitio.Commons.Tasks;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.Impressions.Interfaces
+namespace Splitio.Commons.Cache.Interfaces
 {
-    public interface IImpressionsLog : IPeriodicTask
+    public interface IImpressionsCache : IPeriodicTask
     {
         int Log(IList<KeyImpression> impressions);
         Task<int> LogAsync(IList<KeyImpression> impressions);

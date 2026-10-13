@@ -22,7 +22,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     public class ImpressionsManagerTests
     {
         private readonly Mock<IImpressionsObserver> _impressionsObserver;
-        private readonly Mock<IImpressionsLog> _impressionsLog;
+        private readonly Mock<IImpressionsCache> _impressionsLog;
         private readonly Mock<IImpressionListener> _customerImpressionListener;
         private readonly Mock<IImpressionsCounter> _impressionsCounter;
         private readonly Mock<ITelemetryRuntimeProducer> _telemetryRuntimeProducer;
@@ -34,7 +34,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public ImpressionsManagerTests()
         {
             _impressionsObserver = new Mock<IImpressionsObserver>();
-            _impressionsLog = new Mock<IImpressionsLog>();
+            _impressionsLog = new Mock<IImpressionsCache>();
             _customerImpressionListener = new Mock<IImpressionListener>();
             _impressionsCounter = new Mock<IImpressionsCounter>();
             _telemetryRuntimeProducer = new Mock<ITelemetryRuntimeProducer>();

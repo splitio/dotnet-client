@@ -1,5 +1,6 @@
 ﻿using Splitio.Commons.Cache.Interfaces;
 using Splitio.Commons.Dto;
+using Splitio.Commons.Tasks;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;

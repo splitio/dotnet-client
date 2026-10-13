@@ -5,7 +5,6 @@ using Splitio.Commons.Cache.Classes;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Services.Common;
 using Splitio.Services.EngineEvaluator;
-using Splitio.Services.Events.Classes;
 using Splitio.Services.EventSource;
 using Splitio.Services.EventSource.Workers;
 using Splitio.Services.Impressions.Classes;
@@ -143,7 +142,7 @@ namespace Splitio.Services.Client.Classes
         {
             var impressionsCache = new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(_config.TreatmentLogSize));
             var impressionsSenderTask = _tasksManager.NewPeriodicTask(Commons.Dto.SplitTaskName.ImpressionsSender, _config.TreatmentLogRefreshRate * 1000);
-            _impressionsLog = new ImpressionsLog(_impressionsSdkApiClient, impressionsCache, impressionsSenderTask);
+            _impressionsLog = new ImpressionsCache(_impressionsSdkApiClient, impressionsCache, impressionsSenderTask);
 
             _customerImpressionListener = impressionListener;
         }
@@ -176,7 +175,7 @@ namespace Splitio.Services.Client.Classes
             var eventsTask = _tasksManager.NewPeriodicTask(Commons.Dto.SplitTaskName.EventsSender, _config.EventLogRefreshRate * 1000);
             var eventsSubmitterTask = _tasksManager.NewOnTimeTask(Commons.Dto.SplitTaskName.EventsSendBulkData);
 
-            _eventsLog = new EventsLog(_eventSdkApiClient, eventsCache, _telemetryRuntimeProducer, eventsTask, eventsSubmitterTask);
+            _eventsLog = new EventsCache(_eventSdkApiClient, eventsCache, _telemetryRuntimeProducer, eventsTask, eventsSubmitterTask);
         }
 
         private void BuildEvaluator()
