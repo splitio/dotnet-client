@@ -1,11 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Commons.Shared.Utils;
 using StackExchange.Redis;
@@ -13,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Domain;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {

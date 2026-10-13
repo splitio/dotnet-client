@@ -43,6 +43,15 @@
           "build/Microsoft.NETFramework.ReferenceAssemblies.net45.targets": {}
         }
       },
+      "murmurhash-signed/1.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/net45/MurmurHash.dll": {}
+        },
+        "runtime": {
+          "lib/net45/MurmurHash.dll": {}
+        }
+      },
       "Newtonsoft.Json/13.0.1": {
         "type": "package",
         "compile": {
@@ -259,6 +268,15 @@
         "type": "package",
         "build": {
           "build/Microsoft.NETFramework.ReferenceAssemblies.net461.targets": {}
+        }
+      },
+      "murmurhash-signed/1.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/net45/MurmurHash.dll": {}
+        },
+        "runtime": {
+          "lib/net45/MurmurHash.dll": {}
         }
       },
       "Newtonsoft.Json/13.0.1": {
@@ -571,6 +589,15 @@
           "lib/netstandard1.0/_._": {}
         }
       },
+      "murmurhash-signed/1.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/MurmurHash.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/MurmurHash.dll": {}
+        }
+      },
       "NETStandard.Library/2.0.3": {
         "type": "package",
         "dependencies": {
@@ -853,6 +880,15 @@
           }
         }
       },
+      "murmurhash-signed/1.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/MurmurHash.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/MurmurHash.dll": {}
+        }
+      },
       "Newtonsoft.Json/13.0.1": {
         "type": "package",
         "compile": {
@@ -1034,6 +1070,15 @@
           "lib/netcoreapp3.1/Microsoft.Extensions.Primitives.dll": {
             "related": ".xml"
           }
+        }
+      },
+      "murmurhash-signed/1.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/MurmurHash.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/MurmurHash.dll": {}
         }
       },
       "Newtonsoft.Json/13.0.1": {
@@ -1219,6 +1264,15 @@
           }
         }
       },
+      "murmurhash-signed/1.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/MurmurHash.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/MurmurHash.dll": {}
+        }
+      },
       "Newtonsoft.Json/13.0.1": {
         "type": "package",
         "compile": {
@@ -1402,6 +1456,15 @@
           }
         }
       },
+      "murmurhash-signed/1.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/MurmurHash.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/MurmurHash.dll": {}
+        }
+      },
       "Newtonsoft.Json/13.0.1": {
         "type": "package",
         "compile": {
@@ -1583,6 +1646,15 @@
           "lib/netcoreapp3.1/Microsoft.Extensions.Primitives.dll": {
             "related": ".xml"
           }
+        }
+      },
+      "murmurhash-signed/1.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/MurmurHash.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/MurmurHash.dll": {}
         }
       },
       "Newtonsoft.Json/13.0.1": {
@@ -2479,6 +2551,21 @@
         "microsoft.netframework.referenceassemblies.net461.nuspec"
       ]
     },
+    "murmurhash-signed/1.0.3": {
+      "sha512": "GpPWSr9v7CcopNk+8xXH5gC9IFT/L4qC/BV4P49Nb8+CQuigRxj9+1BT5vLvDpNgAgtkX9JuwpbcrK7d55r+Dg==",
+      "type": "package",
+      "path": "murmurhash-signed/1.0.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net35/MurmurHash.dll",
+        "lib/net40/MurmurHash.dll",
+        "lib/net45/MurmurHash.dll",
+        "lib/netstandard2.0/MurmurHash.dll",
+        "murmurhash-signed.1.0.3.nupkg.sha512",
+        "murmurhash-signed.nuspec"
+      ]
+    },
     "NETStandard.Library/2.0.3": {
       "sha512": "st47PosZSHrjECdjeIzZQbzivYBJFv6P2nv4cj2ypdI204DO+vZ7l5raGMiX4eXMJ53RfOIg+/s4DHVZ54Nu2A==",
       "type": "package",
@@ -2886,51 +2973,59 @@
       "Common.Logging >= 3.3.1",
       "Common.Logging.Core >= 3.3.1",
       "Microsoft.NETFramework.ReferenceAssemblies >= 1.0.3",
-      "Newtonsoft.Json >= 13.0.1"
+      "Newtonsoft.Json >= 13.0.1",
+      "murmurhash-signed >= 1.0.3"
     ],
     ".NETFramework,Version=v4.6.1": [
       "Common.Logging >= 3.3.1",
       "Common.Logging.Core >= 3.3.1",
       "Microsoft.Extensions.Logging >= 3.1.32",
       "Microsoft.NETFramework.ReferenceAssemblies >= 1.0.3",
-      "Newtonsoft.Json >= 13.0.1"
+      "Newtonsoft.Json >= 13.0.1",
+      "murmurhash-signed >= 1.0.3"
     ],
     ".NETStandard,Version=v2.0": [
       "Common.Logging >= 3.3.1",
       "Common.Logging.Core >= 3.3.1",
       "Microsoft.Extensions.Logging >= 3.1.32",
       "NETStandard.Library >= 2.0.3",
-      "Newtonsoft.Json >= 13.0.1"
+      "Newtonsoft.Json >= 13.0.1",
+      "murmurhash-signed >= 1.0.3"
     ],
     "net5.0": [
       "Common.Logging >= 3.3.1",
       "Common.Logging.Core >= 3.3.1",
       "Microsoft.Extensions.Logging >= 3.1.32",
-      "Newtonsoft.Json >= 13.0.1"
+      "Newtonsoft.Json >= 13.0.1",
+      "murmurhash-signed >= 1.0.3"
     ],
     "net6.0": [
       "Common.Logging >= 3.3.1",
       "Common.Logging.Core >= 3.3.1",
       "Microsoft.Extensions.Logging >= 3.1.32",
-      "Newtonsoft.Json >= 13.0.1"
+      "Newtonsoft.Json >= 13.0.1",
+      "murmurhash-signed >= 1.0.3"
     ],
     "net7.0": [
       "Common.Logging >= 3.3.1",
       "Common.Logging.Core >= 3.3.1",
       "Microsoft.Extensions.Logging >= 3.1.32",
-      "Newtonsoft.Json >= 13.0.1"
+      "Newtonsoft.Json >= 13.0.1",
+      "murmurhash-signed >= 1.0.3"
     ],
     "net8.0": [
       "Common.Logging >= 3.3.1",
       "Common.Logging.Core >= 3.3.1",
       "Microsoft.Extensions.Logging >= 3.1.32",
-      "Newtonsoft.Json >= 13.0.1"
+      "Newtonsoft.Json >= 13.0.1",
+      "murmurhash-signed >= 1.0.3"
     ],
     "net9.0": [
       "Common.Logging >= 3.3.1",
       "Common.Logging.Core >= 3.3.1",
       "Microsoft.Extensions.Logging >= 3.1.32",
-      "Newtonsoft.Json >= 13.0.1"
+      "Newtonsoft.Json >= 13.0.1",
+      "murmurhash-signed >= 1.0.3"
     ]
   },
   "packageFolders": {
@@ -2940,11 +3035,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\chill\\source\\repos\\commons\\telemetry\\dotnet-client\\Splitio.Commons\\Splitio.Commons.csproj",
+      "projectUniqueName": "C:\\Users\\chill\\source\\repos\\commons\\cache\\dotnet-client\\Splitio.Commons\\Splitio.Commons.csproj",
       "projectName": "Splitio.Commons",
-      "projectPath": "C:\\Users\\chill\\source\\repos\\commons\\telemetry\\dotnet-client\\Splitio.Commons\\Splitio.Commons.csproj",
+      "projectPath": "C:\\Users\\chill\\source\\repos\\commons\\cache\\dotnet-client\\Splitio.Commons\\Splitio.Commons.csproj",
       "packagesPath": "C:\\Users\\chill\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\chill\\source\\repos\\commons\\telemetry\\dotnet-client\\Splitio.Commons\\obj\\",
+      "outputPath": "C:\\Users\\chill\\source\\repos\\commons\\cache\\dotnet-client\\Splitio.Commons\\obj\\",
       "projectStyle": "PackageReference",
       "crossTargeting": true,
       "fallbackFolders": [
@@ -3035,6 +3130,10 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[13.0.1, )"
+          },
+          "murmurhash-signed": {
+            "target": "Package",
+            "version": "[1.0.3, )"
           }
         },
         "imports": [
@@ -3087,6 +3186,10 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[13.0.1, )"
+          },
+          "murmurhash-signed": {
+            "target": "Package",
+            "version": "[1.0.3, )"
           }
         },
         "imports": [
@@ -3125,6 +3228,10 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[13.0.1, )"
+          },
+          "murmurhash-signed": {
+            "target": "Package",
+            "version": "[1.0.3, )"
           }
         },
         "imports": [
@@ -3163,6 +3270,10 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[13.0.1, )"
+          },
+          "murmurhash-signed": {
+            "target": "Package",
+            "version": "[1.0.3, )"
           }
         },
         "imports": [
@@ -3201,6 +3312,10 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[13.0.1, )"
+          },
+          "murmurhash-signed": {
+            "target": "Package",
+            "version": "[1.0.3, )"
           }
         },
         "imports": [
@@ -3241,6 +3356,10 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[13.0.1, )"
+          },
+          "murmurhash-signed": {
+            "target": "Package",
+            "version": "[1.0.3, )"
           }
         },
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.317\\RuntimeIdentifierGraph.json"
@@ -3269,6 +3388,10 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[13.0.1, )"
+          },
+          "murmurhash-signed": {
+            "target": "Package",
+            "version": "[1.0.3, )"
           }
         },
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.317\\RuntimeIdentifierGraph.json"
@@ -3297,6 +3420,10 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[13.0.1, )"
+          },
+          "murmurhash-signed": {
+            "target": "Package",
+            "version": "[1.0.3, )"
           }
         },
         "imports": [

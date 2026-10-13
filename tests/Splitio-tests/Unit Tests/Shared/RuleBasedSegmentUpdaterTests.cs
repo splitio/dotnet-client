@@ -1,8 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Domain;
 using Splitio.Domain;
-using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Parsing;
+using Splitio.Commons.Engine.Matchers;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
@@ -38,7 +39,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             var result = _updater.Process(changes, till);
 
             // Assert
-            Assert.AreEqual(0, result[Splitio.Enums.SegmentType.Standard].Count);
+            Assert.AreEqual(0, result[Splitio.Commons.Dto.SegmentType.Standard].Count);
             _ruleBasedSegmentCacheMock.Verify(x => x.Update(It.IsAny<List<RuleBasedSegment>>(), It.IsAny<List<string>>(), till), Times.Once);
         }
 
@@ -99,7 +100,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             var result = _updater.Process(changes, till);
 
             // Assert
-            var rSegments = result[Splitio.Enums.SegmentType.Standard];
+            var rSegments = result[Splitio.Commons.Dto.SegmentType.Standard];
             Assert.AreEqual(2, rSegments.Count);
             CollectionAssert.Contains(rSegments, "seg1");
             CollectionAssert.Contains(rSegments, "seg2");
@@ -126,7 +127,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             var result = _updater.Process(changes, till);
 
             // Assert
-            Assert.AreEqual(0, result[Splitio.Enums.SegmentType.Standard].Count);
+            Assert.AreEqual(0, result[Splitio.Commons.Dto.SegmentType.Standard].Count);
             _ruleBasedSegmentCacheMock.Verify(x => x.Update(It.IsAny<List<RuleBasedSegment>>(), It.IsAny<List<string>>(), till), Times.Once);
         }
     }

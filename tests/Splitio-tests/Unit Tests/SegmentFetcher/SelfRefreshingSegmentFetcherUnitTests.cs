@@ -1,21 +1,21 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Commons.Domain;
-using Splitio.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Services.Cache.Classes;
-using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Client.Classes;
-using Splitio.Services.Common;
+using Splitio.Commons.Cache.Classes;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.SegmentFetcher.Interfaces;
-using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Tasks;
 using Splitio.Services.Tasks;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.SdkEvents;
 
 namespace Splitio_Tests.Unit_Tests.SegmentFetcher
 {
@@ -40,7 +40,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var taskManager = new TasksManager(gates);
             var worker = new SegmentTaskWorker(5, segmentsQueue);
             segmentsQueue.AddObserver(worker);
-            var segmentsTask = taskManager.NewPeriodicTask(Splitio.Enums.Task.SegmentsFetcher, 10);
+            var segmentsTask = taskManager.NewPeriodicTask(Splitio.Commons.Dto.SplitTaskName.SegmentsFetcher, 10);
             var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, cache, segmentsQueue, segmentsTask, gates);
             segmentFetcher.Start();
 

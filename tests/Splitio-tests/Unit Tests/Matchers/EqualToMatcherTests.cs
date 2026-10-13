@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Parsing;
+using Splitio.Commons.Engine.Matchers;
 using Splitio.Commons.Dto;
 using Splitio.Commons.Shared.Utils;
 

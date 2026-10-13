@@ -1,4 +1,5 @@
-﻿using Splitio.Commons.Dto;
+﻿using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Dto;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Common;
@@ -7,7 +8,6 @@ using Splitio.Redis.Services.Events.Classes;
 using Splitio.Redis.Services.Impressions.Classes;
 using Splitio.Redis.Services.Shared;
 using Splitio.Redis.Telemetry.Storages;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Evaluator;

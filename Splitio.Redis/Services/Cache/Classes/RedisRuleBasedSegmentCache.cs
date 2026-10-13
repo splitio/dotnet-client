@@ -1,11 +1,12 @@
 ﻿using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Commons.Shared.Utils;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Domain;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {

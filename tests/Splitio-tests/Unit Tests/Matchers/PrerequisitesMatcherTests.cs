@@ -2,8 +2,8 @@
 using Moq;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Evaluator;
-using Splitio.Services.Parsing.Matchers;
+using Splitio.Commons.Engine.Evaluator;
+using Splitio.Commons.Engine.Matchers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -25,14 +25,14 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             // Arrange
             var key = new Key("a-key", null);
             _evaluator
-                .Setup(x => x.EvaluateFeatures(Splitio.Enums.API.Prerequisites, key, new List<string> { "always-on" }, null, false))
+                .Setup(x => x.EvaluateFeatures(API.Prerequisites, key, new List<string> { "always-on" }, null, false))
                 .Returns(new List<TreatmentResult>
                 {
                     new TreatmentResult("always-on", "on-labe-test", "on", false, 100)
                 });
 
             _evaluator
-                .Setup(x => x.EvaluateFeatures(Splitio.Enums.API.Prerequisites, key, new List<string> { "always-off" }, null, false))
+                .Setup(x => x.EvaluateFeatures(API.Prerequisites, key, new List<string> { "always-off" }, null, false))
                 .Returns(new List<TreatmentResult>
                 {
                     new TreatmentResult("always-off", "off-labe-test", "off", false, 100)
@@ -75,11 +75,11 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             // Arrange
             var key = new Key("a-key", null);
             _evaluator
-                .Setup(x => x.EvaluateFeatures(Splitio.Enums.API.Prerequisites, key, new List<string> { "not-existent-feature-flag" }, null, false))
+                .Setup(x => x.EvaluateFeatures(API.Prerequisites, key, new List<string> { "not-existent-feature-flag" }, null, false))
                 .Returns(new List<TreatmentResult>());
 
             _evaluator
-                .Setup(x => x.EvaluateFeatures(Splitio.Enums.API.Prerequisites, key, new List<string> { "always-on" }, null, false))
+                .Setup(x => x.EvaluateFeatures(API.Prerequisites, key, new List<string> { "always-on" }, null, false))
                 .Returns(new List<TreatmentResult>
                 {
                     new TreatmentResult("always-on", "on-labe-test", "on", false, 100)
@@ -113,14 +113,14 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             // Arrange
             var key = new Key("a-key", null);
             _evaluator
-                .Setup(x => x.EvaluateFeaturesAsync(Splitio.Enums.API.Prerequisites, key, new List<string> { "always-on" }, null, false))
+                .Setup(x => x.EvaluateFeaturesAsync(API.Prerequisites, key, new List<string> { "always-on" }, null, false))
                 .ReturnsAsync(new List<TreatmentResult>
                 {
                     new TreatmentResult("always-on", "on-labe-test", "on", false, 100)
                 });
 
             _evaluator
-                .Setup(x => x.EvaluateFeaturesAsync(Splitio.Enums.API.Prerequisites, key, new List<string> { "always-off" }, null, false))
+                .Setup(x => x.EvaluateFeaturesAsync(API.Prerequisites, key, new List<string> { "always-off" }, null, false))
                 .ReturnsAsync(new List<TreatmentResult>
                 {
                     new TreatmentResult("always-off", "off-labe-test", "off", false, 100)
@@ -163,11 +163,11 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             // Arrange
             var key = new Key("a-key", null);
             _evaluator
-                .Setup(x => x.EvaluateFeaturesAsync(Splitio.Enums.API.Prerequisites, key, new List<string> { "not-existent-feature-flag" }, null, false))
+                .Setup(x => x.EvaluateFeaturesAsync(API.Prerequisites, key, new List<string> { "not-existent-feature-flag" }, null, false))
                 .ReturnsAsync(new List<TreatmentResult>());
 
             _evaluator
-                .Setup(x => x.EvaluateFeaturesAsync(Splitio.Enums.API.Prerequisites, key, new List<string> { "always-on" }, null, false))
+                .Setup(x => x.EvaluateFeaturesAsync(API.Prerequisites, key, new List<string> { "always-on" }, null, false))
                 .ReturnsAsync(new List<TreatmentResult>
                 {
                     new TreatmentResult("always-on", "on-labe-test", "on", false, 100)

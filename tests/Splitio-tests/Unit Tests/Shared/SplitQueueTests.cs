@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Shared.Utils;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;

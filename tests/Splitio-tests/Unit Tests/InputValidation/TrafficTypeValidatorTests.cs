@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.Cache.Interfaces;
 using Splitio.Commons.Shared.Logger;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Shared.Interfaces;
 
@@ -30,7 +30,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         {
             // Arrange.
             string trafficType = null;
-            var method = Splitio.Enums.API.Track;
+            var method = Splitio.Commons.Dto.API.Track;
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
@@ -51,7 +51,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         {
             // Arrange.
             var trafficType = string.Empty;
-            var method = Splitio.Enums.API.Track;
+            var method = Splitio.Commons.Dto.API.Track;
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
@@ -72,7 +72,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         {
             // Arrange.
             string trafficType = "aBcDeFg";
-            var method = Splitio.Enums.API.Track;
+            var method = Splitio.Commons.Dto.API.Track;
 
             _splitCache
                 .Setup(mock => mock.TrafficTypeExists(trafficType.ToLower()))
@@ -99,7 +99,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         {
             // Arrange.
             string trafficType = "traffict_type_test";
-            var method = Splitio.Enums.API.Track;
+            var method = Splitio.Commons.Dto.API.Track;
 
             _splitCache
                 .Setup(mock => mock.TrafficTypeExists(trafficType))

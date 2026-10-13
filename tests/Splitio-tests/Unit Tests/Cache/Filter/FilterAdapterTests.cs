@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Cache.Filter;
+using Splitio.Commons.Cache.Filter;
 
 namespace Splitio_Tests.Unit_Tests.Cache.Filter
 {

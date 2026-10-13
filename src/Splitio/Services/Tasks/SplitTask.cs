@@ -1,6 +1,7 @@
-﻿using Splitio.Commons.Shared.Logger;
+﻿using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Dto;
+using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
-using Splitio.Services.Cache.Interfaces;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace Splitio.Services.Tasks
     {
         protected readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitTask));
 
-        protected readonly Enums.Task _taskName;
+        protected readonly Commons.Dto.SplitTaskName _taskName;
         protected readonly IStatusManager _statusManager;
         
         protected CancellationTokenSource _cts;
@@ -22,7 +23,7 @@ namespace Splitio.Services.Tasks
         protected int _interval;
         protected bool _running;
 
-        public SplitTask(Enums.Task taskName, int interval, IStatusManager statusManager)
+        public SplitTask(Commons.Dto.SplitTaskName taskName, int interval, IStatusManager statusManager)
         {
             _taskName = taskName;
             _interval = interval;

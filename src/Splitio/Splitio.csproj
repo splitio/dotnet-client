@@ -48,4 +48,8 @@
     <ProjectReference Include="..\..\Splitio.Commons\Splitio.Commons.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Enums\" />
+  </ItemGroup>
+
 </Project>

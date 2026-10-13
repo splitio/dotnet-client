@@ -1,7 +1,7 @@
-﻿using Splitio.Commons.Shared.Logger;
+﻿using Splitio.Commons.Cache.Filter;
+using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Telemetry.Domain;
-using Splitio.Services.Cache.Filter;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Tasks;
 using System;

@@ -1,15 +1,15 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Cache.Classes;
-using Splitio.Services.Cache.Interfaces;
+using Splitio.Commons.Cache.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
-using Splitio.Services.Tasks;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Domain;
+using Splitio.Commons.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.SegmentFetcher
 {

@@ -1,7 +1,5 @@
 ﻿using Splitio.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Cache.Classes;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
@@ -12,6 +10,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Cache.Classes;
 
 namespace Splitio.Services.Client.Classes
 {

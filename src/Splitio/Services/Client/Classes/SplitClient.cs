@@ -7,11 +7,9 @@ using Splitio.Commons.Telemetry.Storages;
 using Splitio.Commons.Impressions.Interfaces;
 using Splitio.Domain;
 using Splitio.Enums.Extensions;
-using Splitio.Services.Cache.Filter;
-using Splitio.Services.Cache.Interfaces;
+using Splitio.Commons.Cache.Filter;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Common;
-using Splitio.Services.Evaluator;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
@@ -28,6 +26,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Splitio.Commons.Engine.Filters;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Engine.Evaluator;
+using Splitio.Commons.Tasks;
+using Splitio.Commons.SdkEvents;
+using Splitio.Services.Cache.Classes;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -105,7 +108,7 @@ namespace Splitio.Services.Client.Classes
         #region GetTreatment
         public async Task<string> GetTreatmentAsync(Key key, string feature, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
-            List<TreatmentResult> evaluationResult = await GetTreatmentsAsync(Enums.API.GetTreatmentAsync, key, new List<string> { feature }, attributes, evaluationOptions);
+            List<TreatmentResult> evaluationResult = await GetTreatmentsAsync(Commons.Dto.API.GetTreatmentAsync, key, new List<string> { feature }, attributes, evaluationOptions);
 
             return TreatmentWithConfig(evaluationResult).Treatment;
         }
@@ -117,7 +120,7 @@ namespace Splitio.Services.Client.Classes
 
         public virtual string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
-            List<TreatmentResult> evaluationResult = GetTreatmentsSync(Enums.API.GetTreatment, key, new List<string> { feature }, attributes, evaluationOptions);
+            List<TreatmentResult> evaluationResult = GetTreatmentsSync(Commons.Dto.API.GetTreatment, key, new List<string> { feature }, attributes, evaluationOptions);
 
             return TreatmentWithConfig(evaluationResult).Treatment;
         }
@@ -131,7 +134,7 @@ namespace Splitio.Services.Client.Classes
         #region GetTreatments
         public async Task<Dictionary<string, string>> GetTreatmentsAsync(Key key, List<string> features, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
-            List<TreatmentResult> results = await GetTreatmentsAsync(Enums.API.GetTreatmentsAsync, key, features, attributes, evaluationOptions);
+            List<TreatmentResult> results = await GetTreatmentsAsync(Commons.Dto.API.GetTreatmentsAsync, key, features, attributes, evaluationOptions);
 
             return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
         }
@@ -143,7 +146,7 @@ namespace Splitio.Services.Client.Classes
 
         public Dictionary<string, string> GetTreatments(Key key, List<string> features, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
-            List<TreatmentResult> results = GetTreatmentsSync(Enums.API.GetTreatments, key, features, attributes, evaluationOptions);
+            List<TreatmentResult> results = GetTreatmentsSync(Commons.Dto.API.GetTreatments, key, features, attributes, evaluationOptions);
 
             return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
         }
@@ -157,7 +160,7 @@ namespace Splitio.Services.Client.Classes
         #region GetTreatmentWithConfig
         public async Task<SplitResult> GetTreatmentWithConfigAsync(Key key, string feature, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
-            List<TreatmentResult> evaluationResult = await GetTreatmentsAsync(Enums.API.GetTreatmentWithConfigAsync, key, new List<string> { feature }, attributes, evaluationOptions);
+            List<TreatmentResult> evaluationResult = await GetTreatmentsAsync(Commons.Dto.API.GetTreatmentWithConfigAsync, key, new List<string> { feature }, attributes, evaluationOptions);
 
             return TreatmentWithConfig(evaluationResult);
         }
@@ -169,7 +172,7 @@ namespace Splitio.Services.Client.Classes
 
         public SplitResult GetTreatmentWithConfig(Key key, string feature, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
-            List<TreatmentResult> evaluationResult = GetTreatmentsSync(Enums.API.GetTreatmentWithConfig, key, new List<string> { feature }, attributes, evaluationOptions);
+            List<TreatmentResult> evaluationResult = GetTreatmentsSync(Commons.Dto.API.GetTreatmentWithConfig, key, new List<string> { feature }, attributes, evaluationOptions);
 
             return TreatmentWithConfig(evaluationResult);
         }
@@ -183,7 +186,7 @@ namespace Splitio.Services.Client.Classes
         #region GetTreatmentsWithConfig
         public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigAsync(Key key, List<string> features, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
-            List<TreatmentResult> results = await GetTreatmentsAsync(Enums.API.GetTreatmentsWithConfigAsync, key, features, attributes, evaluationOptions);
+            List<TreatmentResult> results = await GetTreatmentsAsync(Commons.Dto.API.GetTreatmentsWithConfigAsync, key, features, attributes, evaluationOptions);
 
             return results.ToDictionary(r => r.FeatureFlagName, r => new SplitResult(r.Treatment, r.Config));
         }
@@ -195,7 +198,7 @@ namespace Splitio.Services.Client.Classes
 
         public Dictionary<string, SplitResult> GetTreatmentsWithConfig(Key key, List<string> features, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
-            List<TreatmentResult> results = GetTreatmentsSync(Enums.API.GetTreatmentsWithConfig, key, features, attributes, evaluationOptions);
+            List<TreatmentResult> results = GetTreatmentsSync(Commons.Dto.API.GetTreatmentsWithConfig, key, features, attributes, evaluationOptions);
 
             return results.ToDictionary(r => r.FeatureFlagName, r => new SplitResult(r.Treatment, r.Config));
         }
@@ -214,7 +217,7 @@ namespace Splitio.Services.Client.Classes
 
         public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigByFlagSetsAsync(Key key, List<string> flagSets, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
-            List<TreatmentResult> results = await GetTreatmentsByFlagSetsAsync(Enums.API.GetTreatmentsWithConfigByFlagSetsAsync, key, flagSets, attributes, evaluationOptions);
+            List<TreatmentResult> results = await GetTreatmentsByFlagSetsAsync(Commons.Dto.API.GetTreatmentsWithConfigByFlagSetsAsync, key, flagSets, attributes, evaluationOptions);
 
             return results.ToDictionary(r => r.FeatureFlagName, r => new SplitResult(r.Treatment, r.Config));
         }
@@ -226,7 +229,7 @@ namespace Splitio.Services.Client.Classes
 
         public Dictionary<string, SplitResult> GetTreatmentsWithConfigByFlagSets(Key key, List<string> flagSets, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
-            List<TreatmentResult> results = GetTreatmentsByFlagSets(Enums.API.GetTreatmentsWithConfigByFlagSets, key, flagSets, attributes, evaluationOptions);
+            List<TreatmentResult> results = GetTreatmentsByFlagSets(Commons.Dto.API.GetTreatmentsWithConfigByFlagSets, key, flagSets, attributes, evaluationOptions);
 
             return results.ToDictionary(r => r.FeatureFlagName, r => new SplitResult(r.Treatment, r.Config));
         }
@@ -240,7 +243,7 @@ namespace Splitio.Services.Client.Classes
 
         public async Task<Dictionary<string, string>> GetTreatmentsByFlagSetsAsync(Key key, List<string> flagSets, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
-            List<TreatmentResult> results = await GetTreatmentsByFlagSetsAsync(Enums.API.GetTreatmentsByFlagSetsAsync, key, flagSets, attributes, evaluationOptions);
+            List<TreatmentResult> results = await GetTreatmentsByFlagSetsAsync(Commons.Dto.API.GetTreatmentsByFlagSetsAsync, key, flagSets, attributes, evaluationOptions);
 
             return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
         }
@@ -252,7 +255,7 @@ namespace Splitio.Services.Client.Classes
 
         public Dictionary<string, string> GetTreatmentsByFlagSets(Key key, List<string> flagSets, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
-            List<TreatmentResult> results = GetTreatmentsByFlagSets(Enums.API.GetTreatmentsByFlagSets, key, flagSets, attributes, evaluationOptions);
+            List<TreatmentResult> results = GetTreatmentsByFlagSets(Commons.Dto.API.GetTreatmentsByFlagSets, key, flagSets, attributes, evaluationOptions);
 
             return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
         }
@@ -266,7 +269,7 @@ namespace Splitio.Services.Client.Classes
 
         public async Task<Dictionary<string, SplitResult>> GetTreatmentsWithConfigByFlagSetAsync(Key key, string flagSet, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
-            List<TreatmentResult> results = await GetTreatmentsByFlagSetsAsync(Enums.API.GetTreatmentsWithConfigByFlagSetAsync, key, new List<string> { flagSet }, attributes, evaluationOptions);
+            List<TreatmentResult> results = await GetTreatmentsByFlagSetsAsync(Commons.Dto.API.GetTreatmentsWithConfigByFlagSetAsync, key, new List<string> { flagSet }, attributes, evaluationOptions);
 
             return results.ToDictionary(r => r.FeatureFlagName, r => new SplitResult(r.Treatment, r.Config));
         }
@@ -278,7 +281,7 @@ namespace Splitio.Services.Client.Classes
 
         public Dictionary<string, SplitResult> GetTreatmentsWithConfigByFlagSet(Key key, string flagSet, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
-            List<TreatmentResult> results = GetTreatmentsByFlagSets(Enums.API.GetTreatmentsWithConfigByFlagSet, key, new List<string> { flagSet }, attributes, evaluationOptions);
+            List<TreatmentResult> results = GetTreatmentsByFlagSets(Commons.Dto.API.GetTreatmentsWithConfigByFlagSet, key, new List<string> { flagSet }, attributes, evaluationOptions);
 
             return results.ToDictionary(r => r.FeatureFlagName, r => new SplitResult(r.Treatment, r.Config));
         }
@@ -292,7 +295,7 @@ namespace Splitio.Services.Client.Classes
 
         public async Task<Dictionary<string, string>> GetTreatmentsByFlagSetAsync(Key key, string flagSet, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
-            List<TreatmentResult> results = await GetTreatmentsByFlagSetsAsync(Enums.API.GetTreatmentsByFlagSetAsync, key, new List<string> { flagSet }, attributes, evaluationOptions);
+            List<TreatmentResult> results = await GetTreatmentsByFlagSetsAsync(Commons.Dto.API.GetTreatmentsByFlagSetAsync, key, new List<string> { flagSet }, attributes, evaluationOptions);
 
             return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
         }
@@ -304,7 +307,7 @@ namespace Splitio.Services.Client.Classes
 
         public Dictionary<string, string> GetTreatmentsByFlagSet(Key key, string flagSet, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
-            List<TreatmentResult> results = GetTreatmentsByFlagSets(Enums.API.GetTreatmentsByFlagSet, key, new List<string> { flagSet }, attributes, evaluationOptions);
+            List<TreatmentResult> results = GetTreatmentsByFlagSets(Commons.Dto.API.GetTreatmentsByFlagSet, key, new List<string> { flagSet }, attributes, evaluationOptions);
 
             return results.ToDictionary(r => r.FeatureFlagName, r => r.Treatment);
         }
@@ -358,14 +361,14 @@ namespace Splitio.Services.Client.Classes
                 if (!_clientExtensionService.TrackValidations(key, trafficType, eventType, value, properties, out var wrappedEvent)) return false;
 
                 _eventsLog.Log(wrappedEvent);
-                _clientExtensionService.RecordLatency(Enums.API.Track, clock.ElapsedMilliseconds);
+                _clientExtensionService.RecordLatency(Commons.Dto.API.Track, clock.ElapsedMilliseconds);
 
                 return true;
             }
             catch (Exception e)
             {
                 _log.Error("Exception caught trying to track an event", e);
-                _clientExtensionService.RecordException(Enums.API.Track);
+                _clientExtensionService.RecordException(Commons.Dto.API.Track);
 
                 return false;
             }
@@ -384,14 +387,14 @@ namespace Splitio.Services.Client.Classes
                 if (!_clientExtensionService.TrackValidations(key, trafficType, eventType, value, properties, out var wrappedEvent)) return false;
 
                 await _eventsLog.LogAsync(wrappedEvent);
-                await _clientExtensionService.RecordLatencyAsync(Enums.API.Track, clock.ElapsedMilliseconds);
+                await _clientExtensionService.RecordLatencyAsync(Commons.Dto.API.Track, clock.ElapsedMilliseconds);
 
                 return true;
             }
             catch (Exception e)
             {
                 _log.Error("Exception caught trying to track an event", e);
-                await _clientExtensionService.RecordExceptionAsync(Enums.API.Track);
+                await _clientExtensionService.RecordExceptionAsync(Commons.Dto.API.Track);
 
                 return false;
             }
@@ -430,9 +433,9 @@ namespace Splitio.Services.Client.Classes
             var trackerCache = new ConcurrentDictionary<string, HashSet<string>>();
             var trackerConfig = new ComponentConfig(config.UniqueKeysCacheMaxSize, config.UniqueKeysBulkSize);
 
-            var mtksTask = _tasksManager.NewPeriodicTask(Enums.Task.MTKsSender, config.UniqueKeysRefreshRate * 1000);
-            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Enums.Task.CacheLongTermCleaning, Gral.IntervalToClearLongTermCache);
-            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Enums.Task.MtkSendBulkData);
+            var mtksTask = _tasksManager.NewPeriodicTask(Commons.Dto.SplitTaskName.MTKsSender, config.UniqueKeysRefreshRate * 1000);
+            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Commons.Dto.SplitTaskName.CacheLongTermCleaning, Gral.IntervalToClearLongTermCache);
+            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Commons.Dto.SplitTaskName.MtkSendBulkData);
 
             _uniqueKeysTracker = new UniqueKeysTracker(trackerConfig, filterAdapter, trackerCache, _impressionsSenderAdapter, mtksTask, cacheLongTermCleaningTask, sendBulkDataTask);
         }
@@ -440,8 +443,8 @@ namespace Splitio.Services.Client.Classes
         protected void BuildImpressionsCounter(BaseConfig config)
         {
             var trackerConfig = new ComponentConfig(config.ImpressionsCounterCacheMaxSize, config.ImpressionsCountBulkSize);
-            var task = _tasksManager.NewPeriodicTask(Enums.Task.ImpressionsCountSender, config.ImpressionsCounterRefreshRate * 1000);
-            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Enums.Task.ImpressionCounterSendBulkData);
+            var task = _tasksManager.NewPeriodicTask(Commons.Dto.SplitTaskName.ImpressionsCountSender, config.ImpressionsCounterRefreshRate * 1000);
+            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Commons.Dto.SplitTaskName.ImpressionCounterSendBulkData);
 
             _impressionsCounter = new ImpressionsCounter(trackerConfig, _impressionsSenderAdapter, task, sendBulkDataTask);
         }
@@ -471,7 +474,7 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Private Async Methods
-        private async Task<List<TreatmentResult>> GetTreatmentsAsync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes, EvaluationOptions evaluationOptions)
+        private async Task<List<TreatmentResult>> GetTreatmentsAsync(Commons.Dto.API method, Key key, List<string> features, Dictionary<string, object> attributes, EvaluationOptions evaluationOptions)
         {
             try
             {
@@ -494,7 +497,7 @@ namespace Splitio.Services.Client.Classes
             }
         }
 
-        private async Task<List<TreatmentResult>> GetTreatmentsByFlagSetsAsync(Enums.API method, Key key, List<string> flagSets, Dictionary<string, object> attributes, EvaluationOptions evaluationOptions)
+        private async Task<List<TreatmentResult>> GetTreatmentsByFlagSetsAsync(Commons.Dto.API method, Key key, List<string> flagSets, Dictionary<string, object> attributes, EvaluationOptions evaluationOptions)
         {
             try
             {
@@ -539,7 +542,7 @@ namespace Splitio.Services.Client.Classes
             _eventsManager.Unregister(SdkEvent.SdkReady);
             _eventsManager.Unregister(SdkEvent.SdkUpdate);
         }
-        private List<TreatmentResult> GetTreatmentsSync(Enums.API method, Key key, List<string> features, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
+        private List<TreatmentResult> GetTreatmentsSync(Commons.Dto.API method, Key key, List<string> features, Dictionary<string, object> attributes = null, EvaluationOptions evaluationOptions = null)
         {
             try
             {
@@ -562,7 +565,7 @@ namespace Splitio.Services.Client.Classes
             }
         }
 
-        private List<TreatmentResult> GetTreatmentsByFlagSets(Enums.API method, Key key, List<string> flagSets, Dictionary<string, object> attributes, EvaluationOptions evaluationOptions = null)
+        private List<TreatmentResult> GetTreatmentsByFlagSets(Commons.Dto.API method, Key key, List<string> flagSets, Dictionary<string, object> attributes, EvaluationOptions evaluationOptions = null)
         {
             try
             {

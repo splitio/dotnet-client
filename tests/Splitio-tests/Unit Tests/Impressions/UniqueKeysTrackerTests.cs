@@ -1,8 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.Cache.Filter;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Dto;
 using Splitio.Commons.Telemetry.Domain;
-using Splitio.Services.Cache.Filter;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Tasks;
@@ -41,9 +42,9 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _cache.Clear();
 
             var config = new ComponentConfig(5, 5);
-            var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 1);
-            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
-            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Enums.Task.MtkSendBulkData);
+            var task = _tasksManager.NewPeriodicTask(Splitio.Commons.Dto.SplitTaskName.MTKsSender, 1);
+            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Commons.Dto.SplitTaskName.CacheLongTermCleaning, 3600);
+            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Commons.Dto.SplitTaskName.MtkSendBulkData);
             _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask, sendBulkDataTask);
 
             // Act.
@@ -70,9 +71,9 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _cache.Clear();
 
             var config = new ComponentConfig(10, 5);
-            var task = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 2);
-            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
-            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Enums.Task.MtkSendBulkData);
+            var task = _tasksManager.NewPeriodicTask(Splitio.Commons.Dto.SplitTaskName.MTKsSender, 2);
+            var cacheLongTermCleaningTask = _tasksManager.NewPeriodicTask(Splitio.Commons.Dto.SplitTaskName.CacheLongTermCleaning, 3600);
+            var sendBulkDataTask = _tasksManager.NewOnTimeTask(Splitio.Commons.Dto.SplitTaskName.MtkSendBulkData);
             _uniqueKeysTracker = new UniqueKeysTracker(config, _filterAdapter.Object, _cache, _senderAdapter.Object, task, cacheLongTermCleaningTask, sendBulkDataTask);
 
             _filterAdapter
@@ -122,9 +123,9 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             Mock<IImpressionsSenderAdapter> _senderAdapter2 = new Mock<IImpressionsSenderAdapter>();
                         
             var config = new ComponentConfig(6, 3);
-            var task = _tasksManager2.NewPeriodicTask(Splitio.Enums.Task.MTKsSender, 1);
-            var cacheLongTermCleaningTask = _tasksManager2.NewPeriodicTask(Splitio.Enums.Task.CacheLongTermCleaning, 3600);
-            var sendBulkDataTask = _tasksManager2.NewOnTimeTask(Splitio.Enums.Task.MtkSendBulkData);
+            var task = _tasksManager2.NewPeriodicTask(Splitio.Commons.Dto.SplitTaskName.MTKsSender, 1);
+            var cacheLongTermCleaningTask = _tasksManager2.NewPeriodicTask(Splitio.Commons.Dto.SplitTaskName.CacheLongTermCleaning, 3600);
+            var sendBulkDataTask = _tasksManager2.NewOnTimeTask(Splitio.Commons.Dto.SplitTaskName.MtkSendBulkData);
             UniqueKeysTracker _uniqueKeysTracker2 = new UniqueKeysTracker(config, _filterAdapter2.Object, _cache2, _senderAdapter2.Object, task, cacheLongTermCleaningTask, sendBulkDataTask);
 
             // Act && Assert.

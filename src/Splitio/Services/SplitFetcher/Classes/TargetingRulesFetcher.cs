@@ -1,5 +1,4 @@
 ﻿using Splitio.Domain;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using Splitio.Services.Tasks;
@@ -9,6 +8,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Cache.Interfaces;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {
@@ -100,13 +100,13 @@ namespace Splitio.Services.SplitFetcher.Classes
                     if (result.RuleBasedSegments.Data != null && result.RuleBasedSegments.Data.Count > 0)
                     {
                         var segments = _ruleBasedSegmentUpdater.Process(result.RuleBasedSegments.Data, result.RuleBasedSegments.Till);
-                        segmentNames.AddRange(segments[Enums.SegmentType.Standard]);
+                        segmentNames.AddRange(segments[Commons.Dto.SegmentType.Standard]);
                     }
 
                     if (result.FeatureFlags.Data != null && result.FeatureFlags.Data.Count > 0)
                     {
                         var segments = _featureFlagUpdater.Process(result.FeatureFlags.Data, result.FeatureFlags.Till);
-                        segmentNames.AddRange(segments[Enums.SegmentType.Standard]);
+                        segmentNames.AddRange(segments[Commons.Dto.SegmentType.Standard]);
                     }
                 }
                 catch (Exception e)

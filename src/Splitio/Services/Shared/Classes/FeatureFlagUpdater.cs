@@ -1,6 +1,4 @@
-﻿using Splitio.Domain;
-using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Parsing.Interfaces;
+﻿using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Commons.Dto;
 using System.Collections.Generic;
@@ -8,6 +6,8 @@ using System.Linq;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Engine.Filters;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Domain;
 
 namespace Splitio.Services.Shared.Classes
 {
@@ -31,14 +31,14 @@ namespace Splitio.Services.Shared.Classes
             _ruleBasedSegmentCache = ruleBasedSegmentCache;
         }
 
-        public Dictionary<Enums.SegmentType, List<string>> Process(List<Split> changes, long till)
+        public Dictionary<Commons.Dto.SegmentType, List<string>> Process(List<Split> changes, long till)
         {
             var toAdd = new List<ParsedSplit>();
             var toRemove = new List<string>();
-            var toReturn = new Dictionary<Enums.SegmentType, List<string>>
+            var toReturn = new Dictionary<Commons.Dto.SegmentType, List<string>>
             {
-                { Enums.SegmentType.Standard, new List<string>() },
-                { Enums.SegmentType.RuleBased, new List<string>() }
+                { Commons.Dto.SegmentType.Standard, new List<string>() },
+                { Commons.Dto.SegmentType.RuleBased, new List<string>() }
             };
 
             foreach (var featureFlag in changes)
@@ -52,8 +52,8 @@ namespace Splitio.Services.Shared.Classes
                 }
 
                 toAdd.Add(ffParsed);
-                toReturn[Enums.SegmentType.Standard].AddRange(ffParsed.GetSegments());
-                toReturn[Enums.SegmentType.RuleBased].AddRange(ffParsed.GetRuleBasedSegments());
+                toReturn[Commons.Dto.SegmentType.Standard].AddRange(ffParsed.GetSegments());
+                toReturn[Commons.Dto.SegmentType.RuleBased].AddRange(ffParsed.GetRuleBasedSegments());
             }
 
             _featureFlagsCache.Update(toAdd, toRemove, till);

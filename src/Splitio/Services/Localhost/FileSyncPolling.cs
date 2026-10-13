@@ -1,6 +1,7 @@
-﻿using Splitio.Commons.Shared.Logger;
+﻿using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Dto;
+using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Tasks;
 using System;
 using System.IO;
@@ -42,7 +43,7 @@ namespace Splitio.Services.Localhost
         {
             if (_task == null)
             {
-                _task = new SplitPeriodicTask(_statusManager, Enums.Task.LocalhostFileSync, _intervalMs);
+                _task = new SplitPeriodicTask(_statusManager, Commons.Dto.SplitTaskName.LocalhostFileSync, _intervalMs);
             }
 
             _path = filePath;

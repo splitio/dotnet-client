@@ -1,11 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Dto;
 using Splitio.Commons.Telemetry.Domain;
 using Splitio.Commons.Telemetry.Storages;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource;
-using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Services.Tasks;
 using Splitio.Telemetry.Common;
 using System.Threading;
@@ -233,7 +234,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
         private SyncManager GetSyncManager(bool streamingEnabled)
         {
-            var startupTask = _taskManager.NewOnTimeTask(Splitio.Enums.Task.SDKInitialization);
+            var startupTask = _taskManager.NewOnTimeTask(Splitio.Commons.Dto.SplitTaskName.SDKInitialization);
 
             return new SyncManager(streamingEnabled,
                 _synchronizer.Object,

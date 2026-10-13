@@ -1,5 +1,5 @@
-﻿using Splitio.Commons.Dto;
-using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Dto;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Shared.Classes;
 

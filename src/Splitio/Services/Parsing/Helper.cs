@@ -1,7 +1,8 @@
-﻿using Splitio.Domain;
-using Splitio.Commons.Dto;
+﻿using Splitio.Commons.Dto;
 using System;
 using System.Collections.Generic;
+using Splitio.Commons.Domain;
+using Splitio.Commons.Engine.Matchers;
 
 namespace Splitio.Services.Parsing.Classes
 {

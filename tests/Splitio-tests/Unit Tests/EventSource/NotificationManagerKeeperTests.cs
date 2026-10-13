@@ -2,7 +2,7 @@
 using Moq;
 using Splitio.Commons.Telemetry.Storages;
 using Splitio.Services.EventSource;
-using Splitio.Services.Shared.Classes;
+using Splitio.Commons.Shared.Utils;
 
 namespace Splitio_Tests.Unit_Tests.EventSource
 {

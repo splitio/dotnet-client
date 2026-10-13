@@ -1,0 +1,38 @@
+﻿using Splitio.Commons.Engine.Evaluator;
+using Splitio.Commons.Engine.Matchers.SemverImp;
+using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
+using System.Collections.Generic;
+
+namespace Splitio.Commons.Engine.Matchers
+{
+    public class LessThanOrEqualToSemverMatcher : BaseMatcher
+    {
+        private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(LessThanOrEqualToSemverMatcher));
+        private readonly Semver _target;
+
+        public LessThanOrEqualToSemverMatcher(string target)
+        {
+            _target = Semver.Build(target);
+        }
+
+        public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            if (key == null || _target == null)
+            {
+                return false;
+            }
+
+            var keySemver = Semver.Build(key);
+            if (keySemver == null)
+            {
+                return false;
+            }
+
+            var result = keySemver.Compare(_target) <= 0;
+            _log.Debug($"{keySemver} <= {_target} | Result: {result}");
+
+            return result;
+        }
+    }
+}

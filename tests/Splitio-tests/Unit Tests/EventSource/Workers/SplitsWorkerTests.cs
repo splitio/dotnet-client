@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Commons.Dto;
 using Splitio.Services.EventSource;
@@ -13,6 +12,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Splitio.Commons.Telemetry.Domain.Enums;
 using Splitio.Commons.Telemetry.Storages;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Domain;
 
 namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 {
@@ -83,10 +84,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             _featureFlagSyncService
                 .Setup(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()))
-                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                .Returns(new Dictionary<SegmentType, List<string>>
                 { 
-                    { Splitio.Enums.SegmentType.Standard, new List<string> { "segment-name" } },
-                    { Splitio.Enums.SegmentType.RuleBased, new List<string>() }
+                    { SegmentType.Standard, new List<string> { "segment-name" } },
+                    { SegmentType.RuleBased, new List<string>() }
                 });
 
             // Act.
@@ -143,10 +144,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             _featureFlagSyncService
                 .Setup(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()))
-                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                .Returns(new Dictionary<SegmentType, List<string>>
                 {
-                    { Splitio.Enums.SegmentType.Standard, new List<string>() },
-                    { Splitio.Enums.SegmentType.RuleBased, new List<string>() }
+                    { SegmentType.Standard, new List<string>() },
+                    { SegmentType.RuleBased, new List<string>() }
                 });
 
             // Act.
@@ -183,10 +184,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             _featureFlagSyncService
                 .Setup(mock => mock.Process(It.IsAny<List<Split>>(), It.IsAny<long>()))
-                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                .Returns(new Dictionary<SegmentType, List<string>>
                 {
-                    { Splitio.Enums.SegmentType.Standard, new List<string>() },
-                    { Splitio.Enums.SegmentType.RuleBased, new List<string>() }
+                    { SegmentType.Standard, new List<string>() },
+                    { SegmentType.RuleBased, new List<string>() }
                 });
 
             // Act.
@@ -311,10 +312,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             _rbsUpdater
                 .Setup(mock => mock.Process(It.IsAny<List<RuleBasedSegmentDto>>(), 2))
-                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                .Returns(new Dictionary<SegmentType, List<string>>
                 {
-                    { Splitio.Enums.SegmentType.Standard, new List<string>() },
-                    { Splitio.Enums.SegmentType.RuleBased, new List<string>() }
+                    { SegmentType.Standard, new List<string>() },
+                    { SegmentType.RuleBased, new List<string>() }
                 });
 
             _splitsWorker.Start();
@@ -352,10 +353,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             _rbsUpdater
                 .Setup(mock => mock.Process(It.IsAny<List<RuleBasedSegmentDto>>(), 2))
-                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                .Returns(new Dictionary<SegmentType, List<string>>
                 {
-                    { Splitio.Enums.SegmentType.Standard, new List<string>() },
-                    { Splitio.Enums.SegmentType.RuleBased, new List<string>() }
+                    { SegmentType.Standard, new List<string>() },
+                    { SegmentType.RuleBased, new List<string>() }
                 });
 
             _splitsWorker.Start();
@@ -392,10 +393,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             _rbsUpdater
                 .Setup(mock => mock.Process(It.IsAny<List<RuleBasedSegmentDto>>(), 2))
-                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                .Returns(new Dictionary<SegmentType, List<string>>
                 {
-                    { Splitio.Enums.SegmentType.Standard, new List<string>() },
-                    { Splitio.Enums.SegmentType.RuleBased, new List<string>() }
+                    { SegmentType.Standard, new List<string>() },
+                    { SegmentType.RuleBased, new List<string>() }
                 });
 
             _splitsWorker.Start();
@@ -428,10 +429,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             _rbsUpdater
                 .Setup(mock => mock.Process(It.IsAny<List<RuleBasedSegmentDto>>(), 2))
-                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                .Returns(new Dictionary<SegmentType, List<string>>
                 {
-                    { Splitio.Enums.SegmentType.Standard, new List<string> { "segment1" } },
-                    { Splitio.Enums.SegmentType.RuleBased, new List<string> { "rbs1", "rbs2"} }
+                    { SegmentType.Standard, new List<string> { "segment1" } },
+                    { SegmentType.RuleBased, new List<string> { "rbs1", "rbs2"} }
                 });
 
             _splitsWorker.Start();
@@ -463,10 +464,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             _featureFlagSyncService
                 .Setup(mock => mock.Process(It.IsAny<List<Split>>(), 2))
-                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                .Returns(new Dictionary<SegmentType, List<string>>
                 {
-                    { Splitio.Enums.SegmentType.Standard, new List<string> { "segment1" } },
-                    { Splitio.Enums.SegmentType.RuleBased, new List<string> { "rbs1", "rbs2"} }
+                    { SegmentType.Standard, new List<string> { "segment1" } },
+                    { SegmentType.RuleBased, new List<string> { "rbs1", "rbs2"} }
                 });
 
             _rbsCache
@@ -506,10 +507,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             _featureFlagSyncService
                 .Setup(mock => mock.Process(It.IsAny<List<Split>>(), 2))
-                .Returns(new Dictionary<Splitio.Enums.SegmentType, List<string>>
+                .Returns(new Dictionary<SegmentType, List<string>>
                 {
-                    { Splitio.Enums.SegmentType.Standard, new List<string> { "segment1" } },
-                    { Splitio.Enums.SegmentType.RuleBased, new List<string> { "rbs1", "rbs2"} }
+                    { SegmentType.Standard, new List<string> { "segment1" } },
+                    { SegmentType.RuleBased, new List<string> { "rbs1", "rbs2"} }
                 });
 
             _rbsCache

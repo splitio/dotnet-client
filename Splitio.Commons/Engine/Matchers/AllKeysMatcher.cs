@@ -1,0 +1,30 @@
+﻿using Splitio.Commons.Dto;
+using Splitio.Commons.Engine.Evaluator;
+using System;
+using System.Collections.Generic;
+
+namespace Splitio.Commons.Engine.Matchers
+{
+    public class AllKeysMatcher : BaseMatcher
+    {
+        public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return key != null;
+        }
+
+        public override bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return key != null;
+        }
+
+        public override bool Match(long key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return true;
+        }
+
+        public override bool Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return key.matchingKey != null;
+        }
+    }
+}

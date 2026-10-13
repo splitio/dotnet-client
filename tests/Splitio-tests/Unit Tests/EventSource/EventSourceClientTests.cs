@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.Cache.Interfaces;
 using Splitio.Commons.Telemetry.Storages;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EventSource;
 using Splitio.Services.Tasks;
 using System;
@@ -32,7 +32,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _statusManager = new Mock<IStatusManager>();
             _tasksManager = new TasksManager(_statusManager.Object);
 
-            var connectTask = _tasksManager.NewOnTimeTask(Splitio.Enums.Task.SSEConnect);
+            var connectTask = _tasksManager.NewOnTimeTask(Splitio.Commons.Dto.SplitTaskName.SSEConnect);
 
             _eventSourceClient = new EventSourceClient(_notificationParser.Object,
                 _httpClient.Object, _telemetryProducer.Object, 

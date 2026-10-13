@@ -1,6 +1,5 @@
 ﻿using Splitio.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
@@ -11,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Cache.Interfaces;
 
 namespace Splitio.Services.Shared.Classes
 {

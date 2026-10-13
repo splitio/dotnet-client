@@ -1,12 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Commons.Dto;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing;
-using Splitio.Services.Parsing.Classes;
 using System.Collections.Generic;
 using System.Linq;
 using Splitio.Commons.Shared.Constants;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Engine.Matchers;
 
 namespace Splitio_Tests.Unit_Tests
 {

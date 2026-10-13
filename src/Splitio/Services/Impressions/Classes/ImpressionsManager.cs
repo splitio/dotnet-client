@@ -163,7 +163,7 @@ namespace Splitio.Services.Impressions.Classes
         {
             if (_customerImpressionListener == null || !impressions.Any()) return;
 
-            _taskManager.NewOnTimeTaskAndStart(Enums.Task.ImpressionListener, () =>
+            _taskManager.NewOnTimeTaskAndStart(Commons.Dto.SplitTaskName.ImpressionListener, () =>
             {
                 foreach (var imp in impressions)
                 {

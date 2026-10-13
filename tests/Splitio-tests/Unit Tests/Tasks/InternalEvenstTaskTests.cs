@@ -2,9 +2,9 @@
 using Moq;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Common;
-using Splitio.Services.Shared.Classes;
-using Splitio.Services.Tasks;
+using Splitio.Commons.SdkEvents;
+using Splitio.Commons.Tasks;
+using Splitio.Commons.Shared.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

@@ -1,8 +1,8 @@
 ﻿using Splitio.Commons.Dto;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Commons.Shared.Utils;
 using System.Collections.Generic;
 using System.IO;
+using Splitio.Commons.Cache.Interfaces;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {

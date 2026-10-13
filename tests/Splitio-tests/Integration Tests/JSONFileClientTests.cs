@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.Cache.Interfaces;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
 using Splitio.Services.Events.Interfaces;
@@ -889,7 +889,7 @@ namespace Splitio_Tests.Integration_Tests
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", new ConfigurationOptions(), trafficTypeValidator: trafficTypeValidator.Object, eventsLog: eventLog.Object);
 
             trafficTypeValidator
-                .Setup(mock => mock.IsValid(It.IsAny<string>(), It.IsAny<Splitio.Enums.API>()))
+                .Setup(mock => mock.IsValid(It.IsAny<string>(), It.IsAny<API>()))
                 .Returns(new ValidatorResult { Success = true }); ;
 
             // Act.

@@ -1,12 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Splitio.Commons.Cache.Interfaces;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Domain;
-using Splitio.Services.Cache.Classes;
-using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Common;
-using Splitio.Services.Shared.Classes;
-using Splitio.Services.Tasks;
+using Splitio.Commons.SdkEvents;
+using Splitio.Commons.Tasks;
+using Splitio.Commons.Cache.Classes;
+using Splitio.Commons.Shared.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

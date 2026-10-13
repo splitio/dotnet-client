@@ -2,8 +2,8 @@
 using Moq;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Evaluator;
-using Splitio.Services.Parsing.Classes;
+using Splitio.Commons.Engine.Evaluator;
+using Splitio.Commons.Engine.Matchers;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -29,7 +29,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             var key = new Key("test", "test");
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(Splitio.Enums.API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
+                .Setup(mock => mock.EvaluateFeaturesAsync(API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
                 .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
@@ -48,7 +48,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             var key = new Key("test", "test");
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(Splitio.Enums.API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
+                .Setup(mock => mock.EvaluateFeaturesAsync(API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
                 .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
@@ -82,7 +82,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             var key = new Key("test2", "test2");
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(Splitio.Enums.API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
+                .Setup(mock => mock.EvaluateFeaturesAsync(API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
                 .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
@@ -101,7 +101,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             var key = new Key("test2", "test2");
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(Splitio.Enums.API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
+                .Setup(mock => mock.EvaluateFeaturesAsync(API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
                 .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
@@ -120,7 +120,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             var key = new Key("test2", "test2");
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(Splitio.Enums.API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
+                .Setup(mock => mock.EvaluateFeaturesAsync(API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
                 .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
@@ -140,7 +140,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             var key = new Key("test2", "test2");
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(Splitio.Enums.API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
+                .Setup(mock => mock.EvaluateFeaturesAsync(API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
                 .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
@@ -159,7 +159,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             var key = new Key("test2", "test2");
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(Splitio.Enums.API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
+                .Setup(mock => mock.EvaluateFeaturesAsync(API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
                 .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
@@ -178,7 +178,7 @@ namespace Splitio_Tests.Unit_Tests.Matchers
             var key = new Key("test2", "test2");
 
             _evaluator
-                .Setup(mock => mock.EvaluateFeaturesAsync(Splitio.Enums.API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
+                .Setup(mock => mock.EvaluateFeaturesAsync(API.DependecyMatcherAsync, key, new List<string> { "test1" }, null, false))
                 .ReturnsAsync(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act

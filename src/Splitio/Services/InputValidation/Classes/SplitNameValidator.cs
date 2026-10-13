@@ -18,7 +18,7 @@ namespace Splitio.Services.InputValidation.Classes
             _log = log ?? WrapperAdapter.Instance().GetLogger(typeof(SplitNameValidator));
         }
 
-        public List<string> SplitNamesAreValid(List<string> featureFlagNames, Enums.API method)
+        public List<string> SplitNamesAreValid(List<string> featureFlagNames, Commons.Dto.API method)
         {
             if (featureFlagNames == null)
             {
@@ -47,7 +47,7 @@ namespace Splitio.Services.InputValidation.Classes
             return ffNames.ToList();
         }
 
-        public ValidatorResult SplitNameIsValid(string featureFlagName, Enums.API method)
+        public ValidatorResult SplitNameIsValid(string featureFlagName, Commons.Dto.API method)
         {
             if (featureFlagName == null)
             {
@@ -66,7 +66,7 @@ namespace Splitio.Services.InputValidation.Classes
             return new ValidatorResult { Success = true, Value = featureFlagName };
         }
 
-        private string CheckWhiteSpaces(string featureFlagName, Enums.API method)
+        private string CheckWhiteSpaces(string featureFlagName, Commons.Dto.API method)
         {
             if (featureFlagName.StartsWith(WHITESPACE) || featureFlagName.EndsWith(WHITESPACE))
             {

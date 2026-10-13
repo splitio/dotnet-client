@@ -1,12 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing;
-using Splitio.Services.Parsing.Matchers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Engine.Matchers;
+using Splitio.Commons.Domain;
 
 namespace Splitio_Tests.Unit_Tests.Matchers
 {
