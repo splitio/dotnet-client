@@ -1,9 +1,6 @@
-﻿using Splitio.Domain;
-using Splitio.Commons.Dto;
-using Splitio.Services.Cache.Classes;
-using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Commons.Dto;
+using Splitio.Commons.Cache.Classes;
 using Splitio.Services.EngineEvaluator;
-using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
@@ -14,6 +11,8 @@ using Splitio.Services.SplitFetcher.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Domain;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -27,9 +26,9 @@ namespace Splitio.Services.Client.Classes
             ConfigurationOptions config,
             ISegmentCache segmentCacheInstance = null,
             IFeatureFlagCache featureFlagCacheInstance = null,
-            IImpressionsLog impressionsLog = null,
+            IImpressionsCache impressionsLog = null,
             bool isLabelsEnabled = true,
-            IEventsLog eventsLog = null,
+            IEventsCache eventsLog = null,
             ITrafficTypeValidator trafficTypeValidator = null,
             IImpressionsManager impressionsManager = null,
             IRuleBasedSegmentCache ruleBasedSegmentCache = null

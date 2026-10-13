@@ -1,13 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.Cache.Interfaces;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Common;
-using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
-using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -90,7 +88,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnExceptionShouldReturnControl()
         {
             //Arrange
-            var impressionsLogMock = new Mock<IImpressionsLog>();
+            var impressionsLogMock = new Mock<IImpressionsCache>();
             var splitCacheMock = new Mock<IFeatureFlagCache>();
 
             splitCacheMock
@@ -258,7 +256,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelKilled()
         {
             //Arrange
-            var impressionsLogMock = new Mock<IImpressionsLog>();
+            var impressionsLogMock = new Mock<IImpressionsCache>();
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", new ConfigurationOptions(), impressionsLog: impressionsLogMock.Object);
 
             client.BlockUntilReady(1000);
@@ -282,7 +280,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelNoConditionMatched()
         {
             //Arrange
-            var impressionsLogMock = new Mock<IImpressionsLog>();
+            var impressionsLogMock = new Mock<IImpressionsCache>();
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", new ConfigurationOptions(), impressionsLog: impressionsLogMock.Object);
 
             client.BlockUntilReady(1000);
@@ -306,7 +304,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelSplitNotFound()
         {
             //Arrange
-            var impressionsLogMock = new Mock<IImpressionsLog>();
+            var impressionsLogMock = new Mock<IImpressionsCache>();
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", new ConfigurationOptions());
 
             //Act           
@@ -329,7 +327,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelException()
         {
             //Arrange
-            var impressionsLogMock = new Mock<IImpressionsLog>();
+            var impressionsLogMock = new Mock<IImpressionsCache>();
             var splitCacheMock = new Mock<IFeatureFlagCache>();
 
             splitCacheMock
@@ -359,7 +357,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelTrafficAllocationFailed()
         {
             //Arrange
-            var impressionsLogMock = new Mock<IImpressionsLog>();
+            var impressionsLogMock = new Mock<IImpressionsCache>();
             var client = new JSONFileClient($"{rootFilePath}splits_staging_4.json", "", new ConfigurationOptions(), impressionsLog: impressionsLogMock.Object);
 
             client.BlockUntilReady(1000);
@@ -382,7 +380,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelForTreatment()
         {
             //Arrange
-            var impressionsLogMock = new Mock<IImpressionsLog>();
+            var impressionsLogMock = new Mock<IImpressionsCache>();
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", new ConfigurationOptions(), impressionsLog: impressionsLogMock.Object);
 
             client.BlockUntilReady(1000);
@@ -420,7 +418,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndNotLogLabelForTreatmentIfLabelsNotEnabled()
         {
             //Arrange
-            var impressionsLogMock = new Mock<IImpressionsLog>();
+            var impressionsLogMock = new Mock<IImpressionsCache>();
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", new ConfigurationOptions(), impressionsLog: impressionsLogMock.Object, isLabelsEnabled: false);
 
             client.BlockUntilReady(1000);
@@ -443,7 +441,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelAndBucketingKeyForTreatment()
         {
             //Arrange
-            var impressionsLogMock = new Mock<IImpressionsLog>();
+            var impressionsLogMock = new Mock<IImpressionsCache>();
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", new ConfigurationOptions { ImpressionsMode = ImpressionsMode.Debug }, impressionsLog: impressionsLogMock.Object);
 
             client.BlockUntilReady(1000);
@@ -612,7 +610,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWithDependencyMatcherImpressionOnChild()
         {
             //Arrange
-            var impressionsLogMock = new Mock<IImpressionsLog>();
+            var impressionsLogMock = new Mock<IImpressionsCache>();
             var client = new JSONFileClient($"{rootFilePath}splits_staging_6.json", "", new ConfigurationOptions(),impressionsLog: impressionsLogMock.Object);
 
             client.BlockUntilReady(1000);
@@ -630,7 +628,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatment_WhenNameDoesntExist_DontLogImpression()
         {
             // Arrange.
-            var impressionsLogMock = new Mock<IImpressionsLog>();
+            var impressionsLogMock = new Mock<IImpressionsCache>();
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", new ConfigurationOptions());
             var splitName = "not_exist";
 
@@ -778,7 +776,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatments_WhenNameDoesntExist_DontLogImpression()
         {
             // Arrange.
-            var impressionsLogMock = new Mock<IImpressionsLog>();
+            var impressionsLogMock = new Mock<IImpressionsCache>();
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", new ConfigurationOptions());
             var splitNames = new List<string> { "not_exist", "not_exist_1" };
 
@@ -885,11 +883,11 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var trafficTypeValidator = new Mock<ITrafficTypeValidator>();
-            var eventLog = new Mock<IEventsLog>();
+            var eventLog = new Mock<IEventsCache>();
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", new ConfigurationOptions(), trafficTypeValidator: trafficTypeValidator.Object, eventsLog: eventLog.Object);
 
             trafficTypeValidator
-                .Setup(mock => mock.IsValid(It.IsAny<string>(), It.IsAny<Splitio.Enums.API>()))
+                .Setup(mock => mock.IsValid(It.IsAny<string>(), It.IsAny<API>()))
                 .Returns(new ValidatorResult { Success = true }); ;
 
             // Act.
@@ -906,7 +904,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentWithConfig_WhenNameDoesntExist_DontLogImpression()
         {
             // Arrange.
-            var impressionsLogMock = new Mock<IImpressionsLog>();
+            var impressionsLogMock = new Mock<IImpressionsCache>();
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", new ConfigurationOptions());
             var splitName = "not_exist";
 
@@ -943,7 +941,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentsWithConfig_WhenNameDoesntExist_DontLogImpression()
         {
             // Arrange.
-            var impressionsLogMock = new Mock<IImpressionsLog>();
+            var impressionsLogMock = new Mock<IImpressionsCache>();
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", new ConfigurationOptions());
             var splitNames = new List<string> { "not_exist", "not_exist_1" };
 

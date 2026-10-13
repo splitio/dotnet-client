@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Domain;
 using Splitio.Commons.Dto;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Splitio.Commons.Domain;
 
 namespace Splitio_Tests.Unit_Tests.Matchers
 {

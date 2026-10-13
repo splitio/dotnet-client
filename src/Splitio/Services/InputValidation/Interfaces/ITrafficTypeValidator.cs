@@ -4,6 +4,6 @@ namespace Splitio.Services.InputValidation.Interfaces
 {
     public interface ITrafficTypeValidator
     {
-        ValidatorResult IsValid(string trafficType, Enums.API method);
+        ValidatorResult IsValid(string trafficType, Commons.Dto.API method);
     }
 }

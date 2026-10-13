@@ -40,7 +40,7 @@ namespace Splitio.Redis.Services.Common
         {
             _uniqueKeysTracker.Start();
             _impressionsCounter.Start();
-            _tasksManager.NewOnTimeTaskAndStart(Enums.Task.TelemetryInit, RecordConfigInitAsync);
+            _tasksManager.NewOnTimeTaskAndStart(Commons.Dto.SplitTaskName.TelemetryInit, RecordConfigInitAsync);
         }
 
         public void Shutdown()

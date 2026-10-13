@@ -1,9 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.Cache.Interfaces;
 using Splitio.Commons.Dto;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
-using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
@@ -19,8 +18,8 @@ namespace Splitio_Tests.Unit_Tests.Common
     {
         private readonly Mock<ITargetingRulesFetcher> _splitFetcher;
         private readonly Mock<ISelfRefreshingSegmentFetcher> _segmentFetcher;
-        private readonly Mock<IImpressionsLog> _impressionsLog;
-        private readonly Mock<IEventsLog> _eventsLog;
+        private readonly Mock<IImpressionsCache> _impressionsLog;
+        private readonly Mock<IEventsCache> _eventsLog;
         private readonly Mock<IImpressionsCounter> _impressionsCounter;
         private readonly Mock<IStatusManager> _statusManager;
         private readonly Mock<ITelemetrySyncTask> _telemetrySyncTask;
@@ -34,8 +33,8 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             _splitFetcher = new Mock<ITargetingRulesFetcher>();
             _segmentFetcher = new Mock<ISelfRefreshingSegmentFetcher>();
-            _impressionsLog = new Mock<IImpressionsLog>();
-            _eventsLog = new Mock<IEventsLog>();
+            _impressionsLog = new Mock<IImpressionsCache>();
+            _eventsLog = new Mock<IEventsCache>();
             _impressionsCounter = new Mock<IImpressionsCounter>();
             _statusManager = new Mock<IStatusManager>();
             _telemetrySyncTask = new Mock<ITelemetrySyncTask>();

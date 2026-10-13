@@ -2,11 +2,11 @@
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Domain;
 using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Tasks;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
+using Splitio.Commons.Tasks;
 
 namespace Splitio.Services.Impressions.Classes
 {

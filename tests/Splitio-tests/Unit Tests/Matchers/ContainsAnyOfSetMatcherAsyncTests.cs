@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
-using Splitio.Services.Parsing;
+using Splitio.Commons.Engine.Matchers;
 using Splitio.Commons.Dto;
 
 namespace Splitio_Tests.Unit_Tests.Matchers

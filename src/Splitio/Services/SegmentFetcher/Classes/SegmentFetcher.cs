@@ -1,4 +1,4 @@
-﻿using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Commons.Cache.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
 
 namespace Splitio.Services.SegmentFetcher.Classes

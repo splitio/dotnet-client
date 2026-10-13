@@ -1,9 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Commons.Cache.Interfaces;
 using Splitio.Commons.Dto;
 using Splitio.Redis.Services.Events.Classes;
-using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.Tasks;
 using System;
 using System.Collections.Generic;

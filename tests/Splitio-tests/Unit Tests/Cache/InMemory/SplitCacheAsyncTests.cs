@@ -1,10 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Commons.Domain;
-using Splitio.Domain;
-using Splitio.Services.Cache.Classes;
-using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Common;
-using Splitio.Services.Tasks;
+using Splitio.Commons.Cache.Classes;
+using Splitio.Commons.SdkEvents;
+using Splitio.Commons.Tasks;
+using Splitio.Commons.Shared.Utils;
 using System;
 using Splitio.Commons.Dto;
 using System.Collections.Concurrent;
@@ -13,6 +12,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Splitio.Commons.Engine.Filters;
+using Splitio.Commons.Cache.Interfaces;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
@@ -33,7 +33,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             _flagSetsFilter = new FlagSetsFilter(new HashSet<string>());
             var splits = new ConcurrentDictionary<string, ParsedSplit>();
             _eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-            _internalEventsTask = new InternalEventsTask(_eventsManager, new Splitio.Services.Shared.Classes.SplitQueue<SdkEventNotification>());
+            _internalEventsTask = new InternalEventsTask(_eventsManager, new SplitQueue<SdkEventNotification>());
             _internalEventsTask.Start();
             _cache = new InMemorySplitCache(splits, _flagSetsFilter, _internalEventsTask);
         }

@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.SemverImp;
+using Splitio.Commons.Engine.Matchers.SemverImp;
 using System.IO;
 
 namespace Splitio_Tests.Unit_Tests.Parsing

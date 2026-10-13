@@ -13,6 +13,7 @@ using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Telemetry.Storages;
 using Splitio.Commons.Telemetry.Domain.Enums;
+using Splitio.Commons.Cache.Interfaces;
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -21,7 +22,7 @@ namespace Splitio.Services.Impressions.Classes
         private readonly ISplitLogger _logger = WrapperAdapter.Instance().GetLogger(typeof(ImpressionsManager));
 
         private readonly IImpressionsObserver _impressionsObserver;
-        private readonly IImpressionsLog _impressionsLog;
+        private readonly IImpressionsCache _impressionsLog;
         private readonly IImpressionListener _customerImpressionListener;
         private readonly IImpressionsCounter _impressionsCounter;
         private readonly ITelemetryRuntimeProducer _telemetryRuntimeProducer;
@@ -32,7 +33,7 @@ namespace Splitio.Services.Impressions.Classes
         private readonly bool _addPreviousTime;
         private readonly bool _labelsEnabled;
 
-        public ImpressionsManager(IImpressionsLog impressionsLog,
+        public ImpressionsManager(IImpressionsCache impressionsLog,
             IImpressionListener customerImpressionListener,
             IImpressionsCounter impressionsCounter,
             bool addPreviousTime,
@@ -163,7 +164,7 @@ namespace Splitio.Services.Impressions.Classes
         {
             if (_customerImpressionListener == null || !impressions.Any()) return;
 
-            _taskManager.NewOnTimeTaskAndStart(Enums.Task.ImpressionListener, () =>
+            _taskManager.NewOnTimeTaskAndStart(Commons.Dto.SplitTaskName.ImpressionListener, () =>
             {
                 foreach (var imp in impressions)
                 {

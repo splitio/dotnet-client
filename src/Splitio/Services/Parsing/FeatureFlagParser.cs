@@ -1,6 +1,4 @@
-﻿using Splitio.Domain;
-using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Parsing.Classes;
+﻿using Splitio.Commons.Engine.Matchers;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Commons.Dto;
@@ -9,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Domain;
 
 namespace Splitio.Services.Parsing
 {
@@ -46,7 +46,7 @@ namespace Splitio.Services.Parsing
                     configurations = split.configurations,
                     Sets = split.Sets,
                     ImpressionsDisabled = split.ImpressionsDisabled,
-                    Prerequisites = new Matchers.PrerequisitesMatcher(split.Prerequisites),
+                    Prerequisites = new Commons.Engine.Matchers.PrerequisitesMatcher(split.Prerequisites),
                 };
 
                 return ParseConditions(split.conditions, parsedSplit, ruleBasedSegmentCache);

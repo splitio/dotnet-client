@@ -1,9 +1,8 @@
-﻿using Splitio.Commons.Domain;
+﻿using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
-using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
@@ -20,8 +19,8 @@ namespace Splitio.Services.Common
         private readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(Synchronizer));
         private readonly ITargetingRulesFetcher _splitFetcher;
         private readonly ISelfRefreshingSegmentFetcher _segmentFetcher;
-        private readonly IImpressionsLog _impressionsLog;
-        private readonly IEventsLog _eventsLog;
+        private readonly IImpressionsCache _impressionsLog;
+        private readonly IEventsCache _eventsLog;
         private readonly IImpressionsCounter _impressionsCounter;
         private readonly IStatusManager _statusManager;
         private readonly ITelemetrySyncTask _telemetrySyncTask;
@@ -35,8 +34,8 @@ namespace Splitio.Services.Common
 
         public Synchronizer(ITargetingRulesFetcher splitFetcher,
             ISelfRefreshingSegmentFetcher segmentFetcher,
-            IImpressionsLog impressionsLog,
-            IEventsLog eventsLog,
+            IImpressionsCache impressionsLog,
+            IEventsCache eventsLog,
             IImpressionsCounter impressionsCounter,
             IStatusManager statusManager,
             ITelemetrySyncTask telemetrySyncTask,

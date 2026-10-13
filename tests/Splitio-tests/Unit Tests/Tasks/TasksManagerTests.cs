@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Services.Cache.Interfaces;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Dto;
 using Splitio.Services.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,7 +28,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
             var count = 0;
 
             // Act.
-            var task = _taskManager.NewOnTimeTaskAndStart(Splitio.Enums.Task.Track, () => count++);
+            var task = _taskManager.NewOnTimeTaskAndStart(Splitio.Commons.Dto.SplitTaskName.Track, () => count++);
             Thread.Sleep(500);
 
             // Assert.
@@ -42,7 +43,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
             var count = 0;
 
             // Act.
-            var task = _taskManager.NewOnTimeTaskAndStart(Splitio.Enums.Task.Track, async () =>
+            var task = _taskManager.NewOnTimeTaskAndStart(Splitio.Commons.Dto.SplitTaskName.Track, async () =>
             {
                 await Task.Delay(1);
                 count++;
@@ -65,7 +66,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
                 .Returns(true);
 
             // Act.
-            var task = _taskManager.NewOnTimeTaskAndStart(Splitio.Enums.Task.Track, () => count++);
+            var task = _taskManager.NewOnTimeTaskAndStart(Splitio.Commons.Dto.SplitTaskName.Track, () => count++);
             Thread.Sleep(500);
 
             // Assert.
@@ -84,7 +85,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
                 .Returns(true);
 
             // Act.
-            var task = _taskManager.NewOnTimeTaskAndStart(Splitio.Enums.Task.Track, async () =>
+            var task = _taskManager.NewOnTimeTaskAndStart(Splitio.Commons.Dto.SplitTaskName.Track, async () =>
             {
                 await Task.Delay(1);
                 count++;
@@ -103,7 +104,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
             var count = 0;
 
             // Act & Assert.
-            var task = _taskManager.NewOnTimeTask(Splitio.Enums.Task.Track);
+            var task = _taskManager.NewOnTimeTask(Splitio.Commons.Dto.SplitTaskName.Track);
             task.SetAction(() => count++);
             Assert.IsFalse(task.IsRunning());
 
@@ -121,7 +122,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
             var count = 0;
 
             // Act & Assert.
-            var task = _taskManager.NewOnTimeTask(Splitio.Enums.Task.Track);
+            var task = _taskManager.NewOnTimeTask(Splitio.Commons.Dto.SplitTaskName.Track);
             Assert.IsFalse(task.IsRunning());
             
             task.Start();
@@ -142,7 +143,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
                 .Returns(true);
 
             // Act & Assert.
-            var task = _taskManager.NewOnTimeTask(Splitio.Enums.Task.Track);
+            var task = _taskManager.NewOnTimeTask(Splitio.Commons.Dto.SplitTaskName.Track);
             Assert.IsFalse(task.IsRunning());
 
             task.Start();
@@ -159,7 +160,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
             var count = 0;
 
             // Act & Assert.
-            var task = _taskManager.NewScheduledTask(Splitio.Enums.Task.Track, 2);
+            var task = _taskManager.NewScheduledTask(Splitio.Commons.Dto.SplitTaskName.Track, 2);
             task.SetAction(() => count++);
             Assert.IsFalse(task.IsRunning());
 
@@ -177,7 +178,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
             var count = 0;
 
             // Act & Assert.
-            var task = _taskManager.NewScheduledTask(Splitio.Enums.Task.Track, 2);
+            var task = _taskManager.NewScheduledTask(Splitio.Commons.Dto.SplitTaskName.Track, 2);
             Assert.IsFalse(task.IsRunning());
 
             task.Start();
@@ -198,7 +199,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
                 .Returns(true);
 
             // Act & Assert.
-            var task = _taskManager.NewScheduledTask(Splitio.Enums.Task.Track, 2);
+            var task = _taskManager.NewScheduledTask(Splitio.Commons.Dto.SplitTaskName.Track, 2);
             task.SetAction(() => count++);
             Assert.IsFalse(task.IsRunning());
 
@@ -217,7 +218,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
             var onStop = 0;
 
             // Act & Assert.
-            var task = _taskManager.NewPeriodicTask(Splitio.Enums.Task.Track, 2);
+            var task = _taskManager.NewPeriodicTask(Splitio.Commons.Dto.SplitTaskName.Track, 2);
             task.SetAction(() => count++);
             task.OnStop(() => onStop++);
 
@@ -242,7 +243,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
             var count = 0;
 
             // Act & Assert.
-            var task = _taskManager.NewPeriodicTask(Splitio.Enums.Task.Track, 2);
+            var task = _taskManager.NewPeriodicTask(Splitio.Commons.Dto.SplitTaskName.Track, 2);
             Assert.IsFalse(task.IsRunning());
 
             task.Start();
@@ -263,7 +264,7 @@ namespace Splitio_Tests.Unit_Tests.Tasks
                 .Returns(true);
 
             // Act & Assert.
-            var task = _taskManager.NewPeriodicTask(Splitio.Enums.Task.Track, 2);
+            var task = _taskManager.NewPeriodicTask(Splitio.Commons.Dto.SplitTaskName.Track, 2);
             task.SetAction(() => count++);
 
             Assert.IsFalse(task.IsRunning());

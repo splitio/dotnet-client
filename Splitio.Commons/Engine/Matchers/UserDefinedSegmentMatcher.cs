@@ -1,0 +1,45 @@
+﻿using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Dto;
+using Splitio.Commons.Engine.Evaluator;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace Splitio.Commons.Engine.Matchers
+{
+    public class UserDefinedSegmentMatcher : BaseMatcher
+    {
+        private readonly string _segmentName;
+        private readonly ISegmentCacheConsumer _segmentsCache;
+
+        public UserDefinedSegmentMatcher(string segmentName, ISegmentCacheConsumer segmentsCache)
+        {
+            _segmentName = segmentName;
+            _segmentsCache = segmentsCache;
+        }
+
+        public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return _segmentsCache.IsInSegment(_segmentName, key);
+        }
+
+        public override bool Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return Match(key.matchingKey, attributes, evaluator);
+        }
+
+        public override async Task<bool> MatchAsync(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return await _segmentsCache.IsInSegmentAsync(_segmentName, key);
+        }
+
+        public override async Task<bool> MatchAsync(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
+        {
+            return await MatchAsync(key.matchingKey, attributes, evaluator);
+        }
+
+        public string GetSegmentName()
+        {
+            return _segmentName;
+        }
+    }
+}

@@ -1,4 +1,4 @@
-﻿using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Commons.Cache.Interfaces;
 
 namespace Splitio.Services.Parsing.Interfaces
 {

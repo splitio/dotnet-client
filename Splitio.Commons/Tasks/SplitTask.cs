@@ -1,0 +1,112 @@
+﻿using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Dto;
+using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Shared.Utils;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Splitio.Commons.Tasks
+{
+    public abstract class SplitTask : ISplitTask
+    {
+        protected readonly ISplitLogger _log = WrapperAdapter.Instance().GetLogger(typeof(SplitTask));
+
+        protected readonly SplitTaskName _taskName;
+        protected readonly IStatusManager _statusManager;
+        
+        protected CancellationTokenSource _cts;
+        protected Action _action;
+        protected Func<Task> _function;
+        protected Func<Task> _onStop;
+        protected Task _task;
+        protected int _interval;
+        protected bool _running;
+
+        public SplitTask(SplitTaskName taskName, int interval, IStatusManager statusManager)
+        {
+            _taskName = taskName;
+            _interval = interval;
+            _statusManager = statusManager;
+        }
+
+        public void Start()
+        {
+            if (_statusManager.IsDestroyed())
+            {
+                _log.Debug($"Task initialization {_taskName}: sdk is already destroyed.");
+                return;
+            }
+
+            if (IsRunning())
+            {
+                _log.Debug($"Task {_taskName} already running.");
+                return;
+            }
+
+            if (_action == null && _function == null)
+            {
+                _log.Warn($"Task {_taskName} has not set the action work to excecute.");
+                return;
+            }
+
+            _running = true;
+            _cts = new CancellationTokenSource();
+            _task = Task.Factory.StartNew(DoWorkAsync, _cts.Token);
+
+            _log.Debug($"Task {_taskName} running.");
+        }
+
+        public async Task StopAsync()
+        {
+            try
+            {
+                if (_onStop != null)
+                    await _onStop.Invoke();
+
+                if (!IsRunning())
+                    return;
+
+                _cts.Cancel();
+                _running = false;
+                _cts.Dispose();
+            }
+            catch (Exception ex)
+            {
+                _log.Debug($"Somenthing went wrong stopping {_taskName} Task.", ex);
+            }
+        }
+
+        public bool IsRunning()
+        {
+            return _running;
+        }
+
+        public void SetAction(Action action)
+        {
+            _action = action;
+        }
+
+        public void SetFunction(Func<Task> function)
+        {
+            _function = function;
+        }
+
+        public void SetInterval(int interval)
+        {
+            _interval = interval;
+        }
+
+        public void OnStop(Func<Task> function)
+        {
+            _onStop = function;
+        }
+
+        public void OnStop(Action action)
+        {
+            _onStop = async () => { action.Invoke(); await Task.FromResult(0); };
+        }
+
+        protected abstract Task DoWorkAsync();
+    }
+}

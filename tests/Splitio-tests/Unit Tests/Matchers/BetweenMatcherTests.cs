@@ -3,6 +3,8 @@ using Splitio.Services.Parsing;
 using Splitio.Commons.Dto;
 using System.Threading.Tasks;
 using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.Engine.Matchers;
+
 
 namespace Splitio_Tests.Unit_Tests
 {

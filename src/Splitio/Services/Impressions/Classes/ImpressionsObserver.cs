@@ -1,5 +1,5 @@
 ﻿#if NET45
-using Splitio.Services.Cache.Lru;
+using Splitio.Commons.Cache.Lru;
 #else
 using BitFaster.Caching.Lru;
 #endif

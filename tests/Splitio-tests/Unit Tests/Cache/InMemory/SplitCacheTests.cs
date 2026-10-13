@@ -3,10 +3,10 @@ using Moq;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Commons.Engine.Filters;
-using Splitio.Domain;
-using Splitio.Services.Cache.Classes;
-using Splitio.Services.Common;
-using Splitio.Services.Tasks;
+using Splitio.Commons.Tasks;
+using Splitio.Commons.Cache.Classes;
+using Splitio.Commons.SdkEvents;
+using Splitio.Commons.Shared.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -250,7 +250,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         {
             // Arrange.
             var eventsManager = new EventsManager<SdkEvent, SdkInternalEvent, EventMetadata>(new EventsManagerConfig(), new EventDelivery<SdkEvent, EventMetadata>());
-            var internalEventsTask = new InternalEventsTask(eventsManager, new Splitio.Services.Shared.Classes.SplitQueue<SdkEventNotification>());
+            var internalEventsTask = new InternalEventsTask(eventsManager, new Splitio.Commons.Shared.Utils.SplitQueue<SdkEventNotification>());
             internalEventsTask.Start();
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(), _flagSetsFilter.Object, internalEventsTask);
             var splitName = "test1";

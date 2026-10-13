@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Parsing;
-using Splitio.Services.Parsing.Classes;
+using Splitio.Commons.Domain;
+using Splitio.Commons.Engine.Matchers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

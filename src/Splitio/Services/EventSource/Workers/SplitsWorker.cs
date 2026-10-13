@@ -1,6 +1,5 @@
 ﻿using Splitio.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
@@ -11,6 +10,8 @@ using System.Threading.Tasks;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Telemetry.Domain.Enums;
 using Splitio.Commons.Telemetry.Storages;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.SSE.Workers;
 
 namespace Splitio.Services.EventSource.Workers
 {
@@ -126,8 +127,8 @@ namespace Splitio.Services.EventSource.Workers
 
                 var segments = _rbsUpdater.Process(new List<RuleBasedSegmentDto> { notification.RuleBasedSegmentDto }, notification.ChangeNumber);
 
-                if (segments[Enums.SegmentType.Standard].Count > 0)
-                    await _segmentFetcher.FetchSegmentsIfNotExistsAsync(segments[Enums.SegmentType.Standard]);
+                if (segments[Commons.Dto.SegmentType.Standard].Count > 0)
+                    await _segmentFetcher.FetchSegmentsIfNotExistsAsync(segments[Commons.Dto.SegmentType.Standard]);
 
                 _log.Debug($"IRBSU, Rule-based Segment updated successfully: {notification.RuleBasedSegmentDto.Name}");
             }
@@ -152,10 +153,10 @@ namespace Splitio.Services.EventSource.Workers
 
                 var segments = _featureFlagUpdater.Process(new List<Split> { scn.FeatureFlag }, scn.ChangeNumber);
 
-                if (segments[Enums.SegmentType.Standard].Count > 0)
-                    await _segmentFetcher.FetchSegmentsIfNotExistsAsync(segments[Enums.SegmentType.Standard]);
+                if (segments[Commons.Dto.SegmentType.Standard].Count > 0)
+                    await _segmentFetcher.FetchSegmentsIfNotExistsAsync(segments[Commons.Dto.SegmentType.Standard]);
 
-                if (segments[Enums.SegmentType.RuleBased].Count >0 && !_ruleBasedSegmentCache.Contains(segments[Enums.SegmentType.RuleBased]))
+                if (segments[Commons.Dto.SegmentType.RuleBased].Count >0 && !_ruleBasedSegmentCache.Contains(segments[Commons.Dto.SegmentType.RuleBased]))
                     return false;
 
                 _telemetryRuntimeProducer.RecordUpdatesFromSSE(UpdatesFromSSEEnum.Splits);

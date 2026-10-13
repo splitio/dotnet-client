@@ -1,10 +1,10 @@
-﻿using Splitio.Domain;
-using Splitio.Commons.Dto;
-using Splitio.Services.Parsing;
+﻿using Splitio.Commons.Dto;
+using Splitio.Commons.Engine.Matchers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Shared.Logger;
+using Splitio.Commons.Domain;
 
 namespace Splitio.Services.Localhost
 {

@@ -4,8 +4,8 @@ using Splitio.Commons.Dto;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.api.Classes;
 using Splitio.Domain;
-using Splitio.Services.Client.Classes;
-using Splitio.Services.Common;
+using Splitio.Services.Cache.Classes;
+using Splitio.Commons.Tasks;
 using Splitio.Services.EventSource;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Tasks;
@@ -14,6 +14,7 @@ using Splitio.Tests.Common;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using Splitio.Commons.SdkEvents;
 
 namespace Splitio.Integration_tests
 {
@@ -378,7 +379,7 @@ namespace Splitio.Integration_tests
             var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<SdkEventNotification>());
             var statusManager = new InMemoryReadinessGatesCache(internalEventsTask);
             var tasksManager = new TasksManager(statusManager);
-            var task = tasksManager.NewOnTimeTask(Enums.Task.SSEConnect);
+            var task = tasksManager.NewOnTimeTask(SplitTaskName.SSEConnect);
 
             var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, telemetryRuntimeProducer, notificationManagerKeeper, statusManager, task);
             eventSourceClient.EventReceived += delegate (object sender, EventReceivedEventArgs e)

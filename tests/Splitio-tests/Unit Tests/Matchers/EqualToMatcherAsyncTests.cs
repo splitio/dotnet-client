@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Commons.Dto;
 using Splitio.Commons.Shared.Utils;
-using Splitio.Services.Parsing;
+using Splitio.Commons.Engine.Matchers;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.Matchers

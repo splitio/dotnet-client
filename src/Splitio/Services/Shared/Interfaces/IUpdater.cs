@@ -1,4 +1,4 @@
-﻿using Splitio.Enums;
+﻿using Splitio.Commons.Dto;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Shared.Interfaces

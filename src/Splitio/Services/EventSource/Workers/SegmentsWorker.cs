@@ -1,4 +1,5 @@
 ﻿using Splitio.Commons.Shared.Utils;
+using Splitio.Commons.SSE.Workers;
 using Splitio.Services.Common;
 using Splitio.Services.Shared.Classes;
 using System;

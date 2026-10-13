@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Services.Client.Classes;
-using Splitio.Services.Tasks;
+using Splitio.Commons.Tasks;
+using Splitio.Services.Cache.Classes;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {

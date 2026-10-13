@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Commons.Shared.Logger;
-using Splitio.Domain;
+using Splitio.Commons.Domain;
 using Splitio.Services.InputValidation.Classes;
 using Splitio_Tests.Resources;
 using System.Collections.Generic;
@@ -97,7 +97,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             Assert.AreEqual(ulongValue, dicResult["property_13"]);
             Assert.IsTrue(result.Size == sizeExpected);
 
-            _log.Verify(mock => mock.Warn($"Property Splitio.Domain.ParsedSplit is of invalid type. Setting value to null"), Times.Once);
+            _log.Verify(mock => mock.Warn($"Property Splitio.Commons.Domain.ParsedSplit is of invalid type. Setting value to null"), Times.Once);
             _log.Verify(mock => mock.Warn(It.IsAny<string>()), Times.Exactly(1));
             _log.Verify(mock => mock.Error(It.IsAny<string>()), Times.Never);
         }

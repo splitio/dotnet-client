@@ -4,6 +4,6 @@ namespace Splitio.Services.InputValidation.Interfaces
 {
     public interface IKeyValidator
     {
-        bool IsValid(Key key, Enums.API method);
+        bool IsValid(Key key, Commons.Dto.API method);
     }
 }

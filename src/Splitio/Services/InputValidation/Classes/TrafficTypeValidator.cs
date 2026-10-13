@@ -1,7 +1,7 @@
-﻿using Splitio.Commons.Dto;
+﻿using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Dto;
 using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using System.Linq;
@@ -21,7 +21,7 @@ namespace Splitio.Services.InputValidation.Classes
             _blockUntilReadyService = blockUntilReadyService;
         }
 
-        public ValidatorResult IsValid(string trafficType, Enums.API method)
+        public ValidatorResult IsValid(string trafficType, Commons.Dto.API method)
         {
             if (!_blockUntilReadyService.IsSdkReady())
                 return new ValidatorResult { Success = true, Value = trafficType };

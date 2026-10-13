@@ -22,7 +22,7 @@ SOFTWARE.
 */
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Cache.Lru;
+using Splitio.Commons.Cache.Lru;
 using System;
 using System.Collections;
 using System.Collections.Generic;

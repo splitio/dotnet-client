@@ -1,7 +1,5 @@
-﻿using Splitio.Domain;
-using Splitio.Redis.Services.Cache.Interfaces;
+﻿using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Commons.Dto;
@@ -10,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Domain;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {

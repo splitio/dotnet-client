@@ -2,7 +2,6 @@
 using Moq;
 using Splitio.Commons.Dto;
 using Splitio.Commons.Domain;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
@@ -13,6 +12,7 @@ using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Telemetry.Storages;
 using Splitio.Commons.Telemetry.Domain.Enums;
 using Splitio.Commons.Engine.Filters;
+using Splitio.Commons.Cache.Interfaces;
 
 namespace Splitio_Tests.Unit_Tests.Shared
 {
@@ -56,10 +56,10 @@ namespace Splitio_Tests.Unit_Tests.Shared
         public void RecordTelemetryGetTreatments()
         {
             // Act.
-            _service.RecordException(Splitio.Enums.API.GetTreatments);
-            _service.RecordException(Splitio.Enums.API.GetTreatmentsAsync);
-            _service.RecordLatency(Splitio.Enums.API.GetTreatments, 10);
-            _service.RecordLatency(Splitio.Enums.API.GetTreatmentsAsync, 10);
+            _service.RecordException(API.GetTreatments);
+            _service.RecordException(API.GetTreatmentsAsync);
+            _service.RecordLatency(API.GetTreatments, 10);
+            _service.RecordLatency(API.GetTreatmentsAsync, 10);
 
             // Assert.
             _telemetryEvaluationProducer.Verify(mock => mock.RecordException(MethodEnum.Treatments), Times.Exactly(2));
@@ -70,10 +70,10 @@ namespace Splitio_Tests.Unit_Tests.Shared
         public void RecordTelemetryGetTreatment()
         {
             // Act.
-            _service.RecordException(Splitio.Enums.API.GetTreatment);
-            _service.RecordException(Splitio.Enums.API.GetTreatmentAsync);
-            _service.RecordLatency(Splitio.Enums.API.GetTreatment, 10);
-            _service.RecordLatency(Splitio.Enums.API.GetTreatmentAsync, 10);
+            _service.RecordException(API.GetTreatment);
+            _service.RecordException(API.GetTreatmentAsync);
+            _service.RecordLatency(API.GetTreatment, 10);
+            _service.RecordLatency(API.GetTreatmentAsync, 10);
 
             // Assert.
             _telemetryEvaluationProducer.Verify(mock => mock.RecordException(MethodEnum.Treatment), Times.Exactly(2));
@@ -84,10 +84,10 @@ namespace Splitio_Tests.Unit_Tests.Shared
         public void RecordTelemetryGetTreatmentWithConfig()
         {
             // Act.
-            _service.RecordException(Splitio.Enums.API.GetTreatmentWithConfig);
-            _service.RecordException(Splitio.Enums.API.GetTreatmentWithConfigAsync);
-            _service.RecordLatency(Splitio.Enums.API.GetTreatmentWithConfig, 10);
-            _service.RecordLatency(Splitio.Enums.API.GetTreatmentWithConfigAsync, 10);
+            _service.RecordException(API.GetTreatmentWithConfig);
+            _service.RecordException(API.GetTreatmentWithConfigAsync);
+            _service.RecordLatency(API.GetTreatmentWithConfig, 10);
+            _service.RecordLatency(API.GetTreatmentWithConfigAsync, 10);
 
             // Assert.
             _telemetryEvaluationProducer.Verify(mock => mock.RecordException(MethodEnum.TreatmentWithConfig), Times.Exactly(2));
@@ -98,10 +98,10 @@ namespace Splitio_Tests.Unit_Tests.Shared
         public void RecordTelemetryGetTreatmentsWithConfig()
         {
             // Act.
-            _service.RecordException(Splitio.Enums.API.GetTreatmentsWithConfig);
-            _service.RecordException(Splitio.Enums.API.GetTreatmentsWithConfigAsync);
-            _service.RecordLatency(Splitio.Enums.API.GetTreatmentsWithConfig, 10);
-            _service.RecordLatency(Splitio.Enums.API.GetTreatmentsWithConfigAsync, 10);
+            _service.RecordException(API.GetTreatmentsWithConfig);
+            _service.RecordException(API.GetTreatmentsWithConfigAsync);
+            _service.RecordLatency(API.GetTreatmentsWithConfig, 10);
+            _service.RecordLatency(API.GetTreatmentsWithConfigAsync, 10);
 
             // Assert.
             _telemetryEvaluationProducer.Verify(mock => mock.RecordException(MethodEnum.TreatmentsWithConfig), Times.Exactly(2));
@@ -112,10 +112,10 @@ namespace Splitio_Tests.Unit_Tests.Shared
         public void RecordTelemetryTrack()
         {
             // Act.
-            _service.RecordException(Splitio.Enums.API.Track);
-            _service.RecordException(Splitio.Enums.API.TrackAsync);
-            _service.RecordLatency(Splitio.Enums.API.Track, 10);
-            _service.RecordLatency(Splitio.Enums.API.TrackAsync, 10);
+            _service.RecordException(API.Track);
+            _service.RecordException(API.TrackAsync);
+            _service.RecordLatency(API.Track, 10);
+            _service.RecordLatency(API.TrackAsync, 10);
 
             // Assert.
             _telemetryEvaluationProducer.Verify(mock => mock.RecordException(MethodEnum.Track), Times.Exactly(2));
@@ -137,7 +137,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Returns(true);
 
             // Act.
-            var names = _service.TreatmentsValidations(Splitio.Enums.API.GetTreatment, new Key("matchingKey", "bucketingKey"), featureFlagNames, _logger.Object, out var result);
+            var names = _service.TreatmentsValidations(API.GetTreatment, new Key("matchingKey", "bucketingKey"), featureFlagNames, _logger.Object, out var result);
 
             // Assert.
             Assert.IsNull(result);
@@ -159,7 +159,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Returns(false);
 
             // Act.
-            var names = _service.TreatmentsValidations(Splitio.Enums.API.GetTreatment, new Key("matchingKey", "bucketingKey"), featureFlagNames, _logger.Object, out var result);
+            var names = _service.TreatmentsValidations(API.GetTreatment, new Key("matchingKey", "bucketingKey"), featureFlagNames, _logger.Object, out var result);
 
             // Assert.
             Assert.AreEqual(2, result.Count);
@@ -177,7 +177,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Returns(true);
 
             // Act.
-            var success = _service.TreatmentValidations(Splitio.Enums.API.GetTreatment, new Key("matchingKey", "bucketingKey"), expected, _logger.Object, out var result);
+            var success = _service.TreatmentValidations(API.GetTreatment, new Key("matchingKey", "bucketingKey"), expected, _logger.Object, out var result);
 
             // Assert.
             Assert.IsTrue(success);
@@ -194,7 +194,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Returns(false);
 
             // Act.
-            var success = _service.TreatmentValidations(Splitio.Enums.API.GetTreatment, new Key("matchingKey", "bucketingKey"), expected, _logger.Object, out var result);
+            var success = _service.TreatmentValidations(API.GetTreatment, new Key("matchingKey", "bucketingKey"), expected, _logger.Object, out var result);
 
             // Assert.
             Assert.IsFalse(success);
@@ -213,7 +213,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Returns(false);
 
             // Act.
-            var success = _service.TreatmentValidations(Splitio.Enums.API.GetTreatment, new Key("matchingKey", "bucketingKey"), expected, _logger.Object, out var result);
+            var success = _service.TreatmentValidations(API.GetTreatment, new Key("matchingKey", "bucketingKey"), expected, _logger.Object, out var result);
 
             // Assert.
             Assert.IsFalse(success);
@@ -243,7 +243,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Returns(true);
 
             // Act.
-            var result = _service.FlagSetsValidations(Splitio.Enums.API.GetTreatment, key, flagSets, _logger.Object);
+            var result = _service.FlagSetsValidations(API.GetTreatment, key, flagSets, _logger.Object);
 
             // Assert.
             Assert.AreEqual(3, result.Count);
@@ -267,7 +267,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
                 .Returns(true);
 
             // Act.
-            var result = service.FlagSetsValidations(Splitio.Enums.API.GetTreatment, key, flagSets, _logger.Object);
+            var result = service.FlagSetsValidations(API.GetTreatment, key, flagSets, _logger.Object);
 
             // Assert.
             Assert.AreEqual(2, result.Count);

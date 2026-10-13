@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Common;
+using Splitio.Commons.SdkEvents;
 using System;
 using System.Threading;
 

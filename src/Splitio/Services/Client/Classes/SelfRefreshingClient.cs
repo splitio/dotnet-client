@@ -1,11 +1,10 @@
 ﻿using Splitio.Domain;
 using Splitio.Commons.Dto;
 using Splitio.Commons.Domain;
-using Splitio.Services.Cache.Classes;
-using Splitio.Services.Cache.Interfaces;
+using Splitio.Commons.Cache.Classes;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Services.Common;
 using Splitio.Services.EngineEvaluator;
-using Splitio.Services.Events.Classes;
 using Splitio.Services.EventSource;
 using Splitio.Services.EventSource.Workers;
 using Splitio.Services.Impressions.Classes;
@@ -25,6 +24,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Splitio.Commons.Telemetry.Storages;
 using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.Cache.Interfaces;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -124,14 +124,14 @@ namespace Splitio.Services.Client.Classes
             var segmentsQueue = new SplitQueue<SelfRefreshingSegment>();
             var segmentFetcherWorkerPool = new SegmentTaskWorker(_config.NumberOfParalellSegmentTasks, segmentsQueue);
             segmentsQueue.AddObserver(segmentFetcherWorkerPool);
-            var segmentsFetcherTask = _tasksManager.NewPeriodicTask(Enums.Task.SegmentsFetcher, segmentRefreshRate * 1000);
+            var segmentsFetcherTask = _tasksManager.NewPeriodicTask(Commons.Dto.SplitTaskName.SegmentsFetcher, segmentRefreshRate * 1000);
             _selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, _segmentCache, segmentsQueue, segmentsFetcherTask, _statusManager);
 
             var splitChangeFetcher = new ApiSplitChangeFetcher(_splitSdkApiClient);
             _splitParser = new FeatureFlagParser(_segmentCache, _selfRefreshingSegmentFetcher);
             _rbsParser = new RuleBasedSegmentParser(_segmentCache, _selfRefreshingSegmentFetcher);
             var featureFlagRefreshRate = _config.RandomizeRefreshRates ? Random(_config.SplitsRefreshRate) : _config.SplitsRefreshRate;
-            var featureFlagsTask = _tasksManager.NewPeriodicTask(Enums.Task.FeatureFlagsFetcher, featureFlagRefreshRate * 1000);
+            var featureFlagsTask = _tasksManager.NewPeriodicTask(Commons.Dto.SplitTaskName.FeatureFlagsFetcher, featureFlagRefreshRate * 1000);
             _featureFlagUpdater = new FeatureFlagUpdater(_splitParser, _featureFlagCache, _flagSetsFilter, _ruleBasedSegmentCache);
             _ruleBasedSegmentUpdater = new RuleBasedSegmentUpdater(_rbsParser, _ruleBasedSegmentCache);
             _targetingRulesFetcher = new TargetingRulesFetcher(splitChangeFetcher, _statusManager, featureFlagsTask, _featureFlagCache, _featureFlagUpdater, _ruleBasedSegmentUpdater, _ruleBasedSegmentCache);
@@ -141,8 +141,8 @@ namespace Splitio.Services.Client.Classes
         private void BuildTreatmentLog(IImpressionListener impressionListener)
         {
             var impressionsCache = new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(_config.TreatmentLogSize));
-            var impressionsSenderTask = _tasksManager.NewPeriodicTask(Enums.Task.ImpressionsSender, _config.TreatmentLogRefreshRate * 1000);
-            _impressionsLog = new ImpressionsLog(_impressionsSdkApiClient, impressionsCache, impressionsSenderTask);
+            var impressionsSenderTask = _tasksManager.NewPeriodicTask(Commons.Dto.SplitTaskName.ImpressionsSender, _config.TreatmentLogRefreshRate * 1000);
+            _impressionsLog = new ImpressionsCache(_impressionsSdkApiClient, impressionsCache, impressionsSenderTask);
 
             _customerImpressionListener = impressionListener;
         }
@@ -172,10 +172,10 @@ namespace Splitio.Services.Client.Classes
         private void BuildEventLog()
         {
             var eventsCache = new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(_config.EventLogSize));
-            var eventsTask = _tasksManager.NewPeriodicTask(Enums.Task.EventsSender, _config.EventLogRefreshRate * 1000);
-            var eventsSubmitterTask = _tasksManager.NewOnTimeTask(Enums.Task.EventsSendBulkData);
+            var eventsTask = _tasksManager.NewPeriodicTask(Commons.Dto.SplitTaskName.EventsSender, _config.EventLogRefreshRate * 1000);
+            var eventsSubmitterTask = _tasksManager.NewOnTimeTask(Commons.Dto.SplitTaskName.EventsSendBulkData);
 
-            _eventsLog = new EventsLog(_eventSdkApiClient, eventsCache, _telemetryRuntimeProducer, eventsTask, eventsSubmitterTask);
+            _eventsLog = new EventsCache(_eventSdkApiClient, eventsCache, _telemetryRuntimeProducer, eventsTask, eventsSubmitterTask);
         }
 
         private void BuildEvaluator()
@@ -223,8 +223,8 @@ namespace Splitio.Services.Client.Classes
         private void BuildTelemetrySyncTask()
         {
             var httpClient = new SplitioHttpClient(ApiKey, _config.ProxyHost, _config.ProxyPort, _config.HttpConnectionTimeout, _config.HttpReadTimeout, GetHeaders());
-            var telemetryStatsSubmitterTask = _tasksManager.NewPeriodicTask(Enums.Task.TelemetryStats, _config.TelemetryRefreshRate * 1000);
-            var telemetryInitSubmitterTask = _tasksManager.NewOnTimeTask(Enums.Task.TelemetryInit);
+            var telemetryStatsSubmitterTask = _tasksManager.NewPeriodicTask(Commons.Dto.SplitTaskName.TelemetryStats, _config.TelemetryRefreshRate * 1000);
+            var telemetryInitSubmitterTask = _tasksManager.NewOnTimeTask(Commons.Dto.SplitTaskName.TelemetryInit);
 
             _telemetryAPI = new TelemetryAPI(httpClient, _config.TelemetryServiceURL, _telemetryRuntimeProducer);
             _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorageConsumer, _telemetryAPI, _featureFlagCache, _segmentCache, _config, FactoryInstantiationsService.Instance(), telemetryStatsSubmitterTask, telemetryInitSubmitterTask);
@@ -260,7 +260,7 @@ namespace Splitio.Services.Client.Classes
 
                 headers.Add(Commons.Shared.Constants.Http.SplitSDKClientKey, ApiKey.Substring(ApiKey.Length - 4));
                 var sseHttpClient = new SplitioHttpClient(ApiKey, _config.ProxyHost, _config.ProxyPort, _config.HttpConnectionTimeout, _config.HttpReadTimeout, headers);
-                var connectTask = _tasksManager.NewOnTimeTask(Enums.Task.SSEConnect);
+                var connectTask = _tasksManager.NewOnTimeTask(Commons.Dto.SplitTaskName.SSEConnect);
                 var eventSourceClient = new EventSourceClient(notificationParser, sseHttpClient, _telemetryRuntimeProducer, notificationManagerKeeper, _statusManager, connectTask);
 
                 // SSEHandler
@@ -272,12 +272,12 @@ namespace Splitio.Services.Client.Classes
 
                 // PushManager
                 var backoff = new BackOff(_config.AuthRetryBackoffBase, attempt: 1);
-                var refreshTokenTask = _tasksManager.NewOnTimeTask(Enums.Task.StreamingTokenRefresh);
+                var refreshTokenTask = _tasksManager.NewOnTimeTask(Commons.Dto.SplitTaskName.StreamingTokenRefresh);
                 var pushManager = new PushManager(sseHandler, authApiClient, _telemetryRuntimeProducer, notificationManagerKeeper, refreshTokenTask, _statusManager);
 
                 // SyncManager
                 var streamingbackoff = new BackOff(_config.StreamingReconnectBackoffBase, attempt: 1);
-                var startupTask = _tasksManager.NewOnTimeTask(Enums.Task.SDKInitialization);
+                var startupTask = _tasksManager.NewOnTimeTask(Commons.Dto.SplitTaskName.SDKInitialization);
                 _syncManager = new SyncManager(_config.StreamingEnabled, synchronizer, pushManager, sseHandler, _telemetryRuntimeProducer, _statusManager, _tasksManager, _telemetrySyncTask, streamingbackoff, streamingStatusQueue, startupTask);
             }
             catch (Exception ex)

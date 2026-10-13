@@ -2,8 +2,8 @@
 using Moq;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Evaluator;
-using Splitio.Services.Parsing.Classes;
+using Splitio.Commons.Engine.Evaluator;
+using Splitio.Commons.Engine.Matchers;
 using System;
 using System.Collections.Generic;
 
@@ -22,7 +22,7 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), key, new List<string> { "test1" }, null, false))
+                .Setup(mock => mock.EvaluateFeatures(It.IsAny<API>(), key, new List<string> { "test1" }, null, false))
                 .Returns(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
@@ -42,7 +42,7 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), key, new List<string> { "test1" }, null, false))
+                .Setup(mock => mock.EvaluateFeatures(It.IsAny<API>(), key, new List<string> { "test1" }, null, false))
                 .Returns(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
@@ -77,7 +77,7 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), key, new List<string> { "test1" }, null, false))
+                .Setup(mock => mock.EvaluateFeatures(It.IsAny<API>(), key, new List<string> { "test1" }, null, false))
                 .Returns(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
@@ -97,7 +97,7 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), key, new List<string> { "test1" }, null, false))
+                .Setup(mock => mock.EvaluateFeatures(It.IsAny<API>(), key, new List<string> { "test1" }, null, false))
                 .Returns(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
@@ -117,7 +117,7 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), key, new List<string> { "test1" }, null, false))
+                .Setup(mock => mock.EvaluateFeatures(It.IsAny<API>(), key, new List<string> { "test1" }, null, false))
                 .Returns(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
@@ -138,7 +138,7 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), key, new List<string> { "test1" }, null, false))
+                .Setup(mock => mock.EvaluateFeatures(It.IsAny<API>(), key, new List<string> { "test1" }, null, false))
                 .Returns(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
@@ -158,7 +158,7 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), key, new List<string> { "test1" }, null, false))
+                .Setup(mock => mock.EvaluateFeatures(It.IsAny<API>(), key, new List<string> { "test1" }, null, false))
                 .Returns(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act
@@ -178,7 +178,7 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.EvaluateFeatures(It.IsAny<Splitio.Enums.API>(), key, new List<string> { "test1" }, null, false))
+                .Setup(mock => mock.EvaluateFeatures(It.IsAny<API>(), key, new List<string> { "test1" }, null, false))
                 .Returns(new List<TreatmentResult> { new TreatmentResult("test1", "label", "on", false) });
 
             //Act

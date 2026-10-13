@@ -76,7 +76,7 @@ namespace Splitio.Services.InputValidation.Classes
             Dictionary<string, FallbackTreatment> result = new Dictionary<string, FallbackTreatment>();
             foreach (var entry in byFlagTreatment)
             {
-                string featureName = new SplitNameValidator(_log).SplitNameIsValid(entry.Key, Enums.API.Split).Value;
+                string featureName = new SplitNameValidator(_log).SplitNameIsValid(entry.Key, Commons.Dto.API.Split).Value;
                 if (string.IsNullOrEmpty(featureName))
                 {
                     continue;

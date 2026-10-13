@@ -2,8 +2,10 @@
 using Moq;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Client.Classes;
-using Splitio.Services.Common;
+using Splitio.Commons.SdkEvents;
+using Splitio.Services.Cache.Classes;
+using Splitio.Commons.Tasks;
+using Splitio.Commons.Shared.Utils;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
@@ -35,8 +37,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<SdkEventNotification>());
             var statusManager = new InMemoryReadinessGatesCache(internalEventsTask);
             var taskManager = new TasksManager(statusManager);
-            var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.ImpressionsCountSender, 1);
-            var sendBulkDataTask = taskManager.NewOnTimeTask(Splitio.Enums.Task.ImpressionCounterSendBulkData);
+            var task = taskManager.NewPeriodicTask(Splitio.Commons.Dto.SplitTaskName.ImpressionsCountSender, 1);
+            var sendBulkDataTask = taskManager.NewOnTimeTask(Splitio.Commons.Dto.SplitTaskName.ImpressionCounterSendBulkData);
             var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, task, sendBulkDataTask);
 
 
@@ -61,8 +63,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<SdkEventNotification>());
             var statusManager = new InMemoryReadinessGatesCache(internalEventsTask);
             var taskManager = new TasksManager(statusManager);
-            var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.ImpressionsCountSender, 1);
-            var sendBulkDataTask = taskManager.NewOnTimeTask(Splitio.Enums.Task.ImpressionCounterSendBulkData);
+            var task = taskManager.NewPeriodicTask(Splitio.Commons.Dto.SplitTaskName.ImpressionsCountSender, 1);
+            var sendBulkDataTask = taskManager.NewOnTimeTask(Splitio.Commons.Dto.SplitTaskName.ImpressionCounterSendBulkData);
             var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, task, sendBulkDataTask);
 
             // Act.
@@ -82,8 +84,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<SdkEventNotification>());
             var statusManager = new InMemoryReadinessGatesCache(internalEventsTask);
             var taskManager = new TasksManager(statusManager);
-            var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.ImpressionsCountSender, 100);
-            var sendBulkDataTask = taskManager.NewOnTimeTask(Splitio.Enums.Task.ImpressionCounterSendBulkData);
+            var task = taskManager.NewPeriodicTask(Splitio.Commons.Dto.SplitTaskName.ImpressionsCountSender, 100);
+            var sendBulkDataTask = taskManager.NewOnTimeTask(Splitio.Commons.Dto.SplitTaskName.ImpressionCounterSendBulkData);
             var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, task, sendBulkDataTask);
 
             impressionsCounter.Inc("feature1", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 15, 11, DateTimeKind.Utc)));
@@ -108,8 +110,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var internalEventsTask = new InternalEventsTask(eventsManager, new SplitQueue<SdkEventNotification>());
             var statusManager = new InMemoryReadinessGatesCache(internalEventsTask);
             var taskManager = new TasksManager(statusManager);
-            var task = taskManager.NewPeriodicTask(Splitio.Enums.Task.ImpressionsCountSender, 100);
-            var sendBulkDataTask = taskManager.NewOnTimeTask(Splitio.Enums.Task.ImpressionCounterSendBulkData);
+            var task = taskManager.NewPeriodicTask(Splitio.Commons.Dto.SplitTaskName.ImpressionsCountSender, 100);
+            var sendBulkDataTask = taskManager.NewOnTimeTask(Splitio.Commons.Dto.SplitTaskName.ImpressionCounterSendBulkData);
             var impressionsCounter = new ImpressionsCounter(config, _senderAdapter.Object, task, sendBulkDataTask);
 
             impressionsCounter.Inc("feature1", SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 15, 11, DateTimeKind.Utc)));

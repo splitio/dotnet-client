@@ -1,4 +1,6 @@
-﻿using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Dto;
+using Splitio.Commons.Tasks;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
@@ -7,7 +9,7 @@ namespace Splitio.Services.Tasks
 {
     public class TasksManager : ITasksManager
     {
-        private readonly ConcurrentDictionary<Enums.Task, ISplitTask> _tasks = new ConcurrentDictionary<Enums.Task, ISplitTask>();
+        private readonly ConcurrentDictionary<Commons.Dto.SplitTaskName, ISplitTask> _tasks = new ConcurrentDictionary<Commons.Dto.SplitTaskName, ISplitTask>();
 
         private readonly IStatusManager _statusManager;
 
@@ -16,7 +18,7 @@ namespace Splitio.Services.Tasks
             _statusManager = statusManager;
         }
 
-        public ISplitTask NewOnTimeTaskAndStart(Enums.Task taskName, Func<Task> function)
+        public ISplitTask NewOnTimeTaskAndStart(Commons.Dto.SplitTaskName taskName, Func<Task> function)
         {
             var task = new SplitOneTimeTask(_statusManager, taskName);
             task.SetFunction(function);
@@ -26,7 +28,7 @@ namespace Splitio.Services.Tasks
             return task;
         }
 
-        public ISplitTask NewOnTimeTaskAndStart(Enums.Task taskName, Action action)
+        public ISplitTask NewOnTimeTaskAndStart(Commons.Dto.SplitTaskName taskName, Action action)
         {
             var task = new SplitOneTimeTask(_statusManager, taskName);
             task.SetAction(action);
@@ -36,7 +38,7 @@ namespace Splitio.Services.Tasks
             return task;
         }
 
-        public ISplitTask NewOnTimeTask(Enums.Task taskName)
+        public ISplitTask NewOnTimeTask(Commons.Dto.SplitTaskName taskName)
         {
             var task = new SplitOneTimeTask(_statusManager, taskName);
             AddOrUpdate(taskName, task);
@@ -44,7 +46,7 @@ namespace Splitio.Services.Tasks
             return task;
         }
 
-        public ISplitTask NewScheduledTask(Enums.Task taskName, int intervalMs)
+        public ISplitTask NewScheduledTask(Commons.Dto.SplitTaskName taskName, int intervalMs)
         {
             var task = new SplitOneTimeTask(_statusManager, taskName, intervalMs);
             AddOrUpdate(taskName, task);
@@ -52,7 +54,7 @@ namespace Splitio.Services.Tasks
             return task;
         }
 
-        public ISplitTask NewPeriodicTask(Enums.Task taskName, int intervalMs)
+        public ISplitTask NewPeriodicTask(Commons.Dto.SplitTaskName taskName, int intervalMs)
         {
             var task = new SplitPeriodicTask(_statusManager, taskName, intervalMs);
             AddOrUpdate(taskName, task);
@@ -69,7 +71,7 @@ namespace Splitio.Services.Tasks
             }
         }
 
-        private void AddOrUpdate(Enums.Task name, ISplitTask task)
+        private void AddOrUpdate(Commons.Dto.SplitTaskName name, ISplitTask task)
         {
             _tasks.TryRemove(name, out _);
             _tasks.TryAdd(name, task);

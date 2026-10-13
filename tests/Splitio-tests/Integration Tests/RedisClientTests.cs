@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Commons.Domain;
 using Splitio.Commons.Dto;
+using Splitio.Commons.SdkEvents;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Client.Classes;
 using Splitio.Redis.Services.Domain;

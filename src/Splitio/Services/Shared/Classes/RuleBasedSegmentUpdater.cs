@@ -1,8 +1,9 @@
-﻿using Splitio.Commons.Shared.Logger;
+﻿using Splitio.Commons.Cache.Interfaces;
+using Splitio.Commons.Domain;
+using Splitio.Commons.Dto;
+using Splitio.Commons.Shared.Logger;
 using Splitio.Commons.Shared.Utils;
 using Splitio.Domain;
-using Splitio.Enums;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;

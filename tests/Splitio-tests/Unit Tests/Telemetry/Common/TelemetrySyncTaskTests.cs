@@ -2,7 +2,6 @@
 using Moq;
 using Splitio.Domain;
 using Splitio.Commons.Dto;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.Tasks;
 using Splitio.Telemetry.Common;
@@ -14,6 +13,7 @@ using Splitio.Commons.Telemetry.Domain;
 using Splitio.Commons.Telemetry.Storages;
 using Splitio.Commons.Telemetry.Domain.Enums;
 using Splitio.Commons.api.Interfaces;
+using Splitio.Commons.Cache.Interfaces;
 
 namespace Splitio_Tests.Unit_Tests.Telemetry.Common
 {
@@ -45,8 +45,8 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
         {
             // Arrange.
             var tasksManager = new TasksManager(_statusManager.Object);
-            var statsTask = tasksManager.NewPeriodicTask(Splitio.Enums.Task.TelemetryStats, 500);
-            var initTask = tasksManager.NewOnTimeTask(Splitio.Enums.Task.TelemetryInit);
+            var statsTask = tasksManager.NewPeriodicTask(Splitio.Commons.Dto.SplitTaskName.TelemetryStats, 500);
+            var initTask = tasksManager.NewOnTimeTask(Splitio.Commons.Dto.SplitTaskName.TelemetryInit);
 
             MockRecordStats();
             var config = MockConfigInit();
@@ -97,8 +97,8 @@ namespace Splitio_Tests.Unit_Tests.Telemetry.Common
             // Arrange.
             MockRecordStats();
             var tasksManager = new TasksManager(_statusManager.Object);
-            var statsTask = tasksManager.NewPeriodicTask(Splitio.Enums.Task.TelemetryStats, 500);
-            var initTask = tasksManager.NewOnTimeTask(Splitio.Enums.Task.TelemetryInit);
+            var statsTask = tasksManager.NewPeriodicTask(Splitio.Commons.Dto.SplitTaskName.TelemetryStats, 500);
+            var initTask = tasksManager.NewOnTimeTask(Splitio.Commons.Dto.SplitTaskName.TelemetryInit);
             _telemetrySyncTask = new TelemetrySyncTask(_telemetryStorage.Object, _telemetryAPI.Object, _splitCache.Object, _segmentCache.Object, new SelfRefreshingConfig(), _factoryInstantiationsService.Object, statsTask, initTask);
 
             // Act.
