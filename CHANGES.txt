@@ -2,6 +2,7 @@ CHANGES
 
 7.13.1 (Nov 3, 2026)
 - Added support for .NET 10
+- Fixed SSE streaming to reconnect when the connection fails or the stream closes unexpectedly.
 
 7.13.0 (Mar 10, 2026)
 - Fixed impressions properties format in redis mode.
