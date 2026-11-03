@@ -42,6 +42,7 @@ pipeline:
                       # Install .NET SDK (adjust version as needed)
                       Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.ps1" -OutFile "dotnet-install.ps1"
                       .\dotnet-install.ps1 -Channel 9.0 -InstallDir "C:\dotnet"
+                      .\dotnet-install.ps1 -Channel 10.0 -InstallDir "C:\dotnet"
                       $env:PATH = "C:\dotnet;$env:PATH"
                       dotnet --version
                       nuget install redis-64 -excludeversion -source http://www.nuget.org/api/v2/
@@ -73,6 +74,8 @@ pipeline:
                     shell: Powershell
                     command: |-
                       $env:PATH = "C:\dotnet;$env:PATH"
+                      dotnet test .\tests\Splitio-tests\Splitio-tests.csproj -c Release -f net10.0 --no-build
+                      if ($LASTEXITCODE -ne 0) { throw "net10.0 unit tests failed" }
                       dotnet test .\tests\Splitio-tests\Splitio-tests.csproj `
                         -c Release `
                         -f net9.0 `
@@ -139,6 +142,34 @@ pipeline:
                         command: |-
                           $env:PATH = "C:\dotnet;$env:PATH"
                           dotnet test .\tests\Splitio.TestSupport\Splitio.TestSupport.csproj -c Release -f net9.0 --no-build
+              - parallel:
+                  - step:
+                      type: Run
+                      name: Run Other Tests Net 10
+                      identifier: Run_Other_Tests_Net_10
+                      spec:
+                        shell: Powershell
+                        command: |-
+                          $env:PATH = "C:\dotnet;$env:PATH"
+                          dotnet test .\tests\Splitio.Integration-tests\Splitio.Integration-tests.csproj -f net10.0 -c Release --no-build
+                  - step:
+                      type: Run
+                      name: Run Other Tests Net 10 - 2
+                      identifier: Run_Other_Tests_Net_10_2
+                      spec:
+                        shell: Powershell
+                        command: |-
+                          $env:PATH = "C:\dotnet;$env:PATH"
+                          dotnet test .\tests\Splitio.Integration-events-tests\Splitio.Integration-events-tests.csproj -f net10.0 -c Release --no-build
+                  - step:
+                      type: Run
+                      name: Run Other Tests Net 10 - 3
+                      identifier: Run_Other_Tests_Net_10_3
+                      spec:
+                        shell: Powershell
+                        command: |-
+                          $env:PATH = "C:\dotnet;$env:PATH"
+                          dotnet test .\tests\Splitio.Integration-redis-tests\Splitio.Integration-redis-tests.csproj -f net10.0 -c Release --no-build
               - parallel:
                   - step:
                       type: Run

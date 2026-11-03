@@ -1,5 +1,8 @@
 CHANGES
 
+7.13.1 (Nov 3, 2026)
+- Added support for .NET 10
+
 7.13.0 (Mar 10, 2026)
 - Fixed impressions properties format in redis mode.
 - Added the ability to listen to different events triggered by the SDK. Read more in our docs.

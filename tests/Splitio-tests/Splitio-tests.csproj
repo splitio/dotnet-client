@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>    
-    <TargetFrameworks>net9.0;net472</TargetFrameworks>
+    <TargetFrameworks>net10.0;net9.0;net472</TargetFrameworks>
     <RootNamespace>Splitio_Tests</RootNamespace>
   </PropertyGroup>
 
@@ -16,7 +16,7 @@
     <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0' Or '$(TargetFramework)' == 'net10.0'">
     <DefineConstants>NETCORE</DefineConstants>
   </PropertyGroup>
 
@@ -128,5 +128,16 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <!--
+    Tests use [DeploymentItem(@"Resources\...")] with a Windows path separator, which MSTest only resolves on Windows.
+    On other platforms, copy the test data files to the output root, where the tests expect them.
+  -->
+  <Target Name="CopyResourcesToOutputRoot" AfterTargets="Build" Condition="'$(OS)' != 'Windows_NT'">
+    <ItemGroup>
+      <_ResourceFile Include="Resources\**\*" Exclude="Resources\**\*.cs" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_ResourceFile)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>
